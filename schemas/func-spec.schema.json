@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/func-spec.schema.json",
+  "title": "Functional Spec",
+  "description": "A functional spec (FUNC): a single business rule with acceptance criteria, extracted from the PRD.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "func-spec-id.schema.json"
+    },
+    "title": {
+      "type": "string",
+      "description": "One-line business description. Imperative, directive, no filler",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Multi-paragraph narrative. What problem this solves, who is affected, what user-visible behaviour is expected. Technical implementation lives in plan.md, not here.",
+      "minLength": 1
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "description": "Verifiable acceptance criteria. Each criteria starts with a commitment level.",
+      "items": {
+        "type": "string",
+        "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "implements": {
+      "type": "array",
+      "description": "Optional. Concrete contract operation IDs the spec touches.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "depends_on": {
+      "type": "array",
+      "description": "Optional. Other FUNC spec IDs this spec depends on (cannot be implemented before they ship).",
+      "items": {
+        "$ref": "func-spec-id.schema.json"
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Optional. Lifecycle status. Omitting is equivalent to 'active'.",
+      "enum": ["active", "planned", "blocked", "deprecated"],
+      "default": "active"
+    }
+  },
+  "required": ["id", "title", "description", "acceptance_criteria"],
+  "additionalProperties": false
+}
