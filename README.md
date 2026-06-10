@@ -12,9 +12,18 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 **Human validation**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
-## Workflow
+## Descripion
 
 ### The flow from business goal to verified code:
+
+For example, a pizza ordering feature moves through the flow like this:
+
+1. **BRD** — "sell pizza online to increase sales"
+2. **PRD** — "customers can pick a pizza on the website and pay online"
+3. **Functional Spec** — `FUNC-ORDER-PLACE`: "POST /orders returns 201 with the created order"
+4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
+5. **Implementation** — the `placeOrder()` handler in code
+6. **Test** — verifies that placing an order returns `201`
 
 ```mermaid
 flowchart TD
@@ -31,6 +40,12 @@ flowchart TD
 ```
 
 ### Architecture specs live outside the feature flow — they govern how every artifact is built:
+
+For example, the rule `ARCH-NO-SECRETS` works like this:
+
+1. **Architecture Spec** — `ARCH-NO-SECRETS`: "no secrets in the repository"
+2. **Governs** — every contract, file, and test in the repo, regardless of feature
+3. **Proven by** — a secret scan check passing on every commit in CI
 
 ```mermaid
 flowchart TD
