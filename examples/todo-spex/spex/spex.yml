@@ -6,6 +6,7 @@ repositories:
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
+      - ARCH-COMMIT-MESSAGE
   - name: contracts
     path: ../contracts
     arch-specs:
@@ -13,15 +14,18 @@ repositories:
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
       - ARCH-OPENAPI
+      - ARCH-COMMIT-MESSAGE
   - name: frontend
     path: ../frontend
     arch-specs:
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
+      - ARCH-COMMIT-MESSAGE
   - name: spex
     path: .
     arch-specs:
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
+      - ARCH-COMMIT-MESSAGE

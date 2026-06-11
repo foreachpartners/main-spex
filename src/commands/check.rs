@@ -201,6 +201,7 @@ fn run_check(
         CheckKind::Regexp => run_regexp(spec_id, check, &scoped, findings),
         CheckKind::Glob => run_glob(spec_id, check, &scoped, findings),
         CheckKind::Script => run_script(spec_id, check, repo_path, spex_dir, &scoped, findings),
+        CheckKind::Command => run_command(spec_id, check, repo_path, spex_dir, findings),
     }
 }
 
@@ -381,6 +382,42 @@ fn run_script(
         if !output.status.success() {
             findings.push(violation(check, spec_id, None, script_message(&output)));
         }
+    }
+}
+
+fn run_command(
+    spec_id: &str,
+    check: &Check,
+    repo_path: &Path,
+    spex_dir: &Path,
+    findings: &mut Vec<Finding>,
+) {
+    let Some(script) = resolve_script(&check.name, repo_path, spex_dir) else {
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            format!(
+                "command `{}` not found in repository or spex `{SCRIPTS_DIR}/`",
+                check.name
+            ),
+        ));
+        return;
+    };
+
+    let output = match Command::new(&script).current_dir(repo_path).output() {
+        Ok(output) => output,
+        Err(err) => {
+            findings.push(config_error(
+                spec_id,
+                &check.name,
+                format!("could not run command `{}`: {err}", script.display()),
+            ));
+            return;
+        }
+    };
+
+    if !output.status.success() {
+        findings.push(violation(check, spec_id, None, script_message(&output)));
     }
 }
 

@@ -17,6 +17,13 @@ mod tests {
         }
     }
 
+    fn make_executable(path: &Path) {
+        use std::os::unix::fs::PermissionsExt;
+        let mut permissions = std::fs::metadata(path).expect("metadata").permissions();
+        permissions.set_mode(permissions.mode() | 0o111);
+        std::fs::set_permissions(path, permissions).expect("set permissions");
+    }
+
     fn scoped(dir: &TempDir, rel: &str, contents: &str) -> ScopedFile {
         let abs = dir.path().join(rel);
         if let Some(parent) = abs.parent() {
@@ -171,6 +178,46 @@ mod tests {
         std::fs::create_dir_all(&spex).expect("spex");
 
         assert!(resolve_script("lint", &repo, &spex).is_none());
+    }
+
+    #[test]
+    fn command_reports_violation_on_failure() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(repo.join(SCRIPTS_DIR)).expect("repo scripts");
+        std::fs::create_dir_all(&spex).expect("spex");
+        let script = repo.join(SCRIPTS_DIR).join("sample.sh");
+        std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
+        make_executable(&script);
+
+        let mut check = check(CheckKind::Command, None);
+        check.severity = Severity::Warn;
+
+        let mut findings = Vec::new();
+        run_command("ARCH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Warn);
+        assert_eq!(findings[0].message, "boom");
+    }
+
+    #[test]
+    fn command_reports_config_error_when_missing() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+
+        let check = check(CheckKind::Command, None);
+
+        let mut findings = Vec::new();
+        run_command("ARCH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Error);
+        assert!(findings[0].message.contains("not found"));
     }
 
     #[test]

@@ -52,6 +52,7 @@ pub enum CheckKind {
     Regexp,
     Glob,
     Script,
+    Command,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]

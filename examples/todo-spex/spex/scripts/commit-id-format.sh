@@ -5,9 +5,14 @@
 # bracketed, comma-separated list of Spec IDs, e.g.
 #   feat(api): add order endpoint [FUNC-ORDER-PLACE, ARCH-SECRETS]
 #
-# Runs in the repository directory. File arguments are ignored — this check
-# inspects git history, not the working tree.
+# Runs once in the repository directory and inspects git history, not the
+# working tree.
 set -eu
+
+if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
+  echo "Not a git repository — cannot verify commit message format"
+  exit 1
+fi
 
 id='(FUNC|ARCH)-[A-Z0-9]+(-[A-Z0-9]+)*'
 bracket="\\[${id}(, ${id})*\\]\$"
