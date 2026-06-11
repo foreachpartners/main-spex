@@ -389,15 +389,8 @@ fn resolve_script(name: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathB
 }
 
 fn find_check_script(checks_dir: &Path, name: &str) -> Option<PathBuf> {
-    let with_ext = checks_dir.join(format!("{name}.sh"));
-    if with_ext.is_file() {
-        return Some(with_ext);
-    }
-    let bare = checks_dir.join(name);
-    if bare.is_file() {
-        return Some(bare);
-    }
-    None
+    let script = checks_dir.join(format!("{name}.sh"));
+    script.is_file().then_some(script)
 }
 
 fn script_message(output: &std::process::Output) -> String {

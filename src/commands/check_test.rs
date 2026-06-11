@@ -141,7 +141,7 @@ mod tests {
     }
 
     #[test]
-    fn resolve_script_resolves_extensionless_name() {
+    fn resolve_script_ignores_extensionless_files() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
@@ -149,8 +149,7 @@ mod tests {
         std::fs::create_dir_all(spex.join(CHECKS_DIR)).expect("spex checks");
         std::fs::write(spex.join(CHECKS_DIR).join("lint"), "").expect("spex script");
 
-        let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, spex.join(CHECKS_DIR).join("lint"));
+        assert!(resolve_script("lint", &repo, &spex).is_none());
     }
 
     #[test]
