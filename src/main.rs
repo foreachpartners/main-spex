@@ -17,7 +17,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    #[command(about = "Initialize a spex workspace by creating spex.yml")]
+    #[command(about = "Initialize a spex workspace")]
     Init,
 }
 
