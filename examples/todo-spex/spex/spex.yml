@@ -2,10 +2,10 @@ name: todo-spex
 repositories:
   - name: api
     path: ../api
-    arch-specs: []
+    arch-specs: [ARCH-SECRETS]
   - name: contracts
     path: ../contracts
-    arch-specs: []
+    arch-specs: [ARCH-SECRETS]
   - name: frontend
     path: ../frontend
-    arch-specs: []
+    arch-specs: [ARCH-SECRETS]

@@ -148,7 +148,13 @@ fn check_repo(
 
 fn collect_files(repo_path: &Path) -> Result<Vec<ScopedFile>> {
     let mut files = Vec::new();
-    for result in WalkBuilder::new(repo_path).build() {
+    let walker = WalkBuilder::new(repo_path)
+        .hidden(false)        // include dotfiles (e.g. .env) that aren't gitignored
+        .git_ignore(true)     // respect .gitignore
+        .git_global(true)     // respect global gitignore
+        .filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"))
+        .build();
+    for result in walker {
         let entry = result.change_context(CheckError::Walk)?;
         if !entry.file_type().is_some_and(|kind| kind.is_file()) {
             continue;
