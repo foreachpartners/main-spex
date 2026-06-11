@@ -54,6 +54,11 @@ struct Finding {
     message: String,
 }
 
+struct RepoReport {
+    name: String,
+    findings: Vec<Finding>,
+}
+
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let current_dir = std::env::current_dir().change_context(CheckError::CurrentDir)?;
     let spex_dir = config::find_dir(&current_dir).change_context(CheckError::Config)?;
@@ -64,12 +69,17 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     let selected = select_repos(&config, &args.repo)?;
 
-    let mut findings = Vec::new();
+    let mut reports = Vec::with_capacity(selected.len());
     for repo in selected {
+        let mut findings = Vec::new();
         check_repo(repo, &spex_dir, &specs, &args.files, &mut findings)?;
+        reports.push(RepoReport {
+            name: repo.name.clone(),
+            findings,
+        });
     }
 
-    Ok(report(&config, &findings))
+    Ok(report(&config, &reports))
 }
 
 fn select_repos<'a>(config: &'a Config, names: &[String]) -> Result<Vec<&'a Repository>> {
@@ -430,21 +440,34 @@ fn config_error(spec_id: &str, check: &str, message: String) -> Finding {
     }
 }
 
-fn report(config: &Config, findings: &[Finding]) -> ExitCode {
-    let mut errors = 0usize;
-    let mut warnings = 0usize;
+fn report(config: &Config, reports: &[RepoReport]) -> ExitCode {
+    let mut total_errors = 0usize;
+    let mut total_warnings = 0usize;
 
-    for finding in findings {
-        match finding.severity {
-            Severity::Error => errors += 1,
-            Severity::Warn => warnings += 1,
+    for repo in reports {
+        let mut errors = 0usize;
+        let mut warnings = 0usize;
+
+        println!("{}:", repo.name);
+        for finding in &repo.findings {
+            match finding.severity {
+                Severity::Error => errors += 1,
+                Severity::Warn => warnings += 1,
+            }
+            println!("  {}", format_finding(finding));
         }
-        println!("{}", format_finding(finding));
+        println!("  {errors} error(s), {warnings} warning(s)");
+
+        total_errors += errors;
+        total_warnings += warnings;
     }
 
-    println!("{}: {errors} error(s), {warnings} warning(s)", config.name);
+    println!(
+        "{}: {total_errors} error(s), {total_warnings} warning(s)",
+        config.name
+    );
 
-    if errors > 0 {
+    if total_errors > 0 {
         ExitCode::from(1)
     } else {
         ExitCode::SUCCESS
