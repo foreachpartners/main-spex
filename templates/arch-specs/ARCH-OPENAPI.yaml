@@ -1,4 +1,4 @@
-id: ARCH-OPENAPI-001
+id: ARCH-OPENAPI
 title: OpenAPI conventions
 description: >-
   The OpenAPI document is the contract that generated clients, servers, and

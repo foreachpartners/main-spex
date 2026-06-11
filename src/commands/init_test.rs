@@ -26,12 +26,25 @@ mod tests_unit {
     }
 
     #[test]
-    fn discover_repositories_excludes_spex_hidden_and_files() {
+    fn discover_repositories_excludes_hidden_and_files() {
         let workspace = workspace_with(&["server", "client", "spex", ".git"], &["notes.txt"]);
 
         let repositories = discover_repositories(workspace.path()).expect("discover");
 
-        assert_eq!(repo_names(&repositories), vec!["client", "server"]);
+        assert_eq!(repo_names(&repositories), vec!["client", "server", "spex"]);
+    }
+
+    #[test]
+    fn discover_repositories_includes_spex_with_dot_path() {
+        let workspace = workspace_with(&["server", "spex"], &[]);
+
+        let repositories = discover_repositories(workspace.path()).expect("discover");
+
+        let spex = repositories
+            .iter()
+            .find(|repo| repo.name == "spex")
+            .expect("spex repository");
+        assert_eq!(spex.path, ".");
     }
 
     #[test]

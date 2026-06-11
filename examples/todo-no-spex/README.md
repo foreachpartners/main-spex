@@ -16,12 +16,6 @@ todo-no-spex/        <- workspace root folder
   contracts/         <- OpenAPI definition of the API
 ```
 
-```sh
-cd examples/todo-no-spex
-mkdir spex && cd spex
-spex init
-```
-
 ## Running the example
 
 ### API
@@ -40,6 +34,3 @@ npm install
 npm run dev
 # Serves http://localhost:5173
 ```
-
-The frontend talks to the API at `http://localhost:3000`, so start the API
-first.

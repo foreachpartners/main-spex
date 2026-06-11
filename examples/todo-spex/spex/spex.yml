@@ -3,14 +3,12 @@ repositories:
   - name: api
     path: ../api
     arch-specs:
-      - ARCH-COMMIT-MESSAGE
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
   - name: contracts
     path: ../contracts
     arch-specs:
-      - ARCH-COMMIT-MESSAGE
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE
@@ -18,7 +16,12 @@ repositories:
   - name: frontend
     path: ../frontend
     arch-specs:
-      - ARCH-COMMIT-MESSAGE
+      - ARCH-SECRETS
+      - ARCH-SPEC-ANNOTATIONS
+      - ARCH-WRITING-STYLE
+  - name: spex
+    path: .
+    arch-specs:
       - ARCH-SECRETS
       - ARCH-SPEC-ANNOTATIONS
       - ARCH-WRITING-STYLE

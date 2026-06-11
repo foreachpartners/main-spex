@@ -159,13 +159,19 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
         }
 
         let dir_name = entry.file_name().to_string_lossy().into_owned();
-        if dir_name == SPEX_DIR_NAME || dir_name.starts_with('.') {
+        if dir_name.starts_with('.') {
             continue;
         }
 
+        let path = if dir_name == SPEX_DIR_NAME {
+            ".".to_string()
+        } else {
+            format!("../{dir_name}")
+        };
+
         repositories.push(Repository {
             name: to_kebab_case(&dir_name),
-            path: format!("../{dir_name}"),
+            path,
         });
     }
 
