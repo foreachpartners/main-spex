@@ -7,12 +7,12 @@ use error_stack::{Report, ResultExt, bail};
 use include_dir::{Dir, include_dir};
 use thiserror::Error;
 
+use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+
 #[cfg(test)]
 #[path = "init_test.rs"]
 mod init_test;
 
-const SPEX_DIR_NAME: &str = "spex";
-const SPEX_CONFIG_FILE: &str = "spex.yml";
 const SCRIPTS_DIR_NAME: &str = "scripts";
 
 static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");

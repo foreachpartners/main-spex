@@ -1,17 +1,24 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use error_stack::{Report, ResultExt};
 use serde::Deserialize;
 use thiserror::Error;
 
+#[cfg(test)]
+#[path = "config_test.rs"]
+mod config_test;
+
 pub const SPEX_CONFIG_FILE: &str = "spex.yml";
+pub const SPEX_DIR_NAME: &str = "spex";
 
 type Result<T> = core::result::Result<T, Report<ConfigError>>;
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
-    #[error("`{SPEX_CONFIG_FILE}` not found — run `spex check` from inside the `spex` directory")]
+    #[error(
+        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any of its repositories"
+    )]
     NotFound,
     #[error("could not read `{SPEX_CONFIG_FILE}`")]
     Read,
@@ -32,6 +39,19 @@ pub struct Repository {
     pub path: String,
     #[serde(rename = "arch-specs", default)]
     pub arch_specs: Vec<String>,
+}
+
+pub fn find_dir(start: &Path) -> Result<PathBuf> {
+    for dir in start.ancestors() {
+        if dir.join(SPEX_CONFIG_FILE).is_file() {
+            return Ok(dir.to_path_buf());
+        }
+        let nested = dir.join(SPEX_DIR_NAME);
+        if nested.join(SPEX_CONFIG_FILE).is_file() {
+            return Ok(nested);
+        }
+    }
+    Err(Report::new(ConfigError::NotFound))
 }
 
 pub fn load(spex_dir: &Path) -> Result<Config> {

@@ -55,7 +55,8 @@ struct Finding {
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
-    let spex_dir = std::env::current_dir().change_context(CheckError::CurrentDir)?;
+    let current_dir = std::env::current_dir().change_context(CheckError::CurrentDir)?;
+    let spex_dir = config::find_dir(&current_dir).change_context(CheckError::Config)?;
 
     let config = config::load(&spex_dir).change_context(CheckError::Config)?;
     let specs = arch_spec::load_all(&spex_dir.join(arch_spec::ARCH_SPECS_DIR))
