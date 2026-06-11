@@ -4,6 +4,16 @@ AI-first specification-driven development framework with human validation.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
+## Quickstart
+
+1. Put all project git repositories in one folder (workspace-root) to set up workspace (e.g. `pizza-shop/server`, `pizza-shop/client`)
+2. Create spex git repository for project in the same folder (`pizza-shop/spex`)
+3. Install spex CLI
+4. Run in spex dir
+   ```bash
+   spex init
+   ```
+
 ## Why
 
 **Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Clear, well-defined functional specifications (`FUNC`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify.
@@ -12,7 +22,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 **Human validation**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
-## Descripion
+## Description
 
 ### The flow from business goal to verified code:
 
