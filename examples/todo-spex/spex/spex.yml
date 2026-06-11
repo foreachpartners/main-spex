@@ -2,10 +2,23 @@ name: todo-spex
 repositories:
   - name: api
     path: ../api
-    arch-specs: [ARCH-SECRETS]
+    arch-specs:
+      - ARCH-COMMIT-MESSAGE
+      - ARCH-SECRETS
+      - ARCH-SPEC-ANNOTATIONS
+      - ARCH-WRITING-STYLE
   - name: contracts
     path: ../contracts
-    arch-specs: [ARCH-SECRETS]
+    arch-specs:
+      - ARCH-COMMIT-MESSAGE
+      - ARCH-SECRETS
+      - ARCH-SPEC-ANNOTATIONS
+      - ARCH-WRITING-STYLE
+      - ARCH-OPENAPI
   - name: frontend
     path: ../frontend
-    arch-specs: [ARCH-SECRETS]
+    arch-specs:
+      - ARCH-COMMIT-MESSAGE
+      - ARCH-SECRETS
+      - ARCH-SPEC-ANNOTATIONS
+      - ARCH-WRITING-STYLE
