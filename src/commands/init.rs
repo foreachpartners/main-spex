@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt, bail};
+use include_dir::{Dir, include_dir};
 use thiserror::Error;
 
 #[cfg(test)]
@@ -12,6 +13,9 @@ mod init_test;
 
 const SPEX_DIR_NAME: &str = "spex";
 const SPEX_CONFIG_FILE: &str = "spex.yml";
+const SCRIPTS_DIR_NAME: &str = "scripts";
+
+static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 type Result<T> = core::result::Result<T, Report<InitError>>;
 
@@ -57,9 +61,49 @@ pub fn run() -> Result<ExitCode> {
     let repositories = confirm_repositories(repositories)?;
 
     let config_path = write_config(&current_dir, &project_name, &repositories)?;
+    copy_templates(&current_dir)?;
 
     println!("Created {}", config_path.display());
     Ok(ExitCode::SUCCESS)
+}
+
+fn copy_templates(spex_dir: &Path) -> Result<()> {
+    TEMPLATES
+        .extract(spex_dir)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not write templates into `{}`", spex_dir.display()))?;
+
+    mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))
+}
+
+#[cfg(unix)]
+fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+
+    if !scripts_dir.is_dir() {
+        return Ok(());
+    }
+
+    let entries = fs::read_dir(scripts_dir)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not read `{}`", scripts_dir.display()))?;
+
+    for entry in entries {
+        let path = entry.change_context(InitError::Io)?.path();
+        let mut permissions = fs::metadata(&path)
+            .change_context(InitError::Io)?
+            .permissions();
+        permissions.set_mode(permissions.mode() | 0o111);
+        fs::set_permissions(&path, permissions)
+            .change_context(InitError::Io)
+            .attach_with(|| format!("could not set permissions on `{}`", path.display()))?;
+    }
+    Ok(())
+}
+
+#[cfg(not(unix))]
+fn mark_scripts_executable(_scripts_dir: &Path) -> Result<()> {
+    Ok(())
 }
 
 fn write_config(

@@ -1,0 +1,11 @@
+name: todo-spex
+repositories:
+  - name: api
+    path: ../api
+    arch-specs: []
+  - name: contracts
+    path: ../contracts
+    arch-specs: []
+  - name: frontend
+    path: ../frontend
+    arch-specs: []
