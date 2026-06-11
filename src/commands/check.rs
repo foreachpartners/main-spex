@@ -17,6 +17,9 @@ mod check_test;
 
 const CHECKS_DIR: &str = "checks";
 
+// Cap files per script invocation so large repos don't blow past the OS arg limit.
+const SCRIPT_BATCH_SIZE: usize = 1000;
+
 type Result<T> = core::result::Result<T, Report<CheckError>>;
 
 #[derive(Debug, Error)]
@@ -356,32 +359,29 @@ fn run_script(
         return;
     };
 
-    let args: Vec<String> = files
-        .iter()
-        .map(|file| file.rel.to_string_lossy().into_owned())
-        .collect();
+    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
+        let args = batch.iter().map(|file| file.rel.as_os_str());
 
-    let output = match Command::new(&script)
-        .args(&args)
-        .current_dir(repo_path)
-        .output()
-    {
-        Ok(output) => output,
-        Err(err) => {
-            findings.push(config_error(
-                spec_id,
-                &check.name,
-                format!("could not run script `{}`: {err}", script.display()),
-            ));
-            return;
+        let output = match Command::new(&script)
+            .args(args)
+            .current_dir(repo_path)
+            .output()
+        {
+            Ok(output) => output,
+            Err(err) => {
+                findings.push(config_error(
+                    spec_id,
+                    &check.name,
+                    format!("could not run script `{}`: {err}", script.display()),
+                ));
+                return;
+            }
+        };
+
+        if !output.status.success() {
+            findings.push(violation(check, spec_id, None, script_message(&output)));
         }
-    };
-
-    if output.status.success() {
-        return;
     }
-
-    findings.push(violation(check, spec_id, None, script_message(&output)));
 }
 
 fn resolve_script(name: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
