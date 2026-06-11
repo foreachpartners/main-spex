@@ -1,4 +1,5 @@
 id: ARCH-WRITING-STYLE
+include_on_spex_init: true
 title: LLM-Oriented Writing Style
 description: >-
   Specs and documentation are read by both engineers and AI agents. Direct,

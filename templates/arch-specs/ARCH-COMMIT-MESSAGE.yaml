@@ -1,4 +1,5 @@
 id: ARCH-COMMIT-MESSAGE
+include_on_spex_init: true
 title: Commit Message Format
 description: >-
   Commits are the unit of traceability between code and the specs that justify

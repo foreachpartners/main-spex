@@ -1,4 +1,5 @@
 id: ARCH-SPEC-ANNOTATIONS
+include_on_spex_init: true
 title: Spec ID Annotation Format
 description: >-
   Annotations link a contract, implementation, or test back to the spec it

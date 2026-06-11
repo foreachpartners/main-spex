@@ -18,6 +18,11 @@
       "description": "Optional narrative: rationale for the rule and what it protects against.",
       "minLength": 1
     },
+    "include_on_spex_init": {
+      "type": "boolean",
+      "description": "When true, `spex init` adds this spec to every repository's arch-specs list. Defaults to false.",
+      "default": false
+    },
     "acceptance_criteria": {
       "type": "array",
       "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",

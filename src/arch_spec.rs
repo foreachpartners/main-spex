@@ -24,6 +24,8 @@ pub enum SpecError {
 pub struct ArchSpec {
     pub id: String,
     #[serde(default)]
+    pub include_on_spex_init: bool,
+    #[serde(default)]
     pub checks: Vec<Check>,
 }
 

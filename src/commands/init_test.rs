@@ -98,7 +98,7 @@ mod tests_unit {
 
     #[test]
     fn render_config_lists_repositories() {
-        let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")]);
+        let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &[]);
 
         let expected = "\
 name: pizza-shop
@@ -114,22 +114,52 @@ repositories:
     }
 
     #[test]
+    fn render_config_lists_default_arch_specs() {
+        let specs = ["ARCH-SECRETS".to_string(), "ARCH-WRITING-STYLE".to_string()];
+        let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
+
+        let expected = "\
+name: pizza-shop
+repositories:
+  - name: server
+    path: ../server
+    arch-specs:
+      - ARCH-SECRETS
+      - ARCH-WRITING-STYLE
+";
+        assert_eq!(yaml, expected);
+    }
+
+    #[test]
     fn render_config_handles_no_repositories() {
-        let yaml = config_to_yaml("pizza-shop", &[]);
+        let yaml = config_to_yaml("pizza-shop", &[], &[]);
 
         assert_eq!(yaml, "name: pizza-shop\nrepositories: []\n");
+    }
+
+    #[test]
+    fn default_arch_specs_includes_flagged_specs_only() {
+        let ids = default_arch_specs().expect("collect default arch specs");
+
+        assert!(ids.contains(&"ARCH-SECRETS".to_string()));
+        assert!(ids.contains(&"ARCH-WRITING-STYLE".to_string()));
+        assert!(!ids.contains(&"ARCH-OPENAPI".to_string()));
+        assert!(ids.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 
     #[test]
     fn write_config_writes_file_to_spex_dir() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        let config_path =
-            write_config(spex_dir.path(), "pizza-shop", &[repo("server")]).expect("write config");
+        let config_path = write_config(spex_dir.path(), "pizza-shop", &[repo("server")], &[])
+            .expect("write config");
 
         assert_eq!(config_path, spex_dir.path().join(SPEX_CONFIG_FILE));
         let written = fs::read_to_string(&config_path).expect("read config");
-        assert_eq!(written, config_to_yaml("pizza-shop", &[repo("server")]));
+        assert_eq!(
+            written,
+            config_to_yaml("pizza-shop", &[repo("server")], &[])
+        );
     }
 
     #[test]
