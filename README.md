@@ -35,8 +35,6 @@ flowchart TD
         Contract --> Impl["Implementation — code"]
         Impl --> Test["Test — proof"]
     end
-
-    style Traced fill:#80808022,stroke:#808080
 ```
 
 ### Architecture specs live outside the feature flow — they govern how every artifact is built:
