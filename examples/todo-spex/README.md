@@ -12,5 +12,5 @@ todo-no-spex/        <- workspace root folder
   api/               <- Rust todo API (axum, in-memory store)
   frontend/          <- React + TypeScript UI (Vite)
   contracts/         <- OpenAPI definition of the API
-  spex/              <- spex framwork harness, specs, skills, checks and workspace setup
+  spex/              <- spex framwork harness, specs, skills, scripts and workspace setup
 ```

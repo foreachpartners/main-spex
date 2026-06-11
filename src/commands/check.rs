@@ -15,7 +15,7 @@ use crate::config::{self, Config, Repository};
 #[path = "check_test.rs"]
 mod check_test;
 
-const CHECKS_DIR: &str = "checks";
+const SCRIPTS_DIR: &str = "scripts";
 
 // Cap files per script invocation so large repos don't blow past the OS arg limit.
 const SCRIPT_BATCH_SIZE: usize = 1000;
@@ -352,7 +352,7 @@ fn run_script(
             spec_id,
             &check.name,
             format!(
-                "script `{}` not found in repository or spex `{CHECKS_DIR}/`",
+                "script `{}` not found in repository or spex `{SCRIPTS_DIR}/`",
                 check.name
             ),
         ));
@@ -385,12 +385,12 @@ fn run_script(
 }
 
 fn resolve_script(name: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
-    find_check_script(&repo_path.join(CHECKS_DIR), name)
-        .or_else(|| find_check_script(&spex_dir.join(CHECKS_DIR), name))
+    find_script(&repo_path.join(SCRIPTS_DIR), name)
+        .or_else(|| find_script(&spex_dir.join(SCRIPTS_DIR), name))
 }
 
-fn find_check_script(checks_dir: &Path, name: &str) -> Option<PathBuf> {
-    let script = checks_dir.join(format!("{name}.sh"));
+fn find_script(scripts_dir: &Path, name: &str) -> Option<PathBuf> {
+    let script = scripts_dir.join(format!("{name}.sh"));
     script.is_file().then_some(script)
 }
 

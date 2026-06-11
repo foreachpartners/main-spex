@@ -162,25 +162,25 @@ repositories:
     }
 
     #[test]
-    fn copy_templates_writes_arch_specs_and_checks() {
+    fn copy_templates_writes_arch_specs_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("arch-specs").is_dir());
-        assert!(spex_dir.path().join("checks").is_dir());
+        assert!(spex_dir.path().join("scripts").is_dir());
     }
 
     #[cfg(unix)]
     #[test]
-    fn copy_templates_marks_checks_executable() {
+    fn copy_templates_marks_scripts_executable() {
         use std::os::unix::fs::PermissionsExt;
 
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        let script = spex_dir.path().join("checks/commit-id-format.sh");
+        let script = spex_dir.path().join("scripts/commit-id-format.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()
