@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/arch-spec-id.schema.json",
   "title": "Architecture Spec ID",
-  "description": "Architecture spec ID with fixed ARCH- prefix. Only English letters, numbers and hyphens. Max 30 characters.",
+  "description": "Architecture spec ID with fixed ARCH- prefix. Only uppercase English letters, numbers and hyphens. Max 40 characters.",
   "type": "string",
-  "pattern": "^ARCH-[A-Za-z0-9]+(-[A-Za-z0-9]+)*$",
-  "maxLength": 30,
+  "pattern": "^ARCH-[A-Z0-9]+(-[A-Z0-9]+)*$",
+  "maxLength": 40,
   "examples": ["ARCH-NO-SECRETS"]
 }

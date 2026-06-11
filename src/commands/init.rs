@@ -1,6 +1,7 @@
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
+use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
@@ -33,7 +34,7 @@ struct Repository {
     path: String,
 }
 
-pub fn run() -> Result<()> {
+pub fn run() -> Result<ExitCode> {
     let current_dir = std::env::current_dir()
         .change_context(InitError::Io)
         .attach("could not determine the current directory")?;
@@ -58,7 +59,7 @@ pub fn run() -> Result<()> {
     let config_path = write_config(&current_dir, &project_name, &repositories)?;
 
     println!("Created {}", config_path.display());
-    Ok(())
+    Ok(ExitCode::SUCCESS)
 }
 
 fn write_config(
@@ -163,6 +164,7 @@ fn config_to_yaml(project_name: &str, repositories: &[Repository]) -> String {
         for repo in repositories {
             yaml.push_str(&format!("  - name: {}\n", repo.name));
             yaml.push_str(&format!("    path: {}\n", repo.path));
+            yaml.push_str("    arch-specs: []\n");
         }
     }
 

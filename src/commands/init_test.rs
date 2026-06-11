@@ -92,8 +92,10 @@ name: pizza-shop
 repositories:
   - name: server
     path: ../server
+    arch-specs: []
   - name: client
     path: ../client
+    arch-specs: []
 ";
         assert_eq!(yaml, expected);
     }

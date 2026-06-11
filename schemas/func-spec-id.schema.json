@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/func-spec-id.schema.json",
   "title": "Functional Spec ID",
-  "description": "Functional spec ID with fixed FUNC- prefix. Only English letters, numbers and hyphens. Max 30 characters.",
+  "description": "Functional spec ID with fixed FUNC- prefix. Only uppercase English letters, numbers and hyphens. Max 40 characters.",
   "type": "string",
-  "pattern": "^FUNC-[A-Za-z0-9]+(-[A-Za-z0-9]+)*$",
-  "maxLength": 30,
+  "pattern": "^FUNC-[A-Z0-9]+(-[A-Z0-9]+)*$",
+  "maxLength": 40,
   "examples": ["FUNC-ORDER-PLACE"]
 }

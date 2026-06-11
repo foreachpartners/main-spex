@@ -20,9 +20,10 @@
     },
     "acceptance_criteria": {
       "type": "array",
+      "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
       "items": {
         "type": "string",
-        "description": "Verifiable acceptance criteria. Starts with a commitment level.",
+        "description": "A single verifiable acceptance criterion. Starts with a commitment level.",
         "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
         "minLength": 1
       },

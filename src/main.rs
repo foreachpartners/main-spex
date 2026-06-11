@@ -1,8 +1,14 @@
+mod arch_spec;
 mod commands;
+mod config;
 
+use std::fmt::Debug;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
+use error_stack::Report;
+
+use commands::check::CheckArgs;
 
 #[derive(Parser)]
 #[command(
@@ -19,17 +25,22 @@ struct Cli {
 enum Commands {
     #[command(about = "Initialize a spex workspace")]
     Init,
+    #[command(about = "Run architecture spec checks against the workspace")]
+    Check(CheckArgs),
 }
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
 
-    let result = match cli.command {
-        Commands::Init => commands::init::run(),
-    };
+    match cli.command {
+        Commands::Init => finish(commands::init::run()),
+        Commands::Check(args) => finish(commands::check::run(args)),
+    }
+}
 
+fn finish<E: Debug>(result: Result<ExitCode, Report<E>>) -> ExitCode {
     match result {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => code,
         Err(report) => {
             eprintln!("error: {report:?}");
             ExitCode::FAILURE
