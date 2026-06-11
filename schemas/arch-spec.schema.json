@@ -38,7 +38,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Unique name identifying the check. For script checks, also the script filename resolved under scripts/.",
+            "description": "Unique name identifying the check. For script checks, also the script filename resolved under scripts/: the repository's scripts/ takes priority, otherwise the spex scripts/ is used.",
             "minLength": 1
           },
           "description": {
