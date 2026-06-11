@@ -52,3 +52,12 @@
           "201":
             description: Order created
   ```
+
+- **Workspace** — the top-level folder that groups everything for a single project: the `spex` directory and the sibling repositories it manages `api`, `frontend` and so on.
+
+  ```text
+  pizza-shop/        <- workspace root folder
+    spex/
+    api/
+    frontend/
+  ```

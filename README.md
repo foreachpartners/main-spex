@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Quickstart
 
-1. Put all project git repositories in one folder (workspace-root) to set up workspace (e.g. `pizza-shop/server`, `pizza-shop/client`)
+1. Put all project git repositories in one shared folder (workspace root folder) to set up workspace (e.g. `pizza-shop/server`, `pizza-shop/client`)
 2. Create spex git repository for project in the same folder (`pizza-shop/spex`)
 3. Install spex CLI
 4. Run in spex dir
