@@ -30,13 +30,23 @@ mod tests {
     }
 
     #[test]
-    fn matches_filter_by_path_name_and_suffix() {
-        let rel = Path::new("src/api/main.rs");
-        assert!(matches_filter(rel, &["src/api/main.rs".to_string()]));
-        assert!(matches_filter(rel, &["main.rs".to_string()]));
-        assert!(matches_filter(rel, &["./src/api/main.rs".to_string()]));
-        assert!(matches_filter(rel, &["api/main.rs".to_string()]));
-        assert!(!matches_filter(rel, &["lib.rs".to_string()]));
+    fn provided_files_resolves_existing_relative_paths() {
+        let dir = tempdir().expect("temp dir");
+        scoped(&dir, "src/api/main.rs", "");
+        scoped(&dir, "README.md", "");
+
+        let files = vec![
+            "src/api/main.rs".to_string(),
+            "./README.md".to_string(),
+            "missing.rs".to_string(),
+        ];
+        let resolved = provided_files(dir.path(), &files);
+        let names: Vec<String> = resolved.iter().map(rel_str).collect();
+
+        assert_eq!(
+            names,
+            vec!["src/api/main.rs".to_string(), "README.md".to_string()]
+        );
     }
 
     #[test]

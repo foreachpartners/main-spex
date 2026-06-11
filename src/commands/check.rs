@@ -118,10 +118,11 @@ fn check_repo(
         return Ok(());
     }
 
-    let mut candidates = collect_files(&repo_path)?;
-    if !files.is_empty() {
-        candidates.retain(|file| matches_filter(&file.rel, files));
-    }
+    let candidates = if files.is_empty() {
+        collect_files(&repo_path)?
+    } else {
+        provided_files(&repo_path, files)
+    };
 
     for spec_id in &repo.arch_specs {
         let Some(spec) = specs.get(spec_id) else {
@@ -166,15 +167,15 @@ fn collect_files(repo_path: &Path) -> Result<Vec<ScopedFile>> {
     Ok(files)
 }
 
-fn matches_filter(rel: &Path, filters: &[String]) -> bool {
-    let rel_str = rel.to_string_lossy();
-    let name = rel.file_name().map(|name| name.to_string_lossy());
-    filters.iter().any(|filter| {
-        let filter = filter.trim_start_matches("./");
-        rel_str == filter
-            || name.as_deref() == Some(filter)
-            || rel_str.ends_with(&format!("/{filter}"))
-    })
+fn provided_files(repo_path: &Path, files: &[String]) -> Vec<ScopedFile> {
+    files
+        .iter()
+        .filter_map(|file| {
+            let rel = PathBuf::from(file.trim_start_matches("./"));
+            let abs = repo_path.join(&rel);
+            abs.is_file().then_some(ScopedFile { abs, rel })
+        })
+        .collect()
 }
 
 fn run_check(
