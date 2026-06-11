@@ -13,7 +13,7 @@ use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 #[path = "init_test.rs"]
 mod init_test;
 
-const SCRIPTS_DIR_NAME: &str = "scripts";
+const CHECKS_DIR_NAME: &str = "checks";
 
 static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
@@ -73,20 +73,20 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write templates into `{}`", spex_dir.display()))?;
 
-    mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))
+    mark_checks_executable(&spex_dir.join(CHECKS_DIR_NAME))
 }
 
 #[cfg(unix)]
-fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
+fn mark_checks_executable(checks_dir: &Path) -> Result<()> {
     use std::os::unix::fs::PermissionsExt;
 
-    if !scripts_dir.is_dir() {
+    if !checks_dir.is_dir() {
         return Ok(());
     }
 
-    let entries = fs::read_dir(scripts_dir)
+    let entries = fs::read_dir(checks_dir)
         .change_context(InitError::Io)
-        .attach_with(|| format!("could not read `{}`", scripts_dir.display()))?;
+        .attach_with(|| format!("could not read `{}`", checks_dir.display()))?;
 
     for entry in entries {
         let path = entry.change_context(InitError::Io)?.path();
@@ -102,7 +102,7 @@ fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
 }
 
 #[cfg(not(unix))]
-fn mark_scripts_executable(_scripts_dir: &Path) -> Result<()> {
+fn mark_checks_executable(_checks_dir: &Path) -> Result<()> {
     Ok(())
 }
 

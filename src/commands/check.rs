@@ -15,7 +15,7 @@ use crate::config::{self, Config, Repository};
 #[path = "check_test.rs"]
 mod check_test;
 
-const SCRIPTS_DIR: &str = "scripts";
+const CHECKS_DIR: &str = "checks";
 
 type Result<T> = core::result::Result<T, Report<CheckError>>;
 
@@ -348,7 +348,7 @@ fn run_script(
             spec_id,
             &check.name,
             format!(
-                "script `{}` not found in repository or spex `{SCRIPTS_DIR}/`",
+                "script `{}` not found in repository or spex `{CHECKS_DIR}/`",
                 check.name
             ),
         ));
@@ -384,13 +384,18 @@ fn run_script(
 }
 
 fn resolve_script(name: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
-    let repo_script = repo_path.join(SCRIPTS_DIR).join(name);
-    if repo_script.is_file() {
-        return Some(repo_script);
+    find_check_script(&repo_path.join(CHECKS_DIR), name)
+        .or_else(|| find_check_script(&spex_dir.join(CHECKS_DIR), name))
+}
+
+fn find_check_script(checks_dir: &Path, name: &str) -> Option<PathBuf> {
+    let with_ext = checks_dir.join(format!("{name}.sh"));
+    if with_ext.is_file() {
+        return Some(with_ext);
     }
-    let spex_script = spex_dir.join(SCRIPTS_DIR).join(name);
-    if spex_script.is_file() {
-        return Some(spex_script);
+    let bare = checks_dir.join(name);
+    if bare.is_file() {
+        return Some(bare);
     }
     None
 }

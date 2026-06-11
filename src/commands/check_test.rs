@@ -118,13 +118,13 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join(SCRIPTS_DIR)).expect("repo scripts");
-        std::fs::create_dir_all(spex.join(SCRIPTS_DIR)).expect("spex scripts");
-        std::fs::write(repo.join(SCRIPTS_DIR).join("lint"), "").expect("repo script");
-        std::fs::write(spex.join(SCRIPTS_DIR).join("lint"), "").expect("spex script");
+        std::fs::create_dir_all(repo.join(CHECKS_DIR)).expect("repo checks");
+        std::fs::create_dir_all(spex.join(CHECKS_DIR)).expect("spex checks");
+        std::fs::write(repo.join(CHECKS_DIR).join("lint.sh"), "").expect("repo script");
+        std::fs::write(spex.join(CHECKS_DIR).join("lint.sh"), "").expect("spex script");
 
         let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, repo.join(SCRIPTS_DIR).join("lint"));
+        assert_eq!(resolved, repo.join(CHECKS_DIR).join("lint.sh"));
     }
 
     #[test]
@@ -133,11 +133,24 @@ mod tests {
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join(SCRIPTS_DIR)).expect("spex scripts");
-        std::fs::write(spex.join(SCRIPTS_DIR).join("lint"), "").expect("spex script");
+        std::fs::create_dir_all(spex.join(CHECKS_DIR)).expect("spex checks");
+        std::fs::write(spex.join(CHECKS_DIR).join("lint.sh"), "").expect("spex script");
 
         let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, spex.join(SCRIPTS_DIR).join("lint"));
+        assert_eq!(resolved, spex.join(CHECKS_DIR).join("lint.sh"));
+    }
+
+    #[test]
+    fn resolve_script_resolves_extensionless_name() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(spex.join(CHECKS_DIR)).expect("spex checks");
+        std::fs::write(spex.join(CHECKS_DIR).join("lint"), "").expect("spex script");
+
+        let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
+        assert_eq!(resolved, spex.join(CHECKS_DIR).join("lint"));
     }
 
     #[test]
