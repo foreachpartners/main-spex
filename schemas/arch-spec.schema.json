@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/arch-spec.schema.json",
   "title": "Architecture Spec",
-  "description": "An architecture spec (ARCH): a cross-cutting technical rule on code style, structure, testing, or security. Applies repo-wide.",
+  "description": "An architecture spec (ARCH): a cross-cutting technical rule on code style, structure, testing, or security",
   "type": "object",
   "properties": {
     "id": {
@@ -20,8 +20,8 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria, provable by automated checks or AI. Each criteria starts with a commitment level.",
       "items": {
+        "description": "Verifiable acceptance criteria, provable by automated checks or AI. Starts with a commitment level.",
         "type": "string",
         "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
         "minLength": 1
@@ -29,6 +29,18 @@
       "minItems": 1
     }
   },
-  "required": ["id", "title", "acceptance_criteria"],
-  "additionalProperties": false
+  "required": ["id", "title", "description", "acceptance_criteria"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "ARCH-NO-SECRETS",
+      "title": "No secrets in source code",
+      "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
+      "acceptance_criteria": [
+        "MUST NOT commit API keys, passwords, or tokens to the repository",
+        "MUST load secrets from environment variables or a secrets manager at runtime",
+        "SHOULD fail CI when a secret-scanning check detects credentials in a diff"
+      ]
+    }
+  ]
 }
