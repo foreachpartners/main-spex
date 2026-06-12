@@ -39,14 +39,14 @@ examples:
     docker_image: "<project-name>-{name}"
     telemetry_service_name: "{name}-service"
   derivation: |
-    # Project name `pizza`, repository name `orders`:
-    repo_dir:                pizza-orders
-    crate:                   pizza-orders
-    package_name:            pizza-orders
-    binary:                  pizza-orders
-    config_prefix:           PIZZA_ORDERS__
-    db_name:                 pizza_orders
-    db_user:                 pizza_orders
-    proto_package:           pizza.services.orders.v1
-    docker_image:            pizza-orders
-    telemetry_service_name:  orders-service
+    # Project name `pepperoni-pizza`, repository name `api`:
+    repo_dir:                pepperoni-pizza-api
+    crate:                   pepperoni-pizza-api
+    package_name:            pepperoni-pizza-api
+    binary:                  pepperoni-pizza-api
+    config_prefix:           PEPPERONI_PIZZA_API__
+    db_name:                 pepperoni_pizza_api
+    db_user:                 pepperoni_pizza_api
+    proto_package:           pepperoni_pizza.services.api.v1
+    docker_image:            pepperoni-pizza-api
+    telemetry_service_name:  api-service

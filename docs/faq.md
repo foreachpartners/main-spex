@@ -5,7 +5,7 @@
 A workspace keeps every repository it manages (`spex`, `api`, `frontend`, …) as its own git repository under one shared folder:
 
 ```text
-pizza-shop/        <- workspace root folder
+pepperoni-pizza/   <- workspace root folder
   spex/
   contracts/
   api/
@@ -31,7 +31,7 @@ A monorepo grants all-or-nothing access: anyone who can clone it sees every line
 Keeping specs in their own `spex` repository lets a single Spec ID govern a contract and its implementations across more than one repository. `BIZ-PLACE-PIZZA-ORDER` can be referenced from `contracts` (the OpenAPI definition of `placeOrder`), from `api` (the endpoint), and from `frontend` (the order form), and all trace back to the same approved spec:
 
 ```text
-pizza-shop/                               <- workspace root folder
+pepperoni-pizza/                          <- workspace root folder
   spex/        BIZ-PLACE-PIZZA-ORDER      <- single source of truth
   contracts/   openapi.yaml               references BIZ-PLACE-PIZZA-ORDER
   api/         implementation             references BIZ-PLACE-PIZZA-ORDER

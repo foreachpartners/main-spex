@@ -18,14 +18,14 @@ _The name `spex` comes from a casual shorthand for specifications._
 ## Quickstart
 
 1. Put all project git repositories in one shared folder (workspace root folder)
-2. Run `spex init` in workspace root to create `pizza-shop/spex` repository
+2. Run `spex init` in workspace root to create `pepperoni-pizza/spex` repository
 
 This creates the following structure:
 
 ```
-pizza-shop/              # workspace root
-├── server/              # existing server repository
-├── client/              # existing client repository
+pepperoni-pizza/         # workspace root
+├── api/                 # existing api repository
+├── frontend/            # existing frontend repository
 └── spex/                # newly spex repository
 ```
 

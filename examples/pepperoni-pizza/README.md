@@ -8,7 +8,7 @@ against a realistic, multi-repo project.
 ## Layout
 
 ```text
-pepperoni-pizza-spex/      <- workspace root folder
+pepperoni-pizza/      <- workspace root folder
   api/               <- Rust pizza order API (axum, in-memory store)
   frontend/          <- React + TypeScript UI (Vite)
   contracts/         <- OpenAPI definition of the API

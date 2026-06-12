@@ -53,12 +53,12 @@
             description: Order created
   ```
 
-- **Project** — the whole product being built, named after its workspace root folder (e.g. `pizza-shop`). One project spans several workspace repositories that share a single set of specs.
+- **Project** — the whole product being built, named after its workspace root folder (e.g. `pepperoni-pizza`). One project spans several workspace repositories that share a single set of specs.
 
 - **Project name** — the identifier of the project, taken from the name of its workspace root folder.
 
   ```text
-  pizza-shop
+  pepperoni-pizza
   ```
 
 - **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
@@ -66,7 +66,7 @@
 - **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
 
   ```text
-  pizza-shop/        <- workspace root
+  pepperoni-pizza/   <- workspace root
     spex/            <- workspace repository
     api/             <- workspace repository
     frontend/        <- workspace repository
