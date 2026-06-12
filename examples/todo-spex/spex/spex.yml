@@ -7,6 +7,7 @@ repositories:
       - TECH-SPEC-ID-ANNOTATIONS
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
   - name: contracts
     path: ../contracts
     tech-specs:
@@ -15,6 +16,7 @@ repositories:
       - TECH-DOC-WRITING-STYLE
       - TECH-OPENAPI-CONVENTIONS
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
   - name: frontend
     path: ../frontend
     tech-specs:
@@ -22,9 +24,11 @@ repositories:
       - TECH-SPEC-ID-ANNOTATIONS
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
   - name: spex
     path: .
     tech-specs:
       - TECH-SECRET-HANDLING
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
