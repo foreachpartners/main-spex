@@ -1,0 +1,95 @@
+import { useEffect, useState } from "react";
+import { ordersApi } from "./api";
+import type { Order } from "./types";
+
+export default function App() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customer, setCustomer] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    ordersApi.list().then(setOrders).catch(showError);
+  }, []);
+
+  function showError(err: unknown) {
+    setError(err instanceof Error ? err.message : "Something went wrong");
+  }
+
+  async function addOrder(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = customer.trim();
+    if (!trimmed) return;
+
+    try {
+      const created = await ordersApi.create({ customer: trimmed });
+      setOrders((current) => [...current, created]);
+      setCustomer("");
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  async function toggleOrder(order: Order) {
+    try {
+      const updated = await ordersApi.update(order.id, {
+        delivered: !order.delivered,
+      });
+      setOrders((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      );
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  async function removeOrder(id: number) {
+    try {
+      await ordersApi.remove(id);
+      setOrders((current) => current.filter((item) => item.id !== id));
+    } catch (err) {
+      showError(err);
+    }
+  }
+
+  return (
+    <main className="app">
+      <h1>Pepperoni Pizza</h1>
+
+      <form className="add-form" onSubmit={addOrder}>
+        <input
+          value={customer}
+          onChange={(event) => setCustomer(event.target.value)}
+          placeholder="Who's ordering a pepperoni pizza?"
+          aria-label="Customer name"
+        />
+        <button type="submit">Order</button>
+      </form>
+
+      {error && <p className="error">{error}</p>}
+
+      <ul className="order-list">
+        {orders.map((order) => (
+          <li key={order.id} className={order.delivered ? "done" : ""}>
+            <label>
+              <input
+                type="checkbox"
+                checked={order.delivered}
+                onChange={() => toggleOrder(order)}
+              />
+              <span>{order.customer}</span>
+            </label>
+            <button
+              className="remove"
+              onClick={() => removeOrder(order.id)}
+              aria-label={`Cancel order for ${order.customer}`}
+            >
+              ✕
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {orders.length === 0 && !error && <p className="empty">No orders yet.</p>}
+    </main>
+  );
+}
