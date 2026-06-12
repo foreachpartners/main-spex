@@ -17,6 +17,8 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Quickstart
 
+## Setup
+
 1. Put all project git repositories in one shared folder (workspace root folder)
 2. Run `spex init` in workspace root to create `pepperoni-pizza/spex` repository
 
@@ -28,6 +30,17 @@ pepperoni-pizza/         # workspace root
 ├── frontend/            # existing frontend repository
 └── spex/                # newly spex repository
 ```
+
+3. Run your first skill `/spex-setup`
+
+### Workflow
+
+Workflow cor is AI skills and CLI commands
+
+1. Create your first business spec `/spex-create-biz` or technical spec `/spex-create-tech`
+2. Create implementation plan for spec `/spex-create-plan`
+3. Execute plan with one or multiple agents working in parallel depending on plan `/spex-execute-plan`
+4. Audit result with `spex check`
 
 ## Why
 
