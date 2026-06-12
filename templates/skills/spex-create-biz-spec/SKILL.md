@@ -1,6 +1,6 @@
 ---
 name: spex-create-biz-spec
-description: Create a business spec (BIZ) by interviewing the user. Use when the user wants to author, draft, or extract a BIZ spec from a PRD, a feature idea, or a business rule. Asks targeted questions, then writes a schema-valid YAML file to <workspace_root>/spex/biz-specs/.
+description: Create a business spec (BIZ) by interviewing the user. Use when the user wants to author, draft, or extract a BIZ spec from a PRD, an RFD, a feature idea, or a business rule. Asks targeted questions, then writes a schema-valid YAML file to <workspace_root>/spex/biz-specs/.
 ---
 
 # Create a Business Spec (BIZ)
@@ -13,16 +13,6 @@ Match the prose style of the existing specs and write the result into the spex r
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-| What                         | Path                                                    |
-| ---------------------------- | ------------------------------------------------------- |
-| Spex repository              | `<workspace_root>/spex/`                                |
-| BIZ specs directory          | `<workspace_root>/spex/biz-specs/`                      |
-| This spec's file             | `<workspace_root>/spex/biz-specs/<spec-id>.yaml`        |
-| BIZ spec schema              | `<workspace_root>/spex/schemas/biz-spec.schema.json`    |
-| BIZ spec id schema           | `<workspace_root>/spex/schemas/biz-spec-id.schema.json` |
-| TECH specs (style reference) | `<workspace_root>/spex/tech-specs/`                     |
-| Workspace config             | `<workspace_root>/spex/spex.yml`                        |
-
 The schema at `<workspace_root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
 ## When to use this skill
@@ -33,13 +23,20 @@ Use it when the user wants to create, draft, or extract a BIZ spec — from a PR
 
 A BIZ spec captures exactly one business rule. If the user describes several behaviors, propose splitting them into multiple specs and confirm the split before writing. A PRD typically breaks down into many business specs.
 
+## Step 0 — Establish the source
+
+Determine what the spec is based on before doing anything else:
+
+- If the user attached or pasted a source (a PRD, an RFD, or a feature description) — whether as text or as a file path/link — treat it as the primary input. Read the attached file or the pasted text in full and pre-fill every answer you can from it before asking anything.
+- If the user provided no source and no rule to spec, ask first what they want to spec. Do not invent a behavior or proceed on assumptions.
+
 ## Step 1 — Gather context first
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- List `<workspace_root>/spex/biz-specs/` to learn existing Spec IDs, naming style, and prose tone.
-- Skim `<workspace_root>/spex/tech-specs/` for the project's writing style.
-- If the user pasted or referenced a PRD, read it and pre-fill answers from it.
+- Read `<workspace_root>/spex/spex.yml` for the project overview and use that to determine the spec's implementation `scope`.
+- Read `<workspace_root>/spex/biz-specs/` for related specs
+- Read `<workspace_root>/spex/biz-specs/` for related specs
 
 ## Step 2 — Interview the user
 

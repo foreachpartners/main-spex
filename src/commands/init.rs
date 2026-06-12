@@ -40,6 +40,13 @@ pub enum InitError {
 
 const SPEX_REPO_PATH: &str = ".";
 
+const SPEX_REPO_DESCRIPTION: &str = "    description: >-
+      Spex workspace repository. Holds the specs and config that govern the
+      project: schemas/ (JSON Schemas for spex.yml and the spec files),
+      tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
+      rules).
+";
+
 struct Repository {
     name: String,
     path: String,
@@ -333,6 +340,9 @@ fn config_to_yaml(
                 &tech_specs.all_repos
             };
             yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
+            if repo.path == SPEX_REPO_PATH {
+                yaml.push_str(SPEX_REPO_DESCRIPTION);
+            }
             yaml.push_str(&format!("    path: {}\n", repo.path));
             if ids.is_empty() {
                 yaml.push_str("    tech-specs: []\n");

@@ -166,6 +166,11 @@ repositories:
     tech-specs:
       - TECH-SECRET-HANDLING
   - repository_name: spex
+    description: >-
+      Spex workspace repository. Holds the specs and config that govern the
+      project: schemas/ (JSON Schemas for spex.yml and the spec files),
+      tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
+      rules).
     path: .
     tech-specs:
       - TECH-DOC-WRITING-STYLE
@@ -328,7 +333,9 @@ repositories:
         let target = fs::read_link(&claude).expect("read .claude symlink");
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
-            claude.join("skills/spex-create-biz-spec/SKILL.md").is_file(),
+            claude
+                .join("skills/spex-create-biz-spec/SKILL.md")
+                .is_file(),
             ".claude/skills should resolve through the symlink"
         );
     }

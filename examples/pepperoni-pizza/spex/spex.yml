@@ -1,6 +1,8 @@
 project_name: pepperoni-pizza
+description: Online ordering for a pizzeria.
 repositories:
   - repository_name: api
+    description: Backend service that handles orders.
     path: ../api
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -9,6 +11,7 @@ repositories:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
   - repository_name: contracts
+    description: OpenAPI contracts shared between the api and frontend.
     path: ../contracts
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -18,6 +21,7 @@ repositories:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
   - repository_name: frontend
+    description: Customer-facing web app for browsing the menu and placing orders.
     path: ../frontend
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -26,6 +30,11 @@ repositories:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
   - repository_name: spex
+    description: >-
+      Spex workspace repository. Holds the specs and config that govern the
+      project: schemas/ (JSON Schemas for spex.yml and the spec files),
+      tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
+      rules).
     path: .
     tech-specs:
       - TECH-SECRET-HANDLING

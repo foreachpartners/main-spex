@@ -37,8 +37,12 @@ pepperoni-pizza/         # workspace root
 
 Workflow cor is AI skills and CLI commands
 
-1. Create your first business spec `/spex-create-biz` or technical spec `/spex-create-tech`
-2. Create implementation plan for spec `/spex-create-plan`
+1. Create your first
+
+- business spec `/spex-create-biz [spec backend order pizza endpoint]`
+- technical spec `/spex-create-tech [commit message format]`
+
+2. Create implementation plan for spec `/spex-create-plan [for BIZ-PLACE-PIZZA-ORDER or commit message format]`
 3. Execute plan with one or multiple agents working in parallel depending on plan `/spex-execute-plan`
 4. Audit result with `spex check`
 
