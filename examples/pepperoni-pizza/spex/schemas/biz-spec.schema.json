@@ -29,6 +29,15 @@
       },
       "minItems": 1
     },
+    "scope": {
+      "type": "array",
+      "description": "Workspace repository names targeted for implementing this spec. Each must match a repository_name in spex.yml.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
     "depends_on": {
       "type": "array",
       "items": {
@@ -56,6 +65,7 @@
         "MUST empty the customer's cart after the order is successfully placed",
         "SHOULD display an order confirmation with a unique order number"
       ],
+      "scope": ["api", "frontend"],
       "depends_on": ["BIZ-CART-ADD-ITEM"],
       "status": "planned"
     }

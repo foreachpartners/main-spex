@@ -50,8 +50,9 @@ Cover these areas:
 2. **Actor & trigger** — Who is affected (which user/role), and what action or event triggers this behavior?
 3. **Problem & value** — What problem does this solve and why does it matter? (Feeds the description.)
 4. **Acceptance criteria** — What must be true for this to be correct? Probe for edge cases, error handling, and prohibitions (what must _not_ happen).
-5. **Dependencies** — Does this require other BIZ specs to ship first? Collect their Spec IDs.
-6. **Status** — Is this `active`, `planned`, `blocked`, or `deprecated`? Default to `planned` for new, not-yet-built behavior.
+5. **Scope** — Which workspace repositories will implement this? Collect their repository names from `<workspace_root>/spex/spex.yml`.
+6. **Dependencies** — Does this require other BIZ specs to ship first? Collect their Spec IDs.
+7. **Status** — Is this `active`, `planned`, `blocked`, or `deprecated`? Default to `planned` for new, not-yet-built behavior.
 
 Keep `description` business-level. Technical implementation details belong in a plan, not in the spec.
 
@@ -62,6 +63,7 @@ Follow the field rules in `<workspace_root>/spex/schemas/biz-spec.schema.json` a
 - `id` must be unique among existing files in `<workspace_root>/spex/biz-specs/`. The name must convey the spec's contents so it's understandable without opening the file.
 - Keep `title` imperative and directive; keep `description` business-level with no implementation detail.
 - Order `acceptance_criteria` strictly by commitment level (MUST, MUST NOT, SHOULD, SHOULD NOT, MAY) and make each one independently verifiable — avoid vague qualifiers like "fast" or "user-friendly".
+- Set `scope` to the workspace repository names that will implement this spec; each must match a `repository_name` in `<workspace_root>/spex/spex.yml`. Omit it only when the target repositories are not yet known.
 - Omit `depends_on` if there are none. Omitting `status` is equivalent to `planned`; default to `planned` for new, not-yet-built behavior.
 
 ## Step 4 — Confirm, then write
