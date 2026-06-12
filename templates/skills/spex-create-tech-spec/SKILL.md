@@ -77,4 +77,8 @@ Show the proposed checks (and any script bodies) to the user and confirm them be
 4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
 5. Validate the spec against `<workspace_root>/spex/schemas/tech-spec.schema.json`.
 
+## Step 6 — Point to the next skill
+
+After the spec is written, prompt the user to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`.
+
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

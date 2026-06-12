@@ -128,4 +128,8 @@ Rules for the plan content:
 2. Write it to `<workspace_root>/spex/plans/<lead-spec-id>.md`. If that file already exists, write to `<workspace_root>/spex/plans/<lead-spec-id>_<datetime>.md` instead so the existing plan is preserved.
 3. Confirm the path back to the user.
 
+## Step 7 — Point to the next skill
+
+After the plan is written, prompt the user to execute it: run `spex-execute-plan <lead-spec-id>`.
+
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

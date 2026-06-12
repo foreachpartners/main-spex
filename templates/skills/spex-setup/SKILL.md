@@ -58,6 +58,10 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 2. Edit `<workspace_root>/spex/spex.yml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace_root>/spex/schemas/spex.schema.json`.
 
+## Step 5 — Point to the next skill
+
+Once `spex.yml` is described, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
+
 ## Field placement
 
 Place `description` right after the name it describes, mirroring the schema example:
