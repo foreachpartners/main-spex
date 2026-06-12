@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/tech-spec-id.schema.json",
   "title": "Technical Spec ID",
-  "description": "Technical spec ID with fixed TECH- prefix. Only uppercase English letters, numbers and hyphens. Max 40 characters.",
+  "description": "Technical spec ID with fixed TECH- prefix. Only uppercase English letters, numbers and hyphens. Max 50 characters.",
   "type": "string",
   "pattern": "^TECH-[A-Z0-9]+(-[A-Z0-9]+)*$",
-  "maxLength": 40,
+  "maxLength": 50,
   "examples": ["TECH-NO-SECRETS"]
 }

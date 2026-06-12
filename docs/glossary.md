@@ -57,7 +57,7 @@
 
   ```text
   pizza-shop/        <- workspace root folder
-    spex/
-    api/
-    frontend/
+    spex/            <- workspace repository
+    api/             <- workspace repository
+    frontend/        <- workspace repository
   ```
