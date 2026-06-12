@@ -13,15 +13,16 @@ Match the prose style of the existing specs and write the result into the spex r
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-| What | Path |
-|------|------|
-| Spex repository | `<workspace_root>/spex/` |
-| BIZ specs directory | `<workspace_root>/spex/biz-specs/` |
-| This spec's file | `<workspace_root>/spex/biz-specs/<spec-id>.yaml` |
-| TECH specs (style reference) | `<workspace_root>/spex/tech-specs/` |
-| Workspace config | `<workspace_root>/spex/spex.yml` |
+| What                         | Path                                                    |
+| ---------------------------- | ------------------------------------------------------- |
+| Spex repository              | `<workspace_root>/spex/`                                |
+| BIZ specs directory          | `<workspace_root>/spex/biz-specs/`                      |
+| This spec's file             | `<workspace_root>/spex/biz-specs/<spec-id>.yaml`        |
+| BIZ spec schema              | `<workspace_root>/spex/schemas/biz-spec.schema.json`    |
+| TECH specs (style reference) | `<workspace_root>/spex/tech-specs/`                     |
+| Workspace config             | `<workspace_root>/spex/spex.yml`                        |
 
-The field rules in this skill are authoritative; you do not need a local schema file. `<workspace_root>/spex/biz-specs/` may not exist yet — create it when you write the first spec.
+The schema at `<workspace_root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting. `<workspace_root>/spex/biz-specs/` may not exist yet — create it when you write the first spec.
 
 ## When to use this skill
 
@@ -56,66 +57,19 @@ Keep `description` business-level. Technical implementation details belong in a 
 
 ## Step 3 — Draft the fields
 
-### `id`
+Follow the field rules in `<workspace_root>/spex/schemas/biz-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
-- Fixed prefix `BIZ-`, then uppercase English letters and hyphens only: `^BIZ-[A-Z]+(-[A-Z]+)*$`.
-- Max 40 characters total.
-- The name must convey the spec's contents so it's understandable without opening the file. Example: `BIZ-PLACE-PIZZA-ORDER`.
-- Ensure it does not collide with an existing file in `<workspace_root>/spex/biz-specs/`.
-
-### `title`
-
-- One imperative, directive line. No filler.
-- Example: `Allow customers to place an order from their cart`.
-
-### `description`
-
-- Multi-paragraph narrative: the problem, who is affected, and the expected user-visible behavior.
-- Plain business language. No implementation details.
-
-### `acceptance_criteria`
-
-- Each item starts with a commitment level: `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, or `MAY` (regex `^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+`).
-- Order strictly by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.
-- Each criterion must be independently verifiable. Avoid vague qualifiers like "fast" or "user-friendly".
-- At least one criterion is required.
-
-### `depends_on` (optional)
-
-- Array of other BIZ Spec IDs that must ship before this one. Omit if none.
-
-### `status` (optional)
-
-- One of `active`, `planned`, `blocked`, `deprecated`. Omitting means `planned`.
+- `id` must be unique among existing files in `<workspace_root>/spex/biz-specs/`. The name must convey the spec's contents so it's understandable without opening the file.
+- Keep `title` imperative and directive; keep `description` business-level with no implementation detail.
+- Order `acceptance_criteria` strictly by commitment level (MUST, MUST NOT, SHOULD, SHOULD NOT, MAY) and make each one independently verifiable — avoid vague qualifiers like "fast" or "user-friendly".
+- Omit `depends_on` if there are none. Omitting `status` is equivalent to `planned`; default to `planned` for new, not-yet-built behavior.
 
 ## Step 4 — Confirm, then write
 
 1. Show the drafted spec to the user and confirm the `id`, criteria, and split (if any).
 2. Write it to `<workspace_root>/spex/biz-specs/<spec-id>.yaml` — the filename must equal the `id`.
 3. Use literal block scalars for multi-paragraph `description`.
-
-## Template
-
-```yaml
-id: BIZ-PLACE-PIZZA-ORDER
-title: Allow customers to place an order from their cart
-description: >-
-  Customers who have added items to their cart need a way to complete a
-  purchase. When a customer confirms checkout, the system creates an order from
-  the current cart contents, captures payment, and empties the cart.
-
-  This affects all authenticated shoppers. After a successful order, the
-  customer sees an order confirmation with a unique order number.
-acceptance_criteria:
-  - "MUST create an order only when the cart contains at least one item"
-  - "MUST capture payment before the order is marked as confirmed"
-  - "MUST empty the customer's cart after the order is successfully placed"
-  - "MUST NOT place an order when payment capture fails"
-  - "SHOULD display an order confirmation with a unique order number"
-depends_on:
-  - BIZ-CART-ADD-ITEM
-status: planned
-```
+4. Validate the result against `<workspace_root>/spex/schemas/biz-spec.schema.json`.
 
 ## Quality bar
 

@@ -286,6 +286,21 @@ repositories:
     }
 
     #[test]
+    fn copy_templates_writes_schemas() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        copy_templates(spex_dir.path()).expect("copy templates");
+
+        assert!(spex_dir.path().join("schemas").is_dir());
+        assert!(
+            spex_dir
+                .path()
+                .join("schemas/biz-spec.schema.json")
+                .is_file()
+        );
+    }
+
+    #[test]
     fn copy_templates_relocates_skills_into_agents() {
         let spex_dir = tempdir().expect("create spex dir");
 

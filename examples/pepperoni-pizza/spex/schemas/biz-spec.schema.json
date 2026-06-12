@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/biz-spec.schema.json",
+  "title": "Business Spec",
+  "description": "A business spec (BIZ): a single business rule with acceptance criteria, extracted from the PRD.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "biz-spec-id.schema.json"
+    },
+    "title": {
+      "type": "string",
+      "description": "One-line business description. Imperative, directive, no filler",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Multi-paragraph narrative. What problem this solves, who is affected, what user-visible behaviour is expected. Technical implementation lives in plan.md, not here.",
+      "minLength": 1
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
+      "items": {
+        "type": "string",
+        "description": "A single verifiable acceptance criterion. Starts with a commitment level.",
+        "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "description": "Other BIZ spec IDs this spec depends on (cannot be implemented before they ship).",
+        "$ref": "biz-spec-id.schema.json"
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status. Omitting is equivalent to 'planned'.",
+      "enum": ["active", "planned", "blocked", "deprecated"],
+      "default": "active"
+    }
+  },
+  "required": ["id", "title", "description", "acceptance_criteria"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "BIZ-PLACE-PIZZA-ORDER",
+      "title": "Allow customers to place an order from their cart",
+      "description": "Customers who have added items to their cart need a way to complete a purchase. When a customer confirms checkout, the system creates an order from the current cart contents, captures payment, and empties the cart.\n\nThis affects all authenticated shoppers. After a successful order, the customer should see an order confirmation with a unique order number.",
+      "acceptance_criteria": [
+        "MUST create an order only when the cart contains at least one item",
+        "MUST capture payment before the order is marked as confirmed",
+        "MUST empty the customer's cart after the order is successfully placed",
+        "SHOULD display an order confirmation with a unique order number"
+      ],
+      "depends_on": ["BIZ-CART-ADD-ITEM"],
+      "status": "planned"
+    }
+  ]
+}

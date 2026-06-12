@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/tech-spec.schema.json",
+  "title": "Technical Spec",
+  "description": "A technical spec (TECH): a cross-cutting technical rule on code style, structure, testing, or security",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "tech-spec-id.schema.json"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short human-readable summary of the spec.",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional narrative: rationale for the rule and what it protects against.",
+      "minLength": 1
+    },
+    "include_for_all_repos": {
+      "type": "boolean",
+      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list, including spex itself. Defaults to false.",
+      "default": false
+    },
+    "include_for_spex": {
+      "type": "boolean",
+      "description": "Overrides spex-repo inclusion when present. When omitted, the spex repository follows `include_for_all_repos`; set explicitly to add or exclude this spec for the spex repository."
+    },
+    "readonly": {
+      "type": "boolean",
+      "description": "When true, this is a global spex framework spec that can be changed only upstream. Consumers must not edit it locally; updates arrive by upgrading spex. Defaults to false.",
+      "default": false
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
+      "items": {
+        "description": "A single verifiable acceptance criterion, provable by automated checks or AI. Starts with a commitment level.",
+        "type": "string",
+        "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "checks": {
+      "type": "array",
+      "description": "Automated checks that verify the spec's acceptance criteria.",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    }
+  },
+  "$defs": {
+    "check_base": {
+      "type": "object",
+      "description": "A single automated check.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Unique name identifying the check.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional human-readable summary of what the check verifies.",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "How the check is executed: regexp matches file contents, glob matches file paths, script runs a command.",
+          "enum": ["regexp", "glob", "script"]
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity when the check fails. Defaults to error when omitted.",
+          "enum": ["warn", "error"],
+          "default": "error"
+        }
+      },
+      "required": ["name", "type"]
+    },
+    "file_scope": {
+      "type": "object",
+      "properties": {
+        "include": {
+          "type": "array",
+          "description": "Glob patterns that narrow this check's file set to matching paths. When omitted, all non-ignored files are in scope.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "description": "Glob patterns that remove matching paths from this check's file set.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "check": {
+      "oneOf": [
+        {
+          "title": "regexp check",
+          "allOf": [
+            { "$ref": "#/$defs/check_base" },
+            { "$ref": "#/$defs/file_scope" }
+          ],
+          "properties": {
+            "type": { "const": "regexp" },
+            "pattern": {
+              "type": "string",
+              "description": "Regular expression matched against the contents of each in-scope file.",
+              "minLength": 1
+            },
+            "negate": {
+              "type": "boolean",
+              "description": "Inverts the check. When false (default), a match is a violation (forbidden). When true, a file with no match is a violation (required).",
+              "default": false
+            }
+          },
+          "required": ["pattern"],
+          "unevaluatedProperties": false
+        },
+        {
+          "title": "glob check",
+          "allOf": [
+            { "$ref": "#/$defs/check_base" },
+            { "$ref": "#/$defs/file_scope" }
+          ],
+          "properties": {
+            "type": { "const": "glob" },
+            "pattern": {
+              "type": "string",
+              "description": "Path glob matched against the paths of in-scope files.",
+              "minLength": 1
+            },
+            "negate": {
+              "type": "boolean",
+              "description": "Inverts the check. When false (default), a matching path is a violation (forbidden). When true, the absence of any matching path is a violation (required).",
+              "default": false
+            }
+          },
+          "required": ["pattern"],
+          "unevaluatedProperties": false
+        },
+        {
+          "title": "script check",
+          "description": "Runs `scripts/<name>.sh` for each matched file from the workspace repository if present, otherwise from spex.",
+          "allOf": [
+            { "$ref": "#/$defs/check_base" },
+            { "$ref": "#/$defs/file_scope" }
+          ],
+          "properties": {
+            "type": { "const": "script" }
+          },
+          "unevaluatedProperties": false
+        },
+        {
+          "title": "command check",
+          "description": "Runs `scripts/<name>.sh` once per workspace repository, from that repository if present, otherwise from spex.",
+          "allOf": [{ "$ref": "#/$defs/check_base" }],
+          "properties": {
+            "type": { "const": "command" }
+          },
+          "unevaluatedProperties": false
+        }
+      ]
+    }
+  },
+  "required": ["id", "title", "description", "acceptance_criteria"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "id": "TECH-SECRET-HANDLING",
+      "title": "No secrets in source code",
+      "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
+      "acceptance_criteria": [
+        "MUST NOT commit API keys, passwords, or tokens to the repository",
+        "MUST load secrets from environment variables or a secrets manager at runtime",
+        "SHOULD fail CI when a secret-scanning check detects credentials in a diff"
+      ],
+      "checks": [
+        {
+          "name": "hardcoded-secrets",
+          "description": "Detect potential hardcoded secrets in source",
+          "type": "regexp",
+          "pattern": "(password|secret|token|api_key)\\s*[:=]\\s*\"[^\"]{8,}\"",
+          "include": ["src/**/*.rs", "src/**/*.ts"],
+          "exclude": ["**/*_test.rs"],
+          "severity": "error"
+        },
+        {
+          "name": "no-backup-files",
+          "type": "glob",
+          "pattern": "**/*.bak",
+          "severity": "warn"
+        }
+      ]
+    }
+  ]
+}

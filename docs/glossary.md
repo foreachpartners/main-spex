@@ -34,7 +34,7 @@
     - "Secret scan check passes on every commit in CI."
   ```
 
-- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
+- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type. In paths, written as the placeholder `<spec-id>`.
 
   ```text
   BIZ-PLACE-PIZZA-ORDER
