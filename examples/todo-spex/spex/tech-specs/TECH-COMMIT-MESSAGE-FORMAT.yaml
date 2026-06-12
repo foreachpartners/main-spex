@@ -1,4 +1,4 @@
-id: TECH-COMMIT-MESSAGE
+id: TECH-COMMIT-MESSAGE-FORMAT
 include_on_spex_init: true
 title: Commit Message Format
 description: >-

@@ -19,7 +19,7 @@
 - **Business Spec** (`BIZ`) — extracted from the PRD. Describes _how the product behaves_: a single business rule with acceptance criteria. A PRD typically breaks down into many business specs.
 
   ```yaml
-  id: BIZ-ORDER-PLACE
+  id: BIZ-PLACE-PIZZA-ORDER
   title: Customer can place an order
   acceptance_criteria:
     - "POST /orders returns 201 with the created order."
@@ -28,7 +28,7 @@
 - **Technical Spec** (`TECH`) — describes _how the code is built_: a cross-cutting technical rule on code style, structure, testing, or security. Not tied to a single feature — it applies repo-wide.
 
   ```yaml
-  id: TECH-NO-SECRETS
+  id: TECH-SECRET-HANDLING
   title: No secrets in the repository
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
@@ -37,8 +37,8 @@
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
 
   ```text
-  BIZ-ORDER-PLACE
-  TECH-NO-SECRETS
+  BIZ-PLACE-PIZZA-ORDER
+  TECH-SECRET-HANDLING
   ```
 
 - **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract.

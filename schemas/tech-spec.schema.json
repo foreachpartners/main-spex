@@ -166,7 +166,7 @@
   "additionalProperties": false,
   "examples": [
     {
-      "id": "TECH-NO-SECRETS",
+      "id": "TECH-SECRET-HANDLING",
       "title": "No secrets in source code",
       "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
       "acceptance_criteria": [

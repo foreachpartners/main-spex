@@ -115,7 +115,10 @@ repositories:
 
     #[test]
     fn render_config_lists_default_tech_specs() {
-        let specs = ["TECH-SECRETS".to_string(), "TECH-WRITING-STYLE".to_string()];
+        let specs = [
+            "TECH-SECRET-HANDLING".to_string(),
+            "TECH-DOC-WRITING-STYLE".to_string(),
+        ];
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
         let expected = "\
@@ -124,8 +127,8 @@ repositories:
   - name: server
     path: ../server
     tech-specs:
-      - TECH-SECRETS
-      - TECH-WRITING-STYLE
+      - TECH-SECRET-HANDLING
+      - TECH-DOC-WRITING-STYLE
 ";
         assert_eq!(yaml, expected);
     }
@@ -141,9 +144,9 @@ repositories:
     fn default_tech_specs_includes_flagged_specs_only() {
         let ids = default_tech_specs().expect("collect default tech specs");
 
-        assert!(ids.contains(&"TECH-SECRETS".to_string()));
-        assert!(ids.contains(&"TECH-WRITING-STYLE".to_string()));
-        assert!(!ids.contains(&"TECH-OPENAPI".to_string()));
+        assert!(ids.contains(&"TECH-SECRET-HANDLING".to_string()));
+        assert!(ids.contains(&"TECH-DOC-WRITING-STYLE".to_string()));
+        assert!(!ids.contains(&"TECH-OPENAPI-CONVENTIONS".to_string()));
         assert!(ids.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 

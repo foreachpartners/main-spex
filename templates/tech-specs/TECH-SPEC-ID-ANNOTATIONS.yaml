@@ -1,4 +1,4 @@
-id: TECH-SPEC-ANNOTATIONS
+id: TECH-SPEC-ID-ANNOTATIONS
 include_on_spex_init: true
 title: Spec ID Annotation Format
 description: >-

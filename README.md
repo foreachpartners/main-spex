@@ -45,7 +45,7 @@ For example, a pizza ordering feature moves through the flow like this:
 
 1. **BRD** — "sell pizza online to increase sales"
 2. **PRD** — "customers can pick a pizza on the website and pay online"
-3. **Business Spec** — `BIZ-ORDER-PLACE`: "POST /orders returns 201 with the created order"
+3. **Business Spec** — `BIZ-PLACE-PIZZA-ORDER`: "POST /orders returns 201 with the created order"
 4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
 5. **Implementation** — the `placeOrder()` handler in code
 6. **Test** — verifies that placing an order returns `201`
@@ -64,9 +64,9 @@ flowchart TD
 
 ### Technical specs live outside the feature flow — they govern how every artifact is built:
 
-For example, the rule `TECH-NO-SECRETS` works like this:
+For example, the rule `TECH-SECRET-HANDLING` works like this:
 
-1. **Technical Spec** — `TECH-NO-SECRETS`: "no secrets in the repository"
+1. **Technical Spec** — `TECH-SECRET-HANDLING`: "no secrets in the repository"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 

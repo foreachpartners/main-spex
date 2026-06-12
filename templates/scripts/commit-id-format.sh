@@ -1,9 +1,9 @@
 #!/bin/sh
-# TECH-COMMIT-MESSAGE / commit-id-format
+# TECH-COMMIT-MESSAGE-FORMAT / commit-id-format
 #
 # Behavioral commits (feat, fix, refactor) must end their subject line with a
 # bracketed, comma-separated list of Spec IDs, e.g.
-#   feat(api): add order endpoint [BIZ-ORDER-PLACE, TECH-SECRETS]
+#   feat(api): add order endpoint [BIZ-PLACE-PIZZA-ORDER, TECH-SECRET-HANDLING]
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.

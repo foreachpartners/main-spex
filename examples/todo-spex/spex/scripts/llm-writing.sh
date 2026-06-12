@@ -1,5 +1,5 @@
 #!/bin/sh
-# TECH-WRITING-STYLE / llm-writing
+# TECH-DOC-WRITING-STYLE / llm-writing
 #
 # Flags filler, hedging, motivational, apologetic, and subjective phrasing in
 # documentation. Receives candidate files as arguments (scoped to *.md by the

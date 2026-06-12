@@ -1,4 +1,4 @@
-id: TECH-OPENAPI
+id: TECH-OPENAPI-CONVENTIONS
 title: OpenAPI conventions
 description: >-
   The OpenAPI document is the contract that generated clients, servers, and

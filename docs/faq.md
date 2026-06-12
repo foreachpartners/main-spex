@@ -28,13 +28,13 @@ A monorepo grants all-or-nothing access: anyone who can clone it sees every line
 
 ### One spec, traceable across many repositories
 
-Keeping specs in their own `spex` repository lets a single Spec ID govern a contract and its implementations across more than one repository. `BIZ-ORDER-PLACE` can be referenced from `contracts` (the OpenAPI definition of `placeOrder`), from `api` (the endpoint), and from `frontend` (the order form), and all trace back to the same approved spec:
+Keeping specs in their own `spex` repository lets a single Spec ID govern a contract and its implementations across more than one repository. `BIZ-PLACE-PIZZA-ORDER` can be referenced from `contracts` (the OpenAPI definition of `placeOrder`), from `api` (the endpoint), and from `frontend` (the order form), and all trace back to the same approved spec:
 
 ```text
-spex/        BIZ-ORDER-PLACE              <- single source of truth
-  contracts/   openapi.yaml               references BIZ-ORDER-PLACE
-  api/         implementation             references BIZ-ORDER-PLACE
-  frontend/    implementation             references BIZ-ORDER-PLACE
+spex/        BIZ-PLACE-PIZZA-ORDER              <- single source of truth
+  contracts/   openapi.yaml               references BIZ-PLACE-PIZZA-ORDER
+  api/         implementation             references BIZ-PLACE-PIZZA-ORDER
+  frontend/    implementation             references BIZ-PLACE-PIZZA-ORDER
 ```
 
 If the spec lived inside one implementation repository, a requirement that spans services would have no natural home and traceability would break at the repo boundary. With `spex` as a shared, versioned source of truth, every repo links to the same reviewed spec by ID, and you can check out `spex` at the commit the code was built against to see exactly what was approved.

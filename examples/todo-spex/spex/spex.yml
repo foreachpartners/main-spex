@@ -3,29 +3,29 @@ repositories:
   - name: api
     path: ../api
     tech-specs:
-      - TECH-SECRETS
-      - TECH-SPEC-ANNOTATIONS
-      - TECH-WRITING-STYLE
-      - TECH-COMMIT-MESSAGE
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-DOC-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE-FORMAT
   - name: contracts
     path: ../contracts
     tech-specs:
-      - TECH-SECRETS
-      - TECH-SPEC-ANNOTATIONS
-      - TECH-WRITING-STYLE
-      - TECH-OPENAPI
-      - TECH-COMMIT-MESSAGE
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-DOC-WRITING-STYLE
+      - TECH-OPENAPI-CONVENTIONS
+      - TECH-COMMIT-MESSAGE-FORMAT
   - name: frontend
     path: ../frontend
     tech-specs:
-      - TECH-SECRETS
-      - TECH-SPEC-ANNOTATIONS
-      - TECH-WRITING-STYLE
-      - TECH-COMMIT-MESSAGE
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-DOC-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE-FORMAT
   - name: spex
     path: .
     tech-specs:
-      - TECH-SECRETS
-      - TECH-SPEC-ANNOTATIONS
-      - TECH-WRITING-STYLE
-      - TECH-COMMIT-MESSAGE
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-DOC-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE-FORMAT
