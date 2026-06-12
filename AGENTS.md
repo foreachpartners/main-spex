@@ -8,6 +8,8 @@ AI-first specification-driven development framework with human validation.
 cargo check # Lint
 cargo fmt   # Format
 cargo test  # Test
+cargo install --path . --force  # Reinstall cli
+spex --help # CLI command
 ```
 
 ## Main dependencies
