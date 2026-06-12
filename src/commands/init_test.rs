@@ -214,7 +214,7 @@ repositories:
     fn write_config_writes_file_to_spex_dir() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        let config_path = write_config(
+        write_config(
             spex_dir.path(),
             "pizza-shop",
             &[repo("server")],
@@ -222,7 +222,7 @@ repositories:
         )
         .expect("write config");
 
-        assert_eq!(config_path, spex_dir.path().join(SPEX_CONFIG_FILE));
+        let config_path = spex_dir.path().join(SPEX_CONFIG_FILE);
         let written = fs::read_to_string(&config_path).expect("read config");
         assert_eq!(
             written,

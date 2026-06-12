@@ -76,10 +76,10 @@ pub fn run() -> Result<ExitCode> {
     let repositories = confirm_repositories(repositories)?;
 
     let tech_specs = default_tech_specs()?;
-    let config_path = write_config(&spex_dir, &project_name, &repositories, &tech_specs)?;
+    write_config(&spex_dir, &project_name, &repositories, &tech_specs)?;
     copy_templates(&spex_dir)?;
 
-    println!("Created {}", config_path.display());
+    println!("spex repository initialized, run spex skill `/spex-setup` to complete setup");
     Ok(ExitCode::SUCCESS)
 }
 
@@ -182,7 +182,7 @@ fn write_config(
     project_name: &str,
     repositories: &[Repository],
     tech_specs: &DefaultTechSpecs,
-) -> Result<PathBuf> {
+) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(
         &config_path,
@@ -190,7 +190,7 @@ fn write_config(
     )
     .change_context(InitError::Io)
     .attach_with(|| format!("could not write `{}`", config_path.display()))?;
-    Ok(config_path)
+    Ok(())
 }
 
 fn default_tech_specs() -> Result<DefaultTechSpecs> {
