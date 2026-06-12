@@ -1,5 +1,5 @@
 ---
-name: generate-biz-spec
+name: spex-generate-biz-spec
 description: Generate a business spec (BIZ) by interviewing the user. Use when the user wants to author, draft, or extract a BIZ spec from a PRD, a feature idea, or a business rule. Asks targeted questions, then writes a schema-valid YAML file to <workspace_root>/spex/biz-specs/.
 ---
 
