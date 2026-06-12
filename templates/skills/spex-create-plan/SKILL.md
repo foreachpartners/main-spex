@@ -1,6 +1,6 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace_root>/spex/plans/<spec-id>_<datetime>.md whose steps hold tasks that AI agents can run in parallel.
+description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace_root>/spex/plans/<spec-id>.md whose steps hold tasks that AI agents can run in parallel.
 ---
 
 # Create an Implementation Plan
@@ -73,7 +73,6 @@ Write the plan in Markdown using the template below. Keep the implementation ove
 - Specs: BIZ-LEAD-SPEC, BIZ-OTHER-SPEC
 - Scope: api, frontend
 - Tech-specs: TECH-SECRET-HANDLING, TECH-NAMING-CONVENTION, TECH-SPEC-ID-ANNOTATIONS, TECH-OPENAPI-CONVENTIONS
-- Created: 2024-11-24-14-44
 
 ## Overview
 
@@ -117,7 +116,7 @@ Each case maps to an acceptance criterion and proves it.
 
 Rules for the plan content:
 
-- The filename is `<lead-spec-id>_<datetime>.md` where `<datetime>` is the current local time as `YYYY-MM-DD-HH-MM` (for example `BIZ-PLACE-PIZZA-ORDER_2024-11-24-14-44.md`). Get the real current time; do not invent it.
+- The filename is `<lead-spec-id>.md`. Only when that file already exists, append the current local time to keep both: `<lead-spec-id>_<datetime>.md` where `<datetime>` is `YYYY-MM-DD-HH-MM` (for example `BIZ-PLACE-PIZZA-ORDER_2024-11-24-14-44.md`). Get the real current time; do not invent it.
 - List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing tech-specs under `Tech-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
@@ -126,7 +125,7 @@ Rules for the plan content:
 ## Step 6 — Confirm, then write
 
 1. Show the drafted plan to the user — especially the step boundaries and which tasks run in parallel — and confirm. Apply edits if needed.
-2. Write it to `<workspace_root>/spex/plans/<lead-spec-id>_<datetime>.md`.
+2. Write it to `<workspace_root>/spex/plans/<lead-spec-id>.md`. If that file already exists, write to `<workspace_root>/spex/plans/<lead-spec-id>_<datetime>.md` instead so the existing plan is preserved.
 3. Confirm the path back to the user.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
