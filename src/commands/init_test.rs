@@ -311,7 +311,7 @@ repositories:
         assert!(
             spex_dir
                 .path()
-                .join(".agents/skills/generate-biz-spec/SKILL.md")
+                .join(".agents/skills/spex-create-biz-spec/SKILL.md")
                 .is_file()
         );
     }
@@ -327,7 +327,7 @@ repositories:
         let target = fs::read_link(&claude).expect("read .claude symlink");
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
-            claude.join("skills/generate-biz-spec/SKILL.md").is_file(),
+            claude.join("skills/spex-create-biz-spec/SKILL.md").is_file(),
             ".claude/skills should resolve through the symlink"
         );
     }
