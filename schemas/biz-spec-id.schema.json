@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/biz-spec-id.schema.json",
   "title": "Business Spec ID",
-  "description": "Business spec ID with fixed BIZ- prefix. Only uppercase English letters, numbers and hyphens. Max 40 characters. The name should convey the spec's contents so it can be understood without opening the spec.",
+  "description": "Business spec ID with fixed BIZ- prefix. Only uppercase English letters and hyphens. Max 40 characters. The name should convey the spec's contents so it can be understood without opening the spec.",
   "type": "string",
-  "pattern": "^BIZ-[A-Z0-9]+(-[A-Z0-9]+)*$",
+  "pattern": "^BIZ-[A-Z]+(-[A-Z]+)*$",
   "maxLength": 40,
   "examples": ["BIZ-PLACE-PIZZA-ORDER"]
 }
