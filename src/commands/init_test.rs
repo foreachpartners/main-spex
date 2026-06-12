@@ -163,17 +163,38 @@ repositories:
     }
 
     #[test]
-    fn verify_spex_dir_accepts_spex_directory() {
+    fn determine_spex_and_workspace_dirs_from_spex_directory() {
         let workspace = workspace_with(&["spex"], &[]);
+        let spex_dir = workspace.path().join("spex");
 
-        assert!(verify_spex_dir(&workspace.path().join("spex")).is_ok());
+        let (result_spex, result_workspace) =
+            determine_spex_and_workspace_dirs(&spex_dir).expect("determine dirs");
+
+        assert_eq!(result_spex, spex_dir);
+        assert_eq!(result_workspace, workspace.path());
     }
 
     #[test]
-    fn verify_spex_dir_rejects_other_directory() {
+    fn determine_spex_and_workspace_dirs_from_workspace_with_existing_spex() {
+        let workspace = workspace_with(&["spex", "server"], &[]);
+
+        let (result_spex, result_workspace) =
+            determine_spex_and_workspace_dirs(workspace.path()).expect("determine dirs");
+
+        assert_eq!(result_spex, workspace.path().join("spex"));
+        assert_eq!(result_workspace, workspace.path());
+    }
+
+    #[test]
+    fn determine_spex_and_workspace_dirs_creates_spex_directory() {
         let workspace = workspace_with(&["server"], &[]);
 
-        assert!(verify_spex_dir(&workspace.path().join("server")).is_err());
+        let (result_spex, result_workspace) =
+            determine_spex_and_workspace_dirs(workspace.path()).expect("determine dirs");
+
+        assert_eq!(result_spex, workspace.path().join("spex"));
+        assert_eq!(result_workspace, workspace.path());
+        assert!(result_spex.is_dir(), "spex directory was not created");
     }
 
     #[test]

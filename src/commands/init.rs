@@ -22,8 +22,6 @@ type Result<T> = core::result::Result<T, Report<InitError>>;
 
 #[derive(Debug, Error)]
 pub enum InitError {
-    #[error("`spex init` must be run from inside a directory named `{SPEX_DIR_NAME}`")]
-    NotSpexDir,
     #[error("`{SPEX_CONFIG_FILE}` already exists in this directory")]
     AlreadyInitialized,
     #[error("the spex directory has no parent workspace folder")]
@@ -46,26 +44,21 @@ pub fn run() -> Result<ExitCode> {
         .change_context(InitError::Io)
         .attach("could not determine the current directory")?;
 
-    verify_spex_dir(&current_dir)?;
-    verify_not_initialized(&current_dir)?;
+    let (spex_dir, workspace_root) = determine_spex_and_workspace_dirs(&current_dir)?;
+    verify_not_initialized(&spex_dir)?;
 
-    let workspace_root = current_dir.parent().ok_or_else(|| {
-        Report::new(InitError::NoWorkspaceRoot)
-            .attach("expected the spex directory to live inside a workspace root folder")
-    })?;
-
-    let default_name = dir_name(workspace_root).ok_or_else(|| {
+    let default_name = dir_name(&workspace_root).ok_or_else(|| {
         Report::new(InitError::NoWorkspaceRoot).attach("could not read the workspace folder name")
     })?;
 
     let project_name = confirm_project_name(default_name)?;
 
-    let repositories = discover_repositories(workspace_root)?;
+    let repositories = discover_repositories(&workspace_root)?;
     let repositories = confirm_repositories(repositories)?;
 
     let arch_specs = default_arch_specs()?;
-    let config_path = write_config(&current_dir, &project_name, &repositories, &arch_specs)?;
-    copy_templates(&current_dir)?;
+    let config_path = write_config(&spex_dir, &project_name, &repositories, &arch_specs)?;
+    copy_templates(&spex_dir)?;
 
     println!("Created {}", config_path.display());
     Ok(ExitCode::SUCCESS)
@@ -152,13 +145,28 @@ fn default_arch_specs() -> Result<Vec<String>> {
     Ok(ids)
 }
 
-fn verify_spex_dir(current_dir: &Path) -> Result<()> {
-    match dir_name(current_dir) {
-        Some(name) if name == SPEX_DIR_NAME => Ok(()),
-        Some(name) => Err(Report::new(InitError::NotSpexDir)
-            .attach(format!("current directory is named `{name}`"))),
-        None => Err(Report::new(InitError::NotSpexDir)),
+fn determine_spex_and_workspace_dirs(current_dir: &Path) -> Result<(PathBuf, PathBuf)> {
+    // Check if we're already in a spex directory
+    if dir_name(current_dir) == Some(SPEX_DIR_NAME) {
+        let workspace_root = current_dir.parent().ok_or_else(|| {
+            Report::new(InitError::NoWorkspaceRoot)
+                .attach("expected the spex directory to live inside a workspace root folder")
+        })?;
+        return Ok((current_dir.to_path_buf(), workspace_root.to_path_buf()));
     }
+
+    // Check if there's a spex subdirectory
+    let spex_subdir = current_dir.join(SPEX_DIR_NAME);
+    if spex_subdir.is_dir() {
+        return Ok((spex_subdir, current_dir.to_path_buf()));
+    }
+
+    // Create spex directory in current location
+    fs::create_dir(&spex_subdir)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not create `{}` directory", spex_subdir.display()))?;
+
+    Ok((spex_subdir, current_dir.to_path_buf()))
 }
 
 fn verify_not_initialized(current_dir: &Path) -> Result<()> {
