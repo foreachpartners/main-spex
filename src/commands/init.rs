@@ -7,8 +7,8 @@ use error_stack::{Report, ResultExt, bail};
 use include_dir::{Dir, include_dir};
 use thiserror::Error;
 
-use crate::arch_spec::{self, ArchSpec};
 use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::tech_spec::{self, TechSpec};
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -28,7 +28,7 @@ pub enum InitError {
     NoWorkspaceRoot,
     #[error("initialization cancelled")]
     Cancelled,
-    #[error("could not parse the bundled arch spec `{0}`")]
+    #[error("could not parse the bundled tech spec `{0}`")]
     Template(String),
     #[error("an I/O operation failed")]
     Io,
@@ -56,8 +56,8 @@ pub fn run() -> Result<ExitCode> {
     let repositories = discover_repositories(&workspace_root)?;
     let repositories = confirm_repositories(repositories)?;
 
-    let arch_specs = default_arch_specs()?;
-    let config_path = write_config(&spex_dir, &project_name, &repositories, &arch_specs)?;
+    let tech_specs = default_tech_specs()?;
+    let config_path = write_config(&spex_dir, &project_name, &repositories, &tech_specs)?;
     copy_templates(&spex_dir)?;
 
     println!("Created {}", config_path.display());
@@ -107,20 +107,20 @@ fn write_config(
     spex_dir: &Path,
     project_name: &str,
     repositories: &[Repository],
-    arch_specs: &[String],
+    tech_specs: &[String],
 ) -> Result<PathBuf> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(
         &config_path,
-        config_to_yaml(project_name, repositories, arch_specs),
+        config_to_yaml(project_name, repositories, tech_specs),
     )
     .change_context(InitError::Io)
     .attach_with(|| format!("could not write `{}`", config_path.display()))?;
     Ok(config_path)
 }
 
-fn default_arch_specs() -> Result<Vec<String>> {
-    let Some(dir) = TEMPLATES.get_dir(arch_spec::ARCH_SPECS_DIR) else {
+fn default_tech_specs() -> Result<Vec<String>> {
+    let Some(dir) = TEMPLATES.get_dir(tech_spec::TECH_SPECS_DIR) else {
         return Ok(Vec::new());
     };
 
@@ -134,7 +134,7 @@ fn default_arch_specs() -> Result<Vec<String>> {
         let raw = file
             .contents_utf8()
             .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
-        let spec: ArchSpec = serde_yaml_ng::from_str(raw)
+        let spec: TechSpec = serde_yaml_ng::from_str(raw)
             .change_context_lazy(|| InitError::Template(name.clone()))?;
         if spec.include_on_spex_init {
             ids.push(spec.id);
@@ -249,7 +249,7 @@ fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>
 fn config_to_yaml(
     project_name: &str,
     repositories: &[Repository],
-    arch_specs: &[String],
+    tech_specs: &[String],
 ) -> String {
     let mut yaml = format!("name: {project_name}\n");
 
@@ -260,11 +260,11 @@ fn config_to_yaml(
         for repo in repositories {
             yaml.push_str(&format!("  - name: {}\n", repo.name));
             yaml.push_str(&format!("    path: {}\n", repo.path));
-            if arch_specs.is_empty() {
-                yaml.push_str("    arch-specs: []\n");
+            if tech_specs.is_empty() {
+                yaml.push_str("    tech-specs: []\n");
             } else {
-                yaml.push_str("    arch-specs:\n");
-                for id in arch_specs {
+                yaml.push_str("    tech-specs:\n");
+                for id in tech_specs {
                     yaml.push_str(&format!("      - {id}\n"));
                 }
             }

@@ -1,4 +1,4 @@
-id: ARCH-WRITING-STYLE
+id: TECH-WRITING-STYLE
 include_on_spex_init: true
 title: LLM-Oriented Writing Style
 description: >-
@@ -31,6 +31,6 @@ checks:
     type: regexp
     pattern: '\p{Cyrillic}'
     include:
-      - "func-specs/*.yaml"
+      - "biz-specs/*.yaml"
       - "**/*.md"
     severity: error

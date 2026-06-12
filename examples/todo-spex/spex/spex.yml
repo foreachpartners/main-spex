@@ -2,30 +2,30 @@ name: todo-spex
 repositories:
   - name: api
     path: ../api
-    arch-specs:
-      - ARCH-SECRETS
-      - ARCH-SPEC-ANNOTATIONS
-      - ARCH-WRITING-STYLE
-      - ARCH-COMMIT-MESSAGE
+    tech-specs:
+      - TECH-SECRETS
+      - TECH-SPEC-ANNOTATIONS
+      - TECH-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE
   - name: contracts
     path: ../contracts
-    arch-specs:
-      - ARCH-SECRETS
-      - ARCH-SPEC-ANNOTATIONS
-      - ARCH-WRITING-STYLE
-      - ARCH-OPENAPI
-      - ARCH-COMMIT-MESSAGE
+    tech-specs:
+      - TECH-SECRETS
+      - TECH-SPEC-ANNOTATIONS
+      - TECH-WRITING-STYLE
+      - TECH-OPENAPI
+      - TECH-COMMIT-MESSAGE
   - name: frontend
     path: ../frontend
-    arch-specs:
-      - ARCH-SECRETS
-      - ARCH-SPEC-ANNOTATIONS
-      - ARCH-WRITING-STYLE
-      - ARCH-COMMIT-MESSAGE
+    tech-specs:
+      - TECH-SECRETS
+      - TECH-SPEC-ANNOTATIONS
+      - TECH-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE
   - name: spex
     path: .
-    arch-specs:
-      - ARCH-SECRETS
-      - ARCH-SPEC-ANNOTATIONS
-      - ARCH-WRITING-STYLE
-      - ARCH-COMMIT-MESSAGE
+    tech-specs:
+      - TECH-SECRETS
+      - TECH-SPEC-ANNOTATIONS
+      - TECH-WRITING-STYLE
+      - TECH-COMMIT-MESSAGE

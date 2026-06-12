@@ -14,21 +14,21 @@
   Daily orders amount should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: functional (`FUNC`) and architecture (`ARCH`).
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: business (`BIZ`) and technical (`TECH`).
 
-- **Functional Spec** (`FUNC`) — extracted from the PRD. Describes _how the product behaves_: a single business rule with acceptance criteria. A PRD typically breaks down into many functional specs.
+- **Business Spec** (`BIZ`) — extracted from the PRD. Describes _how the product behaves_: a single business rule with acceptance criteria. A PRD typically breaks down into many business specs.
 
   ```yaml
-  id: FUNC-ORDER-PLACE
+  id: BIZ-ORDER-PLACE
   title: Customer can place an order
   acceptance_criteria:
     - "POST /orders returns 201 with the created order."
   ```
 
-- **Architecture Spec** (`ARCH`) — describes _how the code is built_: a cross-cutting technical rule on code style, structure, testing, or security. Not tied to a single feature — it applies repo-wide.
+- **Technical Spec** (`TECH`) — describes _how the code is built_: a cross-cutting technical rule on code style, structure, testing, or security. Not tied to a single feature — it applies repo-wide.
 
   ```yaml
-  id: ARCH-NO-SECRETS
+  id: TECH-NO-SECRETS
   title: No secrets in the repository
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
@@ -37,11 +37,11 @@
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
 
   ```text
-  FUNC-ORDER-PLACE
-  ARCH-NO-SECRETS
+  BIZ-ORDER-PLACE
+  TECH-NO-SECRETS
   ```
 
-- **Contract** — derived from a functional spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract.
+- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract.
 
   ```yaml
   paths:

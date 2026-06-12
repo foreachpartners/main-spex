@@ -37,8 +37,8 @@ pub struct Config {
 pub struct Repository {
     pub name: String,
     pub path: String,
-    #[serde(rename = "arch-specs", default)]
-    pub arch_specs: Vec<String>,
+    #[serde(rename = "tech-specs", default)]
+    pub tech_specs: Vec<String>,
 }
 
 pub fn find_dir(start: &Path) -> Result<PathBuf> {

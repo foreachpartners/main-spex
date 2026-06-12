@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::arch_spec::{Check, CheckKind, Severity};
+    use crate::tech_spec::{Check, CheckKind, Severity};
     use tempfile::{TempDir, tempdir};
 
     fn check(kind: CheckKind, pattern: Option<&str>) -> Check {
@@ -81,7 +81,7 @@ mod tests {
         let check = check(CheckKind::Regexp, Some("api_key\\s*=\\s*\"[^\"]{8,}\""));
 
         let mut findings = Vec::new();
-        run_regexp("ARCH-SECRETS", &check, &[&file], &mut findings);
+        run_regexp("TECH-SECRETS", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -96,7 +96,7 @@ mod tests {
         check.negate = true;
 
         let mut findings = Vec::new();
-        run_regexp("ARCH-LICENSE", &check, &[&file], &mut findings);
+        run_regexp("TECH-LICENSE", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.rs"));
@@ -110,7 +110,7 @@ mod tests {
         let check = check(CheckKind::Glob, Some("**/*.bak"));
 
         let mut findings = Vec::new();
-        run_glob("ARCH-SECRETS", &check, &[&bak, &src], &mut findings);
+        run_glob("TECH-SECRETS", &check, &[&bak, &src], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("notes.bak"));
@@ -124,7 +124,7 @@ mod tests {
         check.negate = true;
 
         let mut findings = Vec::new();
-        run_glob("ARCH-LICENSE", &check, &[&src], &mut findings);
+        run_glob("TECH-LICENSE", &check, &[&src], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert!(findings[0].location.is_none());
@@ -195,7 +195,7 @@ mod tests {
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_command("ARCH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
+        run_command("TECH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Warn);
@@ -213,7 +213,7 @@ mod tests {
         let check = check(CheckKind::Command, None);
 
         let mut findings = Vec::new();
-        run_command("ARCH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
+        run_command("TECH-COMMIT-MESSAGE", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);

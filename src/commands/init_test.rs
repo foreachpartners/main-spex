@@ -105,17 +105,17 @@ name: pizza-shop
 repositories:
   - name: server
     path: ../server
-    arch-specs: []
+    tech-specs: []
   - name: client
     path: ../client
-    arch-specs: []
+    tech-specs: []
 ";
         assert_eq!(yaml, expected);
     }
 
     #[test]
-    fn render_config_lists_default_arch_specs() {
-        let specs = ["ARCH-SECRETS".to_string(), "ARCH-WRITING-STYLE".to_string()];
+    fn render_config_lists_default_tech_specs() {
+        let specs = ["TECH-SECRETS".to_string(), "TECH-WRITING-STYLE".to_string()];
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
         let expected = "\
@@ -123,9 +123,9 @@ name: pizza-shop
 repositories:
   - name: server
     path: ../server
-    arch-specs:
-      - ARCH-SECRETS
-      - ARCH-WRITING-STYLE
+    tech-specs:
+      - TECH-SECRETS
+      - TECH-WRITING-STYLE
 ";
         assert_eq!(yaml, expected);
     }
@@ -138,12 +138,12 @@ repositories:
     }
 
     #[test]
-    fn default_arch_specs_includes_flagged_specs_only() {
-        let ids = default_arch_specs().expect("collect default arch specs");
+    fn default_tech_specs_includes_flagged_specs_only() {
+        let ids = default_tech_specs().expect("collect default tech specs");
 
-        assert!(ids.contains(&"ARCH-SECRETS".to_string()));
-        assert!(ids.contains(&"ARCH-WRITING-STYLE".to_string()));
-        assert!(!ids.contains(&"ARCH-OPENAPI".to_string()));
+        assert!(ids.contains(&"TECH-SECRETS".to_string()));
+        assert!(ids.contains(&"TECH-WRITING-STYLE".to_string()));
+        assert!(!ids.contains(&"TECH-OPENAPI".to_string()));
         assert!(ids.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 
@@ -213,12 +213,12 @@ repositories:
     }
 
     #[test]
-    fn copy_templates_writes_arch_specs_and_scripts() {
+    fn copy_templates_writes_tech_specs_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        assert!(spex_dir.path().join("arch-specs").is_dir());
+        assert!(spex_dir.path().join("tech-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
     }
 

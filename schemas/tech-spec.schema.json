@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://spex.dev/schemas/arch-spec.schema.json",
-  "title": "Architecture Spec",
-  "description": "An architecture spec (ARCH): a cross-cutting technical rule on code style, structure, testing, or security",
+  "$id": "https://spex.dev/schemas/tech-spec.schema.json",
+  "title": "Technical Spec",
+  "description": "A technical spec (TECH): a cross-cutting technical rule on code style, structure, testing, or security",
   "type": "object",
   "properties": {
     "id": {
-      "$ref": "arch-spec-id.schema.json"
+      "$ref": "tech-spec-id.schema.json"
     },
     "title": {
       "type": "string",
@@ -20,7 +20,7 @@
     },
     "include_on_spex_init": {
       "type": "boolean",
-      "description": "When true, `spex init` adds this spec to every repository's arch-specs list. Defaults to false.",
+      "description": "When true, `spex init` adds this spec to every repository's tech-specs list. Defaults to false.",
       "default": false
     },
     "acceptance_criteria": {
@@ -166,7 +166,7 @@
   "additionalProperties": false,
   "examples": [
     {
-      "id": "ARCH-NO-SECRETS",
+      "id": "TECH-NO-SECRETS",
       "title": "No secrets in source code",
       "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
       "acceptance_criteria": [

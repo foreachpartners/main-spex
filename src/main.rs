@@ -1,6 +1,6 @@
-mod arch_spec;
 mod commands;
 mod config;
+mod tech_spec;
 
 use std::fmt::Debug;
 use std::process::ExitCode;
@@ -25,7 +25,7 @@ struct Cli {
 enum Commands {
     #[command(about = "Initialize a spex repository")]
     Init,
-    #[command(about = "Run architecture spec checks against the workspace")]
+    #[command(about = "Run technical spec checks against the workspace")]
     Check(CheckArgs),
 }
 

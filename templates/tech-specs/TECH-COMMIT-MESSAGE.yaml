@@ -1,4 +1,4 @@
-id: ARCH-COMMIT-MESSAGE
+id: TECH-COMMIT-MESSAGE
 include_on_spex_init: true
 title: Commit Message Format
 description: >-

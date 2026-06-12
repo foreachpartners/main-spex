@@ -1,9 +1,9 @@
 #!/bin/sh
-# ARCH-COMMIT-MESSAGE / commit-id-format
+# TECH-COMMIT-MESSAGE / commit-id-format
 #
 # Behavioral commits (feat, fix, refactor) must end their subject line with a
 # bracketed, comma-separated list of Spec IDs, e.g.
-#   feat(api): add order endpoint [FUNC-ORDER-PLACE, ARCH-SECRETS]
+#   feat(api): add order endpoint [BIZ-ORDER-PLACE, TECH-SECRETS]
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.
@@ -14,7 +14,7 @@ if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
   exit 1
 fi
 
-id='(FUNC|ARCH)-[A-Z0-9]+(-[A-Z0-9]+)*'
+id='(BIZ|TECH)-[A-Z0-9]+(-[A-Z0-9]+)*'
 bracket="\\[${id}(, ${id})*\\]\$"
 
 bad=$(git log -10 --pretty=%s \

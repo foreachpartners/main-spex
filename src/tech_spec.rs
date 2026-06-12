@@ -6,22 +6,22 @@ use error_stack::{Report, ResultExt};
 use serde::Deserialize;
 use thiserror::Error;
 
-pub const ARCH_SPECS_DIR: &str = "arch-specs";
+pub const TECH_SPECS_DIR: &str = "tech-specs";
 
 type Result<T> = core::result::Result<T, Report<SpecError>>;
 
 #[derive(Debug, Error)]
 pub enum SpecError {
-    #[error("could not read the `{ARCH_SPECS_DIR}` directory")]
+    #[error("could not read the `{TECH_SPECS_DIR}` directory")]
     ReadDir,
-    #[error("could not read arch spec `{0}`")]
+    #[error("could not read tech spec `{0}`")]
     ReadFile(String),
-    #[error("could not parse arch spec `{0}`")]
+    #[error("could not parse tech spec `{0}`")]
     Parse(String),
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ArchSpec {
+pub struct TechSpec {
     pub id: String,
     #[serde(default)]
     pub include_on_spex_init: bool,
@@ -65,7 +65,7 @@ pub enum Severity {
     Error,
 }
 
-pub fn load_all(specs_dir: &Path) -> Result<HashMap<String, ArchSpec>> {
+pub fn load_all(specs_dir: &Path) -> Result<HashMap<String, TechSpec>> {
     let mut specs = HashMap::new();
     if !specs_dir.is_dir() {
         return Ok(specs);
@@ -89,7 +89,7 @@ pub fn load_all(specs_dir: &Path) -> Result<HashMap<String, ArchSpec>> {
             .into_owned();
         let raw = fs::read_to_string(&path)
             .change_context_lazy(|| SpecError::ReadFile(file_name.clone()))?;
-        let spec: ArchSpec = serde_yaml_ng::from_str(&raw)
+        let spec: TechSpec = serde_yaml_ng::from_str(&raw)
             .change_context_lazy(|| SpecError::Parse(file_name.clone()))?;
         specs.insert(spec.id.clone(), spec);
     }

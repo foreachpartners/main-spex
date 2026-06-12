@@ -8,8 +8,8 @@ use ignore::WalkBuilder;
 use regex::Regex;
 use thiserror::Error;
 
-use crate::arch_spec::{self, ArchSpec, Check, CheckKind, Severity};
 use crate::config::{self, Config, Repository};
+use crate::tech_spec::{self, Check, CheckKind, Severity, TechSpec};
 
 #[cfg(test)]
 #[path = "check_test.rs"]
@@ -28,7 +28,7 @@ pub enum CheckError {
     CurrentDir,
     #[error("could not load spex configuration")]
     Config,
-    #[error("could not load arch specs")]
+    #[error("could not load tech specs")]
     Specs,
     #[error("unknown repository `{0}` — not listed in spex.yml")]
     UnknownRepo(String),
@@ -67,7 +67,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let spex_dir = config::find_dir(&current_dir).change_context(CheckError::Config)?;
 
     let config = config::load(&spex_dir).change_context(CheckError::Config)?;
-    let specs = arch_spec::load_all(&spex_dir.join(arch_spec::ARCH_SPECS_DIR))
+    let specs = tech_spec::load_all(&spex_dir.join(tech_spec::TECH_SPECS_DIR))
         .change_context(CheckError::Specs)?;
 
     let selected = select_repos(&config, &args.repo)?;
@@ -105,7 +105,7 @@ fn select_repos<'a>(config: &'a Config, names: &[String]) -> Result<Vec<&'a Repo
 fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
-    specs: &std::collections::HashMap<String, ArchSpec>,
+    specs: &std::collections::HashMap<String, TechSpec>,
     files: &[String],
     findings: &mut Vec<Finding>,
 ) -> Result<()> {
@@ -127,7 +127,7 @@ fn check_repo(
         provided_files(&repo_path, files)
     };
 
-    for spec_id in &repo.arch_specs {
+    for spec_id in &repo.tech_specs {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(Finding {
                 severity: Severity::Error,
@@ -135,8 +135,8 @@ fn check_repo(
                 check: String::new(),
                 location: None,
                 message: format!(
-                    "arch spec `{spec_id}` not found in {}/",
-                    arch_spec::ARCH_SPECS_DIR
+                    "tech spec `{spec_id}` not found in {}/",
+                    tech_spec::TECH_SPECS_DIR
                 ),
             });
             continue;

@@ -1,4 +1,4 @@
-id: ARCH-OPENAPI
+id: TECH-OPENAPI
 title: OpenAPI conventions
 description: >-
   The OpenAPI document is the contract that generated clients, servers, and
@@ -8,7 +8,7 @@ acceptance_criteria:
   - "MUST use OpenAPI 3.1.1"
   - "MUST declare every endpoint with operationId, summary, and at least one response"
   - "MUST give every operationId a unique value across the document"
-  - "MUST link each operation to one or more FUNCs via the `x-requirement` array extension (e.g. `x-requirement: [FUNC-PLACE-ORDER, FUNC-AUTH-LOGIN]`). Single-FUNC operations also use the array form for uniformity"
+  - "MUST link each operation to one or more business specs (BIZ) via the `x-requirement` array extension (e.g. `x-requirement: [BIZ-PLACE-ORDER, BIZ-AUTH-LOGIN]`). Single-spec operations also use the array form for uniformity"
   - "MUST define request and response shapes in components/schemas; never inline"
   - "MUST give every schema a name and use $ref to reference it"
   - "MUST list explicit error responses (4xx, 5xx) for non-trivial endpoints"
@@ -20,6 +20,6 @@ acceptance_criteria:
   - "MUST normalize every spec with `openapi-format` before commit so field ordering and whitespace are canonical and diffs stay minimal"
   - "MUST NOT use anyOf / oneOf without a discriminator"
   - "MUST NOT leave operationId implicit"
-  - "MUST NOT duplicate FUNC mappings between `x-requirement` and `info.description` — `x-requirement` is the single source of truth"
+  - "MUST NOT duplicate business spec mappings between `x-requirement` and `info.description` — `x-requirement` is the single source of truth"
   - "SHOULD use enum constraints for fields with a closed set of values"
   - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
