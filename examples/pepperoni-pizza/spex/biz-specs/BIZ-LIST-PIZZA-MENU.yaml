@@ -1,0 +1,19 @@
+id: BIZ-LIST-PIZZA-MENU
+title: Let customers list the pizza menu
+description: |
+  Customers need to see which pizzas they can order before placing an order.
+  The system exposes a read endpoint that returns the full pizza menu so the
+  storefront can display it.
+
+  This affects all customers browsing the storefront. Each pizza shows enough
+  information to choose one: an identifier, a name, a description, and a price.
+acceptance_criteria:
+  - MUST return the full pizza menu
+  - MUST return each pizza with a stable identifier, name, description, and price
+  - MUST return an empty list (not an error) when the menu has no pizzas
+  - SHOULD order the pizzas consistently across requests
+scope:
+  - contracts
+  - api
+  - frontend
+status: planned

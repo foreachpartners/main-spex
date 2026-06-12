@@ -1,4 +1,4 @@
-import type { NewOrder, Order, UpdateOrder } from "./types";
+import type { NewOrder, Order, Pizza, UpdateOrder } from "./types";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -39,4 +39,9 @@ export const ordersApi = {
     request<void>(`/orders/${id}`, {
       method: "DELETE",
     }),
+};
+
+// @spec impl BIZ-LIST-PIZZA-MENU
+export const pizzasApi = {
+  list: () => request<Pizza[]>("/pizzas"),
 };

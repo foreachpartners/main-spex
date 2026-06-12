@@ -1,34 +1,37 @@
-project_name: pepperoni-pizza
-description: Online ordering for a pizzeria.
+project_name: pepperoni-pizza-no-spex
+description: >-
+  Online pepperoni pizza ordering system built from a Rust API, an OpenAPI
+  contract, and a React web client.
 repositories:
   - repository_name: api
-    description: Backend service that handles orders.
+    description: Rust/Axum backend service that implements the pizza order API.
     path: ../api
     tech-specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DOC-WRITING-STYLE
+      - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
-      - TECH-DOC-WRITING-STYLE
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-NAMING-CONVENTION
   - repository_name: contracts
-    description: OpenAPI contracts shared between the api and frontend.
+    description: >-
+      OpenAPI contract that defines the order API and is the single source of
+      truth the api implements and the frontend consumes.
     path: ../contracts
     tech-specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DOC-WRITING-STYLE
+      - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
-      - TECH-DOC-WRITING-STYLE
-      - TECH-OPENAPI-CONVENTIONS
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-NAMING-CONVENTION
   - repository_name: frontend
-    description: Customer-facing web app for browsing the menu and placing orders.
+    description: React + Vite web client that lets customers place pizza orders.
     path: ../frontend
     tech-specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DOC-WRITING-STYLE
+      - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
-      - TECH-DOC-WRITING-STYLE
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-NAMING-CONVENTION
   - repository_name: spex
     description: >-
       Spex workspace repository. Holds the specs and config that govern the
@@ -37,7 +40,7 @@ repositories:
       rules).
     path: .
     tech-specs:
-      - TECH-SECRET-HANDLING
-      - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DOC-WRITING-STYLE
       - TECH-NAMING-CONVENTION
+      - TECH-SECRET-HANDLING

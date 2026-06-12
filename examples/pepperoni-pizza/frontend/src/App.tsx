@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { ordersApi } from "./api";
-import type { Order } from "./types";
+import { ordersApi, pizzasApi } from "./api";
+import type { Order, Pizza } from "./types";
 
 export default function App() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pizzas, setPizzas] = useState<Pizza[]>([]);
   const [customer, setCustomer] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     ordersApi.list().then(setOrders).catch(showError);
+    pizzasApi.list().then(setPizzas).catch(showError);
   }, []);
 
   function showError(err: unknown) {
@@ -90,6 +92,24 @@ export default function App() {
       </ul>
 
       {orders.length === 0 && !error && <p className="empty">No orders yet.</p>}
+
+      <h2>Menu</h2>
+
+      <ul className="pizza-menu">
+        {pizzas.map((pizza) => (
+          <li key={pizza.id} className="pizza">
+            <div className="pizza-header">
+              <span className="pizza-name">{pizza.name}</span>
+              <span className="pizza-price">${pizza.price.toFixed(2)}</span>
+            </div>
+            <p className="pizza-description">{pizza.description}</p>
+          </li>
+        ))}
+      </ul>
+
+      {pizzas.length === 0 && !error && (
+        <p className="empty">The menu is empty right now.</p>
+      )}
     </main>
   );
 }

@@ -7,6 +7,20 @@ servers:
   - url: http://localhost:3000
     description: Local development server
 paths:
+  /pizzas:
+    get:
+      operationId: listPizzas
+      summary: List the pizza menu
+      x-spec: "@spec contract BIZ-LIST-PIZZA-MENU"
+      responses:
+        "200":
+          description: The pizza menu
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pizza"
   /orders:
     get:
       operationId: listOrders
@@ -106,6 +120,35 @@ components:
         type: integer
         format: int64
   schemas:
+    Pizza:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - price
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Stable menu key for the pizza
+          examples:
+            - margherita
+        name:
+          type: string
+          minLength: 1
+          examples:
+            - Margherita
+        description:
+          type: string
+          examples:
+            - Tomato, mozzarella, basil
+        price:
+          type: number
+          minimum: 0
+          description: Price in the storefront currency
+          examples:
+            - 9.5
     Order:
       type: object
       required:

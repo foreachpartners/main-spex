@@ -17,6 +17,14 @@ struct Order {
     delivered: bool,
 }
 
+#[derive(Clone, Serialize)]
+struct Pizza {
+    id: String,
+    name: String,
+    description: String,
+    price: f64,
+}
+
 #[derive(Deserialize)]
 struct NewOrder {
     customer: String,
@@ -34,6 +42,36 @@ struct UpdateOrder {
 struct AppState {
     orders: Arc<Mutex<Vec<Order>>>,
     next_id: Arc<AtomicI64>,
+    menu: Arc<Vec<Pizza>>,
+}
+
+fn seed_menu() -> Vec<Pizza> {
+    vec![
+        Pizza {
+            id: "margherita".to_string(),
+            name: "Margherita".to_string(),
+            description: "Tomato, mozzarella, basil".to_string(),
+            price: 9.5,
+        },
+        Pizza {
+            id: "pepperoni".to_string(),
+            name: "Pepperoni".to_string(),
+            description: "Tomato, mozzarella, pepperoni".to_string(),
+            price: 11.0,
+        },
+        Pizza {
+            id: "diavola".to_string(),
+            name: "Diavola".to_string(),
+            description: "Tomato, mozzarella, spicy salami, chili".to_string(),
+            price: 11.5,
+        },
+        Pizza {
+            id: "quattro-formaggi".to_string(),
+            name: "Quattro Formaggi".to_string(),
+            description: "Mozzarella, gorgonzola, fontina, parmesan".to_string(),
+            price: 12.5,
+        },
+    ]
 }
 
 #[tokio::main]
@@ -41,6 +79,7 @@ async fn main() {
     let state = AppState {
         orders: Arc::new(Mutex::new(Vec::new())),
         next_id: Arc::new(AtomicI64::new(1)),
+        menu: Arc::new(seed_menu()),
     };
 
     let app = Router::new()
@@ -49,6 +88,7 @@ async fn main() {
             "/orders/:id",
             get(get_order).put(update_order).delete(delete_order),
         )
+        .route("/pizzas", get(list_pizzas))
         .layer(CorsLayer::permissive())
         .with_state(state);
 
@@ -65,6 +105,11 @@ async fn main() {
 async fn list_orders(State(state): State<AppState>) -> Json<Vec<Order>> {
     let orders = state.orders.lock().unwrap();
     Json(orders.clone())
+}
+
+// @spec impl BIZ-LIST-PIZZA-MENU
+async fn list_pizzas(State(state): State<AppState>) -> Json<Vec<Pizza>> {
+    Json(state.menu.as_ref().clone())
 }
 
 async fn create_order(
@@ -131,4 +176,61 @@ fn not_found() -> Response {
 
 fn error(status: StatusCode, message: &str) -> Response {
     (status, Json(json!({ "message": message }))).into_response()
+}
+
+// @spec test BIZ-LIST-PIZZA-MENU
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn state_with_menu(menu: Vec<Pizza>) -> AppState {
+        AppState {
+            orders: Arc::new(Mutex::new(Vec::new())),
+            next_id: Arc::new(AtomicI64::new(1)),
+            menu: Arc::new(menu),
+        }
+    }
+
+    #[tokio::test]
+    async fn returns_seeded_menu_in_full_with_valid_fields() {
+        let menu = seed_menu();
+        let expected_len = menu.len();
+        let state = state_with_menu(menu);
+
+        let pizzas = list_pizzas(State(state)).await.0;
+
+        // AC1: the full seeded menu is returned.
+        assert_eq!(pizzas.len(), expected_len);
+
+        // AC2: every pizza has non-empty id/name/description and a numeric price.
+        for pizza in &pizzas {
+            assert!(!pizza.id.is_empty());
+            assert!(!pizza.name.is_empty());
+            assert!(!pizza.description.is_empty());
+            assert!(pizza.price.is_finite());
+            assert!(pizza.price >= 0.0);
+        }
+    }
+
+    #[tokio::test]
+    async fn empty_menu_returns_empty_list() {
+        let state = state_with_menu(Vec::new());
+
+        // AC3: an empty menu returns an empty list, not an error.
+        let pizzas = list_pizzas(State(state)).await.0;
+        assert!(pizzas.is_empty());
+    }
+
+    #[tokio::test]
+    async fn order_is_stable_across_calls() {
+        let state = state_with_menu(seed_menu());
+
+        let first = list_pizzas(State(state.clone())).await.0;
+        let second = list_pizzas(State(state)).await.0;
+
+        // AC4: calling twice yields the same order.
+        let first_ids: Vec<&str> = first.iter().map(|p| p.id.as_str()).collect();
+        let second_ids: Vec<&str> = second.iter().map(|p| p.id.as_str()).collect();
+        assert_eq!(first_ids, second_ids);
+    }
 }
