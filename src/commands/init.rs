@@ -40,6 +40,8 @@ pub enum InitError {
 }
 
 const SPEX_REPO_PATH: &str = ".";
+const SPEX_WORKSPACE_ICON: &str = "🧰";
+const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
@@ -77,6 +79,7 @@ pub fn run() -> Result<ExitCode> {
 
     let tech_specs = default_tech_specs()?;
     write_config(&spex_dir, &project_name, &repositories, &tech_specs)?;
+    write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
 
     println!("spex repository initialized, run spex skill `/spex-setup` to complete setup");
@@ -191,6 +194,49 @@ fn write_config(
     .change_context(InitError::Io)
     .attach_with(|| format!("could not write `{}`", config_path.display()))?;
     Ok(())
+}
+
+fn write_code_workspace(
+    spex_dir: &Path,
+    project_name: &str,
+    repositories: &[Repository],
+) -> Result<()> {
+    let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
+    let path = spex_dir.join(&file_name);
+    fs::write(&path, code_workspace_json(project_name, repositories))
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not write `{}`", path.display()))?;
+    Ok(())
+}
+
+fn code_workspace_json(project_name: &str, repositories: &[Repository]) -> String {
+    let mut json = String::from("{\n  \"folders\": [\n");
+    for repo in repositories {
+        let name = workspace_folder_name(project_name, repo);
+        json.push_str(&format!(
+            "    {{ \"name\": \"{}\", \"path\": \"{}\" }},\n",
+            escape_json(&name),
+            escape_json(&repo.path),
+        ));
+    }
+    json.push_str("  ]\n}\n");
+    json
+}
+
+// spex owns its icon; spex-setup fills the icons for the other folders.
+fn workspace_folder_name(project_name: &str, repo: &Repository) -> String {
+    if repo.path == SPEX_REPO_PATH {
+        return format!("{SPEX_WORKSPACE_ICON} {}", repo.name);
+    }
+
+    repo.name
+        .strip_prefix(&format!("{project_name}-"))
+        .unwrap_or(&repo.name)
+        .to_string()
+}
+
+fn escape_json(value: &str) -> String {
+    value.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 fn default_tech_specs() -> Result<DefaultTechSpecs> {

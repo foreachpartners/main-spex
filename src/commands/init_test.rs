@@ -186,6 +186,51 @@ repositories:
     }
 
     #[test]
+    fn code_workspace_sets_icon_only_for_spex_and_strips_project_prefix() {
+        let json = code_workspace_json(
+            "moodmart",
+            &[
+                repo("moodmart-backend"),
+                repo("moodmart-proto"),
+                spex_repo(),
+            ],
+        );
+
+        let expected = "\
+{
+  \"folders\": [
+    { \"name\": \"backend\", \"path\": \"../moodmart-backend\" },
+    { \"name\": \"proto\", \"path\": \"../moodmart-proto\" },
+    { \"name\": \"\u{1f9f0} spex\", \"path\": \".\" },
+  ]
+}
+";
+        assert_eq!(json, expected);
+    }
+
+    #[test]
+    fn code_workspace_keeps_name_without_matching_prefix() {
+        let json = code_workspace_json("moodmart", &[repo("server")]);
+
+        assert!(
+            json.contains("{ \"name\": \"server\", \"path\": \"../server\" },"),
+            "unexpected json: {json}"
+        );
+    }
+
+    #[test]
+    fn write_code_workspace_uses_project_name_file() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        write_code_workspace(spex_dir.path(), "pizza-shop", &[spex_repo()])
+            .expect("write code-workspace");
+
+        let path = spex_dir.path().join("pizza-shop.code-workspace");
+        let written = fs::read_to_string(&path).expect("read code-workspace");
+        assert_eq!(written, code_workspace_json("pizza-shop", &[spex_repo()]));
+    }
+
+    #[test]
     fn default_tech_specs_includes_flagged_specs_only() {
         let specs = default_tech_specs().expect("collect default tech specs");
 

@@ -1,11 +1,13 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yml). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents. Writes a schema-valid spex.yml.
+description: Fill in the missing descriptions in the workspace config (spex.yml) and the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yml.
 ---
 
 # Describe the Workspace (spex.yml)
 
 Add a short `description` for the project and for each workspace repository in `spex.yml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
+
+After describing the repositories, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -16,6 +18,7 @@ All paths are relative to the workspace root (the folder that holds every worksp
 | Spex repository       | `<workspace_root>/spex/`                         |
 | Workspace config      | `<workspace_root>/spex/spex.yml`                 |
 | Workspace config schema | `<workspace_root>/spex/schemas/spex.schema.json` |
+| Editor workspace file | `<workspace_root>/spex/<project_name>.code-workspace` |
 
 The schema at `<workspace_root>/spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
 
@@ -58,9 +61,32 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 2. Edit `<workspace_root>/spex/spex.yml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace_root>/spex/schemas/spex.schema.json`.
 
-## Step 5 — Point to the next skill
+## Step 5 — Fill in the workspace folder icons
 
-Once `spex.yml` is described, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
+`spex init` writes `<workspace_root>/spex/<project_name>.code-workspace` with a `folders` list. The `spex` folder already has its icon (🧰); every other folder starts without one. Give each remaining folder a single emoji icon that fits its role.
+
+1. Read the `.code-workspace` file.
+2. For each folder whose `name` has no leading emoji, prepend one emoji plus a space (for example `🦀 backend`, `🛍️ storefront`). Base the choice on the repository's stack and role, which you already learned in Step 2.
+3. Leave the `spex` folder's icon and every `path` untouched. Change only the `name` fields.
+4. Keep the file valid JSON-with-comments (it may keep its trailing comma after the last folder).
+
+Example result:
+
+```json
+{
+  "folders": [
+    { "name": "📜 proto", "path": "../moodmart-proto" },
+    { "name": "🦀 backend", "path": "../moodmart-backend" },
+    { "name": "🛍️ storefront", "path": "../moodmart-storefront" },
+    { "name": "📋 analysis", "path": "../moodmart-analysis" },
+    { "name": "🧰 spex", "path": "." },
+  ]
+}
+```
+
+## Step 6 — Point to the next skill
+
+Once `spex.yml` is described and the workspace folders are iconified, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
 
 ## Field placement
 

@@ -29,7 +29,10 @@ pepperoni-pizza/         # workspace root
 ├── api/                 # existing api repository
 ├── frontend/            # existing frontend repository
 └── spex/                # newly spex repository
+    └── pepperoni-pizza.code-workspace  # editor workspace file
 ```
+
+Open `spex/pepperoni-pizza.code-workspace` in your editor to work across every repository at once.
 
 3. Run your first skill `/spex-setup`
 
