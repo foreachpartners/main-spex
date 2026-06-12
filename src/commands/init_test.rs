@@ -285,6 +285,38 @@ repositories:
         assert!(spex_dir.path().join("scripts").is_dir());
     }
 
+    #[test]
+    fn copy_templates_relocates_skills_into_agents() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        copy_templates(spex_dir.path()).expect("copy templates");
+
+        assert!(!spex_dir.path().join("skills").exists());
+        assert!(spex_dir.path().join(".agents/skills").is_dir());
+        assert!(
+            spex_dir
+                .path()
+                .join(".agents/skills/generate-biz-spec/SKILL.md")
+                .is_file()
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn copy_templates_links_claude_to_agents() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        copy_templates(spex_dir.path()).expect("copy templates");
+
+        let claude = spex_dir.path().join(".claude");
+        let target = fs::read_link(&claude).expect("read .claude symlink");
+        assert_eq!(target, std::path::Path::new(".agents"));
+        assert!(
+            claude.join("skills/generate-biz-spec/SKILL.md").is_file(),
+            ".claude/skills should resolve through the symlink"
+        );
+    }
+
     #[cfg(unix)]
     #[test]
     fn copy_templates_marks_scripts_executable() {

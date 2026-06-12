@@ -15,6 +15,9 @@ use crate::tech_spec::{self, TechSpec};
 mod init_test;
 
 const SCRIPTS_DIR_NAME: &str = "scripts";
+const SKILLS_DIR_NAME: &str = "skills";
+const AGENTS_DIR_NAME: &str = ".agents";
+const CLAUDE_DIR_NAME: &str = ".claude";
 
 static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
@@ -77,7 +80,52 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write templates into `{}`", spex_dir.display()))?;
 
+    relocate_skills_to_agents(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))
+}
+
+fn relocate_skills_to_agents(spex_dir: &Path) -> Result<()> {
+    let skills = spex_dir.join(SKILLS_DIR_NAME);
+    if !skills.is_dir() {
+        return Ok(());
+    }
+
+    let agents = spex_dir.join(AGENTS_DIR_NAME);
+    fs::create_dir_all(&agents)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not create `{}`", agents.display()))?;
+
+    let dest = agents.join(SKILLS_DIR_NAME);
+    fs::rename(&skills, &dest)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not move skills into `{}`", dest.display()))?;
+
+    link_claude_to_agents(spex_dir)
+}
+
+#[cfg(unix)]
+fn link_claude_to_agents(spex_dir: &Path) -> Result<()> {
+    use std::os::unix::fs::symlink;
+
+    let link = spex_dir.join(CLAUDE_DIR_NAME);
+    if link.symlink_metadata().is_ok() {
+        return Ok(());
+    }
+
+    symlink(AGENTS_DIR_NAME, &link)
+        .change_context(InitError::Io)
+        .attach_with(|| {
+            format!(
+                "could not link `{}` to `{}`",
+                link.display(),
+                AGENTS_DIR_NAME
+            )
+        })
+}
+
+#[cfg(not(unix))]
+fn link_claude_to_agents(_spex_dir: &Path) -> Result<()> {
+    Ok(())
 }
 
 #[cfg(unix)]
