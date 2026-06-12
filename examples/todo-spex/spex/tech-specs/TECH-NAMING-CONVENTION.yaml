@@ -8,40 +8,45 @@ description: >-
   database name and user, proto package, container image, and telemetry service
   name. Without a derivation rule each becomes an independent decision and the
   system grows inconsistent variations. The naming convention is the single
-  source that derives every identifier from one short name plus the repository's
-  role, so two engineers asked the same question arrive at the same answer
-  without consulting each other.
+  source that derives every identifier from the project name plus the
+  repository's short name, so two engineers asked the same question arrive at
+  the same answer without consulting each other.
 acceptance_criteria:
-  - "MUST derive every cross-cutting identifier (repo directory, crate or package name, binary, config-prefix, database name, database user, proto package, container image, telemetry service name) from a single `name` plus the workspace repository's role"
-  - "MUST author derivations as role-keyed templates with one entity per identifier, substituting only the documented variables: `{name}` (kebab-case lower), `{NAME}` (uppercase, hyphens to underscores), `{Name}` (PascalCase)"
-  - "MUST keep the project prefix as a literal placeholder (`<project-name>`, `<PROJECT_NAME>`) edited once by the consumer and committed, not substituted by tooling"
+  - "MUST derive every cross-cutting identifier (repo directory, crate or package name, binary, config-prefix, database name, database user, proto package, container image, telemetry service name) from a single project name plus the workspace repository's short name"
+  - "MUST author derivations as one flat template with a single entry per identifier, substituting only the documented variables: `{name}` (kebab-case lower), `{NAME}` (uppercase, hyphens to underscores), `{Name}` (PascalCase)"
+  - "MUST prefix every derived identifier with the project name (the workspace-root folder), so a workspace repository is globally identifiable on its own"
+  - "MUST keep the project prefix as a literal placeholder edited once by the consumer and committed, not substituted by tooling, in three forms: `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake)"
+  - "MUST use the snake forms (`<project_name>`, `{NAME}`) for identifiers that forbid hyphens (database name, database user, proto package)"
   - "MUST consume derived identifiers from generated output rather than re-deriving them in code"
   - "MUST update the convention and regenerate consumers when a new cross-cutting entity is needed, so the derivation stays the single source"
-  - "MUST NOT introduce per-repository overrides for naming; a repository needing a different identifier shape is a new role or a flaw in the convention"
+  - "MUST NOT introduce per-repository overrides for naming; a repository needing a different identifier shape is a flaw in the convention"
   - "MUST NOT record any cross-cutting identifier in a second place once it is derivable from the convention"
   - "SHOULD verify each derived `config_prefix` against the env-var namespace with an automated check that regexes the prefix"
-  - "SHOULD omit empty roles that carry no derived identifiers rather than authoring blank entities"
+  - "SHOULD ignore identifiers that do not apply to a repository (a proto repository has no database) rather than inventing them"
 examples:
-  role_templates: |
-    # `<project-name>` and `<PROJECT_NAME>` are literal placeholders the consumer edits once and commits.
-    service:
-      directory: "{name}"
-      crate: "<project-name>-{name}"
-      binary: "<project-name>-{name}"
-      config_prefix: "<PROJECT_NAME>_{NAME}"
-      database: "<project-name>_{name}"
-      database_user: "<project-name>_{name}"
-      proto_package: "<project-name>.{name}.v1"
-      container_image: "<project-name>/{name}"
-      telemetry_service: "<project-name>-{name}"
+  template: |
+    # `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake) are
+    # literal placeholders the consumer edits once and commits. `{name}` is the short
+    # repository name; keep it a single lowercase token so the db and proto forms stay valid.
+    repo_dir: "<project-name>-{name}"
+    crate: "<project-name>-{name}"
+    package_name: "<project-name>-{name}"
+    binary: "<project-name>-{name}"
+    config_prefix: "<PROJECT_NAME>_{NAME}__"
+    db_name: "<project_name>_{name}"
+    db_user: "<project_name>_{name}"
+    proto_package: "<project_name>.services.{name}.v1"
+    docker_image: "<project-name>-{name}"
+    telemetry_service_name: "{name}-service"
   derivation: |
-    # project_name: todo, repository_name: api, role: service
-    directory:          api
-    crate:              todo-api
-    binary:             todo-api
-    config_prefix:      TODO_API
-    database:           todo_api
-    database_user:      todo_api
-    proto_package:      todo.api.v1
-    container_image:    todo/api
-    telemetry_service:  todo-api
+    # Project name `todo`, repository name `api`:
+    repo_dir:                todo-api
+    crate:                   todo-api
+    package_name:            todo-api
+    binary:                  todo-api
+    config_prefix:           TODO_API__
+    db_name:                 todo_api
+    db_user:                 todo_api
+    proto_package:           todo.services.api.v1
+    docker_image:            todo-api
+    telemetry_service_name:  api-service
