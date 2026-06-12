@@ -1,0 +1,13 @@
+id: TECH-SPEC-ID-ANNOTATIONS
+include_for_all_repos: true
+include_for_spex: false
+readonly: true
+title: Spec ID Annotation Format
+description: >-
+  Annotations link a contract, implementation, or test back to the spec it
+  satisfies. Placing them once at each layer boundary keeps traceability
+  unambiguous without scattering Spec IDs through internal helpers.
+acceptance_criteria:
+  - "MUST annotate with `@spec {contract|impl|test} {SpecID}[, {SpecID}]*` as a code comment or as an `x-spec` property in an OpenAPI schema"
+  - "MUST place `@spec contract` once at the contract boundary (contract / handler / test)"
+  - "MUST NOT place `@spec` deeper than the top boundary of its layer (traced through that boundary like repository, storage layer functions, service/business logic layer, generated SDK)"

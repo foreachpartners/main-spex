@@ -1,0 +1,23 @@
+id: TECH-NAMING-CONVENTION
+title: Derived Naming Convention
+include_for_all_repos: true
+readonly: true
+description: >-
+  A single workspace repository owns many cross-cutting identifiers: directory
+  name, crate or package name, binary, config-prefix (env-var namespace),
+  database name and user, proto package, container image, and telemetry service
+  name. Without a derivation rule each becomes an independent decision and the
+  system grows inconsistent variations. The naming convention is the single
+  source that derives every identifier from one short name plus the repository's
+  role, so two engineers asked the same question arrive at the same answer
+  without consulting each other.
+acceptance_criteria:
+  - "MUST derive every cross-cutting identifier (repo directory, crate or package name, binary, config-prefix, database name, database user, proto package, container image, telemetry service name) from a single `name` plus the workspace repository's role"
+  - "MUST author derivations as role-keyed templates with one entity per identifier, substituting only the documented variables: `{name}` (kebab-case lower), `{NAME}` (uppercase, hyphens to underscores), `{Name}` (PascalCase)"
+  - "MUST keep the project prefix as a literal placeholder (`<project>`, `<PROJECT>`) edited once by the consumer and committed, not substituted by tooling"
+  - "MUST consume derived identifiers from generated output rather than re-deriving them in code"
+  - "MUST update the convention and regenerate consumers when a new cross-cutting entity is needed, so the derivation stays the single source"
+  - "MUST NOT introduce per-repository overrides for naming; a repository needing a different identifier shape is a new role or a flaw in the convention"
+  - "MUST NOT record any cross-cutting identifier in a second place once it is derivable from the convention"
+  - "SHOULD verify each derived `config_prefix` against the env-var namespace with an automated check that regexes the prefix"
+  - "SHOULD omit empty roles that carry no derived identifiers rather than authoring blank entities"
