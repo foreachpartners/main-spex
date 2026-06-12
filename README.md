@@ -1,6 +1,6 @@
 # spex
 
-AI-first specification-driven development framework with human validation.
+AI-first specification-driven development framework with human in control.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
@@ -35,7 +35,7 @@ pizza-shop/              # workspace root
 
 **Technical Rules as Specs**: Cross-cutting technical rules — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
 
-**Human validation**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
+**Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
 ## Description
 

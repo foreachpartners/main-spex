@@ -1,6 +1,6 @@
 # spex
 
-AI-first specification-driven development framework with human validation.
+AI-first specification-driven development framework with human in control.
 
 ## Quick commands
 
