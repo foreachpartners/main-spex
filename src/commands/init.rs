@@ -24,7 +24,7 @@ type Result<T> = core::result::Result<T, Report<InitError>>;
 pub enum InitError {
     #[error("`{SPEX_CONFIG_FILE}` already exists in this directory")]
     AlreadyInitialized,
-    #[error("the spex directory has no parent workspace folder")]
+    #[error("the spex directory has no parent workspace root")]
     NoWorkspaceRoot,
     #[error("initialization cancelled")]
     Cancelled,
@@ -48,7 +48,7 @@ pub fn run() -> Result<ExitCode> {
     verify_not_initialized(&spex_dir)?;
 
     let default_name = dir_name(&workspace_root).ok_or_else(|| {
-        Report::new(InitError::NoWorkspaceRoot).attach("could not read the workspace folder name")
+        Report::new(InitError::NoWorkspaceRoot).attach("could not read the workspace root name")
     })?;
 
     let project_name = confirm_project_name(default_name)?;
@@ -150,7 +150,7 @@ fn determine_spex_and_workspace_dirs(current_dir: &Path) -> Result<(PathBuf, Pat
     if dir_name(current_dir) == Some(SPEX_DIR_NAME) {
         let workspace_root = current_dir.parent().ok_or_else(|| {
             Report::new(InitError::NoWorkspaceRoot)
-                .attach("expected the spex directory to live inside a workspace root folder")
+                .attach("expected the spex directory to live inside a workspace root")
         })?;
         return Ok((current_dir.to_path_buf(), workspace_root.to_path_buf()));
     }
@@ -223,7 +223,7 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
 
 fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>> {
     if repositories.is_empty() {
-        let answer = prompt("No sibling repositories found. Continue anyway? [Y/n]: ")?;
+        let answer = prompt("No workspace repositories found. Continue anyway? [Y/n]: ")?;
         if is_yes(&answer) {
             return Ok(repositories);
         }
@@ -237,7 +237,7 @@ fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>
         .join(", ");
 
     let answer = prompt(&format!(
-        "Repositories: {names}\nUse these repositories? [Y/n]: "
+        "Workspace repositories: {names}\nUse these repositories? [Y/n]: "
     ))?;
     if is_yes(&answer) {
         Ok(repositories)

@@ -17,7 +17,7 @@ type Result<T> = core::result::Result<T, Report<ConfigError>>;
 #[derive(Debug, Error)]
 pub enum ConfigError {
     #[error(
-        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any of its repositories"
+        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any workspace repository"
     )]
     NotFound,
     #[error("could not read `{SPEX_CONFIG_FILE}`")]

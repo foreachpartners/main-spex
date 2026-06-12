@@ -53,11 +53,17 @@
             description: Order created
   ```
 
-- **Workspace** — the top-level folder that groups everything for a single project: the `spex` directory and the sibling repositories it manages `api`, `frontend` and so on.
+- **Project** — the whole product being built, named after its workspace root folder (e.g. `pizza-shop`). One project spans several workspace repositories that share a single set of specs.
+
+- **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
+
+- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
 
   ```text
-  pizza-shop/        <- workspace root folder
+  pizza-shop/        <- workspace root
     spex/            <- workspace repository
     api/             <- workspace repository
     frontend/        <- workspace repository
   ```
+
+- **Workspace repository** — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories — never "projects" or "services".

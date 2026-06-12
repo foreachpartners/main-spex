@@ -20,7 +20,7 @@
     },
     "include_on_spex_init": {
       "type": "boolean",
-      "description": "When true, `spex init` adds this spec to every repository's tech-specs list. Defaults to false.",
+      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list. Defaults to false.",
       "default": false
     },
     "acceptance_criteria": {
@@ -140,7 +140,7 @@
         },
         {
           "title": "script check",
-          "description": "Runs `scripts/<name>.sh` for each matched file from the repository if present, otherwise from spex.",
+          "description": "Runs `scripts/<name>.sh` for each matched file from the workspace repository if present, otherwise from spex.",
           "allOf": [
             { "$ref": "#/$defs/check_base" },
             { "$ref": "#/$defs/file_scope" }
@@ -152,7 +152,7 @@
         },
         {
           "title": "command check",
-          "description": "Runs `scripts/<name>.sh` once per repo from the repository if present, otherwise from spex.",
+          "description": "Runs `scripts/<name>.sh` once per workspace repository, from that repository if present, otherwise from spex.",
           "allOf": [{ "$ref": "#/$defs/check_base" }],
           "properties": {
             "type": { "const": "command" }

@@ -30,15 +30,15 @@ pub enum CheckError {
     Config,
     #[error("could not load tech specs")]
     Specs,
-    #[error("unknown repository `{0}` — not listed in spex.yml")]
+    #[error("unknown workspace repository `{0}` — not listed in spex.yml")]
     UnknownRepo(String),
-    #[error("could not walk repository files")]
+    #[error("could not walk workspace repository files")]
     Walk,
 }
 
 #[derive(Args)]
 pub struct CheckArgs {
-    #[arg(long, num_args = 1.., help = "Repository names to check (default: all)")]
+    #[arg(long, num_args = 1.., help = "Workspace repository names to check (default: all)")]
     repo: Vec<String>,
     #[arg(long, num_args = 1.., help = "Files to check (default: all non-ignored files)")]
     files: Vec<String>,
@@ -116,7 +116,7 @@ fn check_repo(
             spec_id: repo.name.clone(),
             check: String::new(),
             location: None,
-            message: format!("repository path not found: {}", repo_path.display()),
+            message: format!("workspace repository path not found: {}", repo_path.display()),
         });
         return Ok(());
     }
@@ -353,7 +353,7 @@ fn run_script(
             spec_id,
             &check.name,
             format!(
-                "script `{}` not found in repository or spex `{SCRIPTS_DIR}/`",
+                "script `{}` not found in workspace repository or spex `{SCRIPTS_DIR}/`",
                 check.name
             ),
         ));
@@ -397,7 +397,7 @@ fn run_command(
             spec_id,
             &check.name,
             format!(
-                "command `{}` not found in repository or spex `{SCRIPTS_DIR}/`",
+                "command `{}` not found in workspace repository or spex `{SCRIPTS_DIR}/`",
                 check.name
             ),
         ));
