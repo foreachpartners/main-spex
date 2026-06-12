@@ -25,8 +25,9 @@ pub struct TechSpec {
     pub id: String,
     #[serde(default)]
     pub include_for_all_repos: bool,
+    // Overrides spex-repo inclusion when present; otherwise spex follows `include_for_all_repos`.
     #[serde(default)]
-    pub include_for_spex: bool,
+    pub include_for_spex: Option<bool>,
     #[serde(default)]
     pub checks: Vec<Check>,
 }

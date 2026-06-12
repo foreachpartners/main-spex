@@ -20,12 +20,16 @@
     },
     "include_for_all_repos": {
       "type": "boolean",
-      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list, except spex itself. Defaults to false.",
+      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list, including spex itself. Defaults to false.",
       "default": false
     },
     "include_for_spex": {
       "type": "boolean",
-      "description": "When true, `spex init` adds this spec to the spex repository's tech-specs list. Independent of `include_for_all_repos`. Defaults to false.",
+      "description": "Overrides spex-repo inclusion when present. When omitted, the spex repository follows `include_for_all_repos`; set explicitly to add or exclude this spec for the spex repository."
+    },
+    "readonly": {
+      "type": "boolean",
+      "description": "When true, this is a global spex framework spec that can be changed only upstream. Consumers must not edit it locally; updates arrive by upgrading spex. Defaults to false.",
       "default": false
     },
     "acceptance_criteria": {

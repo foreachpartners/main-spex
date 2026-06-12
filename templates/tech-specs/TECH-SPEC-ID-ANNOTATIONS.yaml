@@ -1,6 +1,7 @@
 id: TECH-SPEC-ID-ANNOTATIONS
 include_for_all_repos: true
 include_for_spex: false
+readonly: true
 title: Spec ID Annotation Format
 description: >-
   Annotations link a contract, implementation, or test back to the spec it

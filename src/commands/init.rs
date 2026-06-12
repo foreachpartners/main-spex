@@ -150,7 +150,7 @@ fn default_tech_specs() -> Result<DefaultTechSpecs> {
         if spec.include_for_all_repos {
             all_repos.push(spec.id.clone());
         }
-        if spec.include_for_spex {
+        if spec.include_for_spex.unwrap_or(spec.include_for_all_repos) {
             spex.push(spec.id);
         }
     }

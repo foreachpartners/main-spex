@@ -1,5 +1,6 @@
 id: TECH-OPENAPI-CONVENTIONS
 title: OpenAPI conventions
+readonly: true
 description: >-
   The OpenAPI document is the contract that generated clients, servers, and
   tests are built from. Consistent, fully-specified, traceable operations keep

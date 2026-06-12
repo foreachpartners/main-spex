@@ -1,6 +1,7 @@
 id: TECH-NAMING-CONVENTION
 title: Derived Naming Convention
 include_for_all_repos: true
+readonly: true
 description: >-
   A single workspace repository owns many cross-cutting identifiers: directory
   name, crate or package name, binary, config-prefix (env-var namespace),
