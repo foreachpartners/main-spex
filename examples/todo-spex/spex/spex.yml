@@ -1,6 +1,6 @@
-name: todo-spex
+project_name: todo-spex
 repositories:
-  - name: api
+  - repository_name: api
     path: ../api
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -8,7 +8,7 @@ repositories:
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
-  - name: contracts
+  - repository_name: contracts
     path: ../contracts
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -17,7 +17,7 @@ repositories:
       - TECH-OPENAPI-CONVENTIONS
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
-  - name: frontend
+  - repository_name: frontend
     path: ../frontend
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -25,7 +25,7 @@ repositories:
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-NAMING-CONVENTION
-  - name: spex
+  - repository_name: spex
     path: .
     tech-specs:
       - TECH-SECRET-HANDLING

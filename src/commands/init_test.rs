@@ -115,12 +115,12 @@ mod tests_unit {
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &no_specs());
 
         let expected = "\
-name: pizza-shop
+project_name: pizza-shop
 repositories:
-  - name: server
+  - repository_name: server
     path: ../server
     tech-specs: []
-  - name: client
+  - repository_name: client
     path: ../client
     tech-specs: []
 ";
@@ -139,9 +139,9 @@ repositories:
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
         let expected = "\
-name: pizza-shop
+project_name: pizza-shop
 repositories:
-  - name: server
+  - repository_name: server
     path: ../server
     tech-specs:
       - TECH-SECRET-HANDLING
@@ -159,13 +159,13 @@ repositories:
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
 
         let expected = "\
-name: pizza-shop
+project_name: pizza-shop
 repositories:
-  - name: server
+  - repository_name: server
     path: ../server
     tech-specs:
       - TECH-SECRET-HANDLING
-  - name: spex
+  - repository_name: spex
     path: .
     tech-specs:
       - TECH-DOC-WRITING-STYLE
@@ -177,7 +177,7 @@ repositories:
     fn render_config_handles_no_repositories() {
         let yaml = config_to_yaml("pizza-shop", &[], &no_specs());
 
-        assert_eq!(yaml, "name: pizza-shop\nrepositories: []\n");
+        assert_eq!(yaml, "project_name: pizza-shop\nrepositories: []\n");
     }
 
     #[test]

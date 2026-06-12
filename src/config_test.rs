@@ -8,7 +8,7 @@ mod tests {
         let spex = workspace.path().join(SPEX_DIR_NAME);
         std::fs::create_dir_all(workspace.path().join("api/src")).expect("repo");
         std::fs::create_dir_all(&spex).expect("spex dir");
-        std::fs::write(spex.join(SPEX_CONFIG_FILE), "name: demo\n").expect("config");
+        std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
         workspace
     }
 

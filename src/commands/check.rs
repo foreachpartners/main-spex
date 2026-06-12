@@ -509,7 +509,7 @@ fn report(config: &Config, reports: &[RepoReport]) -> ExitCode {
 
     println!(
         "{}: {total_errors} error(s), {total_warnings} warning(s)",
-        config.name
+        config.project_name
     );
 
     if total_errors > 0 {

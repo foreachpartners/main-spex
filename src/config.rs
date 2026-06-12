@@ -28,13 +28,14 @@ pub enum ConfigError {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub name: String,
+    pub project_name: String,
     #[serde(default)]
     pub repositories: Vec<Repository>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Repository {
+    #[serde(rename = "repository_name")]
     pub name: String,
     pub path: String,
     #[serde(rename = "tech-specs", default)]

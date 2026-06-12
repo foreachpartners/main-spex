@@ -266,7 +266,7 @@ fn config_to_yaml(
     repositories: &[Repository],
     tech_specs: &DefaultTechSpecs,
 ) -> String {
-    let mut yaml = format!("name: {project_name}\n");
+    let mut yaml = format!("project_name: {project_name}\n");
 
     if repositories.is_empty() {
         yaml.push_str("repositories: []\n");
@@ -278,7 +278,7 @@ fn config_to_yaml(
             } else {
                 &tech_specs.all_repos
             };
-            yaml.push_str(&format!("  - name: {}\n", repo.name));
+            yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
             yaml.push_str(&format!("    path: {}\n", repo.path));
             if ids.is_empty() {
                 yaml.push_str("    tech-specs: []\n");

@@ -55,6 +55,12 @@
 
 - **Project** — the whole product being built, named after its workspace root folder (e.g. `pizza-shop`). One project spans several workspace repositories that share a single set of specs.
 
+- **Project name** — the identifier of the project, taken from the name of its workspace root folder.
+
+  ```text
+  pizza-shop
+  ```
+
 - **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
 
 - **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
@@ -66,4 +72,12 @@
     frontend/        <- workspace repository
   ```
 
-- **Workspace repository** — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories — never "projects" or "services".
+- **Workspace repository** (repository) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories — never "projects" or "services".
+
+- **Workspace repository name** (repository name) — the identifier of a workspace repository, taken from the name of its folder inside the workspace root.
+
+  ```text
+  spex
+  api
+  frontend
+  ```
