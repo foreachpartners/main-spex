@@ -4,15 +4,30 @@ AI-first specification-driven development framework with human validation.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
+## Prerequisites
+
+- **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
+- **Git**: [Install Git](https://git-scm.com/install/)
+- **spex CLI**: Clone spex repository and install spex cli tool:
+  ```sh
+  git clone https://github.com/ziimakc/spex
+  cd spex
+  cargo install --path . --force
+  ```
+
 ## Quickstart
 
-1. Put all project git repositories in one shared folder (workspace root folder) to set up workspace (e.g. `pizza-shop/server`, `pizza-shop/client`)
-2. Create spex git repository for project in the same folder (`pizza-shop/spex`)
-3. Install spex CLI `cargo install --path . --force `
-4. Run in spex dir
-   ```bash
-   spex init
-   ```
+1. Put all project git repositories in one shared folder (workspace root folder)
+2. Run `spex init` in workspace root to create `pizza-shop/spex` repository
+
+This creates the following structure:
+
+```
+pizza-shop/              # workspace root
+├── server/              # existing server repository
+├── client/              # existing client repository
+└── spex/                # newly spex repository
+```
 
 ## Why
 
