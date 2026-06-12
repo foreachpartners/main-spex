@@ -12,13 +12,6 @@ cargo install --path . --force  # Reinstall cli
 spex --help # CLI command
 ```
 
-## Main dependencies
-
-- **rust** `1.96.0` — language toolchain (edition 2024).
-- **clap** `4.6.1` — command-line argument parsing (derive).
-- **error-stack** `0.7.1` — contextual error reporting.
-- **thiserror** `2.0.18` — derive macro for error type definitions.
-
 ## Principles
 
 - **Clean Code**: Simple code is clean if it can be understood easily – by everyone on the team. Clean code can be read and enhanced by a developer other than its original author. With understandability comes readability, changeability, extensibility and maintainability.
