@@ -15,6 +15,7 @@ use crate::tech_spec::{self, TechSpec};
 mod init_test;
 
 const SCRIPTS_DIR_NAME: &str = "scripts";
+const BIZ_SPECS_DIR_NAME: &str = "biz-specs";
 const SKILLS_DIR_NAME: &str = "skills";
 const AGENTS_DIR_NAME: &str = ".agents";
 const CLAUDE_DIR_NAME: &str = ".claude";
@@ -79,6 +80,11 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .extract(spex_dir)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write templates into `{}`", spex_dir.display()))?;
+
+    let biz_specs = spex_dir.join(BIZ_SPECS_DIR_NAME);
+    fs::create_dir_all(&biz_specs)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not create `{}`", biz_specs.display()))?;
 
     relocate_skills_to_agents(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))

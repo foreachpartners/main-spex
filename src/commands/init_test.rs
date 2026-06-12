@@ -282,6 +282,7 @@ repositories:
         copy_templates(spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("tech-specs").is_dir());
+        assert!(spex_dir.path().join("biz-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
     }
 

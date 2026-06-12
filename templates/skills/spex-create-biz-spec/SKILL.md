@@ -7,7 +7,7 @@ description: Create a business spec (BIZ) by interviewing the user. Use when the
 
 A business spec (`BIZ`) describes _how the product behaves_: a single business rule with verifiable acceptance criteria, extracted from the PRD. Your job is to turn a fuzzy idea into one schema-valid spec by asking the user focused questions, then writing the file.
 
-Match the prose style of the existing specs and write the result into the spex repository's `biz-specs/` directory.
+Match the prose style of the existing specs and write the result into the spex repository's `<workspace_root>/spex/biz-specs/` directory.
 
 ## Paths
 
@@ -19,10 +19,11 @@ All paths are relative to the workspace root (the folder that holds every worksp
 | BIZ specs directory          | `<workspace_root>/spex/biz-specs/`                      |
 | This spec's file             | `<workspace_root>/spex/biz-specs/<spec-id>.yaml`        |
 | BIZ spec schema              | `<workspace_root>/spex/schemas/biz-spec.schema.json`    |
+| BIZ spec id schema           | `<workspace_root>/spex/schemas/biz-spec-id.schema.json` |
 | TECH specs (style reference) | `<workspace_root>/spex/tech-specs/`                     |
 | Workspace config             | `<workspace_root>/spex/spex.yml`                        |
 
-The schema at `<workspace_root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting. `<workspace_root>/spex/biz-specs/` may not exist yet — create it when you write the first spec.
+The schema at `<workspace_root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
 ## When to use this skill
 
