@@ -10,6 +10,20 @@ mod tests_unit {
         }
     }
 
+    fn spex_repo() -> Repository {
+        Repository {
+            name: "spex".to_string(),
+            path: SPEX_REPO_PATH.to_string(),
+        }
+    }
+
+    fn no_specs() -> DefaultTechSpecs {
+        DefaultTechSpecs {
+            all_repos: Vec::new(),
+            spex: Vec::new(),
+        }
+    }
+
     fn workspace_with(dirs: &[&str], files: &[&str]) -> TempDir {
         let root = tempdir().expect("create temp workspace");
         for dir in dirs {
@@ -98,7 +112,7 @@ mod tests_unit {
 
     #[test]
     fn render_config_lists_repositories() {
-        let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &[]);
+        let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &no_specs());
 
         let expected = "\
 name: pizza-shop
@@ -115,10 +129,13 @@ repositories:
 
     #[test]
     fn render_config_lists_default_tech_specs() {
-        let specs = [
-            "TECH-SECRET-HANDLING".to_string(),
-            "TECH-DOC-WRITING-STYLE".to_string(),
-        ];
+        let specs = DefaultTechSpecs {
+            all_repos: vec![
+                "TECH-SECRET-HANDLING".to_string(),
+                "TECH-DOC-WRITING-STYLE".to_string(),
+            ],
+            spex: Vec::new(),
+        };
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
         let expected = "\
@@ -134,34 +151,77 @@ repositories:
     }
 
     #[test]
+    fn render_config_uses_spex_specs_for_spex_repo() {
+        let specs = DefaultTechSpecs {
+            all_repos: vec!["TECH-SECRET-HANDLING".to_string()],
+            spex: vec!["TECH-DOC-WRITING-STYLE".to_string()],
+        };
+        let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
+
+        let expected = "\
+name: pizza-shop
+repositories:
+  - name: server
+    path: ../server
+    tech-specs:
+      - TECH-SECRET-HANDLING
+  - name: spex
+    path: .
+    tech-specs:
+      - TECH-DOC-WRITING-STYLE
+";
+        assert_eq!(yaml, expected);
+    }
+
+    #[test]
     fn render_config_handles_no_repositories() {
-        let yaml = config_to_yaml("pizza-shop", &[], &[]);
+        let yaml = config_to_yaml("pizza-shop", &[], &no_specs());
 
         assert_eq!(yaml, "name: pizza-shop\nrepositories: []\n");
     }
 
     #[test]
     fn default_tech_specs_includes_flagged_specs_only() {
-        let ids = default_tech_specs().expect("collect default tech specs");
+        let specs = default_tech_specs().expect("collect default tech specs");
 
-        assert!(ids.contains(&"TECH-SECRET-HANDLING".to_string()));
-        assert!(ids.contains(&"TECH-DOC-WRITING-STYLE".to_string()));
-        assert!(!ids.contains(&"TECH-OPENAPI-CONVENTIONS".to_string()));
-        assert!(ids.windows(2).all(|pair| pair[0] <= pair[1]));
+        assert!(
+            specs
+                .all_repos
+                .contains(&"TECH-SECRET-HANDLING".to_string())
+        );
+        assert!(
+            specs
+                .all_repos
+                .contains(&"TECH-DOC-WRITING-STYLE".to_string())
+        );
+        assert!(
+            !specs
+                .all_repos
+                .contains(&"TECH-OPENAPI-CONVENTIONS".to_string())
+        );
+        assert!(specs.all_repos.windows(2).all(|pair| pair[0] <= pair[1]));
+
+        assert!(specs.spex.contains(&"TECH-SECRET-HANDLING".to_string()));
+        assert!(specs.spex.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 
     #[test]
     fn write_config_writes_file_to_spex_dir() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        let config_path = write_config(spex_dir.path(), "pizza-shop", &[repo("server")], &[])
-            .expect("write config");
+        let config_path = write_config(
+            spex_dir.path(),
+            "pizza-shop",
+            &[repo("server")],
+            &no_specs(),
+        )
+        .expect("write config");
 
         assert_eq!(config_path, spex_dir.path().join(SPEX_CONFIG_FILE));
         let written = fs::read_to_string(&config_path).expect("read config");
         assert_eq!(
             written,
-            config_to_yaml("pizza-shop", &[repo("server")], &[])
+            config_to_yaml("pizza-shop", &[repo("server")], &no_specs())
         );
     }
 

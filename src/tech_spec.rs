@@ -24,7 +24,9 @@ pub enum SpecError {
 pub struct TechSpec {
     pub id: String,
     #[serde(default)]
-    pub include_on_spex_init: bool,
+    pub include_for_all_repos: bool,
+    #[serde(default)]
+    pub include_for_spex: bool,
     #[serde(default)]
     pub checks: Vec<Check>,
 }

@@ -116,7 +116,10 @@ fn check_repo(
             spec_id: repo.name.clone(),
             check: String::new(),
             location: None,
-            message: format!("workspace repository path not found: {}", repo_path.display()),
+            message: format!(
+                "workspace repository path not found: {}",
+                repo_path.display()
+            ),
         });
         return Ok(());
     }

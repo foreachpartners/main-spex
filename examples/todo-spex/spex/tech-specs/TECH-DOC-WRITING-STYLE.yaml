@@ -1,5 +1,6 @@
 id: TECH-DOC-WRITING-STYLE
-include_on_spex_init: true
+include_for_all_repos: true
+include_for_spex: true
 title: LLM-Oriented Writing Style
 description: >-
   Specs and documentation are read by both engineers and AI agents. Direct,

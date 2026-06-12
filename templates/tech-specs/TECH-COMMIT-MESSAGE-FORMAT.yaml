@@ -1,5 +1,5 @@
 id: TECH-COMMIT-MESSAGE-FORMAT
-include_on_spex_init: true
+include_for_all_repos: true
 title: Commit Message Format
 description: >-
   Commits are the unit of traceability between code and the specs that justify

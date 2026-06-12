@@ -34,9 +34,16 @@ pub enum InitError {
     Io,
 }
 
+const SPEX_REPO_PATH: &str = ".";
+
 struct Repository {
     name: String,
     path: String,
+}
+
+struct DefaultTechSpecs {
+    all_repos: Vec<String>,
+    spex: Vec<String>,
 }
 
 pub fn run() -> Result<ExitCode> {
@@ -107,7 +114,7 @@ fn write_config(
     spex_dir: &Path,
     project_name: &str,
     repositories: &[Repository],
-    tech_specs: &[String],
+    tech_specs: &DefaultTechSpecs,
 ) -> Result<PathBuf> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(
@@ -119,12 +126,16 @@ fn write_config(
     Ok(config_path)
 }
 
-fn default_tech_specs() -> Result<Vec<String>> {
+fn default_tech_specs() -> Result<DefaultTechSpecs> {
     let Some(dir) = TEMPLATES.get_dir(tech_spec::TECH_SPECS_DIR) else {
-        return Ok(Vec::new());
+        return Ok(DefaultTechSpecs {
+            all_repos: Vec::new(),
+            spex: Vec::new(),
+        });
     };
 
-    let mut ids = Vec::new();
+    let mut all_repos = Vec::new();
+    let mut spex = Vec::new();
     for file in dir.files() {
         if file.path().extension().and_then(|ext| ext.to_str()) != Some("yaml") {
             continue;
@@ -136,13 +147,17 @@ fn default_tech_specs() -> Result<Vec<String>> {
             .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
         let spec: TechSpec = serde_yaml_ng::from_str(raw)
             .change_context_lazy(|| InitError::Template(name.clone()))?;
-        if spec.include_on_spex_init {
-            ids.push(spec.id);
+        if spec.include_for_all_repos {
+            all_repos.push(spec.id.clone());
+        }
+        if spec.include_for_spex {
+            spex.push(spec.id);
         }
     }
 
-    ids.sort();
-    Ok(ids)
+    all_repos.sort();
+    spex.sort();
+    Ok(DefaultTechSpecs { all_repos, spex })
 }
 
 fn determine_spex_and_workspace_dirs(current_dir: &Path) -> Result<(PathBuf, PathBuf)> {
@@ -206,7 +221,7 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
         }
 
         let path = if dir_name == SPEX_DIR_NAME {
-            ".".to_string()
+            SPEX_REPO_PATH.to_string()
         } else {
             format!("../{dir_name}")
         };
@@ -249,7 +264,7 @@ fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>
 fn config_to_yaml(
     project_name: &str,
     repositories: &[Repository],
-    tech_specs: &[String],
+    tech_specs: &DefaultTechSpecs,
 ) -> String {
     let mut yaml = format!("name: {project_name}\n");
 
@@ -258,13 +273,18 @@ fn config_to_yaml(
     } else {
         yaml.push_str("repositories:\n");
         for repo in repositories {
+            let ids = if repo.path == SPEX_REPO_PATH {
+                &tech_specs.spex
+            } else {
+                &tech_specs.all_repos
+            };
             yaml.push_str(&format!("  - name: {}\n", repo.name));
             yaml.push_str(&format!("    path: {}\n", repo.path));
-            if tech_specs.is_empty() {
+            if ids.is_empty() {
                 yaml.push_str("    tech-specs: []\n");
             } else {
                 yaml.push_str("    tech-specs:\n");
-                for id in tech_specs {
+                for id in ids {
                     yaml.push_str(&format!("      - {id}\n"));
                 }
             }

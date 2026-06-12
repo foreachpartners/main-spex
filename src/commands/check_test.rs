@@ -195,7 +195,13 @@ mod tests {
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_command("TECH-COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
+        run_command(
+            "TECH-COMMIT-MESSAGE-FORMAT",
+            &check,
+            &repo,
+            &spex,
+            &mut findings,
+        );
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Warn);
@@ -213,7 +219,13 @@ mod tests {
         let check = check(CheckKind::Command, None);
 
         let mut findings = Vec::new();
-        run_command("TECH-COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
+        run_command(
+            "TECH-COMMIT-MESSAGE-FORMAT",
+            &check,
+            &repo,
+            &spex,
+            &mut findings,
+        );
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);

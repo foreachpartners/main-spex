@@ -18,9 +18,14 @@
       "description": "Optional narrative: rationale for the rule and what it protects against.",
       "minLength": 1
     },
-    "include_on_spex_init": {
+    "include_for_all_repos": {
       "type": "boolean",
-      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list. Defaults to false.",
+      "description": "When true, `spex init` adds this spec to every workspace repository's tech-specs list, except spex itself. Defaults to false.",
+      "default": false
+    },
+    "include_for_spex": {
+      "type": "boolean",
+      "description": "When true, `spex init` adds this spec to the spex repository's tech-specs list. Independent of `include_for_all_repos`. Defaults to false.",
       "default": false
     },
     "acceptance_criteria": {

@@ -26,6 +26,5 @@ repositories:
     path: .
     tech-specs:
       - TECH-SECRET-HANDLING
-      - TECH-SPEC-ID-ANNOTATIONS
       - TECH-DOC-WRITING-STYLE
       - TECH-COMMIT-MESSAGE-FORMAT
