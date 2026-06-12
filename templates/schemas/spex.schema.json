@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/spex.schema.json",
+  "title": "Spex Workspace Config",
+  "description": "Workspace configuration (spex.yml): the project and the workspace repositories that spex manages together.",
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "description": "Kebab-case name of the project.",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional summary of what the project is and does.",
+      "minLength": 1
+    },
+    "repositories": {
+      "type": "array",
+      "description": "Workspace repositories that spex manages for this project.",
+      "items": {
+        "$ref": "#/$defs/repository"
+      }
+    }
+  },
+  "$defs": {
+    "repository": {
+      "type": "object",
+      "description": "A single workspace repository.",
+      "properties": {
+        "repository_name": {
+          "type": "string",
+          "description": "Kebab-case name of the repository.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional summary of what the repository is and does.",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the repository, relative to the spex directory.",
+          "minLength": 1
+        },
+        "tech-specs": {
+          "type": "array",
+          "description": "TECH spec IDs that apply to this repository.",
+          "items": {
+            "$ref": "tech-spec-id.schema.json"
+          }
+        }
+      },
+      "required": ["repository_name", "path"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["project_name"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "project_name": "pepperoni-pizza",
+      "description": "Online ordering for a pizzeria.",
+      "repositories": [
+        {
+          "repository_name": "api",
+          "description": "Backend service that handles orders.",
+          "path": "../api",
+          "tech-specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
+        }
+      ]
+    }
+  ]
+}
