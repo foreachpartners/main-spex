@@ -16,6 +16,7 @@ mod init_test;
 
 const SCRIPTS_DIR_NAME: &str = "scripts";
 const BIZ_SPECS_DIR_NAME: &str = "biz-specs";
+const PLANS_DIR_NAME: &str = "plans";
 const SKILLS_DIR_NAME: &str = "skills";
 const AGENTS_DIR_NAME: &str = ".agents";
 const CLAUDE_DIR_NAME: &str = ".claude";
@@ -92,6 +93,11 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     fs::create_dir_all(&biz_specs)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not create `{}`", biz_specs.display()))?;
+
+    let plans = spex_dir.join(PLANS_DIR_NAME);
+    fs::create_dir_all(&plans)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not create `{}`", plans.display()))?;
 
     relocate_skills_to_agents(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))
