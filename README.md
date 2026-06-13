@@ -59,6 +59,12 @@ Workflow cor is AI skills and CLI commands
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
+## Framework Principles
+
+**Simplicity**: The tool should help the developer get work done, not stand in the way. Everything about spex is kept simple, so it can be adopted and put to use in five minutes.
+
+**Tool-agnostic**: To avoid lock-in and restrictions, the framework works with any IDE, terminal, or AI model.
+
 ## Description
 
 ### The flow from business goal to verified code:
