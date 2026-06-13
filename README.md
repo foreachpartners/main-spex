@@ -47,7 +47,7 @@ Workflow cor is AI skills and CLI commands
 
 2. Create implementation plan for spec `/spex-create-plan [for BIZ-PLACE-PIZZA-ORDER or commit message format]`
 3. Execute plan with one or multiple agents working in parallel depending on plan `/spex-execute-plan`
-4. Audit result with `spex check`
+4. Check result with `spex check`
 
 ## Why
 
