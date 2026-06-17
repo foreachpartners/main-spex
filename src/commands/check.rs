@@ -9,13 +9,11 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::{self, Config, Repository};
-use crate::tech_spec::{self, Check, CheckKind, Severity, TechSpec};
+use crate::tech_spec::{self, Check, CheckKind, SCRIPTS_DIR, Severity, TechSpec};
 
 #[cfg(test)]
 #[path = "check_test.rs"]
 mod check_test;
-
-const SCRIPTS_DIR: &str = "scripts";
 
 // Cap files per script invocation so large repos don't blow past the OS arg limit.
 const SCRIPT_BATCH_SIZE: usize = 1000;

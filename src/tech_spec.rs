@@ -7,6 +7,7 @@ use serde::Deserialize;
 use thiserror::Error;
 
 pub const TECH_SPECS_DIR: &str = "tech-specs";
+pub const SCRIPTS_DIR: &str = "scripts";
 
 type Result<T> = core::result::Result<T, Report<SpecError>>;
 

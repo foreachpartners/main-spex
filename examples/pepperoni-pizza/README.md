@@ -12,5 +12,5 @@ pepperoni-pizza/      <- workspace root folder
   api/               <- Rust pizza order API (axum, in-memory store)
   frontend/          <- React + TypeScript UI (Vite)
   contracts/         <- OpenAPI definition of the API
-  spex/              <- spex framwork harness, specs, skills, scripts and workspace setup
+  spex/              <- spex framework harness, specs, skills, scripts and workspace setup
 ```

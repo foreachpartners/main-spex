@@ -8,13 +8,12 @@ use include_dir::{Dir, include_dir};
 use thiserror::Error;
 
 use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
-use crate::tech_spec::{self, TechSpec};
+use crate::tech_spec::{self, SCRIPTS_DIR, TechSpec};
 
 #[cfg(test)]
 #[path = "init_test.rs"]
 mod init_test;
 
-const SCRIPTS_DIR_NAME: &str = "scripts";
 const BIZ_SPECS_DIR_NAME: &str = "biz-specs";
 const PLANS_DIR_NAME: &str = "plans";
 const SKILLS_DIR_NAME: &str = "skills";
@@ -103,7 +102,7 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .attach_with(|| format!("could not create `{}`", plans.display()))?;
 
     relocate_skills_to_agents(spex_dir)?;
-    mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR_NAME))
+    mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
 }
 
 fn relocate_skills_to_agents(spex_dir: &Path) -> Result<()> {
