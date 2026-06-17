@@ -9,15 +9,15 @@ Add a short `description` for the project and for each workspace repository in `
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name.
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name.
 
 | What                  | Path                                            |
 | --------------------- | ----------------------------------------------- |
-| Spex repository       | `<workspace_root>/spex/`                         |
-| Workspace config      | `<workspace_root>/spex/spex.yml`                 |
-| Workspace config schema | `<workspace_root>/spex/schemas/spex.schema.json` |
+| Spex repository       | `<workspace-root>/spex/`                         |
+| Workspace config      | `<workspace-root>/spex/spex.yml`                 |
+| Workspace config schema | `<workspace-root>/spex/schemas/spex.schema.json` |
 
-The schema at `<workspace_root>/spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
+The schema at `<workspace-root>/spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
 
 ## When to use this skill
 
@@ -25,7 +25,7 @@ Use it when the user wants to set up, describe, or document their spex project �
 
 ## Step 1 — Read the config
 
-Read `<workspace_root>/spex/spex.yml`. Note the `project_name`, every repository's `repository_name` and `path`, and which `description` fields are already present.
+Read `<workspace-root>/spex/spex.yml`. Note the `project_name`, every repository's `repository_name` and `path`, and which `description` fields are already present.
 
 Decide what to fill in:
 
@@ -35,7 +35,7 @@ Decide what to fill in:
 
 ## Step 2 — Inspect each repository
 
-For each repository missing a description, look at its real contents (resolve `path` relative to `<workspace_root>/spex/`). Gather just enough to summarize what it is and does:
+For each repository missing a description, look at its real contents (resolve `path` relative to `<workspace-root>/spex/`). Gather just enough to summarize what it is and does:
 
 - Read its `README` if present.
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
@@ -55,8 +55,8 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 ## Step 4 — Confirm, then write
 
 1. Show the proposed descriptions to the user and confirm them.
-2. Edit `<workspace_root>/spex/spex.yml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
-3. Validate the result against `<workspace_root>/spex/schemas/spex.schema.json`.
+2. Edit `<workspace-root>/spex/spex.yml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
+3. Validate the result against `<workspace-root>/spex/schemas/spex.schema.json`.
 
 ## Step 5 — Point to the next skill
 
@@ -83,4 +83,4 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - No existing field, path, or tech-spec is changed or removed.
-- `spex.yml` stays valid against `<workspace_root>/spex/schemas/spex.schema.json`.
+- `spex.yml` stays valid against `<workspace-root>/spex/schemas/spex.schema.json`.

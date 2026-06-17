@@ -1,6 +1,6 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace_root>/spex/plans/<spec-id>.md whose steps hold tasks that AI agents can run in parallel.
+description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/spex/plans/<spec-id>.md whose steps hold tasks that AI agents can run in parallel.
 ---
 
 # Create an Implementation Plan
@@ -11,7 +11,7 @@ The plan is a working document: it records what to build, the contract changes, 
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
 
 ## When to use this skill
 
@@ -29,17 +29,17 @@ When several specs are given, pick the lead spec (the one the others depend on, 
 
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace_root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
+For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
 
 If a spec lists `depends_on`, check those specs `status`. Flag any dependency that is not yet shipped and confirm with the user whether to plan around it or stop.
 
 ## Step 2 — Resolve scope and governing tech-specs
 
-From `<workspace_root>/spex/spex.yml`:
+From `<workspace-root>/spex/spex.yml`:
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `tech-specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
-- Read each governing tech-spec in `<workspace_root>/spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
+- Read each governing tech-spec in `<workspace-root>/spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
 
 Record which repository each governing tech-spec comes from so a task in one repository only carries the tech-specs that apply there.
 
@@ -125,7 +125,7 @@ Rules for the plan content:
 ## Step 6 — Confirm, then write
 
 1. Show the drafted plan to the user — especially the step boundaries and which tasks run in parallel — and confirm. Apply edits if needed.
-2. Write it to `<workspace_root>/spex/plans/<lead-spec-id>.md`. If that file already exists, write to `<workspace_root>/spex/plans/<lead-spec-id>_<datetime>.md` instead so the existing plan is preserved.
+2. Write it to `<workspace-root>/spex/plans/<lead-spec-id>.md`. If that file already exists, write to `<workspace-root>/spex/plans/<lead-spec-id>_<datetime>.md` instead so the existing plan is preserved.
 3. Confirm the path back to the user.
 
 ## Step 7 — Point to the next skill

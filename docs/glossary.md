@@ -63,7 +63,7 @@
 
 - **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
 
-- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages. In paths, written as the placeholder `<workspace_root>`.
+- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages. In paths, written as the placeholder `<workspace-root>`.
 
   ```text
   pepperoni-pizza/   <- workspace root

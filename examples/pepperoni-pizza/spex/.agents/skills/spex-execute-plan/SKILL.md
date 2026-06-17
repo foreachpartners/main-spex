@@ -1,6 +1,6 @@
 ---
 name: spex-execute-plan
-description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace_root>/spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, and running `spex check` on the affected repositories.
+description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, and running `spex check` on the affected repositories.
 ---
 
 # Execute an Implementation Plan
@@ -11,28 +11,28 @@ You coordinate the work — you do not redo what an agent already did. Each task
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`) or to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`). The plan must already exist in `<workspace_root>/spex/plans/`.
+Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`) or to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`). The plan must already exist in `<workspace-root>/spex/plans/`.
 
 ## Step 0 — Establish the target plan
 
 Determine which plan to execute before doing anything else:
 
-- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, match it against the plan filenames in `<workspace_root>/spex/plans/`; if several plans share that spec ID, pick the most recent by datetime and confirm.
-- If the user named nothing, list the plans in `<workspace_root>/spex/plans/` and ask which to execute. Do not invent a plan.
+- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, match it against the plan filenames in `<workspace-root>/spex/plans/`; if several plans share that spec ID, pick the most recent by datetime and confirm.
+- If the user named nothing, list the plans in `<workspace-root>/spex/plans/` and ask which to execute. Do not invent a plan.
 
 ## Step 1 — Read the plan and its context
 
-Read the chosen plan in `<workspace_root>/spex/plans/<spec-id>_<datetime>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
+Read the chosen plan in `<workspace-root>/spex/plans/<spec-id>_<datetime>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
 
 Then read enough context to execute faithfully:
 
-- Read each targeted spec in `<workspace_root>/spex/biz-specs/<spec-id>.yaml` for its acceptance criteria.
-- Read each governing tech-spec named in the plan from `<workspace_root>/spex/tech-specs/` so every agent stays compliant.
-- For each affected repository, resolve its `path` from `<workspace_root>/spex/spex.yml` and note its build/test commands and annotation conventions.
+- Read each targeted spec in `<workspace-root>/spex/biz-specs/<spec-id>.yaml` for its acceptance criteria.
+- Read each governing tech-spec named in the plan from `<workspace-root>/spex/tech-specs/` so every agent stays compliant.
+- For each affected repository, resolve its `path` from `<workspace-root>/spex/spex.yml` and note its build/test commands and annotation conventions.
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
 

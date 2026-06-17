@@ -1,19 +1,19 @@
 ---
 name: spex-create-biz-spec
-description: Create a business spec (BIZ) by interviewing the user. Use when the user wants to author, draft, or extract a BIZ spec from a PRD, an RFD, a feature idea, or a business rule. Asks targeted questions, then writes a schema-valid YAML file to <workspace_root>/spex/biz-specs/.
+description: Create a business spec (BIZ) by interviewing the user. Use when the user wants to author, draft, or extract a BIZ spec from a PRD, an RFD, a feature idea, or a business rule. Asks targeted questions, then writes a schema-valid YAML file to <workspace-root>/spex/biz-specs/.
 ---
 
 # Create a Business Spec (BIZ)
 
 A business spec (`BIZ`) describes _how the product behaves_: a single business rule with verifiable acceptance criteria, extracted from the PRD. Your job is to turn a fuzzy idea into one schema-valid spec by asking the user focused questions, then writing the file.
 
-Match the prose style of the existing specs and write the result into the spex repository's `<workspace_root>/spex/biz-specs/` directory.
+Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/spex/biz-specs/` directory.
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace_root>` with the real folder name and `<spec-id>` with the spec's `id`.
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-The schema at `<workspace_root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
+The schema at `<workspace-root>/spex/schemas/biz-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
 ## When to use this skill
 
@@ -34,9 +34,9 @@ Determine what the spec is based on before doing anything else:
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- Read `<workspace_root>/spex/spex.yml` for the project overview and use that to determine the spec's implementation `scope`.
-- Read `<workspace_root>/spex/biz-specs/` for related specs
-- Read `<workspace_root>/spex/contract/` for schemas if exists
+- Read `<workspace-root>/spex/spex.yml` for the project overview and use that to determine the spec's implementation `scope`.
+- Read `<workspace-root>/spex/biz-specs/` for related specs
+- Read `<workspace-root>/spex/contract/` for schemas if exists
 
 ## Step 2 — Clarify missing details with the user
 
@@ -44,16 +44,16 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 
 ## Step 3 — Draft the fields
 
-Follow the field rules in `<workspace_root>/spex/schemas/biz-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
+Follow the field rules in `<workspace-root>/spex/schemas/biz-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
 Draft spec for user
 
 ## Step 4 — Confirm, then write
 
 1. Show the drafted spec to the user for confirmation. Apply edits if needed.
-2. Write it to `<workspace_root>/spex/biz-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
+2. Write it to `<workspace-root>/spex/biz-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
 3. Use literal block scalars for multi-paragraph `description`.
-4. Validate the result against `<workspace_root>/spex/schemas/biz-spec.schema.json`.
+4. Validate the result against `<workspace-root>/spex/schemas/biz-spec.schema.json`.
 
 ## Step 5 — Point to the next skill
 

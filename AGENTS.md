@@ -20,3 +20,4 @@ spex --help # CLI command
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables. This project is not public-facing, so do NOT write doc comments (`///`, `//!`) and do NOT write comments that restate what the code does. The only acceptable comment is a short `//` note explaining a non-obvious "why" (a constraint, footgun, or workaround) that names alone cannot convey, e.g. a hard-exit that avoids a runtime segfault. When in doubt, leave it out.
 - **YAGNI** (You Aren't Gonna Need It): Implement only what the current requirements demand. Don't add functionality, configuration, or generalization for hypothetical future needs.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
+- **Conventions**: Follow the authoring conventions in `docs/conventions.md` (e.g. path placeholders) across docs, skills, and schemas.
