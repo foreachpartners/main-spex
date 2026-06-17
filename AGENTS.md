@@ -14,6 +14,27 @@ cargo install --path . --force  # Reinstall cli
 spex --help # CLI command
 ```
 
+## Project structure
+
+```
+src/                CLI source
+  main.rs           Entry point, arg parsing
+  config.rs         Config loading
+  tech_spec.rs      Tech-spec model
+  commands/         Subcommands (init, check)
+docs/               Glossary, conventions, CLI reference, FAQ
+templates/          Assets scaffolded into projects
+  schemas/          Spec schemas
+  scripts/          Helper scripts
+  skills/           Agent skills
+  tech-specs/       Reusable tech-spec templates
+examples/           Sample projects (pepperoni-pizza)
+```
+
+Tests live next to the code they cover as `*_test.rs` files.
+
+Keep this section in sync when the structure changes.
+
 ## Principles
 
 - **Clean Code**: Simple code is clean if it can be understood easily – by everyone on the team. Clean code can be read and enhanced by a developer other than its original author. With understandability comes readability, changeability, extensibility, and maintainability.
