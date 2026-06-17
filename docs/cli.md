@@ -40,6 +40,8 @@ spex check
 
 The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
+A `script` or `command` check runs `scripts/<name>.sh`, resolved from the workspace repository first and from the spex repository only as a fallback. A repository that ships its own `scripts/<name>.sh` therefore overrides the shared spex script for that repository.
+
 #### Flags
 
 - `--repo <name>...` — limit the run to the named workspace repositories. Defaults to all repositories in `spex.yml`.
