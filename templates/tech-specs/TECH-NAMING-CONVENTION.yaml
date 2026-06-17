@@ -17,12 +17,18 @@ acceptance_criteria:
   - "MUST prefix every derived identifier with the project name (the workspace-root folder), so a workspace repository is globally identifiable on its own"
   - "MUST keep the project prefix as a literal placeholder edited once by the consumer and committed, not substituted by tooling, in three forms: `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake)"
   - "MUST use the snake forms (`<project_name>`, `{NAME}`) for identifiers that forbid hyphens (database name, database user, proto package)"
+  - "MUST name each repository directory in kebab-case: lowercase letters and digits joined by single hyphens"
   - "MUST consume derived identifiers from generated output rather than re-deriving them in code"
   - "MUST update the convention and regenerate consumers when a new cross-cutting entity is needed, so the derivation stays the single source"
   - "MUST NOT introduce per-repository overrides for naming; a repository needing a different identifier shape is a flaw in the convention"
   - "MUST NOT record any cross-cutting identifier in a second place once it is derivable from the convention"
   - "SHOULD verify each derived `config_prefix` against the env-var namespace with an automated check that regexes the prefix"
   - "SHOULD ignore identifiers that do not apply to a repository (a proto repository has no database) rather than inventing them"
+checks:
+  - name: repo-dir-kebab-case
+    description: Repository directory name must be kebab-case
+    type: command
+    severity: error
 examples:
   template: |
     # `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake) are
