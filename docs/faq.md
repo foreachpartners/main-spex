@@ -38,4 +38,4 @@ pepperoni-pizza/                          <- workspace root folder
   frontend/    implementation             references BIZ-PLACE-PIZZA-ORDER
 ```
 
-If the spec lived inside one implementation repository, a requirement that spans services would have no natural home and traceability would break at the repo boundary. With `spex` as a shared, versioned source of truth, every repo links to the same reviewed spec by ID, and you can check out `spex` at the commit the code was built against to see exactly what was approved.
+If the spec lived inside one implementation repository, a spec that spans several repositories would have no natural home, and traceability would break at the repo boundary. Keeping it in `spex` as a shared, versioned source of truth gives every repository one reviewed spec to link to by ID, and you can check out `spex` at the commit the code was built against to see exactly what was approved.

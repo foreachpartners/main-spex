@@ -1,4 +1,4 @@
-project_name: pepperoni-pizza-no-spex
+project_name: pepperoni-pizza
 description: >-
   Online pepperoni pizza ordering system built from a Rust API, an OpenAPI
   contract, and a React web client.

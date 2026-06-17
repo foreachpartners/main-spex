@@ -51,7 +51,7 @@ Infer the project `description` from `project_name` and the combined picture of 
 Each `description` must be a single, plain sentence that states what the thing is and does:
 
 - Project: what the product is and the problem it solves.
-- Repository: its role within the project (for example backend service, web client, shared library, infrastructure).
+- Repository: it's role within the project (for example backend service, web client, shared library, infrastructure).
 
 Keep each description to one line, concrete, and free of filler. Match the imperative, no-hype style of the existing specs. Do not restate the name.
 

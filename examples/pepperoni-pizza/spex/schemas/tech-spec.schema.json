@@ -176,7 +176,7 @@
   "examples": [
     {
       "id": "TECH-SECRET-HANDLING",
-      "title": "No secrets in source code",
+      "title": "Secret Protection",
       "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
       "acceptance_criteria": [
         "MUST NOT commit API keys, passwords, or tokens to the repository",

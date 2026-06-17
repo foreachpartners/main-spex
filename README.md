@@ -47,10 +47,10 @@ pepperoni-pizza/         # workspace root
 Workflow core is AI agent skills and CLI commands.
 
 1. Create your first specification (spec):
-   - business spec `/spex-create-biz [backend order pizza endpoint]`. Will create `spex/biz-specs/BIZ-ORDER-PIZZA.yaml`
-   - technical spec `/spex-create-tech [secret protection]`. Will create `spex/tech-specs/TECH-SECRET-PROTECTION.yaml`
-2. Create implementation plan for spec `/spex-create-plan [secret protection]`. Will create `spex/plans/TECH-SECRET-PROTECTION.md`
-3. Execute plan `/spex-execute-plan [secret protection]`. Will execute `TECH-SECRET-PROTECTION.md` plan using multiple agents working in parallel per step.
+   - business spec `/spex-create-biz-spec [backend place pizza order endpoint]`. Will create `spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml`
+   - technical spec `/spex-create-tech-spec [secret handling]`. Will create `spex/tech-specs/TECH-SECRET-HANDLING.yaml`
+2. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `spex/plans/TECH-SECRET-HANDLING.md`
+3. Execute plan `/spex-execute-plan [secret handling]`. Will execute `TECH-SECRET-HANDLING.md` plan using multiple agents working in parallel per step.
 4. Check result with `spex check`. Will run all TECH spec checks related to your changes.
 
 ## Why
@@ -100,7 +100,7 @@ flowchart TD
 
 For example, the rule `TECH-SECRET-HANDLING` works like this:
 
-1. **Technical Spec** — `TECH-SECRET-HANDLING`: "no secrets in the repository"
+1. **Technical Spec** — `TECH-SECRET-HANDLING`: "Secret Protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 

@@ -29,7 +29,7 @@
 
   ```yaml
   id: TECH-SECRET-HANDLING
-  title: No secrets in the repository
+  title: Secret Protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
   ```
@@ -72,7 +72,7 @@
     frontend/        <- workspace repository
   ```
 
-- **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) — never "projects" or "services".
+- **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) or by more specific role (service, mobile).
 
 - **Workspace repository name** (repository name) — the identifier of a workspace repository, taken from the name of its folder inside the workspace root.
 
