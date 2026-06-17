@@ -44,22 +44,22 @@ pepperoni-pizza/         # workspace root
 
 ### Workflow
 
-Workflow core is AI agent skills and CLI commands
+Workflow core is AI agent skills and CLI commands.
 
 1. Create your first specification (spec):
    - business spec `/spex-create-biz [backend order pizza endpoint]`. Will create `spex/biz-specs/BIZ-ORDER-PIZZA.yaml`
    - technical spec `/spex-create-tech [secret protection]`. Will create `spex/tech-specs/TECH-SECRET-PROTECTION.yaml`
 2. Create implementation plan for spec `/spex-create-plan [secret protection]`. Will create `spex/plans/TECH-SECRET-PROTECTION.md`
-3. Execute plan`/spex-execute-plan [secret protection]`. Will execute `TECH-SECRET-PROTECTION.md` plan using multiple agents working in parallel per step.
-4. Check result with `spex check`. Will run all related TECH spec checks related to your changes.
+3. Execute plan `/spex-execute-plan [secret protection]`. Will execute `TECH-SECRET-PROTECTION.md` plan using multiple agents working in parallel per step.
+4. Check result with `spex check`. Will run all TECH spec checks related to your changes.
 
 ## Why
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
 
-**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster because you need to describe an idea from your head that will meet your/customer expectations and not someone else.
+**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your or your customer's expectations, not someone else's.
 
-**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge to ensure project maintainability over long time. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
+**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
@@ -104,6 +104,6 @@ For example, the rule `TECH-SECRET-HANDLING` works like this:
 
 ```mermaid
 flowchart TD
-    Tech["Technical Spec — how to built"] -.governs.-> Flow["Contracts, code, tests"]
-    Tech -.proven by.-> Checks["Automated an AI checks"]
+    Tech["Technical Spec — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
+    Tech -.proven by.-> Checks["Automated and AI checks"]
 ```

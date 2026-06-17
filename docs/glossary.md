@@ -10,8 +10,8 @@
 - **PRD** (Product Requirements Document) — extracted from the BRD. Describes _what_ the product should do: features and user-facing behavior. Written by/for product, design, and engineering.
 
   ```md
-  Customers can pick a pizza on website, place an order and pay online with credit card.
-  Daily orders amount should be tracked.
+  Customers can pick a pizza on the website, place an order, and pay online with a credit card.
+  The daily order count should be tracked.
   ```
 
 - **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: business (`BIZ`) and technical (`TECH`).
