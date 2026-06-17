@@ -69,6 +69,8 @@ Workflow core is AI agent skills and CLI commands.
 
 **Tool-agnostic**: To avoid lock-in and restrictions, the framework works with any IDE, terminal, or AI model.
 
+**Ubiquitous language**: A shared vocabulary connects business, specs, and code so humans and AI mean the same thing by the same term. spex defines its terms in the [glossary](docs/glossary.md) and uses them consistently across specs, contracts, code, and docs, removing ambiguity and the translation errors it causes.
+
 ## Description
 
 ### The flow from business goal to verified code:
