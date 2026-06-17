@@ -34,7 +34,7 @@
     - "Secret scan check passes on every commit in CI."
   ```
 
-- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type. In paths, written as the placeholder `<spec-id>`.
+- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
 
   ```text
   BIZ-PLACE-PIZZA-ORDER
@@ -63,7 +63,7 @@
 
 - **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
 
-- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages. In paths, written as the placeholder `<workspace-root>`.
+- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
 
   ```text
   pepperoni-pizza/   <- workspace root
