@@ -7,7 +7,7 @@
 
 ## Steps
 
-1. Create a feature branch from `main`.
+1. Create a feature branch from `dev`.
 2. Make your changes.
 3. Add tests covering your changes.
 4. Update the examples in `examples/` if your changes affect them.
