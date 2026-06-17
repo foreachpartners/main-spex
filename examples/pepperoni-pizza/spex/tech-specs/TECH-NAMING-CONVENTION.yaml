@@ -9,10 +9,10 @@ description: >-
   name. Without a derivation rule each becomes an independent decision and the
   system grows inconsistent variations. The naming convention is the single
   source that derives every identifier from the project name plus the
-  repository's short name, so two engineers asked the same question arrive at
+  repository name, so two engineers asked the same question arrive at
   the same answer without consulting each other.
 acceptance_criteria:
-  - "MUST derive every cross-cutting identifier (repo directory, crate or package name, binary, config-prefix, database name, database user, proto package, container image, telemetry service name) from a single project name plus the workspace repository's short name"
+  - "MUST derive every cross-cutting identifier (repo directory, crate or package name, binary, config-prefix, database name, database user, proto package, container image, telemetry service name) from a single project name plus the workspace repository name"
   - "MUST author derivations as one flat template with a single entry per identifier, substituting only the documented variables: `{name}` (kebab-case lower), `{NAME}` (uppercase, hyphens to underscores), `{Name}` (PascalCase)"
   - "MUST prefix every derived identifier with the project name (the workspace-root folder), so a workspace repository is globally identifiable on its own"
   - "MUST keep the project prefix as a literal placeholder edited once by the consumer and committed, not substituted by tooling, in three forms: `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake)"
@@ -26,7 +26,7 @@ acceptance_criteria:
 examples:
   template: |
     # `<project-name>` (kebab), `<project_name>` (snake), `<PROJECT_NAME>` (upper snake) are
-    # literal placeholders the consumer edits once and commits. `{name}` is the short
+    # literal placeholders the consumer edits once and commits. `{name}` is the
     # repository name; keep it a single lowercase token so the db and proto forms stay valid.
     repo_dir: "<project-name>-{name}"
     crate: "<project-name>-{name}"
