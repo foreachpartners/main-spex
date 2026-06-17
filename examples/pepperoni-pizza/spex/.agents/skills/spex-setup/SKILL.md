@@ -11,10 +11,10 @@ Add a short `description` for the project and for each workspace repository in `
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name.
 
-| What                  | Path                                            |
-| --------------------- | ----------------------------------------------- |
-| Spex repository       | `<workspace-root>/spex/`                         |
-| Workspace config      | `<workspace-root>/spex/spex.yml`                 |
+| What                    | Path                                             |
+| ----------------------- | ------------------------------------------------ |
+| Spex repository         | `<workspace-root>/spex/`                         |
+| Workspace config        | `<workspace-root>/spex/spex.yml`                 |
 | Workspace config schema | `<workspace-root>/spex/schemas/spex.schema.json` |
 
 The schema at `<workspace-root>/spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
