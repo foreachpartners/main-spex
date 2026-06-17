@@ -8,7 +8,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
-- **spex CLI**: Clone spex repository and install spex cli tool:
+- **spex CLI**: Clone spex repository (repo) and install spex cli tool:
   ```sh
   git clone https://github.com/ziimakc/spex
   cd spex
@@ -17,45 +17,49 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Quickstart
 
-## Setup
+### See also
 
-1. Put all project git repositories in one shared folder (workspace root folder)
-2. Run `spex init` in workspace root to create `pepperoni-pizza/spex` repository
+- [Glossary](docs/glossary.md)
 
-This creates the following structure:
+### Setup
+
+We will create the following structure:
 
 ```
 pepperoni-pizza/         # workspace root
 ├── api/                 # existing api repository
 ├── frontend/            # existing frontend repository
-└── spex/                # newly spex repository
+├── ...                  # repeat for other repositories
+└── spex/                # new spex repository (created by cli)
     └── pepperoni-pizza.code-workspace  # editor workspace file
 ```
 
-Open `spex/pepperoni-pizza.code-workspace` in your editor to work across every repository at once.
-
-3. Run your first skill `/spex-setup`
+1. Put all project git repos in one shared folder (workspace root folder)
+2. Run `spex init` in workspace root to create `pepperoni-pizza/spex` repo
+3. Open workspace to work across all repositories at once:
+   - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
+   - Claude CLI: run `claude --add-dir ../api ../contracts ../frontend ..` from `spex` repo
+   - Zed: add project, pick all workspace repos (folders)
+4. Run your first agent skill (skill) `/spex-setup` to complete setup
 
 ### Workflow
 
-Workflow cor is AI skills and CLI commands
+Workflow core is AI agent skills and CLI commands
 
-1. Create your first
-
-- business spec `/spex-create-biz [spec backend order pizza endpoint]`
-- technical spec `/spex-create-tech [commit message format]`
-
-2. Create implementation plan for spec `/spex-create-plan [for BIZ-PLACE-PIZZA-ORDER or commit message format]`
-3. Execute plan with one or multiple agents working in parallel depending on plan `/spex-execute-plan`
-4. Check result with `spex check`
+1. Create your first specification (spec):
+   - business spec `/spex-create-biz [backend order pizza endpoint]`. Will create `spex/biz-specs/BIZ-ORDER-PIZZA.yaml`
+   - technical spec `/spex-create-tech [secret protection]`. Will create `spex/tech-specs/TECH-SECRET-PROTECTION.yaml`
+2. Create implementation plan for spec `/spex-create-plan [secret protection]`. Will create `spex/plans/TECH-SECRET-PROTECTION.md`
+3. Execute plan`/spex-execute-plan [secret protection]`. Will execute `TECH-SECRET-PROTECTION.md` plan using multiple agents working in parallel per step.
+4. Check result with `spex check`. Will run all related TECH spec checks related to your changes.
 
 ## Why
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
 
-**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better because you need describe an idea from your head thet will meet your expectations and not someone else.
+**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster because you need to describe an idea from your head that will meet your/customer expectations and not someone else.
 
-**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge to ensure project maintanability over long time. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
+**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge to ensure project maintainability over long time. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
