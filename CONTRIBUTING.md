@@ -1,6 +1,13 @@
 # Contributing
 
-1. Create a feature branch from `dev`.
+## Prerequisites
+
+- **Rust**: [Install Rust](https://rust-lang.org/tools/install/)
+- **dprint**: [Install dprint](https://dprint.dev/install/) (formats Markdown, YAML, and JSON)
+
+## Steps
+
+1. Create a feature branch from `main`.
 2. Make your changes.
 3. Add tests covering your changes.
 4. Update the examples in `examples/` if your changes affect them.
