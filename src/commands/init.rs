@@ -4,11 +4,11 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt, bail};
-use include_dir::{Dir, include_dir};
 use thiserror::Error;
 
 use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
-use crate::tech_spec::{self, SCRIPTS_DIR, TechSpec};
+use crate::tech_spec::TechSpec;
+use crate::templates;
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -16,11 +16,6 @@ mod init_test;
 
 const BIZ_SPECS_DIR_NAME: &str = "biz-specs";
 const PLANS_DIR_NAME: &str = "plans";
-const SKILLS_DIR_NAME: &str = "skills";
-const AGENTS_DIR_NAME: &str = ".agents";
-const CLAUDE_DIR_NAME: &str = ".claude";
-
-static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 type Result<T> = core::result::Result<T, Report<InitError>>;
 
@@ -86,10 +81,7 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    TEMPLATES
-        .extract(spex_dir)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not write templates into `{}`", spex_dir.display()))?;
+    templates::scaffold(spex_dir).change_context(InitError::Io)?;
 
     let biz_specs = spex_dir.join(BIZ_SPECS_DIR_NAME);
     fs::create_dir_all(&biz_specs)
@@ -101,81 +93,6 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .change_context(InitError::Io)
         .attach_with(|| format!("could not create `{}`", plans.display()))?;
 
-    relocate_skills_to_agents(spex_dir)?;
-    mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
-}
-
-fn relocate_skills_to_agents(spex_dir: &Path) -> Result<()> {
-    let skills = spex_dir.join(SKILLS_DIR_NAME);
-    if !skills.is_dir() {
-        return Ok(());
-    }
-
-    let agents = spex_dir.join(AGENTS_DIR_NAME);
-    fs::create_dir_all(&agents)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not create `{}`", agents.display()))?;
-
-    let dest = agents.join(SKILLS_DIR_NAME);
-    fs::rename(&skills, &dest)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not move skills into `{}`", dest.display()))?;
-
-    link_claude_to_agents(spex_dir)
-}
-
-#[cfg(unix)]
-fn link_claude_to_agents(spex_dir: &Path) -> Result<()> {
-    use std::os::unix::fs::symlink;
-
-    let link = spex_dir.join(CLAUDE_DIR_NAME);
-    if link.symlink_metadata().is_ok() {
-        return Ok(());
-    }
-
-    symlink(AGENTS_DIR_NAME, &link)
-        .change_context(InitError::Io)
-        .attach_with(|| {
-            format!(
-                "could not link `{}` to `{}`",
-                link.display(),
-                AGENTS_DIR_NAME
-            )
-        })
-}
-
-#[cfg(not(unix))]
-fn link_claude_to_agents(_spex_dir: &Path) -> Result<()> {
-    Ok(())
-}
-
-#[cfg(unix)]
-fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-
-    if !scripts_dir.is_dir() {
-        return Ok(());
-    }
-
-    let entries = fs::read_dir(scripts_dir)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not read `{}`", scripts_dir.display()))?;
-
-    for entry in entries {
-        let path = entry.change_context(InitError::Io)?.path();
-        let mut permissions = fs::metadata(&path)
-            .change_context(InitError::Io)?
-            .permissions();
-        permissions.set_mode(permissions.mode() | 0o111);
-        fs::set_permissions(&path, permissions)
-            .change_context(InitError::Io)
-            .attach_with(|| format!("could not set permissions on `{}`", path.display()))?;
-    }
-    Ok(())
-}
-
-#[cfg(not(unix))]
-fn mark_scripts_executable(_scripts_dir: &Path) -> Result<()> {
     Ok(())
 }
 
@@ -239,7 +156,7 @@ fn escape_json(value: &str) -> String {
 }
 
 fn default_tech_specs() -> Result<DefaultTechSpecs> {
-    let Some(dir) = TEMPLATES.get_dir(tech_spec::TECH_SPECS_DIR) else {
+    let Some(dir) = templates::tech_specs_dir() else {
         return Ok(DefaultTechSpecs {
             all_repos: Vec::new(),
             spex: Vec::new(),

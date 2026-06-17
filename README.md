@@ -17,10 +17,6 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Quickstart
 
-### See also
-
-- [Glossary](docs/glossary.md)
-
 ### Setup
 
 We will create the following structure:
@@ -109,3 +105,7 @@ flowchart TD
     Tech["Technical Spec — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
     Tech -.proven by.-> Checks["Automated and AI checks"]
 ```
+
+## Learn more
+
+For an in-depth walkthrough of concepts and the full workflow, see the [Guide](docs/guide.md).

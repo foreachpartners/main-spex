@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod tech_spec;
+mod templates;
 
 use std::fmt::Debug;
 use std::process::ExitCode;
@@ -25,6 +26,10 @@ struct Cli {
 enum Commands {
     #[command(about = "Initialize the spex workspace repository")]
     Init,
+    #[command(
+        about = "Rewrite bundled skills, schemas, scripts and tech-specs with the latest versions"
+    )]
+    Update,
     #[command(about = "Run technical spec checks against the workspace")]
     Check(CheckArgs),
 }
@@ -34,6 +39,7 @@ fn main() -> ExitCode {
 
     match cli.command {
         Commands::Init => finish(commands::init::run()),
+        Commands::Update => finish(commands::update::run()),
         Commands::Check(args) => finish(commands::check::run(args)),
     }
 }

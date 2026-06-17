@@ -21,7 +21,8 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   tech_spec.rs      Tech-spec model
-  commands/         Subcommands (init, check)
+  templates.rs      Bundled template scaffolding (shared by init/update)
+  commands/         Subcommands (init, update, check)
 docs/               Glossary, conventions, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas

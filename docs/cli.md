@@ -20,6 +20,16 @@ spex init
 
 Finish setup afterwards by running the `/spex-setup` skill.
 
+### `spex update`
+
+Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and tech specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yml`.
+
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or tech specs you have added are left untouched. Use it after upgrading the `spex` binary to pull in framework updates.
+
+```sh
+spex update
+```
+
 ### `spex check`
 
 Runs the technical spec checks declared in `spex.yml` against the workspace. Each workspace repository is checked against the TECH specs listed in its `tech-specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yml`.
