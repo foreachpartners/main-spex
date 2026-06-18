@@ -68,8 +68,8 @@
         },
         "type": {
           "type": "string",
-          "description": "How the check is executed: regexp matches file contents, glob matches file paths, script runs a command.",
-          "enum": ["regexp", "glob", "script", "command"]
+          "description": "How the check is executed: regexp matches file contents, glob matches file paths, script runs an external program.",
+          "enum": ["regexp", "glob", "script"]
         },
         "severity": {
           "type": "string",
@@ -149,23 +149,26 @@
         },
         {
           "title": "script check",
-          "description": "Runs `scripts/<name>.sh` for each matched file from the workspace repository if present, otherwise from spex.",
+          "description": "Runs an external script, resolved from the workspace repository first and from spex as a fallback.",
           "allOf": [
             { "$ref": "#/$defs/check_base" },
             { "$ref": "#/$defs/file_scope" }
           ],
           "properties": {
-            "type": { "const": "script" }
+            "type": { "const": "script" },
+            "script": {
+              "type": "string",
+              "description": "Path to the script relative to the repository root (for example `scripts/llm-writing.sh`). Resolved from the workspace repository first, then from spex, so a repository can override the shared script by shipping its own at the same path.",
+              "minLength": 1
+            },
+            "run": {
+              "type": "string",
+              "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments; `per-repo` runs it once in the repository directory with no file arguments. Defaults to `per-file`.",
+              "enum": ["per-file", "per-repo"],
+              "default": "per-file"
+            }
           },
-          "unevaluatedProperties": false
-        },
-        {
-          "title": "command check",
-          "description": "Runs `scripts/<name>.sh` once per workspace repository, from that repository if present, otherwise from spex.",
-          "allOf": [{ "$ref": "#/$defs/check_base" }],
-          "properties": {
-            "type": { "const": "command" }
-          },
+          "required": ["script"],
           "unevaluatedProperties": false
         }
       ]

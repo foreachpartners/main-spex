@@ -40,7 +40,7 @@ spex check
 
 The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
-A `script` or `command` check runs `scripts/<name>.sh`, resolved from the workspace repository first and from the spex repository only as a fallback. A repository that ships its own `scripts/<name>.sh` therefore overrides the shared spex script for that repository.
+A `script` check runs the program named by its `script:` path (for example `scripts/llm-writing.sh`), resolved from the workspace repository first and from the spex repository only as a fallback. A repository that ships its own script at the same path therefore overrides the shared spex script for that repository. Set `run: per-file` (the default) to pass the matched files as arguments, or `run: per-repo` to run the script once in the repository directory with no arguments.
 
 #### Flags
 

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::tech_spec::{Check, CheckKind, Severity};
+    use crate::tech_spec::{Check, CheckKind, RunScope, Severity};
     use tempfile::{TempDir, tempdir};
 
     fn check(kind: CheckKind, pattern: Option<&str>) -> Check {
@@ -11,10 +11,19 @@ mod tests {
             kind,
             pattern: pattern.map(str::to_string),
             negate: false,
+            script: None,
+            run: RunScope::PerFile,
             include: Vec::new(),
             exclude: Vec::new(),
             severity: Severity::Error,
         }
+    }
+
+    fn script_check(reference: &str, run: RunScope) -> Check {
+        let mut check = check(CheckKind::Script, None);
+        check.script = Some(reference.to_string());
+        check.run = run;
+        check
     }
 
     fn make_executable(path: &Path) {
@@ -135,13 +144,13 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join(SCRIPTS_DIR)).expect("repo scripts");
-        std::fs::create_dir_all(spex.join(SCRIPTS_DIR)).expect("spex scripts");
-        std::fs::write(repo.join(SCRIPTS_DIR).join("lint.sh"), "").expect("repo script");
-        std::fs::write(spex.join(SCRIPTS_DIR).join("lint.sh"), "").expect("spex script");
+        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
+        std::fs::create_dir_all(spex.join("scripts")).expect("spex scripts");
+        std::fs::write(repo.join("scripts/lint.sh"), "").expect("repo script");
+        std::fs::write(spex.join("scripts/lint.sh"), "").expect("spex script");
 
-        let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, repo.join(SCRIPTS_DIR).join("lint.sh"));
+        let resolved = resolve_script("scripts/lint.sh", &repo, &spex).expect("resolved");
+        assert_eq!(resolved, repo.join("scripts/lint.sh"));
     }
 
     #[test]
@@ -150,23 +159,11 @@ mod tests {
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join(SCRIPTS_DIR)).expect("spex scripts");
-        std::fs::write(spex.join(SCRIPTS_DIR).join("lint.sh"), "").expect("spex script");
+        std::fs::create_dir_all(spex.join("scripts")).expect("spex scripts");
+        std::fs::write(spex.join("scripts/lint.sh"), "").expect("spex script");
 
-        let resolved = resolve_script("lint", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, spex.join(SCRIPTS_DIR).join("lint.sh"));
-    }
-
-    #[test]
-    fn resolve_script_ignores_extensionless_files() {
-        let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join(SCRIPTS_DIR)).expect("spex scripts");
-        std::fs::write(spex.join(SCRIPTS_DIR).join("lint"), "").expect("spex script");
-
-        assert!(resolve_script("lint", &repo, &spex).is_none());
+        let resolved = resolve_script("scripts/lint.sh", &repo, &spex).expect("resolved");
+        assert_eq!(resolved, spex.join("scripts/lint.sh"));
     }
 
     #[test]
@@ -177,29 +174,30 @@ mod tests {
         std::fs::create_dir_all(&repo).expect("repo");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        assert!(resolve_script("lint", &repo, &spex).is_none());
+        assert!(resolve_script("scripts/lint.sh", &repo, &spex).is_none());
     }
 
     #[test]
-    fn command_reports_violation_on_failure() {
+    fn script_per_repo_reports_violation_on_failure() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join(SCRIPTS_DIR)).expect("repo scripts");
+        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
         std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join(SCRIPTS_DIR).join("sample.sh");
+        let script = repo.join("scripts/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
-        let mut check = check(CheckKind::Command, None);
+        let mut check = script_check("scripts/sample.sh", RunScope::PerRepo);
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_command(
+        run_script(
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
             &spex,
+            &[],
             &mut findings,
         );
 
@@ -209,27 +207,88 @@ mod tests {
     }
 
     #[test]
-    fn command_reports_config_error_when_missing() {
+    fn script_per_file_passes_files_as_arguments() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
+        std::fs::create_dir_all(&spex).expect("spex");
+        let script = repo.join("scripts/echo-args.sh");
+        std::fs::write(
+            &script,
+            "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
+        )
+        .expect("write script");
+        make_executable(&script);
+
+        let file = ScopedFile {
+            abs: repo.join("README.md"),
+            rel: PathBuf::from("README.md"),
+        };
+        let check = script_check("scripts/echo-args.sh", RunScope::PerFile);
+
+        let mut findings = Vec::new();
+        run_script(
+            "TECH-DOC-WRITING-STYLE",
+            &check,
+            &repo,
+            &spex,
+            &[&file],
+            &mut findings,
+        );
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].message, "README.md");
+    }
+
+    #[test]
+    fn script_reports_config_error_when_file_missing() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&repo).expect("repo");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        let check = check(CheckKind::Command, None);
+        let check = script_check("scripts/sample.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_command(
+        run_script(
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
             &spex,
+            &[],
             &mut findings,
         );
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
         assert!(findings[0].message.contains("not found"));
+    }
+
+    #[test]
+    fn script_reports_config_error_when_unset() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+
+        let check = check(CheckKind::Script, None);
+
+        let mut findings = Vec::new();
+        run_script(
+            "TECH-DOC-WRITING-STYLE",
+            &check,
+            &repo,
+            &spex,
+            &[],
+            &mut findings,
+        );
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Error);
+        assert!(findings[0].message.contains("requires `script`"));
     }
 
     #[test]

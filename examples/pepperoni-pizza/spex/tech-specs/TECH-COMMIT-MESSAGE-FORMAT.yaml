@@ -13,5 +13,7 @@ acceptance_criteria:
 checks:
   - name: commit-id-format
     description: Recent behavioral commits must end with a bracketed, comma-separated Spec ID list
-    type: command
+    type: script
+    run: per-repo
+    script: scripts/commit-id-format.sh
     severity: warn

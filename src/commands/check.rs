@@ -9,7 +9,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::{self, Config, Repository};
-use crate::tech_spec::{self, Check, CheckKind, SCRIPTS_DIR, Severity, TechSpec};
+use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 
 #[cfg(test)]
 #[path = "check_test.rs"]
@@ -202,7 +202,6 @@ fn run_check(
         CheckKind::Regexp => run_regexp(spec_id, check, &scoped, findings),
         CheckKind::Glob => run_glob(spec_id, check, &scoped, findings),
         CheckKind::Script => run_script(spec_id, check, repo_path, spex_dir, &scoped, findings),
-        CheckKind::Command => run_command(spec_id, check, repo_path, spex_dir, findings),
     }
 }
 
@@ -349,33 +348,49 @@ fn run_script(
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
-    let Some(script) = resolve_script(&check.name, repo_path, spex_dir) else {
+    let Some(reference) = &check.script else {
         findings.push(config_error(
             spec_id,
             &check.name,
-            format!(
-                "script `{}` not found in workspace repository or spex `{SCRIPTS_DIR}/`",
-                check.name
-            ),
+            "script check requires `script`".to_string(),
         ));
         return;
     };
 
+    let Some(script) = resolve_script(reference, repo_path, spex_dir) else {
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            format!("script `{reference}` not found in workspace repository or spex"),
+        ));
+        return;
+    };
+
+    match check.run {
+        RunScope::PerFile => run_per_file(spec_id, check, &script, repo_path, files, findings),
+        RunScope::PerRepo => run_per_repo(spec_id, check, &script, repo_path, findings),
+    }
+}
+
+fn run_per_file(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    repo_path: &Path,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
         let args = batch.iter().map(|file| file.rel.as_os_str());
 
-        let output = match Command::new(&script)
+        let output = match Command::new(script)
             .args(args)
             .current_dir(repo_path)
             .output()
         {
             Ok(output) => output,
             Err(err) => {
-                findings.push(config_error(
-                    spec_id,
-                    &check.name,
-                    format!("could not run script `{}`: {err}", script.display()),
-                ));
+                findings.push(run_error(spec_id, check, script, err));
                 return;
             }
         };
@@ -386,33 +401,17 @@ fn run_script(
     }
 }
 
-fn run_command(
+fn run_per_repo(
     spec_id: &str,
     check: &Check,
+    script: &Path,
     repo_path: &Path,
-    spex_dir: &Path,
     findings: &mut Vec<Finding>,
 ) {
-    let Some(script) = resolve_script(&check.name, repo_path, spex_dir) else {
-        findings.push(config_error(
-            spec_id,
-            &check.name,
-            format!(
-                "command `{}` not found in workspace repository or spex `{SCRIPTS_DIR}/`",
-                check.name
-            ),
-        ));
-        return;
-    };
-
-    let output = match Command::new(&script).current_dir(repo_path).output() {
+    let output = match Command::new(script).current_dir(repo_path).output() {
         Ok(output) => output,
         Err(err) => {
-            findings.push(config_error(
-                spec_id,
-                &check.name,
-                format!("could not run command `{}`: {err}", script.display()),
-            ));
+            findings.push(run_error(spec_id, check, script, err));
             return;
         }
     };
@@ -422,14 +421,21 @@ fn run_command(
     }
 }
 
-fn resolve_script(name: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
-    find_script(&repo_path.join(SCRIPTS_DIR), name)
-        .or_else(|| find_script(&spex_dir.join(SCRIPTS_DIR), name))
+fn resolve_script(reference: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
+    let repo_script = repo_path.join(reference);
+    if repo_script.is_file() {
+        return Some(repo_script);
+    }
+    let spex_script = spex_dir.join(reference);
+    spex_script.is_file().then_some(spex_script)
 }
 
-fn find_script(scripts_dir: &Path, name: &str) -> Option<PathBuf> {
-    let script = scripts_dir.join(format!("{name}.sh"));
-    script.is_file().then_some(script)
+fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -> Finding {
+    config_error(
+        spec_id,
+        &check.name,
+        format!("could not run script `{}`: {err}", script.display()),
+    )
 }
 
 fn script_message(output: &std::process::Output) -> String {

@@ -45,6 +45,10 @@ pub struct Check {
     #[serde(default)]
     pub negate: bool,
     #[serde(default)]
+    pub script: Option<String>,
+    #[serde(default)]
+    pub run: RunScope,
+    #[serde(default)]
     pub include: Vec<String>,
     #[serde(default)]
     pub exclude: Vec<String>,
@@ -58,7 +62,14 @@ pub enum CheckKind {
     Regexp,
     Glob,
     Script,
-    Command,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum RunScope {
+    #[default]
+    PerFile,
+    PerRepo,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
