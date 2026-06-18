@@ -27,6 +27,7 @@ checks:
     severity: warn
 examples:
   subject: |
+    style: format md files
     feat(menu): list available pizzas BIZ-LIST-PIZZA-MENU
     fix(cart): reject negative quantities BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE
   with_body: |
