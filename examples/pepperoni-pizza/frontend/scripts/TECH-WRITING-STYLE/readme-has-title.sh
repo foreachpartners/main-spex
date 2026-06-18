@@ -1,5 +1,5 @@
 #!/bin/sh
-# TECH-DOC-WRITING-STYLE / readme-has-title (frontend-only, per-repo)
+# TECH-WRITING-STYLE / readme-has-title (frontend-only, per-repo)
 #
 # A frontend-specific check declared in spex.yml under `checks_additional`.
 # Lives in the frontend repository's own `scripts/` because additional checks

@@ -132,7 +132,7 @@ repositories:
         let specs = DefaultTechSpecs {
             all_repos: vec![
                 "TECH-SECRET-HANDLING".to_string(),
-                "TECH-DOC-WRITING-STYLE".to_string(),
+                "TECH-WRITING-STYLE".to_string(),
             ],
             spex: Vec::new(),
         };
@@ -145,7 +145,7 @@ repositories:
     path: ../server
     tech-specs:
       - TECH-SECRET-HANDLING
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
 ";
         assert_eq!(yaml, expected);
     }
@@ -154,7 +154,7 @@ repositories:
     fn render_config_uses_spex_specs_for_spex_repo() {
         let specs = DefaultTechSpecs {
             all_repos: vec!["TECH-SECRET-HANDLING".to_string()],
-            spex: vec!["TECH-DOC-WRITING-STYLE".to_string()],
+            spex: vec!["TECH-WRITING-STYLE".to_string()],
         };
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
 
@@ -173,7 +173,7 @@ repositories:
       rules).
     path: .
     tech-specs:
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
 ";
         assert_eq!(yaml, expected);
     }
@@ -239,11 +239,7 @@ repositories:
                 .all_repos
                 .contains(&"TECH-SECRET-HANDLING".to_string())
         );
-        assert!(
-            specs
-                .all_repos
-                .contains(&"TECH-DOC-WRITING-STYLE".to_string())
-        );
+        assert!(specs.all_repos.contains(&"TECH-WRITING-STYLE".to_string()));
         assert!(
             !specs
                 .all_repos

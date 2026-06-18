@@ -2,7 +2,7 @@
 
 - Specs: BIZ-LIST-PIZZA-MENU
 - Scope: contracts, api, frontend
-- Tech-specs: TECH-COMMIT-MESSAGE-FORMAT, TECH-DOC-WRITING-STYLE, TECH-NAMING-CONVENTION, TECH-SECRET-HANDLING, TECH-SPEC-ID-ANNOTATIONS
+- Tech-specs: TECH-COMMIT-MESSAGE-FORMAT, TECH-WRITING-STYLE, TECH-NAMING-CONVENTION, TECH-SECRET-HANDLING, TECH-SPEC-ID-ANNOTATIONS
 
 ## Overview
 
@@ -32,7 +32,7 @@ Status: completed
 
 Status: completed
 
-Edit `contracts/openapi.yaml`. Add the `/pizzas` path with the `listPizzas` operation and the `Pizza` schema under `components/schemas`, mirroring the existing `listOrders` / `Order` definitions. Put `x-spec: "@spec contract BIZ-LIST-PIZZA-MENU"` on the operation. Apply TECH-NAMING-CONVENTION (operationId and schema naming consistent with existing entries), TECH-SPEC-ID-ANNOTATIONS, and TECH-DOC-WRITING-STYLE for the `summary`/`description` text. Annotate spec: BIZ-LIST-PIZZA-MENU.
+Edit `contracts/openapi.yaml`. Add the `/pizzas` path with the `listPizzas` operation and the `Pizza` schema under `components/schemas`, mirroring the existing `listOrders` / `Order` definitions. Put `x-spec: "@spec contract BIZ-LIST-PIZZA-MENU"` on the operation. Apply TECH-NAMING-CONVENTION (operationId and schema naming consistent with existing entries), TECH-SPEC-ID-ANNOTATIONS, and TECH-WRITING-STYLE for the `summary`/`description` text. Annotate spec: BIZ-LIST-PIZZA-MENU.
 
 ### Step 2 — Implement and consume the contract (parallel)
 

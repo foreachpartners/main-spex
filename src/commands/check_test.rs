@@ -198,9 +198,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts/TECH-DOC-WRITING-STYLE")).expect("repo scripts");
+        std::fs::create_dir_all(repo.join("scripts/TECH-WRITING-STYLE")).expect("repo scripts");
         std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/TECH-DOC-WRITING-STYLE/echo-args.sh");
+        let script = repo.join("scripts/TECH-WRITING-STYLE/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -216,7 +216,7 @@ mod tests {
 
         let mut findings = Vec::new();
         run_script(
-            "TECH-DOC-WRITING-STYLE",
+            "TECH-WRITING-STYLE",
             &check,
             &repo,
             &repo,
@@ -265,7 +265,7 @@ mod tests {
 
         let mut findings = Vec::new();
         run_script(
-            "TECH-DOC-WRITING-STYLE",
+            "TECH-WRITING-STYLE",
             &check,
             &repo,
             &repo,

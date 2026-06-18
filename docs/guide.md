@@ -26,14 +26,14 @@ Name the inherited check by `spec` + `name`, then set only the fields you want t
 repositories:
   - repository_name: frontend
     path: ../frontend
-    tech-specs: [TECH-DOC-WRITING-STYLE]
+    tech-specs: [TECH-WRITING-STYLE]
     checks_override:
-      - spec: TECH-DOC-WRITING-STYLE # only the severity changes
+      - spec: TECH-WRITING-STYLE # only the severity changes
         name: no-cyrillic
         severity: warn
-      - spec: TECH-DOC-WRITING-STYLE # use a repo-specific script instead of the shared one
+      - spec: TECH-WRITING-STYLE # use a repo-specific script instead of the shared one
         name: llm-writing
-        script: llm-writing.sh
+        script: writing-style.sh
 ```
 
 When an override sets `script`, it resolves under the repository directory (`frontend/scripts/<spec-id>/...`). When it omits `script`, the inherited spex script is reused (`spex/scripts/<spec-id>/...`). An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
@@ -46,9 +46,9 @@ Each entry is a complete check plus the `spec` it belongs to (which must be one 
 repositories:
   - repository_name: frontend
     path: ../frontend
-    tech-specs: [TECH-DOC-WRITING-STYLE]
+    tech-specs: [TECH-WRITING-STYLE]
     checks_additional:
-      - spec: TECH-DOC-WRITING-STYLE
+      - spec: TECH-WRITING-STYLE
         name: no-todo
         type: regexp
         pattern: "TODO"

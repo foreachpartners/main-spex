@@ -8,7 +8,7 @@ repositories:
     path: ../api
     tech-specs:
       - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
@@ -19,7 +19,7 @@ repositories:
     path: ../contracts
     tech-specs:
       - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
@@ -28,18 +28,18 @@ repositories:
     path: ../frontend
     tech-specs:
       - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
     # Patch an inherited check: keep the shared spex pattern, only lower the severity.
     checks_override:
-      - spec: TECH-DOC-WRITING-STYLE
+      - spec: TECH-WRITING-STYLE
         name: no-cyrillic
         severity: warn
     # Add a frontend-only check; its script resolves under the frontend repository.
     checks_additional:
-      - spec: TECH-DOC-WRITING-STYLE
+      - spec: TECH-WRITING-STYLE
         name: readme-has-title
         description: The frontend README must start with a top-level Markdown title
         type: script
@@ -55,6 +55,6 @@ repositories:
     path: .
     tech-specs:
       - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DOC-WRITING-STYLE
+      - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING

@@ -59,7 +59,7 @@
         "type": { "const": "script" },
         "script": {
           "type": "string",
-          "description": "Script filename (for example `llm-writing.sh`). Resolved at `scripts/<spec-id>/<script>` under the base directory, so the `<spec-id>` folder keeps checks from different specs from sharing a path.",
+          "description": "Script filename (for example `writing-style.sh`). Resolved at `scripts/<spec-id>/<script>` under the base directory, so the `<spec-id>` folder keeps checks from different specs from sharing a path.",
           "minLength": 1
         },
         "run": {

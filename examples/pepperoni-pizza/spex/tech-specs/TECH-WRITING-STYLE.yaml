@@ -1,15 +1,17 @@
-id: TECH-DOC-WRITING-STYLE
+id: TECH-WRITING-STYLE
 include_for_all_repos: true
 readonly: true
-title: LLM-Oriented Writing Style
+title: LLM-oriented writing style
 description: >-
   Specs and documentation are read by both engineers and AI agents. Direct,
   imperative prose with explicit commitment levels and no filler keeps rules
-  unambiguous and machine-actionable.
+  unambiguous and machine-actionable. The commitment-level keywords (MUST,
+  SHOULD, MAY, MUST NOT) carry the meanings defined in RFC 2119.
 acceptance_criteria:
   - "MUST use imperative, directive language: 'Load ENV at startup.' not 'First, we''ll load ENV...'"
+  - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
   - "MUST prioritize clarity over brevity; brevity over all else"
-  - "MUST use MUST for mandatory rules, SHOULD for recommended, MAY for optional, DO NOT for prohibited"
+  - "MUST use MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited"
   - "MUST fix all findings from the llm-writing check before publishing"
   - "MUST NOT use motivational phrases: 'Great job!', 'Perfect!', 'Excellent!'"
   - "MUST NOT use uncertainty markers: 'maybe', 'perhaps', 'I think'"
@@ -24,7 +26,7 @@ checks:
     description: Flag filler, hedging, motivational, and apologetic phrasing in docs
     type: script
     run: per-file
-    script: llm-writing.sh
+    script: writing-style.sh
     include:
       - "**/*.md"
     severity: warn
@@ -37,8 +39,3 @@ checks:
       - "biz-specs/*.yaml"
       - "**/*.md"
     severity: error
-examples:
-  avoid: |
-    Basically, we'll probably want to load the config first. Sounds good?
-  prefer: |
-    MUST load configuration at startup.

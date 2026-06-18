@@ -1,0 +1,34 @@
+id: TECH-WRITING-STYLE
+include_for_all_repos: true
+readonly: true
+title: Writing style
+description: >-
+  Specs, code and documentation are read by both engineers and AI agents. Direct,
+  imperative prose with explicit commitment levels and no filler keeps rules
+  unambiguous and machine-actionable.
+acceptance_criteria:
+  - "MUST use imperative, directive language: 'Load ENV at startup.' not 'First, we''ll load ENV...'"
+  - "MUST prioritize clarity over brevity; brevity over all else"
+  - "MUST use RFC 2119 for commitment level - MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited, SHOULD NOT for discouraged"
+  - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful', 'clean')"
+  - "MUST NOT use non-English"
+  - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
+
+checks:
+  - name: llm-writing
+    description: Flag filler, hedging, motivational, and apologetic phrasing
+    type: script
+    run: per-file
+    script: writing-style.sh
+    severity: warn
+
+  - name: no-cyrillic
+    description: Requirements and documentation must be in English
+    type: regexp
+    pattern: '\p{Cyrillic}'
+    severity: error
+examples:
+  avoid: |
+    Basically, we'll probably want to load the config first. Sounds good?
+  prefer: |
+    MUST load configuration at startup.
