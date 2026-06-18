@@ -45,8 +45,8 @@ Workflow core is AI agent skills and CLI commands.
 1. Create your first specification (spec):
    - business spec `/spex-create-biz-spec [backend place pizza order endpoint]`. Will create `spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml`
    - technical spec `/spex-create-tech-spec [secret handling]`. Will create `spex/tech-specs/TECH-SECRET-HANDLING.yaml`
-2. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `spex/plans/TECH-SECRET-HANDLING.md`
-3. Execute plan `/spex-execute-plan [secret handling]`. Will execute `TECH-SECRET-HANDLING.md` plan using multiple agents working in parallel per step.
+2. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `spex/plans/TECH-SECRET-HANDLING/2024-11-25_secret-handling.md`
+3. Execute plan `/spex-execute-plan [secret handling]`. Will execute the `TECH-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 4. Check result with `spex check`. Will run all TECH spec checks related to your changes.
 
 ## Why

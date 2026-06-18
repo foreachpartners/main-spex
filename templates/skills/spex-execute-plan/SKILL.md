@@ -21,12 +21,12 @@ Use it when the user wants to execute, run, or implement an existing plan. Do no
 
 Determine which plan to execute before doing anything else:
 
-- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, match it against the plan filenames in `<workspace-root>/spex/plans/`; if several plans share that spec ID, pick the most recent by datetime and confirm.
-- If the user named nothing, list the plans in `<workspace-root>/spex/plans/` and ask which to execute. Do not invent a plan.
+- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, look in `<workspace-root>/spex/plans/<spec-id>/`; if it holds several plans, pick the most recent by the `<date>` in the filename and confirm.
+- If the user named nothing, list the plan directories in `<workspace-root>/spex/plans/` and their plans, then ask which to execute. Do not invent a plan.
 
 ## Step 1 — Read the plan and its context
 
-Read the chosen plan in `<workspace-root>/spex/plans/<spec-id>_<datetime>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
+Read the chosen plan in `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
 
 Then read enough context to execute faithfully:
 

@@ -1,6 +1,6 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/spex/plans/<spec-id>.md whose steps hold tasks that AI agents can run in parallel.
+description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md whose steps hold tasks that AI agents can run in parallel.
 ---
 
 # Create an Implementation Plan
@@ -12,6 +12,8 @@ The plan is a working document: it records what to build, the contract changes, 
 ## Paths
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
+
+Each spec's plans live in their own directory: `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md`. The schema at `<workspace-root>/spex/schemas/plan-filename.schema.json` is authoritative for the filename rules.
 
 ## When to use this skill
 
@@ -25,7 +27,7 @@ Determine which specs to plan before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, plan that one and confirm the ID.
 - If no spec is identified ask which to plan. Do not invent a spec.
 
-When several specs are given, pick the lead spec (the one the others depend on, or the first named) — its `id` names the file. List every targeted spec inside the plan.
+When several specs are given, pick the lead spec (the one the others depend on, or the first named) — its `id` names the plan directory. List every targeted spec inside the plan.
 
 ## Step 1 — Read the specs
 
@@ -116,7 +118,7 @@ Each case maps to an acceptance criterion and proves it.
 
 Rules for the plan content:
 
-- The filename is `<lead-spec-id>.md`. Only when that file already exists, append the current local time to keep both: `<lead-spec-id>_<datetime>.md` where `<datetime>` is `YYYY-MM-DD-HH-MM` (for example `BIZ-PLACE-PIZZA-ORDER_2024-11-24-14-44.md`). Get the real current time; do not invent it.
+- The plan lives at `<spec-id>/<date>_<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>_<slug>` must validate against `<workspace-root>/spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `BIZ-PLACE-PIZZA-ORDER/2024-11-24_add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
 - List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing tech-specs under `Tech-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
@@ -125,11 +127,11 @@ Rules for the plan content:
 ## Step 6 — Confirm, then write
 
 1. Show the drafted plan to the user — especially the step boundaries and which tasks run in parallel — and confirm. Apply edits if needed.
-2. Write it to `<workspace-root>/spex/plans/<lead-spec-id>.md`. If that file already exists, write to `<workspace-root>/spex/plans/<lead-spec-id>_<datetime>.md` instead so the existing plan is preserved.
+2. Write it to `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/spex/schemas/plan-filename.schema.json`.
 3. Confirm the path back to the user.
 
 ## Step 7 — Point to the next skill
 
-After the plan is written, prompt the user to execute it: run `spex-execute-plan <lead-spec-id>`.
+After the plan is written, prompt the user to execute it: run `spex-execute-plan <spec-id>`.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
