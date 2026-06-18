@@ -36,6 +36,10 @@ Tests live next to the code they cover as `*_test.rs` files.
 
 Keep this section in sync when the structure changes.
 
+## Rules
+
+- **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
+
 ## Principles
 
 - **Clean Code**: Simple code is clean if it can be understood easily – by everyone on the team. Clean code can be read and enhanced by a developer other than its original author. With understandability comes readability, changeability, extensibility, and maintainability.
