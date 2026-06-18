@@ -24,3 +24,30 @@ acceptance_criteria:
   - "MUST NOT duplicate business spec mappings between `x-requirement` and `info.description` — `x-requirement` is the single source of truth"
   - "SHOULD use enum constraints for fields with a closed set of values"
   - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
+examples:
+  operation: |
+    paths:
+      /pizzas:
+        get:
+          operationId: listPizzaMenu
+          summary: List the available pizza menu
+          x-requirement: [BIZ-LIST-PIZZA-MENU]
+          responses:
+            "200":
+              description: Menu returned
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/PizzaMenu"
+            "500":
+              $ref: "#/components/responses/InternalError"
+  schema: |
+    components:
+      schemas:
+        PizzaMenu:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Pizza"

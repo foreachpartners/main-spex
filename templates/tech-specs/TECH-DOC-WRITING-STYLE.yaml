@@ -37,3 +37,8 @@ checks:
       - "biz-specs/*.yaml"
       - "**/*.md"
     severity: error
+examples:
+  avoid: |
+    Basically, we'll probably want to load the config first. Sounds good?
+  prefer: |
+    MUST load configuration at startup.

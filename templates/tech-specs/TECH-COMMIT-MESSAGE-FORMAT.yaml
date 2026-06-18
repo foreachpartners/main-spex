@@ -17,3 +17,7 @@ checks:
     run: per-repo
     script: commit-id-format.sh
     severity: warn
+examples:
+  subject: |
+    feat(menu): list available pizzas [BIZ-LIST-PIZZA-MENU]
+    fix(cart): reject negative quantities [BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE]
