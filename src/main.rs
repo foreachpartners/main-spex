@@ -1,5 +1,7 @@
+mod biz_spec;
 mod commands;
 mod config;
+mod style;
 mod tech_spec;
 mod templates;
 
@@ -35,6 +37,8 @@ enum Commands {
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
+    #[command(about = "Report annotation coverage of active business specs")]
+    Coverage,
 }
 
 fn main() -> ExitCode {
@@ -45,6 +49,7 @@ fn main() -> ExitCode {
         Commands::Update => finish(commands::update::run()),
         Commands::Check(args) => finish(commands::check::run(args)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
+        Commands::Coverage => finish(commands::coverage::run()),
     }
 }
 

@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
@@ -11,6 +10,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::{self, Config, Repository};
+use crate::style::Style;
 use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 
 #[cfg(test)]
@@ -819,48 +819,5 @@ fn plural(count: usize, noun: &str) -> String {
         format!("1 {noun}")
     } else {
         format!("{count} {noun}s")
-    }
-}
-
-struct Style {
-    enabled: bool,
-}
-
-impl Style {
-    fn detect() -> Self {
-        let enabled = std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none();
-        Self { enabled }
-    }
-
-    fn paint(&self, code: &str, text: &str) -> String {
-        if self.enabled {
-            format!("\u{1b}[{code}m{text}\u{1b}[0m")
-        } else {
-            text.to_string()
-        }
-    }
-
-    fn bold(&self, text: &str) -> String {
-        self.paint("1", text)
-    }
-
-    fn dim(&self, text: &str) -> String {
-        self.paint("2", text)
-    }
-
-    fn red(&self, text: &str) -> String {
-        self.paint("31", text)
-    }
-
-    fn yellow(&self, text: &str) -> String {
-        self.paint("33", text)
-    }
-
-    fn green(&self, text: &str) -> String {
-        self.paint("32", text)
-    }
-
-    fn cyan(&self, text: &str) -> String {
-        self.paint("36", text)
     }
 }

@@ -49,7 +49,7 @@
       "type": "string",
       "description": "Lifecycle status. Omitting is equivalent to 'planned'.",
       "enum": ["active", "planned", "blocked", "deprecated"],
-      "default": "active"
+      "default": "planned"
     }
   },
   "required": ["id", "title", "description", "acceptance_criteria"],

@@ -21,8 +21,10 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   tech_spec.rs      Tech-spec model
+  biz_spec.rs       Biz-spec model
+  style.rs          Terminal color styling (shared by commands)
   templates.rs      Bundled template scaffolding (shared by init/update)
-  commands/         Subcommands (init, update, check, check_schema)
+  commands/         Subcommands (init, update, check, check_schema, coverage)
 docs/               Glossary, conventions, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas

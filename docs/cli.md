@@ -57,6 +57,24 @@ spex check --repo api frontend
 spex check --repo api --files src/main.rs src/orders.rs
 ```
 
+### `spex coverage`
+
+Reports how well the active business specs are covered by spec-id annotations across the workspace. For every BIZ spec whose `status` is `active`, it checks that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+
+```sh
+spex coverage
+```
+
+A single annotation of each kind anywhere in any workspace repository counts — the search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are not `active` are listed only in the per-status totals and are otherwise ignored.
+
+The report prints the total number of business specs per status (omitting any status with no specs), then lists each active spec with its coverage:
+
+- `✓` — implementation, test, and contract annotations are all present.
+- `⚠` — implementation and test are present, but the optional contract annotation is missing.
+- `✗` — an implementation or test annotation is missing.
+
+Each incomplete spec lists what is missing (for example `missing: test, contract (optional)`). A missing contract is reported but never counts as a gap, because contracts are optional. The command exits with a non-zero status when any active spec has a gap (a missing implementation or test).
+
 ### `spex check-schema`
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
