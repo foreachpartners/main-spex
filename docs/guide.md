@@ -58,5 +58,4 @@ repositories:
 
 ## See also
 
-- [Conventions](conventions.md)
 - [FAQ](faq.md)

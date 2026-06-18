@@ -49,4 +49,4 @@ Keep this section in sync when the structure changes.
 
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Conventions**: Follow the authoring conventions in `docs/conventions.md` (e.g. path placeholders) across docs, skills, and schemas.
+- **Writing style**: Follow the authoring conventions in `templates/tech-specs/TECH-WRITING-STYLE.yaml` (e.g. path placeholders) across docs, skills, and schemas.
