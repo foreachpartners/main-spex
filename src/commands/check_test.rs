@@ -318,6 +318,7 @@ mod tests {
         CheckOverride {
             spec: spec.to_string(),
             name: name.to_string(),
+            disable: false,
             description: None,
             kind: None,
             pattern: None,
@@ -407,6 +408,55 @@ mod tests {
 
         let mut repository = repository("../api", vec!["TECH-X"]);
         repository.checks_override = vec![check_override("TECH-X", "missing")];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Error);
+        assert!(findings[0].message.contains("not an inherited check"));
+    }
+
+    #[test]
+    fn disable_override_skips_check() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        let script = spex.join("scripts/TECH-X/foo.sh");
+        std::fs::write(&script, "#!/bin/sh\necho spex\nexit 1\n").expect("script");
+        make_executable(&script);
+
+        let mut foo = script_check("foo.sh", RunScope::PerRepo);
+        foo.name = "foo".to_string();
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![foo]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        let mut over = check_override("TECH-X", "foo");
+        over.disable = true;
+        repository.checks_override = vec![over];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert!(findings.is_empty());
+    }
+
+    #[test]
+    fn disable_override_orphan_reports_error() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        let mut over = check_override("TECH-X", "missing");
+        over.disable = true;
+        repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
         check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");

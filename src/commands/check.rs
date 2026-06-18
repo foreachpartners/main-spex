@@ -178,6 +178,10 @@ fn check_repo(
             continue;
         };
 
+        if over.disable {
+            continue;
+        }
+
         let effective = over.apply(base);
         let script_base = if over.script.is_some() {
             &repo_path

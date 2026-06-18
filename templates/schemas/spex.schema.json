@@ -62,7 +62,7 @@
         },
         "checks_override": {
           "type": "array",
-          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. When the override sets `script`, the path resolves under the repository directory; otherwise the inherited spex script is reused.",
+          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. Set `disable: true` to turn the inherited check off entirely. When the override sets `script`, the path resolves under the repository directory; otherwise the inherited spex script is reused.",
           "items": {
             "$ref": "#/$defs/check_override"
           }
@@ -83,6 +83,10 @@
           "type": "string",
           "description": "Name of the inherited check to override.",
           "minLength": 1
+        },
+        "disable": {
+          "type": "boolean",
+          "description": "When `true`, the inherited check is disabled entirely and never runs. Other override fields are ignored."
         },
         "description": {
           "type": "string",

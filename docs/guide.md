@@ -34,9 +34,12 @@ repositories:
       - spec: TECH-WRITING-STYLE # use a repo-specific script instead of the shared one
         name: llm-writing
         script: writing-style.sh
+      - spec: TECH-WRITING-STYLE # turn the inherited check off entirely
+        name: no-emoji
+        disable: true
 ```
 
-When an override sets `script`, it resolves under the repository directory (`frontend/scripts/<spec-id>/...`). When it omits `script`, the inherited spex script is reused (`spex/scripts/<spec-id>/...`). An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
+When an override sets `script`, it resolves under the repository directory (`frontend/scripts/<spec-id>/...`). When it omits `script`, the inherited spex script is reused (`spex/scripts/<spec-id>/...`). Set `disable: true` to turn the inherited check off completely; all other override fields are then ignored. An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
 
 ### `checks_additional` — add a new check
 

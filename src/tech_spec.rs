@@ -72,6 +72,8 @@ pub struct CheckOverride {
     pub spec: String,
     pub name: String,
     #[serde(default)]
+    pub disable: bool,
+    #[serde(default)]
     pub description: Option<String>,
     #[serde(rename = "type", default)]
     pub kind: Option<CheckKind>,
