@@ -16,11 +16,14 @@ acceptance_criteria:
   - "MUST write path placeholders in angle brackets with a lowercase, hyphenated name, marking a part of a path the reader replaces with a real value: `<workspace-root>/spex/biz-specs/<spec-id>.yaml`"
 
 checks:
-  - name: llm-writing
+  - name: writing
     description: Flag filler, hedging, motivational, and apologetic phrasing
     type: script
     run: per-file
     script: writing-style.sh
+    exclude:
+      - "**/TECH-WRITING-STYLE.yaml"
+      - "**/writing-style.sh"
     severity: warn
 
   - name: no-cyrillic

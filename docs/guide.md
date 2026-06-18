@@ -32,7 +32,7 @@ repositories:
         name: no-cyrillic
         severity: warn
       - spec: TECH-WRITING-STYLE # use a repo-specific script instead of the shared one
-        name: llm-writing
+        name: writing
         script: writing-style.sh
       - spec: TECH-WRITING-STYLE # turn the inherited check off entirely
         name: no-emoji

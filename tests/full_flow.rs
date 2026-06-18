@@ -40,15 +40,9 @@ spex
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
-  warn  TECH-WRITING-STYLE/llm-writing
-      tech-specs/TECH-WRITING-STYLE.yaml:
-      13:  - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful', 'clean')"
-      33:    Basically, we'll probably want to load the config first. Sounds good?
-      scripts/TECH-WRITING-STYLE/writing-style.sh:
-      11:words='(maybe|perhaps|I think|basically|essentially|actually|sorry|unfortunately|elegant|beautiful|clean)'
-  0 errors, 3 warnings
+  0 errors, 2 warnings
 
-proj: 1 error, 10 warnings
+proj: 1 error, 9 warnings
 "#;
 
 #[test]
