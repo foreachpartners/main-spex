@@ -5,7 +5,7 @@ mod tests_unit {
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-id-format.sh";
+    const SCRIPT: &str = "scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
     const TECH_SPEC: &str = "tech-specs/TECH-SECRET-HANDLING.yaml";
 
     #[test]

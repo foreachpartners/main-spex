@@ -396,7 +396,7 @@ repositories:
 
         let script = spex_dir
             .path()
-            .join("scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-id-format.sh");
+            .join("scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

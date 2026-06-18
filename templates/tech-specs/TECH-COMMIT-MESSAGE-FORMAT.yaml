@@ -5,19 +5,32 @@ title: Commit Message Format
 description: >-
   Commits are the unit of traceability between code and the specs that justify
   it. Conventional Commit subjects that end with the affected Spec IDs let every
-  behavioral change trace back to an approved requirement.
+  behavioral change trace back to an approved requirement. See
+  https://www.conventionalcommits.org/ for the Conventional Commits
+  specification.
 acceptance_criteria:
-  - "MUST use Conventional Commits format `{type}(scope): message [Spec ID]` with comma separated affected Spec ID list in brackets at the end of the subject line"
-  - "MUST include at least one Spec ID in brackets for every behavioral change commit"
+  - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
+  - "MUST include at least one `<Spec ID>[, <Spec ID>]` for every behavioral change commit at the end of description"
 
 checks:
-  - name: commit-id-format
-    description: Recent behavioral commits must end with a bracketed, comma-separated Spec ID list
+  - name: commit-conventional-format
+    description: Recent commits must follow the Conventional Commits subject format
     type: script
     run: per-repo
-    script: commit-id-format.sh
+    script: commit-conventional-format.sh
+    severity: warn
+  - name: commit-spec-id-trace
+    description: Recent behavioral commits must end with a comma-separated Spec ID list
+    type: script
+    run: per-repo
+    script: commit-spec-id-trace.sh
     severity: warn
 examples:
   subject: |
-    feat(menu): list available pizzas [BIZ-LIST-PIZZA-MENU]
-    fix(cart): reject negative quantities [BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE]
+    feat(menu): list available pizzas BIZ-LIST-PIZZA-MENU
+    fix(cart): reject negative quantities BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE
+  with_body: |
+    feat(menu): list available pizzas BIZ-LIST-PIZZA-MENU
+
+    Render the menu from the catalog service and cache results for 60s
+    to reduce load on the upstream API.
