@@ -49,7 +49,3 @@ Keep this section in sync when the structure changes.
 - **YAGNI** (You Aren't Gonna Need It): Implement only what the current requirements demand. Don't add functionality, configuration, or generalization for hypothetical future needs.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
 - **Conventions**: Follow the authoring conventions in `docs/conventions.md` (e.g. path placeholders) across docs, skills, and schemas.
-
-## AI
-
-- `edit_file` only matches `old_text` on **whole-line boundaries** (a known Zed bug). A mid-line fragment fails with "Could not find matching text" even when it's unique and byte-exact, which sends the agent into a re-read/retry loop. Avoid it: make every `old_text`/`new_text` span complete lines (from the line's first character through its newline), never a fragment inside a line. For files made of very long single-line prose (e.g. one-line Markdown bullets), use `write_file` to rewrite instead of `edit_file`.
