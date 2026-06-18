@@ -33,7 +33,7 @@ pub struct TechSpec {
     pub checks: Vec<Check>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Check {
     pub name: String,
     #[serde(default)]
@@ -54,6 +54,61 @@ pub struct Check {
     pub exclude: Vec<String>,
     #[serde(default)]
     pub severity: Severity,
+}
+
+// A full check declared per repository in `spex.yml` under `checks_additional`.
+#[derive(Debug, Deserialize)]
+pub struct RepoCheck {
+    pub spec: String,
+    #[serde(flatten)]
+    pub check: Check,
+}
+
+// A partial patch declared per repository in `spex.yml` under `checks_override`.
+// `spec` + `name` identify the inherited check; every other field overrides it
+// when present and is inherited when absent.
+#[derive(Debug, Deserialize)]
+pub struct CheckOverride {
+    pub spec: String,
+    pub name: String,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(rename = "type", default)]
+    pub kind: Option<CheckKind>,
+    #[serde(default)]
+    pub pattern: Option<String>,
+    #[serde(default)]
+    pub negate: Option<bool>,
+    #[serde(default)]
+    pub script: Option<String>,
+    #[serde(default)]
+    pub run: Option<RunScope>,
+    #[serde(default)]
+    pub include: Option<Vec<String>>,
+    #[serde(default)]
+    pub exclude: Option<Vec<String>>,
+    #[serde(default)]
+    pub severity: Option<Severity>,
+}
+
+impl CheckOverride {
+    pub fn apply(&self, base: &Check) -> Check {
+        Check {
+            name: base.name.clone(),
+            description: self
+                .description
+                .clone()
+                .or_else(|| base.description.clone()),
+            kind: self.kind.unwrap_or(base.kind),
+            pattern: self.pattern.clone().or_else(|| base.pattern.clone()),
+            negate: self.negate.unwrap_or(base.negate),
+            script: self.script.clone().or_else(|| base.script.clone()),
+            run: self.run.unwrap_or(base.run),
+            include: self.include.clone().unwrap_or_else(|| base.include.clone()),
+            exclude: self.exclude.clone().unwrap_or_else(|| base.exclude.clone()),
+            severity: self.severity.unwrap_or(base.severity),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]

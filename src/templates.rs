@@ -137,6 +137,11 @@ fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
 
     for entry in entries {
         let path = entry.change_context(TemplateError::Io)?.path();
+        // Scripts are namespaced under `scripts/<spec-id>/`, so recurse into subdirectories.
+        if path.is_dir() {
+            mark_scripts_executable(&path)?;
+            continue;
+        }
         let mut permissions = fs::metadata(&path)
             .change_context(TemplateError::Io)?
             .permissions();

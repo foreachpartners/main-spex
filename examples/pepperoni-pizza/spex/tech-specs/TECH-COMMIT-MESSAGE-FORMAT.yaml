@@ -15,5 +15,5 @@ checks:
     description: Recent behavioral commits must end with a bracketed, comma-separated Spec ID list
     type: script
     run: per-repo
-    script: scripts/commit-id-format.sh
+    script: commit-id-format.sh
     severity: warn

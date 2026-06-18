@@ -29,7 +29,7 @@ checks:
     description: Repository directory name must be kebab-case
     type: script
     run: per-repo
-    script: scripts/repo-dir-kebab-case.sh
+    script: repo-dir-kebab-case.sh
     severity: error
 examples:
   template: |

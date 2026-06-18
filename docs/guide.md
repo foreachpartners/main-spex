@@ -12,23 +12,49 @@ spex update
 
 See the [CLI reference](cli.md) for the full command set.
 
-## Overriding a check script per repository
+## Per-repository checks
 
-A `script` check runs the program named by its `script:` path, which spex resolves from the workspace repository first and from the spex repository only as a fallback. A tech spec can therefore ship a shared default script while letting an individual repository override it.
+Every workspace repository inherits the checks declared by the tech specs in its `tech-specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
 
-To override the shared script for one repository, add a file at the same path in that repository:
+A `script` check's `script:` value is just the filename; spex resolves it at `scripts/<spec-id>/<script>` under the relevant base directory. The `<spec-id>` folder namespaces scripts so checks from different specs never share a path. Shared scripts live in the spex repository's `scripts/`; a repository's own scripts live in that repository's `scripts/`.
 
-```text
-pepperoni-pizza/                 <- workspace root folder
-  spex/
-    scripts/
-      commit-id-format.sh        <- shared default, used by every repository
-  api/
-    scripts/
-      commit-id-format.sh        <- overrides the shared script for `api` only
+### `checks_override` — patch an inherited check
+
+Name the inherited check by `spec` + `name`, then set only the fields you want to change. Every other field is inherited. The merged check runs instead of the inherited one.
+
+```yaml
+repositories:
+  - repository_name: frontend
+    path: ../frontend
+    tech-specs: [TECH-DOC-WRITING-STYLE]
+    checks_override:
+      - spec: TECH-DOC-WRITING-STYLE # only the severity changes
+        name: no-cyrillic
+        severity: warn
+      - spec: TECH-DOC-WRITING-STYLE # use a repo-specific script instead of the shared one
+        name: llm-writing
+        script: llm-writing.sh
 ```
 
-When `spex check` runs the `commit-id-format` check against `api`, it uses `api/scripts/commit-id-format.sh`; every other repository falls back to `spex/scripts/commit-id-format.sh`.
+When an override sets `script`, it resolves under the repository directory (`frontend/scripts/<spec-id>/...`). When it omits `script`, the inherited spex script is reused (`spex/scripts/<spec-id>/...`). An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
+
+### `checks_additional` — add a new check
+
+Each entry is a complete check plus the `spec` it belongs to (which must be one of the repository's `tech-specs`). It runs in addition to everything inherited. Script paths resolve under the repository directory.
+
+```yaml
+repositories:
+  - repository_name: frontend
+    path: ../frontend
+    tech-specs: [TECH-DOC-WRITING-STYLE]
+    checks_additional:
+      - spec: TECH-DOC-WRITING-STYLE
+        name: no-todo
+        type: regexp
+        pattern: "TODO"
+        include: ["src/**/*.tsx"]
+        severity: warn
+```
 
 ## See also
 

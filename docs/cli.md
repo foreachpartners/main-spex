@@ -40,7 +40,9 @@ spex check
 
 The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
-A `script` check runs the program named by its `script:` path (for example `scripts/llm-writing.sh`), resolved from the workspace repository first and from the spex repository only as a fallback. A repository that ships its own script at the same path therefore overrides the shared spex script for that repository. Set `run: per-file` (the default) to pass the matched files as arguments, or `run: per-repo` to run the script once in the repository directory with no arguments.
+A `script` check runs the program named by its `script:` filename (for example `llm-writing.sh`), resolved at `scripts/<spec-id>/<script>` under the spex directory for checks inherited from tech specs, and under the repository directory for per-repo `checks_additional` and for a `checks_override` that sets its own `script`. Set `run: per-file` (the default) to pass the matched files as arguments, or `run: per-repo` to run the script once in the repository directory with no arguments.
+
+A repository can adjust the checks it inherits, or add new ones, in `spex.yml` via `checks_override` (a partial patch identified by `spec` + `name`) and `checks_additional` (full checks). See the [guide](guide.md#per-repository-checks) for details.
 
 #### Flags
 

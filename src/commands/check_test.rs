@@ -1,7 +1,11 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::tech_spec::{Check, CheckKind, RunScope, Severity};
+    use crate::config::Repository;
+    use crate::tech_spec::{
+        Check, CheckKind, CheckOverride, RepoCheck, RunScope, Severity, TechSpec,
+    };
+    use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
 
     fn check(kind: CheckKind, pattern: Option<&str>) -> Check {
@@ -140,41 +144,23 @@ mod tests {
     }
 
     #[test]
-    fn resolve_script_prefers_repo_over_spex() {
+    fn resolve_script_joins_scripts_and_spec_dir() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
-        std::fs::create_dir_all(spex.join("scripts")).expect("spex scripts");
-        std::fs::write(repo.join("scripts/lint.sh"), "").expect("repo script");
-        std::fs::write(spex.join("scripts/lint.sh"), "").expect("spex script");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        std::fs::write(spex.join("scripts/TECH-X/lint.sh"), "").expect("spex script");
 
-        let resolved = resolve_script("scripts/lint.sh", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, repo.join("scripts/lint.sh"));
-    }
-
-    #[test]
-    fn resolve_script_falls_back_to_spex() {
-        let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join("scripts")).expect("spex scripts");
-        std::fs::write(spex.join("scripts/lint.sh"), "").expect("spex script");
-
-        let resolved = resolve_script("scripts/lint.sh", &repo, &spex).expect("resolved");
-        assert_eq!(resolved, spex.join("scripts/lint.sh"));
+        let resolved = resolve_script("lint.sh", &spex, "TECH-X").expect("resolved");
+        assert_eq!(resolved, spex.join("scripts/TECH-X/lint.sh"));
     }
 
     #[test]
     fn resolve_script_returns_none_when_missing() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        assert!(resolve_script("scripts/lint.sh", &repo, &spex).is_none());
+        assert!(resolve_script("lint.sh", &spex, "TECH-X").is_none());
     }
 
     #[test]
@@ -182,13 +168,14 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
+        std::fs::create_dir_all(repo.join("scripts/TECH-COMMIT-MESSAGE-FORMAT"))
+            .expect("repo scripts");
         std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/sample.sh");
+        let script = repo.join("scripts/TECH-COMMIT-MESSAGE-FORMAT/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
-        let mut check = script_check("scripts/sample.sh", RunScope::PerRepo);
+        let mut check = script_check("sample.sh", RunScope::PerRepo);
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
@@ -196,7 +183,7 @@ mod tests {
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
-            &spex,
+            &repo,
             &[],
             &mut findings,
         );
@@ -211,9 +198,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts")).expect("repo scripts");
+        std::fs::create_dir_all(repo.join("scripts/TECH-DOC-WRITING-STYLE")).expect("repo scripts");
         std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/echo-args.sh");
+        let script = repo.join("scripts/TECH-DOC-WRITING-STYLE/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -225,14 +212,14 @@ mod tests {
             abs: repo.join("README.md"),
             rel: PathBuf::from("README.md"),
         };
-        let check = script_check("scripts/echo-args.sh", RunScope::PerFile);
+        let check = script_check("echo-args.sh", RunScope::PerFile);
 
         let mut findings = Vec::new();
         run_script(
             "TECH-DOC-WRITING-STYLE",
             &check,
             &repo,
-            &spex,
+            &repo,
             &[&file],
             &mut findings,
         );
@@ -249,14 +236,14 @@ mod tests {
         std::fs::create_dir_all(&repo).expect("repo");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        let check = script_check("scripts/sample.sh", RunScope::PerRepo);
+        let check = script_check("sample.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
         run_script(
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
-            &spex,
+            &repo,
             &[],
             &mut findings,
         );
@@ -281,7 +268,7 @@ mod tests {
             "TECH-DOC-WRITING-STYLE",
             &check,
             &repo,
-            &spex,
+            &repo,
             &[],
             &mut findings,
         );
@@ -306,5 +293,212 @@ mod tests {
         let scoped = scope_files(&check, &files).expect("scoped");
         let names: Vec<String> = scoped.iter().map(|file| rel_str(file)).collect();
         assert_eq!(names, vec!["src/main.rs".to_string()]);
+    }
+
+    fn tech_spec(id: &str, checks: Vec<Check>) -> TechSpec {
+        TechSpec {
+            id: id.to_string(),
+            include_for_all_repos: false,
+            include_for_spex: None,
+            checks,
+        }
+    }
+
+    fn repository(path: &str, tech_specs: Vec<&str>) -> Repository {
+        Repository {
+            name: "api".to_string(),
+            path: path.to_string(),
+            tech_specs: tech_specs.into_iter().map(str::to_string).collect(),
+            checks_additional: Vec::new(),
+            checks_override: Vec::new(),
+        }
+    }
+
+    fn check_override(spec: &str, name: &str) -> CheckOverride {
+        CheckOverride {
+            spec: spec.to_string(),
+            name: name.to_string(),
+            description: None,
+            kind: None,
+            pattern: None,
+            negate: None,
+            script: None,
+            run: None,
+            include: None,
+            exclude: None,
+            severity: None,
+        }
+    }
+
+    fn named_check(name: &str, kind: CheckKind, pattern: Option<&str>) -> Check {
+        let mut check = check(kind, pattern);
+        check.name = name.to_string();
+        check
+    }
+
+    #[test]
+    fn override_patches_severity_and_reuses_spex_script() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        let script = spex.join("scripts/TECH-X/foo.sh");
+        std::fs::write(&script, "#!/bin/sh\necho spex\nexit 1\n").expect("script");
+        make_executable(&script);
+
+        let mut foo = script_check("foo.sh", RunScope::PerRepo);
+        foo.name = "foo".to_string();
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![foo]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        let mut over = check_override("TECH-X", "foo");
+        over.severity = Some(Severity::Warn);
+        repository.checks_override = vec![over];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Warn);
+        assert_eq!(findings[0].message, "spex");
+        assert_eq!(findings[0].spec_id, "TECH-X");
+    }
+
+    #[test]
+    fn override_sets_repo_script() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        std::fs::create_dir_all(repo.join("scripts/TECH-X")).expect("repo scripts");
+        let spex_script = spex.join("scripts/TECH-X/foo.sh");
+        std::fs::write(&spex_script, "#!/bin/sh\necho spex\nexit 1\n").expect("spex script");
+        make_executable(&spex_script);
+        let repo_script = repo.join("scripts/TECH-X/foo.sh");
+        std::fs::write(&repo_script, "#!/bin/sh\necho repo\nexit 1\n").expect("repo script");
+        make_executable(&repo_script);
+
+        let mut foo = script_check("foo.sh", RunScope::PerRepo);
+        foo.name = "foo".to_string();
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![foo]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        let mut over = check_override("TECH-X", "foo");
+        over.script = Some("foo.sh".to_string());
+        repository.checks_override = vec![over];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].message, "repo");
+    }
+
+    #[test]
+    fn orphan_override_reports_error() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        repository.checks_override = vec![check_override("TECH-X", "missing")];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Error);
+        assert!(findings[0].message.contains("not an inherited check"));
+    }
+
+    #[test]
+    fn additional_spec_not_in_tech_specs_reports_error() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![]))]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        repository.checks_additional = vec![RepoCheck {
+            spec: "TECH-Y".to_string(),
+            check: named_check("no-todo", CheckKind::Regexp, Some("TODO")),
+        }];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].severity, Severity::Error);
+        assert!(
+            findings[0]
+                .message
+                .contains("not in this repository's tech-specs")
+        );
+    }
+
+    #[test]
+    fn additional_collision_runs_both() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&spex).expect("spex");
+        std::fs::write(repo.join("notes.md"), "TODO: fix\n").expect("file");
+
+        let specs = HashMap::from([(
+            "TECH-X".to_string(),
+            tech_spec(
+                "TECH-X",
+                vec![named_check("no-todo", CheckKind::Regexp, Some("TODO"))],
+            ),
+        )]);
+
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        repository.checks_additional = vec![RepoCheck {
+            spec: "TECH-X".to_string(),
+            check: named_check("no-todo", CheckKind::Regexp, Some("TODO")),
+        }];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 2);
+        assert!(findings.iter().all(|finding| finding.check == "no-todo"));
+    }
+
+    #[test]
+    fn additional_script_resolves_from_repo_base() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(repo.join("scripts/TECH-X")).expect("repo scripts");
+        std::fs::create_dir_all(&spex).expect("spex");
+        let script = repo.join("scripts/TECH-X/repo-only.sh");
+        std::fs::write(&script, "#!/bin/sh\necho repo-only\nexit 1\n").expect("script");
+        make_executable(&script);
+
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![]))]);
+
+        let mut added = script_check("repo-only.sh", RunScope::PerRepo);
+        added.name = "repo-only".to_string();
+        let mut repository = repository("../api", vec!["TECH-X"]);
+        repository.checks_additional = vec![RepoCheck {
+            spec: "TECH-X".to_string(),
+            check: added,
+        }];
+
+        let mut findings = Vec::new();
+        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].message, "repo-only");
     }
 }

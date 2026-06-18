@@ -49,9 +49,93 @@
           "items": {
             "$ref": "tech-spec-id.schema.json"
           }
+        },
+        "checks_additional": {
+          "type": "array",
+          "description": "Full checks that run for this repository in addition to the checks it inherits from its tech-specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech-specs). Script paths resolve under the repository directory.",
+          "items": {
+            "allOf": [
+              { "$ref": "check.schema.json" },
+              { "required": ["spec"] }
+            ]
+          }
+        },
+        "checks_override": {
+          "type": "array",
+          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. When the override sets `script`, the path resolves under the repository directory; otherwise the inherited spex script is reused.",
+          "items": {
+            "$ref": "#/$defs/check_override"
+          }
         }
       },
       "required": ["repository_name", "path"],
+      "additionalProperties": false
+    },
+    "check_override": {
+      "type": "object",
+      "description": "A partial patch for an inherited check. `spec` + `name` identify the target; every other field overrides the inherited check when present.",
+      "properties": {
+        "spec": {
+          "description": "Tech spec ID of the inherited check to override. Must be one of the repository's tech-specs.",
+          "$ref": "tech-spec-id.schema.json"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the inherited check to override.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Overrides the inherited check's description.",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "description": "Overrides the inherited check's type.",
+          "enum": ["regexp", "glob", "script"]
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Overrides the inherited check's regexp or glob pattern.",
+          "minLength": 1
+        },
+        "negate": {
+          "type": "boolean",
+          "description": "Overrides the inherited check's negate flag."
+        },
+        "script": {
+          "type": "string",
+          "description": "Overrides the inherited check's script filename. When set, it resolves at `scripts/<spec-id>/<script>` under the repository directory.",
+          "minLength": 1
+        },
+        "run": {
+          "type": "string",
+          "description": "Overrides the inherited script check's invocation granularity.",
+          "enum": ["per-file", "per-repo"]
+        },
+        "include": {
+          "type": "array",
+          "description": "Overrides the inherited check's include globs.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "description": "Overrides the inherited check's exclude globs.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "severity": {
+          "type": "string",
+          "description": "Overrides the inherited check's severity.",
+          "enum": ["warn", "error"]
+        }
+      },
+      "required": ["spec", "name"],
       "additionalProperties": false
     }
   },

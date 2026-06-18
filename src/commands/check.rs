@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
@@ -103,7 +104,7 @@ fn select_repos<'a>(config: &'a Config, names: &[String]) -> Result<Vec<&'a Repo
 fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
-    specs: &std::collections::HashMap<String, TechSpec>,
+    specs: &HashMap<String, TechSpec>,
     files: &[String],
     findings: &mut Vec<Finding>,
 ) -> Result<()> {
@@ -128,6 +129,15 @@ fn check_repo(
         provided_files(&repo_path, files)
     };
 
+    let overridden: HashSet<(&str, &str)> = repo
+        .checks_override
+        .iter()
+        .map(|over| (over.spec.as_str(), over.name.as_str()))
+        .collect();
+
+    // Inherited checks identified by `(spec_id, name)`, used to resolve overrides.
+    let mut inherited: HashMap<(&str, &str), &Check> = HashMap::new();
+
     for spec_id in &repo.tech_specs {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(Finding {
@@ -144,8 +154,67 @@ fn check_repo(
         };
 
         for check in &spec.checks {
+            inherited.insert((spec_id.as_str(), check.name.as_str()), check);
+            if overridden.contains(&(spec_id.as_str(), check.name.as_str())) {
+                continue;
+            }
             run_check(&spec.id, check, &repo_path, spex_dir, &candidates, findings);
         }
+    }
+
+    for over in &repo.checks_override {
+        let Some(base) = inherited.get(&(over.spec.as_str(), over.name.as_str())) else {
+            findings.push(Finding {
+                severity: Severity::Error,
+                spec_id: repo.name.clone(),
+                check: String::new(),
+                location: None,
+                message: format!(
+                    "checks_override targets `{}/{}`, which is not an inherited check",
+                    over.spec, over.name
+                ),
+            });
+            continue;
+        };
+
+        let effective = over.apply(base);
+        let script_base = if over.script.is_some() {
+            &repo_path
+        } else {
+            spex_dir
+        };
+        run_check(
+            &over.spec,
+            &effective,
+            &repo_path,
+            script_base,
+            &candidates,
+            findings,
+        );
+    }
+
+    for additional in &repo.checks_additional {
+        if !repo.tech_specs.iter().any(|spec| spec == &additional.spec) {
+            findings.push(Finding {
+                severity: Severity::Error,
+                spec_id: repo.name.clone(),
+                check: String::new(),
+                location: None,
+                message: format!(
+                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's tech-specs",
+                    additional.spec, additional.check.name, additional.spec
+                ),
+            });
+            continue;
+        }
+        run_check(
+            &additional.spec,
+            &additional.check,
+            &repo_path,
+            &repo_path,
+            &candidates,
+            findings,
+        );
     }
 
     Ok(())
@@ -186,7 +255,7 @@ fn run_check(
     spec_id: &str,
     check: &Check,
     repo_path: &Path,
-    spex_dir: &Path,
+    script_base: &Path,
     files: &[ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
@@ -201,7 +270,7 @@ fn run_check(
     match check.kind {
         CheckKind::Regexp => run_regexp(spec_id, check, &scoped, findings),
         CheckKind::Glob => run_glob(spec_id, check, &scoped, findings),
-        CheckKind::Script => run_script(spec_id, check, repo_path, spex_dir, &scoped, findings),
+        CheckKind::Script => run_script(spec_id, check, repo_path, script_base, &scoped, findings),
     }
 }
 
@@ -344,7 +413,7 @@ fn run_script(
     spec_id: &str,
     check: &Check,
     repo_path: &Path,
-    spex_dir: &Path,
+    script_base: &Path,
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
@@ -357,11 +426,12 @@ fn run_script(
         return;
     };
 
-    let Some(script) = resolve_script(reference, repo_path, spex_dir) else {
+    let Some(script) = resolve_script(reference, script_base, spec_id) else {
+        let dir = script_base.join(tech_spec::SCRIPTS_DIR).join(spec_id);
         findings.push(config_error(
             spec_id,
             &check.name,
-            format!("script `{reference}` not found in workspace repository or spex"),
+            format!("script `{reference}` not found in {}", dir.display()),
         ));
         return;
     };
@@ -421,13 +491,14 @@ fn run_per_repo(
     }
 }
 
-fn resolve_script(reference: &str, repo_path: &Path, spex_dir: &Path) -> Option<PathBuf> {
-    let repo_script = repo_path.join(reference);
-    if repo_script.is_file() {
-        return Some(repo_script);
-    }
-    let spex_script = spex_dir.join(reference);
-    spex_script.is_file().then_some(spex_script)
+// Scripts are stored at `<base>/scripts/<spec-id>/<reference>`, so the `script`
+// field only carries the bare filename.
+fn resolve_script(reference: &str, base: &Path, spec_id: &str) -> Option<PathBuf> {
+    let script = base
+        .join(tech_spec::SCRIPTS_DIR)
+        .join(spec_id)
+        .join(reference);
+    script.is_file().then_some(script)
 }
 
 fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -> Finding {

@@ -24,7 +24,7 @@ checks:
     description: Flag filler, hedging, motivational, and apologetic phrasing in docs
     type: script
     run: per-file
-    script: scripts/llm-writing.sh
+    script: llm-writing.sh
     include:
       - "**/*.md"
     severity: warn

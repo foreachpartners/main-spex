@@ -5,6 +5,8 @@ use error_stack::{Report, ResultExt};
 use serde::Deserialize;
 use thiserror::Error;
 
+use crate::tech_spec::{CheckOverride, RepoCheck};
+
 #[cfg(test)]
 #[path = "config_test.rs"]
 mod config_test;
@@ -40,6 +42,10 @@ pub struct Repository {
     pub path: String,
     #[serde(rename = "tech-specs", default)]
     pub tech_specs: Vec<String>,
+    #[serde(default)]
+    pub checks_additional: Vec<RepoCheck>,
+    #[serde(default)]
+    pub checks_override: Vec<CheckOverride>,
 }
 
 pub fn find_dir(start: &Path) -> Result<PathBuf> {

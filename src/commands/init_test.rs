@@ -394,7 +394,9 @@ repositories:
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        let script = spex_dir.path().join("scripts/commit-id-format.sh");
+        let script = spex_dir
+            .path()
+            .join("scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-id-format.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

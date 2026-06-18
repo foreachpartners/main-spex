@@ -57,14 +57,14 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 - `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
 - `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
-- `script` — run an external script named by `script:` (a path like `scripts/<name>.sh`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, or `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history).
+- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, or `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history).
 
 Guidance:
 
-- Name each check in kebab-case, unique within the spec. A `script` check references its program with `script:`, resolved from the repository first and from spex as a fallback, so a repository can override the shared script by shipping its own at the same path.
+- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved at `scripts/<spec-id>/<script>` so checks from different specs never share a path. A repository can adjust an inherited check or add its own in `spex.yml` via `checks_override` and `checks_additional`.
 - Set `severity: warn` for advisory checks and `error` (default) for enforced ones.
 - Not every criterion needs a check. When a criterion can only be judged by AI or human review, say so and leave it without a check rather than inventing a brittle one.
-- When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero with a clear message on violation. Mirror the header style of existing scripts (`# <SPEC-ID> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.
+- When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero with a clear message on violation. Store it at `scripts/<spec-id>/<check-name>.sh` and mirror the header style of existing scripts (`# <SPEC-ID> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.
 
 Show the proposed checks (and any script bodies) to the user and confirm them before writing.
 
