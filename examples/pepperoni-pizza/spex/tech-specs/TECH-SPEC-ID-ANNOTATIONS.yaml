@@ -9,8 +9,17 @@ description: >-
   unambiguous without scattering Spec IDs through internal helpers.
 acceptance_criteria:
   - "MUST annotate contract, implementation and test at least once at the boundary"
-  - "MUST annotate as `x-spec: <spec-id>` e.g. `x-spec: BIZ-LIST-PIZZA-MENU` property in an OpenAPI schema, otherwise as a comment `@spec {contract|impl|test} {SpecID}[, {SpecID}]*` e.g. `@spec impl BIZ-LIST-PIZZA-MENU`"
+  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl BIZ-LIST-PIZZA-MENU`)"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
+checks:
+  - name: annotation-format
+    description: Spec-id annotations must use the documented comment or x-spec syntax
+    type: script
+    run: per-file
+    script: annotation-format.sh
+    exclude:
+      - "**/*.md"
+    severity: warn
 examples:
   contract: |
     # OpenAPI operation — annotate the boundary, not every nested schema

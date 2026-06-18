@@ -13,7 +13,7 @@ acceptance_criteria:
   - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful', 'clean')"
   - "MUST NOT use non-English"
   - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
-  - "MUST write path placeholders in angle brackets with a lowercase, hyphenated name, marking a part of a path the reader replaces with a real value: `<workspace-root>/spex/biz-specs/<spec-id>.yaml`"
+  - "MUST write placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<workspace-root>/spex/biz-specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`)"
 
 checks:
   - name: writing
