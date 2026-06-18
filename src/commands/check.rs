@@ -30,7 +30,7 @@ pub enum CheckError {
     Config,
     #[error("could not load tech specs")]
     Specs,
-    #[error("unknown workspace repository `{0}` — not listed in spex.yml")]
+    #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
     UnknownRepo(String),
     #[error("could not walk workspace repository files")]
     Walk,

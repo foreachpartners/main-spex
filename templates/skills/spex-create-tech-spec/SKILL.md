@@ -34,7 +34,7 @@ Determine what the spec is based on before doing anything else:
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- Read `<workspace-root>/spex/spex.yml` for the project overview, the workspace repositories, and which tech-specs they already list.
+- Read `<workspace-root>/spex/spex.yaml` for the project overview, the workspace repositories, and which tech-specs they already list.
 - Read `<workspace-root>/spex/tech-specs/` for related specs and to match their style. Reuse an existing spec rather than duplicating its rule.
 
 ## Step 2 — Clarify missing details with the user
@@ -61,7 +61,7 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 Guidance:
 
-- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved at `scripts/<spec-id>/<script>` so checks from different specs never share a path. A repository can adjust an inherited check or add its own in `spex.yml` via `checks_override` and `checks_additional`.
+- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved at `scripts/<spec-id>/<script>` so checks from different specs never share a path. A repository can adjust an inherited check or add its own in `spex.yaml` via `checks_override` and `checks_additional`.
 - Set `severity: warn` for advisory checks and `error` (default) for enforced ones.
 - Not every criterion needs a check. When a criterion can only be judged by AI or human review, say so and leave it without a check rather than inventing a brittle one.
 - When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero with a clear message on violation. Store it at `scripts/<spec-id>/<check-name>.sh` and mirror the header style of existing scripts (`# <SPEC-ID> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.

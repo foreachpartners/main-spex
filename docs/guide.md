@@ -14,7 +14,7 @@ See the [CLI reference](cli.md) for the full command set.
 
 ## Per-repository checks
 
-Every workspace repository inherits the checks declared by the tech specs in its `tech-specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
+Every workspace repository inherits the checks declared by the tech specs in its `tech-specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yaml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
 
 A `script` check's `script:` value is just the filename; spex resolves it at `scripts/<spec-id>/<script>` under the relevant base directory. The `<spec-id>` folder namespaces scripts so checks from different specs never share a path. Shared scripts live in the spex repository's `scripts/`; a repository's own scripts live in that repository's `scripts/`.
 

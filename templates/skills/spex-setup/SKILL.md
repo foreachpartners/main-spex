@@ -1,11 +1,11 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yml) and the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yml.
+description: Fill in the missing descriptions in the workspace config (spex.yaml) and the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yaml.
 ---
 
-# Describe the Workspace (spex.yml)
+# Describe the Workspace (spex.yaml)
 
-Add a short `description` for the project and for each workspace repository in `spex.yml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
+Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
 After describing the repositories, fill in the folder icons in the editor workspace file (see the last step).
 
@@ -16,7 +16,7 @@ All paths are relative to the workspace root (the folder that holds every worksp
 | What                    | Path                                                  |
 | ----------------------- | ----------------------------------------------------- |
 | Spex repository         | `<workspace-root>/spex/`                              |
-| Workspace config        | `<workspace-root>/spex/spex.yml`                      |
+| Workspace config        | `<workspace-root>/spex/spex.yaml`                     |
 | Workspace config schema | `<workspace-root>/spex/schemas/spex.schema.json`      |
 | Editor workspace file   | `<workspace-root>/spex/<project_name>.code-workspace` |
 
@@ -28,7 +28,7 @@ Use it when the user wants to set up, describe, or document their spex project �
 
 ## Step 1 — Read the config
 
-Read `<workspace-root>/spex/spex.yml`. Note the `project_name`, every repository's `repository_name` and `path`, and which `description` fields are already present.
+Read `<workspace-root>/spex/spex.yaml`. Note the `project_name`, every repository's `repository_name` and `path`, and which `description` fields are already present.
 
 Decide what to fill in:
 
@@ -58,7 +58,7 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 ## Step 4 — Confirm, then write
 
 1. Show the proposed descriptions to the user and confirm them.
-2. Edit `<workspace-root>/spex/spex.yml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
+2. Edit `<workspace-root>/spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace-root>/spex/schemas/spex.schema.json`.
 
 ## Step 5 — Fill in the workspace folder icons
@@ -86,7 +86,7 @@ Example result:
 
 ## Step 6 — Point to the next skill
 
-Once `spex.yml` is described and the workspace folders are iconified, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
+Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
 
 ## Field placement
 
@@ -109,4 +109,4 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - No existing field, path, or tech-spec is changed or removed.
-- `spex.yml` stays valid against `<workspace-root>/spex/schemas/spex.schema.json`.
+- `spex.yaml` stays valid against `<workspace-root>/spex/schemas/spex.schema.json`.

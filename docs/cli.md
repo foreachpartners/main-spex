@@ -12,7 +12,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing `spex` directory.
 
-It creates the `spex` directory (if missing), prompts to confirm the project name (defaulting to the workspace root folder name) and the discovered workspace repositories, then writes `spex.yml`, a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default tech specs).
+It creates the `spex` directory (if missing), prompts to confirm the project name (defaulting to the workspace root folder name) and the discovered workspace repositories, then writes `spex.yaml`, a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default tech specs).
 
 ```sh
 spex init
@@ -22,7 +22,7 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and tech specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and tech specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
 Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or tech specs you have added are left untouched. Use it after upgrading the `spex` binary to pull in framework updates.
 
@@ -32,7 +32,7 @@ spex update
 
 ### `spex check`
 
-Runs the technical spec checks declared in `spex.yml` against the workspace. Each workspace repository is checked against the TECH specs listed in its `tech-specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yml`.
+Runs the technical spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the TECH specs listed in its `tech-specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -42,11 +42,11 @@ The command exits with a non-zero status when any `error`-severity finding is re
 
 A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), resolved at `scripts/<spec-id>/<script>` under the spex directory for checks inherited from tech specs, and under the repository directory for per-repo `checks_additional` and for a `checks_override` that sets its own `script`. Set `run: per-file` (the default) to pass the matched files as arguments, or `run: per-repo` to run the script once in the repository directory with no arguments.
 
-A repository can adjust the checks it inherits, or add new ones, in `spex.yml` via `checks_override` (a partial patch identified by `spec` + `name`) and `checks_additional` (full checks). See the [guide](guide.md#per-repository-checks) for details.
+A repository can adjust the checks it inherits, or add new ones, in `spex.yaml` via `checks_override` (a partial patch identified by `spec` + `name`) and `checks_additional` (full checks). See the [guide](guide.md#per-repository-checks) for details.
 
 #### Flags
 
-- `--repo <name>...` — limit the run to the named workspace repositories. Defaults to all repositories in `spex.yml`.
+- `--repo <name>...` — limit the run to the named workspace repositories. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). Defaults to all non-ignored files.
 
 ```sh

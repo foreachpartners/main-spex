@@ -62,8 +62,8 @@ fn init_then_check_pepperoni_pizza() {
         String::from_utf8_lossy(&init.stderr),
     );
     assert!(
-        project.join("spex/spex.yml").is_file(),
-        "init did not write spex/spex.yml"
+        project.join("spex/spex.yaml").is_file(),
+        "init did not write spex/spex.yaml"
     );
     assert!(
         project.join("spex/tech-specs").is_dir(),

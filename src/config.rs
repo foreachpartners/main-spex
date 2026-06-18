@@ -11,7 +11,7 @@ use crate::tech_spec::{CheckOverride, RepoCheck};
 #[path = "config_test.rs"]
 mod config_test;
 
-pub const SPEX_CONFIG_FILE: &str = "spex.yml";
+pub const SPEX_CONFIG_FILE: &str = "spex.yaml";
 pub const SPEX_DIR_NAME: &str = "spex";
 
 type Result<T> = core::result::Result<T, Report<ConfigError>>;

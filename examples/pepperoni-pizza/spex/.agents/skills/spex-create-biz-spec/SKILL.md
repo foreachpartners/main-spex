@@ -34,7 +34,7 @@ Determine what the spec is based on before doing anything else:
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- Read `<workspace-root>/spex/spex.yml` for the project overview and use that to determine the spec's implementation `scope`.
+- Read `<workspace-root>/spex/spex.yaml` for the project overview and use that to determine the spec's implementation `scope`.
 - Read `<workspace-root>/spex/biz-specs/` for related specs
 - Read `<workspace-root>/spex/contract/` for schemas if exists
 

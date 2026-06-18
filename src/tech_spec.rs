@@ -56,7 +56,7 @@ pub struct Check {
     pub severity: Severity,
 }
 
-// A full check declared per repository in `spex.yml` under `checks_additional`.
+// A full check declared per repository in `spex.yaml` under `checks_additional`.
 #[derive(Debug, Deserialize)]
 pub struct RepoCheck {
     pub spec: String,
@@ -64,7 +64,7 @@ pub struct RepoCheck {
     pub check: Check,
 }
 
-// A partial patch declared per repository in `spex.yml` under `checks_override`.
+// A partial patch declared per repository in `spex.yaml` under `checks_override`.
 // `spec` + `name` identify the inherited check; every other field overrides it
 // when present and is inherited when absent.
 #[derive(Debug, Deserialize)]

@@ -61,7 +61,7 @@
   pepperoni-pizza
   ```
 
-- **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yml`.
+- **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yaml`.
 
 - **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
 

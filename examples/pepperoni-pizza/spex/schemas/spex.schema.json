@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/spex.schema.json",
   "title": "Spex Workspace Config",
-  "description": "Workspace configuration (spex.yml): the project and the workspace repositories that spex manages together.",
+  "description": "Workspace configuration (spex.yaml): the project and the workspace repositories that spex manages together.",
   "type": "object",
   "properties": {
     "project_name": {

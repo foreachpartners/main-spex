@@ -79,7 +79,7 @@
       "description": "A single automated check.",
       "properties": {
         "spec": {
-          "description": "Tech spec ID this check belongs to. Used only by per-repo checks in spex.yml, where the check's identity is `<spec>/<name>`; omitted inside tech-spec files, which supply the spec ID themselves.",
+          "description": "Tech spec ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside tech-spec files, which supply the spec ID themselves.",
           "$ref": "tech-spec-id.schema.json"
         },
         "name": {
