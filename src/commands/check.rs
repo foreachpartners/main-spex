@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
@@ -561,30 +562,37 @@ fn config_error(spec_id: &str, check: &str, message: String) -> Finding {
 }
 
 fn report(config: &Config, reports: &[RepoReport]) -> ExitCode {
+    let style = Style::detect();
     let mut total_errors = 0usize;
     let mut total_warnings = 0usize;
 
     for repo in reports {
-        let mut errors = 0usize;
-        let mut warnings = 0usize;
-
-        println!("{}:", repo.name);
-        for finding in &repo.findings {
-            match finding.severity {
-                Severity::Error => errors += 1,
-                Severity::Warn => warnings += 1,
-            }
-            println!("  {}", format_finding(finding));
-        }
-        println!("  {errors} error(s), {warnings} warning(s)");
-
+        let errors = repo
+            .findings
+            .iter()
+            .filter(|f| f.severity == Severity::Error)
+            .count();
+        let warnings = repo.findings.len() - errors;
         total_errors += errors;
         total_warnings += warnings;
+
+        println!("{}", style.bold(&repo.name));
+        if repo.findings.is_empty() {
+            println!("  {}", style.green("no issues"));
+        } else {
+            for finding in &repo.findings {
+                print_finding(&style, finding);
+            }
+            println!("  {}", style.dim(&count_summary(errors, warnings)));
+        }
+        println!();
     }
 
+    let total = count_summary(total_errors, total_warnings);
     println!(
-        "{}: {total_errors} error(s), {total_warnings} warning(s)",
-        config.project_name
+        "{}: {}",
+        style.bold(&config.project_name),
+        style.bold(&total)
     );
 
     if total_errors > 0 {
@@ -594,10 +602,10 @@ fn report(config: &Config, reports: &[RepoReport]) -> ExitCode {
     }
 }
 
-fn format_finding(finding: &Finding) -> String {
+fn print_finding(style: &Style, finding: &Finding) {
     let severity = match finding.severity {
-        Severity::Error => "error",
-        Severity::Warn => "warn",
+        Severity::Error => style.red("error"),
+        Severity::Warn => style.yellow("warn"),
     };
     let check = if finding.check.is_empty() {
         finding.spec_id.clone()
@@ -607,7 +615,69 @@ fn format_finding(finding: &Finding) -> String {
     let location = finding
         .location
         .as_deref()
-        .map(|location| format!("{location}: "))
+        .map(|location| format!("  {}", style.dim(&format!("({location})"))))
         .unwrap_or_default();
-    format!("{severity}: {check}: {location}{}", finding.message)
+    println!("  {severity}  {}{location}", style.cyan(&check));
+    for line in finding.message.lines() {
+        println!("      {line}");
+    }
+}
+
+fn count_summary(errors: usize, warnings: usize) -> String {
+    format!(
+        "{}, {}",
+        plural(errors, "error"),
+        plural(warnings, "warning")
+    )
+}
+
+fn plural(count: usize, noun: &str) -> String {
+    if count == 1 {
+        format!("1 {noun}")
+    } else {
+        format!("{count} {noun}s")
+    }
+}
+
+struct Style {
+    enabled: bool,
+}
+
+impl Style {
+    fn detect() -> Self {
+        let enabled = std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none();
+        Self { enabled }
+    }
+
+    fn paint(&self, code: &str, text: &str) -> String {
+        if self.enabled {
+            format!("\u{1b}[{code}m{text}\u{1b}[0m")
+        } else {
+            text.to_string()
+        }
+    }
+
+    fn bold(&self, text: &str) -> String {
+        self.paint("1", text)
+    }
+
+    fn dim(&self, text: &str) -> String {
+        self.paint("2", text)
+    }
+
+    fn red(&self, text: &str) -> String {
+        self.paint("31", text)
+    }
+
+    fn yellow(&self, text: &str) -> String {
+        self.paint("33", text)
+    }
+
+    fn green(&self, text: &str) -> String {
+        self.paint("32", text)
+    }
+
+    fn cyan(&self, text: &str) -> String {
+        self.paint("36", text)
+    }
 }
