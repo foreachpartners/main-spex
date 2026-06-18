@@ -1,41 +1,39 @@
 id: TECH-WRITING-STYLE
 include_for_all_repos: true
 readonly: true
-title: LLM-oriented writing style
+title: Writing style
 description: >-
-  Specs and documentation are read by both engineers and AI agents. Direct,
+  Specs, code and documentation are read by both engineers and AI agents. Direct,
   imperative prose with explicit commitment levels and no filler keeps rules
-  unambiguous and machine-actionable. The commitment-level keywords (MUST,
-  SHOULD, MAY, MUST NOT) carry the meanings defined in RFC 2119.
+  unambiguous and machine-actionable.
 acceptance_criteria:
   - "MUST use imperative, directive language: 'Load ENV at startup.' not 'First, we''ll load ENV...'"
-  - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
   - "MUST prioritize clarity over brevity; brevity over all else"
-  - "MUST use MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited"
-  - "MUST fix all findings from the llm-writing check before publishing"
-  - "MUST NOT use motivational phrases: 'Great job!', 'Perfect!', 'Excellent!'"
-  - "MUST NOT use uncertainty markers: 'maybe', 'perhaps', 'I think'"
-  - "MUST NOT use filler words: 'basically', 'essentially', 'actually'"
-  - "MUST NOT use apologies: 'sorry', 'unfortunately'"
-  - "MUST NOT use conversational check-ins: 'Make sense?', 'Got it?'"
-  - "MUST NOT use subjective qualifiers: 'elegant', 'beautiful', 'clean'"
-  - "MUST NOT use non-English text in rules and documentation"
+  - "MUST use RFC 2119 for commitment level - MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited, SHOULD NOT for discouraged"
+  - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful', 'clean')"
+  - "MUST NOT use non-English"
+  - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
+  - "MUST write path placeholders in angle brackets with a lowercase, hyphenated name, marking a part of a path the reader replaces with a real value: `<workspace-root>/spex/biz-specs/<spec-id>.yaml`"
 
 checks:
   - name: llm-writing
-    description: Flag filler, hedging, motivational, and apologetic phrasing in docs
+    description: Flag filler, hedging, motivational, and apologetic phrasing
     type: script
     run: per-file
     script: writing-style.sh
-    include:
-      - "**/*.md"
     severity: warn
 
   - name: no-cyrillic
     description: Requirements and documentation must be in English
     type: regexp
     pattern: '\p{Cyrillic}'
-    include:
-      - "biz-specs/*.yaml"
-      - "**/*.md"
     severity: error
+examples:
+  avoid: |
+    Basically, we'll probably want to load the config first. Sounds good?
+  prefer: |
+    MUST load configuration at startup.
+  placeholder: |
+    <workspace-root>/spex/biz-specs/<spec-id>.yaml
+
+    e.g. pepperoni-pizza/spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml

@@ -8,6 +8,23 @@ description: >-
   satisfies. Placing them once at each layer boundary keeps traceability
   unambiguous without scattering Spec IDs through internal helpers.
 acceptance_criteria:
-  - "MUST annotate with `@spec {contract|impl|test} {SpecID}[, {SpecID}]*` as a code comment or as an `x-spec` property in an OpenAPI schema"
-  - "MUST place `@spec contract` once at the contract boundary (contract / handler / test)"
-  - "MUST NOT place `@spec` deeper than the top boundary of its layer (traced through that boundary like repository, storage layer functions, service/business logic layer, generated SDK)"
+  - "MUST annotate contract, implementation and test at least once at the boundary"
+  - "MUST annotate as `x-spec: <spec-id>` e.g. `x-spec: BIZ-LIST-PIZZA-MENU` property in an OpenAPI schema, otherwise as a comment `@spec {contract|impl|test} {SpecID}[, {SpecID}]*` e.g. `@spec impl BIZ-LIST-PIZZA-MENU`"
+  - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
+examples:
+  contract: |
+    # OpenAPI operation — annotate the boundary, not every nested schema
+    paths:
+      /pizzas:
+        get:
+          operationId: listPizzaMenu
+          x-spec: BIZ-LIST-PIZZA-MENU
+  implementation: |
+    // @spec impl BIZ-LIST-PIZZA-MENU
+    fn list_pizza_menu(req: Request) -> Response {
+        // menu_service and its repository are NOT annotated (no nesting)
+        menu_service.list()
+    }
+  test: |
+    // @spec test BIZ-LIST-PIZZA-MENU, BIZ-ORDER-PIZZA
+    fn lists_available_pizzas() { /* ... */ }
