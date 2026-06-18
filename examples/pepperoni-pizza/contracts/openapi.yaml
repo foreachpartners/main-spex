@@ -11,7 +11,7 @@ paths:
     get:
       operationId: listPizzas
       summary: List the pizza menu
-      x-spec: "@spec contract BIZ-LIST-PIZZA-MENU"
+      x-spec: BIZ-LIST-PIZZA-MENU
       responses:
         "200":
           description: The pizza menu
