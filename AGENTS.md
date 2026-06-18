@@ -30,9 +30,11 @@ templates/          Assets scaffolded into projects
   skills/           Agent skills
   tech-specs/       Reusable tech-spec templates
 examples/           Sample projects (pepperoni-pizza)
+tests/              Integration tests that build and run the spex binary
 ```
 
-Tests live next to the code they cover as `*_test.rs` files.
+Unit tests live next to the code they cover as `*_test.rs` files. End-to-end
+tests that drive the compiled binary live in `tests/`.
 
 Keep this section in sync when the structure changes.
 
