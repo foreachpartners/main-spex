@@ -76,7 +76,9 @@ pub fn run() -> Result<ExitCode> {
     write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
 
-    println!("spex repository initialized, run spex skill `/spex-setup` to complete setup");
+    println!(
+        "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to complete setup"
+    );
     Ok(ExitCode::SUCCESS)
 }
 
