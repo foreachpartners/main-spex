@@ -10,6 +10,7 @@ use clap::{Parser, Subcommand};
 use error_stack::Report;
 
 use commands::check::CheckArgs;
+use commands::check_schema::CheckSchemaArgs;
 
 #[derive(Parser)]
 #[command(
@@ -32,6 +33,8 @@ enum Commands {
     Update,
     #[command(about = "Run technical spec checks against the workspace")]
     Check(CheckArgs),
+    #[command(about = "Validate JSON or YAML files against a JSON Schema")]
+    CheckSchema(CheckSchemaArgs),
 }
 
 fn main() -> ExitCode {
@@ -41,6 +44,7 @@ fn main() -> ExitCode {
         Commands::Init => finish(commands::init::run()),
         Commands::Update => finish(commands::update::run()),
         Commands::Check(args) => finish(commands::check::run(args)),
+        Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
     }
 }
 

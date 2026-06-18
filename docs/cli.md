@@ -57,6 +57,25 @@ spex check --repo api frontend
 spex check --repo api --files src/main.rs src/orders.rs
 ```
 
+### `spex check-schema`
+
+Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
+
+This is a general-purpose validator. The `TECH-SPEX-CONFORMANCE` tech spec uses it to keep the spex repository's own spec files (`spex.yaml`, `biz-specs/<spec-id>.yaml`, `tech-specs/<spec-id>.yaml`) valid against the bundled schemas.
+
+#### Flags
+
+- `--schema <path>` — the JSON Schema the files are validated against (required).
+- `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
+
+```sh
+spex check-schema --schema schemas/tech-spec.schema.json --files tech-specs/TECH-NAMING-CONVENTION.yaml
+```
+
+```sh
+spex check-schema --schema schemas/biz-spec.schema.json --files biz-specs/BIZ-LIST-PIZZA-MENU.yaml biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml
+```
+
 ## Install
 
 Install the `spex` binary globally from a source checkout. `cargo install` builds an optimized binary and copies it to `~/.cargo/bin/`, which is on your `PATH` when Rust is installed via `rustup`.

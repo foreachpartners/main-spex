@@ -22,7 +22,7 @@ src/                CLI source
   config.rs         Config loading
   tech_spec.rs      Tech-spec model
   templates.rs      Bundled template scaffolding (shared by init/update)
-  commands/         Subcommands (init, update, check)
+  commands/         Subcommands (init, update, check, check_schema)
 docs/               Glossary, conventions, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas

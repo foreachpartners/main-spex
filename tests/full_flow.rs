@@ -88,9 +88,23 @@ fn init_then_check_pepperoni_pizza() {
 }
 
 fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_spex"))
+    // The TECH-SPEX-CONFORMANCE check shells out to `spex check-schema`, so the
+    // binary under test must be discoverable on PATH.
+    let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
+    let bin_dir = bin.parent().expect("binary directory");
+    let path = match std::env::var_os("PATH") {
+        Some(existing) => {
+            let mut dirs = vec![bin_dir.to_path_buf()];
+            dirs.extend(std::env::split_paths(&existing));
+            std::env::join_paths(dirs).expect("join PATH")
+        }
+        None => bin_dir.as_os_str().to_owned(),
+    };
+
+    let mut child = Command::new(bin)
         .args(args)
         .current_dir(dir)
+        .env("PATH", path)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
