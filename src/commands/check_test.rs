@@ -358,7 +358,15 @@ mod tests {
         repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Warn);
@@ -390,7 +398,15 @@ mod tests {
         repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].message, "repo");
@@ -410,7 +426,15 @@ mod tests {
         repository.checks_override = vec![check_override("TECH-X", "missing")];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -438,7 +462,15 @@ mod tests {
         repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert!(findings.is_empty());
     }
@@ -459,7 +491,15 @@ mod tests {
         repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -483,7 +523,15 @@ mod tests {
         }];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -518,7 +566,15 @@ mod tests {
         }];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 2);
         assert!(findings.iter().all(|finding| finding.check == "no-todo"));
@@ -546,9 +602,114 @@ mod tests {
         }];
 
         let mut findings = Vec::new();
-        check_repo(&repository, &spex, &specs, &[], &mut findings).expect("check");
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].message, "repo-only");
+    }
+
+    #[test]
+    fn workspace_check_runs_once_across_repos() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let api = workspace.path().join("api");
+        let web = workspace.path().join("web");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        std::fs::create_dir_all(&api).expect("api");
+        std::fs::create_dir_all(&web).expect("web");
+        std::fs::write(api.join("a.txt"), "").expect("a");
+        std::fs::write(web.join("b.txt"), "").expect("b");
+
+        let script = spex.join("scripts/TECH-X/list.sh");
+        std::fs::write(
+            &script,
+            "#!/bin/sh\nfor f in \"$@\"; do echo \"$f\"; done\nexit 1\n",
+        )
+        .expect("script");
+        make_executable(&script);
+
+        let mut listing = script_check("list.sh", RunScope::Workspace);
+        listing.name = "list".to_string();
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![listing]))]);
+
+        let mut collected = Vec::new();
+        let mut findings = Vec::new();
+        check_repo(
+            &repository("../api", vec!["TECH-X"]),
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut collected,
+        )
+        .expect("api");
+        check_repo(
+            &repository("../web", vec!["TECH-X"]),
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut collected,
+        )
+        .expect("web");
+
+        // The workspace check is deferred, so neither repository reports it.
+        assert!(findings.is_empty());
+        // Both repositories merge into a single pending check.
+        assert_eq!(collected.len(), 1);
+        assert_eq!(collected[0].files.len(), 2);
+
+        run_workspace_checks(&spex, &collected, &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].spec_id, "TECH-X");
+        assert_eq!(findings[0].check, "list");
+        let message = &findings[0].message;
+        assert!(message.contains("../api/a.txt"), "got: {message}");
+        assert!(message.contains("../web/b.txt"), "got: {message}");
+    }
+
+    #[test]
+    fn workspace_check_respects_exclude() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let api = workspace.path().join("api");
+        std::fs::create_dir_all(&spex).expect("spex");
+        std::fs::create_dir_all(&api).expect("api");
+        std::fs::write(api.join("keep.txt"), "").expect("keep");
+        std::fs::write(api.join("skip.md"), "").expect("skip");
+
+        let mut listing = script_check("list.sh", RunScope::Workspace);
+        listing.name = "list".to_string();
+        listing.exclude = vec!["**/*.md".to_string()];
+        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![listing]))]);
+
+        let mut collected = Vec::new();
+        let mut findings = Vec::new();
+        check_repo(
+            &repository("../api", vec!["TECH-X"]),
+            &spex,
+            &specs,
+            &[],
+            &mut findings,
+            &mut collected,
+        )
+        .expect("api");
+
+        assert_eq!(collected.len(), 1);
+        let files: Vec<_> = collected[0]
+            .files
+            .iter()
+            .map(|file| file.to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(files, vec!["../api/keep.txt".to_string()]);
     }
 }

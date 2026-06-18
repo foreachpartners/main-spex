@@ -8,8 +8,9 @@ use tempfile::tempdir;
 // Snapshot of `spex check` for a freshly initialized copy of the
 // `pepperoni-pizza-no-spex` example. The findings are intentional: the example
 // ships demo violations and the workspace is not a git repository, so the
-// commit-format checks warn. Update this when the example or bundled templates
-// change.
+// commit-format checks warn. The trailing `workspace` section reports the
+// workspace-scoped checks that run once across every repository. Update this
+// when the example or bundled templates change.
 const EXPECTED_CHECK_REPORT: &str = r#"api
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
@@ -41,6 +42,9 @@ spex
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
   0 errors, 2 warnings
+
+workspace
+  no issues
 
 proj: 1 error, 9 warnings
 "#;

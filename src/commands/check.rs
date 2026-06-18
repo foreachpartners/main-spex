@@ -49,6 +49,16 @@ struct ScopedFile {
     rel: PathBuf,
 }
 
+// A `workspace`-scoped script check, deferred until every repository has been
+// scanned so it runs once across the whole workspace. `files` are paths from the
+// spex directory (the script's working directory) to each in-scope file.
+struct WorkspaceCheck {
+    spec_id: String,
+    check: Check,
+    script_base: PathBuf,
+    files: Vec<PathBuf>,
+}
+
 struct Finding {
     severity: Severity,
     spec_id: String,
@@ -73,11 +83,28 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let selected = select_repos(&config, &args.repo)?;
 
     let mut reports = Vec::with_capacity(selected.len());
+    let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
     for repo in selected {
         let mut findings = Vec::new();
-        check_repo(repo, &spex_dir, &specs, &args.files, &mut findings)?;
+        check_repo(
+            repo,
+            &spex_dir,
+            &specs,
+            &args.files,
+            &mut findings,
+            &mut workspace_checks,
+        )?;
         reports.push(RepoReport {
             name: repo.name.clone(),
+            findings,
+        });
+    }
+
+    if !workspace_checks.is_empty() {
+        let mut findings = Vec::new();
+        run_workspace_checks(&spex_dir, &workspace_checks, &mut findings);
+        reports.push(RepoReport {
+            name: "workspace".to_string(),
             findings,
         });
     }
@@ -108,6 +135,7 @@ fn check_repo(
     specs: &HashMap<String, TechSpec>,
     files: &[String],
     findings: &mut Vec<Finding>,
+    workspace_checks: &mut Vec<WorkspaceCheck>,
 ) -> Result<()> {
     let repo_path = spex_dir.join(&repo.path);
     if !repo_path.is_dir() {
@@ -159,7 +187,16 @@ fn check_repo(
             if overridden.contains(&(spec_id.as_str(), check.name.as_str())) {
                 continue;
             }
-            run_check(&spec.id, check, &repo_path, spex_dir, &candidates, findings);
+            dispatch_check(
+                &spec.id,
+                check,
+                repo,
+                &repo_path,
+                spex_dir,
+                &candidates,
+                findings,
+                workspace_checks,
+            );
         }
     }
 
@@ -188,13 +225,15 @@ fn check_repo(
         } else {
             spex_dir
         };
-        run_check(
+        dispatch_check(
             &over.spec,
             &effective,
+            repo,
             &repo_path,
             script_base,
             &candidates,
             findings,
+            workspace_checks,
         );
     }
 
@@ -212,13 +251,15 @@ fn check_repo(
             });
             continue;
         }
-        run_check(
+        dispatch_check(
             &additional.spec,
             &additional.check,
+            repo,
             &repo_path,
             &repo_path,
             &candidates,
             findings,
+            workspace_checks,
         );
     }
 
@@ -254,6 +295,70 @@ fn provided_files(repo_path: &Path, files: &[String]) -> Vec<ScopedFile> {
             abs.is_file().then_some(ScopedFile { abs, rel })
         })
         .collect()
+}
+
+#[allow(clippy::too_many_arguments)]
+fn dispatch_check(
+    spec_id: &str,
+    check: &Check,
+    repo: &Repository,
+    repo_path: &Path,
+    script_base: &Path,
+    files: &[ScopedFile],
+    findings: &mut Vec<Finding>,
+    workspace_checks: &mut Vec<WorkspaceCheck>,
+) {
+    if check.kind == CheckKind::Script && check.run == RunScope::Workspace {
+        collect_workspace_check(
+            spec_id,
+            check,
+            repo,
+            script_base,
+            files,
+            findings,
+            workspace_checks,
+        );
+    } else {
+        run_check(spec_id, check, repo_path, script_base, files, findings);
+    }
+}
+
+// Defers a `workspace`-scoped check: scopes this repository's files, then merges
+// them (as paths from the spex directory) into the pending check identified by
+// `(spec_id, name)` so the script runs once over the whole workspace.
+fn collect_workspace_check(
+    spec_id: &str,
+    check: &Check,
+    repo: &Repository,
+    script_base: &Path,
+    files: &[ScopedFile],
+    findings: &mut Vec<Finding>,
+    workspace_checks: &mut Vec<WorkspaceCheck>,
+) {
+    let scoped = match scope_files(check, files) {
+        Ok(scoped) => scoped,
+        Err(message) => {
+            findings.push(config_error(spec_id, &check.name, message));
+            return;
+        }
+    };
+
+    let prefix = Path::new(&repo.path);
+    let scoped_files = scoped.iter().map(|file| prefix.join(&file.rel));
+
+    if let Some(pending) = workspace_checks
+        .iter_mut()
+        .find(|pending| pending.spec_id == spec_id && pending.check.name == check.name)
+    {
+        pending.files.extend(scoped_files);
+    } else {
+        workspace_checks.push(WorkspaceCheck {
+            spec_id: spec_id.to_string(),
+            check: check.clone(),
+            script_base: script_base.to_path_buf(),
+            files: scoped_files.collect(),
+        });
+    }
 }
 
 fn run_check(
@@ -422,13 +527,90 @@ fn run_script(
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
+    let Some(script) = locate_script(spec_id, check, script_base, findings) else {
+        return;
+    };
+
+    match check.run {
+        RunScope::PerFile => run_per_file(spec_id, check, &script, repo_path, files, findings),
+        RunScope::PerRepo => run_per_repo(spec_id, check, &script, repo_path, findings),
+        // Workspace checks are collected in `dispatch_check` and run once after
+        // every repository via `run_workspace_checks`, never through here.
+        RunScope::Workspace => {}
+    }
+}
+
+fn run_workspace_checks(
+    spex_dir: &Path,
+    workspace_checks: &[WorkspaceCheck],
+    findings: &mut Vec<Finding>,
+) {
+    for pending in workspace_checks {
+        let Some(script) = locate_script(
+            &pending.spec_id,
+            &pending.check,
+            &pending.script_base,
+            findings,
+        ) else {
+            continue;
+        };
+        run_workspace_script(
+            &pending.spec_id,
+            &pending.check,
+            &script,
+            spex_dir,
+            &pending.files,
+            findings,
+        );
+    }
+}
+
+// Runs a `workspace`-scoped script once in the spex directory, passing every
+// in-scope file (as a path from that directory) as an argument.
+fn run_workspace_script(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    spex_dir: &Path,
+    files: &[PathBuf],
+    findings: &mut Vec<Finding>,
+) {
+    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
+        let args = batch.iter().map(|file| file.as_os_str());
+
+        let output = match Command::new(script)
+            .args(args)
+            .current_dir(spex_dir)
+            .output()
+        {
+            Ok(output) => output,
+            Err(err) => {
+                findings.push(run_error(spec_id, check, script, err));
+                return;
+            }
+        };
+
+        if !output.status.success() {
+            findings.push(violation(check, spec_id, None, script_message(&output)));
+        }
+    }
+}
+
+// Resolves a script check's program path, pushing a config error when the check
+// declares no script or the file is missing.
+fn locate_script(
+    spec_id: &str,
+    check: &Check,
+    script_base: &Path,
+    findings: &mut Vec<Finding>,
+) -> Option<PathBuf> {
     let Some(reference) = &check.script else {
         findings.push(config_error(
             spec_id,
             &check.name,
             "script check requires `script`".to_string(),
         ));
-        return;
+        return None;
     };
 
     let Some(script) = resolve_script(reference, script_base, spec_id) else {
@@ -438,13 +620,10 @@ fn run_script(
             &check.name,
             format!("script `{reference}` not found in {}", dir.display()),
         ));
-        return;
+        return None;
     };
 
-    match check.run {
-        RunScope::PerFile => run_per_file(spec_id, check, &script, repo_path, files, findings),
-        RunScope::PerRepo => run_per_repo(spec_id, check, &script, repo_path, findings),
-    }
+    Some(script)
 }
 
 fn run_per_file(

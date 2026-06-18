@@ -127,6 +127,7 @@ pub enum RunScope {
     #[default]
     PerFile,
     PerRepo,
+    Workspace,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]

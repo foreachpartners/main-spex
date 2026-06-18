@@ -12,12 +12,21 @@ acceptance_criteria:
   - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl BIZ-LIST-PIZZA-MENU`)"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
   - "MAY annotate TECH spec following same rules"
+  - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
 checks:
   - name: annotation-format
     description: Spec-id annotations must use the documented comment or x-spec syntax
     type: script
     run: per-file
     script: annotation-format.sh
+    exclude:
+      - "**/*.md"
+    severity: warn
+  - name: no-orphan-annotations
+    description: Spec-id annotations must reference a spec that exists in biz-specs or tech-specs
+    type: script
+    run: workspace
+    script: no-orphan-annotations.sh
     exclude:
       - "**/*.md"
     severity: warn
