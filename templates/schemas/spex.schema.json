@@ -115,7 +115,7 @@
         "run": {
           "type": "string",
           "description": "Overrides the inherited script check's invocation granularity.",
-          "enum": ["per-file", "per-repo"]
+          "enum": ["per-file", "per-repo", "workspace"]
         },
         "include": {
           "type": "array",
