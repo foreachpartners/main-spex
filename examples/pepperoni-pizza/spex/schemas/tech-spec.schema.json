@@ -15,7 +15,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Optional narrative: rationale for the rule and what it protects against.",
+      "description": "Narrative: rationale for the rule and what it protects against.",
       "minLength": 1
     },
     "include_for_all_repos": {
@@ -65,7 +65,7 @@
   "examples": [
     {
       "id": "TECH-SECRET-HANDLING",
-      "title": "Secret Protection",
+      "title": "Secret protection",
       "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
       "acceptance_criteria": [
         "MUST NOT commit API keys, passwords, or tokens to the repository",

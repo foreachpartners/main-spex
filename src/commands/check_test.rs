@@ -538,7 +538,7 @@ mod tests {
         assert!(
             findings[0]
                 .message
-                .contains("not in this repository's tech-specs")
+                .contains("not in this repository's tech_specs")
         );
     }
 

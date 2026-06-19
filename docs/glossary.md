@@ -29,7 +29,7 @@
 
   ```yaml
   id: TECH-SECRET-HANDLING
-  title: Secret Protection
+  title: Secret protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
   ```

@@ -245,7 +245,7 @@ fn check_repo(
                 check: String::new(),
                 location: None,
                 message: format!(
-                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's tech-specs",
+                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's tech_specs",
                     additional.spec, additional.check.name, additional.spec
                 ),
             });

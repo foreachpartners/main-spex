@@ -315,9 +315,9 @@ fn config_to_yaml(
             }
             yaml.push_str(&format!("    path: {}\n", repo.path));
             if ids.is_empty() {
-                yaml.push_str("    tech-specs: []\n");
+                yaml.push_str("    tech_specs: []\n");
             } else {
-                yaml.push_str("    tech-specs:\n");
+                yaml.push_str("    tech_specs:\n");
                 for id in ids {
                     yaml.push_str(&format!("      - {id}\n"));
                 }

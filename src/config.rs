@@ -40,7 +40,7 @@ pub struct Repository {
     #[serde(rename = "repository_name")]
     pub name: String,
     pub path: String,
-    #[serde(rename = "tech-specs", default)]
+    #[serde(default)]
     pub tech_specs: Vec<String>,
     #[serde(default)]
     pub checks_additional: Vec<RepoCheck>,

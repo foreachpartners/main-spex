@@ -119,10 +119,10 @@ project_name: pizza-shop
 repositories:
   - repository_name: server
     path: ../server
-    tech-specs: []
+    tech_specs: []
   - repository_name: client
     path: ../client
-    tech-specs: []
+    tech_specs: []
 ";
         assert_eq!(yaml, expected);
     }
@@ -143,7 +143,7 @@ project_name: pizza-shop
 repositories:
   - repository_name: server
     path: ../server
-    tech-specs:
+    tech_specs:
       - TECH-SECRET-HANDLING
       - TECH-WRITING-STYLE
 ";
@@ -163,7 +163,7 @@ project_name: pizza-shop
 repositories:
   - repository_name: server
     path: ../server
-    tech-specs:
+    tech_specs:
       - TECH-SECRET-HANDLING
   - repository_name: spex
     description: >-
@@ -172,7 +172,7 @@ repositories:
       tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
       rules).
     path: .
-    tech-specs:
+    tech_specs:
       - TECH-WRITING-STYLE
 ";
         assert_eq!(yaml, expected);

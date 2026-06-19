@@ -6,7 +6,7 @@ repositories:
   - repository_name: api
     description: Rust/Axum backend service that implements the pizza order API.
     path: ../api
-    tech-specs:
+    tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
@@ -17,7 +17,7 @@ repositories:
       OpenAPI contract that defines the order API and is the single source of
       truth the api implements and the frontend consumes.
     path: ../contracts
-    tech-specs:
+    tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
@@ -26,7 +26,7 @@ repositories:
   - repository_name: frontend
     description: React + Vite web client that lets customers place pizza orders.
     path: ../frontend
-    tech-specs:
+    tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION
@@ -53,7 +53,7 @@ repositories:
       tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
       rules).
     path: .
-    tech-specs:
+    tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-WRITING-STYLE
       - TECH-NAMING-CONVENTION

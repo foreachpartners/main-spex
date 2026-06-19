@@ -36,7 +36,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 - Read `<workspace-root>/spex/spex.yaml` for the project overview and use that to determine the spec's implementation `scope`.
 - Read `<workspace-root>/spex/biz-specs/` for related specs
-- Read `<workspace-root>/spex/contract/` for schemas if exists
+- Read any contract definitions in the `contracts` repository (resolve its `path` from `spex.yaml`) for related schemas, if it exists
 
 ## Step 2 — Clarify missing details with the user
 
@@ -46,7 +46,10 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 
 Follow the field rules in `<workspace-root>/spex/schemas/biz-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
-Draft spec for user
+- `id` must start with `BIZ-` and convey the rule so it reads without opening the spec.
+- Write `acceptance_criteria` as verifiable statements, each starting with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
+- Set `scope` to the repositories that implement the rule, each matching a `repository_name` in `spex.yaml`.
+- Keep the `description` focused on user-visible behavior; leave technical implementation to the plan.
 
 ## Step 4 — Confirm, then write
 

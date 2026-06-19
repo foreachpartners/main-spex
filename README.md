@@ -97,7 +97,7 @@ flowchart TD
 
 For example, the rule `TECH-SECRET-HANDLING` works like this:
 
-1. **Technical Spec** — `TECH-SECRET-HANDLING`: "Secret Protection"
+1. **Technical Spec** — `TECH-SECRET-HANDLING`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 

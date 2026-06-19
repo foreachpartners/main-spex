@@ -40,7 +40,7 @@ If a spec lists `depends_on`, check those specs `status`. Flag any dependency th
 From `<workspace-root>/spex/spex.yaml`:
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `tech-specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
+- For each affected repository, read its `tech_specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
 - Read each governing tech-spec in `<workspace-root>/spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
 
 Record which repository each governing tech-spec comes from so a task in one repository only carries the tech-specs that apply there.

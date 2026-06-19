@@ -14,7 +14,7 @@ See the [CLI reference](cli.md) for the full command set.
 
 ## Per-repository checks
 
-Every workspace repository inherits the checks declared by the tech specs in its `tech-specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yaml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
+Every workspace repository inherits the checks declared by the tech specs in its `tech_specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yaml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
 
 A `script` check's `script:` value is just the filename; spex resolves it at `scripts/<spec-id>/<script>` under the relevant base directory. The `<spec-id>` folder namespaces scripts so checks from different specs never share a path. Shared scripts live in the spex repository's `scripts/`; a repository's own scripts live in that repository's `scripts/`.
 
@@ -26,7 +26,7 @@ Name the inherited check by `spec` + `name`, then set only the fields you want t
 repositories:
   - repository_name: frontend
     path: ../frontend
-    tech-specs: [TECH-WRITING-STYLE]
+    tech_specs: [TECH-WRITING-STYLE]
     checks_override:
       - spec: TECH-WRITING-STYLE # only the severity changes
         name: no-cyrillic
@@ -43,13 +43,13 @@ When an override sets `script`, it resolves under the repository directory (`fro
 
 ### `checks_additional` — add a new check
 
-Each entry is a complete check plus the `spec` it belongs to (which must be one of the repository's `tech-specs`). It runs in addition to everything inherited. Script paths resolve under the repository directory.
+Each entry is a complete check plus the `spec` it belongs to (which must be one of the repository's `tech_specs`). It runs in addition to everything inherited. Script paths resolve under the repository directory.
 
 ```yaml
 repositories:
   - repository_name: frontend
     path: ../frontend
-    tech-specs: [TECH-WRITING-STYLE]
+    tech_specs: [TECH-WRITING-STYLE]
     checks_additional:
       - spec: TECH-WRITING-STYLE
         name: no-todo

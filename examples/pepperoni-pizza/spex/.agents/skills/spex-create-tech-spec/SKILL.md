@@ -11,7 +11,7 @@ Match the prose style of the existing specs and write the result into the spex r
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`. |
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
 The schema at `<workspace-root>/spex/schemas/tech-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
@@ -57,7 +57,7 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 - `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
 - `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
-- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, or `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history).
+- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history), or `run: workspace` to invoke it once across the whole workspace with every repository's matched files as arguments (for example reasoning about cross-repository state).
 
 Guidance:
 
@@ -72,7 +72,7 @@ Show the proposed checks (and any script bodies) to the user and confirm them be
 
 1. Show the drafted spec and proposed checks to the user for confirmation. Apply edits if needed.
 2. Write the spec to `<workspace-root>/spex/tech-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
-3. Write any `script` check bodies to the path referenced by `script:` (typically `<workspace-root>/spex/scripts/<name>.sh`) and make them executable.
+3. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/spex/scripts/<spec-id>/<name>.sh`) and make them executable.
 4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
 5. Validate the spec against `<workspace-root>/spex/schemas/tech-spec.schema.json`.
 

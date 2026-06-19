@@ -43,7 +43,7 @@
           "description": "Path to the repository, relative to the spex directory.",
           "minLength": 1
         },
-        "tech-specs": {
+        "tech_specs": {
           "type": "array",
           "description": "TECH spec IDs that apply to this repository.",
           "items": {
@@ -52,7 +52,7 @@
         },
         "checks_additional": {
           "type": "array",
-          "description": "Full checks that run for this repository in addition to the checks it inherits from its tech-specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech-specs). Script paths resolve under the repository directory.",
+          "description": "Full checks that run for this repository in addition to the checks it inherits from its tech_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech_specs). Script paths resolve under the repository directory.",
           "items": {
             "allOf": [
               { "$ref": "check.schema.json" },
@@ -76,7 +76,7 @@
       "description": "A partial patch for an inherited check. `spec` + `name` identify the target; every other field overrides the inherited check when present.",
       "properties": {
         "spec": {
-          "description": "Tech spec ID of the inherited check to override. Must be one of the repository's tech-specs.",
+          "description": "Tech spec ID of the inherited check to override. Must be one of the repository's tech_specs.",
           "$ref": "tech-spec-id.schema.json"
         },
         "name": {
@@ -154,7 +154,7 @@
           "repository_name": "api",
           "description": "Backend service that handles orders.",
           "path": "../api",
-          "tech-specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
+          "tech_specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
         }
       ]
     }
