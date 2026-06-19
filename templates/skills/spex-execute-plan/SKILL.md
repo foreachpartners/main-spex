@@ -32,7 +32,7 @@ Then read enough context to execute faithfully:
 
 - Read each targeted spec in `<workspace-root>/spex/biz-specs/<spec-id>.yaml` for its acceptance criteria.
 - Read each governing tech-spec named in the plan from `<workspace-root>/spex/tech-specs/` so every agent stays compliant.
-- For each affected repository, resolve its `path` from `<workspace-root>/spex/spex.yaml` and note its build/test commands and annotation conventions.
+- For each affected repository, resolve its `path` from `<workspace-root>/spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
 

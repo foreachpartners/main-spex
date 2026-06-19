@@ -37,7 +37,7 @@ If a spec lists `depends_on`, check those specs `status`. Flag any dependency th
 
 ## Step 2 — Resolve scope and governing tech-specs
 
-From `<workspace-root>/spex/spex.yaml`:
+From `<workspace-root>/spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `tech_specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
@@ -47,9 +47,9 @@ Record which repository each governing tech-spec comes from so a task in one rep
 
 ## Step 3 — Inspect the current code
 
-For each affected repository, resolve its `path` and study the current state so the plan extends real code instead of guessing:
+For each affected repository, resolve its `path` and study the current state so the plan extends real code instead of guessing. Use the repository `description`s to identify each one's role (which holds the contracts, which is the backend, frontend, mobile, and so on):
 
-- Find the contract(s) the spec touches and read the relevant endpoints, messages, or schemas.
+- Find the contract(s) the spec touches — in whichever repository holds the interface definitions — and read the relevant endpoints, messages, or schemas.
 - Read the handlers, modules, and tests nearest to the change, and note an existing feature to copy the structure from (the "by example" pattern: how a similar endpoint, screen, or test is already built).
 - Note the build/test commands and any annotation conventions (for example `@spec` tags) the repository already uses.
 
@@ -67,7 +67,7 @@ Keep steps as few as the dependencies allow; maximize parallelism within each st
 
 ## Step 5 — Draft the plan
 
-Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered.
+Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`, `contracts`) are placeholders; use the real names and roles from `spex.yaml`.
 
 ```md
 # Plan: <lead spec title>

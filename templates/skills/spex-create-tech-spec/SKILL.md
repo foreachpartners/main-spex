@@ -34,7 +34,7 @@ Determine what the spec is based on before doing anything else:
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- Read `<workspace-root>/spex/spex.yaml` for the project overview, the workspace repositories, and which tech-specs they already list.
+- Read `<workspace-root>/spex/spex.yaml` for the project overview, the workspace repositories, and which tech-specs they already list. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 - Read `<workspace-root>/spex/tech-specs/` for related specs and to match their style. Reuse an existing spec rather than duplicating its rule.
 
 ## Step 2 — Clarify missing details with the user

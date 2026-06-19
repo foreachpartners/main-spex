@@ -34,9 +34,9 @@ Determine what the spec is based on before doing anything else:
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
-- Read `<workspace-root>/spex/spex.yaml` for the project overview and use that to determine the spec's implementation `scope`.
+- Read `<workspace-root>/spex/spex.yaml` for the project overview. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role and use that to determine the spec's implementation `scope`.
 - Read `<workspace-root>/spex/biz-specs/` for related specs
-- Read any contract definitions in the `contracts` repository (resolve its `path` from `spex.yaml`) for related schemas, if it exists
+- Use the repository `description`s in `spex.yaml` to find the repository that holds the contract/interface definitions (it may be named anything — for example `contracts`, `proto`, or `api`), resolve its `path`, and read any related schemas there.
 
 ## Step 2 — Clarify missing details with the user
 
