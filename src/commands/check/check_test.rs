@@ -5,6 +5,7 @@ mod tests {
     use crate::tech_spec::{
         Check, CheckKind, CheckOverride, RepoCheck, RunScope, Severity, TechSpec,
     };
+    use serial_test::serial;
     use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
 
@@ -163,7 +164,12 @@ mod tests {
         assert!(resolve_script("lint.sh", &spex, "TECH-X").is_none());
     }
 
+    // Tests that create a script and then execute it run serially: `Command`
+    // forks, and a sibling thread's fork inherits the whole process fd table, so
+    // it can briefly hold another test's still-open write handle to its script
+    // open for writing, making that script's exec fail with ETXTBSY.
     #[test]
+    #[serial(script_exec)]
     fn script_per_repo_reports_violation_on_failure() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
@@ -194,6 +200,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
     fn script_per_file_passes_files_as_arguments() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
@@ -338,6 +345,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
     fn override_patches_severity_and_reuses_spex_script() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
@@ -375,6 +383,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
     fn override_sets_repo_script() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
@@ -581,6 +590,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
     fn additional_script_resolves_from_repo_base() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
@@ -617,6 +627,7 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
     fn workspace_check_runs_once_across_repos() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
