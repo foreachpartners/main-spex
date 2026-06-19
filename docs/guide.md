@@ -16,7 +16,7 @@ See the [CLI reference](cli.md) for the full command set.
 
 Every workspace repository inherits the checks declared by the tech specs in its `tech_specs`. A repository can adjust those inherited checks, or add new ones, by declaring them in `spex.yaml`. A check's identity is `<spec>/<name>`, so every per-repo entry names both the `spec` and the `name`.
 
-A `script` check's `script:` value is just the filename; spex resolves it at `scripts/<spec-id>/<script>` under the relevant base directory. The `<spec-id>` folder namespaces scripts so checks from different specs never share a path. Shared scripts live in the spex repository's `scripts/`; a repository's own scripts live in that repository's `scripts/`.
+A `script` check's `script:` value is just the filename; spex resolves it at `scripts/<spec-id>/<script>` in the spex repository. Every check script lives there — inherited, `checks_override`, and `checks_additional` alike. The `<spec-id>` folder namespaces scripts so checks from different specs never share a path. A script's `run:` scope decides where it executes (`per-repo`/`per-file` run with the repository as the working directory), but the file itself always lives in spex.
 
 ### `checks_override` — patch an inherited check
 
@@ -31,7 +31,7 @@ repositories:
       - spec: TECH-WRITING-STYLE # only the severity changes
         name: no-cyrillic
         severity: warn
-      - spec: TECH-WRITING-STYLE # use a repo-specific script instead of the shared one
+      - spec: TECH-WRITING-STYLE # point the check at a different spex script
         name: writing
         script: writing-style.sh
       - spec: TECH-WRITING-STYLE # turn the inherited check off entirely
@@ -39,11 +39,11 @@ repositories:
         disable: true
 ```
 
-When an override sets `script`, it resolves under the repository directory (`frontend/scripts/<spec-id>/...`). When it omits `script`, the inherited spex script is reused (`spex/scripts/<spec-id>/...`). Set `disable: true` to turn the inherited check off completely; all other override fields are then ignored. An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
+When an override sets `script`, it resolves in the spex repository (`spex/scripts/<spec-id>/...`), the same place the inherited script lives. Set `disable: true` to turn the inherited check off completely; all other override fields are then ignored. An override that targets a `spec`/`name` the repository does not inherit is reported as an error.
 
 ### `checks_additional` — add a new check
 
-Each entry is a complete check plus the `spec` it belongs to (which must be one of the repository's `tech_specs`). It runs in addition to everything inherited. Script paths resolve under the repository directory.
+Each entry is a complete check plus the `spec` it belongs to (which must be one of the repository's `tech_specs`). It runs in addition to everything inherited. Script paths resolve in the spex repository (`spex/scripts/<spec-id>/...`).
 
 ```yaml
 repositories:

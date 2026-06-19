@@ -38,7 +38,7 @@ repositories:
       - spec: TECH-WRITING-STYLE
         name: no-cyrillic
         severity: warn
-    # Add a frontend-only check; its script resolves under the frontend repository.
+    # Add a frontend-only check; its script lives in spex (scripts/TECH-WRITING-STYLE/).
     checks_additional:
       - spec: TECH-WRITING-STYLE
         name: readme-has-title

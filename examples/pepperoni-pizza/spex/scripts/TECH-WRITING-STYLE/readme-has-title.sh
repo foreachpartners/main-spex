@@ -2,8 +2,8 @@
 # TECH-WRITING-STYLE / readme-has-title (frontend-only, per-repo)
 #
 # A frontend-specific check declared in spex.yaml under `checks_additional`.
-# Lives in the frontend repository's own `scripts/` because additional checks
-# resolve their script path under the repository directory.
+# Like every check script, it lives in the spex repository's `scripts/`; the
+# `per-repo` run scope runs it once in the frontend repository's directory.
 #
 # The README must open with a top-level Markdown title (`# ...`).
 set -eu

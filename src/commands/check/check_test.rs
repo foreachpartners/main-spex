@@ -174,10 +174,10 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts/TECH-COMMIT-MESSAGE-FORMAT"))
-            .expect("repo scripts");
-        std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/TECH-COMMIT-MESSAGE-FORMAT/sample.sh");
+        std::fs::create_dir_all(spex.join("scripts/TECH-COMMIT-MESSAGE-FORMAT"))
+            .expect("spex scripts");
+        std::fs::create_dir_all(&repo).expect("repo");
+        let script = spex.join("scripts/TECH-COMMIT-MESSAGE-FORMAT/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
@@ -189,7 +189,7 @@ mod tests {
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
-            &repo,
+            &spex,
             &[],
             &mut findings,
         );
@@ -205,9 +205,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(repo.join("scripts/TECH-WRITING-STYLE")).expect("repo scripts");
-        std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/TECH-WRITING-STYLE/echo-args.sh");
+        std::fs::create_dir_all(spex.join("scripts/TECH-WRITING-STYLE")).expect("spex scripts");
+        std::fs::create_dir_all(&repo).expect("repo");
+        let script = spex.join("scripts/TECH-WRITING-STYLE/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -226,7 +226,7 @@ mod tests {
             "TECH-WRITING-STYLE",
             &check,
             &repo,
-            &repo,
+            &spex,
             &[&file],
             &mut findings,
         );
@@ -250,7 +250,7 @@ mod tests {
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
-            &repo,
+            &spex,
             &[],
             &mut findings,
         );
@@ -275,7 +275,7 @@ mod tests {
             "TECH-WRITING-STYLE",
             &check,
             &repo,
-            &repo,
+            &spex,
             &[],
             &mut findings,
         );
@@ -384,18 +384,18 @@ mod tests {
 
     #[test]
     #[serial(script_exec)]
-    fn override_sets_repo_script() {
+    fn override_sets_script_resolves_from_spex() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&repo).expect("repo");
         std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
-        std::fs::create_dir_all(repo.join("scripts/TECH-X")).expect("repo scripts");
-        let spex_script = spex.join("scripts/TECH-X/foo.sh");
-        std::fs::write(&spex_script, "#!/bin/sh\necho spex\nexit 1\n").expect("spex script");
-        make_executable(&spex_script);
-        let repo_script = repo.join("scripts/TECH-X/foo.sh");
-        std::fs::write(&repo_script, "#!/bin/sh\necho repo\nexit 1\n").expect("repo script");
-        make_executable(&repo_script);
+        let inherited = spex.join("scripts/TECH-X/foo.sh");
+        std::fs::write(&inherited, "#!/bin/sh\necho inherited\nexit 1\n").expect("inherited");
+        make_executable(&inherited);
+        let custom = spex.join("scripts/TECH-X/custom.sh");
+        std::fs::write(&custom, "#!/bin/sh\necho custom\nexit 1\n").expect("custom");
+        make_executable(&custom);
 
         let mut foo = script_check("foo.sh", RunScope::PerRepo);
         foo.name = "foo".to_string();
@@ -403,7 +403,7 @@ mod tests {
 
         let mut repository = repository("../api", vec!["TECH-X"]);
         let mut over = check_override("TECH-X", "foo");
-        over.script = Some("foo.sh".to_string());
+        over.script = Some("custom.sh".to_string());
         repository.checks_override = vec![over];
 
         let mut findings = Vec::new();
@@ -418,7 +418,7 @@ mod tests {
         .expect("check");
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].message, "repo");
+        assert_eq!(findings[0].message, "custom");
     }
 
     #[test]
@@ -591,20 +591,20 @@ mod tests {
 
     #[test]
     #[serial(script_exec)]
-    fn additional_script_resolves_from_repo_base() {
+    fn additional_script_resolves_from_spex_base() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
-        std::fs::create_dir_all(repo.join("scripts/TECH-X")).expect("repo scripts");
-        std::fs::create_dir_all(&spex).expect("spex");
-        let script = repo.join("scripts/TECH-X/repo-only.sh");
-        std::fs::write(&script, "#!/bin/sh\necho repo-only\nexit 1\n").expect("script");
+        std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
+        std::fs::create_dir_all(&repo).expect("repo");
+        let script = spex.join("scripts/TECH-X/added.sh");
+        std::fs::write(&script, "#!/bin/sh\necho added\nexit 1\n").expect("script");
         make_executable(&script);
 
         let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![]))]);
 
-        let mut added = script_check("repo-only.sh", RunScope::PerRepo);
-        added.name = "repo-only".to_string();
+        let mut added = script_check("added.sh", RunScope::PerRepo);
+        added.name = "added".to_string();
         let mut repository = repository("../api", vec!["TECH-X"]);
         repository.checks_additional = vec![RepoCheck {
             spec: "TECH-X".to_string(),
@@ -623,7 +623,7 @@ mod tests {
         .expect("check");
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].message, "repo-only");
+        assert_eq!(findings[0].message, "added");
     }
 
     #[test]

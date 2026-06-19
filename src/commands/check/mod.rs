@@ -51,6 +51,7 @@ struct ScopedFile {
 struct RepoCtx<'a> {
     repo: &'a Repository,
     repo_path: &'a Path,
+    spex_dir: &'a Path,
     candidates: &'a [ScopedFile],
 }
 
@@ -60,7 +61,6 @@ struct RepoCtx<'a> {
 struct WorkspaceCheck {
     spec_id: String,
     check: Check,
-    script_base: PathBuf,
     files: Vec<PathBuf>,
 }
 
@@ -161,6 +161,7 @@ fn check_repo(
     let ctx = RepoCtx {
         repo,
         repo_path: &repo_path,
+        spex_dir,
         candidates: &candidates,
     };
 
@@ -190,7 +191,7 @@ fn check_repo(
             if overridden.contains(&(spec_id.as_str(), check.name.as_str())) {
                 continue;
             }
-            dispatch_check(&ctx, &spec.id, check, spex_dir, findings, workspace_checks);
+            dispatch_check(&ctx, &spec.id, check, findings, workspace_checks);
         }
     }
 
@@ -211,19 +212,7 @@ fn check_repo(
         }
 
         let effective = over.apply(base);
-        let script_base = if over.script.is_some() {
-            &repo_path
-        } else {
-            spex_dir
-        };
-        dispatch_check(
-            &ctx,
-            &over.spec,
-            &effective,
-            script_base,
-            findings,
-            workspace_checks,
-        );
+        dispatch_check(&ctx, &over.spec, &effective, findings, workspace_checks);
     }
 
     for additional in &repo.checks_additional {
@@ -241,7 +230,6 @@ fn check_repo(
             &ctx,
             &additional.spec,
             &additional.check,
-            &repo_path,
             findings,
             workspace_checks,
         );
@@ -279,14 +267,13 @@ fn dispatch_check(
     ctx: &RepoCtx,
     spec_id: &str,
     check: &Check,
-    script_base: &Path,
     findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) {
     if check.kind == CheckKind::Script && check.run == RunScope::Workspace {
-        collect_workspace_check(ctx, spec_id, check, script_base, findings, workspace_checks);
+        collect_workspace_check(ctx, spec_id, check, findings, workspace_checks);
     } else {
-        run_check(ctx, spec_id, check, script_base, findings);
+        run_check(ctx, spec_id, check, findings);
     }
 }
 
@@ -297,7 +284,6 @@ fn collect_workspace_check(
     ctx: &RepoCtx,
     spec_id: &str,
     check: &Check,
-    script_base: &Path,
     findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) {
@@ -321,7 +307,6 @@ fn collect_workspace_check(
         workspace_checks.push(WorkspaceCheck {
             spec_id: spec_id.to_string(),
             check: check.clone(),
-            script_base: script_base.to_path_buf(),
             files: scoped_files.collect(),
         });
     }

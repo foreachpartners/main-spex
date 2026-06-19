@@ -10,13 +10,7 @@ use super::*;
 // Cap files per script invocation so large repos don't blow past the OS arg limit.
 const SCRIPT_BATCH_SIZE: usize = 1000;
 
-pub(super) fn run_check(
-    ctx: &RepoCtx,
-    spec_id: &str,
-    check: &Check,
-    script_base: &Path,
-    findings: &mut Vec<Finding>,
-) {
+pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &mut Vec<Finding>) {
     let scoped = match scope_files(check, ctx.candidates) {
         Ok(scoped) => scoped,
         Err(message) => {
@@ -32,7 +26,7 @@ pub(super) fn run_check(
             spec_id,
             check,
             ctx.repo_path,
-            script_base,
+            ctx.spex_dir,
             &scoped,
             findings,
         ),
@@ -190,11 +184,11 @@ pub(super) fn run_script(
     spec_id: &str,
     check: &Check,
     repo_path: &Path,
-    script_base: &Path,
+    spex_dir: &Path,
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
-    let Some(script) = locate_script(spec_id, check, script_base, findings) else {
+    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
         return;
     };
 
@@ -213,12 +207,8 @@ pub(super) fn run_workspace_checks(
     findings: &mut Vec<Finding>,
 ) {
     for pending in workspace_checks {
-        let Some(script) = locate_script(
-            &pending.spec_id,
-            &pending.check,
-            &pending.script_base,
-            findings,
-        ) else {
+        let Some(script) = locate_script(&pending.spec_id, &pending.check, spex_dir, findings)
+        else {
             continue;
         };
         run_workspace_script(
@@ -283,7 +273,7 @@ where
 fn locate_script(
     spec_id: &str,
     check: &Check,
-    script_base: &Path,
+    spex_dir: &Path,
     findings: &mut Vec<Finding>,
 ) -> Option<PathBuf> {
     let Some(reference) = &check.script else {
@@ -295,8 +285,8 @@ fn locate_script(
         return None;
     };
 
-    let Some(script) = resolve_script(reference, script_base, spec_id) else {
-        let dir = script_base.join(tech_spec::SCRIPTS_DIR).join(spec_id);
+    let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
+        let dir = spex_dir.join(tech_spec::SCRIPTS_DIR).join(spec_id);
         findings.push(config_error(
             spec_id,
             &check.name,

@@ -50,7 +50,7 @@
     },
     {
       "title": "script check",
-      "description": "Runs an external script stored at `scripts/<spec-id>/<script>`, resolved under its base directory (the spex directory for tech-spec and inherited checks, the repository directory for per-repo `checks_additional` and for `checks_override` that set `script`).",
+      "description": "Runs an external script stored in the spex directory at `scripts/<spec-id>/<script>`. Every script lives in spex, including those named by per-repo `checks_additional` and `checks_override`.",
       "allOf": [
         { "$ref": "#/$defs/check_base" },
         { "$ref": "#/$defs/file_scope" }
@@ -59,7 +59,7 @@
         "type": { "const": "script" },
         "script": {
           "type": "string",
-          "description": "Script filename (for example `writing-style.sh`). Resolved at `scripts/<spec-id>/<script>` under the base directory, so the `<spec-id>` folder keeps checks from different specs from sharing a path.",
+          "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<spec-id>/<script>`, so the `<spec-id>` folder keeps checks from different specs from sharing a path.",
           "minLength": 1
         },
         "run": {

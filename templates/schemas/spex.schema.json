@@ -57,7 +57,7 @@
         },
         "checks_additional": {
           "type": "array",
-          "description": "Full checks that run for this repository in addition to the checks it inherits from its tech_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech_specs). Script paths resolve under the repository directory.",
+          "description": "Full checks that run for this repository in addition to the checks it inherits from its tech_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech_specs). Script paths resolve in the spex directory.",
           "items": {
             "allOf": [
               { "$ref": "check.schema.json" },
@@ -67,7 +67,7 @@
         },
         "checks_override": {
           "type": "array",
-          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. Set `disable: true` to turn the inherited check off entirely. When the override sets `script`, the path resolves under the repository directory; otherwise the inherited spex script is reused.",
+          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. Set `disable: true` to turn the inherited check off entirely. A `script` set here resolves in the spex directory, the same as the inherited script.",
           "items": {
             "$ref": "#/$defs/check_override"
           }
@@ -114,7 +114,7 @@
         },
         "script": {
           "type": "string",
-          "description": "Overrides the inherited check's script filename. When set, it resolves at `scripts/<spec-id>/<script>` under the repository directory.",
+          "description": "Overrides the inherited check's script filename. When set, it resolves in the spex directory at `scripts/<spec-id>/<script>`.",
           "minLength": 1
         },
         "run": {
