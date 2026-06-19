@@ -71,9 +71,41 @@
           "items": {
             "$ref": "#/$defs/check_override"
           }
+        },
+        "checks_preexisting_errors": {
+          "type": "array",
+          "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. An `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
+          "items": {
+            "$ref": "#/$defs/preexisting_error"
+          }
         }
       },
       "required": ["repository_name", "path"],
+      "additionalProperties": false
+    },
+    "preexisting_error": {
+      "type": "object",
+      "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
+      "properties": {
+        "spec": {
+          "description": "Tech spec ID of the check whose pre-existing errors are baselined. Must be one of the repository's tech_specs.",
+          "$ref": "tech-spec-id.schema.json"
+        },
+        "check": {
+          "type": "string",
+          "description": "Name of the check whose pre-existing errors are baselined.",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "description": "Repository-relative files whose pre-existing errors are suppressed. Omit or leave empty to suppress the whole check. A regexp finding's `file:line` location is matched on its file part.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": ["spec", "check"],
       "additionalProperties": false
     },
     "check_override": {

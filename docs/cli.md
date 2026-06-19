@@ -58,7 +58,22 @@ The command exits with a non-zero status when any `error`-severity finding is re
 
 A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<spec-id>/<script>` under the spex directory — including the scripts named by per-repo `checks_additional` and `checks_override`. Set `run: per-file` (the default) to pass the matched files as arguments, `run: per-repo` to run the script once in the repository directory with no arguments, or `run: workspace` to run the script once in the spex directory with the matched files from every repository (as paths relative to the spex directory) as arguments. A `workspace` script runs a single time even when several repositories inherit it, so it can reason about the whole workspace at once (for example, flagging spec-id annotations that point at a spec that no longer exists).
 
+A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
+
 A repository can adjust the checks it inherits, or add new ones, in `spex.yaml` via `checks_override` (a partial patch identified by `spec` + `name`) and `checks_additional` (full checks). See the [guide](guide.md#per-repository-checks) for details.
+
+A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `spec` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
+
+```yaml
+repositories:
+  - repository_name: frontend
+    path: ../frontend
+    tech_specs: [TECH-WRITING-STYLE]
+    checks_preexisting_errors:
+      - spec: TECH-WRITING-STYLE
+        check: no-cyrillic
+        files: [README.md, docs/intro.md]
+```
 
 #### Flags
 

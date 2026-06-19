@@ -7,6 +7,9 @@
 # (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`). Flags any line that opens an annotation
 # but does not match its grammar. Receives candidate files as arguments
 # (Markdown excluded by the check's exclude patterns).
+#
+# Emits one finding per malformed line following the script location contract:
+#   <file>:<line><TAB>malformed spec-id annotation
 set -u
 
 [ "$#" -eq 0 ] && exit 0
@@ -22,11 +25,11 @@ for file in "$@"; do
     grep -nE '@spec ' "$file" | grep -Ev "$comment"
     grep -nE 'x-spec:' "$file" | grep -Ev "$xspec"
   )
-  if [ -n "$bad" ]; then
-    echo "$file:"
-    echo "$bad"
-    status=1
-  fi
+  [ -n "$bad" ] || continue
+  status=1
+  printf '%s\n' "$bad" | while IFS= read -r line; do
+    printf '%s:%s\tmalformed spec-id annotation\n' "$file" "${line%%:*}"
+  done
 done
 
 exit "$status"

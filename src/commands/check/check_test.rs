@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::config::Repository;
+    use crate::config::{PreexistingError, Repository};
     use crate::tech_spec::{
         Check, CheckKind, CheckOverride, RepoCheck, RunScope, Severity, TechSpec,
     };
@@ -236,6 +236,43 @@ mod tests {
     }
 
     #[test]
+    #[serial(script_exec)]
+    fn script_emits_one_finding_per_location_line() {
+        let workspace = tempdir().expect("workspace");
+        let repo = workspace.path().join("api");
+        let spex = workspace.path().join("spex");
+        std::fs::create_dir_all(spex.join("scripts/TECH-WRITING-STYLE")).expect("spex scripts");
+        std::fs::create_dir_all(&repo).expect("repo");
+        let script = spex.join("scripts/TECH-WRITING-STYLE/locations.sh");
+        // Emits two contract lines (one with a location, one file-less) plus a
+        // blank line that must be ignored.
+        std::fs::write(
+            &script,
+            "#!/bin/sh\nprintf 'docs/intro.md:40\\tmatches forbidden writing pattern\\n'\nprintf '\\n'\nprintf 'a stray diagnostic\\n'\nexit 1\n",
+        )
+        .expect("write script");
+        make_executable(&script);
+
+        let check = script_check("locations.sh", RunScope::PerRepo);
+
+        let mut findings = Vec::new();
+        run_script(
+            "TECH-WRITING-STYLE",
+            &check,
+            &repo,
+            &spex,
+            &[],
+            &mut findings,
+        );
+
+        assert_eq!(findings.len(), 2);
+        assert_eq!(findings[0].location.as_deref(), Some("docs/intro.md:40"));
+        assert_eq!(findings[0].message, "matches forbidden writing pattern");
+        assert!(findings[1].location.is_none());
+        assert_eq!(findings[1].message, "a stray diagnostic");
+    }
+
+    #[test]
     fn script_reports_config_error_when_file_missing() {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
@@ -318,6 +355,7 @@ mod tests {
             tech_specs: tech_specs.into_iter().map(str::to_string).collect(),
             checks_additional: Vec::new(),
             checks_override: Vec::new(),
+            checks_preexisting_errors: Vec::new(),
         }
     }
 
@@ -680,12 +718,20 @@ mod tests {
 
         run_workspace_checks(&spex, &collected, &mut findings);
 
-        assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].spec_id, "TECH-X");
-        assert_eq!(findings[0].check, "list");
-        let message = &findings[0].message;
-        assert!(message.contains("../api/a.txt"), "got: {message}");
-        assert!(message.contains("../web/b.txt"), "got: {message}");
+        // The script echoes each in-scope file on its own line, so the contract
+        // turns them into one finding per file.
+        assert_eq!(findings.len(), 2);
+        assert!(
+            findings
+                .iter()
+                .all(|finding| finding.spec_id == "TECH-X" && finding.check == "list")
+        );
+        let messages: Vec<&str> = findings
+            .iter()
+            .map(|finding| finding.message.as_str())
+            .collect();
+        assert!(messages.contains(&"../api/a.txt"), "got: {messages:?}");
+        assert!(messages.contains(&"../web/b.txt"), "got: {messages:?}");
     }
 
     #[test]
@@ -722,5 +768,74 @@ mod tests {
             .map(|file| file.to_string_lossy().into_owned())
             .collect();
         assert_eq!(files, vec!["../api/keep.txt".to_string()]);
+    }
+
+    fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {
+        Finding {
+            severity,
+            spec_id: "TECH-X".to_string(),
+            check: check.to_string(),
+            location: location.map(str::to_string),
+            message: "boom".to_string(),
+        }
+    }
+
+    fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
+        PreexistingError {
+            spec: "TECH-X".to_string(),
+            check: check.to_string(),
+            files: files.into_iter().map(str::to_string).collect(),
+        }
+    }
+
+    #[test]
+    fn normalize_location_drops_trailing_line_number() {
+        assert_eq!(normalize_location("src/main.rs:42"), "src/main.rs");
+        assert_eq!(normalize_location("src/main.rs"), "src/main.rs");
+        // A non-numeric suffix is part of the path, not a line number.
+        assert_eq!(normalize_location("a:b/c.rs"), "a:b/c.rs");
+    }
+
+    #[test]
+    fn preexisting_empty_files_suppresses_whole_check() {
+        let baseline = vec![preexisting("no-cyrillic", vec![])];
+        assert!(is_preexisting(
+            &finding(Severity::Error, "no-cyrillic", Some("README.md:1")),
+            &baseline,
+        ));
+        assert!(is_preexisting(
+            &finding(Severity::Error, "no-cyrillic", None),
+            &baseline,
+        ));
+    }
+
+    #[test]
+    fn preexisting_matches_listed_file_only() {
+        let baseline = vec![preexisting("no-cyrillic", vec!["docs/old.md"])];
+        // Listed file, normalized from `file:line`, is suppressed.
+        assert!(is_preexisting(
+            &finding(Severity::Error, "no-cyrillic", Some("docs/old.md:3")),
+            &baseline,
+        ));
+        // A new error in another file still surfaces.
+        assert!(!is_preexisting(
+            &finding(Severity::Error, "no-cyrillic", Some("docs/new.md:3")),
+            &baseline,
+        ));
+    }
+
+    #[test]
+    fn preexisting_never_suppresses_warnings_or_other_checks() {
+        let baseline = vec![preexisting("no-cyrillic", vec![])];
+        // Warnings are never a baseline concern.
+        assert!(!is_preexisting(
+            &finding(Severity::Warn, "no-cyrillic", Some("README.md:1")),
+            &baseline,
+        ));
+        // A different check name does not match.
+        assert!(!is_preexisting(
+            &finding(Severity::Error, "writing", Some("README.md:1")),
+            &baseline,
+        ));
     }
 }

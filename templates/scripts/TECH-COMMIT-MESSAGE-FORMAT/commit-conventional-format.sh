@@ -9,6 +9,9 @@
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.
+#
+# Findings are file-less (git history has no working-tree path): one line per
+# offending commit subject.
 set -eu
 
 if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
@@ -23,7 +26,8 @@ bad=$(git log -10 --no-merges --pretty=%s \
   | grep -vE "$conventional" || true)
 
 if [ -n "$bad" ]; then
-  echo "Commits not in Conventional Commits format:"
-  echo "$bad"
+  printf '%s\n' "$bad" | while IFS= read -r subject; do
+    printf 'commit not in Conventional Commits format: %s\n' "$subject"
+  done
   exit 1
 fi

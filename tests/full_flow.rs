@@ -176,6 +176,48 @@ fn init_then_check_pepperoni_pizza() {
 }
 
 #[test]
+fn preexisting_errors_baseline_suppresses_matching_error() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
+    copy_dir(&example, &project);
+
+    let init = run_spex(&project, &["init"], "\n\n");
+    assert!(init.status.success(), "init failed");
+
+    // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
+    // error in any other file would still surface.
+    let config_path = project.join("spex/spex.yaml");
+    let config = fs::read_to_string(&config_path).expect("read spex.yaml");
+    let patched = config.replace(
+        "  - repository_name: frontend\n",
+        "  - repository_name: frontend\n    checks_preexisting_errors:\n      - spec: TECH-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
+    );
+    assert_ne!(
+        patched, config,
+        "frontend repository not found in spex.yaml"
+    );
+    fs::write(&config_path, patched).expect("write spex.yaml");
+
+    let check = run_spex(&project, &["check"], "");
+    let report = report_text(&check.stdout);
+    assert!(
+        !report.contains("error  TECH-WRITING-STYLE/no-cyrillic"),
+        "baseline did not suppress the pre-existing error\n{report}",
+    );
+    assert!(
+        report.contains("proj: 0 errors"),
+        "expected no remaining errors\n{report}",
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 once the only error is baselined (exit {:?})",
+        check.status.code(),
+    );
+}
+
+#[test]
 fn workflow() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");

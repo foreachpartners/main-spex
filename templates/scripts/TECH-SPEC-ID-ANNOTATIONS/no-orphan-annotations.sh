@@ -7,6 +7,9 @@
 # paths relative to the spex directory), and the known Spec IDs are the spec
 # files in biz-specs/ and tech-specs/. An annotation pointing at an ID with no
 # spec file is an orphan — usually a spec that was renamed or removed.
+#
+# Emits one finding per orphan following the script location contract:
+#   <file><TAB>orphan annotation references unknown spec `<id>`
 set -u
 
 [ "$#" -eq 0 ] && exit 0
@@ -34,7 +37,7 @@ for file in "$@"; do
   refs=$(grep -hE '@spec |x-spec:' "$file" 2>/dev/null | grep -oE "$id" | sort -u)
   for ref in $refs; do
     is_known "$ref" || {
-      echo "$file: orphan annotation references unknown spec \`$ref\`"
+      printf '%s\torphan annotation references unknown spec `%s`\n' "$file" "$ref"
       status=1
     }
   done

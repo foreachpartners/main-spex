@@ -48,6 +48,20 @@ pub struct Repository {
     pub checks_additional: Vec<RepoCheck>,
     #[serde(default)]
     pub checks_override: Vec<CheckOverride>,
+    #[serde(default)]
+    pub checks_preexisting_errors: Vec<PreexistingError>,
+}
+
+// A baseline entry that suppresses pre-existing `error`-severity findings for an
+// inherited or additional check identified by `spec` + `check`. An empty `files`
+// suppresses the whole check; otherwise only findings whose location file is
+// listed are suppressed, so new errors in other files still surface.
+#[derive(Debug, Deserialize)]
+pub struct PreexistingError {
+    pub spec: String,
+    pub check: String,
+    #[serde(default)]
+    pub files: Vec<String>,
 }
 
 pub fn find_dir(start: &Path) -> Result<PathBuf> {

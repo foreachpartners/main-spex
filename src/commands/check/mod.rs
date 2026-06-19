@@ -6,7 +6,7 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::config::{Config, Repository};
+use crate::config::{Config, PreexistingError, Repository};
 use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 use crate::util;
 use crate::workspace::Workspace;
@@ -87,7 +87,8 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     let mut reports = Vec::with_capacity(selected.len());
     let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
-    for repo in selected {
+    for repo in &selected {
+        let repo = *repo;
         let mut findings = Vec::new();
         check_repo(
             repo,
@@ -97,6 +98,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             &mut findings,
             &mut workspace_checks,
         )?;
+        findings.retain(|finding| !is_preexisting(finding, &repo.checks_preexisting_errors));
         reports.push(RepoReport {
             name: repo.name.clone(),
             findings,
@@ -106,6 +108,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     if !workspace_checks.is_empty() {
         let mut findings = Vec::new();
         run_workspace_checks(&workspace.dir, &workspace_checks, &mut findings);
+        findings.retain(|finding| !is_preexisting_workspace(finding, &selected));
         reports.push(RepoReport {
             name: "workspace".to_string(),
             findings,
@@ -113,6 +116,76 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     }
 
     Ok(report(&workspace.config, &reports))
+}
+
+// Drops a finding when it matches a repository's pre-existing-error baseline: an
+// `error`-severity finding whose `(spec, check)` matches an entry and whose
+// location file is listed (or the entry lists no files, suppressing the whole
+// check). Warnings and unmatched errors always survive.
+fn is_preexisting(finding: &Finding, baseline: &[PreexistingError]) -> bool {
+    finding.severity == Severity::Error
+        && matches_baseline(
+            baseline,
+            &finding.spec_id,
+            &finding.check,
+            finding_file(finding).as_deref(),
+        )
+}
+
+// Workspace findings carry a location prefixed by the owning repository's path
+// (relative to the spex directory), so resolve each to its repository and match
+// against that repository's baseline. There is no workspace-level baseline.
+fn is_preexisting_workspace(finding: &Finding, repos: &[&Repository]) -> bool {
+    if finding.severity != Severity::Error {
+        return false;
+    }
+    let Some(location) = finding.location.as_deref() else {
+        return false;
+    };
+    repos.iter().any(|repo| {
+        let prefix = format!("{}/", repo.path);
+        location.strip_prefix(&prefix).is_some_and(|rel| {
+            matches_baseline(
+                &repo.checks_preexisting_errors,
+                &finding.spec_id,
+                &finding.check,
+                Some(&normalize_location(rel)),
+            )
+        })
+    })
+}
+
+fn matches_baseline(
+    baseline: &[PreexistingError],
+    spec_id: &str,
+    check: &str,
+    file: Option<&str>,
+) -> bool {
+    baseline.iter().any(|entry| {
+        entry.spec == spec_id
+            && entry.check == check
+            && (entry.files.is_empty()
+                || file.is_some_and(|file| entry.files.iter().any(|listed| listed == file)))
+    })
+}
+
+fn finding_file(finding: &Finding) -> Option<String> {
+    finding
+        .location
+        .as_deref()
+        .map(|location| normalize_location(location))
+}
+
+// Reduces a finding location to its file path by dropping a trailing `:<line>`,
+// so a regexp finding's `file:line` matches a baseline entry keyed on `file`.
+fn normalize_location(location: &str) -> String {
+    if let Some((path, line)) = location.rsplit_once(':')
+        && !line.is_empty()
+        && line.bytes().all(|byte| byte.is_ascii_digit())
+    {
+        return path.to_string();
+    }
+    location.to_string()
 }
 
 fn select_repos<'a>(config: &'a Config, names: &[String]) -> Result<Vec<&'a Repository>> {

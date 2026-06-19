@@ -263,9 +263,45 @@ where
     };
 
     if !output.status.success() {
-        findings.push(violation(check, spec_id, None, script_message(&output)));
+        push_script_findings(spec_id, check, &output, findings);
     }
     true
+}
+
+// Parses a failed script's stdout into one finding per line, following the
+// script location contract: each line is `LOCATION<TAB>MESSAGE`, where a
+// missing `LOCATION` (empty, or no tab at all) yields a file-less finding. When
+// the script printed nothing on stdout, falls back to a single file-less finding
+// built from stderr or the exit status.
+fn push_script_findings(
+    spec_id: &str,
+    check: &Check,
+    output: &std::process::Output,
+    findings: &mut Vec<Finding>,
+) {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let before = findings.len();
+    for line in stdout.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let (location, message) = parse_script_line(line);
+        findings.push(violation(check, spec_id, location, message));
+    }
+    if findings.len() == before {
+        findings.push(violation(check, spec_id, None, script_fallback(output)));
+    }
+}
+
+fn parse_script_line(line: &str) -> (Option<String>, String) {
+    match line.split_once('\t') {
+        Some((location, message)) => {
+            let location = location.trim();
+            let location = (!location.is_empty()).then(|| location.to_string());
+            (location, message.trim().to_string())
+        }
+        None => (None, line.trim().to_string()),
+    }
 }
 
 // Resolves a script check's program path, pushing a config error when the check
@@ -349,22 +385,14 @@ fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -
     )
 }
 
-fn script_message(output: &std::process::Output) -> String {
-    let stdout = String::from_utf8_lossy(&output.stdout);
+fn script_fallback(output: &std::process::Output) -> String {
     let stderr = String::from_utf8_lossy(&output.stderr);
-    let mut parts = Vec::new();
-    if !stdout.trim().is_empty() {
-        parts.push(stdout.trim().to_string());
-    }
     if !stderr.trim().is_empty() {
-        parts.push(stderr.trim().to_string());
+        return stderr.trim().to_string();
     }
-    if parts.is_empty() {
-        let code = output
-            .status
-            .code()
-            .map_or_else(|| "signal".to_string(), |code| code.to_string());
-        return format!("script exited with status {code}");
-    }
-    parts.join("\n")
+    let code = output
+        .status
+        .code()
+        .map_or_else(|| "signal".to_string(), |code| code.to_string());
+    format!("script exited with status {code}")
 }
