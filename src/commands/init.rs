@@ -7,7 +7,7 @@ use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
 use crate::biz_spec::BIZ_SPECS_DIR;
-use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::tech_spec::TechSpec;
 use crate::templates;
 
@@ -297,7 +297,7 @@ fn config_to_yaml(
     repositories: &[DiscoveredRepo],
     tech_specs: &DefaultTechSpecs,
 ) -> String {
-    let mut yaml = format!("project_name: {project_name}\n");
+    let mut yaml = format!("project_name: {project_name}\ncli_version: {CLI_VERSION}\n");
 
     if repositories.is_empty() {
         yaml.push_str("repositories: []\n");

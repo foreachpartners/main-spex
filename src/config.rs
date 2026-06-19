@@ -13,6 +13,7 @@ mod config_test;
 
 pub const SPEX_CONFIG_FILE: &str = "spex.yaml";
 pub const SPEX_DIR_NAME: &str = "spex";
+pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 type Result<T> = core::result::Result<T, Report<ConfigError>>;
 
@@ -31,6 +32,7 @@ pub enum ConfigError {
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub project_name: String,
+    pub cli_version: String,
     #[serde(default)]
     pub repositories: Vec<Repository>,
 }
@@ -72,4 +74,51 @@ pub fn load(spex_dir: &Path) -> Result<Config> {
         .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
     serde_yaml_ng::from_str(&raw).change_context(ConfigError::Parse)
+}
+
+// Warns when the version that wrote `spex.yaml` differs from the running CLI so
+// the user knows to run `spex update` and resync the bundled templates.
+pub fn version_warning(config: &Config) -> Option<String> {
+    if config.cli_version == CLI_VERSION {
+        return None;
+    }
+    Some(format!(
+        "`{SPEX_CONFIG_FILE}` was written by spex {}, but the installed CLI is {CLI_VERSION} — run `spex update` to sync",
+        config.cli_version
+    ))
+}
+
+// Rewrites the `cli_version` line in raw `spex.yaml` text, preserving comments
+// and field order. Inserts it after `project_name` when absent.
+pub fn set_cli_version(raw: &str, version: &str) -> String {
+    let new_line = format!("cli_version: {version}");
+
+    if raw.lines().any(|line| line.starts_with("cli_version:")) {
+        let mut out = String::with_capacity(raw.len());
+        for line in raw.lines() {
+            if line.starts_with("cli_version:") {
+                out.push_str(&new_line);
+            } else {
+                out.push_str(line);
+            }
+            out.push('\n');
+        }
+        return out;
+    }
+
+    let mut out = String::with_capacity(raw.len() + new_line.len() + 1);
+    let mut inserted = false;
+    for line in raw.lines() {
+        out.push_str(line);
+        out.push('\n');
+        if !inserted && line.starts_with("project_name:") {
+            out.push_str(&new_line);
+            out.push('\n');
+            inserted = true;
+        }
+    }
+    if !inserted {
+        out.insert_str(0, &format!("{new_line}\n"));
+    }
+    out
 }

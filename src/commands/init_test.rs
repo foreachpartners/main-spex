@@ -114,8 +114,10 @@ mod tests_unit {
     fn render_config_lists_repositories() {
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &no_specs());
 
-        let expected = "\
+        let expected = format!(
+            "\
 project_name: pizza-shop
+cli_version: {CLI_VERSION}
 repositories:
   - repository_name: server
     path: ../server
@@ -123,7 +125,8 @@ repositories:
   - repository_name: client
     path: ../client
     tech_specs: []
-";
+"
+        );
         assert_eq!(yaml, expected);
     }
 
@@ -138,15 +141,18 @@ repositories:
         };
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
-        let expected = "\
+        let expected = format!(
+            "\
 project_name: pizza-shop
+cli_version: {CLI_VERSION}
 repositories:
   - repository_name: server
     path: ../server
     tech_specs:
       - TECH-SECRET-HANDLING
       - TECH-WRITING-STYLE
-";
+"
+        );
         assert_eq!(yaml, expected);
     }
 
@@ -158,8 +164,10 @@ repositories:
         };
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
 
-        let expected = "\
+        let expected = format!(
+            "\
 project_name: pizza-shop
+cli_version: {CLI_VERSION}
 repositories:
   - repository_name: server
     path: ../server
@@ -174,7 +182,8 @@ repositories:
     path: .
     tech_specs:
       - TECH-WRITING-STYLE
-";
+"
+        );
         assert_eq!(yaml, expected);
     }
 
@@ -182,7 +191,10 @@ repositories:
     fn render_config_handles_no_repositories() {
         let yaml = config_to_yaml("pizza-shop", &[], &no_specs());
 
-        assert_eq!(yaml, "project_name: pizza-shop\nrepositories: []\n");
+        assert_eq!(
+            yaml,
+            format!("project_name: pizza-shop\ncli_version: {CLI_VERSION}\nrepositories: []\n")
+        );
     }
 
     #[test]

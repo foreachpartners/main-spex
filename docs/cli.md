@@ -12,7 +12,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing `spex` directory.
 
-It creates the `spex` directory (if missing), prompts to confirm the project name (defaulting to the workspace root folder name) and the discovered workspace repositories, then writes `spex.yaml`, a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default tech specs).
+It creates the `spex` directory (if missing), prompts to confirm the project name (defaulting to the workspace root folder name) and the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default tech specs).
 
 ```sh
 spex init
@@ -24,7 +24,7 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and tech specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or tech specs you have added are left untouched. Use it after upgrading the `spex` binary to pull in framework updates.
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or tech specs you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update

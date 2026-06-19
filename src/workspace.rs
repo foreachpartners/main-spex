@@ -6,6 +6,7 @@ use thiserror::Error;
 
 use crate::biz_spec::{self, BizSpec};
 use crate::config::{self, Config};
+use crate::style::Style;
 use crate::tech_spec::{self, TechSpec};
 
 type Result<T> = core::result::Result<T, Report<WorkspaceError>>;
@@ -35,6 +36,10 @@ impl Workspace {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
         let dir = config::find_dir(&current_dir).change_context(WorkspaceError::Config)?;
         let config = config::load(&dir).change_context(WorkspaceError::Config)?;
+        if let Some(warning) = config::version_warning(&config) {
+            let style = Style::detect();
+            eprintln!("{} {warning}", style.yellow("warning:"));
+        }
         Ok(Self { dir, config })
     }
 

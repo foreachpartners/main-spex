@@ -10,6 +10,11 @@
       "description": "Kebab-case name of the project.",
       "minLength": 1
     },
+    "cli_version": {
+      "type": "string",
+      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns on a mismatch with the installed CLI; run `spex update` to sync.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
     "description": {
       "type": "string",
       "description": "Optional summary of what the project is and does.",
@@ -143,11 +148,12 @@
       "additionalProperties": false
     }
   },
-  "required": ["project_name"],
+  "required": ["project_name", "cli_version"],
   "additionalProperties": false,
   "examples": [
     {
       "project_name": "pepperoni-pizza",
+      "cli_version": "0.1.0",
       "description": "Online ordering for a pizzeria.",
       "repositories": [
         {
