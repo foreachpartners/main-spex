@@ -4,6 +4,8 @@ mod config;
 mod style;
 mod tech_spec;
 mod templates;
+mod util;
+mod workspace;
 
 use std::fmt::Debug;
 use std::process::ExitCode;

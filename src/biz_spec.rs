@@ -1,9 +1,10 @@
-use std::fs;
 use std::path::Path;
 
-use error_stack::{Report, ResultExt};
+use error_stack::Report;
 use serde::Deserialize;
 use thiserror::Error;
+
+use crate::util;
 
 pub const BIZ_SPECS_DIR: &str = "biz-specs";
 
@@ -55,33 +56,12 @@ impl Status {
 }
 
 pub fn load_all(specs_dir: &Path) -> Result<Vec<BizSpec>> {
-    let mut specs = Vec::new();
-    if !specs_dir.is_dir() {
-        return Ok(specs);
-    }
-
-    let entries = fs::read_dir(specs_dir)
-        .change_context(BizSpecError::ReadDir)
-        .attach_with(|| format!("could not read `{}`", specs_dir.display()))?;
-
-    for entry in entries {
-        let entry = entry.change_context(BizSpecError::ReadDir)?;
-        let path = entry.path();
-        if path.extension().and_then(|ext| ext.to_str()) != Some("yaml") {
-            continue;
-        }
-
-        let file_name = path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned();
-        let raw = fs::read_to_string(&path)
-            .change_context_lazy(|| BizSpecError::ReadFile(file_name.clone()))?;
-        let spec: BizSpec = serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| BizSpecError::Parse(file_name.clone()))?;
-        specs.push(spec);
-    }
+    let mut specs: Vec<BizSpec> = util::load_yaml_dir(
+        specs_dir,
+        || BizSpecError::ReadDir,
+        BizSpecError::ReadFile,
+        BizSpecError::Parse,
+    )?;
 
     specs.sort_by(|a, b| a.id.cmp(&b.id));
     Ok(specs)

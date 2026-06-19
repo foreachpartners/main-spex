@@ -3,15 +3,15 @@ mod tests_unit {
     use super::super::*;
     use tempfile::{TempDir, tempdir};
 
-    fn repo(name: &str) -> Repository {
-        Repository {
+    fn repo(name: &str) -> DiscoveredRepo {
+        DiscoveredRepo {
             name: name.to_string(),
             path: format!("../{name}"),
         }
     }
 
-    fn spex_repo() -> Repository {
-        Repository {
+    fn spex_repo() -> DiscoveredRepo {
+        DiscoveredRepo {
             name: "spex".to_string(),
             path: SPEX_REPO_PATH.to_string(),
         }
@@ -35,7 +35,7 @@ mod tests_unit {
         root
     }
 
-    fn repo_names(repositories: &[Repository]) -> Vec<&str> {
+    fn repo_names(repositories: &[DiscoveredRepo]) -> Vec<&str> {
         repositories.iter().map(|repo| repo.name.as_str()).collect()
     }
 

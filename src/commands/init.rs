@@ -6,6 +6,7 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
+use crate::biz_spec::BIZ_SPECS_DIR;
 use crate::config::{SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::tech_spec::TechSpec;
 use crate::templates;
@@ -14,7 +15,6 @@ use crate::templates;
 #[path = "init_test.rs"]
 mod init_test;
 
-const BIZ_SPECS_DIR_NAME: &str = "biz-specs";
 const PLANS_DIR_NAME: &str = "plans";
 
 type Result<T> = core::result::Result<T, Report<InitError>>;
@@ -44,7 +44,7 @@ const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       rules).
 ";
 
-struct Repository {
+struct DiscoveredRepo {
     name: String,
     path: String,
 }
@@ -85,7 +85,7 @@ pub fn run() -> Result<ExitCode> {
 fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir).change_context(InitError::Io)?;
 
-    let biz_specs = spex_dir.join(BIZ_SPECS_DIR_NAME);
+    let biz_specs = spex_dir.join(BIZ_SPECS_DIR);
     fs::create_dir_all(&biz_specs)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not create `{}`", biz_specs.display()))?;
@@ -101,7 +101,7 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
 fn write_config(
     spex_dir: &Path,
     project_name: &str,
-    repositories: &[Repository],
+    repositories: &[DiscoveredRepo],
     tech_specs: &DefaultTechSpecs,
 ) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
@@ -117,7 +117,7 @@ fn write_config(
 fn write_code_workspace(
     spex_dir: &Path,
     project_name: &str,
-    repositories: &[Repository],
+    repositories: &[DiscoveredRepo],
 ) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
@@ -127,7 +127,7 @@ fn write_code_workspace(
     Ok(())
 }
 
-fn code_workspace_json(project_name: &str, repositories: &[Repository]) -> String {
+fn code_workspace_json(project_name: &str, repositories: &[DiscoveredRepo]) -> String {
     let mut json = String::from("{\n  \"folders\": [\n");
     for repo in repositories {
         let name = workspace_folder_name(project_name, repo);
@@ -142,7 +142,7 @@ fn code_workspace_json(project_name: &str, repositories: &[Repository]) -> Strin
 }
 
 // spex owns its icon; spex-setup fills the icons for the other folders.
-fn workspace_folder_name(project_name: &str, repo: &Repository) -> String {
+fn workspace_folder_name(project_name: &str, repo: &DiscoveredRepo) -> String {
     if repo.path == SPEX_REPO_PATH {
         return format!("{SPEX_WORKSPACE_ICON} {}", repo.name);
     }
@@ -233,7 +233,7 @@ fn confirm_project_name(default_name: &str) -> Result<String> {
     })
 }
 
-fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
+fn discover_repositories(workspace_root: &Path) -> Result<Vec<DiscoveredRepo>> {
     let entries = fs::read_dir(workspace_root)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not read `{}`", workspace_root.display()))?;
@@ -257,7 +257,7 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
             format!("../{dir_name}")
         };
 
-        repositories.push(Repository {
+        repositories.push(DiscoveredRepo {
             name: to_kebab_case(&dir_name),
             path,
         });
@@ -267,7 +267,7 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<Repository>> {
     Ok(repositories)
 }
 
-fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>> {
+fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<DiscoveredRepo>> {
     if repositories.is_empty() {
         let answer = prompt("No workspace repositories found. Continue anyway? [Y/n]: ")?;
         if is_yes(&answer) {
@@ -294,7 +294,7 @@ fn confirm_repositories(repositories: Vec<Repository>) -> Result<Vec<Repository>
 
 fn config_to_yaml(
     project_name: &str,
-    repositories: &[Repository],
+    repositories: &[DiscoveredRepo],
     tech_specs: &DefaultTechSpecs,
 ) -> String {
     let mut yaml = format!("project_name: {project_name}\n");

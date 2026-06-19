@@ -1,0 +1,380 @@
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+use globset::{Glob, GlobSet, GlobSetBuilder};
+use regex::Regex;
+
+use super::*;
+
+// Cap files per script invocation so large repos don't blow past the OS arg limit.
+const SCRIPT_BATCH_SIZE: usize = 1000;
+
+pub(super) fn run_check(
+    ctx: &RepoCtx,
+    spec_id: &str,
+    check: &Check,
+    script_base: &Path,
+    findings: &mut Vec<Finding>,
+) {
+    let scoped = match scope_files(check, ctx.candidates) {
+        Ok(scoped) => scoped,
+        Err(message) => {
+            findings.push(config_error(spec_id, &check.name, message));
+            return;
+        }
+    };
+
+    match check.kind {
+        CheckKind::Regexp => run_regexp(spec_id, check, &scoped, findings),
+        CheckKind::Glob => run_glob(spec_id, check, &scoped, findings),
+        CheckKind::Script => run_script(
+            spec_id,
+            check,
+            ctx.repo_path,
+            script_base,
+            &scoped,
+            findings,
+        ),
+    }
+}
+
+pub(super) fn scope_files<'a>(
+    check: &Check,
+    files: &'a [ScopedFile],
+) -> core::result::Result<Vec<&'a ScopedFile>, String> {
+    let include =
+        build_globset(&check.include).map_err(|err| format!("invalid include glob: {err}"))?;
+    let exclude =
+        build_globset(&check.exclude).map_err(|err| format!("invalid exclude glob: {err}"))?;
+
+    Ok(files
+        .iter()
+        .filter(|file| {
+            if let Some(include) = &include
+                && !include.is_match(&file.rel)
+            {
+                return false;
+            }
+            if let Some(exclude) = &exclude
+                && exclude.is_match(&file.rel)
+            {
+                return false;
+            }
+            true
+        })
+        .collect())
+}
+
+pub(super) fn build_globset(
+    patterns: &[String],
+) -> core::result::Result<Option<GlobSet>, globset::Error> {
+    if patterns.is_empty() {
+        return Ok(None);
+    }
+    let mut builder = GlobSetBuilder::new();
+    for pattern in patterns {
+        builder.add(Glob::new(pattern)?);
+    }
+    Ok(Some(builder.build()?))
+}
+
+pub(super) fn run_regexp(
+    spec_id: &str,
+    check: &Check,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
+    let Some(pattern) = &check.pattern else {
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            "regexp check requires `pattern`".to_string(),
+        ));
+        return;
+    };
+    let regex = match Regex::new(pattern) {
+        Ok(regex) => regex,
+        Err(err) => {
+            findings.push(config_error(
+                spec_id,
+                &check.name,
+                format!("invalid regexp: {err}"),
+            ));
+            return;
+        }
+    };
+
+    for file in files {
+        let Ok(content) = std::fs::read_to_string(&file.abs) else {
+            continue;
+        };
+
+        if check.negate {
+            if !content.lines().any(|line| regex.is_match(line)) {
+                findings.push(violation(
+                    check,
+                    spec_id,
+                    Some(rel_str(file)),
+                    message(check, "required pattern not found"),
+                ));
+            }
+        } else {
+            for (index, line) in content.lines().enumerate() {
+                if regex.is_match(line) {
+                    findings.push(violation(
+                        check,
+                        spec_id,
+                        Some(format!("{}:{}", rel_str(file), index + 1)),
+                        message(check, "matches forbidden pattern"),
+                    ));
+                }
+            }
+        }
+    }
+}
+
+pub(super) fn run_glob(
+    spec_id: &str,
+    check: &Check,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
+    let Some(pattern) = &check.pattern else {
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            "glob check requires `pattern`".to_string(),
+        ));
+        return;
+    };
+    let matcher = match Glob::new(pattern) {
+        Ok(glob) => glob.compile_matcher(),
+        Err(err) => {
+            findings.push(config_error(
+                spec_id,
+                &check.name,
+                format!("invalid glob: {err}"),
+            ));
+            return;
+        }
+    };
+
+    let matched: Vec<&&ScopedFile> = files
+        .iter()
+        .filter(|file| matcher.is_match(&file.rel))
+        .collect();
+
+    if check.negate {
+        if matched.is_empty() {
+            findings.push(violation(
+                check,
+                spec_id,
+                None,
+                message(check, &format!("required path not found: {pattern}")),
+            ));
+        }
+    } else {
+        for file in matched {
+            findings.push(violation(
+                check,
+                spec_id,
+                Some(rel_str(file)),
+                message(check, "forbidden path"),
+            ));
+        }
+    }
+}
+
+pub(super) fn run_script(
+    spec_id: &str,
+    check: &Check,
+    repo_path: &Path,
+    script_base: &Path,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
+    let Some(script) = locate_script(spec_id, check, script_base, findings) else {
+        return;
+    };
+
+    match check.run {
+        RunScope::PerFile => run_per_file(spec_id, check, &script, repo_path, files, findings),
+        RunScope::PerRepo => run_per_repo(spec_id, check, &script, repo_path, findings),
+        // Workspace checks are collected in `dispatch_check` and run once after
+        // every repository via `run_workspace_checks`, never through here.
+        RunScope::Workspace => {}
+    }
+}
+
+pub(super) fn run_workspace_checks(
+    spex_dir: &Path,
+    workspace_checks: &[WorkspaceCheck],
+    findings: &mut Vec<Finding>,
+) {
+    for pending in workspace_checks {
+        let Some(script) = locate_script(
+            &pending.spec_id,
+            &pending.check,
+            &pending.script_base,
+            findings,
+        ) else {
+            continue;
+        };
+        run_workspace_script(
+            &pending.spec_id,
+            &pending.check,
+            &script,
+            spex_dir,
+            &pending.files,
+            findings,
+        );
+    }
+}
+
+// Runs a `workspace`-scoped script once in the spex directory, passing every
+// in-scope file (as a path from that directory) as an argument.
+fn run_workspace_script(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    spex_dir: &Path,
+    files: &[PathBuf],
+    findings: &mut Vec<Finding>,
+) {
+    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
+        let args = batch.iter().map(|file| file.as_os_str());
+
+        let output = match Command::new(script)
+            .args(args)
+            .current_dir(spex_dir)
+            .output()
+        {
+            Ok(output) => output,
+            Err(err) => {
+                findings.push(run_error(spec_id, check, script, err));
+                return;
+            }
+        };
+
+        if !output.status.success() {
+            findings.push(violation(check, spec_id, None, script_message(&output)));
+        }
+    }
+}
+
+// Resolves a script check's program path, pushing a config error when the check
+// declares no script or the file is missing.
+fn locate_script(
+    spec_id: &str,
+    check: &Check,
+    script_base: &Path,
+    findings: &mut Vec<Finding>,
+) -> Option<PathBuf> {
+    let Some(reference) = &check.script else {
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            "script check requires `script`".to_string(),
+        ));
+        return None;
+    };
+
+    let Some(script) = resolve_script(reference, script_base, spec_id) else {
+        let dir = script_base.join(tech_spec::SCRIPTS_DIR).join(spec_id);
+        findings.push(config_error(
+            spec_id,
+            &check.name,
+            format!("script `{reference}` not found in {}", dir.display()),
+        ));
+        return None;
+    };
+
+    Some(script)
+}
+
+fn run_per_file(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    repo_path: &Path,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
+    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
+        let args = batch.iter().map(|file| file.rel.as_os_str());
+
+        let output = match Command::new(script)
+            .args(args)
+            .current_dir(repo_path)
+            .output()
+        {
+            Ok(output) => output,
+            Err(err) => {
+                findings.push(run_error(spec_id, check, script, err));
+                return;
+            }
+        };
+
+        if !output.status.success() {
+            findings.push(violation(check, spec_id, None, script_message(&output)));
+        }
+    }
+}
+
+fn run_per_repo(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    repo_path: &Path,
+    findings: &mut Vec<Finding>,
+) {
+    let output = match Command::new(script).current_dir(repo_path).output() {
+        Ok(output) => output,
+        Err(err) => {
+            findings.push(run_error(spec_id, check, script, err));
+            return;
+        }
+    };
+
+    if !output.status.success() {
+        findings.push(violation(check, spec_id, None, script_message(&output)));
+    }
+}
+
+// Scripts are stored at `<base>/scripts/<spec-id>/<reference>`, so the `script`
+// field only carries the bare filename.
+pub(super) fn resolve_script(reference: &str, base: &Path, spec_id: &str) -> Option<PathBuf> {
+    let script = base
+        .join(tech_spec::SCRIPTS_DIR)
+        .join(spec_id)
+        .join(reference);
+    script.is_file().then_some(script)
+}
+
+fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -> Finding {
+    config_error(
+        spec_id,
+        &check.name,
+        format!("could not run script `{}`: {err}", script.display()),
+    )
+}
+
+fn script_message(output: &std::process::Output) -> String {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let mut parts = Vec::new();
+    if !stdout.trim().is_empty() {
+        parts.push(stdout.trim().to_string());
+    }
+    if !stderr.trim().is_empty() {
+        parts.push(stderr.trim().to_string());
+    }
+    if parts.is_empty() {
+        let code = output
+            .status
+            .code()
+            .map_or_else(|| "signal".to_string(), |code| code.to_string());
+        return format!("script exited with status {code}");
+    }
+    parts.join("\n")
+}

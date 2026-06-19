@@ -20,11 +20,14 @@ spex --help # CLI command
 src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
+  workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
   tech_spec.rs      Tech-spec model
   biz_spec.rs       Biz-spec model
   style.rs          Terminal color styling (shared by commands)
+  util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
   commands/         Subcommands (init, update, check, check_schema, coverage)
+    check/          check command: orchestration (mod), runners, report
 docs/               Glossary, conventions, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas

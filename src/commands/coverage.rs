@@ -4,13 +4,14 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt};
-use ignore::WalkBuilder;
 use regex::Regex;
 use thiserror::Error;
 
-use crate::biz_spec::{self, BizSpec, Status};
-use crate::config::{self, Config};
+use crate::biz_spec::{BizSpec, Status};
+use crate::config::Config;
 use crate::style::Style;
+use crate::util::{self, plural};
+use crate::workspace::Workspace;
 
 #[cfg(test)]
 #[path = "coverage_test.rs"]
@@ -20,12 +21,8 @@ type Result<T> = core::result::Result<T, Report<CoverageError>>;
 
 #[derive(Debug, Error)]
 pub enum CoverageError {
-    #[error("could not determine the current directory")]
-    CurrentDir,
-    #[error("could not load spex configuration")]
-    Config,
-    #[error("could not load business specs")]
-    Specs,
+    #[error("could not load the spex workspace")]
+    Workspace,
     #[error("could not walk workspace repository files")]
     Walk,
 }
@@ -60,16 +57,14 @@ impl SpecRow {
 }
 
 pub fn run() -> Result<ExitCode> {
-    let current_dir = std::env::current_dir().change_context(CoverageError::CurrentDir)?;
-    let spex_dir = config::find_dir(&current_dir).change_context(CoverageError::Config)?;
+    let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
+    let specs = workspace
+        .biz_specs()
+        .change_context(CoverageError::Workspace)?;
 
-    let config = config::load(&spex_dir).change_context(CoverageError::Config)?;
-    let specs = biz_spec::load_all(&spex_dir.join(biz_spec::BIZ_SPECS_DIR))
-        .change_context(CoverageError::Specs)?;
+    let found = scan_workspace(&workspace.dir, &workspace.config)?;
 
-    let found = scan_workspace(&spex_dir, &config)?;
-
-    Ok(report(&config, &specs, &found))
+    Ok(report(&workspace.config, &specs, &found))
 }
 
 // Scans every workspace repository except spex itself for spec-id annotations.
@@ -90,14 +85,7 @@ fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Found> {
 }
 
 fn scan_repo(scanner: &Scanner, repo_path: &Path, found: &mut Found) -> Result<()> {
-    let walker = WalkBuilder::new(repo_path)
-        .hidden(false)
-        .git_ignore(true)
-        .git_global(true)
-        .filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"))
-        .build();
-
-    for result in walker {
+    for result in util::repo_walker(repo_path) {
         let entry = result.change_context(CoverageError::Walk)?;
         if !entry.file_type().is_some_and(|kind| kind.is_file()) {
             continue;
@@ -293,12 +281,4 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) {
         ))
     );
     println!();
-}
-
-fn plural(count: usize, noun: &str) -> String {
-    if count == 1 {
-        format!("1 {noun}")
-    } else {
-        format!("{count} {noun}s")
-    }
 }
