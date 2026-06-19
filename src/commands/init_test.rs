@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use indoc::{formatdoc, indoc};
     use tempfile::{TempDir, tempdir};
 
     fn repo(name: &str) -> DiscoveredRepo {
@@ -114,19 +115,17 @@ mod tests_unit {
     fn render_config_lists_repositories() {
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &no_specs());
 
-        let expected = format!(
-            "\
-project_name: pizza-shop
-cli_version: {CLI_VERSION}
-repositories:
-  - repository_name: server
-    path: ../server
-    tech_specs: []
-  - repository_name: client
-    path: ../client
-    tech_specs: []
-"
-        );
+        let expected = formatdoc! {"
+            project_name: pizza-shop
+            cli_version: {CLI_VERSION}
+            repositories:
+              - repository_name: server
+                path: ../server
+                tech_specs: []
+              - repository_name: client
+                path: ../client
+                tech_specs: []
+        "};
         assert_eq!(yaml, expected);
     }
 
@@ -141,18 +140,16 @@ repositories:
         };
         let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
 
-        let expected = format!(
-            "\
-project_name: pizza-shop
-cli_version: {CLI_VERSION}
-repositories:
-  - repository_name: server
-    path: ../server
-    tech_specs:
-      - TECH-SECRET-HANDLING
-      - TECH-WRITING-STYLE
-"
-        );
+        let expected = formatdoc! {"
+            project_name: pizza-shop
+            cli_version: {CLI_VERSION}
+            repositories:
+              - repository_name: server
+                path: ../server
+                tech_specs:
+                  - TECH-SECRET-HANDLING
+                  - TECH-WRITING-STYLE
+        "};
         assert_eq!(yaml, expected);
     }
 
@@ -164,26 +161,24 @@ repositories:
         };
         let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
 
-        let expected = format!(
-            "\
-project_name: pizza-shop
-cli_version: {CLI_VERSION}
-repositories:
-  - repository_name: server
-    path: ../server
-    tech_specs:
-      - TECH-SECRET-HANDLING
-  - repository_name: spex
-    description: >-
-      Spex workspace repository. Holds the specs and config that govern the
-      project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
-      rules).
-    path: .
-    tech_specs:
-      - TECH-WRITING-STYLE
-"
-        );
+        let expected = formatdoc! {"
+            project_name: pizza-shop
+            cli_version: {CLI_VERSION}
+            repositories:
+              - repository_name: server
+                path: ../server
+                tech_specs:
+                  - TECH-SECRET-HANDLING
+              - repository_name: spex
+                description: >-
+                  Spex workspace repository. Holds the specs and config that govern the
+                  project: schemas/ (JSON Schemas for spex.yaml and the spec files),
+                  tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
+                  rules).
+                path: .
+                tech_specs:
+                  - TECH-WRITING-STYLE
+        "};
         assert_eq!(yaml, expected);
     }
 
@@ -208,15 +203,15 @@ repositories:
             ],
         );
 
-        let expected = "\
-{
-  \"folders\": [
-    { \"name\": \"backend\", \"path\": \"../moodmart-backend\" },
-    { \"name\": \"proto\", \"path\": \"../moodmart-proto\" },
-    { \"name\": \"\u{1f9f0} spex\", \"path\": \".\" },
-  ]
-}
-";
+        let expected = indoc! {"
+            {
+              \"folders\": [
+                { \"name\": \"backend\", \"path\": \"../moodmart-backend\" },
+                { \"name\": \"proto\", \"path\": \"../moodmart-proto\" },
+                { \"name\": \"\u{1f9f0} spex\", \"path\": \".\" },
+              ]
+            }
+        "};
         assert_eq!(json, expected);
     }
 

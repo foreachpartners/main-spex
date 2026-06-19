@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use indoc::indoc;
     use std::collections::HashMap;
     use tempfile::tempdir;
 
@@ -63,28 +64,53 @@ mod tests {
 
     #[test]
     fn set_cli_version_replaces_existing_line() {
-        let raw = "project_name: demo\ncli_version: 0.0.1\nrepositories: []\n";
+        let raw = indoc! {"
+            project_name: demo
+            cli_version: 0.0.1
+            repositories: []
+        "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
-            "project_name: demo\ncli_version: 0.2.0\nrepositories: []\n"
+            indoc! {"
+                project_name: demo
+                cli_version: 0.2.0
+                repositories: []
+            "}
         );
     }
 
     #[test]
     fn set_cli_version_inserts_after_project_name() {
-        let raw = "project_name: demo\nrepositories: []\n";
+        let raw = indoc! {"
+            project_name: demo
+            repositories: []
+        "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
-            "project_name: demo\ncli_version: 0.2.0\nrepositories: []\n"
+            indoc! {"
+                project_name: demo
+                cli_version: 0.2.0
+                repositories: []
+            "}
         );
     }
 
     #[test]
     fn set_cli_version_preserves_comments() {
-        let raw = "project_name: demo\ncli_version: 0.0.1\n# keep me\nrepositories: []\n";
+        let raw = indoc! {"
+            project_name: demo
+            cli_version: 0.0.1
+            # keep me
+            repositories: []
+        "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
-            "project_name: demo\ncli_version: 0.2.0\n# keep me\nrepositories: []\n"
+            indoc! {"
+                project_name: demo
+                cli_version: 0.2.0
+                # keep me
+                repositories: []
+            "}
         );
     }
 
@@ -96,17 +122,18 @@ mod tests {
         }
     }
 
-    const TWO_REPOS: &str = "project_name: demo
-repositories:
-  - repository_name: api
-    path: ../api
-    tech_specs:
-      - TECH-X
-  - repository_name: web
-    path: ../web
-    tech_specs:
-      - TECH-X
-";
+    const TWO_REPOS: &str = indoc! {"
+        project_name: demo
+        repositories:
+          - repository_name: api
+            path: ../api
+            tech_specs:
+              - TECH-X
+          - repository_name: web
+            path: ../web
+            tech_specs:
+              - TECH-X
+    "};
 
     #[test]
     fn set_preexisting_errors_appends_block_with_files() {
@@ -121,23 +148,24 @@ repositories:
         let out = set_preexisting_errors(TWO_REPOS, &by_repo);
         assert_eq!(
             out,
-            "project_name: demo
-repositories:
-  - repository_name: api
-    path: ../api
-    tech_specs:
-      - TECH-X
-    checks_preexisting_errors:
-      - spec: TECH-X
-        check: no-cyrillic
-        files:
-          - README.md
-          - docs/intro.md
-  - repository_name: web
-    path: ../web
-    tech_specs:
-      - TECH-X
-"
+            indoc! {"
+                project_name: demo
+                repositories:
+                  - repository_name: api
+                    path: ../api
+                    tech_specs:
+                      - TECH-X
+                    checks_preexisting_errors:
+                      - spec: TECH-X
+                        check: no-cyrillic
+                        files:
+                          - README.md
+                          - docs/intro.md
+                  - repository_name: web
+                    path: ../web
+                    tech_specs:
+                      - TECH-X
+            "}
         );
     }
 
@@ -148,6 +176,7 @@ repositories:
             vec![entry("TECH-Y", "commit-format", &[])],
         )]);
         let out = set_preexisting_errors(TWO_REPOS, &by_repo);
+        // A mid-document fragment keeps its 2-space indent, which indoc would strip.
         assert!(out.ends_with(
             "  - repository_name: web
     path: ../web
@@ -165,18 +194,19 @@ repositories:
 
     #[test]
     fn set_preexisting_errors_replaces_existing_block() {
-        let raw = "project_name: demo
-repositories:
-  - repository_name: api
-    path: ../api
-    checks_preexisting_errors:
-      - spec: TECH-X
-        check: stale
-        files:
-          - old.md
-    tech_specs:
-      - TECH-X
-";
+        let raw = indoc! {"
+            project_name: demo
+            repositories:
+              - repository_name: api
+                path: ../api
+                checks_preexisting_errors:
+                  - spec: TECH-X
+                    check: stale
+                    files:
+                      - old.md
+                tech_specs:
+                  - TECH-X
+        "};
         let by_repo = HashMap::from([(
             "api".to_string(),
             vec![entry("TECH-X", "no-cyrillic", &["README.md"])],
@@ -193,24 +223,26 @@ repositories:
 
     #[test]
     fn set_preexisting_errors_removes_stale_block_when_empty() {
-        let raw = "project_name: demo
-repositories:
-  - repository_name: api
-    path: ../api
-    checks_preexisting_errors:
-      - spec: TECH-X
-        check: gone
-";
+        let raw = indoc! {"
+            project_name: demo
+            repositories:
+              - repository_name: api
+                path: ../api
+                checks_preexisting_errors:
+                  - spec: TECH-X
+                    check: gone
+        "};
         // api is in scope but has no current errors, so its block is dropped.
         let by_repo = HashMap::from([("api".to_string(), Vec::new())]);
         let out = set_preexisting_errors(raw, &by_repo);
         assert_eq!(
             out,
-            "project_name: demo
-repositories:
-  - repository_name: api
-    path: ../api
-"
+            indoc! {"
+                project_name: demo
+                repositories:
+                  - repository_name: api
+                    path: ../api
+            "}
         );
     }
 }
