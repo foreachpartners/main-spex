@@ -6,6 +6,17 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
+## Prerequisites
+
+- **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
+- **Git**: [Install Git](https://git-scm.com/install/)
+- **spex CLI**: Clone spex repository (repo) and install spex cli tool:
+  ```sh
+  git clone https://github.com/ziimakc/spex
+  cd spex
+  cargo install --path . --force
+  ```
+
 ## Commands
 
 ### `spex init`
@@ -101,24 +112,6 @@ spex check-schema --schema schemas/tech-spec.schema.json --files tech-specs/TECH
 ```sh
 spex check-schema --schema schemas/biz-spec.schema.json --files biz-specs/BIZ-LIST-PIZZA-MENU.yaml biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml
 ```
-
-## Install
-
-Install the `spex` binary globally from a source checkout. `cargo install` builds an optimized binary and copies it to `~/.cargo/bin/`, which is on your `PATH` when Rust is installed via `rustup`.
-
-```sh
-cargo install --path . # Build and install
-```
-
-```sh
-cargo install --path . --force  # Reinstall after changes
-```
-
-```sh
-cargo uninstall spex # Uninstall
-```
-
-There is no need to run `cargo build` first; `cargo install` compiles the release binary itself.
 
 ## Development
 
