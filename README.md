@@ -4,6 +4,8 @@ AI-first specification-driven development framework with human in control.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
+## Quickstart
+
 ## Prerequisites
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
@@ -14,8 +16,6 @@ _The name `spex` comes from a casual shorthand for specifications._
   cd spex
   cargo install --path . --force
   ```
-
-## Quickstart
 
 ### Setup
 
@@ -110,3 +110,9 @@ flowchart TD
 ## Learn more
 
 For an in-depth walkthrough of concepts and the full workflow, see the [Guide](docs/guide.md).
+
+## Try tutorial
+
+Ready to try it yourself? Follow the [Tutorial](docs/tutorial.md) to take the
+`pepperoni-pizza` example from a plain multi-repo project to a fully spec-driven
+workspace, end to end.

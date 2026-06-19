@@ -6,10 +6,15 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
-## Prerequisites
+## Install
+
+### Prerequisites
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
+
+### Installation
+
 - **spex CLI**: Clone spex repository (repo) and install spex cli tool:
   ```sh
   git clone https://github.com/ziimakc/spex

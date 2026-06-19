@@ -1,0 +1,25 @@
+id: TECH-NETWORK-CONFIG
+title: Network configuration from the environment
+description: >-
+  Hardcoding the bind address ties the service to one environment and forces a
+  recompile to run it anywhere else (a different host, port, or container).
+  Resolving the address from the environment at startup keeps the binary
+  portable and lets deployment decide where the service listens, while an
+  in-code default keeps local runs zero-config.
+acceptance_criteria:
+  - "MUST resolve the server bind address from the environment at startup, falling back to an in-code default only when the variable is unset"
+  - "MUST NOT bind the server to a string-literal address; bind to the resolved value instead"
+checks:
+  - name: no-hardcoded-bind-address
+    description: The server must bind to a value resolved from the environment, never a string literal
+    type: regexp
+    pattern: 'bind\("'
+    include: ["src/**/*.rs"]
+    severity: error
+examples:
+  avoid: |
+    let listener = TcpListener::bind("127.0.0.1:3000").await?;
+  prefer: |
+    let bind_addr = std::env::var("PEPPERONI_PIZZA_API__BIND_ADDR")
+        .unwrap_or_else(|_| "127.0.0.1:3000".to_string());
+    let listener = TcpListener::bind(&bind_addr).await?;

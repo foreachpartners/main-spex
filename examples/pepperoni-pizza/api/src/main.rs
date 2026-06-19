@@ -92,11 +92,14 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .expect("failed to bind to 127.0.0.1:3000");
+    let bind_addr = std::env::var("PEPPERONI_PIZZA_API__BIND_ADDR")
+        .unwrap_or_else(|_| "127.0.0.1:3000".to_string());
 
-    println!("Pepperoni Pizza API listening on http://127.0.0.1:3000");
+    let listener = tokio::net::TcpListener::bind(&bind_addr)
+        .await
+        .unwrap_or_else(|_| panic!("failed to bind to {bind_addr}"));
+
+    println!("Pepperoni Pizza API listening on http://{bind_addr}");
     axum::serve(listener, app)
         .await
         .expect("server error");
@@ -178,7 +181,6 @@ fn error(status: StatusCode, message: &str) -> Response {
     (status, Json(json!({ "message": message }))).into_response()
 }
 
-// @spec test BIZ-LIST-PIZZA-MENU
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -116,11 +116,11 @@ Business specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  BIZ-LIST-PIZZA-MENU
+  ✗  BIZ-LIST-PIZZA-MENU  missing: test
 
-  1 fully covered · 0 gaps
+  0 fully covered · 1 gap
 
-pepperoni-pizza: no gaps
+pepperoni-pizza: 1 gap
 "#;
 
 #[test]
@@ -203,10 +203,10 @@ fn workflow() {
         "coverage report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );
-    assert!(
-        coverage.status.success(),
-        "coverage should exit 0 when there are no gaps (exit {:?})",
+    assert_eq!(
         coverage.status.code(),
+        Some(1),
+        "coverage should exit 1 when there is a gap"
     );
 }
 

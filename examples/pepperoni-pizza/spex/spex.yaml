@@ -13,6 +13,7 @@ repositories:
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-NETWORK-CONFIG
   - repository_name: contracts
     description: >-
       OpenAPI contract that defines the order API and is the single source of
