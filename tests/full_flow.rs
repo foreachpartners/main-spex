@@ -49,6 +49,80 @@ workspace
 proj: 1 error, 9 warnings
 "#;
 
+// Snapshot of `spex coverage` for the freshly initialized no-spex example.
+// `init` does not scaffold any business specs, so coverage reports the empty
+// project and exits successfully.
+const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
+
+Business specs (0)
+  none found
+
+Active spec coverage (0)
+  no active specs
+
+proj: no gaps
+"#;
+
+// Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
+// example. Like the no-spex run the workspace is not a git repository, so the
+// commit-format checks warn; the example also ships demo writing-style
+// violations in its frontend README. No errors are present, so check succeeds.
+const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"api
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
+      Not a git repository — cannot verify commit message format
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
+      Not a git repository — cannot verify commit message format
+  warn  TECH-SECRET-HANDLING/no-backup-files  (data.backup)
+      Backup and scratch files may carry pre-redaction content
+  0 errors, 3 warnings
+
+contracts
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
+      Not a git repository — cannot verify commit message format
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
+      Not a git repository — cannot verify commit message format
+  0 errors, 2 warnings
+
+frontend
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
+      Not a git repository — cannot verify commit message format
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
+      Not a git repository — cannot verify commit message format
+  warn  TECH-WRITING-STYLE/no-cyrillic  (README.md:1)
+      Requirements and documentation must be in English
+  warn  TECH-WRITING-STYLE/readme-has-title
+      README.md must start with a '# ' title
+  0 errors, 4 warnings
+
+spex
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
+      Not a git repository — cannot verify commit message format
+  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
+      Not a git repository — cannot verify commit message format
+  0 errors, 2 warnings
+
+workspace
+  no issues
+
+pepperoni-pizza: 0 errors, 11 warnings
+"#;
+
+// Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
+// business spec is `active` and annotated across the contract, impl, and test
+// layers, so it reports as fully covered with no gaps.
+const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
+
+Business specs (1)
+  active      1
+
+Active spec coverage (1)
+  ✓  BIZ-LIST-PIZZA-MENU
+
+  1 fully covered · 0 gaps
+
+pepperoni-pizza: no gaps
+"#;
+
 #[test]
 fn init_then_check_pepperoni_pizza() {
     let workspace = tempdir().expect("create temp workspace");
@@ -75,11 +149,8 @@ fn init_then_check_pepperoni_pizza() {
     );
 
     let check = run_spex(&project, &["check"], "");
-    // `/bin/sh` echo interprets the literal `\b` in writing-style.sh into
-    // backspace bytes; drop them so the snapshot stays portable across shells.
-    let report = String::from_utf8_lossy(&check.stdout).replace('\u{8}', "");
     assert_eq!(
-        report,
+        report_text(&check.stdout),
         EXPECTED_CHECK_REPORT,
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
@@ -89,6 +160,60 @@ fn init_then_check_pepperoni_pizza() {
         Some(1),
         "check should exit 1 when errors are present"
     );
+
+    let coverage = run_spex(&project, &["coverage"], "");
+    assert_eq!(
+        report_text(&coverage.stdout),
+        EXPECTED_COVERAGE_REPORT,
+        "coverage report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&coverage.stderr),
+    );
+    assert!(
+        coverage.status.success(),
+        "coverage should exit 0 when there are no gaps (exit {:?})",
+        coverage.status.code(),
+    );
+}
+
+#[test]
+fn workflow() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza");
+    copy_dir(&example, &project);
+
+    let check = run_spex(&project, &["check"], "");
+    assert_eq!(
+        report_text(&check.stdout),
+        EXPECTED_WORKFLOW_CHECK_REPORT,
+        "check report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&check.stderr),
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 when there are no errors (exit {:?})",
+        check.status.code(),
+    );
+
+    let coverage = run_spex(&project, &["coverage"], "");
+    assert_eq!(
+        report_text(&coverage.stdout),
+        EXPECTED_WORKFLOW_COVERAGE_REPORT,
+        "coverage report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&coverage.stderr),
+    );
+    assert!(
+        coverage.status.success(),
+        "coverage should exit 0 when there are no gaps (exit {:?})",
+        coverage.status.code(),
+    );
+}
+
+// `/bin/sh` echo interprets the literal `\b` in writing-style.sh into backspace
+// bytes; drop them so snapshots stay portable across shells.
+fn report_text(stdout: &[u8]) -> String {
+    String::from_utf8_lossy(stdout).replace('\u{8}', "")
 }
 
 fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
@@ -131,7 +256,20 @@ fn copy_dir(src: &Path, dst: &Path) {
         let entry = entry.expect("read dir entry");
         let from = entry.path();
         let to = dst.join(entry.file_name());
-        if entry.file_type().expect("read file type").is_dir() {
+        let file_type = entry.file_type().expect("read file type");
+        if file_type.is_symlink() {
+            let target = fs::read_link(&from).expect("read symlink target");
+            std::os::unix::fs::symlink(target, &to).expect("create symlink");
+        } else if file_type.is_dir() {
+            // Skip build artifacts so copies stay deterministic regardless of
+            // whatever a developer has built locally inside an example.
+            let name = entry.file_name();
+            if matches!(
+                name.to_str(),
+                Some("node_modules") | Some("target") | Some("dist")
+            ) {
+                continue;
+            }
             copy_dir(&from, &to);
         } else {
             fs::copy(&from, &to).expect("copy file");
