@@ -153,7 +153,7 @@
   "examples": [
     {
       "project_name": "pepperoni-pizza",
-      "cli_version": "0.1.0",
+      "cli_version": "0.3.1",
       "description": "Online ordering for a pizzeria.",
       "repositories": [
         {
@@ -161,6 +161,30 @@
           "description": "Backend service that handles orders.",
           "path": "../api",
           "tech_specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
+        },
+        {
+          "repository_name": "frontend",
+          "description": "React web client that lets customers place orders.",
+          "path": "../frontend",
+          "tech_specs": ["TECH-WRITING-STYLE", "TECH-NAMING-CONVENTION"],
+          "checks_override": [
+            {
+              "spec": "TECH-WRITING-STYLE",
+              "name": "no-cyrillic",
+              "severity": "warn"
+            }
+          ],
+          "checks_additional": [
+            {
+              "spec": "TECH-WRITING-STYLE",
+              "name": "readme-has-title",
+              "description": "The frontend README must start with a top-level Markdown title.",
+              "type": "script",
+              "run": "per-repo",
+              "script": "readme-has-title.sh",
+              "severity": "warn"
+            }
+          ]
         }
       ]
     }

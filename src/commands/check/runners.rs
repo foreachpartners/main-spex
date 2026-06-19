@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -243,23 +244,38 @@ fn run_workspace_script(
 ) {
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
         let args = batch.iter().map(|file| file.as_os_str());
-
-        let output = match Command::new(script)
-            .args(args)
-            .current_dir(spex_dir)
-            .output()
-        {
-            Ok(output) => output,
-            Err(err) => {
-                findings.push(run_error(spec_id, check, script, err));
-                return;
-            }
-        };
-
-        if !output.status.success() {
-            findings.push(violation(check, spec_id, None, script_message(&output)));
+        if !run_script_command(spec_id, check, script, spex_dir, args, findings) {
+            return;
         }
     }
+}
+
+// Spawns the script in `cwd` and records any failure. Returns `false` when the
+// script could not be spawned so batched callers stop issuing further batches.
+fn run_script_command<I, S>(
+    spec_id: &str,
+    check: &Check,
+    script: &Path,
+    cwd: &Path,
+    args: I,
+    findings: &mut Vec<Finding>,
+) -> bool
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    let output = match Command::new(script).args(args).current_dir(cwd).output() {
+        Ok(output) => output,
+        Err(err) => {
+            findings.push(run_error(spec_id, check, script, err));
+            return false;
+        }
+    };
+
+    if !output.status.success() {
+        findings.push(violation(check, spec_id, None, script_message(&output)));
+    }
+    true
 }
 
 // Resolves a script check's program path, pushing a config error when the check
@@ -302,21 +318,8 @@ fn run_per_file(
 ) {
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
         let args = batch.iter().map(|file| file.rel.as_os_str());
-
-        let output = match Command::new(script)
-            .args(args)
-            .current_dir(repo_path)
-            .output()
-        {
-            Ok(output) => output,
-            Err(err) => {
-                findings.push(run_error(spec_id, check, script, err));
-                return;
-            }
-        };
-
-        if !output.status.success() {
-            findings.push(violation(check, spec_id, None, script_message(&output)));
+        if !run_script_command(spec_id, check, script, repo_path, args, findings) {
+            return;
         }
     }
 }
@@ -328,17 +331,14 @@ fn run_per_repo(
     repo_path: &Path,
     findings: &mut Vec<Finding>,
 ) {
-    let output = match Command::new(script).current_dir(repo_path).output() {
-        Ok(output) => output,
-        Err(err) => {
-            findings.push(run_error(spec_id, check, script, err));
-            return;
-        }
-    };
-
-    if !output.status.success() {
-        findings.push(violation(check, spec_id, None, script_message(&output)));
-    }
+    run_script_command(
+        spec_id,
+        check,
+        script,
+        repo_path,
+        std::iter::empty::<&OsStr>(),
+        findings,
+    );
 }
 
 // Scripts are stored at `<base>/scripts/<spec-id>/<reference>`, so the `script`

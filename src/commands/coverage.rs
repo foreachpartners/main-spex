@@ -192,9 +192,8 @@ fn report(config: &Config, specs: &[BizSpec], found: &Found) -> ExitCode {
     print_status_totals(&style, specs);
 
     let rows = active_rows(specs, found);
-    print_coverage(&style, &rows);
+    let gaps = print_coverage(&style, &rows);
 
-    let gaps = rows.iter().filter(|row| row.has_gap()).count();
     let footer = if gaps == 0 {
         style.green("no gaps")
     } else {
@@ -235,7 +234,7 @@ fn print_status_totals(style: &Style, specs: &[BizSpec]) {
     println!();
 }
 
-fn print_coverage(style: &Style, rows: &[SpecRow]) {
+fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
     println!(
         "{}",
         style.bold(&format!("Active spec coverage ({})", rows.len()))
@@ -243,7 +242,7 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) {
     if rows.is_empty() {
         println!("  {}", style.dim("no active specs"));
         println!();
-        return;
+        return 0;
     }
 
     let width = rows.iter().map(|row| row.id.len()).max().unwrap_or(0);
@@ -282,4 +281,5 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) {
         ))
     );
     println!();
+    gaps
 }
