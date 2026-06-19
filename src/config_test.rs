@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use std::collections::HashMap;
     use tempfile::tempdir;
 
     fn workspace() -> tempfile::TempDir {
@@ -84,6 +85,132 @@ mod tests {
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
             "project_name: demo\ncli_version: 0.2.0\n# keep me\nrepositories: []\n"
+        );
+    }
+
+    fn entry(spec: &str, check: &str, files: &[&str]) -> PreexistingEntry {
+        PreexistingEntry {
+            spec: spec.to_string(),
+            check: check.to_string(),
+            files: files.iter().map(|file| file.to_string()).collect(),
+        }
+    }
+
+    const TWO_REPOS: &str = "project_name: demo
+repositories:
+  - repository_name: api
+    path: ../api
+    tech_specs:
+      - TECH-X
+  - repository_name: web
+    path: ../web
+    tech_specs:
+      - TECH-X
+";
+
+    #[test]
+    fn set_preexisting_errors_appends_block_with_files() {
+        let by_repo = HashMap::from([(
+            "api".to_string(),
+            vec![entry(
+                "TECH-X",
+                "no-cyrillic",
+                &["README.md", "docs/intro.md"],
+            )],
+        )]);
+        let out = set_preexisting_errors(TWO_REPOS, &by_repo);
+        assert_eq!(
+            out,
+            "project_name: demo
+repositories:
+  - repository_name: api
+    path: ../api
+    tech_specs:
+      - TECH-X
+    checks_preexisting_errors:
+      - spec: TECH-X
+        check: no-cyrillic
+        files:
+          - README.md
+          - docs/intro.md
+  - repository_name: web
+    path: ../web
+    tech_specs:
+      - TECH-X
+"
+        );
+    }
+
+    #[test]
+    fn set_preexisting_errors_renders_whole_check_without_files() {
+        let by_repo = HashMap::from([(
+            "web".to_string(),
+            vec![entry("TECH-Y", "commit-format", &[])],
+        )]);
+        let out = set_preexisting_errors(TWO_REPOS, &by_repo);
+        assert!(out.ends_with(
+            "  - repository_name: web
+    path: ../web
+    tech_specs:
+      - TECH-X
+    checks_preexisting_errors:
+      - spec: TECH-Y
+        check: commit-format
+"
+        ));
+        // The api repository is out of scope, so it keeps no block.
+        assert!(!out.contains("check: commit-format\n  - repository_name: web"));
+        assert_eq!(out.matches("checks_preexisting_errors:").count(), 1);
+    }
+
+    #[test]
+    fn set_preexisting_errors_replaces_existing_block() {
+        let raw = "project_name: demo
+repositories:
+  - repository_name: api
+    path: ../api
+    checks_preexisting_errors:
+      - spec: TECH-X
+        check: stale
+        files:
+          - old.md
+    tech_specs:
+      - TECH-X
+";
+        let by_repo = HashMap::from([(
+            "api".to_string(),
+            vec![entry("TECH-X", "no-cyrillic", &["README.md"])],
+        )]);
+        let out = set_preexisting_errors(raw, &by_repo);
+        assert!(!out.contains("stale"), "old block survived:\n{out}");
+        assert!(
+            out.contains("check: no-cyrillic"),
+            "new block missing:\n{out}"
+        );
+        // The block is regenerated once, not duplicated.
+        assert_eq!(out.matches("checks_preexisting_errors:").count(), 1);
+    }
+
+    #[test]
+    fn set_preexisting_errors_removes_stale_block_when_empty() {
+        let raw = "project_name: demo
+repositories:
+  - repository_name: api
+    path: ../api
+    checks_preexisting_errors:
+      - spec: TECH-X
+        check: gone
+";
+        // api is in scope but has no current errors, so its block is dropped.
+        let by_repo = HashMap::from([("api".to_string(), Vec::new())]);
+        let out = set_preexisting_errors(raw, &by_repo);
+        assert_eq!(
+            out,
+            "project_name: demo
+repositories:
+  - repository_name: api
+    path: ../api
+"
         );
     }
 }

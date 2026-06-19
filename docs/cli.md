@@ -79,6 +79,7 @@ repositories:
 
 - `--repo <name>...` — limit the run to the named workspace repositories. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). Defaults to all non-ignored files.
+- `--fill-preexisting-errors` — record the current `error`-severity findings as a `checks_preexisting_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
 
 ```sh
 spex check --repo api frontend
@@ -86,6 +87,12 @@ spex check --repo api frontend
 
 ```sh
 spex check --repo api --files src/main.rs src/orders.rs
+```
+
+`--fill-preexisting-errors` runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `checks_preexisting_errors` entry per check into that repository's block in `spex.yaml`. A finding tied to a file is baselined for that file; a file-less error (for example a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. The command regenerates each selected repository's baseline from the current findings — dropping entries whose errors are gone — and leaves the rest of `spex.yaml`, and any unselected repository, byte-stable. It always exits `0`. Repository-level errors that belong to no named check (for example a misconfigured override) are not baselined; fix those directly.
+
+```sh
+spex check --repo frontend --fill-preexisting-errors
 ```
 
 ### `spex coverage`

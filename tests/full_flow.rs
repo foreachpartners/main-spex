@@ -218,6 +218,55 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
 }
 
 #[test]
+fn fill_preexisting_errors_baselines_then_suppresses() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
+    copy_dir(&example, &project);
+
+    let init = run_spex(&project, &["init"], "\n\n");
+    assert!(init.status.success(), "init failed");
+
+    // The freshly initialized example has one error: the frontend README.
+    let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
+    assert!(
+        fill.status.success(),
+        "--fill-preexisting-errors should exit 0 (exit {:?})\nstderr:\n{}",
+        fill.status.code(),
+        String::from_utf8_lossy(&fill.stderr),
+    );
+
+    let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
+    assert!(
+        config.contains("checks_preexisting_errors:")
+            && config.contains("check: no-cyrillic")
+            && config.contains("- README.md"),
+        "baseline was not written into spex.yaml:\n{config}",
+    );
+
+    // Running it again is idempotent: nothing new to baseline.
+    let refill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
+    let config_after =
+        fs::read_to_string(project.join("spex/spex.yaml")).expect("reread spex.yaml");
+    assert_eq!(config, config_after, "second fill changed spex.yaml");
+    assert!(refill.status.success());
+
+    // With the baseline in place, the error is suppressed and check passes.
+    let check = run_spex(&project, &["check"], "");
+    let report = report_text(&check.stdout);
+    assert!(
+        !report.contains("error  TECH-WRITING-STYLE/no-cyrillic"),
+        "generated baseline did not suppress the error\n{report}",
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 after the baseline is generated (exit {:?})",
+        check.status.code(),
+    );
+}
+
+#[test]
 fn workflow() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
