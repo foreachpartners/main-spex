@@ -50,6 +50,15 @@
       "description": "Lifecycle status. Omitting is equivalent to 'planned'.",
       "enum": ["active", "planned", "blocked", "deprecated"],
       "default": "planned"
+    },
+    "coverage_ignore": {
+      "type": "array",
+      "description": "Coverage layers to skip for this spec. A listed layer is treated as ok even when its annotation is missing, so it never counts as a gap. By default coverage requires all three layers.",
+      "items": {
+        "type": "string",
+        "enum": ["contract", "impl", "test"]
+      },
+      "uniqueItems": true
     }
   },
   "required": ["id", "title", "description", "acceptance_criteria"],

@@ -25,6 +25,32 @@ pub struct BizSpec {
     pub id: String,
     #[serde(default)]
     pub status: Status,
+    #[serde(default)]
+    pub coverage_ignore: Vec<CoverageLayer>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CoverageLayer {
+    Contract,
+    Impl,
+    Test,
+}
+
+impl CoverageLayer {
+    pub const ALL: [CoverageLayer; 3] = [
+        CoverageLayer::Impl,
+        CoverageLayer::Test,
+        CoverageLayer::Contract,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            CoverageLayer::Contract => "contract",
+            CoverageLayer::Impl => "impl",
+            CoverageLayer::Test => "test",
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]

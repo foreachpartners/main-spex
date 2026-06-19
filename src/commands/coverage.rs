@@ -7,7 +7,7 @@ use error_stack::{Report, ResultExt};
 use regex::Regex;
 use thiserror::Error;
 
-use crate::biz_spec::{BizSpec, Status};
+use crate::biz_spec::{BizSpec, CoverageLayer, Status};
 use crate::config::Config;
 use crate::style::Style;
 use crate::util::{self, plural};
@@ -27,32 +27,36 @@ pub enum CoverageError {
     Walk,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum Layer {
-    Contract,
-    Impl,
-    Test,
-}
-
 // Spec-id annotations found across the workspace, keyed by spec id.
-type Found = HashMap<String, HashSet<Layer>>;
+type Found = HashMap<String, HashSet<CoverageLayer>>;
 
 struct SpecRow {
     id: String,
-    has_contract: bool,
-    has_impl: bool,
-    has_test: bool,
+    present: HashSet<CoverageLayer>,
+    ignored: HashSet<CoverageLayer>,
 }
 
 impl SpecRow {
-    // A contract is optional, so a spec only has a real gap when an impl or a
-    // test annotation is missing.
+    fn is_present(&self, layer: CoverageLayer) -> bool {
+        self.present.contains(&layer)
+    }
+
+    fn is_required(&self, layer: CoverageLayer) -> bool {
+        !self.ignored.contains(&layer)
+    }
+
+    // A gap is a required layer with no annotation. Layers listed in
+    // `coverage_ignore` are treated as ok even when missing.
     fn has_gap(&self) -> bool {
-        !self.has_impl || !self.has_test
+        CoverageLayer::ALL
+            .iter()
+            .any(|&layer| self.is_required(layer) && !self.is_present(layer))
     }
 
     fn fully_covered(&self) -> bool {
-        self.has_contract && self.has_impl && self.has_test
+        CoverageLayer::ALL
+            .iter()
+            .all(|&layer| self.is_present(layer))
     }
 }
 
@@ -122,9 +126,9 @@ impl Scanner {
     fn scan(&self, content: &str, found: &mut Found) {
         for caps in self.spec.captures_iter(content) {
             let layer = match &caps[1] {
-                "contract" => Layer::Contract,
-                "impl" => Layer::Impl,
-                "test" => Layer::Test,
+                "contract" => CoverageLayer::Contract,
+                "impl" => CoverageLayer::Impl,
+                "test" => CoverageLayer::Test,
                 _ => continue,
             };
             for id in self.id.find_iter(&caps[2]) {
@@ -139,7 +143,7 @@ impl Scanner {
             found
                 .entry(caps[1].to_string())
                 .or_default()
-                .insert(Layer::Contract);
+                .insert(CoverageLayer::Contract);
         }
     }
 }
@@ -152,31 +156,27 @@ fn active_rows(specs: &[BizSpec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
         .filter(|spec| spec.status == Status::Active)
-        .map(|spec| {
-            let layers = found.get(&spec.id);
-            let has = |layer: Layer| layers.is_some_and(|set| set.contains(&layer));
-            SpecRow {
-                id: spec.id.clone(),
-                has_contract: has(Layer::Contract),
-                has_impl: has(Layer::Impl),
-                has_test: has(Layer::Test),
-            }
+        .map(|spec| SpecRow {
+            id: spec.id.clone(),
+            present: found.get(&spec.id).cloned().unwrap_or_default(),
+            ignored: spec.coverage_ignore.iter().copied().collect(),
         })
         .collect()
 }
 
 fn missing_summary(row: &SpecRow) -> String {
-    let mut parts = Vec::new();
-    if !row.has_impl {
-        parts.push("impl".to_string());
-    }
-    if !row.has_test {
-        parts.push("test".to_string());
-    }
-    if !row.has_contract {
-        parts.push("contract (optional)".to_string());
-    }
-    parts.join(", ")
+    CoverageLayer::ALL
+        .iter()
+        .filter(|&&layer| !row.is_present(layer))
+        .map(|&layer| {
+            if row.is_required(layer) {
+                layer.label().to_string()
+            } else {
+                format!("{} (ignored)", layer.label())
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 fn report(config: &Config, specs: &[BizSpec], found: &Found) -> ExitCode {
@@ -255,7 +255,8 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) {
             covered += 1;
             (style.green("✓"), true)
         } else {
-            // Required layers present, only the optional contract is missing.
+            // No gap: every required layer is present, but an ignored layer is
+            // still missing, so coverage is not complete.
             (style.yellow("⚠"), false)
         };
 

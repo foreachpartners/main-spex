@@ -1,12 +1,21 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::biz_spec::{BizSpec, Status};
+    use crate::biz_spec::{BizSpec, CoverageLayer, Status};
 
     fn spec(id: &str, status: Status) -> BizSpec {
         BizSpec {
             id: id.to_string(),
             status,
+            coverage_ignore: Vec::new(),
+        }
+    }
+
+    fn row(id: &str, present: &[CoverageLayer], ignored: &[CoverageLayer]) -> SpecRow {
+        SpecRow {
+            id: id.to_string(),
+            present: present.iter().copied().collect(),
+            ignored: ignored.iter().copied().collect(),
         }
     }
 
@@ -20,30 +29,45 @@ mod tests {
     fn scan_collects_each_layer_from_spec_annotations() {
         let found = scan("// @spec contract BIZ-A\n// @spec impl BIZ-A\n// @spec test BIZ-A\n");
         let layers = found.get("BIZ-A").expect("BIZ-A present");
-        assert!(layers.contains(&Layer::Contract));
-        assert!(layers.contains(&Layer::Impl));
-        assert!(layers.contains(&Layer::Test));
+        assert!(layers.contains(&CoverageLayer::Contract));
+        assert!(layers.contains(&CoverageLayer::Impl));
+        assert!(layers.contains(&CoverageLayer::Test));
     }
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
         let found = scan("// @spec test BIZ-A, BIZ-B, TECH-RATE-LIMIT\n");
-        assert!(found.get("BIZ-A").unwrap().contains(&Layer::Test));
-        assert!(found.get("BIZ-B").unwrap().contains(&Layer::Test));
-        assert!(found.get("TECH-RATE-LIMIT").unwrap().contains(&Layer::Test));
+        assert!(found.get("BIZ-A").unwrap().contains(&CoverageLayer::Test));
+        assert!(found.get("BIZ-B").unwrap().contains(&CoverageLayer::Test));
+        assert!(
+            found
+                .get("TECH-RATE-LIMIT")
+                .unwrap()
+                .contains(&CoverageLayer::Test)
+        );
     }
 
     #[test]
     fn scan_treats_xspec_as_contract() {
         let found = scan("        x-spec: BIZ-A\n");
-        assert!(found.get("BIZ-A").unwrap().contains(&Layer::Contract));
-        assert!(!found.get("BIZ-A").unwrap().contains(&Layer::Impl));
+        assert!(
+            found
+                .get("BIZ-A")
+                .unwrap()
+                .contains(&CoverageLayer::Contract)
+        );
+        assert!(!found.get("BIZ-A").unwrap().contains(&CoverageLayer::Impl));
     }
 
     #[test]
     fn scan_treats_quoted_xspec_as_contract() {
         let found = scan("x-spec: \"BIZ-A\"\n");
-        assert!(found.get("BIZ-A").unwrap().contains(&Layer::Contract));
+        assert!(
+            found
+                .get("BIZ-A")
+                .unwrap()
+                .contains(&CoverageLayer::Contract)
+        );
     }
 
     #[test]
@@ -63,54 +87,83 @@ mod tests {
     fn omitting_status_defaults_to_planned_and_is_ignored() {
         let spec: BizSpec = serde_yaml_ng::from_str("id: BIZ-A\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
+        assert!(spec.coverage_ignore.is_empty());
         let rows = active_rows(&[spec], &Found::new());
         assert!(rows.is_empty());
     }
 
     #[test]
-    fn missing_summary_lists_required_then_optional() {
-        let row = SpecRow {
-            id: "BIZ-A".to_string(),
-            has_contract: false,
-            has_impl: false,
-            has_test: false,
-        };
-        assert_eq!(missing_summary(&row), "impl, test, contract (optional)");
+    fn active_rows_carries_coverage_ignore() {
+        let spec: BizSpec = serde_yaml_ng::from_str(
+            "id: BIZ-A\nstatus: active\ncoverage_ignore: [contract, test]\n",
+        )
+        .expect("parse spec");
+        let rows = active_rows(&[spec], &Found::new());
+        let row = &rows[0];
+        assert!(!row.is_required(CoverageLayer::Contract));
+        assert!(!row.is_required(CoverageLayer::Test));
+        assert!(row.is_required(CoverageLayer::Impl));
     }
 
     #[test]
-    fn missing_only_contract_is_not_a_gap() {
-        let row = SpecRow {
-            id: "BIZ-A".to_string(),
-            has_contract: false,
-            has_impl: true,
-            has_test: true,
-        };
+    fn missing_summary_lists_layers_in_order() {
+        let row = row("BIZ-A", &[], &[]);
+        assert_eq!(missing_summary(&row), "impl, test, contract");
+    }
+
+    #[test]
+    fn missing_contract_is_a_gap_by_default() {
+        let row = row("BIZ-A", &[CoverageLayer::Impl, CoverageLayer::Test], &[]);
+        assert!(row.has_gap());
+        assert!(!row.fully_covered());
+        assert_eq!(missing_summary(&row), "contract");
+    }
+
+    #[test]
+    fn ignored_layer_is_not_a_gap() {
+        let row = row(
+            "BIZ-A",
+            &[CoverageLayer::Impl, CoverageLayer::Test],
+            &[CoverageLayer::Contract],
+        );
         assert!(!row.has_gap());
         assert!(!row.fully_covered());
-        assert_eq!(missing_summary(&row), "contract (optional)");
+        assert_eq!(missing_summary(&row), "contract (ignored)");
+    }
+
+    #[test]
+    fn missing_ignored_impl_is_not_a_gap() {
+        let row = row(
+            "BIZ-A",
+            &[CoverageLayer::Test, CoverageLayer::Contract],
+            &[CoverageLayer::Impl],
+        );
+        assert!(!row.has_gap());
+        assert_eq!(missing_summary(&row), "impl (ignored)");
     }
 
     #[test]
     fn missing_test_is_a_gap() {
-        let row = SpecRow {
-            id: "BIZ-A".to_string(),
-            has_contract: true,
-            has_impl: true,
-            has_test: false,
-        };
+        let row = row(
+            "BIZ-A",
+            &[CoverageLayer::Impl, CoverageLayer::Contract],
+            &[],
+        );
         assert!(row.has_gap());
         assert_eq!(missing_summary(&row), "test");
     }
 
     #[test]
     fn full_coverage_has_no_gap() {
-        let row = SpecRow {
-            id: "BIZ-A".to_string(),
-            has_contract: true,
-            has_impl: true,
-            has_test: true,
-        };
+        let row = row(
+            "BIZ-A",
+            &[
+                CoverageLayer::Impl,
+                CoverageLayer::Test,
+                CoverageLayer::Contract,
+            ],
+            &[],
+        );
         assert!(!row.has_gap());
         assert!(row.fully_covered());
         assert_eq!(missing_summary(&row), "");
