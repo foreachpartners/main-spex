@@ -52,10 +52,10 @@ export default function App() {
   }
 
   return (
-    <main className="app">
+    <main>
       <h1>Pepperoni Pizza</h1>
 
-      <form className="add-form" onSubmit={addOrder}>
+      <form onSubmit={addOrder}>
         <input
           value={customer}
           onChange={(event) => setCustomer(event.target.value)}
@@ -65,11 +65,11 @@ export default function App() {
         <button type="submit">Order</button>
       </form>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p>{error}</p>}
 
-      <ul className="order-list">
+      <ul>
         {orders.map((order) => (
-          <li key={order.id} className={order.delivered ? "done" : ""}>
+          <li key={order.id}>
             <label>
               <input
                 type="checkbox"
@@ -79,7 +79,6 @@ export default function App() {
               <span>{order.customer}</span>
             </label>
             <button
-              className="remove"
               onClick={() => removeOrder(order.id)}
               aria-label={`Cancel order for ${order.customer}`}
             >
@@ -89,7 +88,7 @@ export default function App() {
         ))}
       </ul>
 
-      {orders.length === 0 && !error && <p className="empty">No orders yet.</p>}
+      {orders.length === 0 && !error && <p>No orders yet.</p>}
     </main>
   );
 }

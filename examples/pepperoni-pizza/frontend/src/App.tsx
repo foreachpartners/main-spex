@@ -54,10 +54,10 @@ export default function App() {
   }
 
   return (
-    <main className="app">
+    <main>
       <h1>Pepperoni Pizza</h1>
 
-      <form className="add-form" onSubmit={addOrder}>
+      <form onSubmit={addOrder}>
         <input
           value={customer}
           onChange={(event) => setCustomer(event.target.value)}
@@ -67,11 +67,11 @@ export default function App() {
         <button type="submit">Order</button>
       </form>
 
-      {error && <p className="error">{error}</p>}
+      {error && <p>{error}</p>}
 
-      <ul className="order-list">
+      <ul>
         {orders.map((order) => (
-          <li key={order.id} className={order.delivered ? "done" : ""}>
+          <li key={order.id}>
             <label>
               <input
                 type="checkbox"
@@ -81,7 +81,6 @@ export default function App() {
               <span>{order.customer}</span>
             </label>
             <button
-              className="remove"
               onClick={() => removeOrder(order.id)}
               aria-label={`Cancel order for ${order.customer}`}
             >
@@ -91,24 +90,24 @@ export default function App() {
         ))}
       </ul>
 
-      {orders.length === 0 && !error && <p className="empty">No orders yet.</p>}
+      {orders.length === 0 && !error && <p>No orders yet.</p>}
 
       <h2>Menu</h2>
 
-      <ul className="pizza-menu">
+      <ul>
         {pizzas.map((pizza) => (
-          <li key={pizza.id} className="pizza">
-            <div className="pizza-header">
-              <span className="pizza-name">{pizza.name}</span>
-              <span className="pizza-price">${pizza.price.toFixed(2)}</span>
+          <li key={pizza.id}>
+            <div>
+              <span>{pizza.name}</span>
+              <span>${pizza.price.toFixed(2)}</span>
             </div>
-            <p className="pizza-description">{pizza.description}</p>
+            <p>{pizza.description}</p>
           </li>
         ))}
       </ul>
 
       {pizzas.length === 0 && !error && (
-        <p className="empty">The menu is empty right now.</p>
+        <p>The menu is empty right now.</p>
       )}
     </main>
   );
