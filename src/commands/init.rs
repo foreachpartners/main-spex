@@ -16,6 +16,7 @@ use crate::templates;
 mod init_test;
 
 const PLANS_DIR_NAME: &str = "plans";
+const CONTRACTS_DIR_NAME: &str = "contracts";
 
 type Result<T> = core::result::Result<T, Report<InitError>>;
 
@@ -94,6 +95,11 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     fs::create_dir_all(&plans)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not create `{}`", plans.display()))?;
+
+    let contracts = spex_dir.join(CONTRACTS_DIR_NAME);
+    fs::create_dir_all(&contracts)
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not create `{}`", contracts.display()))?;
 
     Ok(())
 }

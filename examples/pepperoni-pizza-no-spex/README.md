@@ -24,8 +24,11 @@ A single screen with three parts:
 pepperoni-pizza-no-spex/   <- workspace root folder
   api/               <- Rust pizza order API (axum, in-memory store)
   frontend/          <- React + TypeScript UI (Vite)
-  contracts/         <- OpenAPI definition of the API
 ```
+
+The API ships its own OpenAPI definition under `api/`. After `spex init`,
+`spex-setup` copies each repository's contract into the `spex` repository's
+`contracts/` folder and records it in `spex.yaml`.
 
 ## Running the example
 

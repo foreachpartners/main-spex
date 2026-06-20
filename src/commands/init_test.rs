@@ -337,6 +337,8 @@ mod tests_unit {
         assert!(spex_dir.path().join("tech-specs").is_dir());
         assert!(spex_dir.path().join("biz-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
+        assert!(spex_dir.path().join("plans").is_dir());
+        assert!(spex_dir.path().join("contracts").is_dir());
     }
 
     #[test]

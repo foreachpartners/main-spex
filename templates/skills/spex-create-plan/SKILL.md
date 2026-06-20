@@ -47,9 +47,9 @@ Record which repository each governing tech-spec comes from so a task in one rep
 
 ## Step 3 — Inspect the current code
 
-For each affected repository, resolve its `path` and study the current state so the plan extends real code instead of guessing. Use the repository `description`s to identify each one's role (which holds the contracts, which is the backend, frontend, mobile, and so on):
+For each affected repository, resolve its `path` and study the current state so the plan extends real code instead of guessing. Use the repository `description`s to identify each one's role (backend, frontend, mobile, and so on); interface contracts live in the `spex` repository's `contracts/` folder, listed per repository under `contracts` in `spex.yaml`:
 
-- Find the contract(s) the spec touches — in whichever repository holds the interface definitions — and read the relevant endpoints, messages, or schemas.
+- Find the contract(s) the spec touches — in the `spex` repository's `contracts/` folder — and read the relevant endpoints, messages, or schemas.
 - Read the handlers, modules, and tests nearest to the change, and note an existing feature to copy the structure from (the "by example" pattern: how a similar endpoint, screen, or test is already built).
 - Note the build/test commands and any annotation conventions (for example `@spec` tags) the repository already uses.
 
@@ -67,7 +67,7 @@ Keep steps as few as the dependencies allow; maximize parallelism within each st
 
 ## Step 5 — Draft the plan
 
-Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`, `contracts`) are placeholders; use the real names and roles from `spex.yaml`.
+Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`) are placeholders; use the real names and roles from `spex.yaml`. Contract changes are made in the `spex` repository's `contracts/` folder, so a contract task runs in `spex`.
 
 ```md
 # Plan: <lead spec title>
@@ -90,7 +90,7 @@ Write the plan in Markdown using the template below. Keep the implementation ove
 
 Status: not-started
 
-#### Task 1.1 — <name> (repo: contracts)
+#### Task 1.1 — <name> (repo: spex, contracts/)
 
 Status: not-started
 

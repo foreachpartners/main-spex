@@ -41,7 +41,7 @@
   TECH-SECRET-HANDLING
   ```
 
-- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract.
+- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder
 
   ```yaml
   paths:
@@ -72,7 +72,7 @@
     frontend/        <- workspace repository
   ```
 
-- **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, `contracts`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) or by more specific role (service, mobile).
+- **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) or by more specific role (service, mobile).
 
 - **Workspace repository name** (repository name) — the identifier of a workspace repository, taken from the name of its folder inside the workspace root.
 

@@ -35,7 +35,7 @@ pepperoni-pizza/         # workspace root
 3. Open workspace to work across all repositories at once and integrate with AI coding agent:
    - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-   - Claude CLI: run `claude --add-dir ../api ../contracts ../frontend ..` from `spex` repo
+   - Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
    - Zed: add project, pick all workspace repos (folders)
 4. Run your first agent skill (skill) `/spex-setup` in AI chat window to complete setup. Skills will be detected by AI coding agent (agent) if setup done right.
 

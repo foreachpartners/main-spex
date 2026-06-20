@@ -20,13 +20,6 @@ const EXPECTED_CHECK_REPORT: &str = r#"api
       Backup and scratch files may carry pre-redaction content
   0 errors, 3 warnings
 
-contracts
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
-  0 errors, 2 warnings
-
 frontend
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
@@ -46,7 +39,7 @@ spex
 workspace
   no issues
 
-proj: 1 error, 9 warnings
+proj: 1 error, 7 warnings
 "#;
 
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.

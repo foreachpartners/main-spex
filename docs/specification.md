@@ -12,7 +12,7 @@ field rules.
 Turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-- Flow runs BRD (why) → PRD (what) → business spec (how it behaves) → contract (interface) → implementation (code) → test (proof).
+- Flow runs BRD (why) → PRD (what) → business spec (how it behaves) → contract (interface) → plan (how to build it) → implementation (code) → test (proof).
 - A BIZ Spec ID names a spec and links the contract, code, and tests that satisfy it.
 - A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a business spec.
 - A plan turns approved specs into ordered steps of parallel-safe tasks that agents execute.
@@ -33,8 +33,9 @@ cross-cutting convention.
 
 A project spans several workspace repositories under one workspace root folder.
 
-- Each workspace repository (`spex`, `api`, `frontend`, `contracts`, …) is its own git repository.
-- The `spex` repository holds the specs, schemas, scripts, skills, and config — the single source of truth.
+- Each workspace repository (`spex`, `api`, `frontend`, …) is its own git repository.
+- The `spex` repository holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
+- Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
 
 ## Traceability
@@ -56,7 +57,7 @@ Creates the `spex` repository in the workspace root and scaffolds the framework.
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `tech-specs/`, and skills.
-- Creates empty `biz-specs/` and `plans/` folders.
+- Creates empty `biz-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Adds each default tech-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
 - Directs the user to finish setup by running the `/spex-setup` skill.
@@ -121,10 +122,12 @@ Skills are agent workflows that drive the spec → plan → execute → check lo
 
 ## spex-setup
 
-Fills in the descriptions and icons left blank by `spex init`.
+Fills in the descriptions and icons left blank by `spex init` and collects each repository's contracts.
 
 - Fills the missing `description` fields in `spex.yaml` for the project and each repository by inspecting their contents.
 - Fills the folder icons in the editor workspace file.
+- Copies each repository's existing contract files into the `spex` repository's `contracts/` folder, renaming each with its repository's prefix (for example `openapi.yaml` from `api` becomes `contracts/api.openapi.yaml`).
+- Records each copied contract under its repository's `contracts` in `spex.yaml`.
 - Is run right after `spex init`.
 
 ## spex-create-biz-spec
@@ -208,7 +211,8 @@ Annotations link a contract, implementation, or test to its spec.
 Declares the project and its repositories.
 
 - Declares `project_name`, `cli_version`, an optional `description`, and the `repositories` list.
-- Each repository has `repository_name`, `path` (relative to the spex directory), an optional `description`, and `tech_specs`.
+- Each repository has `repository_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `tech_specs`.
+- Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
 - Each repository may add per-repo `checks_override`, `checks_additional`, and `checks_preexisting_errors`.
 - Validated against `schemas/spex.schema.json`.
 

@@ -16,7 +16,9 @@ Follow the installation process in [cli.md](cli.md#install).
 
 Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
-`api`, `frontend`, and `contracts` repositories side by side.
+`api` and `frontend` repositories side by side. The `api` repository ships its
+own `openapi.yaml`; `spex-setup` later copies it into the `spex` repository's
+`contracts/` folder.
 
 Init git repository for each and commit `chore: initial commit`. Commit as you complete each step so your progress is easy to review and roll back.
 
@@ -26,7 +28,7 @@ Init git repository for each and commit `chore: initial commit`. Commit as you c
 - Open workspace to work across all repositories at once and integrate with AI coding agent:
   - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
   - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-  - Claude CLI: run `claude --add-dir ../api ../contracts ../frontend ..` from `spex` repo
+  - Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
   - Zed: add project, pick all workspace repos (folders)
 - init git repository and commit.
 - run your first skill `/spex-setup` in AI chat window to complete setup.
@@ -56,7 +58,7 @@ The skill interviews you, proposes the split when the PRD covers more than one
 capability, then writes a schema-valid spec per capability. A spec captures one
 capability, not one repository: this PRD is the single capability "customers can
 see the menu," so it produces one spec under `spex/biz-specs/` — even though its
-`scope` spans `contracts`, `api`, and `frontend`. The agent chooses the `BIZ-`
+`scope` spans `api` and `frontend`. The agent chooses the `BIZ-`
 Spec ID; note it down, since later steps reference it. Review the spec and confirm
 its `status` is `active`.
 

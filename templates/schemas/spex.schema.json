@@ -48,6 +48,13 @@
           "description": "Path to the repository, relative to the spex directory.",
           "minLength": 1
         },
+        "contracts": {
+          "type": "array",
+          "description": "Machine-readable interface contracts this repository owns, copied into the spex repository's `contracts/` folder. Each entry points at a contract file and summarizes it.",
+          "items": {
+            "$ref": "#/$defs/contract"
+          }
+        },
         "tech_specs": {
           "type": "array",
           "description": "TECH spec IDs that apply to this repository.",
@@ -59,10 +66,7 @@
           "type": "array",
           "description": "Full checks that run for this repository in addition to the checks it inherits from its tech_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's tech_specs). Script paths resolve in the spex directory.",
           "items": {
-            "allOf": [
-              { "$ref": "check.schema.json" },
-              { "required": ["spec"] }
-            ]
+            "allOf": [{ "$ref": "check.schema.json" }, { "required": ["spec"] }]
           }
         },
         "checks_override": {
@@ -81,6 +85,24 @@
         }
       },
       "required": ["repository_name", "path"],
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "description": "A machine-readable interface contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) owned by a repository and stored in the spex repository's `contracts/` folder.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the contract file inside the spex repository, relative to the spex directory (for example `contracts/api.openapi.yaml`).",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Short summary of what the contract covers (for example `admin rest openapi spec`).",
+          "minLength": 1
+        }
+      },
+      "required": ["path", "description"],
       "additionalProperties": false
     },
     "preexisting_error": {
@@ -192,6 +214,12 @@
           "repository_name": "api",
           "description": "Backend service that handles orders.",
           "path": "../api",
+          "contracts": [
+            {
+              "path": "contracts/api.openapi.yaml",
+              "description": "REST OpenAPI spec for the orders API."
+            }
+          ],
           "tech_specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
         },
         {
