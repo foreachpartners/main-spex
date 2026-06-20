@@ -20,7 +20,7 @@ copy to `pepperoni-pizza`. This folder is your **workspace root**, containing th
 
 ## Step 3 — Set up spex
 
-Follow the **Quickstart Setup** in [README.md](../README.md#setup): run `spex init`,
+Follow the **Quickstart Setup** in [README.md](../README.md#Setup): run `spex init`,
 open the workspace in your editor, and run the `/spex-setup` skill.
 
 ## Step 4 — Put each repository under Git
@@ -40,8 +40,7 @@ through the findings until it exits cleanly.
 Drive a real feature from PRD to verified code. Start with the PRD-level
 statement of what the product should do:
 
-> Customers can see the full pizza menu (id, name, description, price) before
-> ordering.
+> Customers can see the full pizza menu (pizza name, description and price) before ordering.
 
 ### 6.1 Create the business spec(s)
 
@@ -49,7 +48,7 @@ Hand the PRD to the skill — it breaks the PRD into one or more capabilities an
 writes a spec for each:
 
 ```text
-/spex-create-biz-spec Customers can see the full pizza menu (id, name, description, price) before ordering
+/spex-create-biz-spec Customers can see the full pizza menu (pizza name, description and price) before ordering
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one

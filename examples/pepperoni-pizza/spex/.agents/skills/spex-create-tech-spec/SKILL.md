@@ -78,6 +78,6 @@ Show the proposed checks (and any script bodies) to the user and confirm them be
 
 ## Step 6 — Point to the next skill
 
-After the spec is written, prompt the user to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`.
+After the spec is written, prompt the user to plan its implementation in a new chat window to save context: run `spex-create-plan <spec-id>` with the spec's `id`. Do not offer to run it in the current chat.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

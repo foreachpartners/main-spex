@@ -132,6 +132,6 @@ Rules for the plan content:
 
 ## Step 7 — Point to the next skill
 
-After the plan is written, prompt the user to execute it: run `spex-execute-plan <spec-id>`.
+After the plan is written, prompt the user to execute it in a new chat window to save context: run `spex-execute-plan <spec-id>`. Do not offer to run it in the current chat.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
