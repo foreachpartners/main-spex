@@ -79,8 +79,9 @@ For example, a pizza ordering feature moves through the flow like this:
 2. **PRD** — "customers can pick a pizza on the website and pay online"
 3. **Business Spec** — `BIZ-PLACE-PIZZA-ORDER`: "POST /orders returns 201 with the created order"
 4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
-5. **Implementation** — the `placeOrder()` handler in code
-6. **Test** — verifies that placing an order returns `201`
+5. **Plan** — step-by-step build plan for the `placeOrder` endpoint
+6. **Implementation** — the `placeOrder()` handler in code
+7. **Test** — verifies that placing an order returns `201`
 
 ```mermaid
 flowchart TD
@@ -89,7 +90,8 @@ flowchart TD
 
     subgraph Traced ["traced by spec ID"]
         Biz["Business Spec — how it behaves"] --> Contract["Contract — interface"]
-        Contract --> Impl["Implementation — code"]
+        Contract --> Plan["Plan — how to build it"]
+        Plan --> Impl["Implementation — code"]
         Impl --> Test["Test — proof"]
     end
 ```
