@@ -1,15 +1,10 @@
-export interface Order {
+export interface Pizza {
   id: number;
-  customer: string;
-  delivered: boolean;
+  name: string;
+  price: number;
 }
 
-export interface NewOrder {
-  customer: string;
-  delivered?: boolean;
-}
-
-export interface UpdateOrder {
-  customer?: string;
-  delivered?: boolean;
+export interface Delivery {
+  id: number;
+  items: string[];
 }

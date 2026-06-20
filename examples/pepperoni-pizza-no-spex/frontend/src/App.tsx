@@ -1,51 +1,41 @@
 import { useEffect, useState } from "react";
-import { ordersApi } from "./api";
-import type { Order } from "./types";
+import { pizzaApi } from "./api";
+import type { Delivery, Pizza } from "./types";
 
 export default function App() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [customer, setCustomer] = useState("");
+  const [menu, setMenu] = useState<Pizza[]>([]);
+  const [cart, setCart] = useState<Pizza[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    ordersApi.list().then(setOrders).catch(showError);
+    pizzaApi.listPizzas().then(setMenu).catch(showError);
+  }, []);
+
+  // Poll the API every 2 seconds so the delivering window clears itself
+  // once the API drops a delivery (5 seconds after it was ordered).
+  useEffect(() => {
+    function refresh() {
+      pizzaApi.listDeliveries().then(setDeliveries).catch(showError);
+    }
+    refresh();
+    const timer = setInterval(refresh, 2000);
+    return () => clearInterval(timer);
   }, []);
 
   function showError(err: unknown) {
     setError(err instanceof Error ? err.message : "Something went wrong");
   }
 
-  async function addOrder(event: React.FormEvent) {
-    event.preventDefault();
-    const trimmed = customer.trim();
-    if (!trimmed) return;
-
-    try {
-      const created = await ordersApi.create({ customer: trimmed });
-      setOrders((current) => [...current, created]);
-      setCustomer("");
-    } catch (err) {
-      showError(err);
-    }
+  function addToCart(pizza: Pizza) {
+    setCart((current) => [...current, pizza]);
   }
 
-  async function toggleOrder(order: Order) {
+  async function placeOrder() {
     try {
-      const updated = await ordersApi.update(order.id, {
-        delivered: !order.delivered,
-      });
-      setOrders((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item)),
-      );
-    } catch (err) {
-      showError(err);
-    }
-  }
-
-  async function removeOrder(id: number) {
-    try {
-      await ordersApi.remove(id);
-      setOrders((current) => current.filter((item) => item.id !== id));
+      await pizzaApi.createOrder(cart.map((pizza) => pizza.id));
+      setCart([]);
+      setDeliveries(await pizzaApi.listDeliveries());
     } catch (err) {
       showError(err);
     }
@@ -55,40 +45,50 @@ export default function App() {
     <main>
       <h1>Pepperoni Pizza</h1>
 
-      <form onSubmit={addOrder}>
-        <input
-          value={customer}
-          onChange={(event) => setCustomer(event.target.value)}
-          placeholder="Who's ordering a pepperoni pizza?"
-          aria-label="Customer name"
-        />
-        <button type="submit">Order</button>
-      </form>
-
       {error && <p>{error}</p>}
 
-      <ul>
-        {orders.map((order) => (
-          <li key={order.id}>
-            <label>
-              <input
-                type="checkbox"
-                checked={order.delivered}
-                onChange={() => toggleOrder(order)}
-              />
-              <span>{order.customer}</span>
-            </label>
-            <button
-              onClick={() => removeOrder(order.id)}
-              aria-label={`Cancel order for ${order.customer}`}
-            >
-              ✕
-            </button>
-          </li>
-        ))}
-      </ul>
+      <section>
+        <h2>Menu</h2>
+        <ul>
+          {menu.map((pizza) => (
+            <li key={pizza.id}>
+              <span>
+                {pizza.name} — ${pizza.price.toFixed(2)}
+              </span>
+              <button onClick={() => addToCart(pizza)}>Add</button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      {orders.length === 0 && !error && <p>No orders yet.</p>}
+      <section>
+        <h2>Cart</h2>
+        {cart.length === 0 ? (
+          <p>Your cart is empty.</p>
+        ) : (
+          <>
+            <ul>
+              {cart.map((pizza, index) => (
+                <li key={index}>{pizza.name}</li>
+              ))}
+            </ul>
+            <button onClick={placeOrder}>Order</button>
+          </>
+        )}
+      </section>
+
+      <section>
+        <h2>Delivering</h2>
+        {deliveries.length === 0 ? (
+          <p>Nothing is being delivered.</p>
+        ) : (
+          <ul>
+            {deliveries.map((delivery) => (
+              <li key={delivery.id}>{delivery.items.join(", ")}</li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }

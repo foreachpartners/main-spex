@@ -1,4 +1,4 @@
-import type { NewOrder, Order, UpdateOrder } from "./types";
+import type { Delivery, Pizza } from "./types";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -13,30 +13,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(body?.message ?? `Request failed: ${response.status}`);
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
   return response.json() as Promise<T>;
 }
 
-export const ordersApi = {
-  list: () => request<Order[]>("/orders"),
+export const pizzaApi = {
+  listPizzas: () => request<Pizza[]>("/pizzas"),
 
-  create: (order: NewOrder) =>
-    request<Order>("/orders", {
+  createOrder: (pizzaIds: number[]) =>
+    request<Delivery>("/orders", {
       method: "POST",
-      body: JSON.stringify(order),
+      body: JSON.stringify({ pizzaIds }),
     }),
 
-  update: (id: number, changes: UpdateOrder) =>
-    request<Order>(`/orders/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(changes),
-    }),
-
-  remove: (id: number) =>
-    request<void>(`/orders/${id}`, {
-      method: "DELETE",
-    }),
+  listDeliveries: () => request<Delivery[]>("/deliveries"),
 };
