@@ -166,10 +166,11 @@ Executes a plan step by step and checks the result.
 
 One coherent product capability or behavior.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `coverage_ignore`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `dirty`, `coverage_ignore`.
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `scope` lists the repositories that implement the capability.
 - `status` defaults to `planned`;
+- `dirty` defaults to `false`; set it `true` when acceptance criteria are not yet fully implemented (the spec has moved ahead of the code).
 
 ## Technical spec (TECH)
 
