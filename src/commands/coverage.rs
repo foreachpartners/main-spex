@@ -78,6 +78,16 @@ fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Found> {
     let mut found = Found::new();
 
     for repo in &config.repositories {
+        // Interface contracts live inside the spex repository's `contracts/`
+        // folder, so scan them explicitly even though the spex dir itself is
+        // skipped below; their `x-spec` annotations are the contract layer.
+        for contract in &repo.contracts {
+            let contract_path = spex_dir.join(&contract.path);
+            if let Ok(content) = fs::read_to_string(&contract_path) {
+                scanner.scan(&content, &mut found);
+            }
+        }
+
         let repo_path = spex_dir.join(&repo.path);
         if !repo_path.is_dir() || canonical(&repo_path) == spex_canon {
             continue;

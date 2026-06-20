@@ -74,6 +74,31 @@ mod tests {
     }
 
     #[test]
+    fn scan_workspace_reads_contract_files_inside_spex_dir() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path();
+        std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
+        std::fs::write(
+            spex_dir.join("contracts/api.openapi.yaml"),
+            "      x-spec: BIZ-A\n",
+        )
+        .expect("write contract");
+
+        let config: crate::config::Config = serde_yaml_ng::from_str(
+            "project_name: demo\ncli_version: 0.0.0\nrepositories:\n  - repository_name: api\n    path: ../api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
+        )
+        .expect("parse config");
+
+        let found = scan_workspace(spex_dir, &config).expect("scan");
+        assert!(
+            found
+                .get("BIZ-A")
+                .unwrap()
+                .contains(&CoverageLayer::Contract)
+        );
+    }
+
+    #[test]
     fn active_rows_ignores_non_active_specs() {
         let specs = vec![
             spec("BIZ-A", Status::Active),

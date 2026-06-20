@@ -53,7 +53,7 @@ Draft each contract following the format of the existing document and the govern
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec per `TECH-SPEC-ID-ANNOTATIONS` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary, never on nested schemas.
+- Annotate each operation with its spec per `TECH-SPEC-ID-ANNOTATIONS` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 Keep the change minimal and consistent with the surrounding document.

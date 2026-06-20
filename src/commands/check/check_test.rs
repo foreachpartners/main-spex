@@ -356,6 +356,7 @@ mod tests {
         Repository {
             name: "api".to_string(),
             path: path.to_string(),
+            contracts: Vec::new(),
             tech_specs: tech_specs.into_iter().map(str::to_string).collect(),
             checks_additional: Vec::new(),
             checks_override: Vec::new(),

@@ -122,7 +122,7 @@ Rules for the plan content:
 - List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing tech-specs under `Tech-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
-- Within each task, name the applicable tech-specs and the spec to annotate per `TECH-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant.
+- Within each task, name the applicable tech-specs and the spec to annotate per `TECH-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
 
 ## Step 6 — Confirm, then write
 

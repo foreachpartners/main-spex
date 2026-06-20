@@ -44,6 +44,8 @@ pub struct Repository {
     pub name: String,
     pub path: String,
     #[serde(default)]
+    pub contracts: Vec<Contract>,
+    #[serde(default)]
     pub tech_specs: Vec<String>,
     #[serde(default)]
     pub checks_additional: Vec<RepoCheck>,
@@ -51,6 +53,13 @@ pub struct Repository {
     pub checks_override: Vec<CheckOverride>,
     #[serde(default)]
     pub checks_preexisting_errors: Vec<PreexistingError>,
+}
+
+// A repository's interface contract, stored inside the spex repository's
+// `contracts/` folder. `path` is relative to the spex directory.
+#[derive(Debug, Deserialize)]
+pub struct Contract {
+    pub path: String,
 }
 
 // A baseline entry that suppresses pre-existing `error`-severity findings for an
