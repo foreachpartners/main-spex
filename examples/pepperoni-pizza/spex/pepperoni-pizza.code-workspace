@@ -1,8 +1,0 @@
-{
-  "folders": [
-    { "name": "api", "path": "../api" },
-    { "name": "contracts", "path": "../contracts" },
-    { "name": "frontend", "path": "../frontend" },
-    { "name": "🧰 spex", "path": "." },
-  ]
-}
