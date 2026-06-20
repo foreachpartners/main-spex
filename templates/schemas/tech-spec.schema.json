@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/tech-spec.schema.json",
   "title": "Technical Spec",
-  "description": "A technical spec (TECH): a cross-cutting technical rule on code style, structure, testing, or security",
+  "description": "A technical spec (TECH): one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Applies repo-wide.",
   "type": "object",
   "properties": {
     "id": {

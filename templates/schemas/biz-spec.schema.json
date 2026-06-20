@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/biz-spec.schema.json",
   "title": "Business Spec",
-  "description": "A business spec (BIZ): a single business rule with acceptance criteria, extracted from the PRD.",
+  "description": "A business spec (BIZ): one coherent product capability or behavior, with its individual rules captured as acceptance criteria. Extracted from the PRD.",
   "type": "object",
   "properties": {
     "id": {

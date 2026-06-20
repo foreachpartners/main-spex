@@ -109,7 +109,7 @@ flowchart TD
 
 ## Learn more
 
-For an in-depth walkthrough of concepts and the full workflow, see the [Guide](docs/guide.md).
+Framework [specification](docs/specification.md).
 
 ## Try tutorial
 

@@ -2,6 +2,10 @@
 
 AI-first specification-driven development framework with human in control.
 
+## Specification
+
+[`docs/specification.md`](docs/specification.md) is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria). Consult it before changing behavior, and keep it in sync when behavior changes.
+
 ## Quick commands
 
 ```sh
@@ -58,3 +62,4 @@ Keep this section in sync when the structure changes.
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
 - **Writing style**: Follow the authoring conventions in `templates/tech-specs/TECH-WRITING-STYLE.yaml` (e.g. path placeholders) across docs, skills, and schemas.
+- **Single source of truth**: `docs/specification.md` defines how the framework behaves. Treat it as authoritative, and update it whenever you change framework behavior.

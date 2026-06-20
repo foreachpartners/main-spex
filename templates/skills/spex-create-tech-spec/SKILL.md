@@ -5,7 +5,7 @@ description: Create a technical spec (TECH) by interviewing the user. Use when t
 
 # Create a Technical Spec (TECH)
 
-A technical spec (`TECH`) describes _how the code is built_: a single cross-cutting technical rule on code style, structure, testing, or security. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file.
+A technical spec (`TECH`) describes _how the code and artifacts are built_: one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file.
 
 Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/spex/tech-specs/` directory.
 
@@ -17,37 +17,37 @@ The schema at `<workspace-root>/spex/schemas/tech-spec.schema.json` is authorita
 
 ## When to use this skill
 
-Use it when the user wants to create, draft, or extract a TECH spec — from a coding standard, a style or naming guide, a security policy, a testing rule, or a pattern already present in the code. Do not use it for product behavior or business rules; those are BIZ specs.
+Use it when the user wants to create, draft, or extract a TECH spec — from a coding standard, a style or naming guide, a security policy, a testing rule, or a pattern already present in the code. Do not use it for product capabilities or behavior; those are BIZ specs.
 
-## Scope rule: one rule per spec
+## Scope rule: one convention per spec
 
-A TECH spec captures exactly one cross-cutting rule. If the user describes several unrelated conventions, propose splitting them into multiple specs and confirm the split before writing.
+A TECH spec captures exactly one coherent cross-cutting convention; its individual rules are the acceptance criteria. If the user describes several unrelated conventions, propose splitting them into multiple specs and confirm the split before writing.
 
 ## Step 0 — Establish the source
 
 Determine what the spec is based on before doing anything else:
 
 - If the user attached or pasted a source (a style guide, a security policy, an engineering decision, or a code excerpt) — whether as text or as a file path/link — treat it as the primary input. Read the attached file or the pasted text in full and pre-fill every answer you can from it before asking anything.
-- If the user provided no source and no rule to spec, ask first what convention they want to spec. Do not invent a rule or proceed on assumptions.
+- If the user provided no source and nothing to spec, ask first what convention they want to spec. Do not invent a convention or proceed on assumptions.
 
 ## Step 1 — Gather context first
 
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
 - Read `<workspace-root>/spex/spex.yaml` for the project overview, the workspace repositories, and which tech-specs they already list. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
-- Read `<workspace-root>/spex/tech-specs/` for related specs and to match their style. Reuse an existing spec rather than duplicating its rule.
+- Read `<workspace-root>/spex/tech-specs/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention.
 
 ## Step 2 — Clarify missing details with the user
 
-Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the rule protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
+Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
 
-Do not set `readonly` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the rule should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
+Do not set `readonly` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the convention should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
 
 ## Step 3 — Draft the fields
 
 Follow the field rules in `<workspace-root>/spex/schemas/tech-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
-- `id` must start with `TECH-` and convey the rule so it reads without opening the spec.
+- `id` must start with `TECH-` and convey the convention so it reads without opening the spec.
 - Write `acceptance_criteria` as verifiable statements, each starting with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
 - Keep each criterion provable by an automated check or by AI inspection.
 

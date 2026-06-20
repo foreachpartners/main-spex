@@ -16,7 +16,7 @@
 
 - **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: business (`BIZ`) and technical (`TECH`).
 
-- **Business Spec** (`BIZ`) — extracted from the PRD. Describes _how the product behaves_: a single business rule with acceptance criteria. A PRD typically breaks down into many business specs.
+- **Business Spec** (`BIZ`) — extracted from the PRD. Describes _how the product behaves_: one coherent product capability or behavior, with its individual rules captured as acceptance criteria. A PRD typically breaks down into many business specs.
 
   ```yaml
   id: BIZ-PLACE-PIZZA-ORDER
@@ -25,7 +25,7 @@
     - "POST /orders returns 201 with the created order."
   ```
 
-- **Technical Spec** (`TECH`) — describes _how the code is built_: a cross-cutting technical rule on code style, structure, testing, or security. Not tied to a single feature — it applies repo-wide.
+- **Technical Spec** (`TECH`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide.
 
   ```yaml
   id: TECH-SECRET-HANDLING

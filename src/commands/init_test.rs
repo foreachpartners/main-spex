@@ -173,8 +173,8 @@ mod tests_unit {
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-                  tech-specs/ (cross-cutting technical rules) and biz-specs/ (business
-                  rules).
+                  tech-specs/ (cross-cutting technical conventions) and biz-specs/ (product
+                  capabilities and behaviors).
                 path: .
                 tech_specs:
                   - TECH-WRITING-STYLE

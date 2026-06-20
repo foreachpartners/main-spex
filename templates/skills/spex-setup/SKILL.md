@@ -86,7 +86,7 @@ Example result:
 
 ## Step 6 — Point to the next skill
 
-Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a business rule, or `spex-create-tech-spec` for a cross-cutting technical rule.
+Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Prompt the user to author their first spec: run `spex-create-biz-spec` for a product capability or behavior, or `spex-create-tech-spec` for a cross-cutting technical convention.
 
 ## Field placement
 

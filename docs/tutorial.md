@@ -45,7 +45,7 @@ statement of what the product should do:
 
 ### 6.1 Create the business spec(s)
 
-Hand the PRD to the skill — it breaks the PRD into one or more business rules and
+Hand the PRD to the skill — it breaks the PRD into one or more capabilities and
 writes a spec for each:
 
 ```text
@@ -53,12 +53,12 @@ writes a spec for each:
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one
-rule, then writes a schema-valid spec per rule. A spec captures one rule, not one
-repository: this PRD is the single rule "customers can see the menu," so it
-produces one spec under `spex/biz-specs/` — even though its `scope` spans
-`contracts`, `api`, and `frontend`. The agent chooses the `BIZ-` Spec ID; note it
-down, since later steps reference it. Review the spec and confirm its `status` is
-`active`.
+capability, then writes a schema-valid spec per capability. A spec captures one
+capability, not one repository: this PRD is the single capability "customers can
+see the menu," so it produces one spec under `spex/biz-specs/` — even though its
+`scope` spans `contracts`, `api`, and `frontend`. The agent chooses the `BIZ-`
+Spec ID; note it down, since later steps reference it. Review the spec and confirm
+its `status` is `active`.
 
 ### 6.2 Plan and execute
 
@@ -82,8 +82,8 @@ Coverage should now show your new spec as `✓`.
 
 ## Step 7 — Technical spec workflow
 
-Technical specs capture cross-cutting rules that apply repo-wide. Create one for
-the API:
+Technical specs capture cross-cutting conventions that apply repo-wide. Create one
+for the API:
 
 ```text
 /spex-create-tech-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
