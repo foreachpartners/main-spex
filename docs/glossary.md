@@ -59,6 +59,7 @@
   # Plan: Customer can place an order
 
   ## Step 1 — Add endpoint
+
   Status: not-started
   ```
 

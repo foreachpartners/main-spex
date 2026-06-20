@@ -45,22 +45,17 @@ through the findings until it exits cleanly.
 Drive a real feature from PRD to verified code. Start with the PRD-level
 statement of what the product should do:
 
-> customers should be able to remove pizza from order.
+> show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 
 ### 5.1 Create the business spec
 
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
-/spex-create-biz-spec customers should be able to remove pizza from order
+/spex-create-biz-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 ```
 
-The skill interviews you, proposes the split when the PRD covers more than one
-capability, then writes a schema-valid spec per capability. A spec captures one
-capability, not one repository: this PRD is the single capability "customers should be able to remove pizza from order" so it produces one spec under `spex/biz-specs/` — even though its
-`scope` spans `api` and `frontend`. The agent chooses the `BIZ-`
-Spec ID; note it down, since later steps reference it. Review the spec and confirm
-its `status` is `planned`.
+The skill interviews you, proposes the split when the PRD covers more than one capability, then writes a schema-valid spec per capability. A spec captures one capability, not one repository. Review the spec and confirm its `status` is `planned`.
 
 ### 5.2 Derive the contract
 
