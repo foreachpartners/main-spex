@@ -65,7 +65,7 @@ For each affected contract:
 1. Show the drafted contract change (the added or modified operations, messages, and schemas) to the user for confirmation. Apply edits if needed.
 2. Write it into `<workspace-root>/spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
 3. Record any new contract file under its repository's `contracts` in `<workspace-root>/spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
-4. Validate the result: for OpenAPI, pass `redocly lint` with zero errors and warnings and normalize with `openapi-format`; for any contract validated by a schema, run the project's check. Validate `spex.yaml` against `<workspace-root>/spex/schemas/spex.schema.json`.
+4. Validate `spex.yaml` against `<workspace-root>/spex/schemas/spex.schema.json`.
 
 ## Step 6 — Point to the next skill
 

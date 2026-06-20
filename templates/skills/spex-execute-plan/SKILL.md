@@ -1,13 +1,13 @@
 ---
 name: spex-execute-plan
-description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, and running `spex check` on the affected repositories.
+description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, running `spex check` on the affected repositories, and setting each implemented business spec's status to active.
 ---
 
 # Execute an Implementation Plan
 
 An implementation plan is an ordered set of steps whose tasks AI agents carry out. Your job is to read one plan, then work through its steps in order: within a step, run the independent tasks in parallel as separate agents; between steps, wait for the earlier step to finish before starting the next. As each task and step lands, mark it completed in the plan file, then run `spex check` on the affected repositories to prove the work respects the governing tech-specs.
 
-You coordinate the work — you do not redo what an agent already did. Each task in a step has a disjoint write scope, so parallel agents never collide.
+You coordinate the work — you do not redo what an agent already did. Each task in a step has a disjoint write scope, so parallel agents never collide. When the plan's steps pass, set each business spec it implemented to `active` so the capability comes under `spex coverage`.
 
 ## Paths
 
@@ -85,13 +85,20 @@ Pass the repositories from the plan's `Scope`. Run from inside the workspace (an
 
 Run the repositories' own tests where the plan's test cases call for them, to prove each acceptance criterion holds.
 
-## Step 6 — Report the result
+## Step 6 — Mark the implemented specs active
+
+Once the steps are complete and `spex check` passes, set each business spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/spex/biz-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
+
+Leave a spec's status unchanged if its acceptance criteria are not yet fully implemented; instead set `dirty: true` so it is clear the spec has moved ahead of the code. Touch only the `status` (and, where needed, `dirty`) line — leave the rest of each spec untouched.
+
+## Step 7 — Report the result
 
 Summarize the run for the user:
 
 - Which steps and tasks completed, referenced by their numbers.
 - The `spex check` outcome per affected repository, and any findings you fixed or left.
 - Which acceptance criteria are now proven, and any test cases still outstanding.
+- Which specs you set to `active`, and any you left `planned` or marked `dirty`, with the reason.
 - Any step that was skipped (already completed) or stopped, with the reason.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

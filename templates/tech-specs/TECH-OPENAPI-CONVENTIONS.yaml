@@ -17,7 +17,6 @@ acceptance_criteria:
   - "MUST mark every secret-bearing field (password, token, key, credential) with `x-sensitive: true` so generated code can wrap it in a secret type"
   - "MUST set `format: password` on secret string fields and `writeOnly: true` on secrets accepted in requests but never returned in responses (e.g. password)"
   - "MUST use snake_case as the default casing for property names, query parameter names, and enum values. URL path segments use kebab-case"
-  - "MUST pass `redocly lint` with zero errors and warnings using the repo `redocly.yaml` ruleset"
   - "MUST normalize every spec with `openapi-format` before commit so field ordering and whitespace are canonical and diffs stay minimal"
   - "MUST NOT use anyOf / oneOf without a discriminator"
   - "MUST NOT leave operationId implicit"

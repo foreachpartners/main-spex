@@ -60,25 +60,28 @@ The skill interviews you, proposes the split when the PRD covers more than one c
 ### 5.2 Derive the contract
 
 ```text
-/spex-create-contract list pizza menu
+/spex-create-contract <spec-id>
 ```
 
-The agent reads the spec and the `api` OpenAPI document, adds the `GET /pizzas`
-operation with its `x-spec` annotation and response schema, and records the
-contract in `spex.yaml` if it is new. Review the contract before planning.
+The agent reads the spec, `api` OpenAPI contract and updates it to match changes.
 
-### 5.3 Plan and execute
+### 5.3 Plan
 
 ```text
-/spex-create-plan list pizza menu
-/spex-execute-plan list pizza menu
+/spex-create-plan <spec-id>
 ```
 
-The agent reads the contract, implements the handler in `api`, wires it into the
-frontend, and adds tests — each tagged with the matching `@spec` annotation —
-running `spex check` as it goes.
+The agent reads the spec, contrac, code and proposes implementation plan.
 
-### 5.4 Verify with check and coverage
+### 5.4 Execute
+
+```text
+/spex-execute-plan <spec-id>
+```
+
+The agent executes plan task for each step in parallel.
+
+### 5.5 Verify with check and coverage
 
 ```sh
 spex check

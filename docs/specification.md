@@ -167,6 +167,7 @@ Executes a plan step by step and checks the result.
 - Works through a plan step by step: runs each step's tasks as parallel agents, and waits between steps.
 - Marks each task and step `completed` as it lands, so an interrupted run resumes from the first incomplete step.
 - Runs `spex check` on the affected repositories and fixes `error` findings.
+- Sets each implemented business spec's `status` to `active` once the steps pass; leaves a spec `planned` and marks it `dirty` when its acceptance criteria are not yet fully implemented.
 
 # Specs
 
