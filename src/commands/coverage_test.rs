@@ -6,6 +6,9 @@ mod tests {
     fn spec(id: &str, status: Status) -> BizSpec {
         BizSpec {
             id: id.to_string(),
+            title: String::new(),
+            description: String::new(),
+            acceptance_criteria: Vec::new(),
             status,
             coverage_ignore: Vec::new(),
         }

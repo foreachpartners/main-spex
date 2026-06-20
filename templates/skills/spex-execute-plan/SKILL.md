@@ -30,9 +30,14 @@ Read the chosen plan in `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md`
 
 Then read enough context to execute faithfully:
 
-- Read each targeted spec in `<workspace-root>/spex/biz-specs/<spec-id>.yaml` for its acceptance criteria.
-- Read each governing tech-spec named in the plan from `<workspace-root>/spex/tech-specs/` so every agent stays compliant.
+- Load the combined context of the plan's specs and governing tech-specs in one call, passing every spec ID from the plan's `Specs` and `Tech-specs`:
+  ```sh
+  spex spec-context <spec-id> <tech-spec-id>...
+  ```
+  This prints each spec's `id`, `title`, `description`, and `acceptance_criteria` (plus `examples` for tech-specs) as Markdown — enough for you to coordinate against. Run it from anywhere inside the workspace.
 - For each affected repository, resolve its `path` from `<workspace-root>/spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
+
+The agents that edit code must still read the full tech-spec files (Step 3), since `spex spec-context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
 

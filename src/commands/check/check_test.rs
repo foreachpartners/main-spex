@@ -342,9 +342,13 @@ mod tests {
     fn tech_spec(id: &str, checks: Vec<Check>) -> TechSpec {
         TechSpec {
             id: id.to_string(),
+            title: String::new(),
+            description: String::new(),
+            acceptance_criteria: Vec::new(),
             include_for_all_repos: false,
             include_for_spex: None,
             checks,
+            examples: std::collections::BTreeMap::new(),
         }
     }
 

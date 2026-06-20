@@ -140,6 +140,16 @@ spex check-schema --schema schemas/tech-spec.schema.json --files tech-specs/TECH
 spex check-schema --schema schemas/biz-spec.schema.json --files biz-specs/BIZ-LIST-PIZZA-MENU.yaml biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml
 ```
 
+### `spex spec-context`
+
+Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; technical specs additionally emit their `examples`. Each ID is resolved against the business specs first, then the technical specs, and the sections are printed in the order requested. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+
+```sh
+spex spec-context BIZ-PLACE-PIZZA-ORDER TECH-SECRET-HANDLING
+```
+
+The command exits with a non-zero status when any ID matches no spec, naming the unknown IDs. The `spex-execute-plan` skill uses it to load a plan's governing specs in a single call instead of opening each YAML file.
+
 ## Development
 
 These commands operate on the `spex` source checkout itself.

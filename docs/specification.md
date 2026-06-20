@@ -101,6 +101,17 @@ Validates JSON or YAML files against a JSON Schema.
 - Exits non-zero when any file fails.
 - Used by `TECH-SPEX-CONFORMANCE` to keep spex's own spec files valid.
 
+## spec-context
+
+Prints the combined context of the named specs as Markdown for an AI agent.
+
+- Takes one or more spec IDs, each a BIZ or TECH spec.
+- For every ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; TECH specs also emit their `examples`.
+- Resolves each ID against the business specs first, then the technical specs.
+- Prints one section per ID, in the order requested, to stdout.
+- Exits non-zero when any ID matches no spec.
+- Used by `spex-execute-plan` to load the governing specs in one call.
+
 # Skills
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
