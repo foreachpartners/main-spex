@@ -15,7 +15,7 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`) or to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`). The plan must already exist in `<workspace-root>/spex/plans/`.
+Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`), to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`), or to draft a contract (use `spex-create-contract`). The plan must already exist in `<workspace-root>/spex/plans/`.
 
 ## Step 0 — Establish the target plan
 

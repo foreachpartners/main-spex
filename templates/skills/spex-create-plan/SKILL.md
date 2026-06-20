@@ -17,7 +17,7 @@ Each spec's plans live in their own directory: `<workspace-root>/spex/plans/<spe
 
 ## When to use this skill
 
-Use it when the user wants to plan or prepare the implementation of one or more BIZ specs — either named (for example `BIZ-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-biz-spec`) or to execute a plan (use `spex-execute-plan`). The spec must exist and be approved before planning.
+Use it when the user wants to plan or prepare the implementation of one or more BIZ specs — either named (for example `BIZ-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-biz-spec`), to draft a contract (use `spex-create-contract`), or to execute a plan (use `spex-execute-plan`). The spec must exist and be approved before planning; its contract should be drafted first so the plan builds on a settled interface.
 
 ## Step 0 — Establish the target specs
 

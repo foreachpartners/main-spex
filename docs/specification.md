@@ -144,6 +144,14 @@ Turns a convention into a schema-valid technical spec with checks.
 - Proposes the automated checks that verify it.
 - Writes `tech-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
 
+## spex-create-contract
+
+Derives the machine-readable interface contract from approved business specs.
+
+- Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
+- Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
+- Runs after `spex-create-biz-spec` and before `spex-create-plan`.
+
 ## spex-create-plan
 
 Splits approved specs into an ordered, parallel-safe plan.

@@ -62,18 +62,28 @@ see the menu," so it produces one spec under `spex/biz-specs/` — even though i
 Spec ID; note it down, since later steps reference it. Review the spec and confirm
 its `status` is `active`.
 
-### 6.2 Plan and execute
+### 6.2 Derive the contract
+
+```text
+/spex-create-contract list pizza menu
+```
+
+The agent reads the spec and the `api` OpenAPI document, adds the `GET /pizzas`
+operation with its `x-spec` annotation and response schema, and records the
+contract in `spex.yaml` if it is new. Review the contract before planning.
+
+### 6.3 Plan and execute
 
 ```text
 /spex-create-plan list pizza menu
 /spex-execute-plan list pizza menu
 ```
 
-The agent adds the `GET /pizzas` operation to the OpenAPI contract, implements
-the handler in `api`, wires it into the frontend, and adds tests — each tagged
-with the matching `@spec` annotation — running `spex check` as it goes.
+The agent reads the contract, implements the handler in `api`, wires it into the
+frontend, and adds tests — each tagged with the matching `@spec` annotation —
+running `spex check` as it goes.
 
-### 6.3 Verify with check and coverage
+### 6.4 Verify with check and coverage
 
 ```sh
 spex check
