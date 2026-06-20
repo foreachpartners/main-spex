@@ -16,53 +16,53 @@ Follow the installation process in [cli.md](cli.md#install).
 
 Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
-`api` and `frontend` repositories side by side. The `api` repository ships its
-own `openapi.yaml`; `spex-setup` later copies it into the `spex` repository's
-`contracts/` folder.
+`api` and `frontend` repositories side by side.
 
-Init git repository for each and commit `chore: initial commit`. Commit as you complete each step so your progress is easy to review and roll back.
+## Step 3 — Set up spex and workspace
 
-## Step 3 — Set up spex
+Run `spex init` in terminal.
 
-- run `spex init` in terminal.
-- Open workspace to work across all repositories at once and integrate with AI coding agent:
-  - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
-  - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-  - Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
-  - Zed: add project, pick all workspace repos (folders)
-- init git repository and commit.
-- run your first skill `/spex-setup` in AI chat window to complete setup.
+Open workspace to work across all repositories at once and integrate with AI coding agent:
 
-## Step 5 — Fix everything `spex check` reports
+- Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
+- Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
+- Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
+- Zed: add project, pick all workspace repos (folders)
 
-Run [`spex check`](cli.md#spex-check) in terminal from anywhere in the workspace and work
+Ask AI to to init git in each repository and commit with `chore: initial commit`.
+
+Commit as you complete each step so your progress is easy to review and roll back.
+
+Run your first skill `/spex-setup` in AI chat window to complete setup.
+
+## Step 4 — Fix everything `spex check` reports
+
+Run `spex check` in terminal from anywhere in the workspace and work
 through the findings until it exits cleanly.
 
-## Step 6 — Business spec workflow
+## Step 5 — Business spec workflow
 
 Drive a real feature from PRD to verified code. Start with the PRD-level
 statement of what the product should do:
 
-> Customers can see the full pizza menu (pizza name, description and price) before ordering.
+> customers should be able to remove pizza from order.
 
-### 6.1 Create the business spec(s)
+### 5.1 Create the business spec
 
-Hand the PRD to the skill — it breaks the PRD into one or more capabilities and
-writes a spec for each:
+Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
-/spex-create-biz-spec Customers can see the full pizza menu (pizza name, description and price) before ordering
+/spex-create-biz-spec customers should be able to remove pizza from order
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one
 capability, then writes a schema-valid spec per capability. A spec captures one
-capability, not one repository: this PRD is the single capability "customers can
-see the menu," so it produces one spec under `spex/biz-specs/` — even though its
+capability, not one repository: this PRD is the single capability "customers should be able to remove pizza from order" so it produces one spec under `spex/biz-specs/` — even though its
 `scope` spans `api` and `frontend`. The agent chooses the `BIZ-`
 Spec ID; note it down, since later steps reference it. Review the spec and confirm
-its `status` is `active`.
+its `status` is `planned`.
 
-### 6.2 Derive the contract
+### 5.2 Derive the contract
 
 ```text
 /spex-create-contract list pizza menu
@@ -72,7 +72,7 @@ The agent reads the spec and the `api` OpenAPI document, adds the `GET /pizzas`
 operation with its `x-spec` annotation and response schema, and records the
 contract in `spex.yaml` if it is new. Review the contract before planning.
 
-### 6.3 Plan and execute
+### 5.3 Plan and execute
 
 ```text
 /spex-create-plan list pizza menu
@@ -83,7 +83,7 @@ The agent reads the contract, implements the handler in `api`, wires it into the
 frontend, and adds tests — each tagged with the matching `@spec` annotation —
 running `spex check` as it goes.
 
-### 6.4 Verify with check and coverage
+### 5.4 Verify with check and coverage
 
 ```sh
 spex check
@@ -92,7 +92,7 @@ spex coverage
 
 Coverage should now show your new spec as `✓`.
 
-## Step 7 — Technical spec workflow
+## Step 6 — Technical spec workflow
 
 Technical specs capture cross-cutting conventions that apply repo-wide. Create one
 for the API:
@@ -108,7 +108,7 @@ hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
 check` — it flags the hardcoded bind address in `api` — resolve the finding by
 reading the address from the environment, and commit.
 
-## Step 8 — Generate a completion report
+## Step 7 — Generate a completion report
 
 Have your AI agent summarize the result:
 

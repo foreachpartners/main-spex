@@ -64,6 +64,6 @@ For each drafted spec:
 
 ## Step 5 — Point to the next skill
 
-After the specs are written, prompt the user to draft each one's contract in a new chat window to save context: run `spex-create-contract <spec-id>` with the spec's `id`. Do not offer to run it in the current chat.
+After the specs are written, offer to draft each one's contract: run `spex-create-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

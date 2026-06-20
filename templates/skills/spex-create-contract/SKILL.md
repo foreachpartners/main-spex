@@ -69,6 +69,6 @@ For each affected contract:
 
 ## Step 6 — Point to the next skill
 
-After the contract is written, prompt the user to plan the implementation in a new chat window to save context: run `spex-create-plan <spec-id>` with the spec's `id`. Do not offer to run it in the current chat.
+After the contract is written, offer to plan the implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
