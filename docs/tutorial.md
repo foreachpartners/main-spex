@@ -18,21 +18,22 @@ Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
 `api`, `frontend`, and `contracts` repositories side by side.
 
+Init git repository for each and commit `chore: initial commit`. Commit as you complete each step so your progress is easy to review and roll back.
+
 ## Step 3 — Set up spex
 
-Follow the **Quickstart Setup** in [README.md](../README.md#Setup): run `spex init`,
-open the workspace in your editor, and run the `/spex-setup` skill.
-
-## Step 4 — Put each repository under Git
-
-spex traces one Spec ID across many repositories, so each workspace repository is
-its own Git repository. Initialize Git and make a baseline commit for each repository.
-
-Commit as you complete each step so your progress is easy to review and roll back.
+- run `spex init` in terminal.
+- Open workspace to work across all repositories at once and integrate with AI coding agent:
+  - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
+  - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
+  - Claude CLI: run `claude --add-dir ../api ../contracts ../frontend ..` from `spex` repo
+  - Zed: add project, pick all workspace repos (folders)
+- init git repository and commit.
+- run your first skill `/spex-setup` in AI chat window to complete setup.
 
 ## Step 5 — Fix everything `spex check` reports
 
-Run [`spex check`](cli.md#spex-check) from anywhere in the workspace and work
+Run [`spex check`](cli.md#spex-check) in terminal from anywhere in the workspace and work
 through the findings until it exits cleanly.
 
 ## Step 6 — Business spec workflow
