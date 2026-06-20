@@ -46,7 +46,7 @@ async fn main() {
     let app = Router::new()
         .route("/orders", get(list_orders).post(create_order))
         .route(
-            "/orders/:id",
+            "/orders/{id}",
             get(get_order).put(update_order).delete(delete_order),
         )
         .layer(CorsLayer::permissive())
