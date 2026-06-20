@@ -48,6 +48,7 @@ Within a step:
 
 - Run every task in the step in parallel, one AI agent per task. The tasks are independent and have disjoint write scopes by construction, so they are safe to run together.
 - Give each agent only its task: the task description, the repository it runs in, the files it owns, the governing tech-specs that apply there, the spec IDs to annotate per `TECH-SPEC-ID-ANNOTATIONS`, and the relevant contract changes and test cases. Do not let an agent edit files outside its task's scope.
+- Instruct each agent to read the named tech-spec files in full from `<workspace-root>/spex/tech-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
 - A step with a single unit runs as one agent.
 
 As each task finishes, verify its result against the task description and the acceptance criteria it serves, then mark it completed (Step 4). Only when every task in the step is completed do you move to the next step.
