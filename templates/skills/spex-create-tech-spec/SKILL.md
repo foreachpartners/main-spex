@@ -78,10 +78,14 @@ Show the proposed checks (and any script bodies) to the user and confirm them be
 2. Write the spec to `<workspace-root>/spex/tech-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
 3. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/spex/scripts/<spec-id>/<name>.sh`) and make them executable.
 4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
-5. Validate the spec against `<workspace-root>/spex/schemas/tech-spec.schema.json`.
+5. Run `spex check` to validate compliance
 
 ## Step 6 — Point to the next skill
 
-After the spec is written, offer to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+If there is no `spex check` errors related to new spec, do nothing.
+If there are errors:
+
+- Errors can be fixed easily: offer to fix them
+- Errors too many: offer to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

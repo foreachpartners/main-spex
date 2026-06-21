@@ -49,6 +49,8 @@ statement of what the product should do:
 
 ### 5.1 Create the business spec
 
+There is no person who requested this feature which you can clarify details, so decide yourself how it should behave for tutorial.
+
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
@@ -102,9 +104,10 @@ for the API:
 The skill interviews you, proposes a `regexp` check that flags binding to a
 hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
 `spex/tech-specs/TECH-*.yaml`. Make sure the new spec is in the `api` repository's
-`tech_specs` list in `spex.yaml` so the check runs against it. Then run `spex
-check` — it flags the hardcoded bind address in `api` — resolve the finding by
-reading the address from the environment, and commit.
+`tech_specs` list in `spex.yaml` so the check runs against it.
+
+Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
+small change or create a plan if compliance with new tech spec requires many changes.
 
 ## Step 7 — Generate a completion report
 
@@ -115,10 +118,8 @@ Create a new file `spex/tutorial-completion.md` that documents the result of thi
 
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.
-3. Under a "Rating" heading, rate both results out of 10 and briefly justify each score: are all checks passing, and is every active business spec fully covered (impl, test, contract)?
-4. Under a "Next steps" heading, list any remaining findings or coverage gaps and what to do about them.
-
-Keep it concise and factual — only report what the commands actually printed.
+3. Rate created biz spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
+3. Rate created tech spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
 ```
 
 Review and commit it:
