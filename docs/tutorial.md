@@ -75,6 +75,8 @@ The agent reads the spec, `api` OpenAPI contract and updates it to match changes
 
 The agent reads the spec, contrac, code and proposes implementation plan.
 
+Tip: you can combine skills in the future `/spex-create-biz-spec /spex-create-contract /spex-create-plan`
+
 ### 5.4 Execute
 
 ```text

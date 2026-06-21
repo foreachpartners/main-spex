@@ -51,6 +51,8 @@ Workflow core is AI agent skills and CLI commands.
 4. Execute plan `/spex-execute-plan [secret handling]`. Will execute the `TECH-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 5. Check result with `spex check`. Will run all TECH spec checks related to your changes.
 
+Tip: you can combine skills `/spex-create-biz-spec /spex-create-contract /spex-create-plan`
+
 ## Why
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.

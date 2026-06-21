@@ -27,6 +27,8 @@ Determine which specs to contract before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, contract that one and confirm the ID.
 - If no spec is identified, ask which to contract. Do not invent a spec.
 
+Before continuing, confirm each target spec's file exists at `<workspace-root>/spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not contract a spec that has not been written and approved.
+
 ## Step 1 — Read the specs
 
 For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.

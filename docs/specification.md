@@ -150,6 +150,7 @@ Derives the machine-readable interface contract from approved business specs.
 
 - Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
 - Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-biz-spec` first.
 - Runs after `spex-create-biz-spec` and before `spex-create-plan`.
 
 ## spex-create-plan
@@ -158,6 +159,8 @@ Splits approved specs into an ordered, parallel-safe plan.
 
 - Reads the target specs, the affected repositories, and the governing tech-specs, then inspects the current code.
 - Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-biz-spec` first.
+- Requires the contract to be settled with `spex-create-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
 - Writes `plans/<spec-id>/<date>_<slug>.md` with a status on every step and task.
 
 ## spex-execute-plan

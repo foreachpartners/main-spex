@@ -29,6 +29,11 @@ Determine which specs to plan before doing anything else:
 
 When several specs are given, pick the lead spec (the one the others depend on, or the first named) — its `id` names the plan directory. List every targeted spec inside the plan.
 
+Before continuing, confirm two preconditions:
+
+- Each target spec's file exists at `<workspace-root>/spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not plan a spec that has not been written and approved.
+- The contract is settled when applicable. If any acceptance criterion crosses a repository boundary (it needs an endpoint, message, or schema), the affected contract must be drafted or updated with `spex-create-contract` before planning. If the work needs no interface change (it is internal to one repository), proceed straight from spec to plan with no contract.
+
 ## Step 1 — Read the specs
 
 For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
