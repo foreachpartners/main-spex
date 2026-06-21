@@ -18,7 +18,8 @@ traceable by a shared Spec ID.
 - A contract is required wherever a machine-readable interface applies — a REST API must have an OpenAPI contract — and is optional otherwise, so a frontend spec may not have a contract.
 - A plan turns approved specs into ordered steps of parallel-safe tasks that agents execute.
 - A plan helps with large changes and is optional for small, self-contained ones.
-- The AI writes every artifact and the human validates each one before the next is generated: a spec is approved before its contract, and both before implementation and tests.
+- The AI writes every artifact and the human validates each one before the next is generated: a spec is approved before its contract, the contract before the plan, and the plan before implementation and tests.
+- No artifact ships without a human review and approval, so every change traces back to a decision a human approved.
 
 ## Spec kinds
 
@@ -37,6 +38,8 @@ A project spans several workspace repositories under one workspace root folder.
 
 - Each workspace repository (`spex`, `api`, `frontend`, …) is its own git repository.
 - The `spex` repository holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
+- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, product behavior only in its business spec, a convention only in its technical spec.
+- Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
 - Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
 
@@ -123,6 +126,7 @@ Skills are agent workflows that drive the spec → plan → execute → check lo
 
 - A skill is triggered by name (for example `/spex-create-biz-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
+- Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
 ## spex-setup
 
@@ -203,6 +207,7 @@ One coherent cross-cutting convention.
 
 A check proves an acceptance criterion.
 
+- Every criterion a script can verify is proven by a check; AI inspection covers only the criteria that require judgment.
 - Has type `regexp` (file contents), `glob` (file paths), or `script` (external program).
 - `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern.
 - `include` / `exclude` globs narrow the file set.
