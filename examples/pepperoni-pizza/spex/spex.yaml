@@ -1,0 +1,47 @@
+project_name: pepperoni-pizza
+description: >-
+  Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
+  live delivery tracking.
+cli_version: 0.6.6
+repositories:
+  - repository_name: api
+    description: >-
+      Rust/axum backend that serves the pizza menu, accepts orders, and tracks
+      in-progress deliveries.
+    path: ../api
+    contracts:
+      - path: contracts/api.openapi.yaml
+        description: >-
+          REST OpenAPI spec for the pizza menu, orders, and deliveries
+          endpoints.
+    tech_specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-CONFIGURABLE-NETWORK-BIND
+      - TECH-NAMING-CONVENTION
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-WRITING-STYLE
+  - repository_name: frontend
+    description: >-
+      React + TypeScript (Vite) web client where customers browse pizzas, place
+      orders, and watch deliveries.
+    path: ../frontend
+    tech_specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
+      - TECH-SECRET-HANDLING
+      - TECH-SPEC-ID-ANNOTATIONS
+      - TECH-WRITING-STYLE
+  - repository_name: spex
+    description: >-
+      Spex workspace repository. Holds the specs and config that govern the
+      project: schemas/ (JSON Schemas for spex.yaml and the spec files),
+      tech-specs/ (cross-cutting technical conventions) and biz-specs/ (product
+      capabilities and behaviors).
+    path: .
+    tech_specs:
+      - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-NAMING-CONVENTION
+      - TECH-SECRET-HANDLING
+      - TECH-SPEX-CONFORMANCE
+      - TECH-WRITING-STYLE
