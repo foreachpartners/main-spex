@@ -50,26 +50,23 @@ Workflow core is AI agent skills and CLI commands.
 3. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `spex/plans/TECH-SECRET-HANDLING/2024-11-25_secret-handling.md`
 4. Execute plan `/spex-execute-plan [secret handling]`. Will execute the `TECH-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 5. Check result with `spex check`. Will run all TECH spec checks related to your changes.
+6. See coverage `spex coverage`. Will run check if all specs have contract, implementation, and test.
 
 Tip: you can combine skills `/spex-create-biz-spec /spex-create-contract /spex-create-plan`
 
-## Why
+## Framework Principles
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
 
-**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted blue snake with big eyes! Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your or your customer's expectations, not someone else's.
+**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted blue snake with big eyes! Clear, well-defined business specifications (`BIZ`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
 
 **Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as technical specs (`TECH`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code.
 
-**Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the human stays in control: specs and contracts are reviewed and approved before implementation, and tests prove the result. The codebase stays maintainable, and every change traces back to a decision a human approved.
+**Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
-## Framework Principles
+**Deterministic enforcement**: AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, tech-spec checks, linting, schema validation, coverage) are what prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook. That's why every check that can be a script must be a script.
 
-**Simplicity**: The tool should help the developer get work done, not stand in the way. Everything about spex is kept simple, so it can be adopted and put to use in five minutes.
-
-**Tool-agnostic**: To avoid lock-in and restrictions, the framework works with any IDE, terminal, or AI model.
-
-**Ubiquitous language**: A shared vocabulary connects business, specs, and code so humans and AI mean the same thing by the same term. spex defines its terms in the [glossary](docs/glossary.md) and uses them consistently across specs, contracts, code, and docs, removing ambiguity and the translation errors it causes.
+See all principles in [framework-principles.md](docs/framework-principles.md).
 
 ## Description
 

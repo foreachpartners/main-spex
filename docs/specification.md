@@ -15,8 +15,10 @@ traceable by a shared Spec ID.
 - Flow runs BRD (why) → PRD (what) → business spec (how it behaves) → contract (interface) → plan (how to build it) → implementation (code) → test (proof).
 - A BIZ Spec ID names a spec and links the contract, code, and tests that satisfy it.
 - A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a business spec.
+- A contract is required wherever a machine-readable interface applies — a REST API must have an OpenAPI contract — and is optional otherwise, so a frontend spec may not have a contract.
 - A plan turns approved specs into ordered steps of parallel-safe tasks that agents execute.
-- The human reviews and approves specs and contracts before implementation; tests prove the result.
+- A plan helps with large changes and is optional for small, self-contained ones.
+- The AI writes every artifact and the human validates each one before the next is generated: a spec is approved before its contract, and both before implementation and tests.
 
 ## Spec kinds
 
@@ -40,8 +42,10 @@ A project spans several workspace repositories under one workspace root folder.
 
 ## Traceability
 
-Separate repositories keep access tight while one Spec ID traces across them.
+Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
+- The Spec ID (BIZ, TECH) is the unit of traceability; every behavioral change traces to one, with no orphans.
+- Traceability is bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
 - Checking out a commit shows exactly which specs the code was built against.
@@ -213,6 +217,7 @@ A check proves an acceptance criterion.
 Annotations link a contract, implementation, or test to its spec.
 
 - Link a contract, implementation, or test to its spec at the layer boundary.
+- Business spec traceability is required and enforced by `spex coverage`; technical spec traceability is optional.
 - Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
 - Annotate once at the boundary, never nested.
 - Never reference a Spec ID with no spec file.
