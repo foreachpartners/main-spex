@@ -1,1 +1,1 @@
-This is frontend for pepperoni pizza
+This is the frontend for pepperoni pizza.

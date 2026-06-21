@@ -41,7 +41,7 @@
   TECH-SECRET-HANDLING
   ```
 
-- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder
+- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.
 
   ```yaml
   paths:

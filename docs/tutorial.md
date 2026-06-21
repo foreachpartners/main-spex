@@ -5,7 +5,7 @@ install the CLI, set up a spex workspace on the `pepperoni-pizza` example, fix
 check and coverage findings, and run the business and technical spec workflows
 end to end.
 
-By the end you will have recreated similar to `examples/pepperoni-pizza` project from the
+By the end you will have recreated a project similar to `examples/pepperoni-pizza` from the
 `examples/pepperoni-pizza-no-spex` starting point.
 
 ## Step 1 — Install spex
@@ -22,14 +22,14 @@ copy to `pepperoni-pizza`. This folder is your **workspace root**, containing th
 
 Run `spex init` in terminal.
 
-Open workspace to work across all repositories at once and integrate with AI coding agent:
+Open the workspace to work across all repositories at once and integrate with an AI coding agent:
 
 - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
 - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
 - Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
 - Zed: add project, pick all workspace repos (folders)
 
-Ask AI to to init git in each repository and commit with `chore: initial commit`.
+Ask AI to init git in each repository and commit with `chore: initial commit`.
 
 Commit as you complete each step so your progress is easy to review and roll back.
 
@@ -49,7 +49,7 @@ statement of what the product should do:
 
 ### 5.1 Create the business spec
 
-There is no person who requested this feature which you can clarify details, so decide yourself how it should behave for tutorial.
+There is no person who requested this feature with whom you can clarify details, so decide yourself how it should behave for the tutorial.
 
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
@@ -73,7 +73,7 @@ The agent reads the spec, `api` OpenAPI contract and updates it to match changes
 /spex-create-plan <spec-id>
 ```
 
-The agent reads the spec, contrac, code and proposes implementation plan.
+The agent reads the spec, contract, code and proposes an implementation plan.
 
 Tip: you can combine skills in the future `/spex-create-biz-spec /spex-create-contract /spex-create-plan`
 
@@ -83,7 +83,7 @@ Tip: you can combine skills in the future `/spex-create-biz-spec /spex-create-co
 /spex-execute-plan <spec-id>
 ```
 
-The agent executes plan task for each step in parallel.
+The agent executes the plan tasks for each step in parallel.
 
 ### 5.5 Verify with check and coverage
 
@@ -124,7 +124,7 @@ Create a new file `spex/tutorial-completion.md` that documents the result of thi
 3. Rate created tech spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
 ```
 
-Review and commit it:
+Review and commit it.
 
 ## 🎉 Congratulations!
 

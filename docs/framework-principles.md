@@ -16,7 +16,7 @@ Casual requests force an AI to guess, leading to inaccurate repository navigatio
 
 Clear, well-defined business specs (`BIZ-*`) eliminate guesswork: they provide explicit acceptance criteria for the AI to follow and for the developer to verify. Specs stay relevant for a long time even as models get faster and better, because they describe an idea from your head that must meet your — or your customer's — expectations, not someone else's.
 
-Asking agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
+Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
 **Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted.
 

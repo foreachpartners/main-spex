@@ -25,7 +25,7 @@ Determine which specs to plan before doing anything else:
 
 - If the user named one or more spec IDs, plan those.
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, plan that one and confirm the ID.
-- If no spec is identified ask which to plan. Do not invent a spec.
+- If no spec is identified, ask which to plan. Do not invent a spec.
 
 When several specs are given, pick the lead spec (the one the others depend on, or the first named) — its `id` names the plan directory. List every targeted spec inside the plan.
 
@@ -33,7 +33,7 @@ When several specs are given, pick the lead spec (the one the others depend on, 
 
 For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
 
-If a spec lists `depends_on`, check those specs `status`. Flag any dependency that is not yet shipped and confirm with the user whether to plan around it or stop.
+If a spec lists `depends_on`, check those specs' `status`. Flag any dependency that is not yet shipped and confirm with the user whether to plan around it or stop.
 
 ## Step 2 — Resolve scope and governing tech-specs
 

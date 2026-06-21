@@ -2,7 +2,7 @@
 
 An example workspace used to test the spex framework. It is a small pepperoni
 pizza shop application split into the kind of sibling repositories spex expects
-to manage, but **without** a `spex` initialized.
+to manage, but **without** `spex` initialized.
 
 Use it as a clean starting point to try `spex init` and the rest of the flow
 against a realistic, multi-repo project.

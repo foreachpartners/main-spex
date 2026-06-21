@@ -95,7 +95,7 @@ Reports annotation coverage for business specs.
 - `coverage_ignore` relaxes named layers.
 - Non-active specs appear only in the per-status totals.
 - Marks each spec ✓ (all present), ⚠ (only an ignored layer missing), or ✗ (a required layer missing).
-- Exits non-zero when any active spec has missing required layer.
+- Exits non-zero when any active spec has a missing required layer.
 
 ## check-schema
 
@@ -185,7 +185,7 @@ One coherent product capability or behavior.
 - Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `dirty`, `coverage_ignore`.
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `scope` lists the repositories that implement the capability.
-- `status` defaults to `planned`;
+- `status` defaults to `planned`.
 - `dirty` defaults to `false`; set it `true` when acceptance criteria are not yet fully implemented (the spec has moved ahead of the code).
 
 ## Technical spec (TECH)
@@ -208,7 +208,7 @@ A check proves an acceptance criterion.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a spec's checks through `tech_specs`; `checks_override` patches one, `checks_additional` adds one.
-- `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward skipping listed errors.
+- `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<spec-id>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - A failing script reports one finding per line as `<location><TAB><message>`.
 
