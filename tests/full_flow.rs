@@ -58,18 +58,10 @@ proj: no gaps
 
 // Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
 // example. Like the no-spex run the workspace is not a git repository, so the
-// commit-format checks warn; the example also ships demo writing-style
-// violations in its frontend README. No errors are present, so check succeeds.
+// commit-format checks warn; the example also ships a demo writing-style
+// violation in its `spex` tutorial notes. No errors are present, so check
+// succeeds.
 const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"api
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
-  warn  TECH-SECRET-HANDLING/no-backup-files  (data.backup)
-      Backup and scratch files may carry pre-redaction content
-  0 errors, 3 warnings
-
-contracts
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
@@ -81,39 +73,38 @@ frontend
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
-  warn  TECH-WRITING-STYLE/no-cyrillic  (README.md:1)
-      Requirements and documentation must be in English
-  warn  TECH-WRITING-STYLE/readme-has-title
-      README.md must start with a '# ' title
-  0 errors, 4 warnings
+  0 errors, 2 warnings
 
 spex
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
-  0 errors, 2 warnings
+  warn  TECH-WRITING-STYLE/writing  (tutorial-completion.md:46)
+      matches forbidden writing pattern
+  0 errors, 3 warnings
 
 workspace
   no issues
 
-pepperoni-pizza: 0 errors, 11 warnings
+pepperoni-pizza: 0 errors, 7 warnings
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
-// business spec is `active` and annotated across the contract, impl, and test
-// layers, so it reports as fully covered with no gaps.
+// business spec is `active`, has all of its acceptance criteria checked off,
+// and is annotated across the contract, impl, and test layers, so it reports
+// as fully covered with no gaps.
 const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
 
 Business specs (1)
   active      1
 
 Active spec coverage (1)
-  ✗  BIZ-LIST-PIZZA-MENU  missing: test
+  ✓  BIZ-DELIVERY-TIME  10/10 AC
 
-  0 fully covered · 1 gap
+  1 fully covered · 0 gaps
 
-pepperoni-pizza: 1 gap
+pepperoni-pizza: no gaps
 "#;
 
 #[test]
@@ -289,8 +280,8 @@ fn workflow() {
     );
     assert_eq!(
         coverage.status.code(),
-        Some(1),
-        "coverage should exit 1 when there is a gap"
+        Some(0),
+        "coverage should exit 0 when every active spec is fully covered"
     );
 }
 

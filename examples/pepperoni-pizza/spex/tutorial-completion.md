@@ -79,7 +79,7 @@ from a perfect score.
   rebuild. Defensible given the author was free to decide details, but it is the
   weakest interpretation of the requirement.
 - **The estimate ignores in-flight progress.** A new order's estimate counts the
-  *full* pizza load of every in-progress delivery, even ones nearly complete, so
+  _full_ pizza load of every in-progress delivery, even ones nearly complete, so
   the live estimate can overstate the true wait. Acceptable as a simplification,
   worth noting as future refinement.
 - **Concurrency nuance:** `create_order` reads in-progress pizzas and pushes the
@@ -93,7 +93,7 @@ from a perfect score.
 they must be read from configuration/environment".
 
 **Verdict: Excellent (5 / 5).** This is a model tech spec: it states the rule,
-explains *why*, enforces it automatically, and the implementation conforms.
+explains _why_, enforces it automatically, and the implementation conforms.
 
 ### What was done well
 
