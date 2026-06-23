@@ -89,7 +89,7 @@ Run the repositories' own tests where the plan's test cases call for them, to pr
 
 Once the steps are complete and `spex check` passes, set each business spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/spex/biz-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
 
-Leave a spec's status unchanged if its acceptance criteria are not yet fully implemented; instead set `dirty: true` so it is clear the spec has moved ahead of the code. Touch only the `status` (and, where needed, `dirty`) line — leave the rest of each spec untouched.
+Tick the checkbox of every acceptance criterion the run implemented, changing its `[ ]` to `[x]`; leave any criterion that is not yet implemented as `[ ]` so `spex coverage` reports it. Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 
 ## Step 7 — Report the result
 
@@ -98,7 +98,7 @@ Summarize the run for the user:
 - Which steps and tasks completed, referenced by their numbers.
 - The `spex check` outcome per affected repository, and any findings you fixed or left.
 - Which acceptance criteria are now proven, and any test cases still outstanding.
-- Which specs you set to `active`, and any you left `planned` or marked `dirty`, with the reason.
+- Which specs you set to `active`, which acceptance criteria you ticked `[x]`, and any criteria you left `[ ]`, with the reason.
 - Any step that was skipped (already completed) or stopped, with the reason.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

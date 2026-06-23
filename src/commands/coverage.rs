@@ -34,6 +34,8 @@ struct SpecRow {
     id: String,
     present: HashSet<CoverageLayer>,
     ignored: HashSet<CoverageLayer>,
+    ac_done: usize,
+    ac_total: usize,
 }
 
 impl SpecRow {
@@ -45,18 +47,25 @@ impl SpecRow {
         !self.ignored.contains(&layer)
     }
 
-    // A gap is a required layer with no annotation. Layers listed in
-    // `coverage_ignore` are treated as ok even when missing.
+    fn ac_complete(&self) -> bool {
+        self.ac_done == self.ac_total
+    }
+
+    // A gap is a required layer with no annotation, or an unimplemented
+    // acceptance criterion. Layers listed in `coverage_ignore` are treated as
+    // ok even when missing; the acceptance-criteria checkboxes are not relaxed.
     fn has_gap(&self) -> bool {
-        CoverageLayer::ALL
-            .iter()
-            .any(|&layer| self.is_required(layer) && !self.is_present(layer))
+        !self.ac_complete()
+            || CoverageLayer::ALL
+                .iter()
+                .any(|&layer| self.is_required(layer) && !self.is_present(layer))
     }
 
     fn fully_covered(&self) -> bool {
-        CoverageLayer::ALL
-            .iter()
-            .all(|&layer| self.is_present(layer))
+        self.ac_complete()
+            && CoverageLayer::ALL
+                .iter()
+                .all(|&layer| self.is_present(layer))
     }
 }
 
@@ -166,10 +175,15 @@ fn active_rows(specs: &[BizSpec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
         .filter(|spec| spec.status == Status::Active)
-        .map(|spec| SpecRow {
-            id: spec.id.clone(),
-            present: found.get(&spec.id).cloned().unwrap_or_default(),
-            ignored: spec.coverage_ignore.iter().copied().collect(),
+        .map(|spec| {
+            let (ac_done, ac_total) = spec.ac_counts();
+            SpecRow {
+                id: spec.id.clone(),
+                present: found.get(&spec.id).cloned().unwrap_or_default(),
+                ignored: spec.coverage_ignore.iter().copied().collect(),
+                ac_done,
+                ac_total,
+            }
         })
         .collect()
 }
@@ -258,24 +272,33 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
     let width = rows.iter().map(|row| row.id.len()).max().unwrap_or(0);
     let mut covered = 0usize;
     for row in rows {
-        let (symbol, fully) = if row.has_gap() {
-            (style.red("✗"), false)
+        let symbol = if row.has_gap() {
+            style.red("✗")
         } else if row.fully_covered() {
             covered += 1;
-            (style.green("✓"), true)
+            style.green("✓")
         } else {
-            // No gap: every required layer is present, but an ignored layer is
-            // still missing, so coverage is not complete.
-            (style.yellow("⚠"), false)
+            // No gap: every required layer is present and all acceptance
+            // criteria are implemented, but an ignored layer is still missing,
+            // so coverage is not complete.
+            style.yellow("⚠")
         };
 
         let id = style.cyan(&format!("{:<width$}", row.id, width = width));
-        if fully {
-            println!("  {symbol}  {id}");
+        let ac_text = format!("{}/{} AC", row.ac_done, row.ac_total);
+        let ac = if row.ac_complete() {
+            style.dim(&ac_text)
+        } else {
+            style.red(&ac_text)
+        };
+
+        let layers = missing_summary(row);
+        if layers.is_empty() {
+            println!("  {symbol}  {id}  {ac}");
         } else {
             println!(
-                "  {symbol}  {id}  {}",
-                style.dim(&format!("missing: {}", missing_summary(row)))
+                "  {symbol}  {id}  {ac}  {}",
+                style.dim(&format!("missing: {layers}"))
             );
         }
     }

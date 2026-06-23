@@ -22,7 +22,7 @@
   id: BIZ-PLACE-PIZZA-ORDER
   title: Customer can place an order
   acceptance_criteria:
-    - "POST /orders returns 201 with the created order."
+    - "[ ] MUST return 201 with the created order from POST /orders"
   ```
 
 - **Technical Spec** (`TECH`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide.

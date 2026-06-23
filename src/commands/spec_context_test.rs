@@ -12,8 +12,8 @@ mod tests {
             title: "Place an order".to_string(),
             description: "  Customers complete a purchase.  ".to_string(),
             acceptance_criteria: vec![
-                "MUST create an order".to_string(),
-                "SHOULD show a confirmation".to_string(),
+                "[x] MUST create an order".to_string(),
+                "[ ] SHOULD show a confirmation".to_string(),
             ],
             status: Status::Active,
             coverage_ignore: Vec::new(),
@@ -46,8 +46,8 @@ mod tests {
              \n\
              ## Acceptance criteria\n\
              \n\
-             - MUST create an order\n\
-             - SHOULD show a confirmation\n"
+             - [x] MUST create an order\n\
+             - [ ] SHOULD show a confirmation\n"
         );
     }
 

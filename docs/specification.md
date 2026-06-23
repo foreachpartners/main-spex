@@ -95,10 +95,11 @@ Reports annotation coverage for business specs.
 
 - Reports annotation coverage for every business spec whose `status` is `active`.
 - Requires an implementation, test, and contract annotation per active spec; a single one anywhere in any repository counts.
-- `coverage_ignore` relaxes named layers.
+- Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
+- `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
 - Non-active specs appear only in the per-status totals.
-- Marks each spec ✓ (all present), ⚠ (only an ignored layer missing), or ✗ (a required layer missing).
-- Exits non-zero when any active spec has a missing required layer.
+- Marks each spec ✓ (all layers present and every criterion implemented), ⚠ (only an ignored layer missing), or ✗ (a required layer missing or a criterion unimplemented).
+- Exits non-zero when any active spec has a missing required layer or an unimplemented acceptance criterion.
 
 ## check-schema
 
@@ -178,7 +179,7 @@ Executes a plan step by step and checks the result.
 - Works through a plan step by step: runs each step's tasks as parallel agents, and waits between steps.
 - Marks each task and step `completed` as it lands, so an interrupted run resumes from the first incomplete step.
 - Runs `spex check` on the affected repositories and fixes `error` findings.
-- Sets each implemented business spec's `status` to `active` once the steps pass; leaves a spec `planned` and marks it `dirty` when its acceptance criteria are not yet fully implemented.
+- Sets each implemented business spec's `status` to `active` once the steps pass, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
 
 # Specs
 
@@ -186,11 +187,11 @@ Executes a plan step by step and checks the result.
 
 One coherent product capability or behavior.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `dirty`, `coverage_ignore`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `coverage_ignore`.
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
+- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
 - `status` defaults to `planned`.
-- `dirty` defaults to `false`; set it `true` when acceptance criteria are not yet fully implemented (the spec has moved ahead of the code).
 
 ## Technical spec (TECH)
 

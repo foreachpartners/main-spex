@@ -6,6 +6,10 @@ use thiserror::Error;
 
 use crate::util;
 
+#[cfg(test)]
+#[path = "biz_spec_test.rs"]
+mod biz_spec_test;
+
 pub const BIZ_SPECS_DIR: &str = "biz-specs";
 
 type Result<T> = core::result::Result<T, Report<BizSpecError>>;
@@ -33,6 +37,22 @@ pub struct BizSpec {
     pub status: Status,
     #[serde(default)]
     pub coverage_ignore: Vec<CoverageLayer>,
+}
+
+impl BizSpec {
+    pub fn ac_counts(&self) -> (usize, usize) {
+        let done = self
+            .acceptance_criteria
+            .iter()
+            .filter(|criterion| ac_implemented(criterion))
+            .count();
+        (done, self.acceptance_criteria.len())
+    }
+}
+
+fn ac_implemented(criterion: &str) -> bool {
+    let trimmed = criterion.trim_start();
+    trimmed.starts_with("[x]") || trimmed.starts_with("[X]")
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]

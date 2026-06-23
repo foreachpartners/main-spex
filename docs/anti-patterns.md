@@ -76,11 +76,11 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 ## Marking a spec active prematurely
 
-**Rule:** A business spec becomes `active` ONLY when its acceptance criteria are fully implemented and verification passes — `spex check` exits 0 on the affected repositories and the tests pass. If the spec has moved ahead of the code, leave it `planned` and set `dirty: true`. Never report "done" when a required step was skipped.
+**Rule:** A business spec becomes `active` ONLY when its acceptance criteria are fully implemented and verification passes — `spex check` exits 0 on the affected repositories and the tests pass. If the spec has moved ahead of the code, leave its unfinished acceptance criteria unchecked (`[ ]`) so `spex coverage` flags them. Never report "done" when a required step was skipped.
 
 **Why:** Trust degrades exponentially. A single false `active` forces the human to re-verify everything you claim, forever after, and breaks the guarantee that an `active` spec is a satisfied one.
 
-**How to apply:** If verification fails, keep the spec `planned`, mark it `dirty`, and state exactly what passed and what didn't. The honest "blocked on X" is always more valuable than a false "active".
+**How to apply:** If verification fails, keep the spec `planned`, leave the unimplemented acceptance criteria `[ ]`, and state exactly what passed and what didn't. The honest "blocked on X" is always more valuable than a false "active".
 
 ## Destructive actions as a shortcut
 

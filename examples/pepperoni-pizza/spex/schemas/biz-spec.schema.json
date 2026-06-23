@@ -20,11 +20,11 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
+      "description": "Verifiable acceptance criteria. Each begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — then a commitment level. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
       "items": {
         "type": "string",
-        "description": "A single verifiable acceptance criterion. Starts with a commitment level.",
-        "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "description": "A single verifiable acceptance criterion. Starts with an implementation checkbox (`[ ]` or `[x]`) followed by a commitment level. `spex coverage` reads the checkbox to report how many of an active spec's criteria are implemented.",
+        "pattern": "^\\[[ xX]\\] (MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
         "minLength": 1
       },
       "minItems": 1
@@ -51,11 +51,6 @@
       "enum": ["active", "planned", "blocked", "deprecated"],
       "default": "planned"
     },
-    "dirty": {
-      "type": "boolean",
-      "description": "Marks a spec whose acceptance criteria are not yet fully implemented (the spec has moved ahead of the code). Absent or false means the implementation matches the spec.",
-      "default": false
-    },
     "coverage_ignore": {
       "type": "array",
       "description": "Coverage layers to skip for this spec. A listed layer is treated as ok even when its annotation is missing, so it never counts as a gap. By default coverage requires all three layers.",
@@ -74,10 +69,10 @@
       "title": "Allow customers to place an order from their cart",
       "description": "Customers who have added items to their cart need a way to complete a purchase. When a customer confirms checkout, the system creates an order from the current cart contents, captures payment, and empties the cart.\n\nThis affects all authenticated shoppers. After a successful order, the customer should see an order confirmation with a unique order number.",
       "acceptance_criteria": [
-        "MUST create an order only when the cart contains at least one item",
-        "MUST capture payment before the order is marked as confirmed",
-        "MUST empty the customer's cart after the order is successfully placed",
-        "SHOULD display an order confirmation with a unique order number"
+        "[x] MUST create an order only when the cart contains at least one item",
+        "[x] MUST capture payment before the order is marked as confirmed",
+        "[ ] MUST empty the customer's cart after the order is successfully placed",
+        "[ ] SHOULD display an order confirmation with a unique order number"
       ],
       "scope": ["api", "frontend"],
       "depends_on": ["BIZ-CART-ADD-ITEM"],

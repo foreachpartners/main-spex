@@ -113,13 +113,15 @@ status: active
 coverage_ignore: [contract]
 ```
 
-The report prints the total number of business specs per status (omitting any status with no specs), then lists each active spec with its coverage:
+Each active spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. An active spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes.
 
-- `✓` — implementation, test, and contract annotations are all present.
-- `⚠` — every required layer is present, but an ignored layer is still missing.
-- `✗` — a required layer is missing.
+The report prints the total number of business specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
 
-Each incomplete spec lists what is missing (for example `missing: test, contract (ignored)`). A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The command exits with a non-zero status when any active spec has a gap (a missing required layer).
+- `✓` — every required layer is annotated and every acceptance criterion is implemented.
+- `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.
+- `✗` — a required layer is missing, or an acceptance criterion is unimplemented.
+
+Each incomplete spec lists what is missing (for example `missing: test, contract (ignored)`). A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The command exits with a non-zero status when any active spec has a gap (a missing required layer or an unimplemented acceptance criterion).
 
 ### `spex check-schema`
 

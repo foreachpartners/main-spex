@@ -19,6 +19,8 @@ mod tests {
             id: id.to_string(),
             present: present.iter().copied().collect(),
             ignored: ignored.iter().copied().collect(),
+            ac_done: 0,
+            ac_total: 0,
         }
     }
 
@@ -179,6 +181,35 @@ mod tests {
         );
         assert!(row.has_gap());
         assert_eq!(missing_summary(&row), "test");
+    }
+
+    #[test]
+    fn unimplemented_ac_is_a_gap() {
+        let mut row = row("BIZ-A", &CoverageLayer::ALL, &[]);
+        row.ac_done = 1;
+        row.ac_total = 2;
+        assert!(row.has_gap());
+        assert!(!row.fully_covered());
+    }
+
+    #[test]
+    fn all_layers_and_ac_complete_is_fully_covered() {
+        let mut row = row("BIZ-A", &CoverageLayer::ALL, &[]);
+        row.ac_done = 3;
+        row.ac_total = 3;
+        assert!(!row.has_gap());
+        assert!(row.fully_covered());
+    }
+
+    #[test]
+    fn active_rows_carries_ac_counts() {
+        let spec: BizSpec = serde_yaml_ng::from_str(
+            "id: BIZ-A\nstatus: active\nacceptance_criteria:\n  - \"[x] MUST do a\"\n  - \"[ ] MUST do b\"\n",
+        )
+        .expect("parse spec");
+        let rows = active_rows(&[spec], &Found::new());
+        assert_eq!(rows[0].ac_done, 1);
+        assert_eq!(rows[0].ac_total, 2);
     }
 
     #[test]
