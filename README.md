@@ -113,6 +113,8 @@ flowchart TD
 
 Framework [specification](docs/specification.md).
 
+Example [project](examples/pepperoni-pizza/README.md) with spex implemented.
+
 ## Try tutorial
 
 Ready to try it yourself? Follow the [Tutorial](docs/tutorial.md) to take the
