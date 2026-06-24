@@ -219,7 +219,6 @@ pub(super) fn run_workspace_checks(
             &pending.check,
             &script,
             spex_dir,
-            &pending.files,
             findings,
         );
         log.step(&format!(
@@ -231,22 +230,23 @@ pub(super) fn run_workspace_checks(
     }
 }
 
-// Runs a `workspace`-scoped script once in the spex directory, passing every
-// in-scope file (as a path from that directory) as an argument.
+// Runs a `workspace`-scoped script exactly once in the spex directory, passing
+// no files; the script discovers whatever it needs from that directory.
 fn run_workspace_script(
     spec_id: &str,
     check: &Check,
     script: &Path,
     spex_dir: &Path,
-    files: &[PathBuf],
     findings: &mut Vec<Finding>,
 ) {
-    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
-        let args = batch.iter().map(|file| file.as_os_str());
-        if !run_script_command(spec_id, check, script, spex_dir, args, findings) {
-            return;
-        }
-    }
+    run_script_command(
+        spec_id,
+        check,
+        script,
+        spex_dir,
+        std::iter::empty::<&OsStr>(),
+        findings,
+    );
 }
 
 // Spawns the script in `cwd` and records any failure. Returns `false` when the

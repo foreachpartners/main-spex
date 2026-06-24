@@ -92,7 +92,7 @@ Runs each repository's TECH-spec checks and gates on errors.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
-- `--files <path>...` limits the run to given files.
+- `--files <path>...` limits the run to given files; a `per-repo` script then runs only in the repositories that own a listed file, unioned with any `--repo` named, while a `workspace` script always runs once.
 - Skips files ignored by `.gitignore`.
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
 - `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
@@ -224,6 +224,8 @@ A check proves an acceptance criterion.
 - A repository inherits a spec's checks through `tech_specs`; `checks_override` patches one, `checks_additional` adds one.
 - `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<spec-id>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
+- `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
+- `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
 - A failing script reports one finding per line as `<location><TAB><message>`.
 
 ## Spec ID annotations

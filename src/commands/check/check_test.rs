@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::config::{PreexistingError, Repository};
+    use crate::config::{Config, PreexistingError, Repository};
     use crate::tech_spec::{
         Check, CheckKind, CheckOverride, RepoCheck, RunScope, Severity, TechSpec,
     };
@@ -687,13 +687,14 @@ mod tests {
         std::fs::create_dir_all(spex.join("scripts/TECH-X")).expect("spex scripts");
         std::fs::create_dir_all(&api).expect("api");
         std::fs::create_dir_all(&web).expect("web");
-        std::fs::write(api.join("a.txt"), "").expect("a");
-        std::fs::write(web.join("b.txt"), "").expect("b");
 
         let script = spex.join("scripts/TECH-X/list.sh");
+        // Fails if handed any file arguments, records each invocation, and emits
+        // its own contract findings: a workspace script gets no files and must
+        // discover its own paths.
         std::fs::write(
             &script,
-            "#!/bin/sh\nfor f in \"$@\"; do echo \"$f\"; done\nexit 1\n",
+            "#!/bin/sh\n[ \"$#\" -eq 0 ] || { echo \"unexpected args: $*\"; exit 1; }\necho run >> runs.log\nprintf 'api/a.txt\\tflagged\\n'\nprintf 'web/b.txt\\tflagged\\n'\nexit 1\n",
         )
         .expect("script");
         make_executable(&script);
@@ -725,65 +726,67 @@ mod tests {
         )
         .expect("web");
 
-        // The workspace check is deferred, so neither repository reports it.
+        // The workspace check is deferred, so neither repository reports it, and
+        // the two repositories collapse into a single pending check.
         assert!(findings.is_empty());
-        // Both repositories merge into a single pending check.
         assert_eq!(collected.len(), 1);
-        assert_eq!(collected[0].files.len(), 2);
 
         run_workspace_checks(&spex, &collected, &Log::new(false), &mut findings);
 
-        // The script echoes each in-scope file on its own line, so the contract
-        // turns them into one finding per file.
+        // It ran exactly once, despite both repositories inheriting it.
+        let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
+        assert_eq!(runs.lines().count(), 1);
+
+        // The script's own contract lines become findings.
         assert_eq!(findings.len(), 2);
         assert!(
             findings
                 .iter()
                 .all(|finding| finding.spec_id == "TECH-X" && finding.check == "list")
         );
-        let messages: Vec<&str> = findings
+        let locations: Vec<&str> = findings
             .iter()
-            .map(|finding| finding.message.as_str())
+            .filter_map(|finding| finding.location.as_deref())
             .collect();
-        assert!(messages.contains(&"../api/a.txt"), "got: {messages:?}");
-        assert!(messages.contains(&"../web/b.txt"), "got: {messages:?}");
+        assert!(locations.contains(&"api/a.txt"), "got: {locations:?}");
+        assert!(locations.contains(&"web/b.txt"), "got: {locations:?}");
     }
 
     #[test]
-    fn workspace_check_respects_exclude() {
-        let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join("spex");
-        let api = workspace.path().join("api");
-        std::fs::create_dir_all(&spex).expect("spex");
-        std::fs::create_dir_all(&api).expect("api");
-        std::fs::write(api.join("keep.txt"), "").expect("keep");
-        std::fs::write(api.join("skip.md"), "").expect("skip");
+    fn select_repos_with_files_picks_owning_and_named_repos() {
+        let dir = tempdir().expect("dir");
+        let spex = dir.path();
+        for (repo, file) in [("api", "a.txt"), ("web", "b.txt"), ("cli", "c.txt")] {
+            std::fs::create_dir_all(spex.join(repo)).expect("repo dir");
+            std::fs::write(spex.join(repo).join(file), "").expect("file");
+        }
 
-        let mut listing = script_check("list.sh", RunScope::Workspace);
-        listing.name = "list".to_string();
-        listing.exclude = vec!["**/*.md".to_string()];
-        let specs = HashMap::from([("TECH-X".to_string(), tech_spec("TECH-X", vec![listing]))]);
+        let mut api = repository("api", vec![]);
+        api.name = "api".to_string();
+        let mut web = repository("web", vec![]);
+        web.name = "web".to_string();
+        let mut cli = repository("cli", vec![]);
+        cli.name = "cli".to_string();
+        let config = Config {
+            project_name: String::new(),
+            cli_version: String::new(),
+            repositories: vec![api, web, cli],
+        };
 
-        let mut collected = Vec::new();
-        let mut findings = Vec::new();
-        check_repo(
-            &repository("../api", vec!["TECH-X"]),
-            &spex,
-            &specs,
-            &[],
-            &Log::new(false),
-            &mut findings,
-            &mut collected,
-        )
-        .expect("api");
+        let files = vec!["a.txt".to_string(), "b.txt".to_string()];
 
-        assert_eq!(collected.len(), 1);
-        let files: Vec<_> = collected[0]
-            .files
-            .iter()
-            .map(|file| file.to_string_lossy().into_owned())
-            .collect();
-        assert_eq!(files, vec!["../api/keep.txt".to_string()]);
+        // Files in api and web select exactly their owning repositories.
+        let selected = select_repos(&config, spex, &[], &files).expect("select");
+        let names: Vec<&str> = selected.iter().map(|repo| repo.name.as_str()).collect();
+        assert_eq!(names, vec!["api", "web"]);
+
+        // --repo cli unions in even though no provided file lives there.
+        let selected = select_repos(&config, spex, &["cli".to_string()], &files).expect("select");
+        let names: Vec<&str> = selected.iter().map(|repo| repo.name.as_str()).collect();
+        assert_eq!(names, vec!["api", "web", "cli"]);
+
+        // An unknown --repo name still errors.
+        assert!(select_repos(&config, spex, &["ghost".to_string()], &files).is_err());
     }
 
     fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {

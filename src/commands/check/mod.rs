@@ -58,7 +58,6 @@ struct ScopedFile {
 // Read-only context for checking a single repository, threaded through the
 // dispatch path so individual checks don't each take the same arguments.
 struct RepoCtx<'a> {
-    repo: &'a Repository,
     repo_path: &'a Path,
     spex_dir: &'a Path,
     candidates: &'a [ScopedFile],
@@ -66,12 +65,11 @@ struct RepoCtx<'a> {
 }
 
 // A `workspace`-scoped script check, deferred until every repository has been
-// scanned so it runs once across the whole workspace. `files` are paths from the
-// spex directory (the script's working directory) to each in-scope file.
+// scanned so it runs exactly once across the whole workspace. It receives no
+// files; the script discovers its own from the spex directory.
 struct WorkspaceCheck {
     spec_id: String,
     check: Check,
-    files: Vec<PathBuf>,
 }
 
 struct Finding {
@@ -94,7 +92,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         .tech_specs()
         .change_context(CheckError::Workspace)?;
 
-    let selected = select_repos(&workspace.config, &args.repo)?;
+    let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
     // The generator must see every current error, including ones an existing
     // baseline would otherwise suppress, so it can rewrite the full baseline.
@@ -343,21 +341,39 @@ fn normalize_location(location: &str) -> String {
     location.to_string()
 }
 
-fn select_repos<'a>(config: &'a Config, names: &[String]) -> Result<Vec<&'a Repository>> {
-    if names.is_empty() {
-        return Ok(config.repositories.iter().collect());
+// Selects the repositories to check, preserving `spex.yaml` order. Without
+// `--files`, that is the `--repo` names (or every repository). With `--files`,
+// it is every repository that owns at least one provided file, unioned with any
+// explicitly named `--repo`, so a `per-repo` script runs only where the files
+// live (plus any repository the user named outright).
+fn select_repos<'a>(
+    config: &'a Config,
+    spex_dir: &Path,
+    names: &[String],
+    files: &[String],
+) -> Result<Vec<&'a Repository>> {
+    for name in names {
+        if !config.repositories.iter().any(|repo| &repo.name == name) {
+            return Err(Report::new(CheckError::UnknownRepo(name.clone())));
+        }
     }
 
-    let mut selected = Vec::with_capacity(names.len());
-    for name in names {
-        let repo = config
+    if files.is_empty() {
+        return Ok(config
             .repositories
             .iter()
-            .find(|repo| &repo.name == name)
-            .ok_or_else(|| Report::new(CheckError::UnknownRepo(name.clone())))?;
-        selected.push(repo);
+            .filter(|repo| names.is_empty() || names.contains(&repo.name))
+            .collect());
     }
-    Ok(selected)
+
+    Ok(config
+        .repositories
+        .iter()
+        .filter(|repo| {
+            names.contains(&repo.name)
+                || !provided_files(&spex_dir.join(&repo.path), files).is_empty()
+        })
+        .collect())
 }
 
 fn check_repo(
@@ -388,7 +404,6 @@ fn check_repo(
     };
 
     let ctx = RepoCtx {
-        repo,
         repo_path: &repo_path,
         spex_dir,
         candidates: &candidates,
@@ -502,7 +517,7 @@ fn dispatch_check(
 ) {
     if check.kind == CheckKind::Script && check.run == RunScope::Workspace {
         // Workspace checks only collect here; they run once in `run_workspace_checks`.
-        collect_workspace_check(ctx, spec_id, check, findings, workspace_checks);
+        collect_workspace_check(spec_id, check, workspace_checks);
     } else {
         let started = Instant::now();
         run_check(ctx, spec_id, check, findings);
@@ -514,37 +529,20 @@ fn dispatch_check(
     }
 }
 
-// Defers a `workspace`-scoped check: scopes this repository's files, then merges
-// them (as paths from the spex directory) into the pending check identified by
-// `(spec_id, name)` so the script runs once over the whole workspace.
+// Defers a `workspace`-scoped check, deduplicating by `(spec_id, name)` so a
+// check inherited by several repositories still runs exactly once.
 fn collect_workspace_check(
-    ctx: &RepoCtx,
     spec_id: &str,
     check: &Check,
-    findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) {
-    let scoped = match scope_files(check, ctx.candidates) {
-        Ok(scoped) => scoped,
-        Err(message) => {
-            findings.push(config_error(spec_id, &check.name, message));
-            return;
-        }
-    };
-
-    let prefix = Path::new(&ctx.repo.path);
-    let scoped_files = scoped.iter().map(|file| prefix.join(&file.rel));
-
-    if let Some(pending) = workspace_checks
-        .iter_mut()
-        .find(|pending| pending.spec_id == spec_id && pending.check.name == check.name)
-    {
-        pending.files.extend(scoped_files);
-    } else {
+    let already_pending = workspace_checks
+        .iter()
+        .any(|pending| pending.spec_id == spec_id && pending.check.name == check.name);
+    if !already_pending {
         workspace_checks.push(WorkspaceCheck {
             spec_id: spec_id.to_string(),
             check: check.clone(),
-            files: scoped_files.collect(),
         });
     }
 }

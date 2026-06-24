@@ -27,8 +27,6 @@ checks:
     type: script
     run: workspace
     script: no-orphan-annotations.sh
-    exclude:
-      - "**/*.md"
     severity: warn
 examples:
   contract: |
