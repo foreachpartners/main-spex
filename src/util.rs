@@ -5,6 +5,10 @@ use error_stack::{Report, ResultExt};
 use ignore::{Walk, WalkBuilder};
 use serde::de::DeserializeOwned;
 
+#[cfg(test)]
+#[path = "util_test.rs"]
+mod util_test;
+
 pub fn plural(count: usize, noun: &str) -> String {
     if count == 1 {
         format!("1 {noun}")
@@ -15,11 +19,14 @@ pub fn plural(count: usize, noun: &str) -> String {
 
 // Walks a workspace repository's files, honoring gitignore rules while still
 // surfacing dotfiles (e.g. `.env`) and always skipping the `.git` directory.
+// `require_git(false)` keeps gitignore rules in effect even when the repository
+// has no `.git` directory; otherwise the `ignore` crate silently ignores them.
 pub fn repo_walker(root: &Path) -> Walk {
     WalkBuilder::new(root)
         .hidden(false)
         .git_ignore(true)
         .git_global(true)
+        .require_git(false)
         .filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"))
         .build()
 }
