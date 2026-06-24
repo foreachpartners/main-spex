@@ -505,7 +505,6 @@ fn dispatch_check(
         collect_workspace_check(ctx, spec_id, check, findings, workspace_checks);
     } else {
         let started = Instant::now();
-        ctx.log.step(&format!("  {spec_id}/{}", check.name));
         run_check(ctx, spec_id, check, findings);
         ctx.log.step(&format!(
             "  {spec_id}/{} ({:.2?})",

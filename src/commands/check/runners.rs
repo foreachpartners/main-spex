@@ -214,7 +214,6 @@ pub(super) fn run_workspace_checks(
             continue;
         };
         let started = std::time::Instant::now();
-        log.step(&format!("  {}/{}", pending.spec_id, pending.check.name));
         run_workspace_script(
             &pending.spec_id,
             &pending.check,

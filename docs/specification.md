@@ -95,7 +95,7 @@ Runs each repository's TECH-spec checks and gates on errors.
 - `--files <path>...` limits the run to given files.
 - Skips files ignored by `.gitignore`.
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
-- `--verbose` reports each repository and each check as it starts and finishes, with timings, on stderr.
+- `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
 
 ## coverage
 
