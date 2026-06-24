@@ -1,13 +1,14 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use std::time::Instant;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
-use crate::style::Style;
+use crate::style::{Log, Style};
 use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
@@ -61,6 +62,7 @@ struct RepoCtx<'a> {
     repo_path: &'a Path,
     spex_dir: &'a Path,
     candidates: &'a [ScopedFile],
+    log: &'a Log,
 }
 
 // A `workspace`-scoped script check, deferred until every repository has been
@@ -85,7 +87,8 @@ struct RepoReport {
     findings: Vec<Finding>,
 }
 
-pub fn run(args: CheckArgs) -> Result<ExitCode> {
+pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
+    let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
     let specs = workspace
         .tech_specs()
@@ -101,15 +104,23 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
     for repo in &selected {
         let repo = *repo;
+        let started = Instant::now();
+        log.step(&format!("checking repository `{}`", repo.name));
         let mut findings = Vec::new();
         check_repo(
             repo,
             &workspace.dir,
             &specs,
             &args.files,
+            &log,
             &mut findings,
             &mut workspace_checks,
         )?;
+        log.step(&format!(
+            "finished repository `{}` in {:.2?}",
+            repo.name,
+            started.elapsed()
+        ));
         if suppress {
             findings.retain(|finding| !is_preexisting(finding, &repo.checks_preexisting_errors));
         }
@@ -121,7 +132,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     if !workspace_checks.is_empty() {
         let mut findings = Vec::new();
-        run_workspace_checks(&workspace.dir, &workspace_checks, &mut findings);
+        run_workspace_checks(&workspace.dir, &workspace_checks, &log, &mut findings);
         if suppress {
             findings.retain(|finding| !is_preexisting_workspace(finding, &selected));
         }
@@ -354,6 +365,7 @@ fn check_repo(
     spex_dir: &Path,
     specs: &HashMap<String, TechSpec>,
     files: &[String],
+    log: &Log,
     findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) -> Result<()> {
@@ -380,6 +392,7 @@ fn check_repo(
         repo_path: &repo_path,
         spex_dir,
         candidates: &candidates,
+        log,
     };
 
     let overridden: HashSet<(&str, &str)> = repo
@@ -488,9 +501,17 @@ fn dispatch_check(
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) {
     if check.kind == CheckKind::Script && check.run == RunScope::Workspace {
+        // Workspace checks only collect here; they run once in `run_workspace_checks`.
         collect_workspace_check(ctx, spec_id, check, findings, workspace_checks);
     } else {
+        let started = Instant::now();
+        ctx.log.step(&format!("  {spec_id}/{}", check.name));
         run_check(ctx, spec_id, check, findings);
+        ctx.log.step(&format!(
+            "  {spec_id}/{} ({:.2?})",
+            check.name,
+            started.elapsed()
+        ));
     }
 }
 

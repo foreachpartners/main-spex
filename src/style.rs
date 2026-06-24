@@ -6,7 +6,15 @@ pub struct Style {
 
 impl Style {
     pub fn detect() -> Self {
-        let enabled = std::io::stdout().is_terminal() && std::env::var_os("NO_COLOR").is_none();
+        Self::new(std::io::stdout().is_terminal())
+    }
+
+    pub fn detect_stderr() -> Self {
+        Self::new(std::io::stderr().is_terminal())
+    }
+
+    fn new(is_terminal: bool) -> Self {
+        let enabled = is_terminal && std::env::var_os("NO_COLOR").is_none();
         Self { enabled }
     }
 
@@ -40,5 +48,27 @@ impl Style {
 
     pub fn cyan(&self, text: &str) -> String {
         self.paint("36", text)
+    }
+}
+
+// Emits progress to stderr while a command executes, leaving stdout for the
+// command's actual output. Silent unless `--verbose` is set.
+pub struct Log {
+    enabled: bool,
+    style: Style,
+}
+
+impl Log {
+    pub fn new(verbose: bool) -> Self {
+        Self {
+            enabled: verbose,
+            style: Style::detect_stderr(),
+        }
+    }
+
+    pub fn step(&self, message: &str) {
+        if self.enabled {
+            eprintln!("{} {message}", self.style.dim("·"));
+        }
     }
 }

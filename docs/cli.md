@@ -6,6 +6,10 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
+## Global flags
+
+- `--verbose` (`-v`) — print progress to stderr while the command executes, so stdout still carries only the command's actual output. Currently the `check` command uses it, logging each repository and each check as it starts and finishes along with how long each took. Useful for spotting which check is slow on a large workspace.
+
 ## Install
 
 ### Prerequisites
@@ -80,6 +84,11 @@ repositories:
 - `--repo <name>...` — limit the run to the named workspace repositories. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). Defaults to all non-ignored files.
 - `--fill-preexisting-errors` — record the current `error`-severity findings as a `checks_preexisting_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
+- `--verbose` (`-v`) — stream progress to stderr as the run proceeds: each repository, then each check it runs (with the time each took), and the workspace checks at the end. The report on stdout is unchanged, so piping or redirecting it still works.
+
+```sh
+spex check --verbose
+```
 
 ```sh
 spex check --repo api frontend

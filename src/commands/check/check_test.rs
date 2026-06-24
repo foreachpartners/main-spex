@@ -414,6 +414,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -455,6 +456,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -483,6 +485,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -519,6 +522,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -548,6 +552,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -580,6 +585,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -623,6 +629,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -660,6 +667,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut Vec::new(),
         )
@@ -701,6 +709,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut collected,
         )
@@ -710,6 +719,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut collected,
         )
@@ -721,7 +731,7 @@ mod tests {
         assert_eq!(collected.len(), 1);
         assert_eq!(collected[0].files.len(), 2);
 
-        run_workspace_checks(&spex, &collected, &mut findings);
+        run_workspace_checks(&spex, &collected, &Log::new(false), &mut findings);
 
         // The script echoes each in-scope file on its own line, so the contract
         // turns them into one finding per file.
@@ -761,6 +771,7 @@ mod tests {
             &spex,
             &specs,
             &[],
+            &Log::new(false),
             &mut findings,
             &mut collected,
         )

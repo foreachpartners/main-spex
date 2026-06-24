@@ -24,6 +24,13 @@ use commands::spec_context::SpecContextArgs;
     about = "AI-first specification-driven development framework"
 )]
 struct Cli {
+    #[arg(
+        long,
+        short,
+        global = true,
+        help = "Print progress to stderr as work executes"
+    )]
+    verbose: bool,
     #[command(subcommand)]
     command: Commands,
 }
@@ -48,11 +55,12 @@ enum Commands {
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    let verbose = cli.verbose;
 
     match cli.command {
         Commands::Init => finish(commands::init::run()),
         Commands::Update => finish(commands::update::run()),
-        Commands::Check(args) => finish(commands::check::run(args)),
+        Commands::Check(args) => finish(commands::check::run(args, verbose)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
         Commands::Coverage => finish(commands::coverage::run()),
         Commands::SpecContext(args) => finish(commands::spec_context::run(args)),

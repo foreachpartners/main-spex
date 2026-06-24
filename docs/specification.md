@@ -55,6 +55,13 @@ Every behavioral change traces to a spec, and one Spec ID traces across the repo
 
 # CLI
 
+## Global flags
+
+Apply to every subcommand.
+
+- `--verbose` (`-v`) prints progress to stderr as work executes, leaving stdout for the command's actual output.
+- Currently only `check` emits progress: each repository and each check it runs, with the time each took.
+
 ## init
 
 Creates the `spex` repository in the workspace root and scaffolds the framework.
@@ -88,6 +95,7 @@ Runs each repository's TECH-spec checks and gates on errors.
 - `--files <path>...` limits the run to given files.
 - Skips files ignored by `.gitignore`.
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
+- `--verbose` reports each repository and each check as it starts and finishes, with timings, on stderr.
 
 ## coverage
 

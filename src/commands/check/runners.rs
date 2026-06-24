@@ -204,13 +204,17 @@ pub(super) fn run_script(
 pub(super) fn run_workspace_checks(
     spex_dir: &Path,
     workspace_checks: &[WorkspaceCheck],
+    log: &Log,
     findings: &mut Vec<Finding>,
 ) {
+    log.step("running workspace checks");
     for pending in workspace_checks {
         let Some(script) = locate_script(&pending.spec_id, &pending.check, spex_dir, findings)
         else {
             continue;
         };
+        let started = std::time::Instant::now();
+        log.step(&format!("  {}/{}", pending.spec_id, pending.check.name));
         run_workspace_script(
             &pending.spec_id,
             &pending.check,
@@ -219,6 +223,12 @@ pub(super) fn run_workspace_checks(
             &pending.files,
             findings,
         );
+        log.step(&format!(
+            "  {}/{} ({:.2?})",
+            pending.spec_id,
+            pending.check.name,
+            started.elapsed()
+        ));
     }
 }
 
