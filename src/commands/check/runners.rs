@@ -10,6 +10,9 @@ use super::*;
 // Cap files per script invocation so large repos don't blow past the OS arg limit.
 const SCRIPT_BATCH_SIZE: usize = 1000;
 
+// Runs a non-workspace check against one repository, dispatching on the check's
+// kind and (for scripts) its run scope. Workspace scripts are deferred by
+// `dispatch_check` and run later in `run_workspace_checks`, so they no-op here.
 pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &mut Vec<Finding>) {
     let scoped = match scope_files(check, ctx.candidates) {
         Ok(scoped) => scoped,
@@ -19,17 +22,23 @@ pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &
         }
     };
 
-    match check.kind {
-        CheckKind::Regexp => run_regexp(spec_id, check, &scoped, findings),
-        CheckKind::Glob => run_glob(spec_id, check, &scoped, findings),
-        CheckKind::Script => run_script(
-            spec_id,
-            check,
-            ctx.repo_path,
-            ctx.spex_dir,
-            &scoped,
-            findings,
-        ),
+    match (check.kind, check.run) {
+        (CheckKind::Regexp, _) => run_regexp(spec_id, check, &scoped, findings),
+        (CheckKind::Glob, _) => run_glob(spec_id, check, &scoped, findings),
+        (CheckKind::Script, RunScope::PerFile) => {
+            run_per_file_script(
+                spec_id,
+                check,
+                ctx.repo_path,
+                ctx.spex_dir,
+                &scoped,
+                findings,
+            );
+        }
+        (CheckKind::Script, RunScope::PerRepo) => {
+            run_per_repo_script(spec_id, check, ctx.repo_path, ctx.spex_dir, findings);
+        }
+        (CheckKind::Script, RunScope::Workspace) => {}
     }
 }
 
@@ -180,27 +189,6 @@ pub(super) fn run_glob(
     }
 }
 
-pub(super) fn run_script(
-    spec_id: &str,
-    check: &Check,
-    repo_path: &Path,
-    spex_dir: &Path,
-    files: &[&ScopedFile],
-    findings: &mut Vec<Finding>,
-) {
-    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
-        return;
-    };
-
-    match check.run {
-        RunScope::PerFile => run_per_file(spec_id, check, &script, repo_path, files, findings),
-        RunScope::PerRepo => run_per_repo(spec_id, check, &script, repo_path, findings),
-        // Workspace checks are collected in `dispatch_check` and run once after
-        // every repository via `run_workspace_checks`, never through here.
-        RunScope::Workspace => {}
-    }
-}
-
 pub(super) fn run_workspace_checks(
     spex_dir: &Path,
     workspace_checks: &[WorkspaceCheck],
@@ -343,33 +331,43 @@ fn locate_script(
     Some(script)
 }
 
-fn run_per_file(
+// Runs a `per-file` script once per batch of in-scope files, passing each
+// file's repository-relative path as an argument.
+pub(super) fn run_per_file_script(
     spec_id: &str,
     check: &Check,
-    script: &Path,
     repo_path: &Path,
+    spex_dir: &Path,
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
+    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
+        return;
+    };
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
         let args = batch.iter().map(|file| file.rel.as_os_str());
-        if !run_script_command(spec_id, check, script, repo_path, args, findings) {
+        if !run_script_command(spec_id, check, &script, repo_path, args, findings) {
             return;
         }
     }
 }
 
-fn run_per_repo(
+// Runs a `per-repo` script exactly once in the repository directory, passing no
+// files; the script discovers whatever it needs from that directory.
+pub(super) fn run_per_repo_script(
     spec_id: &str,
     check: &Check,
-    script: &Path,
     repo_path: &Path,
+    spex_dir: &Path,
     findings: &mut Vec<Finding>,
 ) {
+    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
+        return;
+    };
     run_script_command(
         spec_id,
         check,
-        script,
+        &script,
         repo_path,
         std::iter::empty::<&OsStr>(),
         findings,

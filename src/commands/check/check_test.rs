@@ -185,12 +185,11 @@ mod tests {
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_script(
+        run_per_repo_script(
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
             &spex,
-            &[],
             &mut findings,
         );
 
@@ -222,7 +221,7 @@ mod tests {
         let check = script_check("echo-args.sh", RunScope::PerFile);
 
         let mut findings = Vec::new();
-        run_script(
+        run_per_file_script(
             "TECH-WRITING-STYLE",
             &check,
             &repo,
@@ -256,14 +255,7 @@ mod tests {
         let check = script_check("locations.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_script(
-            "TECH-WRITING-STYLE",
-            &check,
-            &repo,
-            &spex,
-            &[],
-            &mut findings,
-        );
+        run_per_repo_script("TECH-WRITING-STYLE", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 2);
         assert_eq!(findings[0].location.as_deref(), Some("docs/intro.md:40"));
@@ -283,12 +275,11 @@ mod tests {
         let check = script_check("sample.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_script(
+        run_per_repo_script(
             "TECH-COMMIT-MESSAGE-FORMAT",
             &check,
             &repo,
             &spex,
-            &[],
             &mut findings,
         );
 
@@ -308,7 +299,7 @@ mod tests {
         let check = check(CheckKind::Script, None);
 
         let mut findings = Vec::new();
-        run_script(
+        run_per_file_script(
             "TECH-WRITING-STYLE",
             &check,
             &repo,
