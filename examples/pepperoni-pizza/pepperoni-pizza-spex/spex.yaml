@@ -18,6 +18,7 @@ repositories:
     tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
       - TECH-CONFIGURABLE-NETWORK-BIND
+      - TECH-DEPENDENCIES-RULES
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
@@ -30,6 +31,7 @@ repositories:
     path: ../pepperoni-pizza-frontend
     tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DEPENDENCIES-RULES
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEC-ID-ANNOTATIONS
@@ -44,6 +46,7 @@ repositories:
     path: .
     tech_specs:
       - TECH-COMMIT-MESSAGE-FORMAT
+      - TECH-DEPENDENCIES-RULES
       - TECH-NAMING-CONVENTION
       - TECH-SECRET-HANDLING
       - TECH-SPEX-CONFORMANCE

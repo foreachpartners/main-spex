@@ -1,0 +1,45 @@
+id: TECH-DEPENDENCIES-RULES
+include_for_all_repos: true
+readonly: true
+title: Dependencies rules
+description: >-
+  Floating version ranges resolve to different code across environments, breaking
+  reproducibility and inviting surprise upgrades. Pin every dependency to an exact,
+  latest stable version, and prefer well-maintained dependencies unlikely to be
+  deprecated.
+acceptance_criteria:
+  - "MUST pin every dependency to an exact, fixed version, not a range or floating specifier (`^`, `~`, `*`, `latest`, x-ranges, or comparators)"
+  - "MUST use the latest stable version of a dependency when adding or updating it"
+  - "SHOULD choose well-maintained dependencies unlikely to be deprecated, judged by popularity, maintenance history, and company backing"
+checks:
+  - name: cargo-floating-version
+    description: Cargo.toml dependencies must pin an exact version, not a range
+    type: regexp
+    pattern: '=\s*"[\^~*<>]'
+    include:
+      - "**/Cargo.toml"
+    severity: error
+  - name: npm-floating-version
+    description: package.json dependencies must pin an exact version, not a range
+    type: regexp
+    pattern: ':\s*"(\^|~|\*|>|<|latest|\d+\.(\d+\.)?x)'
+    include:
+      - "**/package.json"
+    severity: error
+examples:
+  avoid: |
+    # Cargo.toml
+    serde = "^1.0"
+    tokio = { version = "1", features = ["full"] }
+
+    // package.json
+    "react": "^19.0.0"
+    "vite": "latest"
+  prefer: |
+    # Cargo.toml
+    serde = "=1.0.228"
+    tokio = { version = "=1.52.3", features = ["full"] }
+
+    // package.json
+    "react": "19.2.7"
+    "vite": "8.0.16"
