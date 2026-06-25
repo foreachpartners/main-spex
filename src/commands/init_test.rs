@@ -7,13 +7,23 @@ mod tests_unit {
     fn repo(name: &str) -> DiscoveredRepo {
         DiscoveredRepo {
             name: name.to_string(),
+            short_name: name.to_string(),
+            path: format!("../{name}"),
+        }
+    }
+
+    fn repo_with_short(name: &str, short_name: &str) -> DiscoveredRepo {
+        DiscoveredRepo {
+            name: name.to_string(),
+            short_name: short_name.to_string(),
             path: format!("../{name}"),
         }
     }
 
     fn spex_repo() -> DiscoveredRepo {
         DiscoveredRepo {
-            name: "spex".to_string(),
+            name: "pizza-shop-spex".to_string(),
+            short_name: "spex".to_string(),
             path: SPEX_REPO_PATH.to_string(),
         }
     }
@@ -42,31 +52,53 @@ mod tests_unit {
 
     #[test]
     fn discover_repositories_excludes_hidden_and_files() {
-        let workspace = workspace_with(&["server", "client", "spex", ".git"], &["notes.txt"]);
+        let workspace = workspace_with(&["server", "client", "shop-spex", ".git"], &["notes.txt"]);
 
-        let repositories = discover_repositories(workspace.path()).expect("discover");
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
 
-        assert_eq!(repo_names(&repositories), vec!["client", "server", "spex"]);
+        assert_eq!(
+            repo_names(&repositories),
+            vec!["client", "server", "shop-spex"]
+        );
     }
 
     #[test]
     fn discover_repositories_includes_spex_with_dot_path() {
-        let workspace = workspace_with(&["server", "spex"], &[]);
+        let workspace = workspace_with(&["server", "shop-spex"], &[]);
 
-        let repositories = discover_repositories(workspace.path()).expect("discover");
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
 
         let spex = repositories
             .iter()
-            .find(|repo| repo.name == "spex")
+            .find(|repo| repo.name == "shop-spex")
             .expect("spex repository");
         assert_eq!(spex.path, ".");
+        assert_eq!(spex.short_name, "spex");
+    }
+
+    #[test]
+    fn discover_repositories_derives_short_name_from_project_prefix() {
+        let workspace = workspace_with(&["shop-api", "shop-spex"], &[]);
+
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
+
+        let api = repositories
+            .iter()
+            .find(|repo| repo.name == "shop-api")
+            .expect("api repository");
+        assert_eq!(api.short_name, "api");
+        assert_eq!(api.path, "../shop-api");
     }
 
     #[test]
     fn discover_repositories_sorts_by_name() {
         let workspace = workspace_with(&["zeta", "alpha", "mu"], &[]);
 
-        let repositories = discover_repositories(workspace.path()).expect("discover");
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
 
         assert_eq!(repo_names(&repositories), vec!["alpha", "mu", "zeta"]);
     }
@@ -75,7 +107,8 @@ mod tests_unit {
     fn discover_repositories_sets_relative_path() {
         let workspace = workspace_with(&["server"], &[]);
 
-        let repositories = discover_repositories(workspace.path()).expect("discover");
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
 
         assert_eq!(repositories[0].path, "../server");
     }
@@ -84,7 +117,8 @@ mod tests_unit {
     fn discover_repositories_kebab_cases_name_but_keeps_path() {
         let workspace = workspace_with(&["My_Repo Name!"], &[]);
 
-        let repositories = discover_repositories(workspace.path()).expect("discover");
+        let repositories =
+            discover_repositories(workspace.path(), "shop-spex", "shop").expect("discover");
 
         assert_eq!(repositories[0].name, "my-repo-name");
         assert_eq!(repositories[0].path, "../My_Repo Name!");
@@ -113,17 +147,26 @@ mod tests_unit {
 
     #[test]
     fn render_config_lists_repositories() {
-        let yaml = config_to_yaml("pizza-shop", &[repo("server"), repo("client")], &no_specs());
+        let yaml = config_to_yaml(
+            "pizza-shop",
+            &[
+                repo_with_short("pizza-shop-server", "server"),
+                repo_with_short("pizza-shop-client", "client"),
+            ],
+            &no_specs(),
+        );
 
         let expected = formatdoc! {"
             project_name: pizza-shop
             cli_version: {CLI_VERSION}
             repositories:
-              - repository_name: server
-                path: ../server
+              - repository_name: pizza-shop-server
+                repository_short_name: server
+                path: ../pizza-shop-server
                 tech_specs: []
-              - repository_name: client
-                path: ../client
+              - repository_name: pizza-shop-client
+                repository_short_name: client
+                path: ../pizza-shop-client
                 tech_specs: []
         "};
         assert_eq!(yaml, expected);
@@ -138,14 +181,19 @@ mod tests_unit {
             ],
             spex: Vec::new(),
         };
-        let yaml = config_to_yaml("pizza-shop", &[repo("server")], &specs);
+        let yaml = config_to_yaml(
+            "pizza-shop",
+            &[repo_with_short("pizza-shop-server", "server")],
+            &specs,
+        );
 
         let expected = formatdoc! {"
             project_name: pizza-shop
             cli_version: {CLI_VERSION}
             repositories:
-              - repository_name: server
-                path: ../server
+              - repository_name: pizza-shop-server
+                repository_short_name: server
+                path: ../pizza-shop-server
                 tech_specs:
                   - TECH-SECRET-HANDLING
                   - TECH-WRITING-STYLE
@@ -159,17 +207,23 @@ mod tests_unit {
             all_repos: vec!["TECH-SECRET-HANDLING".to_string()],
             spex: vec!["TECH-WRITING-STYLE".to_string()],
         };
-        let yaml = config_to_yaml("pizza-shop", &[repo("server"), spex_repo()], &specs);
+        let yaml = config_to_yaml(
+            "pizza-shop",
+            &[repo_with_short("pizza-shop-server", "server"), spex_repo()],
+            &specs,
+        );
 
         let expected = formatdoc! {"
             project_name: pizza-shop
             cli_version: {CLI_VERSION}
             repositories:
-              - repository_name: server
-                path: ../server
+              - repository_name: pizza-shop-server
+                repository_short_name: server
+                path: ../pizza-shop-server
                 tech_specs:
                   - TECH-SECRET-HANDLING
-              - repository_name: spex
+              - repository_name: pizza-shop-spex
+                repository_short_name: spex
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
@@ -193,15 +247,12 @@ mod tests_unit {
     }
 
     #[test]
-    fn code_workspace_sets_icon_only_for_spex_and_strips_project_prefix() {
-        let json = code_workspace_json(
-            "moodmart",
-            &[
-                repo("moodmart-backend"),
-                repo("moodmart-proto"),
-                spex_repo(),
-            ],
-        );
+    fn code_workspace_uses_short_name_and_icon_for_spex() {
+        let json = code_workspace_json(&[
+            repo_with_short("moodmart-backend", "backend"),
+            repo_with_short("moodmart-proto", "proto"),
+            spex_repo(),
+        ]);
 
         let expected = indoc! {"
             {
@@ -216,16 +267,6 @@ mod tests_unit {
     }
 
     #[test]
-    fn code_workspace_keeps_name_without_matching_prefix() {
-        let json = code_workspace_json("moodmart", &[repo("server")]);
-
-        assert!(
-            json.contains("{ \"name\": \"server\", \"path\": \"../server\" },"),
-            "unexpected json: {json}"
-        );
-    }
-
-    #[test]
     fn write_code_workspace_uses_project_name_file() {
         let spex_dir = tempdir().expect("create spex dir");
 
@@ -234,7 +275,7 @@ mod tests_unit {
 
         let path = spex_dir.path().join("pizza-shop.code-workspace");
         let written = fs::read_to_string(&path).expect("read code-workspace");
-        assert_eq!(written, code_workspace_json("pizza-shop", &[spex_repo()]));
+        assert_eq!(written, code_workspace_json(&[spex_repo()]));
     }
 
     #[test]
@@ -279,38 +320,56 @@ mod tests_unit {
     }
 
     #[test]
-    fn determine_spex_and_workspace_dirs_from_spex_directory() {
-        let workspace = workspace_with(&["spex"], &[]);
-        let spex_dir = workspace.path().join("spex");
-
-        let (result_spex, result_workspace) =
-            determine_spex_and_workspace_dirs(&spex_dir).expect("determine dirs");
-
-        assert_eq!(result_spex, spex_dir);
-        assert_eq!(result_workspace, workspace.path());
-    }
-
-    #[test]
-    fn determine_spex_and_workspace_dirs_from_workspace_with_existing_spex() {
-        let workspace = workspace_with(&["spex", "server"], &[]);
-
-        let (result_spex, result_workspace) =
-            determine_spex_and_workspace_dirs(workspace.path()).expect("determine dirs");
-
-        assert_eq!(result_spex, workspace.path().join("spex"));
-        assert_eq!(result_workspace, workspace.path());
-    }
-
-    #[test]
-    fn determine_spex_and_workspace_dirs_creates_spex_directory() {
+    fn workspace_root_defaults_to_current_directory() {
         let workspace = workspace_with(&["server"], &[]);
 
-        let (result_spex, result_workspace) =
-            determine_spex_and_workspace_dirs(workspace.path()).expect("determine dirs");
+        assert_eq!(
+            workspace_root(workspace.path()).expect("workspace root"),
+            workspace.path()
+        );
+    }
 
-        assert_eq!(result_spex, workspace.path().join("spex"));
-        assert_eq!(result_workspace, workspace.path());
-        assert!(result_spex.is_dir(), "spex directory was not created");
+    #[test]
+    fn workspace_root_from_inside_spex_directory() {
+        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
+        let spex_dir = workspace.path().join("pizza-shop-spex");
+
+        assert_eq!(
+            workspace_root(&spex_dir).expect("workspace root"),
+            workspace.path()
+        );
+    }
+
+    #[test]
+    fn ensure_spex_dir_reuses_current_when_inside_spex_directory() {
+        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
+        let spex_dir = workspace.path().join("pizza-shop-spex");
+
+        let resolved =
+            ensure_spex_dir(&spex_dir, workspace.path(), "pizza-shop").expect("ensure spex dir");
+
+        assert_eq!(resolved, spex_dir);
+    }
+
+    #[test]
+    fn ensure_spex_dir_creates_project_named_directory() {
+        let workspace = workspace_with(&["server"], &[]);
+
+        let resolved = ensure_spex_dir(workspace.path(), workspace.path(), "pizza-shop")
+            .expect("ensure spex dir");
+
+        assert_eq!(resolved, workspace.path().join("pizza-shop-spex"));
+        assert!(resolved.is_dir(), "spex directory was not created");
+    }
+
+    #[test]
+    fn ensure_spex_dir_reuses_existing_directory() {
+        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
+
+        let resolved = ensure_spex_dir(workspace.path(), workspace.path(), "pizza-shop")
+            .expect("ensure spex dir");
+
+        assert_eq!(resolved, workspace.path().join("pizza-shop-spex"));
     }
 
     #[test]

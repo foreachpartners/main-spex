@@ -1,6 +1,6 @@
 ---
 name: spex-execute-plan
-description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, running `spex check` on the affected repositories, and setting each implemented business spec's status to active.
+description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/. Reads the plan and the specs, repositories, and tech-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, running `spex check` on the affected repositories, and setting each implemented business spec's status to active.
 ---
 
 # Execute an Implementation Plan
@@ -15,18 +15,18 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`), to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`), or to draft a contract (use `spex-create-contract`). The plan must already exist in `<workspace-root>/spex/plans/`.
+Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`), to author specs (`spex-create-biz-spec`, `spex-create-tech-spec`), or to draft a contract (use `spex-create-contract`). The plan must already exist in `<workspace-root>/<project-name>-spex/plans/`.
 
 ## Step 0 — Establish the target plan
 
 Determine which plan to execute before doing anything else:
 
-- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, look in `<workspace-root>/spex/plans/<spec-id>/`; if it holds several plans, pick the most recent by the `<date>` in the filename and confirm.
-- If the user named nothing, list the plan directories in `<workspace-root>/spex/plans/` and their plans, then ask which to execute. Do not invent a plan.
+- If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, look in `<workspace-root>/<project-name>-spex/plans/<spec-id>/`; if it holds several plans, pick the most recent by the `<date>` in the filename and confirm.
+- If the user named nothing, list the plan directories in `<workspace-root>/<project-name>-spex/plans/` and their plans, then ask which to execute. Do not invent a plan.
 
 ## Step 1 — Read the plan and its context
 
-Read the chosen plan in `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
+Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>_<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
 
 Then read enough context to execute faithfully:
 
@@ -35,7 +35,7 @@ Then read enough context to execute faithfully:
   spex spec-context <spec-id> <tech-spec-id>...
   ```
   This prints each spec's `id`, `title`, `description`, and `acceptance_criteria` (plus `examples` for tech-specs) as Markdown — enough for you to coordinate against. Run it from anywhere inside the workspace.
-- For each affected repository, resolve its `path` from `<workspace-root>/spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
+- For each affected repository, resolve its `path` from `<workspace-root>/<project-name>-spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
 The agents that edit code must still read the full tech-spec files (Step 3), since `spex spec-context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
 
@@ -53,7 +53,7 @@ Within a step:
 
 - Run every task in the step in parallel, one AI agent per task. The tasks are independent and have disjoint write scopes by construction, so they are safe to run together.
 - Give each agent only its task: the task description, the repository it runs in, the files it owns, the governing tech-specs that apply there, the spec IDs to annotate per `TECH-SPEC-ID-ANNOTATIONS` (once at the boundary, or the first file in a relation chain — never repeated across the nested helpers it calls), and the relevant contract changes and test cases. Do not let an agent edit files outside its task's scope.
-- Instruct each agent to read the named tech-spec files in full from `<workspace-root>/spex/tech-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
+- Instruct each agent to read the named tech-spec files in full from `<workspace-root>/<project-name>-spex/tech-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
 - A step with a single unit runs as one agent.
 
 As each task finishes, verify its result against the task description and the acceptance criteria it serves, then mark it completed (Step 4). Only when every task in the step is completed do you move to the next step.
@@ -87,7 +87,7 @@ Run the repositories' own tests where the plan's test cases call for them, to pr
 
 ## Step 6 — Mark the implemented specs active
 
-Once the steps are complete and `spex check` passes, set each business spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/spex/biz-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
+Once the steps are complete and `spex check` passes, set each business spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
 
 Tick the checkbox of every acceptance criterion the run implemented, changing its `[ ]` to `[x]`; leave any criterion that is not yet implemented as `[ ]` so `spex coverage` reports it. Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-The contract is already drafted in `spex/contracts/api.openapi.yaml`, so both repositories implement against a settled interface and run in parallel.
+The contract is already drafted in `pepperoni-pizza-spex/contracts/api.openapi.yaml`, so both repositories implement against a settled interface and run in parallel.
 
 `api` (Rust/axum, `src/main.rs`): add a single estimation helper that turns a pizza count plus the current in-progress workload into whole seconds, using 1 minute per pizza and 2 workers each making one pizza at a time, rounding up to the next whole minute and returning it in seconds — `ceil((order_pizzas + in_progress_pizzas) / 2) * 60`. Add `estimatedSeconds` (the fixed total) to the `Delivery` struct, computed at creation from the new order's pizzas plus the pizzas already in in-progress deliveries, so both `create_order` and `list_deliveries` return it; a delivery stays in progress until its `estimatedSeconds` elapses, then drops from the listing. Add `remainingSeconds`, recomputed live in `list_deliveries` as `estimatedSeconds` minus the elapsed seconds (never negative), so the delivering view counts down on each poll. Add the `POST /order-estimate` handler that computes the live estimate from the requested pizzas plus the current in-progress pizzas. Follow the existing `create_order` handler by example for state access, validation, and error shape. Extend `src/tests.rs` following the existing `#[tokio::test]` cases.
 
@@ -14,7 +14,7 @@ The contract is already drafted in `spex/contracts/api.openapi.yaml`, so both re
 
 ## Contract changes
 
-Already drafted in `spex/contracts/api.openapi.yaml`; no contract edits in this plan. The implementation consumes:
+Already drafted in `pepperoni-pizza-spex/contracts/api.openapi.yaml`; no contract edits in this plan. The implementation consumes:
 
 - `POST /order-estimate` — body `EstimateRequest` `{ pizzaIds: number[] }`; `200` returns `DeliveryEstimate` `{ estimatedSeconds: integer }`; `400` returns `Error` `{ message }`. Annotated `x-spec: BIZ-DELIVERY-TIME`.
 - `Delivery` schema gains required `estimatedSeconds: integer` (whole minutes rounded up, returned in seconds; fixed at creation) and required `remainingSeconds: integer` (seconds left, recomputed each request, counting down), returned by `POST /orders` (`201`) and `GET /deliveries` (`200`).
@@ -29,14 +29,14 @@ Status: completed
 
 Status: completed
 
-Edit `api/src/main.rs` and `api/src/tests.rs`.
+Edit `pepperoni-pizza-api/src/main.rs` and `pepperoni-pizza-api/src/tests.rs`.
 
 - Add constants for the rule: 2 workers, 1 minute per pizza.
 - Add an `estimate_seconds` helper computing `ceil((order_pizzas + in_progress_pizzas) / workers)` whole minutes, then returning it in seconds (`* 60`, `i64`).
 - Add `estimated_seconds: i64` and `remaining_seconds: i64` to `Delivery` and apply `#[serde(rename_all = "camelCase")]` so they serialize as `estimatedSeconds`/`remainingSeconds`. In `create_order`, compute `estimated_seconds` from the new order's pizza count plus the count of pizzas across current in-progress deliveries (set `remaining_seconds` equal to it), before pushing the new delivery. In `list_deliveries`, drop a delivery once its `estimated_seconds` has elapsed, and recompute `remaining_seconds` as `estimated_seconds` minus the elapsed seconds (never negative) on each returned delivery.
 - Add the `estimate_order_delivery_time` handler for `POST /order-estimate`: accept `EstimateRequest { pizza_ids }`, validate unknown pizzas with the existing `error` helper and shape, sum the requested pizzas plus current in-progress pizzas, and return `{ estimatedSeconds }`. Register the route in `main`.
 - Annotate the boundary per TECH-SPEC-ID-ANNOTATIONS: `// @spec impl BIZ-DELIVERY-TIME` once on the new handler (do not nest onto the helper). Do not re-annotate `create_order` internals.
-- Add tests in `api/src/tests.rs` covering the cases below; annotate the new test(s) `// @spec test BIZ-DELIVERY-TIME`.
+- Add tests in `pepperoni-pizza-api/src/tests.rs` covering the cases below; annotate the new test(s) `// @spec test BIZ-DELIVERY-TIME`.
 - Applies: TECH-SPEC-ID-ANNOTATIONS (boundary annotation), TECH-NAMING-CONVENTION, TECH-SECRET-HANDLING (no secrets introduced), TECH-WRITING-STYLE (test names and comments).
 - Validate: `cargo test` in `api`.
 
@@ -44,7 +44,7 @@ Edit `api/src/main.rs` and `api/src/tests.rs`.
 
 Status: completed
 
-Edit `frontend/src/types.ts`, `frontend/src/api.ts`, `frontend/src/App.tsx`, `frontend/src/api.test.ts`, and `frontend/src/App.test.tsx`.
+Edit `pepperoni-pizza-frontend/src/types.ts`, `pepperoni-pizza-frontend/src/api.ts`, `pepperoni-pizza-frontend/src/App.tsx`, `pepperoni-pizza-frontend/src/api.test.ts`, and `pepperoni-pizza-frontend/src/App.test.tsx`.
 
 - Add `estimatedSeconds: number` to the `Delivery` interface and a `DeliveryEstimate` interface in `types.ts`.
 - Add `estimateOrderDeliveryTime(pizzaIds: number[])` to `pizzaApi` in `api.ts`, POSTing `{ pizzaIds }` to `/order-estimate` and returning `DeliveryEstimate`, following the existing `createOrder` call by example.

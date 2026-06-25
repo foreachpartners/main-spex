@@ -2,13 +2,13 @@
 
 ## Why a workspace of separate repositories?
 
-A workspace keeps every repository it manages (`spex`, `api`, `frontend`, …) as its own git repository under one shared folder:
+A workspace keeps every repository it manages as its own git repository under one shared folder, each named `<project-name>-<repository-short-name>`:
 
 ```text
-pepperoni-pizza/   <- workspace root folder
-  spex/            <- specs, config, and contracts/
-  api/
-  frontend/
+pepperoni-pizza/             <- workspace root folder
+  pepperoni-pizza-spex/      <- specs, config, and contracts/
+  pepperoni-pizza-api/
+  pepperoni-pizza-frontend/
 ```
 
 Each person — and each AI agent — gets access only to what they need. Because each repository is independent, access is granted per repository:

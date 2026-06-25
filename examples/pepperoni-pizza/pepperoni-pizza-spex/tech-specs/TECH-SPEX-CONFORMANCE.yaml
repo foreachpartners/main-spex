@@ -25,8 +25,8 @@ checks:
     severity: error
 examples:
   layout: |
-    spex/
+    pepperoni-pizza-spex/
       spex.yaml                              # validated against schemas/spex.schema.json
       biz-specs/BIZ-LIST-PIZZA-MENU.yaml     # validated against schemas/biz-spec.schema.json
       tech-specs/TECH-NAMING-CONVENTION.yaml # validated against schemas/tech-spec.schema.json
-      scripts/TECH-NAMING-CONVENTION/repo-dir-kebab-case.sh
+      scripts/TECH-NAMING-CONVENTION/repo-dir.sh

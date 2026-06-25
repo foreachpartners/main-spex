@@ -346,6 +346,7 @@ mod tests {
     fn repository(path: &str, tech_specs: Vec<&str>) -> Repository {
         Repository {
             name: "api".to_string(),
+            short_name: "api".to_string(),
             path: path.to_string(),
             contracts: Vec::new(),
             tech_specs: tech_specs.into_iter().map(str::to_string).collect(),

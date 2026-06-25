@@ -13,15 +13,15 @@ While inspecting each repository, collect any interface contract it ships into t
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name.
 
-| What                    | Path                                                  |
-| ----------------------- | ----------------------------------------------------- |
-| Spex repository         | `<workspace-root>/spex/`                              |
-| Workspace config        | `<workspace-root>/spex/spex.yaml`                     |
-| Contracts folder        | `<workspace-root>/spex/contracts/`                    |
-| Workspace config schema | `<workspace-root>/spex/schemas/spex.schema.json`      |
-| Editor workspace file   | `<workspace-root>/spex/<project_name>.code-workspace` |
+| What                    | Path                                                                 |
+| ----------------------- | -------------------------------------------------------------------- |
+| Spex repository         | `<workspace-root>/<project-name>-spex/`                              |
+| Workspace config        | `<workspace-root>/<project-name>-spex/spex.yaml`                     |
+| Contracts folder        | `<workspace-root>/<project-name>-spex/contracts/`                    |
+| Workspace config schema | `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`      |
+| Editor workspace file   | `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` |
 
-The schema at `<workspace-root>/spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
+The schema at `<workspace-root>/<project-name>-spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
 
 ## When to use this skill
 
@@ -29,7 +29,7 @@ Use it when the user wants to set up, describe, or document their spex project �
 
 ## Step 1 — Read the config
 
-Read `<workspace-root>/spex/spex.yaml`. Note the `project_name`, every repository's `repository_name` and `path`, and which `description` fields are already present.
+Read `<workspace-root>/<project-name>-spex/spex.yaml`. Note the `project_name`, every repository's `repository_name` (full name), `repository_short_name`, and `path`, and which `description` fields are already present.
 
 Decide what to fill in:
 
@@ -39,7 +39,7 @@ Decide what to fill in:
 
 ## Step 2 — Inspect each repository
 
-For each repository missing a description, look at its real contents (resolve `path` relative to `<workspace-root>/spex/`). Gather just enough to summarize what it is and does:
+For each repository missing a description, look at its real contents (resolve `path` relative to `<workspace-root>/<project-name>-spex/`). Gather just enough to summarize what it is and does:
 
 - Read its `README` if present.
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
@@ -60,8 +60,8 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 ## Step 4 — Confirm, then write
 
 1. Show the proposed descriptions to the user and confirm them.
-2. Edit `<workspace-root>/spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
-3. Validate the result against `<workspace-root>/spex/schemas/spex.schema.json`.
+2. Edit `<workspace-root>/<project-name>-spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
+3. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 4b — Collect contracts
 
@@ -70,19 +70,20 @@ Each repository's interface contract is the single source of truth for its machi
 For each repository, using the contract files you noted in Step 2:
 
 1. Identify its interface contract files. Look for OpenAPI (`openapi.yaml`, `openapi.json`, `*.openapi.yaml`), proto (`*.proto`), GraphQL SDL (`schema.graphql`, `*.graphql`), and AsyncAPI (`asyncapi.yaml`). Skip repositories that ship no contract.
-2. Copy each contract file into `<workspace-root>/spex/contracts/`, renaming it with the repository's name as a prefix: `<repository-name>.<original-filename>` (for example `api`'s `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository name.
+2. Copy each contract file into `<workspace-root>/<project-name>-spex/contracts/`, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
 3. Add the copy under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
 4. Leave the original contract file in its repository untouched; the copy under `contracts/` is what spex tracks.
-5. Validate the result against `<workspace-root>/spex/schemas/spex.schema.json`.
+5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 Confirm the copied contracts and their descriptions with the user, the same way you confirm descriptions in Step 4.
 
 Example `spex.yaml` repository entry after collecting a contract:
 
 ```yaml
-- repository_name: api
+- repository_name: pepperoni-pizza-api
+  repository_short_name: api
   description: Backend service that handles orders.
-  path: ../api
+  path: ../pepperoni-pizza-api
   contracts:
     - path: contracts/api.openapi.yaml
       description: REST OpenAPI spec for the orders API.
@@ -92,7 +93,7 @@ Example `spex.yaml` repository entry after collecting a contract:
 
 ## Step 5 — Fill in the workspace folder icons
 
-`spex init` writes `<workspace-root>/spex/<project_name>.code-workspace` with a `folders` list. The `spex` folder already has its icon (🧰); every other folder starts without one. Give each remaining folder a single emoji icon that fits its role.
+`spex init` writes `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` with a `folders` list. The `spex` folder already has its icon (🧰); every other folder starts without one. Give each remaining folder a single emoji icon that fits its role.
 
 1. Read the `.code-workspace` file.
 2. For each folder whose `name` has no leading emoji, prepend one emoji plus a space (for example `🦀 backend`, `🛍️ storefront`). Base the choice on the repository's stack and role, which you already learned in Step 2.
@@ -125,9 +126,10 @@ Place `description` right after the name it describes, and the `contracts` list 
 project_name: pepperoni-pizza
 description: Online ordering for a pizzeria.
 repositories:
-  - repository_name: api
+  - repository_name: pepperoni-pizza-api
+    repository_short_name: api
     description: Backend service that handles orders.
-    path: ../api
+    path: ../pepperoni-pizza-api
     contracts:
       - path: contracts/api.openapi.yaml
         description: REST OpenAPI spec for the orders API.
@@ -142,4 +144,4 @@ repositories:
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract is copied into `contracts/` with a repository-prefixed name and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - No existing field, path, or tech-spec is changed or removed.
-- `spex.yaml` stays valid against `<workspace-root>/spex/schemas/spex.schema.json`.
+- `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

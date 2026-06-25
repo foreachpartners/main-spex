@@ -112,7 +112,7 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **Why:** A duplicated fact is already wrong, or soon will be. Agents copy context between files for convenience ("let me add this to the agent rules too"), and copies diverge faster than anyone notices.
 
-**How to apply:** Keep the interface in `<workspace-root>/spex/contracts/`, the behavior in `<workspace-root>/spex/biz-specs/<spec-id>.yaml`, the convention in `<workspace-root>/spex/tech-specs/<spec-id>.yaml`, the layout in `spex.yaml`, and terms in `docs/glossary.md`. Reference these sources; do not copy them.
+**How to apply:** Keep the interface in `<workspace-root>/<project-name>-spex/contracts/`, the behavior in `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`, the convention in `<workspace-root>/<project-name>-spex/tech-specs/<spec-id>.yaml`, the layout in `spex.yaml`, and terms in `docs/glossary.md`. Reference these sources; do not copy them.
 
 ## Changes without traceability
 

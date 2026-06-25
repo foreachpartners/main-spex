@@ -42,6 +42,8 @@ pub struct Config {
 pub struct Repository {
     #[serde(rename = "repository_name")]
     pub name: String,
+    #[serde(rename = "repository_short_name")]
+    pub short_name: String,
     pub path: String,
     #[serde(default)]
     pub contracts: Vec<Contract>,
@@ -74,17 +76,32 @@ pub struct PreexistingError {
     pub files: Vec<String>,
 }
 
+// Locates the spex directory by finding the `spex.yaml` it contains. Walks up
+// from `start`; at each ancestor it uses a directly present `spex.yaml`, then
+// falls back to scanning that ancestor's immediate child directories. The child
+// scan lets discovery work from the workspace root or a sibling repository even
+// though the spex repository directory is named `<project-name>-spex`.
 pub fn find_dir(start: &Path) -> Result<PathBuf> {
     for dir in start.ancestors() {
         if dir.join(SPEX_CONFIG_FILE).is_file() {
             return Ok(dir.to_path_buf());
         }
-        let nested = dir.join(SPEX_DIR_NAME);
-        if nested.join(SPEX_CONFIG_FILE).is_file() {
-            return Ok(nested);
+        if let Some(child) = spex_child_dir(dir) {
+            return Ok(child);
         }
     }
     Err(Report::new(ConfigError::NotFound))
+}
+
+fn spex_child_dir(dir: &Path) -> Option<PathBuf> {
+    let mut children: Vec<PathBuf> = fs::read_dir(dir)
+        .ok()?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|path| path.join(SPEX_CONFIG_FILE).is_file())
+        .collect();
+    children.sort();
+    children.into_iter().next()
 }
 
 pub fn load(spex_dir: &Path) -> Result<Config> {

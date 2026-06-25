@@ -18,15 +18,22 @@ Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
 `api` and `frontend` repositories side by side.
 
+## Step 2.1 — Rename folders to follow TECH-NAMING-CONVENTION
+
+Repository directory naming is <project-name>-<repository-short-name>
+
+- `api` becomes `pepperoni-pizza-api`
+- `frontend` becomes `pepperoni-pizza-frontend`
+
 ## Step 3 — Set up spex and workspace
 
 Run `spex init` in terminal.
 
 Open the workspace to work across all repositories at once and integrate with an AI coding agent:
 
-- Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
+- Cursor/VSCode: open workspace from file `pepperoni-pizza-spex/pepperoni-pizza.code-workspace`
 - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-- Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
+- Claude CLI: run `claude --add-dir ../pepperoni-pizza-api ../pepperoni-pizza-frontend ..` from `pepperoni-pizza-spex` repo
 - Zed: add project, pick all workspace repos (folders)
 
 Ask AI to init git in each repository and commit with `chore: initial commit`.
@@ -105,7 +112,7 @@ for the API:
 
 The skill interviews you, proposes a `regexp` check that flags binding to a
 hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
-`spex/tech-specs/TECH-*.yaml`. Make sure the new spec is in the `api` repository's
+`pepperoni-pizza-spex/tech-specs/TECH-*.yaml`. Make sure the new spec is in the `api` repository's
 `tech_specs` list in `spex.yaml` so the check runs against it.
 
 Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
@@ -116,7 +123,7 @@ small change or create a plan if compliance with new tech spec requires many cha
 Have your AI agent summarize the result:
 
 ```text
-Create a new file `spex/tutorial-completion.md` that documents the result of this tutorial. In it:
+Create a new file `pepperoni-pizza-spex/tutorial-completion.md` that documents the result of this tutorial. In it:
 
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.

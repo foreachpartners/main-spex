@@ -1,6 +1,6 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md whose steps hold tasks that AI agents can run in parallel.
+description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/<project-name>-spex/plans/<spec-id>/<date>_<slug>.md whose steps hold tasks that AI agents can run in parallel.
 ---
 
 # Create an Implementation Plan
@@ -13,7 +13,7 @@ The plan is a working document: it records what to build, the contract changes, 
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the lead spec's `id`.
 
-Each spec's plans live in their own directory: `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md`. The schema at `<workspace-root>/spex/schemas/plan-filename.schema.json` is authoritative for the filename rules.
+Each spec's plans live in their own directory: `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>_<slug>.md`. The schema at `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json` is authoritative for the filename rules.
 
 ## When to use this skill
 
@@ -31,22 +31,22 @@ When several specs are given, pick the lead spec (the one the others depend on, 
 
 Before continuing, confirm two preconditions:
 
-- Each target spec's file exists at `<workspace-root>/spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not plan a spec that has not been written and approved.
+- Each target spec's file exists at `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not plan a spec that has not been written and approved.
 - The contract is settled when applicable. If any acceptance criterion crosses a repository boundary (it needs an endpoint, message, or schema), the affected contract must be drafted or updated with `spex-create-contract` before planning. If the work needs no interface change (it is internal to one repository), proceed straight from spec to plan with no contract.
 
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
 
 If a spec lists `depends_on`, check those specs' `status`. Flag any dependency that is not yet shipped and confirm with the user whether to plan around it or stop.
 
 ## Step 2 — Resolve scope and governing tech-specs
 
-From `<workspace-root>/spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
+From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `tech_specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
-- Read each governing tech-spec in `<workspace-root>/spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
+- Read each governing tech-spec in `<workspace-root>/<project-name>-spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
 
 Record which repository each governing tech-spec comes from so a task in one repository only carries the tech-specs that apply there.
 
@@ -123,7 +123,7 @@ Each case maps to an acceptance criterion and proves it.
 
 Rules for the plan content:
 
-- The plan lives at `<spec-id>/<date>_<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>_<slug>` must validate against `<workspace-root>/spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `BIZ-PLACE-PIZZA-ORDER/2024-11-24_add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
+- The plan lives at `<spec-id>/<date>_<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>_<slug>` must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `BIZ-PLACE-PIZZA-ORDER/2024-11-24_add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
 - List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing tech-specs under `Tech-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
@@ -132,7 +132,7 @@ Rules for the plan content:
 ## Step 6 — Confirm, then write
 
 1. Show the drafted plan to the user — especially the step boundaries and which tasks run in parallel — and confirm. Apply edits if needed.
-2. Write it to `<workspace-root>/spex/plans/<spec-id>/<date>_<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/spex/schemas/plan-filename.schema.json`.
+2. Write it to `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>_<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json`.
 3. Confirm the path back to the user.
 
 ## Step 7 — Point to the next skill

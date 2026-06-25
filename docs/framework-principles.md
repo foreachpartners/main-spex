@@ -98,14 +98,14 @@ Every fact has exactly one authoritative source. Everything else references it.
 
 Duplication has always been a source of bugs. With AI-assisted development it becomes critical: agents generate code fast, copies diverge faster, and a duplicated fact falls out of sync before anyone notices.
 
-| Fact                          | Single source                                                      | Not duplicated to                                |
-| ----------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
-| HTTP / gRPC / event interface | Native contract in `spex/contracts/` (OpenAPI, `.proto`, AsyncAPI) | No markdown copy of the interface                |
-| Product behavior              | Business spec (`spex/biz-specs/<spec-id>.yaml`)                    | No copy in code comments or plans                |
-| Cross-cutting convention      | Technical spec (`spex/tech-specs/<spec-id>.yaml`)                  | No copy in agent rules, READMEs, or service docs |
-| Check logic                   | TECH-spec `checks` and `scripts/<spec-id>/`                        | No restated rule in CI config prose              |
-| Workspace layout              | `spex/spex.yaml`                                                   | No second list of repositories anywhere          |
-| Term definitions              | `docs/glossary.md`                                                 | No re-definition in other docs                   |
+| Fact                          | Single source                                                                     | Not duplicated to                                |
+| ----------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| HTTP / gRPC / event interface | Native contract in `<project-name>-spex/contracts/` (OpenAPI, `.proto`, AsyncAPI) | No markdown copy of the interface                |
+| Product behavior              | Business spec (`<project-name>-spex/biz-specs/<spec-id>.yaml`)                    | No copy in code comments or plans                |
+| Cross-cutting convention      | Technical spec (`<project-name>-spex/tech-specs/<spec-id>.yaml`)                  | No copy in agent rules, READMEs, or service docs |
+| Check logic                   | TECH-spec `checks` and `scripts/<spec-id>/`                                       | No restated rule in CI config prose              |
+| Workspace layout              | `<project-name>-spex/spex.yaml`                                                   | No second list of repositories anywhere          |
+| Term definitions              | `docs/glossary.md`                                                                | No re-definition in other docs                   |
 
 **Violation test**: the same fact exists in two places — one is already wrong, or soon will be.
 

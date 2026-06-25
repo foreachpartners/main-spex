@@ -13,7 +13,7 @@ acceptance_criteria:
   - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful', 'clean')"
   - "MUST use English"
   - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
-  - "MUST write substitution placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<workspace-root>/spex/biz-specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`); in a format template that defines an identifier's required casing, the placeholder MUST instead mirror the produced case and delimiter (`<PROJECT_NAME>_<DATA>`, `<project_name>.<data>`)"
+  - "MUST write substitution placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`); in a format template that defines an identifier's required casing, the placeholder MUST instead mirror the produced case and delimiter (`<PROJECT_NAME>_<DATA>`, `<project_name>.<data>`)"
 
 checks:
   - name: writing
@@ -37,6 +37,6 @@ examples:
   prefer: |
     MUST load configuration at startup.
   placeholder: |
-    <workspace-root>/spex/biz-specs/<spec-id>.yaml
+    <workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml
 
-    e.g. pepperoni-pizza/spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml
+    e.g. pepperoni-pizza/pepperoni-pizza-spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml

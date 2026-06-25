@@ -47,6 +47,7 @@ const SPEX_REPO_DESCRIPTION: &str = "    description: >-
 
 struct DiscoveredRepo {
     name: String,
+    short_name: String,
     path: String,
 }
 
@@ -60,8 +61,7 @@ pub fn run() -> Result<ExitCode> {
         .change_context(InitError::Io)
         .attach("could not determine the current directory")?;
 
-    let (spex_dir, workspace_root) = determine_spex_and_workspace_dirs(&current_dir)?;
-    verify_not_initialized(&spex_dir)?;
+    let workspace_root = workspace_root(&current_dir)?;
 
     let default_name = dir_name(&workspace_root).ok_or_else(|| {
         Report::new(InitError::NoWorkspaceRoot).attach("could not read the workspace root name")
@@ -69,7 +69,14 @@ pub fn run() -> Result<ExitCode> {
 
     let project_name = confirm_project_name(default_name)?;
 
-    let repositories = discover_repositories(&workspace_root)?;
+    // The spex repository directory follows the naming convention
+    // (`<project-name>-spex`), so it can only be resolved once the project name
+    // is known.
+    let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
+    verify_not_initialized(&spex_dir)?;
+
+    let spex_dir_name = dir_name(&spex_dir).unwrap_or_default().to_string();
+    let repositories = discover_repositories(&workspace_root, &spex_dir_name, &project_name)?;
     let repositories = confirm_repositories(repositories)?;
 
     let tech_specs = default_tech_specs()?;
@@ -127,16 +134,16 @@ fn write_code_workspace(
 ) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
-    fs::write(&path, code_workspace_json(project_name, repositories))
+    fs::write(&path, code_workspace_json(repositories))
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write `{}`", path.display()))?;
     Ok(())
 }
 
-fn code_workspace_json(project_name: &str, repositories: &[DiscoveredRepo]) -> String {
+fn code_workspace_json(repositories: &[DiscoveredRepo]) -> String {
     let mut json = String::from("{\n  \"folders\": [\n");
     for repo in repositories {
-        let name = workspace_folder_name(project_name, repo);
+        let name = workspace_folder_name(repo);
         json.push_str(&format!(
             "    {{ \"name\": \"{}\", \"path\": \"{}\" }},\n",
             escape_json(&name),
@@ -147,16 +154,13 @@ fn code_workspace_json(project_name: &str, repositories: &[DiscoveredRepo]) -> S
     json
 }
 
-// spex owns its icon; spex-setup fills the icons for the other folders.
-fn workspace_folder_name(project_name: &str, repo: &DiscoveredRepo) -> String {
+// Folders display the repository short name; spex owns its icon, and spex-setup
+// fills the icons for the other folders.
+fn workspace_folder_name(repo: &DiscoveredRepo) -> String {
     if repo.path == SPEX_REPO_PATH {
-        return format!("{SPEX_WORKSPACE_ICON} {}", repo.name);
+        return format!("{SPEX_WORKSPACE_ICON} {}", repo.short_name);
     }
-
-    repo.name
-        .strip_prefix(&format!("{project_name}-"))
-        .unwrap_or(&repo.name)
-        .to_string()
+    repo.short_name.clone()
 }
 
 fn escape_json(value: &str) -> String {
@@ -197,28 +201,42 @@ fn default_tech_specs() -> Result<DefaultTechSpecs> {
     Ok(DefaultTechSpecs { all_repos, spex })
 }
 
-fn determine_spex_and_workspace_dirs(current_dir: &Path) -> Result<(PathBuf, PathBuf)> {
-    // Check if we're already in a spex directory
-    if dir_name(current_dir) == Some(SPEX_DIR_NAME) {
-        let workspace_root = current_dir.parent().ok_or_else(|| {
+// The workspace root is the current directory, unless `spex init` runs from
+// inside the spex repository directory, in which case it is the parent.
+fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
+    if dir_name(current_dir).is_some_and(is_spex_dir_name) {
+        let parent = current_dir.parent().ok_or_else(|| {
             Report::new(InitError::NoWorkspaceRoot)
                 .attach("expected the spex directory to live inside a workspace root")
         })?;
-        return Ok((current_dir.to_path_buf(), workspace_root.to_path_buf()));
+        return Ok(parent.to_path_buf());
+    }
+    Ok(current_dir.to_path_buf())
+}
+
+// Resolves the spex repository directory (`<project-name>-spex`), creating it
+// when it does not yet exist. Reuses the current directory when `spex init` runs
+// from inside the spex repository.
+fn ensure_spex_dir(
+    current_dir: &Path,
+    workspace_root: &Path,
+    project_name: &str,
+) -> Result<PathBuf> {
+    if dir_name(current_dir).is_some_and(is_spex_dir_name) {
+        return Ok(current_dir.to_path_buf());
     }
 
-    // Check if there's a spex subdirectory
-    let spex_subdir = current_dir.join(SPEX_DIR_NAME);
-    if spex_subdir.is_dir() {
-        return Ok((spex_subdir, current_dir.to_path_buf()));
+    let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
+    if !spex_dir.is_dir() {
+        fs::create_dir(&spex_dir)
+            .change_context(InitError::Io)
+            .attach_with(|| format!("could not create `{}` directory", spex_dir.display()))?;
     }
+    Ok(spex_dir)
+}
 
-    // Create spex directory in current location
-    fs::create_dir(&spex_subdir)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not create `{}` directory", spex_subdir.display()))?;
-
-    Ok((spex_subdir, current_dir.to_path_buf()))
+fn is_spex_dir_name(name: &str) -> bool {
+    name == SPEX_DIR_NAME || name.ends_with(&format!("-{SPEX_DIR_NAME}"))
 }
 
 fn verify_not_initialized(current_dir: &Path) -> Result<()> {
@@ -239,7 +257,11 @@ fn confirm_project_name(default_name: &str) -> Result<String> {
     })
 }
 
-fn discover_repositories(workspace_root: &Path) -> Result<Vec<DiscoveredRepo>> {
+fn discover_repositories(
+    workspace_root: &Path,
+    spex_dir_name: &str,
+    project_name: &str,
+) -> Result<Vec<DiscoveredRepo>> {
     let entries = fs::read_dir(workspace_root)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not read `{}`", workspace_root.display()))?;
@@ -257,20 +279,31 @@ fn discover_repositories(workspace_root: &Path) -> Result<Vec<DiscoveredRepo>> {
             continue;
         }
 
-        let path = if dir_name == SPEX_DIR_NAME {
+        let path = if dir_name == spex_dir_name {
             SPEX_REPO_PATH.to_string()
         } else {
             format!("../{dir_name}")
         };
 
+        let name = to_kebab_case(&dir_name);
+        let short_name = repository_short_name(&name, project_name);
         repositories.push(DiscoveredRepo {
-            name: to_kebab_case(&dir_name),
+            name,
+            short_name,
             path,
         });
     }
 
     repositories.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(repositories)
+}
+
+// The repository short name is the full repository name minus the
+// `<project-name>-` prefix, per TECH-NAMING-CONVENTION.
+fn repository_short_name(name: &str, project_name: &str) -> String {
+    name.strip_prefix(&format!("{project_name}-"))
+        .unwrap_or(name)
+        .to_string()
 }
 
 fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<DiscoveredRepo>> {
@@ -316,6 +349,7 @@ fn config_to_yaml(
                 &tech_specs.all_repos
             };
             yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
+            yaml.push_str(&format!("    repository_short_name: {}\n", repo.short_name));
             if repo.path == SPEX_REPO_PATH {
                 yaml.push_str(SPEX_REPO_DESCRIPTION);
             }

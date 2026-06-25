@@ -36,8 +36,9 @@ cross-cutting convention.
 
 A project spans several workspace repositories under one workspace root folder.
 
-- Each workspace repository (`spex`, `api`, `frontend`, …) is its own git repository.
-- The `spex` repository holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
+- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per TECH-NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
+- The spex repository (`<project-name>-spex`) holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
+- spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
 - Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, product behavior only in its business spec, a convention only in its technical spec.
 - Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
 - Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
@@ -64,10 +65,11 @@ Apply to every subcommand.
 
 ## init
 
-Creates the `spex` repository in the workspace root and scaffolds the framework.
+Creates the spex repository (`<project-name>-spex`) in the workspace root and scaffolds the framework.
 
 - Prompts to confirm the project name, defaulting to the workspace root folder name.
-- Prompts to confirm the discovered workspace repositories.
+- Creates the spex repository directory named `<project-name>-spex`.
+- Prompts to confirm the discovered workspace repositories, deriving each `repository_short_name` from its directory name minus the `<project-name>-` prefix.
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `tech-specs/`, and skills.
@@ -143,7 +145,7 @@ Fills in the descriptions and icons left blank by `spex init` and collects each 
 
 - Fills the missing `description` fields in `spex.yaml` for the project and each repository by inspecting their contents.
 - Fills the folder icons in the editor workspace file.
-- Copies each repository's existing contract files into the `spex` repository's `contracts/` folder, renaming each with its repository's prefix (for example `openapi.yaml` from `api` becomes `contracts/api.openapi.yaml`).
+- Copies each repository's existing contract files into the spex repository's `contracts/` folder, renaming each with its repository short name as a prefix (for example `openapi.yaml` from the `api` repository becomes `contracts/api.openapi.yaml`).
 - Records each copied contract under its repository's `contracts` in `spex.yaml`.
 - Is run right after `spex init`.
 
@@ -245,7 +247,8 @@ Annotations link a contract, implementation, or test to its spec.
 Declares the project and its repositories.
 
 - Declares `project_name`, `cli_version`, an optional `description`, and the `repositories` list.
-- Each repository has `repository_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `tech_specs`.
+- Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `tech_specs`.
+- `--repo` accepts either a repository's full name or its short name.
 - Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
 - Each repository may add per-repo `checks_override`, `checks_additional`, and `checks_preexisting_errors`.
 - Validated against `schemas/spex.schema.json`.

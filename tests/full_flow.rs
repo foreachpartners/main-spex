@@ -11,7 +11,7 @@ use tempfile::tempdir;
 // commit-format checks warn. The trailing `workspace` section reports the
 // workspace-scoped checks that run once across every repository. Update this
 // when the example or bundled templates change.
-const EXPECTED_CHECK_REPORT: &str = r#"api
+const EXPECTED_CHECK_REPORT: &str = r#"proj-api
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
@@ -20,7 +20,7 @@ const EXPECTED_CHECK_REPORT: &str = r#"api
       Backup and scratch files may carry pre-redaction content
   0 errors, 3 warnings
 
-frontend
+proj-frontend
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
@@ -29,7 +29,7 @@ frontend
       Requirements and documentation must be in English
   1 error, 2 warnings
 
-spex
+proj-spex
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
@@ -61,21 +61,21 @@ proj: no gaps
 // commit-format checks warn; the example also ships a demo writing-style
 // violation in its `spex` tutorial notes. No errors are present, so check
 // succeeds.
-const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"api
+const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"pepperoni-pizza-api
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
   0 errors, 2 warnings
 
-frontend
+pepperoni-pizza-frontend
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
       Not a git repository — cannot verify commit message format
   0 errors, 2 warnings
 
-spex
+pepperoni-pizza-spex
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
       Not a git repository — cannot verify commit message format
   warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
@@ -112,8 +112,7 @@ fn init_then_check_pepperoni_pizza() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
-    copy_dir(&example, &project);
+    copy_no_spex(&project);
 
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(
@@ -124,11 +123,11 @@ fn init_then_check_pepperoni_pizza() {
         String::from_utf8_lossy(&init.stderr),
     );
     assert!(
-        project.join("spex/spex.yaml").is_file(),
-        "init did not write spex/spex.yaml"
+        project.join("proj-spex/spex.yaml").is_file(),
+        "init did not write proj-spex/spex.yaml"
     );
     assert!(
-        project.join("spex/tech-specs").is_dir(),
+        project.join("proj-spex/tech-specs").is_dir(),
         "init did not scaffold tech-specs"
     );
 
@@ -164,19 +163,18 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
-    copy_dir(&example, &project);
+    copy_no_spex(&project);
 
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
 
     // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
     // error in any other file would still surface.
-    let config_path = project.join("spex/spex.yaml");
+    let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
-        "  - repository_name: frontend\n",
-        "  - repository_name: frontend\n    checks_preexisting_errors:\n      - spec: TECH-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - repository_name: proj-frontend\n",
+        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - spec: TECH-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(
         patched, config,
@@ -206,8 +204,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
-    copy_dir(&example, &project);
+    copy_no_spex(&project);
 
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
@@ -221,7 +218,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
         String::from_utf8_lossy(&fill.stderr),
     );
 
-    let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
+    let config = fs::read_to_string(project.join("proj-spex/spex.yaml")).expect("read spex.yaml");
     assert!(
         config.contains("checks_preexisting_errors:")
             && config.contains("check: no-cyrillic")
@@ -232,7 +229,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     // Running it again is idempotent: nothing new to baseline.
     let refill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
     let config_after =
-        fs::read_to_string(project.join("spex/spex.yaml")).expect("reread spex.yaml");
+        fs::read_to_string(project.join("proj-spex/spex.yaml")).expect("reread spex.yaml");
     assert_eq!(config, config_after, "second fill changed spex.yaml");
     assert!(refill.status.success());
 
@@ -323,6 +320,28 @@ fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
         .expect("write spex stdin");
 
     child.wait_with_output().expect("wait for spex")
+}
+
+// Copies the no-spex example into `project` and, mirroring tutorial Step 2.1,
+// renames its repositories to follow TECH-NAMING-CONVENTION
+// (`<project-name>-<repository-short-name>`). The project name defaults to the
+// workspace folder name, so the prefix is derived from it.
+fn copy_no_spex(project: &Path) {
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
+    copy_dir(&example, project);
+
+    let project_name = project
+        .file_name()
+        .and_then(|name| name.to_str())
+        .expect("project folder name")
+        .to_string();
+    for short in ["api", "frontend"] {
+        fs::rename(
+            project.join(short),
+            project.join(format!("{project_name}-{short}")),
+        )
+        .expect("rename repository to follow naming convention");
+    }
 }
 
 fn copy_dir(src: &Path, dst: &Path) {

@@ -7,13 +7,13 @@ description: Derive the machine-readable interface contract from one or more bus
 
 A contract is the machine-readable _interface_ derived from a business spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
-Match the format and prose style of the existing contracts and write the result into the `spex` repository's `<workspace-root>/spex/contracts/` folder.
+Match the format and prose style of the existing contracts and write the result into the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder.
 
 ## Paths
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-Each repository's contracts live in the `spex` repository's `<workspace-root>/spex/contracts/` folder, named with the repository's prefix (for example `contracts/api.openapi.yaml`), and are declared per repository under `contracts` in `<workspace-root>/spex/spex.yaml`.
+Each repository's contracts live in the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder, named with the repository's prefix (for example `contracts/api.openapi.yaml`), and are declared per repository under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`.
 
 ## When to use this skill
 
@@ -27,17 +27,19 @@ Determine which specs to contract before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, contract that one and confirm the ID.
 - If no spec is identified, ask which to contract. Do not invent a spec.
 
+Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not contract a spec that has not been written and approved.
+
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace-root>/spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 
-From `<workspace-root>/spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
+From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
-- For each affected repository, read its `tech_specs` list and read the governing contract conventions in `<workspace-root>/spex/tech-specs/` — at minimum `TECH-OPENAPI-CONVENTIONS` (for OpenAPI) and `TECH-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/<project-name>-spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
+- For each affected repository, read its `tech_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/tech-specs/` — at minimum `TECH-OPENAPI-CONVENTIONS` (for OpenAPI) and `TECH-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -63,9 +65,9 @@ Keep the change minimal and consistent with the surrounding document.
 For each affected contract:
 
 1. Show the drafted contract change (the added or modified operations, messages, and schemas) to the user for confirmation. Apply edits if needed.
-2. Write it into `<workspace-root>/spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
-3. Record any new contract file under its repository's `contracts` in `<workspace-root>/spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
-4. Validate `spex.yaml` against `<workspace-root>/spex/schemas/spex.schema.json`.
+2. Write it into `<workspace-root>/<project-name>-spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
+3. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
+4. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 6 — Point to the next skill
 

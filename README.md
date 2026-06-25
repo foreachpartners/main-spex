@@ -22,20 +22,22 @@ _The name `spex` comes from a casual shorthand for specifications._
 We will create the following structure:
 
 ```
-pepperoni-pizza/         # workspace root
-├── api/                 # existing api repository
-├── frontend/            # existing frontend repository
-├── ...                  # repeat for other repositories
-└── spex/                # new spex repository (created by cli)
-    └── pepperoni-pizza.code-workspace  # editor workspace file
+pepperoni-pizza/                       # workspace root
+├── pepperoni-pizza-api/               # existing api repository
+├── pepperoni-pizza-frontend/          # existing frontend repository
+├── ...                                # repeat for other repositories
+└── pepperoni-pizza-spex/              # new spex repository (created by cli)
+    └── pepperoni-pizza.code-workspace # editor workspace file
 ```
 
+Repository directories follow `<project-name>-<repository-short-name>` (TECH-NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
+
 1. Put all project git repos in one shared folder (workspace root folder)
-2. Run terminal command `spex init` in workspace root to create `pepperoni-pizza/spex` repo
+2. Run terminal command `spex init` in workspace root to create the `pepperoni-pizza-spex` repo
 3. Open workspace to work across all repositories at once and integrate with AI coding agent:
-   - Cursor/VSCode: open workspace from file `spex/pepperoni-pizza.code-workspace`
+   - Cursor/VSCode: open workspace from file `pepperoni-pizza-spex/pepperoni-pizza.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-   - Claude CLI: run `claude --add-dir ../api ../frontend ..` from `spex` repo
+   - Claude CLI: run `claude --add-dir ../pepperoni-pizza-api ../pepperoni-pizza-frontend ..` from `pepperoni-pizza-spex` repo
    - Zed: add project, pick all workspace repos (folders)
 4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
 
@@ -44,10 +46,10 @@ pepperoni-pizza/         # workspace root
 Workflow core is AI agent skills and CLI commands.
 
 1. Create your first specification (spec):
-   - business spec `/spex-create-biz-spec [backend place pizza order endpoint]`. Will create `spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml`
-   - technical spec `/spex-create-tech-spec [secret handling]`. Will create `spex/tech-specs/TECH-SECRET-HANDLING.yaml`
-2. Derive the contract for a business spec `/spex-create-contract [place pizza order]`. Will add the endpoint to `spex/contracts/api.openapi.yaml`.
-3. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `spex/plans/TECH-SECRET-HANDLING/2024-11-25_secret-handling.md`
+   - business spec `/spex-create-biz-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml`
+   - technical spec `/spex-create-tech-spec [secret handling]`. Will create `pepperoni-pizza-spex/tech-specs/TECH-SECRET-HANDLING.yaml`
+2. Derive the contract for a business spec `/spex-create-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/TECH-SECRET-HANDLING/2024-11-25_secret-handling.md`
 4. Execute plan `/spex-execute-plan [secret handling]`. Will execute the `TECH-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 5. Check result with `spex check`. Will run all TECH spec checks related to your changes.
 6. See coverage `spex coverage`. Will run check if all specs have contract, implementation, and test.

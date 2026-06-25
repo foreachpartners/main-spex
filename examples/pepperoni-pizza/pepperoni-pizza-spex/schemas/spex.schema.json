@@ -35,7 +35,12 @@
       "properties": {
         "repository_name": {
           "type": "string",
-          "description": "Kebab-case name of the repository.",
+          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per TECH-NAMING-CONVENTION.",
+          "minLength": 1
+        },
+        "repository_short_name": {
+          "type": "string",
+          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in TECH-NAMING-CONVENTION.",
           "minLength": 1
         },
         "description": {
@@ -84,7 +89,7 @@
           }
         }
       },
-      "required": ["repository_name", "path"],
+      "required": ["repository_name", "repository_short_name", "path"],
       "additionalProperties": false
     },
     "contract": {
@@ -211,9 +216,10 @@
       "description": "Online ordering for a pizzeria.",
       "repositories": [
         {
-          "repository_name": "api",
+          "repository_name": "pepperoni-pizza-api",
+          "repository_short_name": "api",
           "description": "Backend service that handles orders.",
-          "path": "../api",
+          "path": "../pepperoni-pizza-api",
           "contracts": [
             {
               "path": "contracts/api.openapi.yaml",
@@ -223,9 +229,10 @@
           "tech_specs": ["TECH-SECRET-HANDLING", "TECH-NAMING-CONVENTION"]
         },
         {
-          "repository_name": "frontend",
+          "repository_name": "pepperoni-pizza-frontend",
+          "repository_short_name": "frontend",
           "description": "React web client that lets customers place orders.",
-          "path": "../frontend",
+          "path": "../pepperoni-pizza-frontend",
           "tech_specs": ["TECH-WRITING-STYLE", "TECH-NAMING-CONVENTION"],
           "checks_override": [
             {
