@@ -9,7 +9,11 @@
 # and checks their @spec / x-spec annotations against the known Spec IDs — the
 # spec files in biz-specs/ and tech-specs/. An annotation pointing at an ID with
 # no spec file is an orphan, usually a spec that was renamed or removed. Markdown
-# files are skipped.
+# files are skipped, as are the spex workspace's own spec and script files:
+# its biz-specs/ and tech-specs/ only contribute their Spec ID (the filename),
+# and its scripts/ holds framework helper code whose comments carry illustrative
+# example annotations — neither's contents are real references. Other repositories
+# are scanned in full, so an app repo's own scripts/ folder is still checked.
 #
 # Emits one finding per orphan following the script location contract:
 #   <file><TAB>orphan annotation references unknown spec `<id>`
@@ -36,15 +40,24 @@ is_known() {
 # contract's `path:` sits under a `- ` list item, so it never matches here.
 repo_paths=$(sed -n 's/^[[:space:]]*path:[[:space:]]*//p' spex.yaml)
 
+spex_dir=$(pwd -P)
+
 orphans=$(
   for repo in $repo_paths; do
     [ -d "$repo" ] || continue
+    repo_dir=$(cd "$repo" && pwd -P)
     # Only enumerate a path that is itself a git repository root.
     top=$(git -C "$repo" rev-parse --show-toplevel 2>/dev/null) || continue
-    [ "$top" = "$(cd "$repo" && pwd -P)" ] || continue
+    [ "$top" = "$repo_dir" ] || continue
 
     git -C "$repo" ls-files | while IFS= read -r rel; do
       case "$rel" in *.md) continue ;; esac
+      # The spex workspace's own spec and script files hold example annotations,
+      # not real references: biz-specs/ and tech-specs/ only contribute their
+      # Spec ID (the filename), and scripts/ is framework helper code.
+      if [ "$repo_dir" = "$spex_dir" ]; then
+        case "$rel" in biz-specs/* | tech-specs/* | scripts/*) continue ;; esac
+      fi
       file="$repo/$rel"
       [ -f "$file" ] || continue
       refs=$(grep -hE '@spec |x-spec:' "$file" 2>/dev/null | grep -oE "$id" | sort -u)
