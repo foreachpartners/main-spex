@@ -3,20 +3,15 @@ title: Derived naming convention
 include_for_all_repos: true
 readonly: true
 description: >-
-  A workspace repository owns many cross-cutting identifiers: directory, crate
-  or package name, binary, config-prefix, database, proto package, container
-  image, and telemetry service name. Deriving each one from the project name
-  plus the repository name keeps them consistent, so two engineers asked the
-  same question reach the same answer without coordinating.
+  A workspace repository owns many cross-cutting identifiers: repository directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the repository name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
 acceptance_criteria:
-  - "MUST derive every cross-cutting identifier (repository directory, crate or package name, binary, config-prefix, database, proto package, container image, telemetry service name) from the project name plus the repository name, prefixing each with the project name so a repository is globally identifiable on its own"
-  - "MUST treat the project name and repository name as literal placeholders the consumer edits once and commits, never substituted by tooling: `<project-name>`/`<project_name>`/`<PROJECT_NAME>` and `<repository-name>`/`<repository_name>`/`<REPOSITORY_NAME>` (kebab/snake/upper)"
-  - "MUST use the underscore forms (`<project_name>`, `<repository_name>`, `<PROJECT_NAME>`, `<REPOSITORY_NAME>`) for identifiers that forbid hyphens: config-prefix, database, proto package"
-  - "MUST name each repository as a single lowercase alphanumeric token, so its kebab and snake forms are identical and the repository directory stays kebab-case"
-  - "MUST keep the config-prefix free of a trailing separator and join nested config keys under it with a double underscore (`PEPPERONI_PIZZA_API__DATABASE__URL`), so the single underscores inside the prefix stay unambiguous"
-  - "MUST keep this convention the single source: consume the derived identifiers, never record one in a second place, and never add a per-repository override"
+  - "MUST derive every cross-cutting identifier from the project name plus the repository name and optional data so it's globally identifiable on its own"
+  - "MUST use conventional case and delimiter based on use case"
+  - "MUST use <project-name>-<repository-name> for repository directory, crate, binary and container image"
+  - "MUST use <project_name>_<repository_name> for db (names both the database and its user)"
+  - "MUST use <PROJECT_NAME>_<REPOSITORY_NAME>_<DATA> for config and env variables"
+  - "MUST use <project_name>.<repository_name>.<data> for proto_package"
   - "MUST extend this convention, not individual repositories, when a new cross-cutting identifier is needed"
-  - "SHOULD ignore identifiers that do not apply to a repository (a proto-only repository has no database) rather than inventing them"
 checks:
   - name: repo-dir-kebab-case
     description: Repository directory name must be kebab-case
@@ -26,28 +21,22 @@ checks:
     severity: error
 examples:
   formats: |
-    # `<project-name>` and `<repository-name>` are placeholders the consumer edits
-    # once and commits; no tool substitutes them. Each renders in kebab, snake, or
-    # upper as the slot requires. Keep the repository name a single lowercase token
-    # so the snake and proto forms stay valid. Only distinct formats are listed;
-    # examples derive project `pepperoni-pizza`, repository `api`.
+    used by:  repository directory, crate, binary, container image
+    format:   <project-name>-<repository-name>
+    example:  pepperoni-pizza-api
+    example:  pepperoni-pizza-web
 
-    used by: repo_dir, crate, package_name, binary, docker_image
-    format:  <project-name>-<repository-name>
-    example: pepperoni-pizza-api
+    used by:  db (names both the database and its user)
+    format:   <project_name>_<repository_name>
+    example:  pepperoni_pizza_api
+    example:  pepperoni_pizza_web
 
-    used by: db (names both the database and its user)
-    format:  <project_name>_<repository_name>
-    example: pepperoni_pizza_api
+    used by:  config, env variables
+    format:   <PROJECT_NAME>_<REPOSITORY_NAME>_<DATA>
+    example:  PEPPERONI_PIZZA_WEB_SERVER_PORT
+    example:  PEPPERONI_PIZZA_API_DATABASE_URL
 
-    used by: config_prefix (nested env keys join with __)
-    format:  <PROJECT_NAME>_<REPOSITORY_NAME>
-    example: PEPPERONI_PIZZA_API, e.g. PEPPERONI_PIZZA_API__DATABASE__URL
-
-    used by: proto_package
-    format:  <project_name>.services.<repository_name>.v1
-    example: pepperoni_pizza.services.api.v1
-
-    used by: telemetry_service_name
-    format:  <repository-name>-service
-    example: api-service
+    used by:  proto_package
+    format:   <project_name>.<repository_name>.<data>
+    example:  pepperoni_pizza.api.v1
+    example:  pepperoni_pizza.web.v1
