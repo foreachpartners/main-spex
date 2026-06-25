@@ -5,8 +5,9 @@ title: Writing style
 description: >-
   Specs, code and documentation are read by both engineers and AI agents. Direct,
   imperative prose with explicit commitment levels and no filler keeps rules
-  unambiguous and machine-actionable.
+  unambiguous and machine-actionable. Code should be self-explanatory without unnesesary comments.
 acceptance_criteria:
+  - "MUST write self-explanatory code with unnesesary comments"
   - "MUST use imperative, directive language: 'Load ENV at startup.' not 'First, we''ll load ENV...'"
   - "MUST prioritize clarity over brevity; brevity over all else"
   - "MUST use RFC 2119 for commitment level - MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited, SHOULD NOT for discouraged"
