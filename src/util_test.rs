@@ -33,6 +33,20 @@ mod tests {
     }
 
     #[test]
+    fn skips_dependency_lock_files() {
+        let dir = tempdir().expect("temp dir");
+        std::fs::write(dir.path().join("Cargo.lock"), "").expect("cargo lock");
+        std::fs::write(dir.path().join("package-lock.json"), "").expect("npm lock");
+        std::fs::write(dir.path().join("Cargo.toml"), "").expect("cargo manifest");
+
+        let files = walked_files(dir.path());
+
+        assert!(files.contains(&PathBuf::from("Cargo.toml")));
+        assert!(!files.contains(&PathBuf::from("Cargo.lock")));
+        assert!(!files.contains(&PathBuf::from("package-lock.json")));
+    }
+
+    #[test]
     fn surfaces_dotfiles_and_skips_git_directory() {
         let dir = tempdir().expect("temp dir");
         std::fs::create_dir_all(dir.path().join(".git")).expect("git dir");

@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 
@@ -17,8 +18,27 @@ pub fn plural(count: usize, noun: &str) -> String {
     }
 }
 
+// Dependency lock files are generated artifacts: never spec-annotated and
+// irrelevant to checks, so the walker skips them in every repository.
+const LOCK_FILES: &[&str] = &[
+    "Cargo.lock",
+    "Gemfile.lock",
+    "Pipfile.lock",
+    "bun.lock",
+    "bun.lockb",
+    "composer.lock",
+    "flake.lock",
+    "go.sum",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "poetry.lock",
+    "uv.lock",
+    "yarn.lock",
+];
+
 // Walks a workspace repository's files, honoring gitignore rules while still
-// surfacing dotfiles (e.g. `.env`) and always skipping the `.git` directory.
+// surfacing dotfiles (e.g. `.env`) and always skipping the `.git` directory and
+// well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
 // `require_git(false)` keeps gitignore rules in effect even when the repository
 // has no `.git` directory; otherwise the `ignore` crate silently ignores them.
 pub fn repo_walker(root: &Path) -> Walk {
@@ -27,8 +47,12 @@ pub fn repo_walker(root: &Path) -> Walk {
         .git_ignore(true)
         .git_global(true)
         .require_git(false)
-        .filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"))
+        .filter_entry(|entry| !is_skipped(entry.file_name()))
         .build()
+}
+
+fn is_skipped(name: &OsStr) -> bool {
+    name == OsStr::new(".git") || LOCK_FILES.iter().any(|lock| name == OsStr::new(lock))
 }
 
 // Parses every `*.yaml` file in `dir` into `T`. Missing directories yield an

@@ -95,7 +95,7 @@ Runs each repository's TECH-spec checks and gates on errors.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
 - `--files <path>...` limits the run to given files; a `per-repo` script then runs only in the repositories that own a listed file, unioned with any `--repo` named, while a `workspace` script always runs once.
-- Skips files ignored by `.gitignore`.
+- Skips files ignored by `.gitignore`, plus well-known generated files (e.g. `Cargo.lock`, `package-lock.json`).
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
 - `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
 
