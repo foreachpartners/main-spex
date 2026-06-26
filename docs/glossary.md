@@ -53,7 +53,7 @@
             description: Order created
   ```
 
-- **Plan** — derived from one or more approved business specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>_<slug>.md`.
+- **Plan** — derived from one or more approved business specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`.
 
   ```md
   # Plan: Customer can place an order

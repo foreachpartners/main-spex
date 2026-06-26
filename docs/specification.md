@@ -180,7 +180,7 @@ Splits approved specs into an ordered, parallel-safe plan.
 - Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
 - Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-biz-spec` first.
 - Requires the contract to be settled with `spex-create-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
-- Writes `plans/<spec-id>/<date>_<slug>.md` with a status on every step and task.
+- Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
 ## spex-execute-plan
 

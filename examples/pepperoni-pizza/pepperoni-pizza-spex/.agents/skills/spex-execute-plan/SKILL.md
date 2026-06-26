@@ -26,7 +26,7 @@ Determine which plan to execute before doing anything else:
 
 ## Step 1 — Read the plan and its context
 
-Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>_<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
+Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Tech-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
 
 Then read enough context to execute faithfully:
 
