@@ -12,9 +12,10 @@
 # offending commit subject.
 set -eu
 
+# Not a git repository means there is no history to verify, so skip and report
+# ok rather than warn — a non-git directory is simply out of scope here.
 if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
-  echo "Not a git repository — cannot verify commit message format"
-  exit 1
+  exit 0
 fi
 
 # Keep in sync with schemas/biz-spec-id.schema.json and schemas/tech-spec-id.schema.json

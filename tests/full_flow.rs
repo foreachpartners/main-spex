@@ -7,44 +7,27 @@ use tempfile::tempdir;
 
 // Snapshot of `spex check` for a freshly initialized copy of the
 // `pepperoni-pizza-no-spex` example. The findings are intentional: the example
-// ships demo violations and the workspace is not a git repository, so the
-// commit-format checks warn. The trailing `workspace` section reports the
-// workspace-scoped checks that run once across every repository. Update this
-// when the example or bundled templates change.
+// ships demo violations.
 const EXPECTED_CHECK_REPORT: &str = r#"proj-api
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
   warn  TECH-SECRET-HANDLING/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
-  0 errors, 3 warnings
+  0 errors, 1 warning
 
 proj-frontend
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
   error  TECH-WRITING-STYLE/no-cyrillic  (README.md:1)
       Requirements and documentation must be in English
-  1 error, 2 warnings
+  1 error, 0 warnings
 
 proj-spex
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
-  0 errors, 2 warnings
+  no issues
 
 workspace
   no issues
 
-proj: 1 error, 7 warnings
+proj: 1 error, 1 warning
 "#;
 
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.
-// `init` does not scaffold any business specs, so coverage reports the empty
-// project and exits successfully.
 const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
 
 Business specs (0)
@@ -57,37 +40,22 @@ proj: no gaps
 "#;
 
 // Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
-// example. Like the no-spex run the workspace is not a git repository, so the
-// commit-format checks warn; the example also ships a demo writing-style
-// violation in its `spex` tutorial notes. No errors are present, so check
-// succeeds.
+// example
 const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"pepperoni-pizza-api
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
-  0 errors, 2 warnings
+  no issues
 
 pepperoni-pizza-frontend
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
-  0 errors, 2 warnings
+  no issues
 
 pepperoni-pizza-spex
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-conventional-format
-      Not a git repository — cannot verify commit message format
-  warn  TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace
-      Not a git repository — cannot verify commit message format
   warn  TECH-WRITING-STYLE/writing  (tutorial-completion.md:46)
       matches forbidden writing pattern
-  0 errors, 3 warnings
+  0 errors, 1 warning
 
 workspace
   no issues
 
-pepperoni-pizza: 0 errors, 7 warnings
+pepperoni-pizza: 0 errors, 1 warning
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
