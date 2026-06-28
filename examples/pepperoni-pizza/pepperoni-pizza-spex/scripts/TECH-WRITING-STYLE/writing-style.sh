@@ -11,7 +11,7 @@ set -u
 
 [ "$#" -eq 0 ] && exit 0
 
-words='\b(maybe|perhaps|I think|basically|essentially|actually|sorry|unfortunately|elegant|beautiful|clean)\b'
+words='\b(maybe|perhaps|I think|basically|essentially|actually|sorry|unfortunately|elegant|beautiful)\b'
 exclamations='(Great job|Perfect|Excellent)!'
 checkins='(Make sense|Got it)\?'
 pattern="${words}|${exclamations}|${checkins}"

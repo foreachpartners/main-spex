@@ -48,14 +48,12 @@ pepperoni-pizza-frontend
   no issues
 
 pepperoni-pizza-spex
-  warn  TECH-WRITING-STYLE/writing  (tutorial-completion.md:46)
-      matches forbidden writing pattern
-  0 errors, 1 warning
+  no issues
 
 workspace
   no issues
 
-pepperoni-pizza: 0 errors, 1 warning
+pepperoni-pizza: 0 errors, 0 warnings
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single

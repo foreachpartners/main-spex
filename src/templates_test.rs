@@ -62,6 +62,50 @@ mod tests_unit {
     }
 
     #[test]
+    fn ensure_agents_md_seeds_file_and_claude_link() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        ensure_agents_md(spex_dir.path()).expect("ensure agents md");
+
+        let agents = spex_dir.path().join(AGENTS_FILE);
+        let expected = TEMPLATES
+            .get_file(AGENTS_FILE)
+            .expect("bundled AGENTS.md")
+            .contents();
+        assert_eq!(fs::read(&agents).expect("read AGENTS.md"), expected);
+
+        #[cfg(unix)]
+        {
+            let claude = spex_dir.path().join(CLAUDE_FILE);
+            let target = fs::read_link(&claude).expect("read CLAUDE.md symlink");
+            assert_eq!(target, Path::new(AGENTS_FILE));
+        }
+    }
+
+    #[test]
+    fn ensure_agents_md_preserves_user_edits() {
+        let spex_dir = tempdir().expect("create spex dir");
+        let agents = spex_dir.path().join(AGENTS_FILE);
+        fs::write(&agents, "custom").expect("seed user AGENTS.md");
+
+        ensure_agents_md(spex_dir.path()).expect("ensure agents md");
+
+        assert_eq!(fs::read_to_string(&agents).unwrap(), "custom");
+    }
+
+    #[test]
+    fn scaffold_leaves_agents_md_untouched() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        scaffold(spex_dir.path()).expect("scaffold");
+
+        assert!(
+            !spex_dir.path().join(AGENTS_FILE).exists(),
+            "scaffold (update) must not create AGENTS.md"
+        );
+    }
+
+    #[test]
     fn scaffold_replaces_managed_skill_removing_stale_files() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path()).expect("scaffold");

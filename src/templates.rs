@@ -17,6 +17,8 @@ pub const SCHEMAS_DIR: &str = "schemas";
 pub const SKILLS_DIR: &str = "skills";
 pub const AGENTS_DIR_NAME: &str = ".agents";
 pub const CLAUDE_DIR_NAME: &str = ".claude";
+pub const AGENTS_FILE: &str = "AGENTS.md";
+pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
@@ -32,6 +34,21 @@ pub enum TemplateError {
 
 pub fn tech_specs_dir() -> Option<&'static Dir<'static>> {
     TEMPLATES.get_dir(TECH_SPECS_DIR)
+}
+
+// Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
+// `init`. It is a user-owned file, so neither this nor `update` overwrites an
+// existing one.
+pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
+    let agents = spex_dir.join(AGENTS_FILE);
+    if !agents.exists()
+        && let Some(file) = TEMPLATES.get_file(AGENTS_FILE)
+    {
+        fs::write(&agents, file.contents())
+            .change_context(TemplateError::Io)
+            .attach_with(|| format!("could not write `{}`", agents.display()))?;
+    }
+    ensure_claude_md_link(spex_dir)
 }
 
 // Writes every bundled template into the spex repo, overwriting managed files
@@ -120,6 +137,25 @@ fn ensure_claude_link(spex_dir: &Path) -> Result<()> {
 
 #[cfg(not(unix))]
 fn ensure_claude_link(_spex_dir: &Path) -> Result<()> {
+    Ok(())
+}
+
+#[cfg(unix)]
+fn ensure_claude_md_link(spex_dir: &Path) -> Result<()> {
+    use std::os::unix::fs::symlink;
+
+    let link = spex_dir.join(CLAUDE_FILE);
+    if link.symlink_metadata().is_ok() {
+        return Ok(());
+    }
+
+    symlink(AGENTS_FILE, &link)
+        .change_context(TemplateError::Io)
+        .attach_with(|| format!("could not link `{}` to `{}`", link.display(), AGENTS_FILE))
+}
+
+#[cfg(not(unix))]
+fn ensure_claude_md_link(_spex_dir: &Path) -> Result<()> {
     Ok(())
 }
 

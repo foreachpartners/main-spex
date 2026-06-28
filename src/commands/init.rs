@@ -92,6 +92,7 @@ pub fn run() -> Result<ExitCode> {
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir).change_context(InitError::Io)?;
+    templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
 
     let biz_specs = spex_dir.join(BIZ_SPECS_DIR);
     fs::create_dir_all(&biz_specs)

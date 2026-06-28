@@ -75,6 +75,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `tech-specs/`, and skills.
 - Creates empty `biz-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
+- Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
 - Adds each default tech-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
 - Directs the user to finish setup by running the `/spex-setup` skill.
 
