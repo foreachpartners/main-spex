@@ -7,11 +7,11 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::biz_spec::{self, BizSpec};
+use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
+use crate::engineering_spec::{self, Check, CheckKind, EngineeringSpec, RunScope, Severity};
 use crate::spec::{self, Status};
 use crate::style::{Log, Style};
-use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
 
@@ -90,9 +90,7 @@ struct RepoReport {
 pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
-    let specs = workspace
-        .tech_specs()
-        .change_context(CheckError::Workspace)?;
+    let specs = workspace.es_specs().change_context(CheckError::Workspace)?;
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -392,7 +390,7 @@ fn repo_matches(repo: &Repository, name: &str) -> bool {
 fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
-    specs: &HashMap<String, TechSpec>,
+    specs: &HashMap<String, EngineeringSpec>,
     files: &[String],
     log: &Log,
     findings: &mut Vec<Finding>,
@@ -432,13 +430,13 @@ fn check_repo(
     // Inherited checks identified by `(spec_id, name)`, used to resolve overrides.
     let mut inherited: HashMap<(&str, &str), &Check> = HashMap::new();
 
-    for spec_id in &repo.tech_specs {
+    for spec_id in &repo.es_specs {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(repo_error(
                 spec_id,
                 format!(
-                    "tech spec `{spec_id}` not found in {}/",
-                    tech_spec::TECH_SPECS_DIR
+                    "engineering spec `{spec_id}` not found in {}/",
+                    engineering_spec::ENGINEERING_SPECS_DIR
                 ),
             ));
             continue;
@@ -474,11 +472,11 @@ fn check_repo(
     }
 
     for additional in &repo.checks_additional {
-        if !repo.tech_specs.iter().any(|spec| spec == &additional.spec) {
+        if !repo.es_specs.iter().any(|spec| spec == &additional.spec) {
             findings.push(repo_error(
                 &repo.name,
                 format!(
-                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's tech_specs",
+                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's es_specs",
                     additional.spec, additional.check.name, additional.spec
                 ),
             ));
@@ -610,7 +608,7 @@ fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
 // Runs only when the spex repository is in scope.
 fn validate_specs(
     workspace: &Workspace,
-    tech_specs: &HashMap<String, TechSpec>,
+    es_specs: &HashMap<String, EngineeringSpec>,
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
@@ -627,25 +625,23 @@ fn validate_specs(
         return Ok(());
     };
 
-    let biz_specs = workspace
-        .biz_specs()
-        .change_context(CheckError::Workspace)?;
+    let cs_specs = workspace.cs_specs().change_context(CheckError::Workspace)?;
 
-    let mut tech_sorted: Vec<&TechSpec> = tech_specs.values().collect();
+    let mut tech_sorted: Vec<&EngineeringSpec> = es_specs.values().collect();
     tech_sorted.sort_by(|a, b| a.id.cmp(&b.id));
 
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
-    for spec in &biz_specs {
+    for spec in &cs_specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
     for spec in &tech_sorted {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
 
-    for spec in &biz_specs {
+    for spec in &cs_specs {
         if let Some(finding) = status_finding(
             &spec.id,
-            biz_spec::BIZ_SPECS_DIR,
+            capability_spec::CAPABILITY_SPECS_DIR,
             &spec.acceptance_criteria,
             spec.status,
         ) {
@@ -655,7 +651,7 @@ fn validate_specs(
     for spec in &tech_sorted {
         if let Some(finding) = status_finding(
             &spec.id,
-            tech_spec::TECH_SPECS_DIR,
+            engineering_spec::ENGINEERING_SPECS_DIR,
             &spec.acceptance_criteria,
             spec.status,
         ) {
@@ -663,7 +659,7 @@ fn validate_specs(
         }
     }
 
-    for spec in &biz_specs {
+    for spec in &cs_specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
 
@@ -690,12 +686,16 @@ fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> O
 }
 
 fn validate_blocked_by(
-    spec: &BizSpec,
+    spec: &CapabilitySpec,
     status_by_id: &HashMap<&str, Status>,
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
-        let location = Some(format!("{}/{}.yaml", biz_spec::BIZ_SPECS_DIR, spec.id));
+        let location = Some(format!(
+            "{}/{}.yaml",
+            capability_spec::CAPABILITY_SPECS_DIR,
+            spec.id
+        ));
         match status_by_id.get(blocker.as_str()) {
             None => findings.push(Finding {
                 severity: Severity::Error,

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/cs-spec-id.schema.json",
+  "title": "Capability Spec ID",
+  "description": "Capability spec ID with fixed CS- prefix. Only uppercase English letters and hyphens. Max 40 characters. The name should convey the spec's contents so it can be understood without opening the spec.",
+  "type": "string",
+  "pattern": "^CS-[A-Z]+(-[A-Z]+)*$",
+  "maxLength": 40,
+  "examples": ["CS-PLACE-PIZZA-ORDER"]
+}

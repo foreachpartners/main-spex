@@ -6,7 +6,7 @@ use error_stack::{Report, ResultExt};
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::tech_spec::{CheckOverride, RepoCheck};
+use crate::engineering_spec::{CheckOverride, RepoCheck};
 
 #[cfg(test)]
 #[path = "config_test.rs"]
@@ -48,7 +48,7 @@ pub struct Repository {
     #[serde(default)]
     pub contracts: Vec<Contract>,
     #[serde(default)]
-    pub tech_specs: Vec<String>,
+    pub es_specs: Vec<String>,
     #[serde(default)]
     pub checks_additional: Vec<RepoCheck>,
     #[serde(default)]

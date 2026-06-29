@@ -2,7 +2,7 @@
 
 A hands-on walkthrough from a plain multi-repo project to a spec-driven one. You
 install the CLI, set up a spex workspace on the `pepperoni-pizza` example, fix
-check and coverage findings, and run the business and technical spec workflows
+check and coverage findings, and run the capability and engineering spec workflows
 end to end.
 
 By the end you will have recreated a project similar to `examples/pepperoni-pizza` from the
@@ -18,7 +18,7 @@ Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
 `api` and `frontend` repositories side by side.
 
-## Step 2.1 — Rename folders to follow TECH-NAMING-CONVENTION
+## Step 2.1 — Rename folders to follow ES-NAMING-CONVENTION
 
 Repository directory naming is <project-name>-<repository-short-name>
 
@@ -47,21 +47,21 @@ Run your first skill `/spex-setup` in AI chat window to complete setup.
 Run `spex check` in terminal from anywhere in the workspace and work
 through the findings until it exits cleanly.
 
-## Step 5 — Business spec workflow
+## Step 5 — Capability spec workflow
 
 Drive a real feature from PRD to verified code. Start with the PRD-level
 statement of what the product should do:
 
 > show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 
-### 5.1 Create the business spec
+### 5.1 Create the capability spec
 
 There is no person who requested this feature with whom you can clarify details, so decide yourself how it should behave for the tutorial.
 
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
-/spex-create-biz-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
+/spex-create-capability-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one capability, then writes a schema-valid spec per capability. A spec captures one capability, not one repository. Review the spec and confirm its `status` is `planned`.
@@ -82,7 +82,7 @@ The agent reads the spec, `api` OpenAPI contract and updates it to match changes
 
 The agent reads the spec, contract, code and proposes an implementation plan.
 
-Tip: you can combine skills in the future `/spex-create-biz-spec /spex-create-contract /spex-create-plan`
+Tip: you can combine skills in the future `/spex-create-capability-spec /spex-create-contract /spex-create-plan`
 
 ### 5.4 Execute
 
@@ -101,22 +101,22 @@ spex coverage
 
 Coverage should now show your new spec as `✓`.
 
-## Step 6 — Technical spec workflow
+## Step 6 — Engineering spec workflow
 
-Technical specs capture cross-cutting conventions that apply repo-wide. Create one
+Engineering specs capture cross-cutting conventions that apply repo-wide. Create one
 for the API:
 
 ```text
-/spex-create-tech-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
+/spex-create-engineering-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
 ```
 
 The skill interviews you, proposes a `regexp` check that flags binding to a
 hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
-`pepperoni-pizza-spex/tech-specs/TECH-*.yaml`. Make sure the new spec is in the `api` repository's
-`tech_specs` list in `spex.yaml` so the check runs against it.
+`pepperoni-pizza-spex/es-specs/ES-*.yaml`. Make sure the new spec is in the `api` repository's
+`es_specs` list in `spex.yaml` so the check runs against it.
 
 Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
-small change or create a plan if compliance with new tech spec requires many changes.
+small change or create a plan if compliance with the new engineering spec requires many changes.
 
 ## Step 7 — Generate a completion report
 
@@ -127,8 +127,8 @@ Create a new file `pepperoni-pizza-spex/tutorial-completion.md` that documents t
 
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.
-3. Rate created biz spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
-3. Rate created tech spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
+3. Rate created capability spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
+3. Rate created engineering spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
 ```
 
 Review and commit it.

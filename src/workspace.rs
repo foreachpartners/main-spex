@@ -4,10 +4,10 @@ use std::path::PathBuf;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::biz_spec::{self, BizSpec};
+use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config};
+use crate::engineering_spec::{self, EngineeringSpec};
 use crate::style::Style;
-use crate::tech_spec::{self, TechSpec};
 
 type Result<T> = core::result::Result<T, Report<WorkspaceError>>;
 
@@ -17,10 +17,10 @@ pub enum WorkspaceError {
     CurrentDir,
     #[error("could not load spex configuration")]
     Config,
-    #[error("could not load tech specs")]
-    TechSpecs,
-    #[error("could not load business specs")]
-    BizSpecs,
+    #[error("could not load engineering specs")]
+    EngineeringSpecs,
+    #[error("could not load capability specs")]
+    CapabilitySpecs,
 }
 
 // A resolved spex workspace: the spex directory plus its parsed configuration.
@@ -43,13 +43,13 @@ impl Workspace {
         Ok(Self { dir, config })
     }
 
-    pub fn tech_specs(&self) -> Result<HashMap<String, TechSpec>> {
-        tech_spec::load_all(&self.dir.join(tech_spec::TECH_SPECS_DIR))
-            .change_context(WorkspaceError::TechSpecs)
+    pub fn es_specs(&self) -> Result<HashMap<String, EngineeringSpec>> {
+        engineering_spec::load_all(&self.dir.join(engineering_spec::ENGINEERING_SPECS_DIR))
+            .change_context(WorkspaceError::EngineeringSpecs)
     }
 
-    pub fn biz_specs(&self) -> Result<Vec<BizSpec>> {
-        biz_spec::load_all(&self.dir.join(biz_spec::BIZ_SPECS_DIR))
-            .change_context(WorkspaceError::BizSpecs)
+    pub fn cs_specs(&self) -> Result<Vec<CapabilitySpec>> {
+        capability_spec::load_all(&self.dir.join(capability_spec::CAPABILITY_SPECS_DIR))
+            .change_context(WorkspaceError::CapabilitySpecs)
     }
 }

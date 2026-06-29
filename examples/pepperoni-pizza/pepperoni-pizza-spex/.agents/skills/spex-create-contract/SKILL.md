@@ -1,11 +1,11 @@
 ---
 name: spex-create-contract
-description: Derive the machine-readable interface contract from one or more business specs. Use when the user wants to author, draft, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a BIZ spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
+description: Derive the machine-readable interface contract from one or more capability specs. Use when the user wants to author, draft, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
 ---
 
 # Create an Interface Contract
 
-A contract is the machine-readable _interface_ derived from a business spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the machine-readable _interface_ derived from a capability spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 Match the format and prose style of the existing contracts and write the result into the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder.
 
@@ -17,7 +17,7 @@ Each repository's contracts live in the `spex` repository's `<workspace-root>/<p
 
 ## When to use this skill
 
-Use it when the user wants to create, draft, or update the contract for one or more BIZ specs — either named (for example `BIZ-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-biz-spec`) or to plan implementation (use `spex-create-plan`). The spec must exist and be approved before its contract is drafted. A TECH spec has no contract; do not use this skill for one.
+Use it when the user wants to create, draft, or update the contract for one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-capability-spec`) or to plan implementation (use `spex-create-plan`). The spec must exist and be approved before its contract is drafted. An ES spec has no contract; do not use this skill for one.
 
 ## Step 0 — Establish the target specs
 
@@ -27,11 +27,11 @@ Determine which specs to contract before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, contract that one and confirm the ID.
 - If no spec is identified, ask which to contract. Do not invent a spec.
 
-Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not contract a spec that has not been written and approved.
+Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-capability-spec`, then return here. Do not contract a spec that has not been written and approved.
 
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 
@@ -39,7 +39,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/<project-name>-spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
-- For each affected repository, read its `tech_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/tech-specs/` — at minimum `TECH-OPENAPI-CONVENTIONS` (for OpenAPI) and `TECH-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, read its `es_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/es-specs/` — at minimum `ES-OPENAPI-CONVENTIONS` (for OpenAPI) and `ES-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -51,11 +51,11 @@ Map each acceptance criterion that crosses a boundary to the interface element t
 
 ## Step 4 — Draft the contract changes
 
-Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `TECH-OPENAPI-CONVENTIONS`:
+Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `ES-OPENAPI-CONVENTIONS`:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec per `TECH-SPEC-ID-ANNOTATIONS` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
+- Annotate each operation with its spec per `ES-SPEC-ID-ANNOTATIONS` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 Keep the change minimal and consistent with the surrounding document.

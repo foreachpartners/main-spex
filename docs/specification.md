@@ -12,9 +12,9 @@ field rules.
 Turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-- Flow runs BRD (why) → PRD (what) → business spec (how it behaves) → contract (interface) → plan (how to build it) → implementation (code) → test (proof).
-- A BIZ Spec ID names a spec and links the contract, code, and tests that satisfy it.
-- A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a business spec.
+- Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface) → plan (how to build it) → implementation (code) → test (proof).
+- A capability Spec ID (`CS`) names a spec and links the contract, code, and tests that satisfy it.
+- A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a capability spec.
 - A contract is required wherever a machine-readable interface applies — a REST API must have an OpenAPI contract — and is optional otherwise, so a frontend spec may not have a contract.
 - A plan turns approved specs into ordered steps of parallel-safe tasks that agents execute.
 - A plan helps with large changes and is optional for small, self-contained ones.
@@ -23,12 +23,12 @@ traceable by a shared Spec ID.
 
 ## Spec kinds
 
-Two kinds of spec capture two kinds of requirement: product behavior and
-cross-cutting convention.
+Two kinds of spec capture two kinds of requirement: a capability the system
+provides and a cross-cutting convention.
 
-- A business spec (BIZ) captures one coherent product capability or behavior, with its individual rules in the acceptance criteria.
-- A technical spec (TECH) captures one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
-- A technical spec applies repo-wide, not per feature.
+- A capability spec (CS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules in the acceptance criteria.
+- An engineering spec (ES) captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
+- An engineering spec applies repo-wide, not per feature. The test: a specific capability the system provides → CS; a rule every change must follow, enforceable repo-wide → ES.
 
 # Workspace
 
@@ -36,10 +36,10 @@ cross-cutting convention.
 
 A project spans several workspace repositories under one workspace root folder.
 
-- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per TECH-NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
+- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per ES-NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
 - The spex repository (`<project-name>-spex`) holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
 - spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
-- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, product behavior only in its business spec, a convention only in its technical spec.
+- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its capability spec, a convention only in its engineering spec.
 - Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
 - Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
@@ -48,7 +48,7 @@ A project spans several workspace repositories under one workspace root folder.
 
 Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
-- The Spec ID (BIZ, TECH) is the unit of traceability; every behavioral change traces to one, with no orphans.
+- The Spec ID (CS, ES) is the unit of traceability; every behavioral change traces to one, with no orphans.
 - Traceability is bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
@@ -72,26 +72,26 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Prompts to confirm the discovered workspace repositories, deriving each `repository_short_name` from its directory name minus the `<project-name>-` prefix.
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
-- Scaffolds the bundled templates: `schemas/`, `scripts/`, `tech-specs/`, and skills.
-- Creates empty `biz-specs/`, `plans/`, and `contracts/` folders.
+- Scaffolds the bundled templates: `schemas/`, `scripts/`, `es-specs/`, and skills.
+- Creates empty `cs-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
-- Adds each default tech-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
+- Adds each default es-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
 - Directs the user to finish setup by running the `/spex-setup` skill.
 
 ## update
 
 Refreshes the managed framework files from the installed binary.
 
-- Rewrites the bundled skills, schemas, scripts, and tech-specs with the versions in the installed binary.
+- Rewrites the bundled skills, schemas, scripts, and es-specs with the versions in the installed binary.
 - Overwrites managed files only; leaves specs, plans, and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
 ## check
 
-Runs each repository's TECH-spec checks and gates on errors.
+Runs each repository's engineering-spec checks and gates on errors.
 
-- Runs the TECH-spec checks each repository lists in its `tech_specs`, reporting findings per repository.
+- Runs the engineering-spec checks each repository lists in its `es_specs`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
@@ -103,9 +103,9 @@ Runs each repository's TECH-spec checks and gates on errors.
 
 ## coverage
 
-Reports annotation coverage for business specs.
+Reports annotation coverage for capability specs.
 
-- Reports annotation coverage for every business spec whose `status` is `active`.
+- Reports annotation coverage for every capability spec whose `status` is `active`.
 - Requires an implementation, test, and contract annotation per active spec; a single one anywhere in any repository counts.
 - Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
@@ -120,15 +120,15 @@ Validates JSON or YAML files against a JSON Schema.
 - Validates JSON or YAML files against a JSON Schema, resolving cross-file `$ref`s offline.
 - Requires `--schema` and `--files`.
 - Exits non-zero when any file fails.
-- Used by `TECH-SPEX-CONFORMANCE` to keep spex's own spec files valid.
+- Used by `ES-SPEX-CONFORMANCE` to keep spex's own spec files valid.
 
 ## spec-context
 
 Prints the combined context of the named specs as Markdown for an AI agent.
 
-- Takes one or more spec IDs, each a BIZ or TECH spec.
-- For every ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; TECH specs also emit their `examples`.
-- Resolves each ID against the business specs first, then the technical specs.
+- Takes one or more spec IDs, each a CS or ES spec.
+- For every ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; ES specs also emit their `examples`.
+- Resolves each ID against the capability specs first, then the engineering specs.
 - Prints one section per ID, in the order requested, to stdout.
 - Exits non-zero when any ID matches no spec.
 - Used by `spex-execute-plan` to load the governing specs in one call.
@@ -137,7 +137,7 @@ Prints the combined context of the named specs as Markdown for an AI agent.
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
 
-- A skill is triggered by name (for example `/spex-create-biz-spec`) or loaded on demand by the AI agent.
+- A skill is triggered by name (for example `/spex-create-capability-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
@@ -151,36 +151,36 @@ Fills in the descriptions and icons left blank by `spex init` and collects each 
 - Records each copied contract under its repository's `contracts` in `spex.yaml`.
 - Is run right after `spex init`.
 
-## spex-create-biz-spec
+## spex-create-capability-spec
 
-Turns a product need into schema-valid business specs.
+Turns a product need into schema-valid capability specs.
 
-- Turns a PRD into one or more schema-valid business specs `biz-specs/<spec-id>.yaml`.
+- Turns a PRD into one or more schema-valid capability specs `cs-specs/<spec-id>.yaml`.
 
-## spex-create-tech-spec
+## spex-create-engineering-spec
 
-Turns a convention into a schema-valid technical spec with checks.
+Turns a convention into a schema-valid engineering spec with checks.
 
-- Turns a convention into one schema-valid technical spec.
+- Turns a convention into one schema-valid engineering spec.
 - Proposes the automated checks that verify it.
-- Writes `tech-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
+- Writes `es-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
 
 ## spex-create-contract
 
-Derives the machine-readable interface contract from approved business specs.
+Derives the machine-readable interface contract from approved capability specs.
 
 - Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
 - Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-biz-spec` first.
-- Runs after `spex-create-biz-spec` and before `spex-create-plan`.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-capability-spec` first.
+- Runs after `spex-create-capability-spec` and before `spex-create-plan`.
 
 ## spex-create-plan
 
 Splits approved specs into an ordered, parallel-safe plan.
 
-- Reads the target specs, the affected repositories, and the governing tech-specs, then inspects the current code.
+- Reads the target specs, the affected repositories, and the governing es-specs, then inspects the current code.
 - Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-biz-spec` first.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-capability-spec` first.
 - Requires the contract to be settled with `spex-create-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
 - Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
@@ -191,28 +191,28 @@ Executes a plan step by step and checks the result.
 - Works through a plan step by step: runs each step's tasks as parallel agents, and waits between steps.
 - Marks each task and step `completed` as it lands, so an interrupted run resumes from the first incomplete step.
 - Runs `spex check` on the affected repositories and fixes `error` findings.
-- Sets each implemented business spec's `status` to `active` once the steps pass, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
+- Sets each implemented capability spec's `status` to `active` once the steps pass, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
 
 # Specs
 
-## Business spec (BIZ)
+## Capability spec (CS)
 
-One coherent product capability or behavior.
+One coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules.
 
 - Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`.
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
-- `blocked_by` lists BIZ or TECH specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
+- `blocked_by` lists CS or ES specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
-## Technical spec (TECH)
+## Engineering spec (ES)
 
-One coherent cross-cutting convention.
+One coherent cross-cutting convention or rule.
 
 - Has `id`, `title`, `description`, `acceptance_criteria`, and optional `status`, `checks`, `examples`.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — like a business spec's.
+- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — like a capability spec's.
 - `include_for_all_repos` adds it to every repository at init.
 - `include_for_spex` overrides `include_for_all_repos` for the spex repository.
 - `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`. Such specs are global rules every including repository must fully follow; they are marked implemented by default — criteria `[x]`, `status` `active` — for simplicity, since a read-only spec cannot be edited locally.
@@ -228,7 +228,7 @@ A check proves an acceptance criterion.
 - `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
-- A repository inherits a spec's checks through `tech_specs`; `checks_override` patches one, `checks_additional` adds one.
+- A repository inherits a spec's checks through `es_specs`; `checks_override` patches one, `checks_additional` adds one.
 - `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<spec-id>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
@@ -240,7 +240,7 @@ A check proves an acceptance criterion.
 Annotations link a contract, implementation, or test to its spec.
 
 - Link a contract, implementation, or test to its spec at the layer boundary.
-- Business spec traceability is required and enforced by `spex coverage`; technical spec traceability is optional.
+- Capability spec traceability is required and enforced by `spex coverage`; engineering spec traceability is optional.
 - Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
 - Annotate once at the boundary, never nested.
 - Never reference a Spec ID with no spec file.
@@ -252,7 +252,7 @@ Annotations link a contract, implementation, or test to its spec.
 Declares the project and its repositories.
 
 - Declares `project_name`, `cli_version`, an optional `description`, and the `repositories` list.
-- Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `tech_specs`.
+- Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `es_specs`.
 - `--repo` accepts either a repository's full name or its short name.
 - Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
 - Each repository may add per-repo `checks_override`, `checks_additional`, and `checks_preexisting_errors`.

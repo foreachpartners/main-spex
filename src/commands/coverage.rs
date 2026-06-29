@@ -7,7 +7,7 @@ use error_stack::{Report, ResultExt};
 use regex::Regex;
 use thiserror::Error;
 
-use crate::biz_spec::{BizSpec, CoverageLayer, Status};
+use crate::capability_spec::{CapabilitySpec, CoverageLayer, Status};
 use crate::config::Config;
 use crate::style::Style;
 use crate::util::{self, plural};
@@ -72,7 +72,7 @@ impl SpecRow {
 pub fn run() -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
     let specs = workspace
-        .biz_specs()
+        .cs_specs()
         .change_context(CoverageError::Workspace)?;
 
     let found = scan_workspace(&workspace.dir, &workspace.config)?;
@@ -131,7 +131,7 @@ struct Scanner {
 
 impl Scanner {
     fn new() -> Self {
-        let id = r"(?:BIZ|TECH)-[A-Z]+(?:-[A-Z]+)*";
+        let id = r"(?:CS|ES)-[A-Z]+(?:-[A-Z]+)*";
         Self {
             spec: Regex::new(&format!(
                 r"@spec\s+(contract|impl|test)\s+({id}(?:\s*,\s*{id})*)"
@@ -171,7 +171,7 @@ fn canonical(path: &Path) -> std::path::PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
-fn active_rows(specs: &[BizSpec], found: &Found) -> Vec<SpecRow> {
+fn active_rows(specs: &[CapabilitySpec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
         .filter(|spec| spec.status == Status::Active)
@@ -203,7 +203,7 @@ fn missing_summary(row: &SpecRow) -> String {
         .join(", ")
 }
 
-fn report(config: &Config, specs: &[BizSpec], found: &Found) -> ExitCode {
+fn report(config: &Config, specs: &[CapabilitySpec], found: &Found) -> ExitCode {
     let style = Style::detect();
 
     println!(
@@ -232,10 +232,10 @@ fn report(config: &Config, specs: &[BizSpec], found: &Found) -> ExitCode {
     }
 }
 
-fn print_status_totals(style: &Style, specs: &[BizSpec]) {
+fn print_status_totals(style: &Style, specs: &[CapabilitySpec]) {
     println!(
         "{}",
-        style.bold(&format!("Business specs ({})", specs.len()))
+        style.bold(&format!("Capability specs ({})", specs.len()))
     );
     if specs.is_empty() {
         println!("  {}", style.dim("none found"));

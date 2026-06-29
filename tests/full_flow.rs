@@ -9,12 +9,12 @@ use tempfile::tempdir;
 // `pepperoni-pizza-no-spex` example. The findings are intentional: the example
 // ships demo violations.
 const EXPECTED_CHECK_REPORT: &str = r#"proj-api
-  warn  TECH-SECRET-HANDLING/no-backup-files  (data.backup)
+  warn  ES-SECRET-HANDLING/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
   0 errors, 1 warning
 
 proj-frontend
-  error  TECH-WRITING-STYLE/no-cyrillic  (README.md:1)
+  error  ES-WRITING-STYLE/no-cyrillic  (README.md:1)
       Requirements and documentation must be in English
   1 error, 0 warnings
 
@@ -30,7 +30,7 @@ proj: 1 error, 1 warning
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.
 const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
 
-Business specs (0)
+Capability specs (0)
   none found
 
 Active spec coverage (0)
@@ -57,16 +57,16 @@ pepperoni-pizza: 0 errors, 0 warnings
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
-// business spec is `active`, has all of its acceptance criteria checked off,
+// capability spec is `active`, has all of its acceptance criteria checked off,
 // and is annotated across the contract, impl, and test layers, so it reports
 // as fully covered with no gaps.
 const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
 
-Business specs (1)
+Capability specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  BIZ-DELIVERY-TIME  10/10 AC
+  ✓  CS-DELIVERY-TIME  10/10 AC
 
   1 fully covered · 0 gaps
 
@@ -93,8 +93,8 @@ fn init_then_check_pepperoni_pizza() {
         "init did not write proj-spex/spex.yaml"
     );
     assert!(
-        project.join("proj-spex/tech-specs").is_dir(),
-        "init did not scaffold tech-specs"
+        project.join("proj-spex/es-specs").is_dir(),
+        "init did not scaffold es-specs"
     );
 
     let check = run_spex(&project, &["check"], "");
@@ -140,7 +140,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
         "  - repository_name: proj-frontend\n",
-        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - spec: TECH-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - spec: ES-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(
         patched, config,
@@ -151,7 +151,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let check = run_spex(&project, &["check"], "");
     let report = report_text(&check.stdout);
     assert!(
-        !report.contains("error  TECH-WRITING-STYLE/no-cyrillic"),
+        !report.contains("error  ES-WRITING-STYLE/no-cyrillic"),
         "baseline did not suppress the pre-existing error\n{report}",
     );
     assert!(
@@ -203,7 +203,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     let check = run_spex(&project, &["check"], "");
     let report = report_text(&check.stdout);
     assert!(
-        !report.contains("error  TECH-WRITING-STYLE/no-cyrillic"),
+        !report.contains("error  ES-WRITING-STYLE/no-cyrillic"),
         "generated baseline did not suppress the error\n{report}",
     );
     assert!(
@@ -255,7 +255,7 @@ fn report_text(stdout: &[u8]) -> String {
 }
 
 fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
-    // The TECH-SPEX-CONFORMANCE check shells out to `spex check-schema`, so the
+    // The ES-SPEX-CONFORMANCE check shells out to `spex check-schema`, so the
     // binary under test must be discoverable on PATH.
     let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
     let bin_dir = bin.parent().expect("binary directory");
@@ -289,7 +289,7 @@ fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
 }
 
 // Copies the no-spex example into `project` and, mirroring tutorial Step 2.1,
-// renames its repositories to follow TECH-NAMING-CONVENTION
+// renames its repositories to follow ES-NAMING-CONVENTION
 // (`<project-name>-<repository-short-name>`). The project name defaults to the
 // workspace folder name, so the prefix is derived from it.
 fn copy_no_spex(project: &Path) {

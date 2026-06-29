@@ -1,0 +1,42 @@
+id: ES-COMMIT-MESSAGE-FORMAT
+include_for_all_repos: true
+readonly: true
+title: Commit message format
+description: >-
+  Commits are the unit of traceability between code and the specs that justify
+  it. The `cs` scope marks capability commits, and ending their
+  Conventional Commit subject with the affected Spec IDs lets every capability
+  change trace back to an approved requirement; the `es` scope marks engineering
+  changes. See https://www.conventionalcommits.org/ for the Conventional Commits
+  specification.
+acceptance_criteria:
+  - "[x] MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
+  - "[x] MUST use the `cs` scope for capability changes (e.g. `feat(cs)`, `fix(cs)`)"
+  - "[x] MUST end every `cs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
+  - "[x] SHOULD use the `es` scope for engineering changes (e.g. `feat(es)`, `fix(es)`)"
+
+checks:
+  - name: commit-conventional-format
+    description: Recent commits must follow the Conventional Commits subject format
+    type: script
+    run: per-repo
+    script: commit-conventional-format.sh
+    severity: warn
+  - name: commit-spec-id-trace
+    description: Recent `cs`-scoped commits must end with a comma-separated Spec ID list
+    type: script
+    run: per-repo
+    script: commit-spec-id-trace.sh
+    severity: warn
+examples:
+  subject: |
+    style: format md files
+    feat(es): cache catalog responses for 60s
+    feat(cs): list available pizzas CS-LIST-PIZZA-MENU
+    fix(cs): reject negative quantities CS-CART-ADD-ITEM, CS-CART-VALIDATE
+  with_body: |
+    feat(cs): list available pizzas CS-LIST-PIZZA-MENU
+
+    Render the menu from the catalog service and cache results for 60s
+    to reduce load on the upstream API.
+status: active

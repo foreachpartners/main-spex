@@ -1,9 +1,9 @@
-mod biz_spec;
+mod capability_spec;
 mod commands;
 mod config;
+mod engineering_spec;
 mod spec;
 mod style;
-mod tech_spec;
 mod templates;
 mod util;
 mod workspace;
@@ -41,14 +41,14 @@ enum Commands {
     #[command(about = "Initialize the spex workspace repository")]
     Init,
     #[command(
-        about = "Rewrite bundled skills, schemas, scripts and tech-specs with the latest versions"
+        about = "Rewrite bundled skills, schemas, scripts and es-specs with the latest versions"
     )]
     Update,
-    #[command(about = "Run technical spec checks against the workspace")]
+    #[command(about = "Run engineering spec checks against the workspace")]
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
-    #[command(about = "Report annotation coverage of active business specs")]
+    #[command(about = "Report annotation coverage of active capability specs")]
     Coverage,
     #[command(about = "Print combined context for the given spec IDs for an AI agent")]
     SpecContext(SpecContextArgs),

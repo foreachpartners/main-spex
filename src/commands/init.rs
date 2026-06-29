@@ -6,9 +6,9 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use crate::biz_spec::BIZ_SPECS_DIR;
+use crate::capability_spec::CAPABILITY_SPECS_DIR;
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
-use crate::tech_spec::TechSpec;
+use crate::engineering_spec::EngineeringSpec;
 use crate::templates;
 
 #[cfg(test)]
@@ -28,7 +28,7 @@ pub enum InitError {
     NoWorkspaceRoot,
     #[error("initialization cancelled")]
     Cancelled,
-    #[error("could not parse the bundled tech spec `{0}`")]
+    #[error("could not parse the bundled engineering spec `{0}`")]
     Template(String),
     #[error("an I/O operation failed")]
     Io,
@@ -41,8 +41,8 @@ const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      tech-specs/ (cross-cutting technical conventions) and biz-specs/ (product
-      capabilities and behaviors).
+      es-specs/ (cross-cutting engineering conventions) and cs-specs/ (the
+      capabilities the system provides).
 ";
 
 struct DiscoveredRepo {
@@ -51,7 +51,7 @@ struct DiscoveredRepo {
     path: String,
 }
 
-struct DefaultTechSpecs {
+struct DefaultEngineeringSpecs {
     all_repos: Vec<String>,
     spex: Vec<String>,
 }
@@ -79,8 +79,8 @@ pub fn run() -> Result<ExitCode> {
     let repositories = discover_repositories(&workspace_root, &spex_dir_name, &project_name)?;
     let repositories = confirm_repositories(repositories)?;
 
-    let tech_specs = default_tech_specs()?;
-    write_config(&spex_dir, &project_name, &repositories, &tech_specs)?;
+    let es_specs = default_engineering_specs()?;
+    write_config(&spex_dir, &project_name, &repositories, &es_specs)?;
     write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
 
@@ -94,10 +94,10 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir).change_context(InitError::Io)?;
     templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
 
-    let biz_specs = spex_dir.join(BIZ_SPECS_DIR);
-    fs::create_dir_all(&biz_specs)
+    let cs_specs = spex_dir.join(CAPABILITY_SPECS_DIR);
+    fs::create_dir_all(&cs_specs)
         .change_context(InitError::Io)
-        .attach_with(|| format!("could not create `{}`", biz_specs.display()))?;
+        .attach_with(|| format!("could not create `{}`", cs_specs.display()))?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
     fs::create_dir_all(&plans)
@@ -116,12 +116,12 @@ fn write_config(
     spex_dir: &Path,
     project_name: &str,
     repositories: &[DiscoveredRepo],
-    tech_specs: &DefaultTechSpecs,
+    es_specs: &DefaultEngineeringSpecs,
 ) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(
         &config_path,
-        config_to_yaml(project_name, repositories, tech_specs),
+        config_to_yaml(project_name, repositories, es_specs),
     )
     .change_context(InitError::Io)
     .attach_with(|| format!("could not write `{}`", config_path.display()))?;
@@ -168,9 +168,9 @@ fn escape_json(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
-fn default_tech_specs() -> Result<DefaultTechSpecs> {
-    let Some(dir) = templates::tech_specs_dir() else {
-        return Ok(DefaultTechSpecs {
+fn default_engineering_specs() -> Result<DefaultEngineeringSpecs> {
+    let Some(dir) = templates::engineering_specs_dir() else {
+        return Ok(DefaultEngineeringSpecs {
             all_repos: Vec::new(),
             spex: Vec::new(),
         });
@@ -187,7 +187,7 @@ fn default_tech_specs() -> Result<DefaultTechSpecs> {
         let raw = file
             .contents_utf8()
             .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
-        let spec: TechSpec = serde_yaml_ng::from_str(raw)
+        let spec: EngineeringSpec = serde_yaml_ng::from_str(raw)
             .change_context_lazy(|| InitError::Template(name.clone()))?;
         if spec.include_for_all_repos {
             all_repos.push(spec.id.clone());
@@ -199,7 +199,7 @@ fn default_tech_specs() -> Result<DefaultTechSpecs> {
 
     all_repos.sort();
     spex.sort();
-    Ok(DefaultTechSpecs { all_repos, spex })
+    Ok(DefaultEngineeringSpecs { all_repos, spex })
 }
 
 // The workspace root is the current directory, unless `spex init` runs from
@@ -300,7 +300,7 @@ fn discover_repositories(
 }
 
 // The repository short name is the full repository name minus the
-// `<project-name>-` prefix, per TECH-NAMING-CONVENTION.
+// `<project-name>-` prefix, per ES-NAMING-CONVENTION.
 fn repository_short_name(name: &str, project_name: &str) -> String {
     name.strip_prefix(&format!("{project_name}-"))
         .unwrap_or(name)
@@ -335,7 +335,7 @@ fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<Discove
 fn config_to_yaml(
     project_name: &str,
     repositories: &[DiscoveredRepo],
-    tech_specs: &DefaultTechSpecs,
+    es_specs: &DefaultEngineeringSpecs,
 ) -> String {
     let mut yaml = format!("project_name: {project_name}\ncli_version: {CLI_VERSION}\n");
 
@@ -345,9 +345,9 @@ fn config_to_yaml(
         yaml.push_str("repositories:\n");
         for repo in repositories {
             let ids = if repo.path == SPEX_REPO_PATH {
-                &tech_specs.spex
+                &es_specs.spex
             } else {
-                &tech_specs.all_repos
+                &es_specs.all_repos
             };
             yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
             yaml.push_str(&format!("    repository_short_name: {}\n", repo.short_name));
@@ -356,9 +356,9 @@ fn config_to_yaml(
             }
             yaml.push_str(&format!("    path: {}\n", repo.path));
             if ids.is_empty() {
-                yaml.push_str("    tech_specs: []\n");
+                yaml.push_str("    es_specs: []\n");
             } else {
-                yaml.push_str("    tech_specs:\n");
+                yaml.push_str("    es_specs:\n");
                 for id in ids {
                     yaml.push_str(&format!("      - {id}\n"));
                 }

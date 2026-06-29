@@ -14,21 +14,21 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: business (`BIZ`) and technical (`TECH`).
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: capability (`CS`) and engineering (`ES`). The dividing line is capability versus convention: a specific capability the system must provide → `CS`; a rule every change must follow, enforceable repo-wide → `ES`.
 
-- **Business Spec** (`BIZ`) — extracted from the PRD. Describes _how the product behaves_: one coherent product capability or behavior, with its individual rules captured as acceptance criteria. A PRD typically breaks down into many business specs.
+- **Capability Spec** (`CS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many capability specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
 
   ```yaml
-  id: BIZ-PLACE-PIZZA-ORDER
+  id: CS-PLACE-PIZZA-ORDER
   title: Customer can place an order
   acceptance_criteria:
     - "[ ] MUST return 201 with the created order from POST /orders"
   ```
 
-- **Technical Spec** (`TECH`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide.
+- **Engineering Spec** (`ES`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a capability spec (`CS`), not an engineering spec.
 
   ```yaml
-  id: TECH-SECRET-HANDLING
+  id: ES-SECRET-HANDLING
   title: Secret protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
@@ -37,11 +37,11 @@
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
 
   ```text
-  BIZ-PLACE-PIZZA-ORDER
-  TECH-SECRET-HANDLING
+  CS-PLACE-PIZZA-ORDER
+  ES-SECRET-HANDLING
   ```
 
-- **Contract** — derived from a business spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.
+- **Contract** — derived from a capability spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.
 
   ```yaml
   paths:
@@ -53,7 +53,7 @@
             description: Order created
   ```
 
-- **Plan** — derived from one or more approved business specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`.
+- **Plan** — derived from one or more approved capability specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`.
 
   ```md
   # Plan: Customer can place an order

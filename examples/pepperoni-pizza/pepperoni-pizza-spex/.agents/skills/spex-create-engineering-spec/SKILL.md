@@ -1,0 +1,92 @@
+---
+name: spex-create-engineering-spec
+description: Create an engineering spec (ES) by interviewing the user. Use when the user wants to author, draft, or extract an ES spec from a coding standard, a style guide, a security policy, an engineering decision, or an existing code pattern. Asks targeted questions, proposes automated checks, then writes a schema-valid YAML file to <workspace-root>/<project-name>-spex/es-specs/.
+---
+
+# Create an Engineering Spec (ES)
+
+An engineering spec (`ES`) describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file.
+
+Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/<project-name>-spex/es-specs/` directory.
+
+## Paths
+
+All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
+
+The schema at `<workspace-root>/<project-name>-spex/schemas/es-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
+
+## When to use this skill
+
+Use it when the user wants to create, draft, or extract an ES spec — from a coding standard, a style or naming guide, a security policy, a testing rule, or a pattern already present in the code. Do not use it for a specific capability the system must provide (an endpoint, integration, health check, performance target); those are capability specs (CS). The test: a rule all code must obey, enforceable repo-wide → ES; a single capability the system provides → CS.
+
+## Scope rule: one convention per spec
+
+An ES spec captures exactly one coherent cross-cutting convention; its individual rules are the acceptance criteria. If the user describes several unrelated conventions, propose splitting them into multiple specs and confirm the split before writing.
+
+## Step 0 — Establish the source
+
+Determine what the spec is based on before doing anything else:
+
+- If the user attached or pasted a source (a style guide, a security policy, an engineering decision, or a code excerpt) — whether as text or as a file path/link — treat it as the primary input. Read the attached file or the pasted text in full and pre-fill every answer you can from it before asking anything.
+- If the user provided no source and nothing to spec, ask first what convention they want to spec. Do not invent a convention or proceed on assumptions.
+
+## Step 1 — Gather context first
+
+Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
+
+- Read `<workspace-root>/<project-name>-spex/spex.yaml` for the project overview, the workspace repositories, and which es-specs they already list. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
+- Read `<workspace-root>/<project-name>-spex/es-specs/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention.
+
+## Step 2 — Clarify missing details with the user
+
+Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
+
+Do not set `readonly` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the convention should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
+
+## Step 3 — Draft the fields
+
+Follow the field rules in `<workspace-root>/<project-name>-spex/schemas/es-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
+
+- `id` must start with `ES-` and convey the convention so it reads without opening the spec.
+- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
+- Keep each criterion provable by an automated check or by AI inspection.
+- Leave `status` unset (it defaults to `planned`) for a new convention; set it to `active` only once the convention is established and every criterion is checked off.
+
+## Step 4 — Propose checks
+
+For each acceptance criterion, propose how it can be verified automatically, then confirm the set with the user before writing. Pick the simplest check `type` that proves the criterion:
+
+- `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
+- `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
+- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history), or `run: workspace` to invoke it once across the whole workspace with every repository's matched files as arguments (for example reasoning about cross-repository state).
+
+Guidance:
+
+- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved at `scripts/<spec-id>/<script>` so checks from different specs never share a path. A repository can adjust an inherited check or add its own in `spex.yaml` via `checks_override` and `checks_additional`.
+- Set `severity: warn` for advisory checks and `error` (default) for enforced ones.
+- Not every criterion needs a check. When a criterion can only be judged by AI or human review, say so and leave it without a check rather than inventing a brittle one.
+- When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero on violation. Store it at `scripts/<spec-id>/<check-name>.sh` and mirror the header style of existing scripts (`# <SPEC-ID> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.
+- A failing script MUST emit one finding per line on stdout following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. This gives script errors the same per-file precision as `regexp` and `glob` checks, so a `checks_preexisting_errors` baseline can suppress them per file. Emit a file-less finding (no location, leaving the part before the tab empty, or printing a line with no tab) only when the violation has no natural path, for example a rule about git history. Do not print a multi-line dump for one violation — emit one tab-separated line per location:
+  ```sh
+  printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
+  ```
+
+Show the proposed checks (and any script bodies) to the user and confirm them before writing.
+
+## Step 5 — Confirm, then write
+
+1. Show the drafted spec and proposed checks to the user for confirmation. Apply edits if needed.
+2. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
+3. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
+4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
+5. Run `spex check` to validate compliance.
+
+## Step 6 — Point to the next skill
+
+If there are no `spex check` errors related to the new spec, do nothing.
+If there are errors:
+
+- Errors can be fixed easily: offer to fix them
+- Too many errors: offer to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+
+Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

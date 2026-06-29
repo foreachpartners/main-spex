@@ -1,0 +1,43 @@
+id: ES-NAMING-CONVENTION
+title: Derived naming convention
+include_for_all_repos: true
+readonly: true
+description: >-
+  A workspace repository owns many cross-cutting identifiers: repository directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the repository short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
+acceptance_criteria:
+  - "[x] MUST derive every cross-cutting identifier from the project name plus the repository short name and optional data so it's globally identifiable on its own"
+  - "[x] MUST use conventional case and delimiter based on use case"
+  - "[x] MUST use <project-name>-<repository-short-name> for repository directory, crate, binary and container image"
+  - "[x] MUST use <project_name>_<repository_short_name> for db (names both the database and its user)"
+  - "[x] MUST use <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA> for config and env variables"
+  - "[x] MUST use <project_name>.<repository_short_name>.<data> for proto_package"
+  - "[x] MUST extend this convention, not individual repositories, when a new cross-cutting identifier is needed"
+checks:
+  - name: repo-dir
+    description: Repository directory name must be <project-name>-<repository-short-name>
+    type: script
+    run: per-repo
+    script: repo-dir.sh
+    severity: error
+examples:
+  formats: |
+    used by:  repository directory, crate, binary, container image
+    format:   <project-name>-<repository-short-name>
+    example:  pepperoni-pizza-api
+    example:  pepperoni-pizza-web
+
+    used by:  db (names both the database and its user)
+    format:   <project_name>_<repository_short_name>
+    example:  pepperoni_pizza_api
+    example:  pepperoni_pizza_web
+
+    used by:  config, env variables
+    format:   <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA>
+    example:  PEPPERONI_PIZZA_WEB_SERVER_PORT
+    example:  PEPPERONI_PIZZA_API_DATABASE_URL
+
+    used by:  proto_package
+    format:   <project_name>.<repository_short_name>.<data>
+    example:  pepperoni_pizza.api.v1
+    example:  pepperoni_pizza.web.v1
+status: active

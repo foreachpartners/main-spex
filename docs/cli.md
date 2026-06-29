@@ -32,7 +32,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
 
-It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default tech specs).
+It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default engineering specs).
 
 ```sh
 spex init
@@ -42,9 +42,9 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and tech specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and engineering specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or tech specs you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or engineering specs you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
@@ -52,7 +52,7 @@ spex update
 
 ### `spex check`
 
-Runs the technical spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the TECH specs listed in its `tech_specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the engineering spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the engineering specs (ES) listed in its `es_specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -73,9 +73,9 @@ repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    tech_specs: [TECH-WRITING-STYLE]
+    es_specs: [ES-WRITING-STYLE]
     checks_preexisting_errors:
-      - spec: TECH-WRITING-STYLE
+      - spec: ES-WRITING-STYLE
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```
@@ -107,7 +107,7 @@ spex check --repo frontend --fill-preexisting-errors
 
 ### `spex coverage`
 
-Reports how well the active business specs are covered by spec-id annotations across the workspace. For every BIZ spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active capability specs are covered by spec-id annotations across the workspace. For every CS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex coverage
@@ -118,14 +118,14 @@ A single annotation of each kind anywhere in any workspace repository counts —
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
 
 ```yaml
-id: BIZ-PLACE-PIZZA-ORDER
+id: CS-PLACE-PIZZA-ORDER
 status: active
 coverage_ignore: [contract]
 ```
 
 Each active spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. An active spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes.
 
-The report prints the total number of business specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
+The report prints the total number of capability specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
 
 - `✓` — every required layer is annotated and every acceptance criterion is implemented.
 - `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. The `TECH-SPEX-CONFORMANCE` tech spec uses it to keep the spex repository's own spec files (`spex.yaml`, `biz-specs/<spec-id>.yaml`, `tech-specs/<spec-id>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. The `ES-SPEX-CONFORMANCE` engineering spec uses it to keep the spex repository's own spec files (`spex.yaml`, `cs-specs/<spec-id>.yaml`, `es-specs/<spec-id>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -145,19 +145,19 @@ This is a general-purpose validator. The `TECH-SPEX-CONFORMANCE` tech spec uses 
 - `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
 
 ```sh
-spex check-schema --schema schemas/tech-spec.schema.json --files tech-specs/TECH-NAMING-CONVENTION.yaml
+spex check-schema --schema schemas/es-spec.schema.json --files es-specs/ES-NAMING-CONVENTION.yaml
 ```
 
 ```sh
-spex check-schema --schema schemas/biz-spec.schema.json --files biz-specs/BIZ-LIST-PIZZA-MENU.yaml biz-specs/BIZ-PLACE-PIZZA-ORDER.yaml
+spex check-schema --schema schemas/cs-spec.schema.json --files cs-specs/CS-LIST-PIZZA-MENU.yaml cs-specs/CS-PLACE-PIZZA-ORDER.yaml
 ```
 
 ### `spex spec-context`
 
-Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; technical specs additionally emit their `examples`. Each ID is resolved against the business specs first, then the technical specs, and the sections are printed in the order requested. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; engineering specs additionally emit their `examples`. Each ID is resolved against the capability specs first, then the engineering specs, and the sections are printed in the order requested. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
-spex spec-context BIZ-PLACE-PIZZA-ORDER TECH-SECRET-HANDLING
+spex spec-context CS-PLACE-PIZZA-ORDER ES-SECRET-HANDLING
 ```
 
 The command exits with a non-zero status when any ID matches no spec, naming the unknown IDs. The `spex-execute-plan` skill uses it to load a plan's governing specs in a single call instead of opening each YAML file.

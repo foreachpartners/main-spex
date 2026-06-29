@@ -28,8 +28,8 @@ mod tests_unit {
         }
     }
 
-    fn no_specs() -> DefaultTechSpecs {
-        DefaultTechSpecs {
+    fn no_specs() -> DefaultEngineeringSpecs {
+        DefaultEngineeringSpecs {
             all_repos: Vec::new(),
             spex: Vec::new(),
         }
@@ -163,21 +163,21 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                tech_specs: []
+                es_specs: []
               - repository_name: pizza-shop-client
                 repository_short_name: client
                 path: ../pizza-shop-client
-                tech_specs: []
+                es_specs: []
         "};
         assert_eq!(yaml, expected);
     }
 
     #[test]
-    fn render_config_lists_default_tech_specs() {
-        let specs = DefaultTechSpecs {
+    fn render_config_lists_default_engineering_specs() {
+        let specs = DefaultEngineeringSpecs {
             all_repos: vec![
-                "TECH-SECRET-HANDLING".to_string(),
-                "TECH-WRITING-STYLE".to_string(),
+                "ES-SECRET-HANDLING".to_string(),
+                "ES-WRITING-STYLE".to_string(),
             ],
             spex: Vec::new(),
         };
@@ -194,18 +194,18 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                tech_specs:
-                  - TECH-SECRET-HANDLING
-                  - TECH-WRITING-STYLE
+                es_specs:
+                  - ES-SECRET-HANDLING
+                  - ES-WRITING-STYLE
         "};
         assert_eq!(yaml, expected);
     }
 
     #[test]
     fn render_config_uses_spex_specs_for_spex_repo() {
-        let specs = DefaultTechSpecs {
-            all_repos: vec!["TECH-SECRET-HANDLING".to_string()],
-            spex: vec!["TECH-WRITING-STYLE".to_string()],
+        let specs = DefaultEngineeringSpecs {
+            all_repos: vec!["ES-SECRET-HANDLING".to_string()],
+            spex: vec!["ES-WRITING-STYLE".to_string()],
         };
         let yaml = config_to_yaml(
             "pizza-shop",
@@ -220,18 +220,18 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                tech_specs:
-                  - TECH-SECRET-HANDLING
+                es_specs:
+                  - ES-SECRET-HANDLING
               - repository_name: pizza-shop-spex
                 repository_short_name: spex
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-                  tech-specs/ (cross-cutting technical conventions) and biz-specs/ (product
-                  capabilities and behaviors).
+                  es-specs/ (cross-cutting engineering conventions) and cs-specs/ (the
+                  capabilities the system provides).
                 path: .
-                tech_specs:
-                  - TECH-WRITING-STYLE
+                es_specs:
+                  - ES-WRITING-STYLE
         "};
         assert_eq!(yaml, expected);
     }
@@ -279,23 +279,19 @@ mod tests_unit {
     }
 
     #[test]
-    fn default_tech_specs_includes_flagged_specs_only() {
-        let specs = default_tech_specs().expect("collect default tech specs");
+    fn default_engineering_specs_includes_flagged_specs_only() {
+        let specs = default_engineering_specs().expect("collect default engineering specs");
 
-        assert!(
-            specs
-                .all_repos
-                .contains(&"TECH-SECRET-HANDLING".to_string())
-        );
-        assert!(specs.all_repos.contains(&"TECH-WRITING-STYLE".to_string()));
+        assert!(specs.all_repos.contains(&"ES-SECRET-HANDLING".to_string()));
+        assert!(specs.all_repos.contains(&"ES-WRITING-STYLE".to_string()));
         assert!(
             !specs
                 .all_repos
-                .contains(&"TECH-OPENAPI-CONVENTIONS".to_string())
+                .contains(&"ES-OPENAPI-CONVENTIONS".to_string())
         );
         assert!(specs.all_repos.windows(2).all(|pair| pair[0] <= pair[1]));
 
-        assert!(specs.spex.contains(&"TECH-SECRET-HANDLING".to_string()));
+        assert!(specs.spex.contains(&"ES-SECRET-HANDLING".to_string()));
         assert!(specs.spex.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 
@@ -388,13 +384,13 @@ mod tests_unit {
     }
 
     #[test]
-    fn copy_templates_writes_tech_specs_and_scripts() {
+    fn copy_templates_writes_es_specs_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        assert!(spex_dir.path().join("tech-specs").is_dir());
-        assert!(spex_dir.path().join("biz-specs").is_dir());
+        assert!(spex_dir.path().join("es-specs").is_dir());
+        assert!(spex_dir.path().join("cs-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
         assert!(spex_dir.path().join("contracts").is_dir());
@@ -410,7 +406,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join("schemas/biz-spec.schema.json")
+                .join("schemas/cs-spec.schema.json")
                 .is_file()
         );
     }
@@ -426,7 +422,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join(".agents/skills/spex-create-biz-spec/SKILL.md")
+                .join(".agents/skills/spex-create-capability-spec/SKILL.md")
                 .is_file()
         );
     }
@@ -443,7 +439,7 @@ mod tests_unit {
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
             claude
-                .join("skills/spex-create-biz-spec/SKILL.md")
+                .join("skills/spex-create-capability-spec/SKILL.md")
                 .is_file(),
             ".claude/skills should resolve through the symlink"
         );
@@ -460,7 +456,7 @@ mod tests_unit {
 
         let script = spex_dir
             .path()
-            .join("scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
+            .join("scripts/ES-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

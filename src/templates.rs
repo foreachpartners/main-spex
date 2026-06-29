@@ -5,7 +5,7 @@ use error_stack::{Report, ResultExt};
 use include_dir::{Dir, DirEntry, include_dir};
 use thiserror::Error;
 
-use crate::tech_spec::{SCRIPTS_DIR, TECH_SPECS_DIR};
+use crate::engineering_spec::{ENGINEERING_SPECS_DIR, SCRIPTS_DIR};
 
 #[cfg(test)]
 #[path = "templates_test.rs"]
@@ -22,7 +22,7 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
-const MANAGED_FLAT_DIRS: [&str; 3] = [SCHEMAS_DIR, SCRIPTS_DIR, TECH_SPECS_DIR];
+const MANAGED_FLAT_DIRS: [&str; 3] = [SCHEMAS_DIR, SCRIPTS_DIR, ENGINEERING_SPECS_DIR];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
 
@@ -32,8 +32,8 @@ pub enum TemplateError {
     Io,
 }
 
-pub fn tech_specs_dir() -> Option<&'static Dir<'static>> {
-    TEMPLATES.get_dir(TECH_SPECS_DIR)
+pub fn engineering_specs_dir() -> Option<&'static Dir<'static>> {
+    TEMPLATES.get_dir(ENGINEERING_SPECS_DIR)
 }
 
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during

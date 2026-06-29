@@ -8,7 +8,7 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **Why:** Checks are the deterministic layer that proves a change does what its spec demands and nothing else broke. They give the same answer every time, catching what both the AI and the human overlook. Bypassing a check re-creates the conditions for the break it was added to prevent. Baselining exists to adopt a check going forward over pre-existing debt, not to wave through new errors.
 
-**How to apply:** When a check fails, fix the root cause. If the check itself is wrong, fix it as a separate change with justification — and, for a TECH-spec check, update the spec's acceptance criterion it proves. Reserve `--fill-preexisting-errors` for adopting a new check over errors that already existed.
+**How to apply:** When a check fails, fix the root cause. If the check itself is wrong, fix it as a separate change with justification — and, for an engineering-spec check, update the spec's acceptance criterion it proves. Reserve `--fill-preexisting-errors` for adopting a new check over errors that already existed.
 
 ## Silencing tests
 
@@ -64,7 +64,7 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **Why:** Specs eliminate guesswork: they are the explicit criteria the human verifies against. A criterion an agent invents was approved by no one, so it escapes human control and bloats the change beyond the spec.
 
-**How to apply:** When the work needs a rule the spec lacks, stop and add it with `spex-create-biz-spec` (or `spex-create-tech-spec`), get it approved, then implement. Load the governing specs with `spex spec-context` so you work from their actual text, not your memory of it.
+**How to apply:** When the work needs a rule the spec lacks, stop and add it with `spex-create-capability-spec` (or `spex-create-engineering-spec`), get it approved, then implement. Load the governing specs with `spex spec-context` so you work from their actual text, not your memory of it.
 
 ## Skipping the approval gate
 
@@ -76,7 +76,7 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 ## Marking a spec active prematurely
 
-**Rule:** A business spec becomes `active` ONLY when its acceptance criteria are fully implemented and verification passes — `spex check` exits 0 on the affected repositories and the tests pass. If the spec has moved ahead of the code, leave its unfinished acceptance criteria unchecked (`[ ]`) so `spex coverage` flags them. Never report "done" when a required step was skipped.
+**Rule:** A capability spec becomes `active` ONLY when its acceptance criteria are fully implemented and verification passes — `spex check` exits 0 on the affected repositories and the tests pass. If the spec has moved ahead of the code, leave its unfinished acceptance criteria unchecked (`[ ]`) so `spex coverage` flags them. Never report "done" when a required step was skipped.
 
 **Why:** Trust degrades exponentially. A single false `active` forces the human to re-verify everything you claim, forever after, and breaks the guarantee that an `active` spec is a satisfied one.
 
@@ -112,12 +112,12 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **Why:** A duplicated fact is already wrong, or soon will be. Agents copy context between files for convenience ("let me add this to the agent rules too"), and copies diverge faster than anyone notices.
 
-**How to apply:** Keep the interface in `<workspace-root>/<project-name>-spex/contracts/`, the behavior in `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`, the convention in `<workspace-root>/<project-name>-spex/tech-specs/<spec-id>.yaml`, the layout in `spex.yaml`, and terms in `docs/glossary.md`. Reference these sources; do not copy them.
+**How to apply:** Keep the interface in `<workspace-root>/<project-name>-spex/contracts/`, the behavior in `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`, the convention in `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml`, the layout in `spex.yaml`, and terms in `docs/glossary.md`. Reference these sources; do not copy them.
 
 ## Changes without traceability
 
 **Rule:** Every behavioral change MUST trace to a spec through a Spec ID annotation at the layer boundary: `@spec impl <spec-id>` and `@spec test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI. Annotate once at the boundary, never nested. Never leave a behavioral change orphaned, and never reference a Spec ID with no spec file.
 
-**Why:** The Spec ID is the unit of traceability. `spex coverage` computes coverage from these annotations and exits non-zero when an active business spec is missing a required layer. Without the annotation the spec appears unimplemented, the audit fails, and bottom-up tracing (test → code → contract → spec) is impossible.
+**Why:** The Spec ID is the unit of traceability. `spex coverage` computes coverage from these annotations and exits non-zero when an active capability spec is missing a required layer. Without the annotation the spec appears unimplemented, the audit fails, and bottom-up tracing (test → code → contract → spec) is impossible.
 
-**How to apply:** Annotate at the boundary as you implement, using the spec the work satisfies. Business-spec traceability is required; technical-spec traceability is optional. If the change has no spec, stop and create one with `spex-create-biz-spec` first.
+**How to apply:** Annotate at the boundary as you implement, using the spec the work satisfies. Capability-spec traceability is required; engineering-spec traceability is optional. If the change has no spec, stop and create one with `spex-create-capability-spec` first.

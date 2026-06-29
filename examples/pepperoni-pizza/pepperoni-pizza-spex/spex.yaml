@@ -2,7 +2,7 @@ project_name: pepperoni-pizza
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
-cli_version: 0.6.6
+cli_version: 0.7.0
 repositories:
   - repository_name: pepperoni-pizza-api
     repository_short_name: api
@@ -15,39 +15,39 @@ repositories:
         description: >-
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
-    tech_specs:
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-CONFIGURABLE-NETWORK-BIND
-      - TECH-DEPENDENCIES-RULES
-      - TECH-NAMING-CONVENTION
-      - TECH-SECRET-HANDLING
-      - TECH-SPEC-ID-ANNOTATIONS
-      - TECH-WRITING-STYLE
+    es_specs:
+      - ES-COMMIT-MESSAGE-FORMAT
+      - ES-CONFIGURABLE-NETWORK-BIND
+      - ES-DEPENDENCIES-RULES
+      - ES-NAMING-CONVENTION
+      - ES-SECRET-HANDLING
+      - ES-SPEC-ID-ANNOTATIONS
+      - ES-WRITING-STYLE
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     description: >-
       React + TypeScript (Vite) web client where customers browse pizzas, place
       orders, and watch deliveries.
     path: ../pepperoni-pizza-frontend
-    tech_specs:
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DEPENDENCIES-RULES
-      - TECH-NAMING-CONVENTION
-      - TECH-SECRET-HANDLING
-      - TECH-SPEC-ID-ANNOTATIONS
-      - TECH-WRITING-STYLE
+    es_specs:
+      - ES-COMMIT-MESSAGE-FORMAT
+      - ES-DEPENDENCIES-RULES
+      - ES-NAMING-CONVENTION
+      - ES-SECRET-HANDLING
+      - ES-SPEC-ID-ANNOTATIONS
+      - ES-WRITING-STYLE
   - repository_name: pepperoni-pizza-spex
     repository_short_name: spex
     description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      tech-specs/ (cross-cutting technical conventions) and biz-specs/ (product
-      capabilities and behaviors).
+      es-specs/ (cross-cutting engineering conventions) and cs-specs/ (the
+      capabilities the system provides).
     path: .
-    tech_specs:
-      - TECH-COMMIT-MESSAGE-FORMAT
-      - TECH-DEPENDENCIES-RULES
-      - TECH-NAMING-CONVENTION
-      - TECH-SECRET-HANDLING
-      - TECH-SPEX-CONFORMANCE
-      - TECH-WRITING-STYLE
+    es_specs:
+      - ES-COMMIT-MESSAGE-FORMAT
+      - ES-DEPENDENCIES-RULES
+      - ES-NAMING-CONVENTION
+      - ES-SECRET-HANDLING
+      - ES-SPEX-CONFORMANCE
+      - ES-WRITING-STYLE

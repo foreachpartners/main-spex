@@ -6,8 +6,8 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::biz_spec::BizSpec;
-use crate::tech_spec::TechSpec;
+use crate::capability_spec::CapabilitySpec;
+use crate::engineering_spec::EngineeringSpec;
 use crate::workspace::Workspace;
 
 #[cfg(test)]
@@ -29,18 +29,18 @@ pub struct SpecContextArgs {
     #[arg(
         num_args = 1..,
         required = true,
-        help = "Spec IDs (BIZ or TECH) to gather context for"
+        help = "Spec IDs (CS or ES) to gather context for"
     )]
     ids: Vec<String>,
 }
 
 pub fn run(args: SpecContextArgs) -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(SpecContextError::Workspace)?;
-    let biz_specs = workspace
-        .biz_specs()
+    let cs_specs = workspace
+        .cs_specs()
         .change_context(SpecContextError::Workspace)?;
-    let tech_specs = workspace
-        .tech_specs()
+    let es_specs = workspace
+        .es_specs()
         .change_context(SpecContextError::Workspace)?;
 
     let mut unknown = Vec::new();
@@ -48,10 +48,10 @@ pub fn run(args: SpecContextArgs) -> Result<ExitCode> {
         .ids
         .iter()
         .filter_map(|id| {
-            if let Some(spec) = biz_specs.iter().find(|spec| &spec.id == id) {
-                Some(render_biz(spec))
-            } else if let Some(spec) = tech_specs.get(id) {
-                Some(render_tech(spec))
+            if let Some(spec) = cs_specs.iter().find(|spec| &spec.id == id) {
+                Some(render_capability(spec))
+            } else if let Some(spec) = es_specs.get(id) {
+                Some(render_engineering(spec))
             } else {
                 unknown.push(id.clone());
                 None
@@ -67,13 +67,13 @@ pub fn run(args: SpecContextArgs) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn render_biz(spec: &BizSpec) -> String {
+fn render_capability(spec: &CapabilitySpec) -> String {
     let mut out = header(&spec.id, &spec.title, &spec.description);
     write_criteria(&mut out, &spec.acceptance_criteria);
     out
 }
 
-fn render_tech(spec: &TechSpec) -> String {
+fn render_engineering(spec: &EngineeringSpec) -> String {
     let mut out = header(&spec.id, &spec.title, &spec.description);
     write_criteria(&mut out, &spec.acceptance_criteria);
     write_examples(&mut out, &spec.examples);

@@ -5,8 +5,8 @@ mod tests_unit {
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/TECH-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
-    const TECH_SPEC: &str = "tech-specs/TECH-SECRET-HANDLING.yaml";
+    const SCRIPT: &str = "scripts/ES-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
+    const ES_SPEC: &str = "es-specs/ES-SECRET-HANDLING.yaml";
 
     #[test]
     fn scaffold_writes_managed_content() {
@@ -14,7 +14,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        for managed in [SCHEMA, SKILL, SCRIPT, TECH_SPEC] {
+        for managed in [SCHEMA, SKILL, SCRIPT, ES_SPEC] {
             assert!(
                 spex_dir.path().join(managed).is_file(),
                 "missing managed file `{managed}`"

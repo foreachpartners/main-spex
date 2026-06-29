@@ -1,13 +1,13 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more business specs. Use when the user wants to plan, break down, or prepare implementation for a BIZ spec (named, or the one just created). Reads the spec, the affected repositories, and the tech-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md whose steps hold tasks that AI agents can run in parallel.
+description: Draft an implementation plan for one or more capability specs. Use when the user wants to plan, break down, or prepare implementation for a CS spec (named, or the one just created). Reads the spec, the affected repositories, and the es-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md whose steps hold tasks that AI agents can run in parallel.
 ---
 
 # Create an Implementation Plan
 
-An implementation plan turns one or more approved business specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the tech-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel.
+An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the es-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel.
 
-The plan is a working document: it records what to build, the contract changes, the governing tech-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
+The plan is a working document: it records what to build, the contract changes, the governing es-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
 
 ## Paths
 
@@ -17,7 +17,7 @@ Each spec's plans live in their own directory: `<workspace-root>/<project-name>-
 
 ## When to use this skill
 
-Use it when the user wants to plan or prepare the implementation of one or more BIZ specs — either named (for example `BIZ-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-biz-spec`), to draft a contract (use `spex-create-contract`), or to execute a plan (use `spex-execute-plan`). The spec must exist and be approved before planning; its contract should be drafted first so the plan builds on a settled interface.
+Use it when the user wants to plan or prepare the implementation of one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-capability-spec`), to draft a contract (use `spex-create-contract`), or to execute a plan (use `spex-execute-plan`). The spec must exist and be approved before planning; its contract should be drafted first so the plan builds on a settled interface.
 
 ## Step 0 — Establish the target specs
 
@@ -31,24 +31,24 @@ When several specs are given, pick the lead spec (the one the others depend on, 
 
 Before continuing, confirm two preconditions:
 
-- Each target spec's file exists at `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-biz-spec`, then return here. Do not plan a spec that has not been written and approved.
+- Each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-capability-spec`, then return here. Do not plan a spec that has not been written and approved.
 - The contract is settled when applicable. If any acceptance criterion crosses a repository boundary (it needs an endpoint, message, or schema), the affected contract must be drafted or updated with `spex-create-contract` before planning. If the work needs no interface change (it is internal to one repository), proceed straight from spec to plan with no contract.
 
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `blocked_by`.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `blocked_by`.
 
 If a spec lists `blocked_by`, those are specs that must be in place first. Confirm with the user whether to plan around them or stop.
 
-## Step 2 — Resolve scope and governing tech-specs
+## Step 2 — Resolve scope and governing es-specs
 
 From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `tech_specs` list. The union of those lists, deduplicated, is the set of tech-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
-- Read each governing tech-spec in `<workspace-root>/<project-name>-spex/tech-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
+- For each affected repository, read its `es_specs` list. The union of those lists, deduplicated, is the set of es-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
+- Read each governing es-spec in `<workspace-root>/<project-name>-spex/es-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
 
-Record which repository each governing tech-spec comes from so a task in one repository only carries the tech-specs that apply there.
+Record which repository each governing es-spec comes from so a task in one repository only carries the es-specs that apply there.
 
 ## Step 3 — Inspect the current code
 
@@ -77,9 +77,9 @@ Write the plan in Markdown using the template below. Keep the implementation ove
 ```md
 # Plan: <lead spec title>
 
-- Specs: BIZ-LEAD-SPEC, BIZ-OTHER-SPEC
+- Specs: CS-LEAD-SPEC, CS-OTHER-SPEC
 - Scope: api, frontend
-- Tech-specs: TECH-SECRET-HANDLING, TECH-NAMING-CONVENTION, TECH-SPEC-ID-ANNOTATIONS, TECH-OPENAPI-CONVENTIONS
+- Engineering-specs: ES-SECRET-HANDLING, ES-NAMING-CONVENTION, ES-SPEC-ID-ANNOTATIONS, ES-OPENAPI-CONVENTIONS
 
 ## Overview
 
@@ -99,7 +99,7 @@ Status: not-started
 
 Status: not-started
 
-<What to do, which files, which tech-specs apply, which spec to annotate.>
+<What to do, which files, which es-specs apply, which spec to annotate.>
 
 #### Task 1.2 — <name> (repo: frontend)
 
@@ -117,17 +117,17 @@ Status: not-started
 
 Each case maps to an acceptance criterion and proves it.
 
-- [BIZ-LEAD-SPEC / AC1] <case>: <given / when / then>
-- [BIZ-LEAD-SPEC / AC2] <case>: <given / when / then>
+- [CS-LEAD-SPEC / AC1] <case>: <given / when / then>
+- [CS-LEAD-SPEC / AC2] <case>: <given / when / then>
 ```
 
 Rules for the plan content:
 
-- The plan lives at `<spec-id>/<date>-<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>-<slug>` must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `BIZ-PLACE-PIZZA-ORDER/2024-11-24-add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
-- List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing tech-specs under `Tech-specs`.
+- The plan lives at `<spec-id>/<date>-<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>-<slug>` must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `CS-PLACE-PIZZA-ORDER/2024-11-24-add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
+- List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing es-specs under `Engineering-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
-- Within each task, name the applicable tech-specs and the spec to annotate per `TECH-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
+- Within each task, name the applicable es-specs and the spec to annotate per `ES-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
 
 ## Step 6 — Confirm, then write
 

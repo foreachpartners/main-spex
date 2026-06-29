@@ -138,12 +138,12 @@ mod tests {
         repositories:
           - repository_name: api
             path: ../api
-            tech_specs:
-              - TECH-X
+            es_specs:
+              - ES-X
           - repository_name: web
             path: ../web
-            tech_specs:
-              - TECH-X
+            es_specs:
+              - ES-X
     "};
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
         let by_repo = HashMap::from([(
             "api".to_string(),
             vec![entry(
-                "TECH-X",
+                "ES-X",
                 "no-cyrillic",
                 &["README.md", "docs/intro.md"],
             )],
@@ -164,37 +164,35 @@ mod tests {
                 repositories:
                   - repository_name: api
                     path: ../api
-                    tech_specs:
-                      - TECH-X
+                    es_specs:
+                      - ES-X
                     checks_preexisting_errors:
-                      - spec: TECH-X
+                      - spec: ES-X
                         check: no-cyrillic
                         files:
                           - README.md
                           - docs/intro.md
                   - repository_name: web
                     path: ../web
-                    tech_specs:
-                      - TECH-X
+                    es_specs:
+                      - ES-X
             "}
         );
     }
 
     #[test]
     fn set_preexisting_errors_renders_whole_check_without_files() {
-        let by_repo = HashMap::from([(
-            "web".to_string(),
-            vec![entry("TECH-Y", "commit-format", &[])],
-        )]);
+        let by_repo =
+            HashMap::from([("web".to_string(), vec![entry("ES-Y", "commit-format", &[])])]);
         let out = set_preexisting_errors(TWO_REPOS, &by_repo);
         // A mid-document fragment keeps its 2-space indent, which indoc would strip.
         assert!(out.ends_with(
             "  - repository_name: web
     path: ../web
-    tech_specs:
-      - TECH-X
+    es_specs:
+      - ES-X
     checks_preexisting_errors:
-      - spec: TECH-Y
+      - spec: ES-Y
         check: commit-format
 "
         ));
@@ -211,16 +209,16 @@ mod tests {
               - repository_name: api
                 path: ../api
                 checks_preexisting_errors:
-                  - spec: TECH-X
+                  - spec: ES-X
                     check: stale
                     files:
                       - old.md
-                tech_specs:
-                  - TECH-X
+                es_specs:
+                  - ES-X
         "};
         let by_repo = HashMap::from([(
             "api".to_string(),
-            vec![entry("TECH-X", "no-cyrillic", &["README.md"])],
+            vec![entry("ES-X", "no-cyrillic", &["README.md"])],
         )]);
         let out = set_preexisting_errors(raw, &by_repo);
         assert!(!out.contains("stale"), "old block survived:\n{out}");
@@ -240,7 +238,7 @@ mod tests {
               - repository_name: api
                 path: ../api
                 checks_preexisting_errors:
-                  - spec: TECH-X
+                  - spec: ES-X
                     check: gone
         "};
         // api is in scope but has no current errors, so its block is dropped.

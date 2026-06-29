@@ -1,0 +1,35 @@
+id: ES-CONFIGURABLE-NETWORK-BIND
+title: Configurable network bind address
+description: >-
+  Hardcoded bind addresses and ports lock the service to one environment, leak
+  deployment topology into source, and force a rebuild to move between local,
+  CI, and production. The listen address and port must come from configuration
+  or environment at startup, sourced from the repository's config-prefix
+  (`PEPPERONI_PIZZA_API__...`, per ES-NAMING-CONVENTION).
+acceptance_criteria:
+  - "[x] MUST read the server's listen/bind address and port from configuration or environment at startup"
+  - "[x] MUST source the bind configuration from the repository config-prefix defined by ES-NAMING-CONVENTION (e.g. `PEPPERONI_PIZZA_API__BIND_ADDR`)"
+  - "[x] MUST NOT embed a bind address, host, or port literal in source code anywhere on the server startup path"
+  - "[x] SHOULD fail fast with a clear error when the required bind configuration is missing or malformed"
+checks:
+  - name: no-hardcoded-bind-literal
+    description: Flags socket-address string literals that hardcode a host and port
+    type: regexp
+    pattern: '"[^"]*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|localhost|\[::1?\]):\d{2,5}[^"]*"'
+    include:
+      - "src/**/*.rs"
+    severity: error
+examples:
+  avoid: |
+    // Address and port are baked into the binary.
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .expect("failed to bind to 127.0.0.1:3000");
+  prefer: |
+    // PEPPERONI_PIZZA_API__BIND_ADDR, e.g. "0.0.0.0:3000".
+    let bind_addr = std::env::var("PEPPERONI_PIZZA_API__BIND_ADDR")
+        .expect("PEPPERONI_PIZZA_API__BIND_ADDR must be set");
+    let listener = tokio::net::TcpListener::bind(&bind_addr)
+        .await
+        .unwrap_or_else(|e| panic!("failed to bind to {bind_addr}: {e}"));
+status: active

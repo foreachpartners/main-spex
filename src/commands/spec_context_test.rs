@@ -3,11 +3,11 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::super::*;
-    use crate::biz_spec::{BizSpec, Status};
-    use crate::tech_spec::TechSpec;
+    use crate::capability_spec::{CapabilitySpec, Status};
+    use crate::engineering_spec::EngineeringSpec;
 
-    fn biz(id: &str) -> BizSpec {
-        BizSpec {
+    fn capability(id: &str) -> CapabilitySpec {
+        CapabilitySpec {
             id: id.to_string(),
             title: "Place an order".to_string(),
             description: "  Customers complete a purchase.  ".to_string(),
@@ -21,10 +21,10 @@ mod tests {
         }
     }
 
-    fn tech(id: &str) -> TechSpec {
+    fn engineering(id: &str) -> EngineeringSpec {
         let mut examples = BTreeMap::new();
         examples.insert("prefer".to_string(), "let x = Secret::new();\n".to_string());
-        TechSpec {
+        EngineeringSpec {
             id: id.to_string(),
             title: "Secret protection".to_string(),
             description: "Never commit secrets.".to_string(),
@@ -38,11 +38,11 @@ mod tests {
     }
 
     #[test]
-    fn biz_section_carries_id_title_description_and_criteria() {
-        let out = render_biz(&biz("BIZ-PLACE-PIZZA-ORDER"));
+    fn capability_section_carries_id_title_description_and_criteria() {
+        let out = render_capability(&capability("CS-PLACE-PIZZA-ORDER"));
         assert_eq!(
             out,
-            "# BIZ-PLACE-PIZZA-ORDER — Place an order\n\
+            "# CS-PLACE-PIZZA-ORDER — Place an order\n\
              \n\
              Customers complete a purchase.\n\
              \n\
@@ -54,11 +54,11 @@ mod tests {
     }
 
     #[test]
-    fn tech_section_carries_examples() {
-        let out = render_tech(&tech("TECH-SECRET-HANDLING"));
+    fn engineering_section_carries_examples() {
+        let out = render_engineering(&engineering("ES-SECRET-HANDLING"));
         assert_eq!(
             out,
-            "# TECH-SECRET-HANDLING — Secret protection\n\
+            "# ES-SECRET-HANDLING — Secret protection\n\
              \n\
              Never commit secrets.\n\
              \n\
@@ -78,7 +78,7 @@ mod tests {
 
     #[test]
     fn header_omits_title_when_absent() {
-        let out = header("BIZ-A", "", "A description.");
-        assert_eq!(out, "# BIZ-A\n\nA description.\n");
+        let out = header("CS-A", "", "A description.");
+        assert_eq!(out, "# CS-A\n\nA description.\n");
     }
 }
