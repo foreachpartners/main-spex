@@ -7,7 +7,9 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
+use crate::biz_spec::{self, BizSpec};
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
+use crate::spec::{self, Status};
 use crate::style::{Log, Style};
 use crate::tech_spec::{self, Check, CheckKind, RunScope, Severity, TechSpec};
 use crate::util::{self, plural};
@@ -143,6 +145,8 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&workspace.dir, &selected, &reports);
     }
+
+    validate_specs(&workspace, &specs, &selected, &mut reports)?;
 
     Ok(report(&workspace.config, &reports))
 }
@@ -591,4 +595,125 @@ fn config_error(spec_id: &str, check: &str, message: String) -> Finding {
 // spec or a misconfigured override).
 fn repo_error(spec_id: &str, message: String) -> Finding {
     config_error(spec_id, "", message)
+}
+
+fn canonical(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
+
+fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
+    canonical(&spex_dir.join(&repo.path)) == canonical(spex_dir)
+}
+
+// Validates the spec set itself (statuses and `blocked_by` references) and
+// attributes any findings to the spex repository, which owns the spec files.
+// Runs only when the spex repository is in scope.
+fn validate_specs(
+    workspace: &Workspace,
+    tech_specs: &HashMap<String, TechSpec>,
+    selected: &[&Repository],
+    reports: &mut [RepoReport],
+) -> Result<()> {
+    let Some(spex_repo) = selected
+        .iter()
+        .find(|repo| is_spex_repo(repo, &workspace.dir))
+    else {
+        return Ok(());
+    };
+    let Some(report) = reports
+        .iter_mut()
+        .find(|report| report.name == spex_repo.name)
+    else {
+        return Ok(());
+    };
+
+    let biz_specs = workspace
+        .biz_specs()
+        .change_context(CheckError::Workspace)?;
+
+    let mut tech_sorted: Vec<&TechSpec> = tech_specs.values().collect();
+    tech_sorted.sort_by(|a, b| a.id.cmp(&b.id));
+
+    let mut status_by_id: HashMap<&str, Status> = HashMap::new();
+    for spec in &biz_specs {
+        status_by_id.insert(spec.id.as_str(), spec.status);
+    }
+    for spec in &tech_sorted {
+        status_by_id.insert(spec.id.as_str(), spec.status);
+    }
+
+    for spec in &biz_specs {
+        if let Some(finding) = status_finding(
+            &spec.id,
+            biz_spec::BIZ_SPECS_DIR,
+            &spec.acceptance_criteria,
+            spec.status,
+        ) {
+            report.findings.push(finding);
+        }
+    }
+    for spec in &tech_sorted {
+        if let Some(finding) = status_finding(
+            &spec.id,
+            tech_spec::TECH_SPECS_DIR,
+            &spec.acceptance_criteria,
+            spec.status,
+        ) {
+            report.findings.push(finding);
+        }
+    }
+
+    for spec in &biz_specs {
+        validate_blocked_by(spec, &status_by_id, &mut report.findings);
+    }
+
+    Ok(())
+}
+
+// A spec with every acceptance criterion checked off is implemented, so its
+// status must say so. Specs with no criteria or any unchecked box are exempt.
+fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> Option<Finding> {
+    let (done, total) = spec::ac_counts(criteria);
+    if total == 0 || done != total || status.is_implemented() {
+        return None;
+    }
+    Some(Finding {
+        severity: Severity::Warn,
+        spec_id: id.to_string(),
+        check: "status".to_string(),
+        location: Some(format!("{dir}/{id}.yaml")),
+        message: format!(
+            "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
+            status.label()
+        ),
+    })
+}
+
+fn validate_blocked_by(
+    spec: &BizSpec,
+    status_by_id: &HashMap<&str, Status>,
+    findings: &mut Vec<Finding>,
+) {
+    for blocker in &spec.blocked_by {
+        let location = Some(format!("{}/{}.yaml", biz_spec::BIZ_SPECS_DIR, spec.id));
+        match status_by_id.get(blocker.as_str()) {
+            None => findings.push(Finding {
+                severity: Severity::Error,
+                spec_id: spec.id.clone(),
+                check: "blocked-by".to_string(),
+                location,
+                message: format!("`blocked_by` references `{blocker}`, a non-existing spec"),
+            }),
+            Some(Status::Active) => findings.push(Finding {
+                severity: Severity::Warn,
+                spec_id: spec.id.clone(),
+                check: "blocked-by".to_string(),
+                location,
+                message: format!(
+                    "`blocked_by` references `{blocker}`, which is already active — remove satisfied blockers"
+                ),
+            }),
+            Some(_) => {}
+        }
+    }
 }

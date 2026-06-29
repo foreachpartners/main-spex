@@ -21,7 +21,7 @@ check_file() {
   awk -v file="$file" '
     function rank(text,   t) {
       t = text
-      sub(/^\[[ xX]\][ \t]*/, "", t)
+      sub(/^\[[ x]\][ \t]*/, "", t)
       if (t ~ /^MUST NOT/)   { label = "MUST NOT";   return 2 }
       if (t ~ /^MUST/)       { label = "MUST";       return 1 }
       if (t ~ /^SHOULD NOT/) { label = "SHOULD NOT"; return 4 }

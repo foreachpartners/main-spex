@@ -4,7 +4,10 @@ use error_stack::Report;
 use serde::Deserialize;
 use thiserror::Error;
 
+use crate::spec;
 use crate::util;
+
+pub use crate::spec::Status;
 
 #[cfg(test)]
 #[path = "biz_spec_test.rs"]
@@ -34,6 +37,8 @@ pub struct BizSpec {
     #[serde(default)]
     pub acceptance_criteria: Vec<String>,
     #[serde(default)]
+    pub blocked_by: Vec<String>,
+    #[serde(default)]
     pub status: Status,
     #[serde(default)]
     pub coverage_ignore: Vec<CoverageLayer>,
@@ -41,18 +46,8 @@ pub struct BizSpec {
 
 impl BizSpec {
     pub fn ac_counts(&self) -> (usize, usize) {
-        let done = self
-            .acceptance_criteria
-            .iter()
-            .filter(|criterion| ac_implemented(criterion))
-            .count();
-        (done, self.acceptance_criteria.len())
+        spec::ac_counts(&self.acceptance_criteria)
     }
-}
-
-fn ac_implemented(criterion: &str) -> bool {
-    let trimmed = criterion.trim_start();
-    trimmed.starts_with("[x]") || trimmed.starts_with("[X]")
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
@@ -75,34 +70,6 @@ impl CoverageLayer {
             CoverageLayer::Contract => "contract",
             CoverageLayer::Impl => "impl",
             CoverageLayer::Test => "test",
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Status {
-    Active,
-    #[default]
-    Planned,
-    Blocked,
-    Deprecated,
-}
-
-impl Status {
-    pub const ALL: [Status; 4] = [
-        Status::Active,
-        Status::Planned,
-        Status::Blocked,
-        Status::Deprecated,
-    ];
-
-    pub fn label(self) -> &'static str {
-        match self {
-            Status::Active => "active",
-            Status::Planned => "planned",
-            Status::Blocked => "blocked",
-            Status::Deprecated => "deprecated",
         }
     }
 }

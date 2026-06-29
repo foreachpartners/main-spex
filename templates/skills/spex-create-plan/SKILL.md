@@ -36,9 +36,9 @@ Before continuing, confirm two preconditions:
 
 ## Step 1 — Read the specs
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `depends_on`.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/biz-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, its `scope` (the in-scope repositories), and `blocked_by`.
 
-If a spec lists `depends_on`, check those specs' `status`. Flag any dependency that is not yet shipped and confirm with the user whether to plan around it or stop.
+If a spec lists `blocked_by`, those are specs that must be in place first. Confirm with the user whether to plan around them or stop.
 
 ## Step 2 — Resolve scope and governing tech-specs
 

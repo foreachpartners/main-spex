@@ -5,6 +5,7 @@ use error_stack::Report;
 use serde::Deserialize;
 use thiserror::Error;
 
+use crate::spec::Status;
 use crate::util;
 
 pub const TECH_SPECS_DIR: &str = "tech-specs";
@@ -31,6 +32,8 @@ pub struct TechSpec {
     pub description: String,
     #[serde(default)]
     pub acceptance_criteria: Vec<String>,
+    #[serde(default)]
+    pub status: Status,
     #[serde(default)]
     pub include_for_all_repos: bool,
     // Overrides spex-repo inclusion when present; otherwise spex follows `include_for_all_repos`.

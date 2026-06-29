@@ -1,6 +1,7 @@
 mod biz_spec;
 mod commands;
 mod config;
+mod spec;
 mod style;
 mod tech_spec;
 mod templates;

@@ -92,6 +92,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's TECH-spec checks and gates on errors.
 
 - Runs the TECH-spec checks each repository lists in its `tech_specs`, reporting findings per repository.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -198,21 +199,24 @@ Executes a plan step by step and checks the result.
 
 One coherent product capability or behavior.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `depends_on`, `status`, `coverage_ignore`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`.
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
+- `blocked_by` lists BIZ or TECH specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
 ## Technical spec (TECH)
 
 One coherent cross-cutting convention.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `status`, `checks`, `examples`.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
+- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — like a business spec's.
 - `include_for_all_repos` adds it to every repository at init.
 - `include_for_spex` overrides `include_for_all_repos` for the spex repository.
-- `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`.
+- `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`. Such specs are global rules every including repository must fully follow; they are marked implemented by default — criteria `[x]`, `status` `active` — for simplicity, since a read-only spec cannot be edited locally.
+- `status` defaults to `planned`.
 - Each criterion should be provable by an automated check or by AI inspection.
 
 ## Checks

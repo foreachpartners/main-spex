@@ -6,23 +6,23 @@ description: >-
   tests are built from. Consistent, fully-specified, traceable operations keep
   generated code correct and diffs reviewable.
 acceptance_criteria:
-  - "MUST use OpenAPI 3.1.1"
-  - "MUST declare every endpoint with operationId, summary, and at least one response"
-  - "MUST give every operationId a unique value across the document"
-  - "MUST annotate each operation with its business spec via the `x-spec` extension per TECH-SPEC-ID-ANNOTATIONS (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`)"
-  - "MUST define request and response shapes in components/schemas; never inline"
-  - "MUST give every schema a name and use $ref to reference it"
-  - "MUST list explicit error responses (4xx, 5xx) for non-trivial endpoints"
-  - "MUST name every components/securitySchemes key with `^[a-zA-Z0-9._-]+$`"
-  - "MUST mark every secret-bearing field (password, token, key, credential) with `x-sensitive: true` so generated code can wrap it in a secret type"
-  - "MUST set `format: password` on secret string fields and `writeOnly: true` on secrets accepted in requests but never returned in responses (e.g. password)"
-  - "MUST use snake_case as the default casing for property names, query parameter names, and enum values. URL path segments use kebab-case"
-  - "MUST normalize every spec with `openapi-format` before commit so field ordering and whitespace are canonical and diffs stay minimal"
-  - "MUST NOT use anyOf / oneOf without a discriminator"
-  - "MUST NOT leave operationId implicit"
-  - "MUST NOT duplicate business spec mappings between `x-spec` and `info.description` — `x-spec` is the single source of truth"
-  - "SHOULD use enum constraints for fields with a closed set of values"
-  - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
+  - "[x] MUST use OpenAPI 3.1.1"
+  - "[x] MUST declare every endpoint with operationId, summary, and at least one response"
+  - "[x] MUST give every operationId a unique value across the document"
+  - "[x] MUST annotate each operation with its business spec via the `x-spec` extension per TECH-SPEC-ID-ANNOTATIONS (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`)"
+  - "[x] MUST define request and response shapes in components/schemas; never inline"
+  - "[x] MUST give every schema a name and use $ref to reference it"
+  - "[x] MUST list explicit error responses (4xx, 5xx) for non-trivial endpoints"
+  - "[x] MUST name every components/securitySchemes key with `^[a-zA-Z0-9._-]+$`"
+  - "[x] MUST mark every secret-bearing field (password, token, key, credential) with `x-sensitive: true` so generated code can wrap it in a secret type"
+  - "[x] MUST set `format: password` on secret string fields and `writeOnly: true` on secrets accepted in requests but never returned in responses (e.g. password)"
+  - "[x] MUST use snake_case as the default casing for property names, query parameter names, and enum values. URL path segments use kebab-case"
+  - "[x] MUST normalize every spec with `openapi-format` before commit so field ordering and whitespace are canonical and diffs stay minimal"
+  - "[x] MUST NOT use anyOf / oneOf without a discriminator"
+  - "[x] MUST NOT leave operationId implicit"
+  - "[x] MUST NOT duplicate business spec mappings between `x-spec` and `info.description` — `x-spec` is the single source of truth"
+  - "[x] SHOULD use enum constraints for fields with a closed set of values"
+  - "[x] SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
 examples:
   operation: |
     paths:
@@ -50,3 +50,4 @@ examples:
               type: array
               items:
                 $ref: "#/components/schemas/Pizza"
+status: active

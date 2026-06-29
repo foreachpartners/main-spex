@@ -9,6 +9,7 @@ mod tests {
             title: String::new(),
             description: String::new(),
             acceptance_criteria: Vec::new(),
+            blocked_by: Vec::new(),
             status,
             coverage_ignore: Vec::new(),
         }

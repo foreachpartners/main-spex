@@ -27,6 +27,7 @@ src/                CLI source
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
   tech_spec.rs      Tech-spec model
   biz_spec.rs       Biz-spec model
+  spec.rs           Shared spec primitives (status, acceptance-criteria checkbox)
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)

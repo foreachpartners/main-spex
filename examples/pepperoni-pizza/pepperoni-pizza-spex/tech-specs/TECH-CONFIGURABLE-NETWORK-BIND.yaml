@@ -7,10 +7,10 @@ description: >-
   or environment at startup, sourced from the repository's config-prefix
   (`PEPPERONI_PIZZA_API__...`, per TECH-NAMING-CONVENTION).
 acceptance_criteria:
-  - "MUST read the server's listen/bind address and port from configuration or environment at startup"
-  - "MUST source the bind configuration from the repository config-prefix defined by TECH-NAMING-CONVENTION (e.g. `PEPPERONI_PIZZA_API__BIND_ADDR`)"
-  - "MUST NOT embed a bind address, host, or port literal in source code anywhere on the server startup path"
-  - "SHOULD fail fast with a clear error when the required bind configuration is missing or malformed"
+  - "[x] MUST read the server's listen/bind address and port from configuration or environment at startup"
+  - "[x] MUST source the bind configuration from the repository config-prefix defined by TECH-NAMING-CONVENTION (e.g. `PEPPERONI_PIZZA_API__BIND_ADDR`)"
+  - "[x] MUST NOT embed a bind address, host, or port literal in source code anywhere on the server startup path"
+  - "[x] SHOULD fail fast with a clear error when the required bind configuration is missing or malformed"
 checks:
   - name: no-hardcoded-bind-literal
     description: Flags socket-address string literals that hardcode a host and port
@@ -32,3 +32,4 @@ examples:
     let listener = tokio::net::TcpListener::bind(&bind_addr)
         .await
         .unwrap_or_else(|e| panic!("failed to bind to {bind_addr}: {e}"));
+status: active

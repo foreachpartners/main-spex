@@ -24,7 +24,7 @@
       "items": {
         "type": "string",
         "description": "A single verifiable acceptance criterion. Starts with an implementation checkbox (`[ ]` or `[x]`) followed by a commitment level. `spex coverage` reads the checkbox to report how many of an active spec's criteria are implemented.",
-        "pattern": "^\\[[ xX]\\] (MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "pattern": "^\\[[ x]\\] (MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
         "minLength": 1
       },
       "minItems": 1
@@ -38,11 +38,15 @@
       },
       "minItems": 1
     },
-    "depends_on": {
+    "blocked_by": {
       "type": "array",
+      "description": "Spec IDs (BIZ or TECH) that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
       "items": {
-        "description": "Other BIZ spec IDs this spec depends on (cannot be implemented before they ship).",
-        "$ref": "biz-spec-id.schema.json"
+        "description": "A BIZ or TECH spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
+        "anyOf": [
+          { "$ref": "biz-spec-id.schema.json" },
+          { "$ref": "tech-spec-id.schema.json" }
+        ]
       }
     },
     "status": {
@@ -75,7 +79,7 @@
         "[ ] SHOULD display an order confirmation with a unique order number"
       ],
       "scope": ["api", "frontend"],
-      "depends_on": ["BIZ-CART-ADD-ITEM"],
+      "blocked_by": ["BIZ-CART-ADD-ITEM", "TECH-PAYMENT-GATEWAY"],
       "status": "planned"
     }
   ]

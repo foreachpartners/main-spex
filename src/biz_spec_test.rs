@@ -8,6 +8,7 @@ mod tests {
             title: String::new(),
             description: String::new(),
             acceptance_criteria: criteria.iter().map(|c| c.to_string()).collect(),
+            blocked_by: Vec::new(),
             status: Status::Active,
             coverage_ignore: Vec::new(),
         }
@@ -15,8 +16,9 @@ mod tests {
 
     #[test]
     fn ac_counts_counts_checked_criteria() {
+        // Only lowercase `[x]` counts as implemented; `[X]` does not.
         let spec = spec(&["[x] MUST do a", "[ ] MUST do b", "[X] MUST do c"]);
-        assert_eq!(spec.ac_counts(), (2, 3));
+        assert_eq!(spec.ac_counts(), (1, 3));
     }
 
     #[test]

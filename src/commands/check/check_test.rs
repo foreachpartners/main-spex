@@ -336,6 +336,7 @@ mod tests {
             title: String::new(),
             description: String::new(),
             acceptance_criteria: Vec::new(),
+            status: crate::spec::Status::default(),
             include_for_all_repos: false,
             include_for_spex: None,
             checks,
@@ -848,5 +849,73 @@ mod tests {
             &finding(Severity::Error, "writing", Some("README.md:1")),
             &baseline,
         ));
+    }
+
+    fn ac(items: &[&str]) -> Vec<String> {
+        items.iter().map(|item| item.to_string()).collect()
+    }
+
+    fn biz_spec(id: &str, blocked_by: Vec<&str>) -> BizSpec {
+        BizSpec {
+            id: id.to_string(),
+            title: String::new(),
+            description: String::new(),
+            acceptance_criteria: Vec::new(),
+            blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
+            status: Status::Planned,
+            coverage_ignore: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn status_finding_flags_fully_checked_unimplemented_spec() {
+        let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
+        let result = status_finding("BIZ-A", "biz-specs", &criteria, Status::Planned);
+        let finding = result.expect("expected a status finding");
+        assert_eq!(finding.severity, Severity::Warn);
+        assert_eq!(finding.check, "status");
+        assert_eq!(finding.location.as_deref(), Some("biz-specs/BIZ-A.yaml"));
+    }
+
+    #[test]
+    fn status_finding_is_silent_when_consistent_or_incomplete() {
+        let full = ac(&["[x] MUST a", "[x] MUST b"]);
+        // Fully checked and already implemented: nothing to flag.
+        assert!(status_finding("BIZ-A", "biz-specs", &full, Status::Active).is_none());
+        assert!(status_finding("BIZ-A", "biz-specs", &full, Status::Deprecated).is_none());
+        // A pending box means the spec isn't done, so any status is allowed.
+        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+        assert!(status_finding("BIZ-A", "biz-specs", &partial, Status::Planned).is_none());
+        // No criteria at all: nothing to infer.
+        assert!(status_finding("BIZ-A", "biz-specs", &[], Status::Planned).is_none());
+    }
+
+    #[test]
+    fn validate_blocked_by_flags_missing_and_active_references() {
+        let status_by_id = HashMap::from([
+            ("BIZ-DONE", Status::Active),
+            ("BIZ-PENDING", Status::Planned),
+            ("TECH-PENDING", Status::Blocked),
+        ]);
+        let spec = biz_spec(
+            "BIZ-A",
+            vec!["BIZ-MISSING", "BIZ-DONE", "BIZ-PENDING", "TECH-PENDING"],
+        );
+
+        let mut findings = Vec::new();
+        validate_blocked_by(&spec, &status_by_id, &mut findings);
+
+        assert_eq!(findings.len(), 2);
+
+        let missing = &findings[0];
+        assert_eq!(missing.severity, Severity::Error);
+        assert_eq!(missing.check, "blocked-by");
+        assert!(missing.message.contains("BIZ-MISSING"));
+        assert!(missing.message.contains("non-existing spec"));
+
+        let active = &findings[1];
+        assert_eq!(active.severity, Severity::Warn);
+        assert!(active.message.contains("BIZ-DONE"));
+        assert!(active.message.contains("already active"));
     }
 }

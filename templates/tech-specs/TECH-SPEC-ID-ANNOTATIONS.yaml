@@ -8,11 +8,11 @@ description: >-
   satisfies. Placing them once at each layer boundary keeps traceability
   unambiguous without scattering Spec IDs through internal helpers.
 acceptance_criteria:
-  - "MUST annotate BIZ spec contract, implementation and test at least once at the boundary"
-  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl BIZ-LIST-PIZZA-MENU`)"
-  - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
-  - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
-  - "MAY annotate TECH spec following same rules"
+  - "[x] MUST annotate BIZ spec contract, implementation and test at least once at the boundary"
+  - "[x] MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: BIZ-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl BIZ-LIST-PIZZA-MENU`)"
+  - "[x] MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
+  - "[x] SHOULD NOT do nested annotations, e.g. handler->service->repository"
+  - "[x] MAY annotate TECH spec following same rules"
 checks:
   - name: annotation-format
     description: Spec-id annotations must use the documented comment or x-spec syntax
@@ -49,3 +49,4 @@ examples:
   test: |
     // @spec test BIZ-LIST-PIZZA-MENU, BIZ-ORDER-PIZZA, TECH-RATE-LIMIT
     fn lists_available_pizzas() { /* ... */ }
+status: active

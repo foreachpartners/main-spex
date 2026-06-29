@@ -34,14 +34,20 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
+      "description": "Verifiable acceptance criteria. Each begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — then a commitment level. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
       "items": {
-        "description": "A single verifiable acceptance criterion, provable by automated checks or AI. Starts with a commitment level.",
+        "description": "A single verifiable acceptance criterion, provable by automated checks or AI. Starts with an implementation checkbox (`[ ]` or `[x]`) followed by a commitment level.",
         "type": "string",
-        "pattern": "^(MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
+        "pattern": "^\\[[ x]\\] (MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
         "minLength": 1
       },
       "minItems": 1
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status. Omitting is equivalent to 'planned'. A read-only global framework spec is marked implemented (`active`) by default, since it cannot be edited locally.",
+      "enum": ["active", "planned", "blocked", "deprecated"],
+      "default": "planned"
     },
     "checks": {
       "type": "array",
@@ -68,10 +74,11 @@
       "title": "Secret protection",
       "description": "Hardcoded credentials, API keys, and tokens in the repository are a common source of security breaches. Secrets must be provided through environment variables or a dedicated secrets manager so they are never committed to version control.",
       "acceptance_criteria": [
-        "MUST load secrets from environment variables or a secrets manager at runtime",
-        "MUST NOT commit API keys, passwords, or tokens to the repository",
-        "SHOULD fail CI when a secret-scanning check detects credentials in a diff"
+        "[x] MUST load secrets from environment variables or a secrets manager at runtime",
+        "[x] MUST NOT commit API keys, passwords, or tokens to the repository",
+        "[x] SHOULD fail CI when a secret-scanning check detects credentials in a diff"
       ],
+      "status": "active",
       "checks": [
         {
           "name": "hardcoded-secrets",

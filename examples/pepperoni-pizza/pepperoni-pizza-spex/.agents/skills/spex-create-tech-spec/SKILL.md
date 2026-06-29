@@ -48,8 +48,9 @@ Do not set `readonly` or `include_for_spex` on a consumer spec unless the user e
 Follow the field rules in `<workspace-root>/<project-name>-spex/schemas/tech-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
 - `id` must start with `TECH-` and convey the convention so it reads without opening the spec.
-- Write `acceptance_criteria` as verifiable statements, each starting with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
+- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
 - Keep each criterion provable by an automated check or by AI inspection.
+- Leave `status` unset (it defaults to `planned`) for a new convention; set it to `active` only once the convention is established and every criterion is checked off.
 
 ## Step 4 — Propose checks
 
