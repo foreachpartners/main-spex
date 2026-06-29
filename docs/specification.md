@@ -92,7 +92,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's engineering-spec checks and gates on errors.
 
 - Runs the engineering-spec checks each repository lists in its `es_specs`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec warns, since a satisfied blocker should be removed.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a capability spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any engineering spec, since those always apply) warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -210,13 +210,12 @@ One coherent capability the system must provide — a product behavior, or a tec
 
 One coherent cross-cutting convention or rule.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `status`, `checks`, `examples`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
+- Is a global rule that always applies; it has no lifecycle status and its acceptance criteria carry no implementation checkbox.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — like a capability spec's.
 - `include_for_all_repos` adds it to every repository at init.
 - `include_for_spex` overrides `include_for_all_repos` for the spex repository.
-- `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`. Such specs are global rules every including repository must fully follow; they are marked implemented by default — criteria `[x]`, `status` `active` — for simplicity, since a read-only spec cannot be edited locally.
-- `status` defaults to `planned`.
+- `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`. Consumers must not edit it locally.
 - Each criterion should be provable by an automated check or by AI inspection.
 
 ## Checks

@@ -627,31 +627,20 @@ fn validate_specs(
 
     let cs_specs = workspace.cs_specs().change_context(CheckError::Workspace)?;
 
-    let mut tech_sorted: Vec<&EngineeringSpec> = es_specs.values().collect();
-    tech_sorted.sort_by(|a, b| a.id.cmp(&b.id));
-
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
     for spec in &cs_specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
-    for spec in &tech_sorted {
-        status_by_id.insert(spec.id.as_str(), spec.status);
+    // Engineering specs are global rules that always apply, so they count as
+    // satisfied for `blocked_by` purposes.
+    for spec in es_specs.values() {
+        status_by_id.insert(spec.id.as_str(), Status::Active);
     }
 
     for spec in &cs_specs {
         if let Some(finding) = status_finding(
             &spec.id,
             capability_spec::CAPABILITY_SPECS_DIR,
-            &spec.acceptance_criteria,
-            spec.status,
-        ) {
-            report.findings.push(finding);
-        }
-    }
-    for spec in &tech_sorted {
-        if let Some(finding) = status_finding(
-            &spec.id,
-            engineering_spec::ENGINEERING_SPECS_DIR,
             &spec.acceptance_criteria,
             spec.status,
         ) {

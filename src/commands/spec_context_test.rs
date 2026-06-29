@@ -29,7 +29,6 @@ mod tests {
             title: "Secret protection".to_string(),
             description: "Never commit secrets.".to_string(),
             acceptance_criteria: vec!["MUST NOT commit secrets".to_string()],
-            status: Status::default(),
             include_for_all_repos: false,
             include_for_spex: None,
             checks: Vec::new(),

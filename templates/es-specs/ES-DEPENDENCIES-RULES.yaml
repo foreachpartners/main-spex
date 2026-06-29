@@ -8,9 +8,9 @@ description: >-
   latest stable version, and prefer well-maintained dependencies unlikely to be
   deprecated.
 acceptance_criteria:
-  - "[x] MUST pin every dependency to an exact, fixed version, not a range or floating specifier (`^`, `~`, `*`, `latest`, x-ranges, or comparators)"
-  - "[x] MUST use the latest stable version of a dependency when adding or updating it"
-  - "[x] SHOULD choose well-maintained dependencies unlikely to be deprecated, judged by popularity, maintenance history, and company backing"
+  - "MUST pin every dependency to an exact, fixed version, not a range or floating specifier (`^`, `~`, `*`, `latest`, x-ranges, or comparators)"
+  - "MUST use the latest stable version of a dependency when adding or updating it"
+  - "SHOULD choose well-maintained dependencies unlikely to be deprecated, judged by popularity, maintenance history, and company backing"
 checks:
   - name: cargo-floating-version
     description: Cargo.toml dependencies must pin an exact version, not a range
@@ -43,4 +43,3 @@ examples:
     // package.json
     "react": "19.2.7"
     "vite": "8.0.16"
-status: active

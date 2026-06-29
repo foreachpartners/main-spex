@@ -329,7 +329,6 @@ mod tests {
             title: String::new(),
             description: String::new(),
             acceptance_criteria: Vec::new(),
-            status: crate::spec::Status::default(),
             include_for_all_repos: false,
             include_for_spex: None,
             checks,

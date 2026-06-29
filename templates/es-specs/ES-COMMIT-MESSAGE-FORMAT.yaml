@@ -10,10 +10,10 @@ description: >-
   changes. See https://www.conventionalcommits.org/ for the Conventional Commits
   specification.
 acceptance_criteria:
-  - "[x] MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "[x] MUST use the `cs` scope for capability changes (e.g. `feat(cs)`, `fix(cs)`)"
-  - "[x] MUST end every `cs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
-  - "[x] SHOULD use the `es` scope for engineering changes (e.g. `feat(es)`, `fix(es)`)"
+  - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
+  - "MUST use the `cs` scope for capability changes (e.g. `feat(cs)`, `fix(cs)`)"
+  - "MUST end every `cs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
+  - "SHOULD use the `es` scope for engineering changes (e.g. `feat(es)`, `fix(es)`)"
 
 checks:
   - name: commit-conventional-format
@@ -39,4 +39,3 @@ examples:
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.
-status: active

@@ -11,12 +11,12 @@ description: >-
   agent that reads the spec breaks. Validating the files on every change keeps
   the source dependable.
 acceptance_criteria:
-  - "[x] MUST validate spex.yaml against schemas/spex.schema.json"
-  - "[x] MUST validate every cs-specs/<spec-id>.yaml against schemas/cs-spec.schema.json"
-  - "[x] MUST validate every es-specs/<spec-id>.yaml against schemas/es-spec.schema.json"
-  - "[x] MUST name each spec file <spec-id>.yaml, so the filename stem equals the file's id"
-  - "[x] MUST ship every script a es-spec check references at scripts/<spec-id>/<script>"
-  - "[x] MUST order every spec's acceptance criteria by RFC 2119 commitment level: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY"
+  - "MUST validate spex.yaml against schemas/spex.schema.json"
+  - "MUST validate every cs-specs/<spec-id>.yaml against schemas/cs-spec.schema.json"
+  - "MUST validate every es-specs/<spec-id>.yaml against schemas/es-spec.schema.json"
+  - "MUST name each spec file <spec-id>.yaml, so the filename stem equals the file's id"
+  - "MUST ship every script a es-spec check references at scripts/<spec-id>/<script>"
+  - "MUST order every spec's acceptance criteria by RFC 2119 commitment level: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY"
 checks:
   - name: spec-files-conform
     description: Spec files satisfy their schemas, are named after their id, and reference scripts that exist
@@ -37,4 +37,3 @@ examples:
       cs-specs/CS-LIST-PIZZA-MENU.yaml     # validated against schemas/cs-spec.schema.json
       es-specs/ES-NAMING-CONVENTION.yaml # validated against schemas/es-spec.schema.json
       scripts/ES-NAMING-CONVENTION/repo-dir.sh
-status: active
