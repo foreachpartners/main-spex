@@ -21,6 +21,7 @@ acceptance_criteria:
   - "MUST NOT use anyOf / oneOf without a discriminator"
   - "MUST NOT leave operationId implicit"
   - "MUST NOT duplicate capability spec mappings between `x-spec` and `info.description` — `x-spec` is the single source of truth"
+  - "MUST NOT leak internal implementation or persistence details in descriptions (storage, hashing, encryption, normalization, backing datastore); describe only what a consumer observes and must satisfy (e.g. `8–128 characters`, not `stored as an Argon2 hash`)"
   - "SHOULD use enum constraints for fields with a closed set of values"
   - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
 examples:

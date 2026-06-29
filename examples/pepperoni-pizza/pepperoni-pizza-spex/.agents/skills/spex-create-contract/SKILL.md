@@ -60,6 +60,10 @@ Draft each contract following the format of the existing document and the govern
 
 Keep the change minimal and consistent with the surrounding document.
 
+The contract is the consumer-facing interface and may be published, served, or turned into client SDKs. Describe only what a consumer observes and must satisfy: field formats, value ranges, required-ness, uniqueness, enum values, and error semantics. Never leak internal implementation or persistence details a consumer cannot observe and does not need — how a value is stored, hashed, encrypted, normalized, or which algorithm or datastore backs it. For example, write "8–128 characters" for a password field, not "stored only as an Argon2 hash"; those details belong in the spec and the implementation, not the contract.
+
+The contract is the consumer-facing interface and may be published, served, or turned into client SDKs. Describe only what a consumer observes and must satisfy: field formats, value ranges, required-ness, uniqueness, enum values, and error semantics. Never leak internal implementation or persistence details a consumer cannot observe and does not need — how a value is stored, hashed, encrypted, normalized, or which algorithm or datastore backs it. For example, write "8–128 characters" for a password field, not "stored only as an Argon2 hash"; those details belong in the spec and the implementation, not the contract.
+
 ## Step 5 — Confirm, then write
 
 For each affected contract:
