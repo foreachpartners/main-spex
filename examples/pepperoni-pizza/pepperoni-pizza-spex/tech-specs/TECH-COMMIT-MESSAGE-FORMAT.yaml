@@ -4,13 +4,16 @@ readonly: true
 title: Commit message format
 description: >-
   Commits are the unit of traceability between code and the specs that justify
-  it. Conventional Commit subjects that end with the affected Spec IDs let every
-  behavioral change trace back to an approved requirement. See
-  https://www.conventionalcommits.org/ for the Conventional Commits
+  it. The `biz` scope marks business-behavior commits, and ending their
+  Conventional Commit subject with the affected Spec IDs lets every business
+  change trace back to an approved requirement; the `tech` scope marks technical
+  changes. See https://www.conventionalcommits.org/ for the Conventional Commits
   specification.
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "MUST include at least one `<Spec ID>[, <Spec ID>]` for every behavioral change commit at the end of description"
+  - "MUST use the `biz` scope for business behavior changes (e.g. `feat(biz)`, `fix(biz)`)"
+  - "SHOULD use the `tech` scope for technical changes (e.g. `feat(tech)`, `fix(tech)`)"
+  - "MUST end every `biz`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
 
 checks:
   - name: commit-conventional-format
@@ -20,7 +23,7 @@ checks:
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
-    description: Recent behavioral commits must end with a comma-separated Spec ID list
+    description: Recent `biz`-scoped commits must end with a comma-separated Spec ID list
     type: script
     run: per-repo
     script: commit-spec-id-trace.sh
@@ -28,10 +31,11 @@ checks:
 examples:
   subject: |
     style: format md files
-    feat(menu): list available pizzas BIZ-LIST-PIZZA-MENU
-    fix(cart): reject negative quantities BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE
+    feat(tech): cache catalog responses for 60s
+    feat(biz): list available pizzas BIZ-LIST-PIZZA-MENU
+    fix(biz): reject negative quantities BIZ-CART-ADD-ITEM, BIZ-CART-VALIDATE
   with_body: |
-    feat(menu): list available pizzas BIZ-LIST-PIZZA-MENU
+    feat(biz): list available pizzas BIZ-LIST-PIZZA-MENU
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.

@@ -1,9 +1,9 @@
 #!/bin/sh
 # TECH-COMMIT-MESSAGE-FORMAT / commit-spec-id-trace
 #
-# Behavioral commits (feat, fix, refactor) must end their subject line with a
-# comma-separated list of Spec IDs, e.g.
-#   feat(api): add order endpoint BIZ-PLACE-PIZZA-ORDER, TECH-SECRET-HANDLING
+# Commits scoped to `biz` mark business-behavior changes and must end their
+# subject line with a comma-separated list of Spec IDs, e.g.
+#   feat(biz): add order endpoint BIZ-PLACE-PIZZA-ORDER, TECH-SECRET-HANDLING
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.
@@ -23,12 +23,12 @@ id='(BIZ|TECH)-[A-Z]+(-[A-Z]+)*'
 trailing=" ${id}(, ${id})*\$"
 
 bad=$(git log -10 --pretty=%s \
-  | grep -E '^(feat|fix|refactor)' \
+  | grep -E '^[a-z]+\(biz\)!?:' \
   | grep -vE "$trailing" || true)
 
 if [ -n "$bad" ]; then
   printf '%s\n' "$bad" | while IFS= read -r subject; do
-    printf 'behavioral commit missing a trailing Spec ID list: %s\n' "$subject"
+    printf 'biz-scoped commit missing a trailing Spec ID list: %s\n' "$subject"
   done
   exit 1
 fi
