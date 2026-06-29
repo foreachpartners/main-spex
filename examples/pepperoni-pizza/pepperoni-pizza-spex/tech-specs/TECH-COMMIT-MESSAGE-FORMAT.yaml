@@ -12,8 +12,8 @@ description: >-
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
   - "MUST use the `biz` scope for business behavior changes (e.g. `feat(biz)`, `fix(biz)`)"
-  - "SHOULD use the `tech` scope for technical changes (e.g. `feat(tech)`, `fix(tech)`)"
   - "MUST end every `biz`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
+  - "SHOULD use the `tech` scope for technical changes (e.g. `feat(tech)`, `fix(tech)`)"
 
 checks:
   - name: commit-conventional-format

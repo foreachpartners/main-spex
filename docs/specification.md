@@ -209,7 +209,7 @@ One coherent product capability or behavior.
 One coherent cross-cutting convention.
 
 - Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
-- Holds its individual rules in the acceptance criteria.
+- Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `include_for_all_repos` adds it to every repository at init.
 - `include_for_spex` overrides `include_for_all_repos` for the spex repository.
 - `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`.
