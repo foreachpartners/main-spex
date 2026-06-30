@@ -39,7 +39,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/<project-name>-spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
-- For each affected repository, read its `es_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/es-specs/` — at minimum `ES-OPENAPI-CONVENTIONS` (for OpenAPI) and `ES-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, read its `es_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/es-specs/` — at minimum `ES-OPENAPI-CONVENTIONS` (for OpenAPI), `ES-GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `ES-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -51,7 +51,7 @@ Map each acceptance criterion that crosses a boundary to the interface element t
 
 ## Step 4 — Draft the contract changes
 
-Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `ES-OPENAPI-CONVENTIONS`:
+Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `ES-OPENAPI-CONVENTIONS`; for GraphQL SDL, apply `ES-GRAPHQL-CONVENTIONS`:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
