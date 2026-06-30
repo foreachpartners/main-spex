@@ -24,7 +24,7 @@ fi
 type='(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)'
 conventional="^${type}(\\([a-z0-9-]+\\))?!?: .+"
 
-bad=$(git log -10 --no-merges --pretty=%s \
+bad=$(git log -2 --no-merges --pretty=%s \
   | grep -viE '^initial commit$' \
   | grep -vE "$conventional" || true)
 

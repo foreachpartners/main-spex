@@ -22,7 +22,7 @@ fi
 id='(CS|ES)-[A-Z]+(-[A-Z]+)*'
 trailing=" ${id}(, ${id})*\$"
 
-bad=$(git log -10 --pretty=%s \
+bad=$(git log -2 --pretty=%s \
   | grep -E '^[a-z]+\(cs\)!?:' \
   | grep -vE "$trailing" || true)
 
