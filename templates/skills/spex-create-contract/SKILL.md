@@ -62,14 +62,14 @@ Keep the change minimal and consistent with the surrounding document.
 
 The contract is the consumer-facing interface and may be published, served, or turned into client SDKs. Describe only what a consumer observes and must satisfy: field formats, value ranges, required-ness, uniqueness, enum values, and error semantics. Never leak internal implementation or persistence details a consumer cannot observe and does not need — how a value is stored, hashed, encrypted, normalized, or which algorithm or datastore backs it. For example, write "8–128 characters" for a password field, not "stored only as an Argon2 hash"; those details belong in the spec and the implementation, not the contract.
 
-## Step 5 — Confirm, then write
+## Step 5 — Write, then offer edits
 
 For each affected contract:
 
-1. Show the drafted contract change (the added or modified operations, messages, and schemas) to the user for confirmation. Apply edits if needed.
-2. Write it into `<workspace-root>/<project-name>-spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
-3. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
-4. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+1. Write it into `<workspace-root>/<project-name>-spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
+2. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
+3. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+4. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Step 6 — Point to the next skill
 

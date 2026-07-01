@@ -70,15 +70,14 @@ Guidance:
   printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
   ```
 
-Show the proposed checks (and any script bodies) to the user and confirm them before writing.
+Draft the checks (and any script bodies) into the spec; you write them and offer edits in Step 5.
 
-## Step 5 — Confirm, then write
+## Step 5 — Write, then offer edits
 
-1. Show the drafted spec and proposed checks to the user for confirmation. Apply edits if needed.
-2. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
-3. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
-4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
-5. Run `spex check` to validate compliance.
+1. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
+2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
+3. Run `spex check` to validate compliance.
+4. Tell the user the spec and checks you wrote and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Step 6 — Point to the next skill
 
