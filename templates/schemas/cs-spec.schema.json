@@ -15,7 +15,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Multi-paragraph narrative. What problem this solves, who or what is affected, and what observable behavior or capability is expected (user-facing or technical). The step-by-step implementation lives in plan.md, not here.",
+      "description": "Short, concrete summary of the capability: the problem it solves and who or what is affected. General only — leave the individual rules to acceptance_criteria and the step-by-step implementation to plan.md.",
       "minLength": 1
     },
     "acceptance_criteria": {
@@ -71,7 +71,7 @@
     {
       "id": "CS-PLACE-PIZZA-ORDER",
       "title": "Allow customers to place an order from their cart",
-      "description": "Customers who have added items to their cart need a way to complete a purchase. When a customer confirms checkout, the system creates an order from the current cart contents, captures payment, and empties the cart.\n\nThis affects all authenticated shoppers. After a successful order, the customer should see an order confirmation with a unique order number.",
+      "description": "Lets authenticated shoppers turn their cart into a paid order.",
       "acceptance_criteria": [
         "[x] MUST create an order only when the cart contains at least one item",
         "[x] MUST capture payment before the order is marked as confirmed",

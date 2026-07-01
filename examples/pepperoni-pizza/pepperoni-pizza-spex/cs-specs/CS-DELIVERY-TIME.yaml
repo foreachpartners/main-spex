@@ -1,17 +1,9 @@
 id: CS-DELIVERY-TIME
 title: Show customers an estimated delivery time for their order
 description: >-
-  Customers ordering pizza want to know how long they will wait before their
-  food arrives. The wait depends on how much work is already in the kitchen:
-  the pizzas in their own order, the pizzas in other orders already being
-  prepared, and how many workers are on shift to make them.
-
-
-  The system estimates the delivery time from these three inputs and shows it
-  to the customer twice: as a live estimate in the cart while they add pizzas
-  (order estimation), and as the delivery time once the order is placed and the
-  delivery is in progress. The kitchen makes one pizza per minute; the estimate
-  is returned in whole seconds so it is easy to read at a glance.
+  Shows customers how long their order will take based on the current kitchen
+  workload, both as a live estimate in the cart and as a countdown once the
+  order is placed.
 acceptance_criteria:
   - "[x] MUST compute the delivery-time estimate in the `api` using 1 minute to make one pizza"
   - "[x] MUST compute the delivery-time estimate in the `api` using 2 workers on shift, each making one pizza at a time"

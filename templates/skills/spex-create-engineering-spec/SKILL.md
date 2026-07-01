@@ -48,6 +48,7 @@ Do not set `readonly` or `include_for_spex` on a consumer spec unless the user e
 Follow the field rules in `<workspace-root>/<project-name>-spex/schemas/es-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
 - `id` must start with `ES-` and convey the convention so it reads without opening the spec.
+- Keep `description` short, simple, and concrete: a general summary of the rule and what it protects against. Do not restate individual rules already covered by `acceptance_criteria`.
 - Write `acceptance_criteria` as verifiable statements, each beginning with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. An engineering spec is a global rule that always applies, so its criteria carry no implementation checkbox.
 - Keep each criterion provable by an automated check or by AI inspection.
 
