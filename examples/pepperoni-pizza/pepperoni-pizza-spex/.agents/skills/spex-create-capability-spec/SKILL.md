@@ -56,14 +56,13 @@ Draft each spec following the field rules in `<workspace-root>/<project-name>-sp
 - Set `blocked_by` only for specs (CS or ES) that must be in place before this one can be implemented and are not yet satisfied. Do not list a shared foundation that every capability rides on (e.g. the API surface), and never list an already-shipped or established spec. When nothing genuinely blocks the work, leave it absent.
 - Keep the `description` on the observable behavior or capability expected (user-facing or technical); leave the step-by-step implementation to the plan.
 
-## Step 4 — Confirm, then write
+## Step 4 — Write, then offer edits
 
 For each drafted spec:
 
-1. Show the drafted spec to the user for confirmation. Apply edits if needed.
-2. Write it to `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
-3. Use literal block scalars for multi-paragraph `description`.
-4. Validate the result against `<workspace-root>/<project-name>-spex/schemas/cs-spec.schema.json`.
+1. Write it to `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use literal block scalars for multi-paragraph `description`.
+2. Validate the result against `<workspace-root>/<project-name>-spex/schemas/cs-spec.schema.json`.
+3. Tell the user the path you wrote and ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Step 5 — Point to the next skill
 

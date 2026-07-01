@@ -129,11 +129,10 @@ Rules for the plan content:
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
 - Within each task, name the applicable es-specs and the spec to annotate per `ES-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
 
-## Step 6 — Confirm, then write
+## Step 6 — Write, then offer edits
 
-1. Show the drafted plan to the user — especially the step boundaries and which tasks run in parallel — and confirm. Apply edits if needed.
-2. Write it to `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json`.
-3. Confirm the path back to the user.
+1. Write the plan to `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json`.
+2. Tell the user the path you wrote, walk through the step boundaries and which tasks run in parallel, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Step 7 — Point to the next skill
 

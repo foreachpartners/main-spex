@@ -48,9 +48,8 @@ Do not set `readonly` or `include_for_spex` on a consumer spec unless the user e
 Follow the field rules in `<workspace-root>/<project-name>-spex/schemas/es-spec.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
 - `id` must start with `ES-` and convey the convention so it reads without opening the spec.
-- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
+- Write `acceptance_criteria` as verifiable statements, each beginning with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. An engineering spec is a global rule that always applies, so its criteria carry no implementation checkbox.
 - Keep each criterion provable by an automated check or by AI inspection.
-- Leave `status` unset (it defaults to `planned`) for a new convention; set it to `active` only once the convention is established and every criterion is checked off.
 
 ## Step 4 — Propose checks
 
@@ -71,15 +70,14 @@ Guidance:
   printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
   ```
 
-Show the proposed checks (and any script bodies) to the user and confirm them before writing.
+Draft the checks (and any script bodies) into the spec; you write them and offer edits in Step 5.
 
-## Step 5 — Confirm, then write
+## Step 5 — Write, then offer edits
 
-1. Show the drafted spec and proposed checks to the user for confirmation. Apply edits if needed.
-2. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`.
-3. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
-4. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
-5. Run `spex check` to validate compliance.
+1. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
+2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
+3. Run `spex check` to validate compliance.
+4. Tell the user the spec and checks you wrote and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Step 6 — Point to the next skill
 
