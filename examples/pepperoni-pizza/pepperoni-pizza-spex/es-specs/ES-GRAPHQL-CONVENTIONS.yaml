@@ -1,6 +1,6 @@
 id: ES-GRAPHQL-CONVENTIONS
 title: GraphQL conventions
-readonly: true
+managed: true
 description: >-
   The GraphQL SDL is the contract that clients and servers must follow.
 acceptance_criteria:

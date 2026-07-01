@@ -27,9 +27,9 @@
       "type": "boolean",
       "description": "Overrides spex-repo inclusion when present. When omitted, the spex repository follows `include_for_all_repos`; set explicitly to add or exclude this spec for the spex repository."
     },
-    "readonly": {
+    "managed": {
       "type": "boolean",
-      "description": "When true, this is a global spex framework spec that can be changed only upstream. Consumers must not edit it locally; updates arrive by upgrading spex. Defaults to false.",
+      "description": "When true, `spex update` overwrites this spec (and its scripts) from the bundled template on every run. Set to false, or omit, to customize this spec locally and keep your changes across updates. Defaults to false.",
       "default": false
     },
     "acceptance_criteria": {

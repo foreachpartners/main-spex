@@ -1,7 +1,7 @@
 id: ES-NAMING-CONVENTION
 title: Derived naming convention
 include_for_all_repos: true
-readonly: true
+managed: true
 description: >-
   A workspace repository owns many cross-cutting identifiers: repository directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the repository short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
 acceptance_criteria:

@@ -7,6 +7,9 @@ mod tests_unit {
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
     const SCRIPT: &str = "scripts/ES-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
     const ES_SPEC: &str = "es-specs/ES-SECRET-HANDLING.yaml";
+    // Managed spec/script pair sharing a spec id, used to test `managed`
+    // gating together.
+    const MANAGED_SPEC: &str = "es-specs/ES-COMMIT-MESSAGE-FORMAT.yaml";
 
     #[test]
     fn scaffold_writes_managed_content() {
@@ -37,6 +40,54 @@ mod tests_unit {
             .expect("bundled schema")
             .contents();
         assert_eq!(fs::read(&schema).expect("read schema"), expected);
+    }
+
+    #[test]
+    fn scaffold_overwrites_es_spec_marked_managed() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path()).expect("scaffold");
+
+        let spec = spex_dir.path().join(MANAGED_SPEC);
+        fs::write(
+            &spec,
+            "id: ES-COMMIT-MESSAGE-FORMAT\nmanaged: true\ntampered: true\n",
+        )
+        .expect("tamper spec, keeping managed");
+        let script = spex_dir.path().join(SCRIPT);
+        fs::write(&script, "tampered").expect("tamper script");
+
+        scaffold(spex_dir.path()).expect("re-scaffold");
+
+        let expected_spec = TEMPLATES
+            .get_file(MANAGED_SPEC)
+            .expect("bundled spec")
+            .contents();
+        assert_eq!(fs::read(&spec).expect("read spec"), expected_spec);
+        let expected_script = TEMPLATES
+            .get_file(SCRIPT)
+            .expect("bundled script")
+            .contents();
+        assert_eq!(fs::read(&script).expect("read script"), expected_script);
+    }
+
+    #[test]
+    fn scaffold_preserves_unmanaged_es_spec() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path()).expect("scaffold");
+
+        let spec = spex_dir.path().join(MANAGED_SPEC);
+        fs::write(&spec, "id: ES-COMMIT-MESSAGE-FORMAT\ncustomized: true\n")
+            .expect("customize spec");
+        let script = spex_dir.path().join(SCRIPT);
+        fs::write(&script, "customized").expect("customize script");
+
+        scaffold(spex_dir.path()).expect("re-scaffold");
+
+        assert_eq!(
+            fs::read_to_string(&spec).unwrap(),
+            "id: ES-COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
+        );
+        assert_eq!(fs::read_to_string(&script).unwrap(), "customized");
     }
 
     #[test]

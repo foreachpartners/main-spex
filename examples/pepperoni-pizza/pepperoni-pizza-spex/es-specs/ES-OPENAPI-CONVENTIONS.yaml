@@ -1,6 +1,6 @@
 id: ES-OPENAPI-CONVENTIONS
 title: OpenAPI conventions
-readonly: true
+managed: true
 description: >-
   The OpenAPI document is the contract that clients and servers must follow.
 acceptance_criteria:

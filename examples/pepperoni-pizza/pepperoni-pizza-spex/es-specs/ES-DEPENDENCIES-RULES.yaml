@@ -1,6 +1,6 @@
 id: ES-DEPENDENCIES-RULES
 include_for_all_repos: true
-readonly: true
+managed: true
 title: Dependencies rules
 description: >-
   Floating version ranges resolve to different code across environments, breaking

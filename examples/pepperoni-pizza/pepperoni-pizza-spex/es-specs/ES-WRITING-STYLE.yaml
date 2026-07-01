@@ -1,6 +1,6 @@
 id: ES-WRITING-STYLE
 include_for_all_repos: true
-readonly: true
+managed: true
 title: Writing style
 description: >-
   Specs, code and documentation are read by both engineers and AI agents. Direct,

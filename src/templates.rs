@@ -6,6 +6,7 @@ use include_dir::{Dir, DirEntry, include_dir};
 use thiserror::Error;
 
 use crate::engineering_spec::{ENGINEERING_SPECS_DIR, SCRIPTS_DIR};
+use serde::Deserialize;
 
 #[cfg(test)]
 #[path = "templates_test.rs"]
@@ -22,7 +23,9 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
-const MANAGED_FLAT_DIRS: [&str; 3] = [SCHEMAS_DIR, SCRIPTS_DIR, ENGINEERING_SPECS_DIR];
+// `es-specs/` and `scripts/` are handled separately: they are only overwritten
+// when the local spec opts in via `managed`.
+const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
 
@@ -57,9 +60,69 @@ pub fn scaffold(spex_dir: &Path) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
+    copy_engineering_specs(spex_dir)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
+}
+
+#[derive(Deserialize, Default)]
+struct ManagedFlag {
+    #[serde(default)]
+    managed: bool,
+}
+
+// A spec opts into `spex update` overwriting it (and its scripts) by setting
+// `managed: true`. If the local file is missing or fails to parse, it is
+// treated as unmanaged, so a brand-new local spec never gets silently
+// overwritten by a same-named bundled one.
+fn is_managed(spec_path: &Path) -> bool {
+    fs::read_to_string(spec_path)
+        .ok()
+        .and_then(|raw| serde_yaml_ng::from_str::<ManagedFlag>(&raw).ok())
+        .is_some_and(|flag| flag.managed)
+}
+
+// Writes each bundled es-spec, overwriting the local copy only when it is new
+// or already `managed`. Scripts for a spec are copied under the same
+// condition, so customizing a spec locally also keeps its scripts untouched
+// by `spex update`.
+fn copy_engineering_specs(spex_dir: &Path) -> Result<()> {
+    let Some(dir) = TEMPLATES.get_dir(ENGINEERING_SPECS_DIR) else {
+        return Ok(());
+    };
+
+    let specs_dest = spex_dir.join(ENGINEERING_SPECS_DIR);
+    fs::create_dir_all(&specs_dest)
+        .change_context(TemplateError::Io)
+        .attach_with(|| format!("could not create `{}`", specs_dest.display()))?;
+
+    let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
+    let scripts_dest = spex_dir.join(SCRIPTS_DIR);
+
+    for file in dir.files() {
+        let Some(name) = file.path().file_name() else {
+            continue;
+        };
+        let dest = specs_dest.join(name);
+        let spec_id = dest.file_stem().unwrap_or_default().to_string_lossy();
+
+        if dest.exists() && !is_managed(&dest) {
+            continue;
+        }
+
+        fs::write(&dest, file.contents())
+            .change_context(TemplateError::Io)
+            .attach_with(|| format!("could not write `{}`", dest.display()))?;
+
+        if let Some(scripts) = scripts_dir
+            && let Some(spec_scripts) = scripts.get_dir(format!("{SCRIPTS_DIR}/{spec_id}"))
+        {
+            copy_tree(spec_scripts, Path::new(SCRIPTS_DIR), &scripts_dest)?;
+        }
+    }
+
+    Ok(())
 }
 
 fn copy_flat_dir(name: &str, spex_dir: &Path) -> Result<()> {

@@ -83,8 +83,9 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 
 Refreshes the managed framework files from the installed binary.
 
-- Rewrites the bundled skills, schemas, scripts, and es-specs with the versions in the installed binary.
-- Overwrites managed files only; leaves specs, plans, and any files the user added untouched.
+- Rewrites the bundled skills and schemas with the versions in the installed binary.
+- Rewrites a bundled es-spec (and its scripts) only when the local copy is new or already has `managed: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
 ## check
@@ -215,7 +216,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `include_for_all_repos` adds it to every repository at init.
 - `include_for_spex` overrides `include_for_all_repos` for the spex repository.
-- `readonly` marks a global framework spec, changed only upstream and pulled in by `spex update`. Consumers must not edit it locally.
+- `managed` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
 
 ## Checks

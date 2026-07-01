@@ -41,7 +41,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
 
-Do not set `readonly` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the convention should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
+Do not set `managed` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the convention should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
 
 ## Step 3 — Draft the fields
 

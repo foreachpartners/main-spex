@@ -1,7 +1,7 @@
 id: ES-SPEX-CONFORMANCE
 include_for_all_repos: false
 include_for_spex: true
-readonly: true
+managed: true
 title: Spec files stay schema-valid
 description: >-
   The spex repository is the single source of truth for the project's specs:

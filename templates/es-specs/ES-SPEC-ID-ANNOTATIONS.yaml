@@ -1,7 +1,7 @@
 id: ES-SPEC-ID-ANNOTATIONS
 include_for_all_repos: true
 include_for_spex: false
-readonly: true
+managed: true
 title: Spec ID annotation format
 description: >-
   Annotations link a contract, implementation, or test back to the spec it

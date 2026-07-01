@@ -1,6 +1,6 @@
 id: ES-COMMIT-MESSAGE-FORMAT
 include_for_all_repos: true
-readonly: true
+managed: true
 title: Commit message format
 description: >-
   Commits are the unit of traceability between code and the specs that justify
