@@ -37,15 +37,9 @@ Then read enough context to execute faithfully:
   This prints each spec's `id`, `title`, `description`, and `acceptance_criteria` (plus `examples` for es-specs) as Markdown — enough for you to coordinate against. Run it from anywhere inside the workspace.
 - For each affected repository, resolve its `path` from `<workspace-root>/<project-name>-spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
-The agents that edit code must still read the full es-spec files (Step 3), since `spex spec-context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
+The agents that edit code must still read the full es-spec files (Step 2), since `spex spec-context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
-
-## Step 2 — Confirm the run
-
-Show the user the plan's steps, which tasks will run in parallel within each step, and the affected repositories. Confirm before executing. If the plan looks wrong or stale, say so and suggest re-planning with `spex-create-plan` rather than executing a broken plan.
-
-## Step 3 — Execute the steps in order
 
 Work step by step, top to bottom. Do not start a step until the previous one is complete.
 
@@ -56,11 +50,9 @@ Within a step:
 - Instruct each agent to read the named es-spec files in full from `<workspace-root>/<project-name>-spex/es-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
 - A step with a single unit runs as one agent.
 
-As each task finishes, verify its result against the task description and the acceptance criteria it serves, then mark it completed (Step 4). Only when every task in the step is completed do you move to the next step.
+As each task finishes, verify its result against the task description and the acceptance criteria it serves, then mark it completed (Step 3). Only when every task in the step is completed do you move to the next step.
 
 If a task fails or an agent cannot complete it, stop the step, report what failed, and ask the user how to proceed rather than pressing on with dependent steps.
-
-## Step 4 — Update status as work lands
 
 Edit the plan file in place as you go — never at the end in a batch:
 
@@ -69,8 +61,6 @@ Edit the plan file in place as you go — never at the end in a batch:
 - Use only `not-started` or `completed`, matching the plan's existing status vocabulary. Leave every other line of the plan untouched.
 
 Keeping status current means an interrupted run can resume from the first incomplete step.
-
-## Step 5 — Run checks on the affected repositories
 
 After the steps are complete, prove the work respects the governing es-specs by running `spex check` scoped to the affected repositories:
 
@@ -85,13 +75,11 @@ Pass the repositories from the plan's `Scope`. Run from inside the workspace (an
 
 Run the repositories' own tests where the plan's test cases call for them, to prove each acceptance criterion holds.
 
-## Step 6 — Mark the implemented specs active
-
 Once the steps are complete and `spex check` passes, set each capability spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
 
 Tick the checkbox of every acceptance criterion the run implemented, changing its `[ ]` to `[x]`; leave any criterion that is not yet implemented as `[ ]` so `spex coverage` reports it. Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 
-## Step 7 — Report the result
+## Step 6 — Report the result
 
 Summarize the run for the user:
 
