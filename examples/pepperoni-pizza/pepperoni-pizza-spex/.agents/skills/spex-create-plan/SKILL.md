@@ -70,6 +70,13 @@ The rule that defines a step boundary:
 
 Keep steps as few as the dependencies allow; maximize parallelism within each step. A small spec may be a single step with a single task.
 
+When a task introduces or changes a table, schema, or domain model, show it in its native structure instead of describing it in prose:
+
+- A database table: a Markdown table with one row per column, naming the column, type, and constraints (PK/FK, nullability, defaults).
+- A domain model (Rust struct, TypeScript interface, and so on): a fenced code block in that language showing the fields and their types.
+
+Follow the structure with a sentence or two of prose only for what the structure cannot express — invariants, behavior, methods to add.
+
 ## Step 5 — Draft the plan
 
 Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`) are placeholders; use the real names and roles from `spex.yaml`. Contract changes are made in the `spex` repository's `contracts/` folder, so a contract task runs in `spex`.
@@ -106,6 +113,26 @@ Status: not-started
 Status: not-started
 
 <...>
+
+<Example of showing a table change instead of describing it in prose:>
+
+| Column | Type | Constraints |
+| --- | --- | --- |
+| user_id | uuid | PK, FK -> users.id |
+| failed_login_attempts | int | not null, default 0 |
+| locked_until | timestamptz | nullable |
+| version | int | not null, default 0 |
+
+<Example of showing a domain model change instead of describing it in prose:>
+
+```rust
+struct Auth {
+    user_id: UserId,
+    failed_login_attempts: u32,
+    locked_until: Option<DateTime<Utc>>,
+    version: u32,
+}
+```
 
 ### Step 2 — <name>
 
