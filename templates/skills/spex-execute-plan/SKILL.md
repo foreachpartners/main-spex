@@ -32,12 +32,12 @@ Then read enough context to execute faithfully:
 
 - Load the combined context of the plan's specs and governing es-specs in one call, passing every spec ID from the plan's `Specs` and `Engineering-specs`:
   ```sh
-  spex spec-context <spec-id> <es-spec-id>...
+  spex context <spec-id> <es-spec-id>...
   ```
   This prints each spec's `id`, `title`, `description`, and `acceptance_criteria` (plus `examples` for es-specs) as Markdown — enough for you to coordinate against. Run it from anywhere inside the workspace.
 - For each affected repository, resolve its `path` from `<workspace-root>/<project-name>-spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
-The agents that edit code must still read the full es-spec files (Step 2), since `spex spec-context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
+The agents that edit code must still read the full es-spec files (Step 2), since `spex context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
 

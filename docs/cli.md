@@ -152,12 +152,12 @@ spex check-schema --schema schemas/es-spec.schema.json --files es-specs/ES-NAMIN
 spex check-schema --schema schemas/cs-spec.schema.json --files cs-specs/CS-LIST-PIZZA-MENU.yaml cs-specs/CS-PLACE-PIZZA-ORDER.yaml
 ```
 
-### `spex spec-context`
+### `spex context`
 
 Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; engineering specs additionally emit their `examples`. Each ID is resolved against the capability specs first, then the engineering specs, and the sections are printed in the order requested. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
-spex spec-context CS-PLACE-PIZZA-ORDER ES-SECRET-HANDLING
+spex context CS-PLACE-PIZZA-ORDER ES-SECRET-HANDLING
 ```
 
 The command exits with a non-zero status when any ID matches no spec, naming the unknown IDs. The `spex-execute-plan` skill uses it to load a plan's governing specs in a single call instead of opening each YAML file.

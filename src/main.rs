@@ -16,7 +16,7 @@ use error_stack::Report;
 
 use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
-use commands::spec_context::SpecContextArgs;
+use commands::context::ContextArgs;
 
 #[derive(Parser)]
 #[command(
@@ -51,7 +51,7 @@ enum Commands {
     #[command(about = "Report annotation coverage of active capability specs")]
     Coverage,
     #[command(about = "Print combined context for the given spec IDs for an AI agent")]
-    SpecContext(SpecContextArgs),
+    Context(ContextArgs),
 }
 
 fn main() -> ExitCode {
@@ -64,7 +64,7 @@ fn main() -> ExitCode {
         Commands::Check(args) => finish(commands::check::run(args, verbose)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
         Commands::Coverage => finish(commands::coverage::run()),
-        Commands::SpecContext(args) => finish(commands::spec_context::run(args)),
+        Commands::Context(args) => finish(commands::context::run(args)),
     }
 }
 

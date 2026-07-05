@@ -11,13 +11,13 @@ use crate::engineering_spec::EngineeringSpec;
 use crate::workspace::Workspace;
 
 #[cfg(test)]
-#[path = "spec_context_test.rs"]
-mod spec_context_test;
+#[path = "context_test.rs"]
+mod context_test;
 
-type Result<T> = core::result::Result<T, Report<SpecContextError>>;
+type Result<T> = core::result::Result<T, Report<ContextError>>;
 
 #[derive(Debug, Error)]
-pub enum SpecContextError {
+pub enum ContextError {
     #[error("could not load the spex workspace")]
     Workspace,
     #[error("unknown spec id: {0}")]
@@ -25,7 +25,7 @@ pub enum SpecContextError {
 }
 
 #[derive(Args)]
-pub struct SpecContextArgs {
+pub struct ContextArgs {
     #[arg(
         num_args = 1..,
         required = true,
@@ -34,14 +34,14 @@ pub struct SpecContextArgs {
     ids: Vec<String>,
 }
 
-pub fn run(args: SpecContextArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(SpecContextError::Workspace)?;
+pub fn run(args: ContextArgs) -> Result<ExitCode> {
+    let workspace = Workspace::discover().change_context(ContextError::Workspace)?;
     let cs_specs = workspace
         .cs_specs()
-        .change_context(SpecContextError::Workspace)?;
+        .change_context(ContextError::Workspace)?;
     let es_specs = workspace
         .es_specs()
-        .change_context(SpecContextError::Workspace)?;
+        .change_context(ContextError::Workspace)?;
 
     let mut unknown = Vec::new();
     let sections: Vec<String> = args
@@ -60,7 +60,7 @@ pub fn run(args: SpecContextArgs) -> Result<ExitCode> {
         .collect();
 
     if !unknown.is_empty() {
-        return Err(Report::new(SpecContextError::Unknown(unknown.join(", "))));
+        return Err(Report::new(ContextError::Unknown(unknown.join(", "))));
     }
 
     print!("{}", sections.join("\n"));

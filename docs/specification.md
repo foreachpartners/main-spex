@@ -123,7 +123,7 @@ Validates JSON or YAML files against a JSON Schema.
 - Exits non-zero when any file fails.
 - Used by `ES-SPEX-CONFORMANCE` to keep spex's own spec files valid.
 
-## spec-context
+## context
 
 Prints the combined context of the named specs as Markdown for an AI agent.
 

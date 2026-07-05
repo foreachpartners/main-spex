@@ -64,7 +64,7 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **Why:** Specs eliminate guesswork: they are the explicit criteria the human verifies against. A criterion an agent invents was approved by no one, so it escapes human control and bloats the change beyond the spec.
 
-**How to apply:** When the work needs a rule the spec lacks, stop and add it with `spex-create-capability-spec` (or `spex-create-engineering-spec`), get it approved, then implement. Load the governing specs with `spex spec-context` so you work from their actual text, not your memory of it.
+**How to apply:** When the work needs a rule the spec lacks, stop and add it with `spex-create-capability-spec` (or `spex-create-engineering-spec`), get it approved, then implement. Load the governing specs with `spex context` so you work from their actual text, not your memory of it.
 
 ## Skipping the approval gate
 
