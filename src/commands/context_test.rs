@@ -4,7 +4,29 @@ mod tests {
 
     use super::super::*;
     use crate::capability_spec::{CapabilitySpec, Status};
+    use crate::config::{Config, Repository};
     use crate::engineering_spec::EngineeringSpec;
+
+    fn repository(name: &str, short_name: &str, es_specs: Vec<&str>) -> Repository {
+        Repository {
+            name: name.to_string(),
+            short_name: short_name.to_string(),
+            path: format!("../{name}"),
+            contracts: Vec::new(),
+            es_specs: es_specs.into_iter().map(str::to_string).collect(),
+            checks_additional: Vec::new(),
+            checks_override: Vec::new(),
+            checks_preexisting_errors: Vec::new(),
+        }
+    }
+
+    fn config(repositories: Vec<Repository>) -> Config {
+        Config {
+            project_name: "pizza-shop".to_string(),
+            cli_version: "0.0.0".to_string(),
+            repositories,
+        }
+    }
 
     fn capability(id: &str) -> CapabilitySpec {
         CapabilitySpec {
@@ -79,5 +101,47 @@ mod tests {
     fn header_omits_title_when_absent() {
         let out = header("CS-A", "", "A description.");
         assert_eq!(out, "# CS-A\n\nA description.\n");
+    }
+
+    #[test]
+    fn expand_repos_replaces_repo_name_with_its_es_specs() {
+        let config = config(vec![repository(
+            "pizza-shop-backend",
+            "backend",
+            vec!["ES-SECRET-HANDLING", "ES-LOGGING"],
+        )]);
+
+        let ids = expand_repos(
+            &config,
+            &["backend".to_string(), "CS-PLACE-PIZZA-ORDER".to_string()],
+        );
+
+        assert_eq!(
+            ids,
+            vec![
+                "ES-SECRET-HANDLING".to_string(),
+                "ES-LOGGING".to_string(),
+                "CS-PLACE-PIZZA-ORDER".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn expand_repos_matches_full_name_and_dedupes() {
+        let config = config(vec![repository(
+            "pizza-shop-backend",
+            "backend",
+            vec!["ES-SECRET-HANDLING"],
+        )]);
+
+        let ids = expand_repos(
+            &config,
+            &[
+                "pizza-shop-backend".to_string(),
+                "ES-SECRET-HANDLING".to_string(),
+            ],
+        );
+
+        assert_eq!(ids, vec!["ES-SECRET-HANDLING".to_string()]);
     }
 }

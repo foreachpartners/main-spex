@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::fmt::Write;
 use std::process::ExitCode;
 
@@ -7,6 +7,7 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::capability_spec::CapabilitySpec;
+use crate::config::Config;
 use crate::engineering_spec::EngineeringSpec;
 use crate::workspace::Workspace;
 
@@ -29,7 +30,7 @@ pub struct ContextArgs {
     #[arg(
         num_args = 1..,
         required = true,
-        help = "Spec IDs (CS or ES) to gather context for"
+        help = "Spec IDs (CS or ES) or workspace repository names to gather context for"
     )]
     ids: Vec<String>,
 }
@@ -43,9 +44,10 @@ pub fn run(args: ContextArgs) -> Result<ExitCode> {
         .es_specs()
         .change_context(ContextError::Workspace)?;
 
+    let ids = expand_repos(&workspace.config, &args.ids);
+
     let mut unknown = Vec::new();
-    let sections: Vec<String> = args
-        .ids
+    let sections: Vec<String> = ids
         .iter()
         .filter_map(|id| {
             if let Some(spec) = cs_specs.iter().find(|spec| &spec.id == id) {
@@ -65,6 +67,30 @@ pub fn run(args: ContextArgs) -> Result<ExitCode> {
 
     print!("{}", sections.join("\n"));
     Ok(ExitCode::SUCCESS)
+}
+
+// Expands any token that names a workspace repository (matched by full or
+// short name) into that repository's `es_specs`, so `spex context backend`
+// gathers every engineering spec that applies to `backend`. Non-repo tokens
+// pass through unchanged. Duplicates are dropped, keeping the first occurrence.
+fn expand_repos(config: &Config, ids: &[String]) -> Vec<String> {
+    let mut seen = HashSet::new();
+    let mut out = Vec::new();
+
+    for id in ids {
+        let repo = config.repositories.iter().find(|repo| repo.matches(id));
+        let expanded: Vec<&String> = match repo {
+            Some(repo) => repo.es_specs.iter().collect(),
+            None => vec![id],
+        };
+        for id in expanded {
+            if seen.insert(id.clone()) {
+                out.push(id.clone());
+            }
+        }
+    }
+
+    out
 }
 
 fn render_capability(spec: &CapabilitySpec) -> String {

@@ -154,13 +154,14 @@ spex check-schema --schema schemas/cs-spec.schema.json --files cs-specs/CS-LIST-
 
 ### `spex context`
 
-Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; engineering specs additionally emit their `examples`. Each ID is resolved against the capability specs first, then the engineering specs, and the sections are printed in the order requested. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Prints the combined context of one or more specs as Markdown on stdout, ready to hand to an AI agent. For every spec ID it emits the spec's `id`, `title`, `description`, and `acceptance_criteria`; engineering specs additionally emit their `examples`. Each argument is resolved against the workspace repositories first (matched by `repository_name` or `repository_short_name` in `spex.yaml`) and expands to that repository's `es_specs`; anything else is resolved against the capability specs, then the engineering specs. Sections are printed in the order the specs are resolved, and duplicates are dropped. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex context CS-PLACE-PIZZA-ORDER ES-SECRET-HANDLING
+spex context backend
 ```
 
-The command exits with a non-zero status when any ID matches no spec, naming the unknown IDs. The `spex-execute-plan` skill uses it to load a plan's governing specs in a single call instead of opening each YAML file.
+The command exits with a non-zero status when any argument matches no spec and no repository, naming the unknown IDs. The `spex-execute-plan` skill uses it to load a plan's governing specs in a single call instead of opening each YAML file.
 
 ## Development
 

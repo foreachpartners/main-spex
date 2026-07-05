@@ -127,11 +127,12 @@ Validates JSON or YAML files against a JSON Schema.
 
 Prints the combined context of the named specs as Markdown for an AI agent.
 
-- Takes one or more spec IDs, each a CS or ES spec.
-- For every ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; ES specs also emit their `examples`.
-- Resolves each ID against the capability specs first, then the engineering specs.
-- Prints one section per ID, in the order requested, to stdout.
-- Exits non-zero when any ID matches no spec.
+- Takes one or more arguments, each a CS spec ID, an ES spec ID, or a workspace repository name (`repository_name` or `repository_short_name` from `spex.yaml`).
+- A repository name argument expands to that repository's `es_specs` list.
+- For every resulting spec ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; ES specs also emit their `examples`.
+- Resolves each non-repository argument against the capability specs first, then the engineering specs.
+- Prints one section per resolved spec ID, in resolution order, deduplicated, to stdout.
+- Exits non-zero when any argument matches no spec and no repository.
 - Used by `spex-execute-plan` to load the governing specs in one call.
 
 # Skills
