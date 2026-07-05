@@ -30,14 +30,10 @@ Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<d
 
 Then read enough context to execute faithfully:
 
-- Load the combined context of the plan's specs and governing es-specs in one call, passing every spec ID from the plan's `Specs` and `Engineering-specs`:
-  ```sh
-  spex context <spec-id> <es-spec-id>...
-  ```
-  This prints each spec's `id`, `title`, `description`, and `acceptance_criteria` (plus `examples` for es-specs) as Markdown — enough for you to coordinate against. Run it from anywhere inside the workspace.
+- Read every spec named in the plan's `Specs` from `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`, and every spec in `Engineering-specs` from `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml`, in full — not a summary — so you coordinate against their actual text, not a paraphrase.
 - For each affected repository, resolve its `path` from `<workspace-root>/<project-name>-spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
-The agents that edit code must still read the full es-spec files (Step 2), since `spex context` omits the checks; use it to orient yourself, not as the authoritative source for compliance.
+## Step 2 — Run the plan's steps
 
 If any step or task is already `completed`, skip it and resume from the first incomplete step.
 
@@ -54,6 +50,8 @@ As each task finishes, verify its result against the task description and the ac
 
 If a task fails or an agent cannot complete it, stop the step, report what failed, and ask the user how to proceed rather than pressing on with dependent steps.
 
+## Step 3 — Update plan status as you go
+
 Edit the plan file in place as you go — never at the end in a batch:
 
 - When a task finishes and is verified, set its `Status:` line to `completed`.
@@ -61,6 +59,8 @@ Edit the plan file in place as you go — never at the end in a batch:
 - Use only `not-started` or `completed`, matching the plan's existing status vocabulary. Leave every other line of the plan untouched.
 
 Keeping status current means an interrupted run can resume from the first incomplete step.
+
+## Step 4 — Verify against the governing es-specs
 
 After the steps are complete, prove the work respects the governing es-specs by running `spex check` scoped to the affected repositories:
 
@@ -74,6 +74,8 @@ Pass the repositories from the plan's `Scope`. Run from inside the workspace (an
 - Report `warn` findings to the user but do not block on them unless the user asks.
 
 Run the repositories' own tests where the plan's test cases call for them, to prove each acceptance criterion holds.
+
+## Step 5 — Activate the implemented capability specs
 
 Once the steps are complete and `spex check` passes, set each capability spec the plan implemented to `active`. For every spec ID in the plan's `Specs`, open `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` and set its `status:` line to `active` (add the line if absent — `status` defaults to `planned`). This signals the capability is implemented and brings it under `spex coverage`.
 

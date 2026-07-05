@@ -31,10 +31,6 @@ pub enum CapabilitySpecError {
 pub struct CapabilitySpec {
     pub id: String,
     #[serde(default)]
-    pub title: String,
-    #[serde(default)]
-    pub description: String,
-    #[serde(default)]
     pub acceptance_criteria: Vec<String>,
     #[serde(default)]
     pub blocked_by: Vec<String>,

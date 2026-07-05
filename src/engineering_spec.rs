@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::path::Path;
 
 use error_stack::Report;
@@ -26,20 +26,12 @@ pub enum SpecError {
 pub struct EngineeringSpec {
     pub id: String,
     #[serde(default)]
-    pub title: String,
-    #[serde(default)]
-    pub description: String,
-    #[serde(default)]
-    pub acceptance_criteria: Vec<String>,
-    #[serde(default)]
     pub include_for_all_repos: bool,
     // Overrides spex-repo inclusion when present; otherwise spex follows `include_for_all_repos`.
     #[serde(default)]
     pub include_for_spex: Option<bool>,
     #[serde(default)]
     pub checks: Vec<Check>,
-    #[serde(default)]
-    pub examples: BTreeMap<String, String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

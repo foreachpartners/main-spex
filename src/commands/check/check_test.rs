@@ -326,13 +326,9 @@ mod tests {
     fn engineering_spec(id: &str, checks: Vec<Check>) -> EngineeringSpec {
         EngineeringSpec {
             id: id.to_string(),
-            title: String::new(),
-            description: String::new(),
-            acceptance_criteria: Vec::new(),
             include_for_all_repos: false,
             include_for_spex: None,
             checks,
-            examples: std::collections::BTreeMap::new(),
         }
     }
 
@@ -850,8 +846,6 @@ mod tests {
     fn capability_spec(id: &str, blocked_by: Vec<&str>) -> CapabilitySpec {
         CapabilitySpec {
             id: id.to_string(),
-            title: String::new(),
-            description: String::new(),
             acceptance_criteria: Vec::new(),
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
             status: Status::Planned,

@@ -123,18 +123,6 @@ Validates JSON or YAML files against a JSON Schema.
 - Exits non-zero when any file fails.
 - Used by `ES-SPEX-CONFORMANCE` to keep spex's own spec files valid.
 
-## context
-
-Prints the combined context of the named specs as Markdown for an AI agent.
-
-- Takes one or more arguments, each a CS spec ID, an ES spec ID, or a workspace repository name (`repository_name` or `repository_short_name` from `spex.yaml`).
-- A repository name argument expands to that repository's `es_specs` list.
-- For every resulting spec ID, emits its `id`, `title`, `description`, and `acceptance_criteria`; ES specs also emit their `examples`.
-- Resolves each non-repository argument against the capability specs first, then the engineering specs.
-- Prints one section per resolved spec ID, in resolution order, deduplicated, to stdout.
-- Exits non-zero when any argument matches no spec and no repository.
-- Used by `spex-execute-plan` to load the governing specs in one call.
-
 # Skills
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.

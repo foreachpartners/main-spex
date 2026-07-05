@@ -355,11 +355,7 @@ fn select_repos<'a>(
     files: &[String],
 ) -> Result<Vec<&'a Repository>> {
     for name in names {
-        if !config
-            .repositories
-            .iter()
-            .any(|repo| repo_matches(repo, name))
-        {
+        if !config.repositories.iter().any(|repo| repo.matches(name)) {
             return Err(Report::new(CheckError::UnknownRepo(name.clone())));
         }
     }
@@ -368,7 +364,7 @@ fn select_repos<'a>(
         return Ok(config
             .repositories
             .iter()
-            .filter(|repo| names.is_empty() || names.iter().any(|name| repo_matches(repo, name)))
+            .filter(|repo| names.is_empty() || names.iter().any(|name| repo.matches(name)))
             .collect());
     }
 
@@ -376,15 +372,10 @@ fn select_repos<'a>(
         .repositories
         .iter()
         .filter(|repo| {
-            names.iter().any(|name| repo_matches(repo, name))
+            names.iter().any(|name| repo.matches(name))
                 || !provided_files(&spex_dir.join(&repo.path), files).is_empty()
         })
         .collect())
-}
-
-// `--repo` accepts either the full repository name or its short name.
-fn repo_matches(repo: &Repository, name: &str) -> bool {
-    repo.name == name || repo.short_name == name
 }
 
 fn check_repo(

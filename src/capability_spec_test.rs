@@ -5,8 +5,6 @@ mod tests {
     fn spec(criteria: &[&str]) -> CapabilitySpec {
         CapabilitySpec {
             id: "CS-A".to_string(),
-            title: String::new(),
-            description: String::new(),
             acceptance_criteria: criteria.iter().map(|c| c.to_string()).collect(),
             blocked_by: Vec::new(),
             status: Status::Active,

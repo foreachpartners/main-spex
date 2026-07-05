@@ -6,8 +6,6 @@ mod tests {
     fn spec(id: &str, status: Status) -> CapabilitySpec {
         CapabilitySpec {
             id: id.to_string(),
-            title: String::new(),
-            description: String::new(),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
             status,
