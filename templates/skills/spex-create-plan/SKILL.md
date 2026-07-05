@@ -81,7 +81,7 @@ Follow the structure with a sentence or two of prose only for what the structure
 
 Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`) are placeholders; use the real names and roles from `spex.yaml`. Contract changes are made in the `spex` repository's `contracts/` folder, so a contract task runs in `spex`.
 
-```md
+````md
 # Plan: <lead spec title>
 
 - Specs: CS-LEAD-SPEC, CS-OTHER-SPEC
@@ -116,12 +116,12 @@ Status: not-started
 
 <Example of showing a table change instead of describing it in prose:>
 
-| Column | Type | Constraints |
-| --- | --- | --- |
-| user_id | uuid | PK, FK -> users.id |
-| failed_login_attempts | int | not null, default 0 |
-| locked_until | timestamptz | nullable |
-| version | int | not null, default 0 |
+| Column                | Type        | Constraints         |
+| --------------------- | ----------- | ------------------- |
+| user_id               | uuid        | PK, FK -> users.id  |
+| failed_login_attempts | int         | not null, default 0 |
+| locked_until          | timestamptz | nullable            |
+| version               | int         | not null, default 0 |
 
 <Example of showing a domain model change instead of describing it in prose:>
 
@@ -133,6 +133,7 @@ struct Auth {
     version: u32,
 }
 ```
+````
 
 ### Step 2 — <name>
 
@@ -146,7 +147,6 @@ Each case maps to an acceptance criterion and proves it.
 
 - [CS-LEAD-SPEC / AC1] <case>: <given / when / then>
 - [CS-LEAD-SPEC / AC2] <case>: <given / when / then>
-```
 
 Rules for the plan content:
 
