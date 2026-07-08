@@ -116,7 +116,7 @@ Example result:
 
 ## Step 6 — Point to the next skill
 
-Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-create-capability-spec` for a capability the system must provide, or `spex-create-engineering-spec` for a cross-cutting engineering convention. Note that it is better to start a new chat first to save context.
+Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-capability-spec` for a capability the system must provide, or `spex-engineering-spec` for a cross-cutting engineering convention. Note that it is better to start a new chat first to save context.
 
 ## Field placement
 

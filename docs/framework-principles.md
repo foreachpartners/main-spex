@@ -60,11 +60,11 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 
 | Category             | Why it is not automatable                              | Example                             |
 | -------------------- | ------------------------------------------------------ | ----------------------------------- |
-| Spec writing         | Translating a business need into acceptance criteria   | `spex-create-capability-spec` skill |
+| Spec writing         | Translating a business need into acceptance criteria   | `spex-capability-spec` skill |
 | Contract design      | Trade-off choices, schema shape                        | REST vs gRPC, response shape        |
 | Code generation      | Translating a spec and contract into an implementation | Implement `CS-PLACE-PIZZA-ORDER`    |
 | Test generation      | Choosing scenarios and edge cases                      | E2E from acceptance criteria        |
-| Plan splitting       | Ordering work into parallel-safe steps                 | `spex-create-plan` skill            |
+| Plan splitting       | Ordering work into parallel-safe steps                 | `spex-plan` skill            |
 | Check triage         | False positive vs real violation vs script bug         | `spex check` output review          |
 | Semantic code review | Logic errors beyond a linter's scope                   | Business logic, race conditions     |
 

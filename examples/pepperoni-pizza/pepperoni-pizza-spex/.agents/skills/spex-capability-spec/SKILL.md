@@ -1,5 +1,5 @@
 ---
-name: spex-create-capability-spec
+name: spex-capability-spec
 description: Create one or more capability specs (CS) by interviewing the user. Use when the user wants to author, draft, or extract CS specs from a PRD, an RFD, a feature idea, a business rule, or a technical capability the product needs. Asks targeted questions, then writes schema-valid YAML files to <workspace-root>/<project-name>-spex/cs-specs/.
 ---
 
@@ -66,6 +66,6 @@ For each drafted spec:
 
 ## Step 5 — Point to the next skill
 
-After the specs are written, offer to draft each one's contract: run `spex-create-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+After the specs are written, offer to draft each one's contract: run `spex-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

@@ -1,5 +1,5 @@
 ---
-name: spex-create-engineering-spec
+name: spex-engineering-spec
 description: Create an engineering spec (ES) by interviewing the user. Use when the user wants to author, draft, or extract an ES spec from a coding standard, a style guide, a security policy, an engineering decision, or an existing code pattern. Asks targeted questions, proposes automated checks, then writes a schema-valid YAML file to <workspace-root>/<project-name>-spex/es-specs/.
 ---
 
@@ -86,6 +86,6 @@ If there are no `spex check` errors related to the new spec, do nothing.
 If there are errors:
 
 - Errors can be fixed easily: offer to fix them
-- Too many errors: offer to plan its implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+- Too many errors: offer to plan its implementation: run `spex-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

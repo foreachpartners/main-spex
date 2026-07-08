@@ -15,7 +15,7 @@ Each artifact needs the human's approval before the next is generated: spec befo
 
 Mark a capability spec `active` only when its acceptance criteria are fully implemented and `spex check` plus its tests pass. Otherwise leave the unmet criteria `[ ]` so `spex coverage` flags them — never report a spec done when a required step was skipped.
 
-Never invent an acceptance criterion. When the work needs a rule no spec states, add it with `spex-create-capability-spec` or `spex-create-engineering-spec`, get it approved, then implement.
+Never invent an acceptance criterion. When the work needs a rule no spec states, add it with `spex-capability-spec` or `spex-engineering-spec`, get it approved, then implement.
 
 ## Principles
 

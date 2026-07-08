@@ -1,5 +1,5 @@
 ---
-name: spex-execute-plan
+name: spex-execute
 description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/. Reads the plan and the specs, repositories, and es-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, running `spex check` on the affected repositories, and setting each implemented capability spec's status to active.
 ---
 
@@ -15,7 +15,7 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-create-plan`), to author specs (`spex-create-capability-spec`, `spex-create-engineering-spec`), or to draft a contract (use `spex-create-contract`). The plan must already exist in `<workspace-root>/<project-name>-spex/plans/`.
+Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-plan`), to author specs (`spex-capability-spec`, `spex-engineering-spec`), or to draft a contract (use `spex-contract`). The plan must already exist in `<workspace-root>/<project-name>-spex/plans/`.
 
 ## Step 0 — Establish the target plan
 

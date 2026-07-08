@@ -46,15 +46,15 @@ Repository directories follow `<project-name>-<repository-short-name>` (ES-NAMIN
 Workflow core is AI agent skills and CLI commands.
 
 1. Create your first specification (spec):
-   - capability spec `/spex-create-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
-   - engineering spec `/spex-create-engineering-spec [secret handling]`. Will create `pepperoni-pizza-spex/es-specs/ES-SECRET-HANDLING.yaml`
-2. Derive the contract for a capability spec `/spex-create-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. Create implementation plan for spec `/spex-create-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/ES-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. Execute plan `/spex-execute-plan [secret handling]`. Will execute the `ES-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+   - capability spec `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
+   - engineering spec `/spex-engineering-spec [secret handling]`. Will create `pepperoni-pizza-spex/es-specs/ES-SECRET-HANDLING.yaml`
+2. Derive the contract for a capability spec `/spex-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. Create implementation plan for spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/ES-SECRET-HANDLING/2024-11-25_secret-handling.md`
+4. Execute plan `/spex-execute [secret handling]`. Will execute the `ES-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 5. Check result with `spex check`. Will run all engineering spec (ES) checks related to your changes.
 6. See coverage `spex coverage`. Will run check if all specs have contract, implementation, and test.
 
-Tip: you can combine skills `/spex-create-capability-spec /spex-create-contract /spex-create-plan`
+Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
 
 ## Framework Principles
 

@@ -127,7 +127,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
 
-- A skill is triggered by name (for example `/spex-create-capability-spec`) or loaded on demand by the AI agent.
+- A skill is triggered by name (for example `/spex-capability-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
@@ -141,13 +141,13 @@ Fills in the descriptions and icons left blank by `spex init` and collects each 
 - Records each copied contract under its repository's `contracts` in `spex.yaml`.
 - Is run right after `spex init`.
 
-## spex-create-capability-spec
+## spex-capability-spec
 
 Turns a product need into schema-valid capability specs.
 
 - Turns a PRD into one or more schema-valid capability specs `cs-specs/<spec-id>.yaml`.
 
-## spex-create-engineering-spec
+## spex-engineering-spec
 
 Turns a convention into a schema-valid engineering spec with checks.
 
@@ -155,26 +155,26 @@ Turns a convention into a schema-valid engineering spec with checks.
 - Proposes the automated checks that verify it.
 - Writes `es-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
 
-## spex-create-contract
+## spex-contract
 
 Derives the machine-readable interface contract from approved capability specs.
 
 - Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
 - Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-capability-spec` first.
-- Runs after `spex-create-capability-spec` and before `spex-create-plan`.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-capability-spec` first.
+- Runs after `spex-capability-spec` and before `spex-plan`.
 
-## spex-create-plan
+## spex-plan
 
 Splits approved specs into an ordered, parallel-safe plan.
 
 - Reads the target specs, the affected repositories, and the governing es-specs, then inspects the current code.
 - Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-create-capability-spec` first.
-- Requires the contract to be settled with `spex-create-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-capability-spec` first.
+- Requires the contract to be settled with `spex-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
 - Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
-## spex-execute-plan
+## spex-execute
 
 Executes a plan step by step and checks the result.
 

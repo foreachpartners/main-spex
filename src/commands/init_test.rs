@@ -422,7 +422,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join(".agents/skills/spex-create-capability-spec/SKILL.md")
+                .join(".agents/skills/spex-capability-spec/SKILL.md")
                 .is_file()
         );
     }
@@ -439,7 +439,7 @@ mod tests_unit {
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
             claude
-                .join("skills/spex-create-capability-spec/SKILL.md")
+                .join("skills/spex-capability-spec/SKILL.md")
                 .is_file(),
             ".claude/skills should resolve through the symlink"
         );

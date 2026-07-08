@@ -1,5 +1,5 @@
 ---
-name: spex-create-plan
+name: spex-plan
 description: Create an implementation plan for one or more capability specs. Use when the user wants to plan, break down, or prepare implementation for a CS spec. Reads the spec, contract, the affected repositories, and the es-specs that govern them, inspects the current code, then writes a step-by-step implementation plan that AI agents can do in parallel.
 ---
 
@@ -31,8 +31,8 @@ When several specs are given, pick the lead spec (the one the others depend on, 
 
 Before continuing, confirm two preconditions:
 
-- Each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-capability-spec`, then return here. Do not plan a spec that has not been written and approved.
-- The contract is settled when applicable. If any acceptance criterion crosses a repository boundary (it needs an endpoint, message, or schema), the affected contract must be drafted or updated with `spex-create-contract` before planning. If the work needs no interface change (it is internal to one repository), proceed straight from spec to plan with no contract.
+- Each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-capability-spec`, then return here. Do not plan a spec that has not been written and approved.
+- The contract is settled when applicable. If any acceptance criterion crosses a repository boundary (it needs an endpoint, message, or schema), the affected contract must be drafted or updated with `spex-contract` before planning. If the work needs no interface change (it is internal to one repository), proceed straight from spec to plan with no contract.
 
 ## Step 1 — Read the specs
 
@@ -159,6 +159,6 @@ Rules for the plan content:
 
 ## Step 7 — Point to the next skill
 
-After the plan is written, offer to execute it: run `spex-execute-plan <spec-id>`. Note that it is better to start a new chat first to save context.
+After the plan is written, offer to execute it: run `spex-execute <spec-id>`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

@@ -61,7 +61,7 @@ There is no person who requested this feature with whom you can clarify details,
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
-/spex-create-capability-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
+/spex-capability-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one capability, then writes a schema-valid spec per capability. A spec captures one capability, not one repository. Review the spec and confirm its `status` is `planned`.
@@ -69,7 +69,7 @@ The skill interviews you, proposes the split when the PRD covers more than one c
 ### 5.2 Derive the contract
 
 ```text
-/spex-create-contract <spec-id>
+/spex-contract <spec-id>
 ```
 
 The agent reads the spec, `api` OpenAPI contract and updates it to match changes.
@@ -77,17 +77,17 @@ The agent reads the spec, `api` OpenAPI contract and updates it to match changes
 ### 5.3 Plan
 
 ```text
-/spex-create-plan <spec-id>
+/spex-plan <spec-id>
 ```
 
 The agent reads the spec, contract, code and proposes an implementation plan.
 
-Tip: you can combine skills in the future `/spex-create-capability-spec /spex-create-contract /spex-create-plan`
+Tip: you can combine skills in the future `/spex-capability-spec /spex-contract /spex-plan`
 
 ### 5.4 Execute
 
 ```text
-/spex-execute-plan <spec-id>
+/spex-execute <spec-id>
 ```
 
 The agent executes the plan tasks for each step in parallel.
@@ -107,7 +107,7 @@ Engineering specs capture cross-cutting conventions that apply repo-wide. Create
 for the API:
 
 ```text
-/spex-create-engineering-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
+/spex-engineering-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
 ```
 
 The skill interviews you, proposes a `regexp` check that flags binding to a

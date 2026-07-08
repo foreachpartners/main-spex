@@ -1,5 +1,5 @@
 ---
-name: spex-create-contract
+name: spex-contract
 description: Derive the machine-readable interface contract from one or more capability specs. Use when the user wants to author, draft, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
 ---
 
@@ -17,7 +17,7 @@ Each repository's contracts live in the `spex` repository's `<workspace-root>/<p
 
 ## When to use this skill
 
-Use it when the user wants to create, draft, or update the contract for one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-capability-spec`) or to plan implementation (use `spex-create-plan`). The spec must exist and be approved before its contract is drafted. An ES spec has no contract; do not use this skill for one.
+Use it when the user wants to create, draft, or update the contract for one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-capability-spec`) or to plan implementation (use `spex-plan`). The spec must exist and be approved before its contract is drafted. An ES spec has no contract; do not use this skill for one.
 
 ## Step 0 — Establish the target specs
 
@@ -27,7 +27,7 @@ Determine which specs to contract before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, contract that one and confirm the ID.
 - If no spec is identified, ask which to contract. Do not invent a spec.
 
-Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-create-capability-spec`, then return here. Do not contract a spec that has not been written and approved.
+Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-capability-spec`, then return here. Do not contract a spec that has not been written and approved.
 
 ## Step 1 — Read the specs
 
@@ -73,6 +73,6 @@ For each affected contract:
 
 ## Step 6 — Point to the next skill
 
-After the contract is written, offer to plan the implementation: run `spex-create-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+After the contract is written, offer to plan the implementation: run `spex-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
