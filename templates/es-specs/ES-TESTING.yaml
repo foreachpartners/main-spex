@@ -1,5 +1,6 @@
 id: ES-TESTING
 include_for_all_repos: true
+include_for_spex: false
 managed: true
 title: Testing hygiene
 description: >-

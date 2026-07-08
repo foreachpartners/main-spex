@@ -1,13 +1,13 @@
 ---
 name: spex-create-plan
-description: Draft an implementation plan for one or more capability specs. Use when the user wants to plan, break down, or prepare implementation for a CS spec (named, or the one just created). Reads the spec, the affected repositories, and the es-specs that govern them, inspects the current code, then writes a step-by-step plan to <workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md whose steps hold tasks that AI agents can run in parallel.
+description: Create an implementation plan for one or more capability specs. Use when the user wants to plan, break down, or prepare implementation for a CS spec. Reads the spec, contract, the affected repositories, and the es-specs that govern them, inspects the current code, then writes a step-by-step implementation plan that AI agents can do in parallel.
 ---
 
 # Create an Implementation Plan
 
 An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the es-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel.
 
-The plan is a working document: it records what to build, the contract changes, the governing es-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
+The plan is a working document: it records what to build, the governing es-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
 
 ## Paths
 
@@ -17,7 +17,7 @@ Each spec's plans live in their own directory: `<workspace-root>/<project-name>-
 
 ## When to use this skill
 
-Use it when the user wants to plan or prepare the implementation of one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-create-capability-spec`), to draft a contract (use `spex-create-contract`), or to execute a plan (use `spex-execute-plan`). The spec must exist and be approved before planning; its contract should be drafted first so the plan builds on a settled interface.
+Use it when the user wants to plan or prepare the implementation of one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just last created. Do not use it to author a spec, draft a contract, or to execute a plan. The spec must exist and be approved before planning; its contract if applicable should be drafted first so the plan builds on a settled interface.
 
 ## Step 0 — Establish the target specs
 
@@ -56,9 +56,11 @@ For each affected repository, resolve its `path` and study the current state so 
 
 - Find the contract(s) the spec touches — in the `spex` repository's `contracts/` folder — and read the relevant endpoints, messages, or schemas.
 - Read the handlers, modules, and tests nearest to the change, and note an existing feature to copy the structure from (the "by example" pattern: how a similar endpoint, screen, or test is already built).
-- Note the build/test commands and any annotation conventions (for example `@spec` tags) the repository already uses.
+- Note the build/test commands and any annotation conventions the repository already uses.
 
 ## Step 4 — Design the steps and tasks
+
+Focus on general picture, not on details, show database/domain model changes, new/changed methods signatures, not their implementation. Prefer bullet points for plan.
 
 Break the work into ordered **steps**. Within a step, split work into **tasks** only when there is more than one independent unit.
 
@@ -79,9 +81,8 @@ Follow the structure with a sentence or two of prose only for what the structure
 
 ## Step 5 — Draft the plan
 
-Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`) are placeholders; use the real names and roles from `spex.yaml`. Contract changes are made in the `spex` repository's `contracts/` folder, so a contract task runs in `spex`.
+Write the plan in Markdown using the template below. Keep the implementation overview short — a few sentences per repository, not a design essay. Derive test cases directly from the acceptance criteria so every criterion is provably covered. The repository names in the template (`api`, `frontend`) are placeholders; use the real names and roles from `spex.yaml`.
 
-````md
 # Plan: <lead spec title>
 
 - Specs: CS-LEAD-SPEC, CS-OTHER-SPEC
@@ -91,10 +92,6 @@ Write the plan in Markdown using the template below. Keep the implementation ove
 ## Overview
 
 <Short implementation overview: what changes in each affected repository and how it follows the existing code by example. A few sentences per repository.>
-
-## Contract changes
-
-<Endpoints, messages, or schemas added or changed, with method, path, status codes, and errors. State "none" if the contract is unchanged.>
 
 ## Steps
 
@@ -106,7 +103,7 @@ Status: not-started
 
 Status: not-started
 
-<What to do, which files, which es-specs apply, which spec to annotate.>
+<What to do as bullet points, database/domain model changes, new/changed methods signatures, not their implementation>
 
 #### Task 1.2 — <name> (repo: frontend)
 
@@ -126,14 +123,13 @@ Status: not-started
 <Example of showing a domain model change instead of describing it in prose:>
 
 ```rust
-struct Auth {
+struct Auth <
     user_id: UserId,
     failed_login_attempts: u32,
     locked_until: Option<DateTime<Utc>>,
     version: u32,
-}
+>
 ```
-````
 
 ### Step 2 — <name>
 
@@ -145,8 +141,8 @@ Status: not-started
 
 Each case maps to an acceptance criterion and proves it.
 
-- [CS-LEAD-SPEC / AC1] <case>: <given / when / then>
-- [CS-LEAD-SPEC / AC2] <case>: <given / when / then>
+- [CS-LEAD-SPEC / AC description] <case>: <given / when / then>
+- [CS-LEAD-SPEC / AC description] <case>: <given / when / then>
 
 Rules for the plan content:
 

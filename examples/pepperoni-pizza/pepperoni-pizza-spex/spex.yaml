@@ -2,7 +2,7 @@ project_name: pepperoni-pizza
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
-cli_version: 0.7.12
+cli_version: 0.7.15
 repositories:
   - repository_name: pepperoni-pizza-api
     repository_short_name: api
@@ -23,6 +23,7 @@ repositories:
       - ES-SECRET-HANDLING
       - ES-SPEC-ID-ANNOTATIONS
       - ES-WRITING-STYLE
+      - ES-TESTING
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     description: >-
@@ -36,6 +37,7 @@ repositories:
       - ES-SECRET-HANDLING
       - ES-SPEC-ID-ANNOTATIONS
       - ES-WRITING-STYLE
+      - ES-TESTING
   - repository_name: pepperoni-pizza-spex
     repository_short_name: spex
     description: >-
