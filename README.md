@@ -88,12 +88,12 @@ For example, a pizza ordering feature moves through the flow like this:
 
 ```mermaid
 flowchart TD
-    BRD["BRD — why"] --> PRD["PRD — what"]
+    BRD["BRD (optional) — why"] --> PRD["PRD (optional) — what"]
     PRD --> Cap
 
     subgraph Traced ["traced by spec ID"]
-        Cap["Capability Spec — what it provides"] --> Contract["Contract — interface"]
-        Contract --> Plan["Plan — how to build it"]
+        Cap["Capability Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
+        Contract --> Plan["Plan (optional) — how to build it"]
         Plan --> Impl["Implementation — code"]
         Impl --> Test["Test — proof"]
     end

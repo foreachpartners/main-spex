@@ -12,7 +12,7 @@ field rules.
 Turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-- Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface) → plan (how to build it) → implementation (code) → test (proof).
+- Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
 - A capability Spec ID (`CS`) names a spec and links the contract, code, and tests that satisfy it.
 - A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a capability spec.
 - A contract is required wherever a machine-readable interface applies — a REST API must have an OpenAPI contract — and is optional otherwise, so a frontend spec may not have a contract.
