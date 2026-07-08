@@ -1,13 +1,13 @@
 ---
 name: spex-execute
-description: Execute an existing implementation plan. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/. Reads the plan and the specs, repositories, and es-specs it names, then works through the steps in order — running the parallel tasks within each step as separate AI agents, marking each step and task completed as it lands, running `spex check` on the affected repositories, and setting each implemented capability spec's status to active.
+description: Execute an existing implementation plan, or carry out an ad-hoc user request directly against the codebase. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/, or asks for a change without a formal plan. For a plan, reads it and the specs, repositories, and es-specs it names, then works through the steps in order. For a plain user request, first gathers every es-spec governing the affected repositories and reads them in full, then implements the request under those rules. Runs the parallel tasks within each step as separate AI agents, marks each step and task completed as it lands, runs `spex check` on the affected repositories, and sets each implemented capability spec's status to active.
 ---
 
-# Execute an Implementation Plan
+# Execute an Implementation Plan or a User Request
 
-An implementation plan is an ordered set of steps whose tasks AI agents carry out. Your job is to read one plan, then work through its steps in order: within a step, run the independent tasks in parallel as separate agents; between steps, wait for the earlier step to finish before starting the next. As each task and step lands, mark it completed in the plan file, then run `spex check` on the affected repositories to prove the work respects the governing es-specs.
+An implementation plan is an ordered set of steps whose tasks AI agents carry out. A user request is any change the user asks for directly, without first writing a plan. Either way, your job is to ground the work in the governing es-specs before touching code, then execute it, verify it, and report back.
 
-You coordinate the work — you do not redo what an agent already did. Each task in a step has a disjoint write scope, so parallel agents never collide. When the plan's steps pass, set each capability spec it implemented to `active` so the capability comes under `spex coverage`.
+You coordinate the work — you do not redo what an agent already did. Each task in a step has a disjoint write scope, so parallel agents never collide.
 
 ## Paths
 
@@ -15,11 +15,17 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan. Do not use it to author a plan (use `spex-plan`), to author specs (`spex-capability-spec`, `spex-engineering-spec`), or to draft a contract (use `spex-contract`). The plan must already exist in `<workspace-root>/<project-name>-spex/plans/`.
+Use it when the user wants to execute, run, or implement an existing plan, or wants a change made directly without a plan. Do not use it to author a plan (use `spex-plan`), to author specs (`spex-capability-spec`, `spex-engineering-spec`), or to draft a contract (use `spex-contract`).
 
-## Step 0 — Establish the target plan
+## Step 0 — Establish plan vs. user request
 
-Determine which plan to execute before doing anything else:
+Determine what you're executing before doing anything else:
+
+- If the user named a plan (a filename, a spec ID with an existing plan, or "the plan I just made"), or a plan clearly exists for what they're asking, treat this as **executing a plan**: continue to "Establish the target plan" below, then Steps 1–6.
+- If the user names no plan and none exists — they're describing a change, bug fix, or feature directly — treat this as **executing a user request**: skip to "Execute a user request" below instead of the plan-based steps.
+- If it's ambiguous whether a plan should exist first (the request is large or multi-repository), ask the user whether to plan it first with `spex-plan` or proceed directly. Do not silently skip planning for large, multi-step work.
+
+### Establish the target plan (plan execution only)
 
 - If the user named a plan (a filename, a spec ID, or "the plan I just made"), use it. When only a spec ID is given, look in `<workspace-root>/<project-name>-spex/plans/<spec-id>/`; if it holds several plans, pick the most recent by the `<date>` in the filename and confirm.
 - If the user named nothing, list the plan directories in `<workspace-root>/<project-name>-spex/plans/` and their plans, then ask which to execute. Do not invent a plan.
@@ -90,5 +96,16 @@ Summarize the run for the user:
 - Which acceptance criteria are now proven, and any test cases still outstanding.
 - Which specs you set to `active`, which acceptance criteria you ticked `[x]`, and any criteria you left `[ ]`, with the reason.
 - Any step that was skipped (already completed) or stopped, with the reason.
+
+## Execute a user request
+
+When there is no plan, ground the request in the specs and es-specs before writing any code:
+
+1. **Identify the affected repositories.** From the user's request, determine which repository or repositories the change touches. If it's unclear, ask, or inspect `<workspace-root>/<project-name>-spex/spex.yaml` and each repository's `description` to infer it.
+2. **Gather the governing es-specs.** For each affected repository, read its `es_specs` list in `spex.yaml` (repository-wide specs are already expanded into it, so the list is authoritative). Read every named es-spec in full from `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — not a summary — so the change respects naming, structure, security, traceability, and annotation rules before you touch code.
+3. **Gather the related capability specs.** Search `<workspace-root>/<project-name>-spex/cs-specs/` for any CS spec whose `scope` includes an affected repository and whose subject overlaps the request. Read each relevant one in full so the change stays consistent with the capability's existing acceptance criteria and doesn't silently contradict them. If the request extends or changes behavior covered by an existing CS spec's acceptance criteria, tell the user and offer to update that spec first with `spex-capability-spec`.
+4. **Implement the request.** Make the change yourself, or dispatch it to one or more AI agents scoped to disjoint files or repositories when the request spans more than one independent unit. Give each agent the relevant es-specs and CS specs gathered above, and the spec IDs to annotate per `ES-SPEC-ID-ANNOTATIONS`.
+5. **Verify.** Run `spex check --repo <affected-repos>` and fix any `error` findings; report `warn` findings without blocking on them. Run the affected repositories' own tests where they exist.
+6. **Report.** Summarize what changed, which repositories were touched, the `spex check` outcome, and any spec you flagged for a follow-up update.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

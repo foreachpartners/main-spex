@@ -1,11 +1,11 @@
 ---
 name: spex-plan
-description: Create an implementation plan for one or more capability specs. Use when the user wants to plan, break down, or prepare implementation for a CS spec. Reads the spec, contract, the affected repositories, and the es-specs that govern them, inspects the current code, then writes a step-by-step implementation plan that AI agents can do in parallel.
+description: Create a new implementation plan for one or more capability specs, or edit an existing plan. Use when the user wants to plan, break down, prepare, update, or amend implementation for a CS spec, or change a named existing plan. Reads the spec, contract, the affected repositories, and the es-specs that govern them, inspects the current code, then writes or updates a step-by-step implementation plan that AI agents can do in parallel.
 ---
 
-# Create an Implementation Plan
+# Create or Edit an Implementation Plan
 
-An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the es-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel.
+An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the es-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel — or, when the user names an existing plan, to revise its steps, tasks, or test cases in place.
 
 The plan is a working document: it records what to build, the governing es-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
 
@@ -17,9 +17,14 @@ Each spec's plans live in their own directory: `<workspace-root>/<project-name>-
 
 ## When to use this skill
 
-Use it when the user wants to plan or prepare the implementation of one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just last created. Do not use it to author a spec, draft a contract, or to execute a plan. The spec must exist and be approved before planning; its contract if applicable should be drafted first so the plan builds on a settled interface.
+Use it when the user wants to plan or prepare the implementation of one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just last created — or to update, amend, or re-plan a named existing plan file. Do not use it to author a spec, draft a contract, or to execute a plan. The spec must exist and be approved before planning; its contract if applicable should be drafted first so the plan builds on a settled interface.
 
-## Step 0 — Establish the target specs
+## Step 0 — Establish create vs. edit, and the target specs
+
+First decide whether this is a new plan or a change to one that already exists:
+
+- If the user names an existing plan (a filename, a path under `<workspace-root>/<project-name>-spex/plans/`, or "the plan for `<spec-id>`" when a plan is already there) or asks to update, revise, re-plan, or change a plan, this is an **edit**. Locate it (see `spex-execute`'s Step 0 for how to resolve a plan from a spec ID when several exist) and read it in full — this is the file you will modify, not replace. Confirm with the user what should change (added, removed, or reordered steps/tasks, revised test cases, a changed scope), then jump to Step 5 using the file's existing steps as the base rather than drafting from scratch — re-run Steps 1–4 only for the parts that changed, so the update stays grounded in the specs, contract, and code. Preserve every untouched line, its ordering, and formatting, and keep each unchanged step/task's `Status:` as-is.
+- Otherwise, this is a **new plan** — continue below.
 
 Determine which specs to plan before doing anything else:
 
@@ -154,8 +159,8 @@ Rules for the plan content:
 
 ## Step 6 — Write, then offer edits
 
-1. Write the plan to `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`, creating the spec's plan directory if it does not exist. The filename stem must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json`.
-2. Tell the user the path you wrote, walk through the step boundaries and which tasks run in parallel, then ask whether they want to change or edit anything. Apply any requested edits in place.
+1. For a new plan, write it to `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`, creating the spec's plan directory if it does not exist; the filename stem must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json`. For an edit, update the existing plan file in place at its current path — never rename or duplicate it.
+2. Tell the user the path you wrote (or the changes you applied, for an edit), walk through the step boundaries and which tasks run in parallel, then ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Step 7 — Point to the next skill
 

@@ -1,11 +1,11 @@
 ---
 name: spex-engineering-spec
-description: Create an engineering spec (ES) by interviewing the user. Use when the user wants to author, draft, or extract an ES spec from a coding standard, a style guide, a security policy, an engineering decision, or an existing code pattern. Asks targeted questions, proposes automated checks, then writes a schema-valid YAML file to <workspace-root>/<project-name>-spex/es-specs/.
+description: Create a new engineering spec (ES) or edit an existing one by interviewing the user. Use when the user wants to author, draft, extract, update, or amend an ES spec — from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing spec. Asks targeted questions, proposes automated checks, then writes a schema-valid YAML file to <workspace-root>/<project-name>-spex/es-specs/.
 ---
 
-# Create an Engineering Spec (ES)
+# Create or Edit an Engineering Spec (ES)
 
-An engineering spec (`ES`) describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file.
+An engineering spec (`ES`) describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file — or, when the user names an existing spec, to update it in place.
 
 Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/<project-name>-spex/es-specs/` directory.
 
@@ -17,13 +17,20 @@ The schema at `<workspace-root>/<project-name>-spex/schemas/es-spec.schema.json`
 
 ## When to use this skill
 
-Use it when the user wants to create, draft, or extract an ES spec — from a coding standard, a style or naming guide, a security policy, a testing rule, or a pattern already present in the code. Do not use it for a specific capability the system must provide (an endpoint, integration, health check, performance target); those are capability specs (CS). The test: a rule all code must obey, enforceable repo-wide → ES; a single capability the system provides → CS.
+Use it when the user wants to create, draft, extract, update, or amend an ES spec — from a coding standard, a style or naming guide, a security policy, a testing rule, a pattern already present in the code, or a named existing spec. Do not use it for a specific capability the system must provide (an endpoint, integration, health check, performance target); those are capability specs (CS). The test: a rule all code must obey, enforceable repo-wide → ES; a single capability the system provides → CS.
 
 ## Scope rule: one convention per spec
 
 An ES spec captures exactly one coherent cross-cutting convention; its individual rules are the acceptance criteria. If the user describes several unrelated conventions, propose splitting them into multiple specs and confirm the split before writing.
 
-## Step 0 — Establish the source
+## Step 0 — Establish create vs. edit
+
+First decide whether this is a new spec or a change to one that already exists:
+
+- If the user names an existing spec ID (for example `ES-SECRET-HANDLING`) or asks to update, amend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Also read its checks and any `script` bodies at `<workspace-root>/<project-name>-spex/scripts/<spec-id>/`. Confirm with the user what should change (revised or new acceptance criteria, new or adjusted checks, a scope change), applying the same field rules as Steps 3–4. Skip straight to Step 5, editing the existing file (and any check scripts) in place rather than starting over; preserve every untouched field, its ordering, and formatting.
+- Otherwise, this is a **new spec** — continue with Step 0's source-gathering below, then Steps 1–4.
+
+### Establish the source (new specs only)
 
 Determine what the spec is based on before doing anything else:
 
@@ -75,10 +82,10 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 
 ## Step 5 — Write, then offer edits
 
-1. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`.
+1. Write the spec to `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
 3. Run `spex check` to validate compliance.
-4. Tell the user the spec and checks you wrote and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
+4. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Step 6 — Point to the next skill
 

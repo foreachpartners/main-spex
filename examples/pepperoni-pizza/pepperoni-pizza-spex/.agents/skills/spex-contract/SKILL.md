@@ -1,6 +1,6 @@
 ---
 name: spex-contract
-description: Derive the machine-readable interface contract from one or more capability specs. Use when the user wants to author, draft, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
+description: Derive or update the machine-readable interface contract from one or more capability specs. Use when the user wants to author, draft, update, or amend the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
 ---
 
 # Create an Interface Contract
