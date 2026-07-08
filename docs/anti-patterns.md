@@ -50,14 +50,6 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 
 **How to apply:** Validate at the boundary the contract defines. Trust internally. If you find yourself adding a check "just in case", ask: what code path produces the bad value? If you can't name one, the check is wrong.
 
-## Comments that explain WHAT
-
-**Rule:** Default to writing no comments. Don't explain WHAT the code does — well-named identifiers do that. Don't reference the current task, fix, or callers ("used by X", "added for Y", "handles case from issue #123").
-
-**Why:** A shared, ubiquitous vocabulary and clear names carry the meaning. WHAT comments rot the moment the code changes; caller references rot the moment a caller is added or removed. The grep for "what calls this" is more reliable than a comment claiming to know.
-
-**How to apply:** Write a comment only when WHY is non-obvious: a hidden constraint, a subtle invariant, a workaround for a specific bug, behavior that would surprise a careful reader. If removing the comment wouldn't confuse a future reader, don't write it.
-
 ## Inventing acceptance criteria
 
 **Rule:** Implement, test, and check only what the spec's acceptance criteria state. Never invent a requirement no spec contains, and never silently widen a criterion while implementing it.
@@ -113,11 +105,3 @@ Engineering hygiene rules for working in spex. Each one is the rule, the reason 
 **Why:** A duplicated fact is already wrong, or soon will be. Agents copy context between files for convenience ("let me add this to the agent rules too"), and copies diverge faster than anyone notices.
 
 **How to apply:** Keep the interface in `<workspace-root>/<project-name>-spex/contracts/`, the behavior in `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`, the convention in `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml`, the layout in `spex.yaml`, and terms in `docs/glossary.md`. Reference these sources; do not copy them.
-
-## Changes without traceability
-
-**Rule:** Every behavioral change MUST trace to a spec through a Spec ID annotation at the layer boundary: `@spec impl <spec-id>` and `@spec test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI. Annotate once at the boundary, never nested. Never leave a behavioral change orphaned, and never reference a Spec ID with no spec file.
-
-**Why:** The Spec ID is the unit of traceability. `spex coverage` computes coverage from these annotations and exits non-zero when an active capability spec is missing a required layer. Without the annotation the spec appears unimplemented, the audit fails, and bottom-up tracing (test → code → contract → spec) is impossible.
-
-**How to apply:** Annotate at the boundary as you implement, using the spec the work satisfies. Capability-spec traceability is required; engineering-spec traceability is optional. If the change has no spec, stop and create one with `spex-create-capability-spec` first.

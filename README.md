@@ -76,9 +76,11 @@ See all principles in [framework-principles.md](docs/framework-principles.md).
 
 For example, a pizza ordering feature moves through the flow like this:
 
-1. **BRD** — "sell pizza online to increase sales"
-2. **PRD** — "customers can pick a pizza on the website and pay online"
-3. **Capability Spec** — `CS-PLACE-PIZZA-ORDER`: "POST /orders returns 201 with the created order"
+1. **BRD** — sell pizza online to increase sales
+2. **PRD** — customers can pick a pizza on the website and pay online
+3. **Capability Spec** — `CS-PLACE-PIZZA-ORDER`: Customer can place an order. 
+
+    Acceptance criteria: POST /orders returns 201 with the created order
 4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
 5. **Plan** — step-by-step build plan for the `placeOrder` endpoint
 6. **Implementation** — the `placeOrder()` handler in code
