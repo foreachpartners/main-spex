@@ -9,17 +9,32 @@ field rules.
 
 ## Artifact chain
 
-Turns business goals into verified code through a chain of artifacts, each
+Framework helps to turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-- Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
-- A capability Spec ID (`CS`) names a spec and links the contract, code, and tests that satisfy it.
-- A contract is the machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a capability spec.
-- A contract is required wherever a machine-readable interface applies — a REST API must have an OpenAPI contract — and is optional otherwise, so a frontend spec may not have a contract.
-- A plan turns approved specs into ordered steps of parallel-safe tasks that agents execute.
-- A plan helps with large changes and is optional for small, self-contained ones.
-- The AI writes every artifact and the human validates each one before the next is generated: a spec is approved before its contract, the contract before the plan, and the plan before implementation and tests.
-- No artifact ships without a human review and approval, so every change traces back to a decision a human approved.
+Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
+
+### BRD
+
+Business goals and stakeholder needs that product owner must identify, prioritize, and translate into PRD.
+
+### PRD
+
+Features and user-facing behavior extracted from the BRD by product owner as actionable user stories and specifications for the development team.
+
+### Capability Spec
+
+Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its individual rules captured as acceptance criteria. CS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
+
+### Contract
+
+The machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a capability spec if applicable (API, cross-service communication contracts). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
+
+### Plan
+
+Plan turns capability specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
+
+A plan helps with large changes and is optional for small, self-contained ones.
 
 ## Spec kinds
 
