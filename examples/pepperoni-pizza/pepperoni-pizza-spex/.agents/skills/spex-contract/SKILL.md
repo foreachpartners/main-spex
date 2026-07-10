@@ -1,23 +1,17 @@
 ---
 name: spex-contract
-description: Derive or update the machine-readable interface contract from one or more capability specs. Use when the user wants to author, draft, update, or amend the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec — named, or the one just created. Reads the spec, the affected repositories, and the contract conventions that govern them, then writes the endpoints, messages, or schemas into the spex repository's contracts/ folder, annotates each with its spec, and records them in spex.yaml.
+description: Derive or update the machine-readable interface contract from one or more capability specs. Use when the user wants to create, extend, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec.
 ---
 
 # Create an Interface Contract
 
 A contract is the machine-readable _interface_ derived from a capability spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
-Match the format and prose style of the existing contracts and write the result into the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder.
-
 ## Paths
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
 Each repository's contracts live in the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder, named with the repository's prefix (for example `contracts/api.openapi.yaml`), and are declared per repository under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`.
-
-## When to use this skill
-
-Use it when the user wants to create, draft, or update the contract for one or more CS specs — either named (for example `CS-PLACE-PIZZA-ORDER`) or the spec just created in this session. Do not use it to author a spec (use `spex-capability-spec`) or to plan implementation (use `spex-plan`). The spec must exist and be approved before its contract is drafted. An RS spec has no contract; do not use this skill for one.
 
 ## Step 0 — Establish the target specs
 
@@ -27,9 +21,7 @@ Determine which specs to contract before doing anything else:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, contract that one and confirm the ID.
 - If no spec is identified, ask which to contract. Do not invent a spec.
 
-Before continuing, confirm each target spec's file exists at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`. If a spec does not exist yet, stop and create it first with `spex-capability-spec`, then return here. Do not contract a spec that has not been written and approved.
-
-## Step 1 — Read the specs
+## Step 1 — Gather context first
 
 For each targeted spec, read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
@@ -70,6 +62,50 @@ For each affected contract:
 2. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
 3. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 4. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
+
+## Example
+
+Acceptance criterion: "POST /orders rejects an empty `items` array with a 422." Resulting OpenAPI fragment in `contracts/api.openapi.yaml`:
+
+```yaml
+paths:
+  /orders:
+    post:
+      operationId: createOrder
+      summary: Create an order
+      x-spec: CS-ORDER-CREATE
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+components:
+  schemas:
+    CreateOrderRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItem"
+```
+
+The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `OrderItem`.
 
 ## Step 6 — Point to the next skill
 

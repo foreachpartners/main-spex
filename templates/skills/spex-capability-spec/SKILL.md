@@ -1,13 +1,11 @@
 ---
 name: spex-capability-spec
-description: Create new capability specs (CS) or edit existing ones by interviewing the user. Use when the user wants to author, draft, extract, update, or amend CS specs — from a PRD, an RFD, a feature idea, a business rule, or a technical capability the product needs.
+description: Create new capability specs (CS) or extend/change existing ones by interviewing the user. Use when the user wants to extend/change existing CS or create a new CS specs — from a PRD, an RFD, a feature idea, a business rule, or a technical capability the product needs.
 ---
 
-# Create or Edit Capability Specs (CS)
+# Create, extend or change Capability Specs (CS)
 
-A capability spec (`CS`) describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as verifiable acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities. A single source usually covers several capabilities, so it can produce one or more specs. Your job is to turn a fuzzy idea or PRD into schema-valid specs by asking the user focused questions, then writing one file per capability — or, when the user names an existing spec, to update it in place.
-
-Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/<project-name>-spex/cs-specs/` directory.
+A capability spec (`CS`) describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as verifiable acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities. A single source usually covers several capabilities, so it can produce one or more specs. Your job is to turn a fuzzy idea or PRD into schema-valid specs by asking the user focused questions, then writing one file per capability — or, when the user names an existing spec, to update/extend it in place.
 
 ## Paths
 
@@ -15,32 +13,29 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 The schema at `<workspace-root>/<project-name>-spex/schemas/cs-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
-## When to use this skill
+For new specs write the result into the spex repository's `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`.
 
-Use it when the user wants to create, draft, extract, update, or amend CS specs — from a PRD, an RFD, a feature request, a business rule, a technical capability the product needs (an endpoint, integration, health check, performance target), or a named existing spec. Do not use it for cross-cutting conventions or rules every change must follow; those are rule specs (RS). The test: a specific capability the system must provide → CS; a rule all code must obey, enforceable repo-wide → RS.
+## Capability spec (CS) vs Rule spec (RS)
+
+A specific capability the system must provide (an endpoint, integration, health check, performance target) → CS. A cross-cutting rule all code must obey, enforceable repo-wide → RS.
 
 ## Scope rule: one capability per spec
 
 A CS spec captures exactly one coherent capability; its individual rules are the acceptance criteria. A PRD typically breaks down into many capability specs, so a single source can yield several. When the source covers more than one capability, identify each distinct one, propose the split as a list of specs (one `id` and one-line summary each), and confirm it with the user before drafting. Write each confirmed capability as its own spec file.
 
-## Step 0 — Establish create vs. edit
+## Step 0 — Establish create vs edit
 
 First decide whether this is a new spec or a change to one that already exists:
 
-- If the user names an existing spec ID (for example `CS-PLACE-PIZZA-ORDER`) or asks to update, amend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Confirm with the user what should change (new or revised acceptance criteria, a scope change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field, its ordering, and formatting.
-- Otherwise, this is a **new spec** — continue with Step 0's source-gathering below, then Steps 1–4.
+- If the user names an existing spec ID (for example `CS-PLACE-PIZZA-ORDER`) or asks to update, extend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Confirm with the user what should change (new or revised acceptance criteria, a scope change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field.
+- Otherwise, this is a **new spec** — continue with Step 1.
 
-### Establish the source (new specs only)
+## Step 1 — Gather context first
 
 Determine what the specs are based on before doing anything else:
 
 - If the user attached or pasted a source (a PRD, an RFD, or a feature description) — whether as text or as a file path/link — treat it as the primary input. Read the attached file or the pasted text in full and pre-fill every answer you can from it before asking anything.
 - If the user provided no source and nothing to spec, ask first what they want to spec. Do not invent a capability or proceed on assumptions.
-
-## Step 1 — Gather context first
-
-Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
-
 - Read `<workspace-root>/<project-name>-spex/spex.yaml` for the project overview. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role and use that to determine the spec's implementation `scope`.
 - Read `<workspace-root>/<project-name>-spex/cs-specs/` for related specs
 - Read the interface contracts in the `spex` repository's `contracts/` folder, listed per repository under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
@@ -70,6 +65,29 @@ For each drafted or edited spec:
 1. Write it to `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Validate the result against `<workspace-root>/<project-name>-spex/schemas/cs-spec.schema.json`.
 3. Tell the user the path you wrote (or the diff you applied, for an edit) and ask whether they want to change anything further. Apply any requested edits in place.
+
+## Example
+
+```yaml
+id: CS-RESET-PASSWORD
+title: Let users reset a forgotten password
+description: >-
+  Lets a user who forgot their password regain access by requesting a reset
+  link by email and choosing a new password.
+acceptance_criteria:
+  - "[ ] MUST send a reset link to the account's email in the `api` when the user requests a reset with a registered email"
+  - "[ ] MUST expire the reset link in the `api` 30 minutes after it is sent"
+  - "[ ] MUST invalidate the reset link in the `api` once it has been used"
+  - "[ ] MUST require the new password in the `api` to meet the account's standard password rules"
+  - "[ ] MUST NOT reveal in the `api` whether an email is registered when a reset is requested for an unknown email"
+  - "[ ] MUST let the user request a reset link in the `frontend` from the sign-in screen"
+  - "[ ] MUST let the user choose a new password in the `frontend` from the reset link"
+  - "[ ] SHOULD sign the user out of all other active sessions in the `api` once the password is reset"
+scope:
+  - api
+  - frontend
+status: active
+```
 
 ## Step 5 — Point to the next skill
 

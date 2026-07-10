@@ -191,12 +191,12 @@ Splits approved specs into an ordered, parallel-safe plan.
 
 ## spex-execute
 
-Executes a plan step by step and checks the result.
+Executes a plan step by step, or a plain user request directly, and checks the result.
 
-- Works through a plan step by step: runs each step's tasks as parallel agents, and waits between steps.
-- Marks each task and step `completed` as it lands, so an interrupted run resumes from the first incomplete step.
+- Works through the units of work in order: a plan's steps top to bottom, or a bare request as one or more independent tasks; runs each unit's tasks as parallel agents.
+- Marks each task and step `completed` as it lands when a plan exists, so an interrupted run resumes from the first incomplete step.
 - Runs `spex check` on the affected repositories and fixes `error` findings.
-- Sets each implemented capability spec's `status` to `active` once the steps pass, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
+- Sets each capability spec the work implemented or advanced to `active`, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
 
 # Specs
 

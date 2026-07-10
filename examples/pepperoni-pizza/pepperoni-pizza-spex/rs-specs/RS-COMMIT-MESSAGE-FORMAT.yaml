@@ -14,7 +14,6 @@ acceptance_criteria:
   - "MUST use the `cs` scope for capability changes (e.g. `feat(cs)`, `fix(cs)`)"
   - "MUST end every `cs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
   - "SHOULD use the `rs` scope for rule changes (e.g. `feat(rs)`, `fix(rs)`)"
-
 checks:
   - name: commit-conventional-format
     description: Recent commits must follow the Conventional Commits subject format

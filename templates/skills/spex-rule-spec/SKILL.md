@@ -1,13 +1,11 @@
 ---
 name: spex-rule-spec
-description: Create a new rule spec (RS) or edit an existing one by interviewing the user. Use when the user wants to author, draft, extract, update, or amend an RS spec — from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing spec. Asks targeted questions, proposes automated checks, then writes a schema-valid YAML file to <workspace-root>/<project-name>-spex/rs-specs/.
+description: Create a new rule spec (RS) or edit an existing one by interviewing the user. Use when the user wants to create, extend, or update an RS spec — from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing spec.
 ---
 
 # Create or Edit a Rule Spec (RS)
 
 A rule spec (`RS`) describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies repository-wide. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file — or, when the user names an existing spec, to update it in place.
-
-Match the prose style of the existing specs and write the result into the spex repository's `<workspace-root>/<project-name>-spex/rs-specs/` directory.
 
 ## Paths
 
@@ -15,9 +13,11 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 The schema at `<workspace-root>/<project-name>-spex/schemas/rs-spec.schema.json` is authoritative for field rules and contains worked examples. Read it before drafting.
 
-## When to use this skill
+Writes a schema-valid YAML file to `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml`
 
-Use it when the user wants to create, draft, extract, update, or amend an RS spec — from a coding standard, a style or naming guide, a security policy, a testing rule, a pattern already present in the code, or a named existing spec. Do not use it for a specific capability the system must provide (an endpoint, integration, health check, performance target); those are capability specs (CS). The test: a rule all code must obey, enforceable repo-wide → RS; a single capability the system provides → CS.
+## CS vs RS
+
+A cross-cutting rule all code must obey, enforceable repo-wide → RS. A specific capability the system must provide (an endpoint, integration, health check, performance target) → CS.
 
 ## Scope rule: one convention per spec
 
@@ -86,6 +86,31 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
 3. Run `spex check` to validate compliance.
 4. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
+
+## Example
+
+```yaml
+id: RS-NO-CONSOLE-LOG
+title: No stray console.log statements
+description: >-
+  Stray console.log calls left over from debugging clutter production output
+  and can leak internal state. Use the project logger instead.
+acceptance_criteria:
+  - "MUST NOT use `console.log` in application code — use the project logger"
+  - "MUST log through the shared logger so output includes level and context"
+include_for_all_repos: true
+checks:
+  - name: no-console-log
+    description: Stray console.log calls should use the project logger instead
+    type: regexp
+    pattern: "console\\.log\\("
+    include:
+      - "**/*.ts"
+      - "**/*.tsx"
+    exclude:
+      - "**/*.test.ts"
+    severity: error
+```
 
 ## Step 6 — Point to the next skill
 
