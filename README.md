@@ -4,9 +4,13 @@ AI-first specification-driven development framework with human in control.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
+## Goal
+
+spex helps you move fast with AI, not stand in your way. Capability specs (CS) and engineering specs (ES) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
+
 ## Quickstart
 
-## Prerequisites
+### Prerequisites
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
@@ -17,7 +21,7 @@ _The name `spex` comes from a casual shorthand for specifications._
   cargo install --path . --force
   ```
 
-### Setup
+#### Setup
 
 We will create the following structure:
 
@@ -49,10 +53,10 @@ Workflow core is AI agent skills and CLI commands.
    - capability spec `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
    - engineering spec `/spex-engineering-spec [secret handling]`. Will create `pepperoni-pizza-spex/es-specs/ES-SECRET-HANDLING.yaml`
 2. Derive the contract for a capability spec `/spex-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. Create implementation plan for spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/ES-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. Execute plan `/spex-execute [secret handling]`. Will execute the `ES-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-5. Check result with `spex check`. Will run all engineering spec (ES) checks related to your changes.
-6. See coverage `spex coverage`. Will run check if all specs have contract, implementation, and test.
+3. Create an implementation plan for a spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/ES-SECRET-HANDLING/2024-11-25_secret-handling.md`
+4. Execute the plan `/spex-execute [secret handling]`. Will execute the `ES-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+5. Check the results with `spex check`. Will run all engineering spec (ES) checks related to your changes.
+6. See coverage with `spex coverage`. Will check if all specs have a contract, implementation, and test.
 
 Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
 
@@ -81,6 +85,7 @@ For example, a pizza ordering feature moves through the flow like this:
 3. **Capability Spec** — `CS-PLACE-PIZZA-ORDER`: Customer can place an order.
 
    Acceptance criteria: POST /orders returns 201 with the created order
+
 4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
 5. **Plan** — step-by-step build plan for the `placeOrder` endpoint
 6. **Implementation** — the `placeOrder()` handler in code
