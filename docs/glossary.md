@@ -14,7 +14,7 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: capability (`CS`) and engineering (`ES`). The dividing line is capability versus convention: a specific capability the system must provide → `CS`; a rule every change must follow, enforceable repo-wide → `ES`.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: capability (`CS`) and rule (`RS`). The dividing line is capability versus convention: a specific capability the system must provide → `CS`; a rule every change must follow, enforceable repo-wide → `RS`.
 
 - **Capability Spec** (`CS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many capability specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
 
@@ -25,10 +25,10 @@
     - "[ ] MUST return 201 with the created order from POST /orders"
   ```
 
-- **Engineering Spec** (`ES`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a capability spec (`CS`), not an engineering spec.
+- **Rule Spec** (`RS`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a capability spec (`CS`), not a rule spec.
 
   ```yaml
-  id: ES-SECRET-HANDLING
+  id: RS-SECRET-HANDLING
   title: Secret protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
@@ -38,7 +38,7 @@
 
   ```text
   CS-PLACE-PIZZA-ORDER
-  ES-SECRET-HANDLING
+  RS-SECRET-HANDLING
   ```
 
 - **Contract** — derived from a capability spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.

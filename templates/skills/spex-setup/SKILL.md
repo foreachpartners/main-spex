@@ -87,8 +87,8 @@ Example `spex.yaml` repository entry after collecting a contract:
   contracts:
     - path: contracts/api.openapi.yaml
       description: REST OpenAPI spec for the orders API.
-  es_specs:
-    - ES-SECRET-HANDLING
+  rs_specs:
+    - RS-SECRET-HANDLING
 ```
 
 ## Step 5 — Fill in the workspace folder icons
@@ -116,7 +116,7 @@ Example result:
 
 ## Step 6 — Point to the next skill
 
-Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-capability-spec` for a capability the system must provide, or `spex-engineering-spec` for a cross-cutting engineering convention. Note that it is better to start a new chat first to save context.
+Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-capability-spec` for a capability the system must provide, or `spex-rule-spec` for a cross-cutting convention or rule. Note that it is better to start a new chat first to save context.
 
 ## Field placement
 
@@ -133,8 +133,8 @@ repositories:
     contracts:
       - path: contracts/api.openapi.yaml
         description: REST OpenAPI spec for the orders API.
-    es_specs:
-      - ES-SECRET-HANDLING
+    rs_specs:
+      - RS-SECRET-HANDLING
 ```
 
 ## Quality bar
@@ -143,5 +143,5 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract is copied into `contracts/` with a repository-prefixed name and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
-- No existing field, path, or es-spec is changed or removed.
+- No existing field, path, or rs-spec is changed or removed.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

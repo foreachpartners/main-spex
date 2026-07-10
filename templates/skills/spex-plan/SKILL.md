@@ -1,13 +1,13 @@
 ---
 name: spex-plan
-description: Create a new implementation plan for one or more capability specs, or edit an existing plan. Use when the user wants to plan, break down, prepare, update, or amend implementation for a CS spec, or change a named existing plan. Reads the spec, contract, the affected repositories, and the es-specs that govern them, inspects the current code, then writes or updates a step-by-step implementation plan that AI agents can do in parallel.
+description: Create a new implementation plan for one or more capability specs, or edit an existing plan. Use when the user wants to plan, break down, prepare, update, or amend implementation for a CS spec, or change a named existing plan. Reads the spec, contract, the affected repositories, and the rs-specs that govern them, inspects the current code, then writes or updates a step-by-step implementation plan that AI agents can do in parallel.
 ---
 
 # Create or Edit an Implementation Plan
 
-An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the es-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel — or, when the user names an existing plan, to revise its steps, tasks, or test cases in place.
+An implementation plan turns one or more approved capability specs into an ordered set of steps that AI agents execute. Your job is to read the specs, the repositories they touch, and the rs-specs that govern those repositories, study the current code, then write one plan file split into steps whose tasks can run in parallel — or, when the user names an existing plan, to revise its steps, tasks, or test cases in place.
 
-The plan is a working document: it records what to build, the governing es-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
+The plan is a working document: it records what to build, the governing rs-specs, the test cases that prove each acceptance criterion, and a status on every step and task so progress is trackable.
 
 ## Paths
 
@@ -45,15 +45,15 @@ For each targeted spec, read `<workspace-root>/<project-name>-spex/cs-specs/<spe
 
 If a spec lists `blocked_by`, those are specs that must be in place first. Confirm with the user whether to plan around them or stop.
 
-## Step 2 — Resolve scope and governing es-specs
+## Step 2 — Resolve scope and governing rs-specs
 
 From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `es_specs` list. The union of those lists, deduplicated, is the set of es-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
-- Read each governing es-spec in `<workspace-root>/<project-name>-spex/es-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
+- For each affected repository, read its `rs_specs` list. The union of those lists, deduplicated, is the set of rs-specs that govern this work. (`spex.yaml` already expands repo-wide specs into each repository, so the per-repo lists are authoritative.)
+- Read each governing rs-spec in `<workspace-root>/<project-name>-spex/rs-specs/` so the plan and its tasks respect them (naming, annotations, secrets, contract conventions, testing).
 
-Record which repository each governing es-spec comes from so a task in one repository only carries the es-specs that apply there.
+Record which repository each governing rs-spec comes from so a task in one repository only carries the rs-specs that apply there.
 
 ## Step 3 — Inspect the current code
 
@@ -92,7 +92,7 @@ Write the plan in Markdown using the template below. Keep the implementation ove
 
 - Specs: CS-LEAD-SPEC, CS-OTHER-SPEC
 - Scope: api, frontend
-- Engineering-specs: ES-SECRET-HANDLING, ES-NAMING-CONVENTION, ES-SPEC-ID-ANNOTATIONS, ES-OPENAPI-CONVENTIONS
+- Rule-specs: RS-SECRET-HANDLING, RS-NAMING-CONVENTION, RS-SPEC-ID-ANNOTATIONS, RS-OPENAPI-CONVENTIONS
 
 ## Overview
 
@@ -152,10 +152,10 @@ Each case maps to an acceptance criterion and proves it.
 Rules for the plan content:
 
 - The plan lives at `<spec-id>/<date>-<slug>.md`, where `<spec-id>` is the lead spec chosen in Step 0. `<date>` is today's date as `YYYY-MM-DD`; get the real current date, do not invent it. `<slug>` is a short lowercase hyphenated summary of the plan (for example `add-list-pizza-menu-endpoint`). The filename stem `<date>-<slug>` must validate against `<workspace-root>/<project-name>-spex/schemas/plan-filename.schema.json` and stay within 50 characters (for example `CS-PLACE-PIZZA-ORDER/2024-11-24-add-place-order-endpoint.md`). Multiple plans can coexist in one spec's directory; never overwrite an existing one.
-- List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing es-specs under `Engineering-specs`.
+- List every targeted spec ID under `Specs`, the affected repositories under `Scope`, and the combined unique governing rs-specs under `Rule-specs`.
 - Every step has a `Status:` line. Every task has its own `Status:` line. Both use `not-started` or `completed`; write all as `not-started` in a fresh plan.
 - Cover every acceptance criterion of every targeted spec with at least one test case, and reference the criterion it proves.
-- Within each task, name the applicable es-specs and the spec to annotate per `ES-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
+- Within each task, name the applicable rs-specs and the spec to annotate per `RS-SPEC-ID-ANNOTATIONS` so the executing agent stays compliant. State which single place carries the annotation — once at the boundary, or the first file in a relation chain (handler, not the service and repository it calls) — so the spec is not repeated through nested helpers.
 
 ## Step 6 — Write, then offer edits
 

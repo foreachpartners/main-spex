@@ -1,0 +1,48 @@
+id: RS-TESTING
+include_for_all_repos: true
+include_for_spex: false
+managed: true
+title: Testing hygiene
+description: >-
+  A test suite is only trustworthy if every test in it runs and can fail. Skipping,
+  ignoring, or focusing a test silences its pass/fail signal covertly — the suite
+  still goes green while coverage quietly narrows.
+acceptance_criteria:
+  - "MUST fix a failing test at its root cause rather than loosening its assertions"
+  - "MUST NOT commit a skipped, ignored, or pending test"
+  - "MUST NOT commit a focused test (`.only`, `fit`, `fdescribe`) that excludes its siblings from running"
+checks:
+  - name: no-skipped-tests
+    description: Flag skipped, ignored, or pending tests
+    type: regexp
+    pattern: '\.skip\(|xit\(|xdescribe\(|#\[ignore\]|@pytest\.mark\.skip|@unittest\.skip|t\.Skip\('
+    include:
+      - "**/*_test.*"
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/tests/**"
+      - "**/test/**"
+    severity: warn
+  - name: no-focused-tests
+    description: Flag focused tests that exclude their siblings from running
+    type: regexp
+    pattern: '\.only\(|\bfit\(|\bfdescribe\('
+    include:
+      - "**/*_test.*"
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/tests/**"
+      - "**/test/**"
+    severity: error
+examples:
+  avoid: |
+    it.skip("rejects a negative quantity", () => { ... })
+    describe.only("cart totals", () => { ... })
+
+    #[ignore]
+    fn rejects_negative_quantity() { ... }
+  prefer: |
+    it("rejects a negative quantity", () => { ... })
+    describe("cart totals", () => { ... })
+
+    fn rejects_negative_quantity() { ... }

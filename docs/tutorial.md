@@ -2,7 +2,7 @@
 
 A hands-on walkthrough from a plain multi-repo project to a spec-driven one. You
 install the CLI, set up a spex workspace on the `pepperoni-pizza` example, fix
-check and coverage findings, and run the capability and engineering spec workflows
+check and coverage findings, and run the capability and rule spec workflows
 end to end.
 
 By the end you will have recreated a project similar to `examples/pepperoni-pizza` from the
@@ -18,7 +18,7 @@ Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
 `api` and `frontend` repositories side by side.
 
-## Step 2.1 — Rename folders to follow ES-NAMING-CONVENTION
+## Step 2.1 — Rename folders to follow RS-NAMING-CONVENTION
 
 Repository directory naming is <project-name>-<repository-short-name>
 
@@ -101,22 +101,22 @@ spex coverage
 
 Coverage should now show your new spec as `✓`.
 
-## Step 6 — Engineering spec workflow
+## Step 6 — Rule spec workflow
 
-Engineering specs capture cross-cutting conventions that apply repo-wide. Create one
+Rule specs capture cross-cutting conventions that apply repo-wide. Create one
 for the API:
 
 ```text
-/spex-engineering-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
+/spex-rule-spec the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
 ```
 
 The skill interviews you, proposes a `regexp` check that flags binding to a
 hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
-`pepperoni-pizza-spex/es-specs/ES-*.yaml`. Make sure the new spec is in the `api` repository's
-`es_specs` list in `spex.yaml` so the check runs against it.
+`pepperoni-pizza-spex/rs-specs/RS-*.yaml`. Make sure the new spec is in the `api` repository's
+`rs_specs` list in `spex.yaml` so the check runs against it.
 
 Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
-small change or create a plan if compliance with the new engineering spec requires many changes.
+small change or create a plan if compliance with the new rule spec requires many changes.
 
 ## Step 7 — Generate a completion report
 
@@ -128,7 +128,7 @@ Create a new file `pepperoni-pizza-spex/tutorial-completion.md` that documents t
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.
 3. Rate created capability spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
-3. Rate created engineering spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
+3. Rate created rule spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
 ```
 
 Review and commit it.

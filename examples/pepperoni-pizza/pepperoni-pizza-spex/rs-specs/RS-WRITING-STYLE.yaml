@@ -1,0 +1,43 @@
+id: RS-WRITING-STYLE
+include_for_all_repos: true
+managed: true
+title: Writing style
+description: >-
+  Specs, code and documentation are read by both engineers and AI agents. Direct,
+  imperative prose with explicit commitment levels and no filler keeps rules
+  unambiguous and machine-actionable. Code should be self-explanatory without unnesesary comments.
+acceptance_criteria:
+  - "MUST write self-explanatory code with unnesesary comments"
+  - "MUST use imperative, directive language: 'Load ENV at startup.' not 'First, we''ll load ENV...'"
+  - "MUST prioritize clarity over brevity; brevity over all else"
+  - "MUST use RFC 2119 for commitment level - MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited, SHOULD NOT for discouraged"
+  - "MUST use English"
+  - "MUST write substitution placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`); in a format template that defines an identifier's required casing, the placeholder MUST instead mirror the produced case and delimiter (`<PROJECT_NAME>_<DATA>`, `<project_name>.<data>`)"
+  - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), filler words ('basically', 'essentially', 'actually'), apologies ('sorry', 'unfortunately'), conversational check-ins ('Make sense?', 'Got it?'), or subjective qualifiers ('elegant', 'beautiful')"
+  - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
+
+checks:
+  - name: writing
+    description: Flag filler, hedging, motivational, and apologetic phrasing
+    type: script
+    run: per-file
+    script: writing-style.sh
+    exclude:
+      - "**/RS-WRITING-STYLE.yaml"
+      - "**/writing-style.sh"
+    severity: warn
+
+  - name: no-cyrillic
+    description: Requirements and documentation must be in English
+    type: regexp
+    pattern: '\p{Cyrillic}'
+    severity: error
+examples:
+  avoid: |
+    Basically, we'll probably want to load the config first. Sounds good?
+  prefer: |
+    MUST load configuration at startup.
+  placeholder: |
+    <workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml
+
+    e.g. pepperoni-pizza/pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml

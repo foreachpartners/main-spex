@@ -1,0 +1,36 @@
+id: RS-GRAPHQL-CONVENTIONS
+title: GraphQL conventions
+managed: true
+description: >-
+  The GraphQL SDL is the contract that clients and servers must follow.
+acceptance_criteria:
+  - "MUST give every Query, Mutation, and Subscription field a description and an explicit return type"
+  - "MUST give every type, field, argument, enum value, and directive a unique name within its scope"
+  - "MUST annotate each root operation field (Query, Mutation, Subscription) with its capability spec via a `# @spec contract <spec-id>` comment per RS-SPEC-ID-ANNOTATIONS (e.g. `# @spec contract CS-LIST-PIZZA-MENU`)"
+  - "MUST define named input and output types; never use anonymous inline shapes, and pass mutation arguments through a single named `input` type"
+  - "MUST name every type, interface, union, and enum in PascalCase; every field and argument in camelCase; every enum value in SCREAMING_SNAKE_CASE"
+  - "MUST mark required fields and arguments non-null with `!`, and leave a type nullable only where absence is meaningful"
+  - "MUST mark every secret-bearing field (password, token, key, credential) with a `@sensitive` directive so generated code can wrap it in a secret type"
+  - "MUST NOT leave a root operation field without a description"
+  - "MUST NOT duplicate capability spec mappings between the `@spec` comment and a type or field description — the `@spec` comment is the single source of truth"
+  - "MUST NOT leak internal implementation or persistence details in descriptions (storage, hashing, encryption, normalization, backing datastore); describe only what a consumer observes and must satisfy (e.g. `8–128 characters`, not `stored as an Argon2 hash`)"
+  - "SHOULD use enum types for fields with a closed set of values"
+  - "SHOULD use custom scalars (e.g. UUID, DateTime) for constrained primitives instead of bare String"
+examples:
+  operation: |
+    type Query {
+      # @spec contract CS-LIST-PIZZA-MENU
+      "List the available pizza menu"
+      pizzaMenu: [Pizza!]
+    }
+  schema: |
+    type Pizza {
+      title: String!
+    }
+  secret: |
+    directive @sensitive on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+    input SignInInput {
+      email: String!
+      password: String! @sensitive
+    }

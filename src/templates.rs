@@ -5,7 +5,7 @@ use error_stack::{Report, ResultExt};
 use include_dir::{Dir, DirEntry, include_dir};
 use thiserror::Error;
 
-use crate::engineering_spec::{ENGINEERING_SPECS_DIR, SCRIPTS_DIR};
+use crate::rule_spec::{RULE_SPECS_DIR, SCRIPTS_DIR};
 use serde::Deserialize;
 
 #[cfg(test)]
@@ -23,7 +23,7 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
-// `es-specs/` and `scripts/` are handled separately: they are only overwritten
+// `rs-specs/` and `scripts/` are handled separately: they are only overwritten
 // when the local spec opts in via `managed`.
 const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
 
@@ -35,8 +35,8 @@ pub enum TemplateError {
     Io,
 }
 
-pub fn engineering_specs_dir() -> Option<&'static Dir<'static>> {
-    TEMPLATES.get_dir(ENGINEERING_SPECS_DIR)
+pub fn rule_specs_dir() -> Option<&'static Dir<'static>> {
+    TEMPLATES.get_dir(RULE_SPECS_DIR)
 }
 
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
@@ -60,7 +60,7 @@ pub fn scaffold(spex_dir: &Path) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
-    copy_engineering_specs(spex_dir)?;
+    copy_rule_specs(spex_dir)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
@@ -83,16 +83,16 @@ fn is_managed(spec_path: &Path) -> bool {
         .is_some_and(|flag| flag.managed)
 }
 
-// Writes each bundled es-spec, overwriting the local copy only when it is new
+// Writes each bundled rs-spec, overwriting the local copy only when it is new
 // or already `managed`. Scripts for a spec are copied under the same
 // condition, so customizing a spec locally also keeps its scripts untouched
 // by `spex update`.
-fn copy_engineering_specs(spex_dir: &Path) -> Result<()> {
-    let Some(dir) = TEMPLATES.get_dir(ENGINEERING_SPECS_DIR) else {
+fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
+    let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
         return Ok(());
     };
 
-    let specs_dest = spex_dir.join(ENGINEERING_SPECS_DIR);
+    let specs_dest = spex_dir.join(RULE_SPECS_DIR);
     fs::create_dir_all(&specs_dest)
         .change_context(TemplateError::Io)
         .attach_with(|| format!("could not create `{}`", specs_dest.display()))?;

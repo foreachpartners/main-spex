@@ -5,11 +5,11 @@ mod tests_unit {
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/ES-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
-    const ES_SPEC: &str = "es-specs/ES-SECRET-HANDLING.yaml";
+    const SCRIPT: &str = "scripts/RS-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
+    const RS_SPEC: &str = "rs-specs/RS-SECRET-HANDLING.yaml";
     // Managed spec/script pair sharing a spec id, used to test `managed`
     // gating together.
-    const MANAGED_SPEC: &str = "es-specs/ES-COMMIT-MESSAGE-FORMAT.yaml";
+    const MANAGED_SPEC: &str = "rs-specs/RS-COMMIT-MESSAGE-FORMAT.yaml";
 
     #[test]
     fn scaffold_writes_managed_content() {
@@ -17,7 +17,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        for managed in [SCHEMA, SKILL, SCRIPT, ES_SPEC] {
+        for managed in [SCHEMA, SKILL, SCRIPT, RS_SPEC] {
             assert!(
                 spex_dir.path().join(managed).is_file(),
                 "missing managed file `{managed}`"
@@ -43,14 +43,14 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_overwrites_es_spec_marked_managed() {
+    fn scaffold_overwrites_rs_spec_marked_managed() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path()).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
             &spec,
-            "id: ES-COMMIT-MESSAGE-FORMAT\nmanaged: true\ntampered: true\n",
+            "id: RS-COMMIT-MESSAGE-FORMAT\nmanaged: true\ntampered: true\n",
         )
         .expect("tamper spec, keeping managed");
         let script = spex_dir.path().join(SCRIPT);
@@ -71,12 +71,12 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_preserves_unmanaged_es_spec() {
+    fn scaffold_preserves_unmanaged_rs_spec() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path()).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::write(&spec, "id: ES-COMMIT-MESSAGE-FORMAT\ncustomized: true\n")
+        fs::write(&spec, "id: RS-COMMIT-MESSAGE-FORMAT\ncustomized: true\n")
             .expect("customize spec");
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
@@ -85,7 +85,7 @@ mod tests_unit {
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
-            "id: ES-COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
+            "id: RS-COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
         );
         assert_eq!(fs::read_to_string(&script).unwrap(), "customized");
     }

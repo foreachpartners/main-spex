@@ -1,11 +1,11 @@
 ---
 name: spex-execute
-description: Execute an existing implementation plan, or carry out an ad-hoc user request directly against the codebase. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/, or asks for a change without a formal plan. For a plan, reads it and the specs, repositories, and es-specs it names, then works through the steps in order. For a plain user request, first gathers every es-spec governing the affected repositories and reads them in full, then implements the request under those rules. Runs the parallel tasks within each step as separate AI agents, marks each step and task completed as it lands, runs `spex check` on the affected repositories, and sets each implemented capability spec's status to active.
+description: Execute an existing implementation plan, or carry out an ad-hoc user request directly against the codebase. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/, or asks for a change without a formal plan. For a plan, reads it and the specs, repositories, and rs-specs it names, then works through the steps in order. For a plain user request, first gathers every rs-spec governing the affected repositories and reads them in full, then implements the request under those rules. Runs the parallel tasks within each step as separate AI agents, marks each step and task completed as it lands, runs `spex check` on the affected repositories, and sets each implemented capability spec's status to active.
 ---
 
 # Execute an Implementation Plan or a User Request
 
-An implementation plan is an ordered set of steps whose tasks AI agents carry out. A user request is any change the user asks for directly, without first writing a plan. Either way, your job is to ground the work in the governing es-specs before touching code, then execute it, verify it, and report back.
+An implementation plan is an ordered set of steps whose tasks AI agents carry out. A user request is any change the user asks for directly, without first writing a plan. Either way, your job is to ground the work in the governing rs-specs before touching code, then execute it, verify it, and report back.
 
 You coordinate the work — you do not redo what an agent already did. Each task in a step has a disjoint write scope, so parallel agents never collide.
 
@@ -15,7 +15,7 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 ## When to use this skill
 
-Use it when the user wants to execute, run, or implement an existing plan, or wants a change made directly without a plan. Do not use it to author a plan (use `spex-plan`), to author specs (`spex-capability-spec`, `spex-engineering-spec`), or to draft a contract (use `spex-contract`).
+Use it when the user wants to execute, run, or implement an existing plan, or wants a change made directly without a plan. Do not use it to author a plan (use `spex-plan`), to author specs (`spex-capability-spec`, `spex-rule-spec`), or to draft a contract (use `spex-contract`).
 
 ## Step 0 — Establish plan vs. user request
 
@@ -32,11 +32,11 @@ Determine what you're executing before doing anything else:
 
 ## Step 1 — Read the plan and its context
 
-Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Engineering-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
+Read the chosen plan in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md` in full. Capture its `Specs`, `Scope` (the affected repositories), `Rule-specs`, the `Contract changes`, every step and its tasks with their current `Status`, and the `Test cases`.
 
 Then read enough context to execute faithfully:
 
-- Read every spec named in the plan's `Specs` from `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`, and every spec in `Engineering-specs` from `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml`, in full — not a summary — so you coordinate against their actual text, not a paraphrase.
+- Read every spec named in the plan's `Specs` from `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`, and every spec in `Rule-specs` from `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml`, in full — not a summary — so you coordinate against their actual text, not a paraphrase.
 - For each affected repository, resolve its `path` from `<workspace-root>/<project-name>-spex/spex.yaml` and note its build/test commands and annotation conventions. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
 ## Step 2 — Run the plan's steps
@@ -48,8 +48,8 @@ Work step by step, top to bottom. Do not start a step until the previous one is 
 Within a step:
 
 - Run every task in the step in parallel, one AI agent per task. The tasks are independent and have disjoint write scopes by construction, so they are safe to run together.
-- Give each agent only its task: the task description, the repository it runs in, the files it owns, the governing es-specs that apply there, the spec IDs to annotate per `ES-SPEC-ID-ANNOTATIONS` (once at the boundary, or the first file in a relation chain — never repeated across the nested helpers it calls), and the relevant contract changes and test cases. Do not let an agent edit files outside its task's scope.
-- Instruct each agent to read the named es-spec files in full from `<workspace-root>/<project-name>-spex/es-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
+- Give each agent only its task: the task description, the repository it runs in, the files it owns, the governing rs-specs that apply there, the spec IDs to annotate per `RS-SPEC-ID-ANNOTATIONS` (once at the boundary, or the first file in a relation chain — never repeated across the nested helpers it calls), and the relevant contract changes and test cases. Do not let an agent edit files outside its task's scope.
+- Instruct each agent to read the named rs-spec files in full from `<workspace-root>/<project-name>-spex/rs-specs/` before editing — not a summary — so it complies with the authoritative source rather than a paraphrase.
 - A step with a single unit runs as one agent.
 
 As each task finishes, verify its result against the task description and the acceptance criteria it serves, then mark it completed (Step 3). Only when every task in the step is completed do you move to the next step.
@@ -66,9 +66,9 @@ Edit the plan file in place as you go — never at the end in a batch:
 
 Keeping status current means an interrupted run can resume from the first incomplete step.
 
-## Step 4 — Verify against the governing es-specs
+## Step 4 — Verify against the governing rs-specs
 
-After the steps are complete, prove the work respects the governing es-specs by running `spex check` scoped to the affected repositories:
+After the steps are complete, prove the work respects the governing rs-specs by running `spex check` scoped to the affected repositories:
 
 ```sh
 spex check --repo <repo-a> <repo-b>
@@ -99,12 +99,12 @@ Summarize the run for the user:
 
 ## Execute a user request
 
-When there is no plan, ground the request in the specs and es-specs before writing any code:
+When there is no plan, ground the request in the specs and rs-specs before writing any code:
 
 1. **Identify the affected repositories.** From the user's request, determine which repository or repositories the change touches. If it's unclear, ask, or inspect `<workspace-root>/<project-name>-spex/spex.yaml` and each repository's `description` to infer it.
-2. **Gather the governing es-specs.** For each affected repository, read its `es_specs` list in `spex.yaml` (repository-wide specs are already expanded into it, so the list is authoritative). Read every named es-spec in full from `<workspace-root>/<project-name>-spex/es-specs/<spec-id>.yaml` — not a summary — so the change respects naming, structure, security, traceability, and annotation rules before you touch code.
+2. **Gather the governing rs-specs.** For each affected repository, read its `rs_specs` list in `spex.yaml` (repository-wide specs are already expanded into it, so the list is authoritative). Read every named rs-spec in full from `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml` — not a summary — so the change respects naming, structure, security, traceability, and annotation rules before you touch code.
 3. **Gather the related capability specs.** Search `<workspace-root>/<project-name>-spex/cs-specs/` for any CS spec whose `scope` includes an affected repository and whose subject overlaps the request. Read each relevant one in full so the change stays consistent with the capability's existing acceptance criteria and doesn't silently contradict them. If the request extends or changes behavior covered by an existing CS spec's acceptance criteria, tell the user and offer to update that spec first with `spex-capability-spec`.
-4. **Implement the request.** Make the change yourself, or dispatch it to one or more AI agents scoped to disjoint files or repositories when the request spans more than one independent unit. Give each agent the relevant es-specs and CS specs gathered above, and the spec IDs to annotate per `ES-SPEC-ID-ANNOTATIONS`.
+4. **Implement the request.** Make the change yourself, or dispatch it to one or more AI agents scoped to disjoint files or repositories when the request spans more than one independent unit. Give each agent the relevant rs-specs and CS specs gathered above, and the spec IDs to annotate per `RS-SPEC-ID-ANNOTATIONS`.
 5. **Verify.** Run `spex check --repo <affected-repos>` and fix any `error` findings; report `warn` findings without blocking on them. Run the affected repositories' own tests where they exist.
 6. **Report.** Summarize what changed, which repositories were touched, the `spex check` outcome, and any spec you flagged for a follow-up update.
 

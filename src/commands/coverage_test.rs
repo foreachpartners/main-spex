@@ -40,12 +40,12 @@ mod tests {
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
-        let found = scan("// @spec test CS-A, CS-B, ES-RATE-LIMIT\n");
+        let found = scan("// @spec test CS-A, CS-B, RS-RATE-LIMIT\n");
         assert!(found.get("CS-A").unwrap().contains(&CoverageLayer::Test));
         assert!(found.get("CS-B").unwrap().contains(&CoverageLayer::Test));
         assert!(
             found
-                .get("ES-RATE-LIMIT")
+                .get("RS-RATE-LIMIT")
                 .unwrap()
                 .contains(&CoverageLayer::Test)
         );

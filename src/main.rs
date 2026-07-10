@@ -1,7 +1,7 @@
 mod capability_spec;
 mod commands;
 mod config;
-mod engineering_spec;
+mod rule_spec;
 mod spec;
 mod style;
 mod templates;
@@ -40,10 +40,10 @@ enum Commands {
     #[command(about = "Initialize the spex workspace repository")]
     Init,
     #[command(
-        about = "Rewrite bundled skills, schemas, scripts and es-specs with the latest versions"
+        about = "Rewrite bundled skills, schemas, scripts and rs-specs with the latest versions"
     )]
     Update,
-    #[command(about = "Run engineering spec checks against the workspace")]
+    #[command(about = "Run rule spec checks against the workspace")]
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),

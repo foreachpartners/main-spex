@@ -2,7 +2,7 @@
 
 - Specs: CS-DELIVERY-TIME
 - Scope: api, frontend
-- Engineering-specs: ES-COMMIT-MESSAGE-FORMAT, ES-NAMING-CONVENTION, ES-SECRET-HANDLING, ES-SPEC-ID-ANNOTATIONS, ES-WRITING-STYLE
+- Rule-specs: RS-COMMIT-MESSAGE-FORMAT, RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-ANNOTATIONS, RS-WRITING-STYLE
 
 ## Overview
 
@@ -35,9 +35,9 @@ Edit `pepperoni-pizza-api/src/main.rs` and `pepperoni-pizza-api/src/tests.rs`.
 - Add an `estimate_seconds` helper computing `ceil((order_pizzas + in_progress_pizzas) / workers)` whole minutes, then returning it in seconds (`* 60`, `i64`).
 - Add `estimated_seconds: i64` and `remaining_seconds: i64` to `Delivery` and apply `#[serde(rename_all = "camelCase")]` so they serialize as `estimatedSeconds`/`remainingSeconds`. In `create_order`, compute `estimated_seconds` from the new order's pizza count plus the count of pizzas across current in-progress deliveries (set `remaining_seconds` equal to it), before pushing the new delivery. In `list_deliveries`, drop a delivery once its `estimated_seconds` has elapsed, and recompute `remaining_seconds` as `estimated_seconds` minus the elapsed seconds (never negative) on each returned delivery.
 - Add the `estimate_order_delivery_time` handler for `POST /order-estimate`: accept `EstimateRequest { pizza_ids }`, validate unknown pizzas with the existing `error` helper and shape, sum the requested pizzas plus current in-progress pizzas, and return `{ estimatedSeconds }`. Register the route in `main`.
-- Annotate the boundary per ES-SPEC-ID-ANNOTATIONS: `// @spec impl CS-DELIVERY-TIME` once on the new handler (do not nest onto the helper). Do not re-annotate `create_order` internals.
+- Annotate the boundary per RS-SPEC-ID-ANNOTATIONS: `// @spec impl CS-DELIVERY-TIME` once on the new handler (do not nest onto the helper). Do not re-annotate `create_order` internals.
 - Add tests in `pepperoni-pizza-api/src/tests.rs` covering the cases below; annotate the new test(s) `// @spec test CS-DELIVERY-TIME`.
-- Applies: ES-SPEC-ID-ANNOTATIONS (boundary annotation), ES-NAMING-CONVENTION, ES-SECRET-HANDLING (no secrets introduced), ES-WRITING-STYLE (test names and comments).
+- Applies: RS-SPEC-ID-ANNOTATIONS (boundary annotation), RS-NAMING-CONVENTION, RS-SECRET-HANDLING (no secrets introduced), RS-WRITING-STYLE (test names and comments).
 - Validate: `cargo test` in `api`.
 
 #### Task 1.2 — Cart estimate and delivery time in the UI (repo: frontend)
@@ -49,9 +49,9 @@ Edit `pepperoni-pizza-frontend/src/types.ts`, `pepperoni-pizza-frontend/src/api.
 - Add `estimatedSeconds: number` to the `Delivery` interface and a `DeliveryEstimate` interface in `types.ts`.
 - Add `estimateOrderDeliveryTime(pizzaIds: number[])` to `pizzaApi` in `api.ts`, POSTing `{ pizzaIds }` to `/order-estimate` and returning `DeliveryEstimate`, following the existing `createOrder` call by example.
 - In `App.tsx`, fetch and show the live estimate in the cart whenever the cart changes (fetch only when the cart is non-empty), and render each in-progress delivery's `remainingSeconds` as its delivery time in the Delivering section.
-- Annotate per ES-SPEC-ID-ANNOTATIONS: `// @spec impl CS-DELIVERY-TIME` once at the new `pizzaApi` method boundary; annotate the new tests `// @spec test CS-DELIVERY-TIME`.
+- Annotate per RS-SPEC-ID-ANNOTATIONS: `// @spec impl CS-DELIVERY-TIME` once at the new `pizzaApi` method boundary; annotate the new tests `// @spec test CS-DELIVERY-TIME`.
 - Extend `api.test.ts` and `App.test.tsx` with the frontend cases below, following the existing Vitest patterns (mock `fetch`; mock `pizzaApi`).
-- Applies: ES-SPEC-ID-ANNOTATIONS, ES-NAMING-CONVENTION, ES-SECRET-HANDLING, ES-WRITING-STYLE.
+- Applies: RS-SPEC-ID-ANNOTATIONS, RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-WRITING-STYLE.
 - Validate: `npm test` in `frontend`.
 
 ## Test cases

@@ -319,7 +319,7 @@ fn locate_script(
     };
 
     let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
-        let dir = spex_dir.join(engineering_spec::SCRIPTS_DIR).join(spec_id);
+        let dir = spex_dir.join(rule_spec::SCRIPTS_DIR).join(spec_id);
         findings.push(config_error(
             spec_id,
             &check.name,
@@ -378,7 +378,7 @@ pub(super) fn run_per_repo_script(
 // field only carries the bare filename.
 pub(super) fn resolve_script(reference: &str, base: &Path, spec_id: &str) -> Option<PathBuf> {
     let script = base
-        .join(engineering_spec::SCRIPTS_DIR)
+        .join(rule_spec::SCRIPTS_DIR)
         .join(spec_id)
         .join(reference);
     script.is_file().then_some(script)

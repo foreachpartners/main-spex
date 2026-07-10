@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal
 
-spex helps you move fast with AI, not stand in your way. Capability specs (CS) and engineering specs (ES) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
+spex helps you move fast with AI, not stand in your way. Capability specs (CS) and rule specs (RS) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
 
 ## Quickstart
 
@@ -34,7 +34,7 @@ pepperoni-pizza/                       # workspace root
     └── pepperoni-pizza.code-workspace # editor workspace file
 ```
 
-Repository directories follow `<project-name>-<repository-short-name>` (ES-NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
+Repository directories follow `<project-name>-<repository-short-name>` (RS-NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
 
 1. Put all project git repos in one shared folder (workspace root folder)
 2. Run terminal command `spex init` in workspace root to create the `pepperoni-pizza-spex` repo
@@ -51,11 +51,11 @@ Workflow core is AI agent skills and CLI commands.
 
 1. Create your first specification (spec):
    - capability spec `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
-   - engineering spec `/spex-engineering-spec [secret handling]`. Will create `pepperoni-pizza-spex/es-specs/ES-SECRET-HANDLING.yaml`
+   - rule spec `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/RS-SECRET-HANDLING.yaml`
 2. Derive the contract for a capability spec `/spex-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. Create an implementation plan for a spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/ES-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. Execute the plan `/spex-execute [secret handling]`. Will execute the `ES-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-5. Check the results with `spex check`. Will run all engineering spec (ES) checks related to your changes.
+3. Create an implementation plan for a spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
+4. Execute the plan `/spex-execute [secret handling]`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+5. Check the results with `spex check`. Will run all rule spec (RS) checks related to your changes.
 6. See coverage with `spex coverage`. Will check if all specs have a contract, implementation, and test.
 
 Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
@@ -66,11 +66,11 @@ Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
 
 **Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted a blue snake with big eyes! Clear, well-defined capability specifications (`CS`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
 
-**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as engineering specs (`ES`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a capability spec (`CS`), not an engineering spec.
+**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a capability spec (`CS`), not a rule spec.
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
-**Deterministic enforcement**: AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, engineering-spec checks, linting, schema validation, coverage) are what prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook. That's why every check that can be a script must be a script.
+**Deterministic enforcement**: AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule-spec checks, linting, schema validation, coverage) are what prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook. That's why every check that can be a script must be a script.
 
 See all principles in [framework-principles.md](docs/framework-principles.md).
 
@@ -104,17 +104,17 @@ flowchart TD
     end
 ```
 
-### Engineering specs live outside the feature flow — they govern how every artifact is built:
+### Rule specs live outside the feature flow — they govern how every artifact is built:
 
-For example, the rule `ES-SECRET-HANDLING` works like this:
+For example, the rule `RS-SECRET-HANDLING` works like this:
 
-1. **Engineering Spec** — `ES-SECRET-HANDLING`: "Secret protection"
+1. **Rule Spec** — `RS-SECRET-HANDLING`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 
 ```mermaid
 flowchart TD
-    Eng["Engineering Spec — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
+    Eng["Rule Spec — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
     Eng -.proven by.-> Checks["Automated and AI checks"]
 ```
 

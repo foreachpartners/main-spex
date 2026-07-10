@@ -25,7 +25,7 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
-  engineering_spec.rs   Engineering-spec model
+  rule_spec.rs   Rule-spec model
   capability_spec.rs    Capability-spec model
   spec.rs           Shared spec primitives (status, acceptance-criteria checkbox)
   style.rs          Terminal color styling (shared by commands)
@@ -38,7 +38,7 @@ templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
   skills/           Agent skills
-  es-specs/         Reusable engineering-spec templates
+  rs-specs/         Reusable rule-spec templates
 examples/           Sample projects (pepperoni-pizza)
 tests/              Integration tests that build and run the spex binary
 ```
@@ -61,5 +61,5 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Writing style**: Follow the authoring conventions in `templates/es-specs/ES-WRITING-STYLE.yaml` (e.g. path placeholders) across docs, skills, and schemas.
+- **Writing style**: Follow the authoring conventions in `templates/rs-specs/RS-WRITING-STYLE.yaml` (e.g. path placeholders) across docs, skills, and schemas.
 - **Single source of truth**: `docs/specification.md` defines how the framework behaves. Treat it as authoritative, and update it whenever you change framework behavior.

@@ -28,8 +28,8 @@ mod tests_unit {
         }
     }
 
-    fn no_specs() -> DefaultEngineeringSpecs {
-        DefaultEngineeringSpecs {
+    fn no_specs() -> DefaultRuleSpecs {
+        DefaultRuleSpecs {
             all_repos: Vec::new(),
             spex: Vec::new(),
         }
@@ -163,21 +163,21 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                es_specs: []
+                rs_specs: []
               - repository_name: pizza-shop-client
                 repository_short_name: client
                 path: ../pizza-shop-client
-                es_specs: []
+                rs_specs: []
         "};
         assert_eq!(yaml, expected);
     }
 
     #[test]
-    fn render_config_lists_default_engineering_specs() {
-        let specs = DefaultEngineeringSpecs {
+    fn render_config_lists_default_rule_specs() {
+        let specs = DefaultRuleSpecs {
             all_repos: vec![
-                "ES-SECRET-HANDLING".to_string(),
-                "ES-WRITING-STYLE".to_string(),
+                "RS-SECRET-HANDLING".to_string(),
+                "RS-WRITING-STYLE".to_string(),
             ],
             spex: Vec::new(),
         };
@@ -194,18 +194,18 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                es_specs:
-                  - ES-SECRET-HANDLING
-                  - ES-WRITING-STYLE
+                rs_specs:
+                  - RS-SECRET-HANDLING
+                  - RS-WRITING-STYLE
         "};
         assert_eq!(yaml, expected);
     }
 
     #[test]
     fn render_config_uses_spex_specs_for_spex_repo() {
-        let specs = DefaultEngineeringSpecs {
-            all_repos: vec!["ES-SECRET-HANDLING".to_string()],
-            spex: vec!["ES-WRITING-STYLE".to_string()],
+        let specs = DefaultRuleSpecs {
+            all_repos: vec!["RS-SECRET-HANDLING".to_string()],
+            spex: vec!["RS-WRITING-STYLE".to_string()],
         };
         let yaml = config_to_yaml(
             "pizza-shop",
@@ -220,18 +220,18 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                es_specs:
-                  - ES-SECRET-HANDLING
+                rs_specs:
+                  - RS-SECRET-HANDLING
               - repository_name: pizza-shop-spex
                 repository_short_name: spex
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-                  es-specs/ (cross-cutting engineering conventions) and cs-specs/ (the
+                  rs-specs/ (cross-cutting conventions and rules) and cs-specs/ (the
                   capabilities the system provides).
                 path: .
-                es_specs:
-                  - ES-WRITING-STYLE
+                rs_specs:
+                  - RS-WRITING-STYLE
         "};
         assert_eq!(yaml, expected);
     }
@@ -279,19 +279,19 @@ mod tests_unit {
     }
 
     #[test]
-    fn default_engineering_specs_includes_flagged_specs_only() {
-        let specs = default_engineering_specs().expect("collect default engineering specs");
+    fn default_rule_specs_includes_flagged_specs_only() {
+        let specs = default_rule_specs().expect("collect default rule specs");
 
-        assert!(specs.all_repos.contains(&"ES-SECRET-HANDLING".to_string()));
-        assert!(specs.all_repos.contains(&"ES-WRITING-STYLE".to_string()));
+        assert!(specs.all_repos.contains(&"RS-SECRET-HANDLING".to_string()));
+        assert!(specs.all_repos.contains(&"RS-WRITING-STYLE".to_string()));
         assert!(
             !specs
                 .all_repos
-                .contains(&"ES-OPENAPI-CONVENTIONS".to_string())
+                .contains(&"RS-OPENAPI-CONVENTIONS".to_string())
         );
         assert!(specs.all_repos.windows(2).all(|pair| pair[0] <= pair[1]));
 
-        assert!(specs.spex.contains(&"ES-SECRET-HANDLING".to_string()));
+        assert!(specs.spex.contains(&"RS-SECRET-HANDLING".to_string()));
         assert!(specs.spex.windows(2).all(|pair| pair[0] <= pair[1]));
     }
 
@@ -384,12 +384,12 @@ mod tests_unit {
     }
 
     #[test]
-    fn copy_templates_writes_es_specs_and_scripts() {
+    fn copy_templates_writes_rs_specs_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        assert!(spex_dir.path().join("es-specs").is_dir());
+        assert!(spex_dir.path().join("rs-specs").is_dir());
         assert!(spex_dir.path().join("cs-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
@@ -456,7 +456,7 @@ mod tests_unit {
 
         let script = spex_dir
             .path()
-            .join("scripts/ES-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
+            .join("scripts/RS-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

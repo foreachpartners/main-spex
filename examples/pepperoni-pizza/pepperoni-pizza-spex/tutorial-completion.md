@@ -2,7 +2,7 @@
 
 This document records the result of the spex tutorial: the verification command
 output, and an assessment of the capability spec, its implementation, and the
-network-bind engineering spec produced along the way.
+network-bind rule spec produced along the way.
 
 ## spex check
 
@@ -87,12 +87,12 @@ from a perfect score.
   snapshot — fine for this in-memory toy, not a correctness guarantee under a
   real datastore.
 
-## Rating: ES-CONFIGURABLE-NETWORK-BIND spec
+## Rating: RS-CONFIGURABLE-NETWORK-BIND spec
 
 **Requirement:** "the API must not hardcode network bind addresses or ports —
 they must be read from configuration/environment".
 
-**Verdict: Excellent (5 / 5).** This is a model engineering spec: it states the rule,
+**Verdict: Excellent (5 / 5).** This is a model rule spec: it states the rule,
 explains _why_, enforces it automatically, and the implementation conforms.
 
 ### What was done well
@@ -102,7 +102,7 @@ explains _why_, enforces it automatically, and the implementation conforms.
   reader understands the motivation rather than memorizing a ban.
 - **Precise, layered acceptance criteria.** It requires reading bind config from
   the environment, sourcing it from the repo's config-prefix (cross-referencing
-  `ES-NAMING-CONVENTION` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
+  `RS-NAMING-CONVENTION` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
   embedded literal on the startup path, and adds a `SHOULD` to fail fast on
   missing/malformed config.
 - **It is enforced automatically.** The `no-hardcoded-bind-literal` regexp check

@@ -2,10 +2,10 @@
 
 This repo (`spex`) is the workspace repository that holds the project's specs and config.
 
-- `spex.yaml`: project description. Lists the workspace repositories, their paths, contracts, and which es-specs apply to each.
-- `cs-specs/` and `es-specs/`: single source of truth for project behavior and conventions.
+- `spex.yaml`: project description. Lists the workspace repositories, their paths, contracts, and which rs-specs apply to each.
+- `cs-specs/` and `rs-specs/`: single source of truth for project behavior and conventions.
 - `cs-specs/`: capability specs (`CS-*`). A capability the system must provide, with acceptance criteria.
-- `es-specs/`: engineering specs (`ES-*`). A cross-cutting convention or rule that applies repo-wide, with acceptance criteria.
+- `rs-specs/`: rule specs (`RS-*`). A cross-cutting convention or rule that applies repo-wide, with acceptance criteria.
 - `contracts/`: machine-readable interface definitions (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI) derived from capability specs.
 - `plans/`: implementation plans derived from approved capability specs that serves as unchangeable history artifact after implementation is done.
 

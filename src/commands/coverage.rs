@@ -131,7 +131,7 @@ struct Scanner {
 
 impl Scanner {
     fn new() -> Self {
-        let id = r"(?:CS|ES)-[A-Z]+(?:-[A-Z]+)*";
+        let id = r"(?:CS|RS)-[A-Z]+(?:-[A-Z]+)*";
         Self {
             spec: Regex::new(&format!(
                 r"@spec\s+(contract|impl|test)\s+({id}(?:\s*,\s*{id})*)"

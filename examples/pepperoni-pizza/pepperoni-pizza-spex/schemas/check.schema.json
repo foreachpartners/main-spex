@@ -79,8 +79,8 @@
       "description": "A single automated check.",
       "properties": {
         "spec": {
-          "description": "Engineering spec ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside es-spec files, which supply the spec ID themselves.",
-          "$ref": "es-spec-id.schema.json"
+          "description": "Rule spec ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside rs-spec files, which supply the spec ID themselves.",
+          "$ref": "rs-spec-id.schema.json"
         },
         "name": {
           "type": "string",

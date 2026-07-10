@@ -35,12 +35,12 @@
       "properties": {
         "repository_name": {
           "type": "string",
-          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per ES-NAMING-CONVENTION.",
+          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per RS-NAMING-CONVENTION.",
           "minLength": 1
         },
         "repository_short_name": {
           "type": "string",
-          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in ES-NAMING-CONVENTION.",
+          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in RS-NAMING-CONVENTION.",
           "minLength": 1
         },
         "description": {
@@ -60,16 +60,16 @@
             "$ref": "#/$defs/contract"
           }
         },
-        "es_specs": {
+        "rs_specs": {
           "type": "array",
-          "description": "Engineering spec IDs (ES) that apply to this repository.",
+          "description": "Rule spec IDs (RS) that apply to this repository.",
           "items": {
-            "$ref": "es-spec-id.schema.json"
+            "$ref": "rs-spec-id.schema.json"
           }
         },
         "checks_additional": {
           "type": "array",
-          "description": "Full checks that run for this repository in addition to the checks it inherits from its es_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's es_specs). Script paths resolve in the spex directory.",
+          "description": "Full checks that run for this repository in addition to the checks it inherits from its rs_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's rs_specs). Script paths resolve in the spex directory.",
           "items": {
             "allOf": [{ "$ref": "check.schema.json" }, { "required": ["spec"] }]
           }
@@ -115,8 +115,8 @@
       "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
       "properties": {
         "spec": {
-          "description": "Engineering spec ID of the check whose pre-existing errors are baselined. Must be one of the repository's es_specs.",
-          "$ref": "es-spec-id.schema.json"
+          "description": "Rule spec ID of the check whose pre-existing errors are baselined. Must be one of the repository's rs_specs.",
+          "$ref": "rs-spec-id.schema.json"
         },
         "check": {
           "type": "string",
@@ -140,8 +140,8 @@
       "description": "A partial patch for an inherited check. `spec` + `name` identify the target; every other field overrides the inherited check when present.",
       "properties": {
         "spec": {
-          "description": "Engineering spec ID of the inherited check to override. Must be one of the repository's es_specs.",
-          "$ref": "es-spec-id.schema.json"
+          "description": "Rule spec ID of the inherited check to override. Must be one of the repository's rs_specs.",
+          "$ref": "rs-spec-id.schema.json"
         },
         "name": {
           "type": "string",
@@ -226,24 +226,24 @@
               "description": "REST OpenAPI spec for the orders API."
             }
           ],
-          "es_specs": ["ES-SECRET-HANDLING", "ES-NAMING-CONVENTION"]
+          "rs_specs": ["RS-SECRET-HANDLING", "RS-NAMING-CONVENTION"]
         },
         {
           "repository_name": "pepperoni-pizza-frontend",
           "repository_short_name": "frontend",
           "description": "React web client that lets customers place orders.",
           "path": "../pepperoni-pizza-frontend",
-          "es_specs": ["ES-WRITING-STYLE", "ES-NAMING-CONVENTION"],
+          "rs_specs": ["RS-WRITING-STYLE", "RS-NAMING-CONVENTION"],
           "checks_override": [
             {
-              "spec": "ES-WRITING-STYLE",
+              "spec": "RS-WRITING-STYLE",
               "name": "no-cyrillic",
               "severity": "warn"
             }
           ],
           "checks_additional": [
             {
-              "spec": "ES-WRITING-STYLE",
+              "spec": "RS-WRITING-STYLE",
               "name": "readme-has-title",
               "description": "The frontend README must start with a top-level Markdown title.",
               "type": "script",

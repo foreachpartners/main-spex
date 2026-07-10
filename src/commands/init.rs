@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::capability_spec::CAPABILITY_SPECS_DIR;
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
-use crate::engineering_spec::EngineeringSpec;
+use crate::rule_spec::RuleSpec;
 use crate::templates;
 
 #[cfg(test)]
@@ -28,7 +28,7 @@ pub enum InitError {
     NoWorkspaceRoot,
     #[error("initialization cancelled")]
     Cancelled,
-    #[error("could not parse the bundled engineering spec `{0}`")]
+    #[error("could not parse the bundled rule spec `{0}`")]
     Template(String),
     #[error("an I/O operation failed")]
     Io,
@@ -41,7 +41,7 @@ const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      es-specs/ (cross-cutting engineering conventions) and cs-specs/ (the
+      rs-specs/ (cross-cutting conventions and rules) and cs-specs/ (the
       capabilities the system provides).
 ";
 
@@ -51,7 +51,7 @@ struct DiscoveredRepo {
     path: String,
 }
 
-struct DefaultEngineeringSpecs {
+struct DefaultRuleSpecs {
     all_repos: Vec<String>,
     spex: Vec<String>,
 }
@@ -79,8 +79,8 @@ pub fn run() -> Result<ExitCode> {
     let repositories = discover_repositories(&workspace_root, &spex_dir_name, &project_name)?;
     let repositories = confirm_repositories(repositories)?;
 
-    let es_specs = default_engineering_specs()?;
-    write_config(&spex_dir, &project_name, &repositories, &es_specs)?;
+    let rs_specs = default_rule_specs()?;
+    write_config(&spex_dir, &project_name, &repositories, &rs_specs)?;
     write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
 
@@ -116,12 +116,12 @@ fn write_config(
     spex_dir: &Path,
     project_name: &str,
     repositories: &[DiscoveredRepo],
-    es_specs: &DefaultEngineeringSpecs,
+    rs_specs: &DefaultRuleSpecs,
 ) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(
         &config_path,
-        config_to_yaml(project_name, repositories, es_specs),
+        config_to_yaml(project_name, repositories, rs_specs),
     )
     .change_context(InitError::Io)
     .attach_with(|| format!("could not write `{}`", config_path.display()))?;
@@ -168,9 +168,9 @@ fn escape_json(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
-fn default_engineering_specs() -> Result<DefaultEngineeringSpecs> {
-    let Some(dir) = templates::engineering_specs_dir() else {
-        return Ok(DefaultEngineeringSpecs {
+fn default_rule_specs() -> Result<DefaultRuleSpecs> {
+    let Some(dir) = templates::rule_specs_dir() else {
+        return Ok(DefaultRuleSpecs {
             all_repos: Vec::new(),
             spex: Vec::new(),
         });
@@ -187,7 +187,7 @@ fn default_engineering_specs() -> Result<DefaultEngineeringSpecs> {
         let raw = file
             .contents_utf8()
             .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
-        let spec: EngineeringSpec = serde_yaml_ng::from_str(raw)
+        let spec: RuleSpec = serde_yaml_ng::from_str(raw)
             .change_context_lazy(|| InitError::Template(name.clone()))?;
         if spec.include_for_all_repos {
             all_repos.push(spec.id.clone());
@@ -199,7 +199,7 @@ fn default_engineering_specs() -> Result<DefaultEngineeringSpecs> {
 
     all_repos.sort();
     spex.sort();
-    Ok(DefaultEngineeringSpecs { all_repos, spex })
+    Ok(DefaultRuleSpecs { all_repos, spex })
 }
 
 // The workspace root is the current directory, unless `spex init` runs from
@@ -300,7 +300,7 @@ fn discover_repositories(
 }
 
 // The repository short name is the full repository name minus the
-// `<project-name>-` prefix, per ES-NAMING-CONVENTION.
+// `<project-name>-` prefix, per RS-NAMING-CONVENTION.
 fn repository_short_name(name: &str, project_name: &str) -> String {
     name.strip_prefix(&format!("{project_name}-"))
         .unwrap_or(name)
@@ -335,7 +335,7 @@ fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<Discove
 fn config_to_yaml(
     project_name: &str,
     repositories: &[DiscoveredRepo],
-    es_specs: &DefaultEngineeringSpecs,
+    rs_specs: &DefaultRuleSpecs,
 ) -> String {
     let mut yaml = format!("project_name: {project_name}\ncli_version: {CLI_VERSION}\n");
 
@@ -345,9 +345,9 @@ fn config_to_yaml(
         yaml.push_str("repositories:\n");
         for repo in repositories {
             let ids = if repo.path == SPEX_REPO_PATH {
-                &es_specs.spex
+                &rs_specs.spex
             } else {
-                &es_specs.all_repos
+                &rs_specs.all_repos
             };
             yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
             yaml.push_str(&format!("    repository_short_name: {}\n", repo.short_name));
@@ -356,9 +356,9 @@ fn config_to_yaml(
             }
             yaml.push_str(&format!("    path: {}\n", repo.path));
             if ids.is_empty() {
-                yaml.push_str("    es_specs: []\n");
+                yaml.push_str("    rs_specs: []\n");
             } else {
-                yaml.push_str("    es_specs:\n");
+                yaml.push_str("    rs_specs:\n");
                 for id in ids {
                     yaml.push_str(&format!("      - {id}\n"));
                 }

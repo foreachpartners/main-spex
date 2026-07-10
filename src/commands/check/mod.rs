@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
-use crate::engineering_spec::{self, Check, CheckKind, EngineeringSpec, RunScope, Severity};
+use crate::rule_spec::{self, Check, CheckKind, RuleSpec, RunScope, Severity};
 use crate::spec::{self, Status};
 use crate::style::{Log, Style};
 use crate::util::{self, plural};
@@ -90,7 +90,7 @@ struct RepoReport {
 pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
-    let specs = workspace.es_specs().change_context(CheckError::Workspace)?;
+    let specs = workspace.rs_specs().change_context(CheckError::Workspace)?;
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -381,7 +381,7 @@ fn select_repos<'a>(
 fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
-    specs: &HashMap<String, EngineeringSpec>,
+    specs: &HashMap<String, RuleSpec>,
     files: &[String],
     log: &Log,
     findings: &mut Vec<Finding>,
@@ -421,13 +421,13 @@ fn check_repo(
     // Inherited checks identified by `(spec_id, name)`, used to resolve overrides.
     let mut inherited: HashMap<(&str, &str), &Check> = HashMap::new();
 
-    for spec_id in &repo.es_specs {
+    for spec_id in &repo.rs_specs {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(repo_error(
                 spec_id,
                 format!(
-                    "engineering spec `{spec_id}` not found in {}/",
-                    engineering_spec::ENGINEERING_SPECS_DIR
+                    "rule spec `{spec_id}` not found in {}/",
+                    rule_spec::RULE_SPECS_DIR
                 ),
             ));
             continue;
@@ -463,11 +463,11 @@ fn check_repo(
     }
 
     for additional in &repo.checks_additional {
-        if !repo.es_specs.iter().any(|spec| spec == &additional.spec) {
+        if !repo.rs_specs.iter().any(|spec| spec == &additional.spec) {
             findings.push(repo_error(
                 &repo.name,
                 format!(
-                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's es_specs",
+                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's rs_specs",
                     additional.spec, additional.check.name, additional.spec
                 ),
             ));
@@ -599,7 +599,7 @@ fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
 // Runs only when the spex repository is in scope.
 fn validate_specs(
     workspace: &Workspace,
-    es_specs: &HashMap<String, EngineeringSpec>,
+    rs_specs: &HashMap<String, RuleSpec>,
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
@@ -622,9 +622,9 @@ fn validate_specs(
     for spec in &cs_specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
-    // Engineering specs are global rules that always apply, so they count as
+    // Rule specs are global rules that always apply, so they count as
     // satisfied for `blocked_by` purposes.
-    for spec in es_specs.values() {
+    for spec in rs_specs.values() {
         status_by_id.insert(spec.id.as_str(), Status::Active);
     }
 

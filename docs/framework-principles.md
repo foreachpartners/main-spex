@@ -22,7 +22,7 @@ Asking an agent to "implement me a snake game where snake is blue and has big ey
 
 ## 3. Technical rules and patterns as Specs
 
-Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as engineering specs (`ES-*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
+Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS-*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
 
 They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability, captured as a capability spec (`CS-*`).
 
@@ -38,23 +38,23 @@ Each artifact is approved before the next is generated: spec before contract, co
 
 ## 5. Deterministic enforcement
 
-AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, engineering-spec checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
+AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule-spec checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
 
 That is why every check that can be a script must be a script. AI fills only the gaps where judgment is required.
 
-The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, engineering-spec checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings.
+The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule-spec checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings.
 
 **Deterministic — clear logic** (result unambiguous, repeatable):
 
-| Category            | Tools                              | Example                                                |
-| ------------------- | ---------------------------------- | ------------------------------------------------------ |
-| Compilation         | `cargo build`, `tsc`, `protoc`     | Type checking, contract-code alignment                 |
-| Linting             | `clippy`, `eslint`, `markdownlint` | Code style, formatting                                 |
-| Spec checks         | `spex check`                       | engineering-spec `regexp` / `glob` / `script` findings |
-| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active CS spec        |
-| Schema validation   | `spex check-schema`                | A spec file invalid against its bundled schema         |
-| Contract validation | OpenAPI validator, proto lint      | Contract syntax correctness                            |
-| Test execution      | `cargo test`, `vitest`             | Pass / fail — a factual result                         |
+| Category            | Tools                              | Example                                         |
+| ------------------- | ---------------------------------- | ----------------------------------------------- |
+| Compilation         | `cargo build`, `tsc`, `protoc`     | Type checking, contract-code alignment          |
+| Linting             | `clippy`, `eslint`, `markdownlint` | Code style, formatting                          |
+| Spec checks         | `spex check`                       | rule-spec `regexp` / `glob` / `script` findings |
+| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active CS spec |
+| Schema validation   | `spex check-schema`                | A spec file invalid against its bundled schema  |
+| Contract validation | OpenAPI validator, proto lint      | Contract syntax correctness                     |
+| Test execution      | `cargo test`, `vitest`             | Pass / fail — a factual result                  |
 
 **AI — fuzzy logic** (requires interpretation, context, judgment):
 
@@ -102,8 +102,8 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 | --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
 | HTTP / gRPC / event interface     | Native contract in `<project-name>-spex/contracts/` (OpenAPI, `.proto`, AsyncAPI) | No markdown copy of the interface                |
 | Capability (product or technical) | Capability spec (`<project-name>-spex/cs-specs/<spec-id>.yaml`)                   | No copy in code comments or plans                |
-| Cross-cutting convention          | Engineering spec (`<project-name>-spex/es-specs/<spec-id>.yaml`)                  | No copy in agent rules, READMEs, or service docs |
-| Check logic                       | Engineering-spec `checks` and `scripts/<spec-id>/`                                | No restated rule in CI config prose              |
+| Cross-cutting convention          | Rule spec (`<project-name>-spex/rs-specs/<spec-id>.yaml`)                         | No copy in agent rules, READMEs, or service docs |
+| Check logic                       | Rule-spec `checks` and `scripts/<spec-id>/`                                       | No restated rule in CI config prose              |
 | Workspace layout                  | `<project-name>-spex/spex.yaml`                                                   | No second list of repositories anywhere          |
 | Term definitions                  | `docs/glossary.md`                                                                | No re-definition in other docs                   |
 
@@ -125,16 +125,16 @@ Three requirements:
 
 **Violation test**: a context is parsimonious when no essential part can be removed without introducing ambiguity or degrading quality, and the whole contains no redundant or irrelevant element.
 
-**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`ES-WRITING-STYLE`](../templates/es-specs/ES-WRITING-STYLE.yaml).
+**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`RS-WRITING-STYLE`](../templates/rs-specs/RS-WRITING-STYLE.yaml).
 
 ## 11. Traceability
 
 Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
 
-- The Spec ID (`CS-*`, `ES-*`) is the traceability unit.
+- The Spec ID (`CS-*`, `RS-*`) is the traceability unit.
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI.
 - `spex coverage` computes coverage from those annotations.
 - Checking out a commit shows exactly which specs the code was built against.
-- Capability spec traceability is required, engineering is optional.
+- Capability spec traceability is required, rule spec traceability is optional.
 
 **Violation test**: a code change affects behavior and carries no Spec ID — it is a violation.

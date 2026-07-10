@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config};
-use crate::engineering_spec::{self, EngineeringSpec};
+use crate::rule_spec::{self, RuleSpec};
 use crate::style::Style;
 
 type Result<T> = core::result::Result<T, Report<WorkspaceError>>;
@@ -17,8 +17,8 @@ pub enum WorkspaceError {
     CurrentDir,
     #[error("could not load spex configuration")]
     Config,
-    #[error("could not load engineering specs")]
-    EngineeringSpecs,
+    #[error("could not load rule specs")]
+    RuleSpecs,
     #[error("could not load capability specs")]
     CapabilitySpecs,
 }
@@ -43,9 +43,9 @@ impl Workspace {
         Ok(Self { dir, config })
     }
 
-    pub fn es_specs(&self) -> Result<HashMap<String, EngineeringSpec>> {
-        engineering_spec::load_all(&self.dir.join(engineering_spec::ENGINEERING_SPECS_DIR))
-            .change_context(WorkspaceError::EngineeringSpecs)
+    pub fn rs_specs(&self) -> Result<HashMap<String, RuleSpec>> {
+        rule_spec::load_all(&self.dir.join(rule_spec::RULE_SPECS_DIR))
+            .change_context(WorkspaceError::RuleSpecs)
     }
 
     pub fn cs_specs(&self) -> Result<Vec<CapabilitySpec>> {

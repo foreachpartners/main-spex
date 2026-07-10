@@ -41,7 +41,7 @@ pub fn run() -> Result<ExitCode> {
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
 
     println!(
-        "spex skills, schemas, scripts and es-specs updated, cli_version set to {CLI_VERSION}"
+        "spex skills, schemas, scripts and rs-specs updated, cli_version set to {CLI_VERSION}"
     );
     Ok(ExitCode::SUCCESS)
 }

@@ -40,12 +40,12 @@
     },
     "blocked_by": {
       "type": "array",
-      "description": "Spec IDs (CS or ES) that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
+      "description": "Spec IDs (CS or RS) that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
       "items": {
-        "description": "A CS or ES spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
+        "description": "A CS or RS spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
         "anyOf": [
           { "$ref": "cs-spec-id.schema.json" },
-          { "$ref": "es-spec-id.schema.json" }
+          { "$ref": "rs-spec-id.schema.json" }
         ]
       }
     },
@@ -79,7 +79,7 @@
         "[ ] SHOULD display an order confirmation with a unique order number"
       ],
       "scope": ["api", "frontend"],
-      "blocked_by": ["CS-CART-ADD-ITEM", "ES-PAYMENT-GATEWAY"],
+      "blocked_by": ["CS-CART-ADD-ITEM", "RS-PAYMENT-GATEWAY"],
       "status": "planned"
     }
   ]

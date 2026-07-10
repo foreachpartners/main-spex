@@ -32,7 +32,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
 
-It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default engineering specs).
+It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default rule specs).
 
 ```sh
 spex init
@@ -42,9 +42,9 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and engineering specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and rule specs (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or engineering specs you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or rule specs you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
@@ -52,7 +52,7 @@ spex update
 
 ### `spex check`
 
-Runs the engineering spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the engineering specs (ES) listed in its `es_specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rule specs (RS) listed in its `rs_specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -73,9 +73,9 @@ repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    es_specs: [ES-WRITING-STYLE]
+    rs_specs: [RS-WRITING-STYLE]
     checks_preexisting_errors:
-      - spec: ES-WRITING-STYLE
+      - spec: RS-WRITING-STYLE
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. The `ES-SPEX-CONFORMANCE` engineering spec uses it to keep the spex repository's own spec files (`spex.yaml`, `cs-specs/<spec-id>.yaml`, `es-specs/<spec-id>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `cs-specs/<spec-id>.yaml`, `rs-specs/<spec-id>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -145,7 +145,7 @@ This is a general-purpose validator. The `ES-SPEX-CONFORMANCE` engineering spec 
 - `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
 
 ```sh
-spex check-schema --schema schemas/es-spec.schema.json --files es-specs/ES-NAMING-CONVENTION.yaml
+spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/RS-NAMING-CONVENTION.yaml
 ```
 
 ```sh
