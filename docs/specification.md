@@ -34,6 +34,8 @@ The machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived f
 
 Plan turns capability specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
 
+Plan should be simple, small and focused on interfaces instead of implementation or people will not review it.
+
 A plan helps with large changes and is optional for small, self-contained ones.
 
 ## Spec kinds
