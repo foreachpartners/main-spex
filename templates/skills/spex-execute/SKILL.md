@@ -23,7 +23,7 @@ Decide whether a plan governs this work:
 
 From here, "the plan" means the file you resolved; where none exists, every step below reduces to the request itself.
 
-## Step 2 — Gather context
+## Step 2 — Gather context (REQUIRED, never skip — even for a small or obvious fix)
 
 Every run needs the same four things before you touch code: the affected repositories, the governing rule-specs, the governing capability specs, and the units of work to perform. A plan already states them; without one, derive them yourself.
 
