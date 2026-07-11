@@ -23,20 +23,25 @@ Decide whether a plan governs this work:
 
 From here, "the plan" means the file you resolved; where none exists, every step below reduces to the request itself.
 
-## Step 2 — Gather context (REQUIRED, never skip — even for a small or obvious fix)
+## Step 2 — Gather context (mandatory gate — do not skip, even for a change that looks like a trivial rename, move, or one-line fix)
 
-Every run needs the same four things before you touch code: the affected repositories, the governing rule-specs, the governing capability specs, and the units of work to perform. A plan already states them; without one, derive them yourself.
+Do not edit, or write any code file until this step is done. Every run needs the same four things: the affected repositories, the governing rule-specs, the governing capability specs, and the units of work to perform. A plan already states them; without one, derive them yourself. A request that looks small, mechanical, or obviously safe is not an exemption — those are exactly the requests this step is most often wrongly skipped for.
 
 - **Repositories** — the plan's `Scope`, or, without a plan, whichever repositories the request touches (ask if unclear, or infer from `<workspace-root>/<project-name>-spex/spex.yaml` and each repository's `description`).
-- **Rule-specs** — the plan's `Rule-specs`, or, without a plan, the union of each affected repository's `rs_specs` list in `spex.yaml` (repository-wide specs are already expanded into it). Read every one in full from `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml` — not a summary — so naming, structure, security, traceability, and annotation rules are settled before you write a line of code.
+- **Rule-specs** — the plan's `Rule-specs`, or, without a plan, the union of each affected repository's `rs_specs` list in `spex.yaml` (repository-wide specs are already expanded into it). Read every single one in full — not a summary, not the ones that sound relevant, not a subset you judge sufficient — before writing or editing any code. Skipping even one because it seems unrelated to the request is exactly the failure this rule exists to prevent: a spec's relevance is often only visible after reading it, never before.
+  - First list `<workspace-root>/<project-name>-spex/rs-specs/` so you know the real filenames; a spec id in `spex.yaml` is not guaranteed to match a file of the same name. Resolve each id to its actual file by matching the id's distinctive suffix against the directory listing rather than assuming the full id is the filename.
+  - If an id from `spex.yaml` resolves to no file at all, do not silently drop it — tell the user the id is missing or stale before proceeding.
+  - Track the union list and the files you opened as you go, e.g. a simple checklist, so you can prove every id was read, not just remembered as read.
 - **Capability specs** — the plan's `Specs`, or, without a plan, every spec under `<workspace-root>/<project-name>-spex/cs-specs/` whose `scope` includes an affected repository and whose subject overlaps the request. Read every relevant one in full from `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` so the change stays consistent with its existing acceptance criteria. If a bare request extends or changes behavior an existing spec's acceptance criteria already cover, tell the user and offer to update that spec first with `spex-capability-spec`.
 - **Units of work** — the plan's steps and tasks, each with its current `Status`, its `Contract changes`, and its `Test cases`; or, without a plan, the request itself as a single unit (Step 3 splits it further if needed).
 
 For each affected repository, resolve its `path` from `spex.yaml` and note its build/test commands and annotation conventions; repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
 
+Before moving to Step 3, state explicitly in your response what you gathered: the repositories; the full union of rs-spec ids from `spex.yaml` for those repositories, each paired with the file path you opened for it (or a flagged mismatch/missing file); the exact cs-spec file paths you opened (or that none applied, and why); and the units of work. The rs-spec list must be exhaustive against `spex.yaml`, not a subset you selected as relevant — if the count of files you opened is smaller than the count of ids in the union list, you have not completed this step. Open the rest now instead of proceeding.
+
 ## Step 3 — Implement
 
-Work through the units of work in order, top to bottom; do not start one until the previous is complete.
+Do not start until Step 2's context note exists in your response. Work through the units of work in order, top to bottom; do not start one until the previous is complete.
 
 - With a plan, its steps are already ordered — skip any step or task already `completed` and resume at the first incomplete one.
 - Without a plan, split the request into tasks only when it spans independent repositories or clearly separable files; most requests are a single task.
