@@ -1,5 +1,5 @@
 #!/bin/sh
-# RS-SPEC-ID-ANNOTATIONS / annotation-format
+# RS-SPEC-ID-TRACING / annotation-format
 #
 # Validates spec-id annotation syntax. A comment annotation must read
 # `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl

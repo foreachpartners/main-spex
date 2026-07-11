@@ -7,7 +7,7 @@ acceptance_criteria:
   - "MUST use OpenAPI 3.1.1"
   - "MUST declare every endpoint with operationId, summary, and at least one response"
   - "MUST give every operationId a unique value across the document"
-  - "MUST annotate each operation with its capability spec via the `x-spec` extension per RS-SPEC-ID-ANNOTATIONS (e.g. `x-spec: CS-LIST-PIZZA-MENU`)"
+  - "MUST annotate each operation with its capability spec via the `x-spec` extension per RS-SPEC-ID-TRACING (e.g. `x-spec: CS-LIST-PIZZA-MENU`)"
   - "MUST define request and response shapes in components/schemas; never inline"
   - "MUST give every schema a name and use $ref to reference it"
   - "MUST list explicit error responses (4xx, 5xx) for non-trivial endpoints"

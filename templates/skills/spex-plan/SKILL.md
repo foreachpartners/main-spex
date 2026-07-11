@@ -52,7 +52,7 @@ Break the work into ordered steps. Within a step, split into tasks only when the
 - Every task in one step MUST be safe to run in parallel: it must not depend on another task's output in the same step, and must not edit the same files as another task in that step.
 - Put work that depends on an earlier result in a later step — a schema or contract change comes before the code that consumes it.
 - Give each task a disjoint write scope (its own files) and state which repository it runs in.
-- Name which single place carries each spec annotation per RS-SPEC-ID-ANNOTATIONS — the boundary (a handler, or the first file in a relation chain) — never the nested helpers it calls.
+- Name which single place carries each spec annotation per RS-SPEC-ID-TRACING — the boundary (a handler, or the first file in a relation chain) — never the nested helpers it calls.
 - Keep steps as few as the dependencies allow; a small spec may be a single step with a single task.
 
 Describe only the shape of each change, never its logic:
@@ -80,7 +80,7 @@ Plan for `CS-RESET-PASSWORD` (scope: `api`, `frontend`):
 
 - Specs: CS-RESET-PASSWORD
 - Scope: api, frontend
-- Rule-specs: RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-ANNOTATIONS
+- Rule-specs: RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-TRACING
 
 ## Step 1 — Store reset tokens and expose the reset endpoints
 
@@ -134,7 +134,7 @@ async fn request_reset(body: RequestResetBody) -> Result<StatusCode, ApiError>; 
 async fn confirm_reset(body: ConfirmResetBody) -> Result<StatusCode, ApiError>; // POST /password-resets/confirm
 ```
 
-Applies: RS-SECRET-HANDLING (token generation, never logged), RS-SPEC-ID-ANNOTATIONS (annotate `request_reset` and `confirm_reset`, the boundary).
+Applies: RS-SECRET-HANDLING (token generation, never logged), RS-SPEC-ID-TRACING (annotate `request_reset` and `confirm_reset`, the boundary).
 
 ### Task 1.2 — Reset request and confirm UI (repo: frontend)
 
@@ -156,7 +156,7 @@ interface ResetPasswordFormProps {
 }
 ```
 
-Applies: RS-NAMING-CONVENTION, RS-SPEC-ID-ANNOTATIONS (annotate the new `pizzaApi` methods, the boundary).
+Applies: RS-NAMING-CONVENTION, RS-SPEC-ID-TRACING (annotate the new `pizzaApi` methods, the boundary).
 
 ## Step 2 — Sign out other sessions on reset
 
@@ -169,7 +169,7 @@ Changed `SessionRepository` in `src/api/session_repo.rs` (repo: api):
 async fn delete_all_for_user_except(&self, user_id: UserId, keep: SessionId) -> Result<(), ApiError>;
 ```
 
-Called from `confirm_reset` (Task 1.1), which already carries the spec annotation — RS-SPEC-ID-ANNOTATIONS forbids re-annotating this repository method (no nested annotations).
+Called from `confirm_reset` (Task 1.1), which already carries the spec annotation — RS-SPEC-ID-TRACING forbids re-annotating this repository method (no nested annotations).
 ````
 
 After writing the plan, offer to execute it: run `spex-execute <spec-id>`. Note that it is better to start a new chat first to save context.

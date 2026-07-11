@@ -2,7 +2,7 @@
 
 - Specs: CS-DELIVERY-TIME
 - Scope: api, frontend
-- Rule-specs: RS-COMMIT-MESSAGE-FORMAT, RS-CONFIGURABLE-NETWORK-BIND, RS-DEPENDENCIES, RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-ANNOTATIONS, RS-TESTING, RS-WRITING-STYLE
+- Rule-specs: RS-COMMIT-MESSAGE-FORMAT, RS-CONFIGURABLE-NETWORK-BIND, RS-DEPENDENCIES, RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-TRACING, RS-TESTING, RS-WRITING-STYLE
 
 ## Step 1 — Compute, expose, and display the delivery-time estimate
 
@@ -65,7 +65,7 @@ async fn estimate_order_delivery_time(
 
 `create_order` and `list_deliveries` keep their existing signatures; their bodies populate and refresh the new `Delivery` fields (`estimated_seconds` at creation, `remaining_seconds` on every read, with elapsed deliveries dropped).
 
-Applies: RS-SPEC-ID-ANNOTATIONS (annotate `estimate_order_delivery_time`, the boundary), RS-TESTING (cover rounding, in-progress workload, validation, and the countdown, with no skipped or focused tests).
+Applies: RS-SPEC-ID-TRACING (annotate `estimate_order_delivery_time`, the boundary), RS-TESTING (cover rounding, in-progress workload, validation, and the countdown, with no skipped or focused tests).
 
 ### Task 1.2 — Cart estimate and delivery countdown UI (repo: frontend)
 
@@ -98,4 +98,4 @@ estimateOrderDeliveryTime: (pizzaIds: number[]) => Promise<DeliveryEstimate>;
 
 `App.tsx` calls `estimateOrderDeliveryTime` whenever the cart changes to show the live estimate, and renders each polled delivery's `remainingSeconds` as its countdown.
 
-Applies: RS-SPEC-ID-ANNOTATIONS (annotate `estimateOrderDeliveryTime`, the boundary), RS-TESTING (cover the API client call and the cart/delivery UI states, with no skipped or focused tests).
+Applies: RS-SPEC-ID-TRACING (annotate `estimateOrderDeliveryTime`, the boundary), RS-TESTING (cover the API client call and the cart/delivery UI states, with no skipped or focused tests).

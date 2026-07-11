@@ -1,5 +1,5 @@
 #!/bin/sh
-# RS-SPEC-ID-ANNOTATIONS / no-orphan-annotations
+# RS-SPEC-ID-TRACING / no-orphan-annotations
 #
 # Flags spec-id annotations that reference a Spec ID with no matching spec.
 # Runs once for the whole workspace from the spex directory (its working

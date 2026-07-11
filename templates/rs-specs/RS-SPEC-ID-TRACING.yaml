@@ -1,16 +1,15 @@
-id: RS-SPEC-ID-ANNOTATIONS
+id: RS-SPEC-ID-TRACING
 include_for_all_repos: true
 include_for_spex: false
 managed: true
-title: Spec ID annotation format
+title: Spec ID tracing
 description: >-
-  Annotations link a contract, implementation, or test back to the spec it
-  satisfies. Placing them once at each layer boundary keeps traceability
-  unambiguous without scattering Spec IDs through internal helpers.
+  Spec ID tracing annotations link a contract, implementation and test back to the spec it satisfies. It makes easy for human and AI to trace specification and related artifacts.
 acceptance_criteria:
-  - "MUST annotate capability (CS) spec contract, implementation and test at least once at the boundary"
+  - "MUST annotate capability (CS) spec contract, implementation and test at least once at the boundary, with additional annotations on other important artifacts being optional"
   - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: CS-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl CS-LIST-PIZZA-MENU`)"
   - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
+  - "SHOULD limit number of traces for one spec so that search results are manageble, 10 traces max is recommended"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
   - "MAY annotate rule (RS) spec following same rules"
 checks:

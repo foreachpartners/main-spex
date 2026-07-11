@@ -31,7 +31,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/<project-name>-spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
-- For each affected repository, read its `rs_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rs-specs/` — at minimum `RS-OPENAPI-CONVENTIONS` (for OpenAPI), `RS-GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `RS-SPEC-ID-ANNOTATIONS` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, read its `rs_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rs-specs/` — at minimum `RS-OPENAPI-CONVENTIONS` (for OpenAPI), `RS-GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `RS-SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -47,7 +47,7 @@ Draft each contract following the format of the existing document and the govern
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec per `RS-SPEC-ID-ANNOTATIONS` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
+- Annotate each operation with its spec per `RS-SPEC-ID-TRACING` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 Keep the change minimal and consistent with the surrounding document.
