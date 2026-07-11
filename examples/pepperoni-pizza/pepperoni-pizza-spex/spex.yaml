@@ -18,7 +18,7 @@ repositories:
     rs_specs:
       - RS-COMMIT-MESSAGE-FORMAT
       - RS-CONFIGURABLE-NETWORK-BIND
-      - RS-DEPENDENCIES-RULES
+      - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION
       - RS-SECRET-HANDLING
       - RS-SPEC-ID-ANNOTATIONS
@@ -32,7 +32,7 @@ repositories:
     path: ../pepperoni-pizza-frontend
     rs_specs:
       - RS-COMMIT-MESSAGE-FORMAT
-      - RS-DEPENDENCIES-RULES
+      - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION
       - RS-SECRET-HANDLING
       - RS-SPEC-ID-ANNOTATIONS
@@ -48,7 +48,7 @@ repositories:
     path: .
     rs_specs:
       - RS-COMMIT-MESSAGE-FORMAT
-      - RS-DEPENDENCIES-RULES
+      - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION
       - RS-SECRET-HANDLING
       - RS-SPEX-CONFORMANCE
