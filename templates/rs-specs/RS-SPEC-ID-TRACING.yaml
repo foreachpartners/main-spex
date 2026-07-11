@@ -8,8 +8,8 @@ description: >-
 acceptance_criteria:
   - "MUST annotate capability (CS) spec contract, implementation and test at least once at the boundary, with additional annotations on other important artifacts being optional"
   - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: CS-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl CS-LIST-PIZZA-MENU`)"
+  - "MUST limit number of traces for one spec to 10 per repo in total"
   - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
-  - "SHOULD limit number of traces for one spec so that search results are manageble, 10 traces max is recommended"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
   - "MAY annotate rule (RS) spec following same rules"
 checks:
@@ -26,6 +26,12 @@ checks:
     type: script
     run: workspace
     script: no-orphan-annotations.sh
+    severity: warn
+  - name: trace-limit
+    description: A Spec ID must not accumulate more than 10 trace annotations within one repository
+    type: script
+    run: workspace
+    script: trace-limit.sh
     severity: warn
 examples:
   contract: |
