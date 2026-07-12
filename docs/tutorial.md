@@ -87,7 +87,7 @@ Tip: you can combine skills in the future `/spex-capability-spec /spex-contract 
 ### 5.4 Execute
 
 ```text
-/spex-execute <spec-id>
+/spex-implement <spec-id>
 ```
 
 The agent executes the plan tasks for each step in parallel.

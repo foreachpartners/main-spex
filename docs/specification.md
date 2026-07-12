@@ -191,7 +191,7 @@ Splits approved specs into an ordered, parallel-safe plan.
 - Requires the contract to be settled with `spex-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
 - Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
-## spex-execute
+## spex-implement
 
 Executes a plan step by step, or a plain user request directly, and checks the result.
 

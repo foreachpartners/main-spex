@@ -54,7 +54,7 @@ Workflow core is AI agent skills and CLI commands.
    - rule spec `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/RS-SECRET-HANDLING.yaml`
 2. Derive the contract for a capability spec `/spex-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
 3. Create an implementation plan for a spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. Execute the plan `/spex-execute [secret handling]`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+4. Execute the plan `/spex-implement [secret handling]`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 5. Check the results with `spex check`. Will run all rule spec (RS) checks related to your changes.
 6. See coverage with `spex coverage`. Will check if all specs have a contract, implementation, and test.
 

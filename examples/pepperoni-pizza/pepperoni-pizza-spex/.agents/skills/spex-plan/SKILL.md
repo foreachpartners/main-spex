@@ -172,6 +172,6 @@ async fn delete_all_for_user_except(&self, user_id: UserId, keep: SessionId) -> 
 Called from `confirm_reset` (Task 1.1), which already carries the spec annotation — RS-SPEC-ID-TRACING forbids re-annotating this repository method (no nested annotations).
 ````
 
-After writing the plan, offer to execute it: run `spex-execute <spec-id>`. Note that it is better to start a new chat first to save context.
+After writing the plan, offer to execute it: run `spex-implement <spec-id>`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.

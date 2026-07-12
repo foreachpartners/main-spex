@@ -1,5 +1,5 @@
 ---
-name: spex-execute
+name: spex-implement
 description: Execute an existing implementation plan, or carry out an ad-hoc user request directly against the codebase. Use when the user wants to run, implement, or carry out a plan from <workspace-root>/<project-name>-spex/plans/, or asks for a change without a formal plan.
 ---
 
