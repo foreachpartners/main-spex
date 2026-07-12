@@ -1,6 +1,6 @@
-mod capability_spec;
 mod commands;
 mod config;
+mod functional_spec;
 mod rule_spec;
 mod spec;
 mod style;
@@ -47,7 +47,7 @@ enum Commands {
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
-    #[command(about = "Report annotation coverage of active capability specs")]
+    #[command(about = "Report annotation coverage of active functional specs")]
     Coverage,
 }
 

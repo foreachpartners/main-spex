@@ -4,15 +4,15 @@ managed: true
 title: Commit message format
 description: >-
   Commits are the unit of traceability between code and the specs that justify
-  it. The `cs` scope marks capability commits, and ending their
-  Conventional Commit subject with the affected Spec IDs lets every capability
+  it. The `fs` scope marks functional commits, and ending their
+  Conventional Commit subject with the affected Spec IDs lets every functional
   change trace back to an approved requirement; the `rs` scope marks rule
   changes. See https://www.conventionalcommits.org/ for the Conventional Commits
   specification.
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "MUST use the `cs` scope for capability changes (e.g. `feat(cs)`, `fix(cs)`)"
-  - "MUST end every `cs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
+  - "MUST use the `fs` scope for functional changes (e.g. `feat(fs)`, `fix(fs)`)"
+  - "MUST end every `fs`-scoped commit description with at least one `<Spec ID>[, <Spec ID>]`"
   - "SHOULD use the `rs` scope for rule changes (e.g. `feat(rs)`, `fix(rs)`)"
 checks:
   - name: commit-conventional-format
@@ -22,7 +22,7 @@ checks:
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
-    description: Recent `cs`-scoped commits must end with a comma-separated Spec ID list
+    description: Recent `fs`-scoped commits must end with a comma-separated Spec ID list
     type: script
     run: per-repo
     script: commit-spec-id-trace.sh
@@ -31,10 +31,10 @@ examples:
   subject: |
     style: format md files
     feat(rs): cache catalog responses for 60s
-    feat(cs): list available pizzas CS-LIST-PIZZA-MENU
-    fix(cs): reject negative quantities CS-CART-ADD-ITEM, CS-CART-VALIDATE
+    feat(fs): list available pizzas FS-LIST-PIZZA-MENU
+    fix(fs): reject negative quantities FS-CART-ADD-ITEM, FS-CART-VALIDATE
   with_body: |
-    feat(cs): list available pizzas CS-LIST-PIZZA-MENU
+    feat(fs): list available pizzas FS-LIST-PIZZA-MENU
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.

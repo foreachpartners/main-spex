@@ -1,6 +1,6 @@
 # Plan: Show customers an estimated delivery time for their order
 
-- Specs: CS-DELIVERY-TIME
+- Specs: FS-DELIVERY-TIME
 - Scope: api, frontend
 - Rule-specs: RS-COMMIT-MESSAGE-FORMAT, RS-CONFIGURABLE-NETWORK-BIND, RS-DEPENDENCIES, RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-TRACING, RS-TESTING, RS-WRITING-STYLE
 

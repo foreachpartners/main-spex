@@ -227,8 +227,8 @@ mod tests_unit {
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-                  rs-specs/ (cross-cutting conventions and rules) and cs-specs/ (the
-                  capabilities the system provides).
+                  rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
+                  functionality the system provides).
                 path: .
                 rs_specs:
                   - RS-WRITING-STYLE
@@ -390,7 +390,7 @@ mod tests_unit {
         copy_templates(spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("rs-specs").is_dir());
-        assert!(spex_dir.path().join("cs-specs").is_dir());
+        assert!(spex_dir.path().join("fs-specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
         assert!(spex_dir.path().join("contracts").is_dir());
@@ -406,7 +406,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join("schemas/cs-spec.schema.json")
+                .join("schemas/fs-spec.schema.json")
                 .is_file()
         );
     }
@@ -422,7 +422,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join(".agents/skills/spex-capability-spec/SKILL.md")
+                .join(".agents/skills/spex-functional-spec/SKILL.md")
                 .is_file()
         );
     }
@@ -439,7 +439,7 @@ mod tests_unit {
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
             claude
-                .join("skills/spex-capability-spec/SKILL.md")
+                .join("skills/spex-functional-spec/SKILL.md")
                 .is_file(),
             ".claude/skills should resolve through the symlink"
         );

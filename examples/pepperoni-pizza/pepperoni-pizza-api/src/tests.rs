@@ -65,7 +65,7 @@ async fn create_order_rejects_unknown_pizza() {
     assert!(list_deliveries(State(state)).await.0.is_empty());
 }
 
-// @spec test CS-DELIVERY-TIME
+// @spec test FS-DELIVERY-TIME
 #[tokio::test]
 async fn estimate_rounds_up_over_two_workers() {
     let response = estimate_order_delivery_time(

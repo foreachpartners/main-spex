@@ -179,7 +179,7 @@ async fn create_order(State(state): State<AppState>, Json(input): Json<NewOrder>
     (StatusCode::CREATED, Json(delivery)).into_response()
 }
 
-// @spec impl CS-DELIVERY-TIME
+// @spec impl FS-DELIVERY-TIME
 async fn estimate_order_delivery_time(
     State(state): State<AppState>,
     Json(input): Json<EstimateRequest>,

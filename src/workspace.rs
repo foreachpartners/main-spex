@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config};
+use crate::functional_spec::{self, FunctionalSpec};
 use crate::rule_spec::{self, RuleSpec};
 use crate::style::Style;
 
@@ -19,8 +19,8 @@ pub enum WorkspaceError {
     Config,
     #[error("could not load rule specs")]
     RuleSpecs,
-    #[error("could not load capability specs")]
-    CapabilitySpecs,
+    #[error("could not load functional specs")]
+    FunctionalSpecs,
 }
 
 // A resolved spex workspace: the spex directory plus its parsed configuration.
@@ -48,8 +48,8 @@ impl Workspace {
             .change_context(WorkspaceError::RuleSpecs)
     }
 
-    pub fn cs_specs(&self) -> Result<Vec<CapabilitySpec>> {
-        capability_spec::load_all(&self.dir.join(capability_spec::CAPABILITY_SPECS_DIR))
-            .change_context(WorkspaceError::CapabilitySpecs)
+    pub fn fs_specs(&self) -> Result<Vec<FunctionalSpec>> {
+        functional_spec::load_all(&self.dir.join(functional_spec::FUNCTIONAL_SPECS_DIR))
+            .change_context(WorkspaceError::FunctionalSpecs)
     }
 }

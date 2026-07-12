@@ -1,11 +1,11 @@
 ---
 name: spex-contract
-description: Derive or update the machine-readable interface contract from one or more capability specs. Use when the user wants to create, extend, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a CS spec.
+description: Derive or update the machine-readable interface contract from one or more functional specs. Use when the user wants to create, extend, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) for a FS spec.
 ---
 
 # Create an Interface Contract
 
-A contract is the machine-readable _interface_ derived from a capability spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the machine-readable _interface_ derived from a functional spec: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 ## Paths
 
@@ -23,7 +23,7 @@ Determine which specs to contract before doing anything else:
 
 ## Step 1 — Gather context first
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 
@@ -73,7 +73,7 @@ paths:
     post:
       operationId: createOrder
       summary: Create an order
-      x-spec: CS-ORDER-CREATE
+      x-spec: FS-ORDER-CREATE
       requestBody:
         content:
           application/json:

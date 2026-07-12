@@ -1,11 +1,11 @@
 ---
 name: spex-plan
-description: Create a new implementation plan for one or more capability specs, or edit an existing plan. Use when the user wants to plan, break down, prepare, update, or amend implementation for a CS spec, or change a named existing plan. Reads the spec, contract, the affected repositories, and the rs-specs that govern them, inspects the current code, then writes or updates a step-by-step implementation plan that AI agents can do in parallel.
+description: Create a new implementation plan for one or more functional specs, or edit an existing plan. Use when the user wants to plan, break down, prepare, update, or amend implementation for a FS spec, or change a named existing plan. Reads the spec, contract, the affected repositories, and the rs-specs that govern them, inspects the current code, then writes or updates a step-by-step implementation plan that AI agents can do in parallel.
 ---
 
 # Create or Edit an Implementation Plan
 
-An implementation plan turns one or more approved capability specs into an ordered set of steps whose tasks AI agents execute in parallel. A plan captures the shape of a change — new or changed method signatures, database/schema changes, domain models, handler/endpoint signatures — never its logic. Your job is to read the specs and contracts, resolve the governing rs-specs, inspect the current code, then draft or update the plan.
+An implementation plan turns one or more approved functional specs into an ordered set of steps whose tasks AI agents execute in parallel. A plan captures the shape of a change — new or changed method signatures, database/schema changes, domain models, handler/endpoint signatures — never its logic. Your job is to read the specs and contracts, resolve the governing rs-specs, inspect the current code, then draft or update the plan.
 
 ## Paths
 
@@ -21,7 +21,7 @@ Determine which specs to plan:
 - If the user said "the one I just made" or gave no ID but a spec was created earlier in this session, plan that one and confirm.
 - If the user instead named an existing plan (a filename, a path, or "the plan for `<spec-id>`"), this is an edit: read it in full and treat its steps as the base, changing only what the user asked for and preserving every untouched step/task and its `Status:` line. If a spec ID has more than one plan, list them and ask which to edit.
 - If no spec is identified, ask which to plan. Do not invent a spec.
-- Each target spec must already exist at `<workspace-root>/<project-name>-spex/cs-specs/<spec-id>.yaml`; if one is missing, stop and create it first with `spex-capability-spec`.
+- Each target spec must already exist at `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml`; if one is missing, stop and create it first with `spex-functional-spec`.
 
 Read every target spec in full. Capture its `title`, `description`, `acceptance_criteria`, `scope` (the in-scope repositories), and `blocked_by`; confirm with the user how to handle any unresolved blocker.
 
@@ -73,12 +73,12 @@ Tell the user the path you wrote (or the change you applied), walk through the s
 
 ## Example
 
-Plan for `CS-RESET-PASSWORD` (scope: `api`, `frontend`):
+Plan for `FS-RESET-PASSWORD` (scope: `api`, `frontend`):
 
 ````md
 # Plan: Let users reset a forgotten password
 
-- Specs: CS-RESET-PASSWORD
+- Specs: FS-RESET-PASSWORD
 - Scope: api, frontend
 - Rule-specs: RS-NAMING-CONVENTION, RS-SECRET-HANDLING, RS-SPEC-ID-TRACING
 

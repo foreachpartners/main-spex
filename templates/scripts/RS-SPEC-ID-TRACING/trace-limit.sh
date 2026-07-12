@@ -9,7 +9,7 @@
 # .gitignore is honored and each repository must be its own git repository),
 # and tallies every @spec / x-spec reference by Spec ID, per repository.
 # Markdown files are skipped, as are the spex workspace's own spec and script
-# files: its cs-specs/ and rs-specs/ only contribute their Spec ID (the
+# files: its fs-specs/ and rs-specs/ only contribute their Spec ID (the
 # filename), and its scripts/ holds framework helper code whose comments
 # carry illustrative example annotations — neither's contents are real
 # references. Other repositories are scanned in full, so an app repo's own
@@ -21,7 +21,7 @@
 #   <repo><TAB>too many traces for `<id>`: <count> (limit 10)
 set -u
 
-id='(CS|RS)-[A-Z]+(-[A-Z]+)*'
+id='(FS|RS)-[A-Z]+(-[A-Z]+)*'
 limit=10
 
 repo_paths=$(sed -n 's/^[[:space:]]*path:[[:space:]]*//p' spex.yaml)
@@ -39,7 +39,7 @@ for repo in $repo_paths; do
     git -C "$repo" ls-files | while IFS= read -r rel; do
       case "$rel" in *.md) continue ;; esac
       if [ "$repo_dir" = "$spex_dir" ]; then
-        case "$rel" in cs-specs/* | rs-specs/* | scripts/*) continue ;; esac
+        case "$rel" in fs-specs/* | rs-specs/* | scripts/*) continue ;; esac
       fi
       file="$repo/$rel"
       [ -f "$file" ] || continue

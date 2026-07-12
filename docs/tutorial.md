@@ -2,7 +2,7 @@
 
 A hands-on walkthrough from a plain multi-repo project to a spec-driven one. You
 install the CLI, set up a spex workspace on the `pepperoni-pizza` example, fix
-check and coverage findings, and run the capability and rule spec workflows
+check and coverage findings, and run the functional and rule spec workflows
 end to end.
 
 By the end you will have recreated a project similar to `examples/pepperoni-pizza` from the
@@ -47,21 +47,21 @@ Run your first skill `/spex-setup` in AI chat window to complete setup.
 Run `spex check` in terminal from anywhere in the workspace and work
 through the findings until it exits cleanly.
 
-## Step 5 — Capability spec workflow
+## Step 5 — Functional spec workflow
 
 Drive a real feature from PRD to verified code. Start with the PRD-level
 statement of what the product should do:
 
 > show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 
-### 5.1 Create the capability spec
+### 5.1 Create the functional spec
 
 There is no person who requested this feature with whom you can clarify details, so decide yourself how it should behave for the tutorial.
 
 Hand the PRD to the skill — it breaks the PRD into one or more specs:
 
 ```text
-/spex-capability-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
+/spex-functional-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
 ```
 
 The skill interviews you, proposes the split when the PRD covers more than one capability, then writes a schema-valid spec per capability. A spec captures one capability, not one repository. Review the spec and confirm its `status` is `planned`.
@@ -82,7 +82,7 @@ The agent reads the spec, `api` OpenAPI contract and updates it to match changes
 
 The agent reads the spec, contract, code and proposes an implementation plan.
 
-Tip: you can combine skills in the future `/spex-capability-spec /spex-contract /spex-plan`
+Tip: you can combine skills in the future `/spex-functional-spec /spex-contract /spex-plan`
 
 ### 5.4 Implement
 
@@ -133,7 +133,7 @@ Create a new file `pepperoni-pizza-spex/tutorial-completion.md` that documents t
 
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.
-3. Rate created capability spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
+3. Rate created functional spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
 3. Rate created rule spec for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
 ```
 

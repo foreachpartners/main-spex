@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal
 
-spex helps you move fast with AI, not stand in your way. Capability specs (CS) and rule specs (RS) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
+spex helps you move fast with AI, not stand in your way. Functional specs (FS) and rule specs (RS) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
 
 ## Quickstart
 
@@ -49,14 +49,14 @@ Repository directories follow `<project-name>-<repository-short-name>` (RS-NAMIN
 
 Workflow core is AI agent skills and CLI commands.
 
-1. **Create capability spec** `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
-2. **Derive the contract** for a capability spec `/spex-contract CS-PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. **Create an implementation plan** for a spec `/spex-plan CS-PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. **Implement the plan** `/spex-implement CS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-5. **Review** `/spex-review CS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+1. **Create functional spec** `/spex-functional-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/fs-specs/FS-PLACE-PIZZA-ORDER.yaml`
+2. **Derive the contract** for a functional spec `/spex-contract FS-PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. **Create an implementation plan** for a spec `/spex-plan FS-PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
+4. **Implement the plan** `/spex-implement FS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+5. **Review** `/spex-review FS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
 6. **Verify** check the results with `spex check` - will run all rule spec (RS) checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and test.
 
-Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
+Tip: you can combine skills `/spex-functional-spec /spex-contract /spex-plan`
 
 **Create a rule spec**: `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/RS-SECRET-HANDLING.yaml`
 
@@ -64,9 +64,9 @@ Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
 
-**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted a blue snake with big eyes! Clear, well-defined capability specifications (`CS`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
+**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted a blue snake with big eyes! Clear, well-defined functional specifications (`FS`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
 
-**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a capability spec (`CS`), not a rule spec.
+**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a functional spec (`FS`), not a rule spec.
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
@@ -82,7 +82,7 @@ For example, a pizza ordering feature moves through the flow like this:
 
 1. **BRD** — sell pizza online to increase sales
 2. **PRD** — customers can pick a pizza on the website and pay online
-3. **Capability Spec** — `CS-PLACE-PIZZA-ORDER`: Customer can place an order.
+3. **Functional Spec** — `FS-PLACE-PIZZA-ORDER`: Customer can place an order.
 
    Acceptance criteria: POST /orders returns 201 with the created order
 
@@ -94,10 +94,10 @@ For example, a pizza ordering feature moves through the flow like this:
 ```mermaid
 flowchart TD
     BRD["BRD (optional) — why"] --> PRD["PRD (optional) — what"]
-    PRD --> Cap
+    PRD --> Func
 
     subgraph Traced ["traced by spec ID"]
-        Cap["Capability Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
+        Func["Functional Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
         Contract --> Plan["Plan (optional) — how to build it"]
         Plan --> Impl["Implementation — code"]
         Impl --> Test["Test — proof"]

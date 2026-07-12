@@ -26,7 +26,7 @@ src/                CLI source
   config.rs         Config loading
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
   rule_spec.rs   Rule-spec model
-  capability_spec.rs    Capability-spec model
+  functional_spec.rs    Functional-spec model
   spec.rs           Shared spec primitives (status, acceptance-criteria checkbox)
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)

@@ -843,8 +843,8 @@ mod tests {
         items.iter().map(|item| item.to_string()).collect()
     }
 
-    fn capability_spec(id: &str, blocked_by: Vec<&str>) -> CapabilitySpec {
-        CapabilitySpec {
+    fn functional_spec(id: &str, blocked_by: Vec<&str>) -> FunctionalSpec {
+        FunctionalSpec {
             id: id.to_string(),
             acceptance_criteria: Vec::new(),
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
@@ -856,36 +856,36 @@ mod tests {
     #[test]
     fn status_finding_flags_fully_checked_unimplemented_spec() {
         let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
-        let result = status_finding("CS-A", "cs-specs", &criteria, Status::Planned);
+        let result = status_finding("FS-A", "fs-specs", &criteria, Status::Planned);
         let finding = result.expect("expected a status finding");
         assert_eq!(finding.severity, Severity::Warn);
         assert_eq!(finding.check, "status");
-        assert_eq!(finding.location.as_deref(), Some("cs-specs/CS-A.yaml"));
+        assert_eq!(finding.location.as_deref(), Some("fs-specs/FS-A.yaml"));
     }
 
     #[test]
     fn status_finding_is_silent_when_consistent_or_incomplete() {
         let full = ac(&["[x] MUST a", "[x] MUST b"]);
         // Fully checked and already implemented: nothing to flag.
-        assert!(status_finding("CS-A", "cs-specs", &full, Status::Active).is_none());
-        assert!(status_finding("CS-A", "cs-specs", &full, Status::Deprecated).is_none());
+        assert!(status_finding("FS-A", "fs-specs", &full, Status::Active).is_none());
+        assert!(status_finding("FS-A", "fs-specs", &full, Status::Deprecated).is_none());
         // A pending box means the spec isn't done, so any status is allowed.
         let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
-        assert!(status_finding("CS-A", "cs-specs", &partial, Status::Planned).is_none());
+        assert!(status_finding("FS-A", "fs-specs", &partial, Status::Planned).is_none());
         // No criteria at all: nothing to infer.
-        assert!(status_finding("CS-A", "cs-specs", &[], Status::Planned).is_none());
+        assert!(status_finding("FS-A", "fs-specs", &[], Status::Planned).is_none());
     }
 
     #[test]
     fn validate_blocked_by_flags_missing_and_active_references() {
         let status_by_id = HashMap::from([
-            ("CS-DONE", Status::Active),
-            ("CS-PENDING", Status::Planned),
+            ("FS-DONE", Status::Active),
+            ("FS-PENDING", Status::Planned),
             ("RS-PENDING", Status::Blocked),
         ]);
-        let spec = capability_spec(
-            "CS-A",
-            vec!["CS-MISSING", "CS-DONE", "CS-PENDING", "RS-PENDING"],
+        let spec = functional_spec(
+            "FS-A",
+            vec!["FS-MISSING", "FS-DONE", "FS-PENDING", "RS-PENDING"],
         );
 
         let mut findings = Vec::new();
@@ -896,12 +896,12 @@ mod tests {
         let missing = &findings[0];
         assert_eq!(missing.severity, Severity::Error);
         assert_eq!(missing.check, "blocked-by");
-        assert!(missing.message.contains("CS-MISSING"));
+        assert!(missing.message.contains("FS-MISSING"));
         assert!(missing.message.contains("non-existing spec"));
 
         let active = &findings[1];
         assert_eq!(active.severity, Severity::Warn);
-        assert!(active.message.contains("CS-DONE"));
+        assert!(active.message.contains("FS-DONE"));
         assert!(active.message.contains("already active"));
     }
 }

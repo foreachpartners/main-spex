@@ -2,7 +2,7 @@ project_name: pepperoni-pizza
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
-cli_version: 0.7.26
+cli_version: 0.7.27
 repositories:
   - repository_name: pepperoni-pizza-api
     repository_short_name: api
@@ -43,7 +43,7 @@ repositories:
     description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rs-specs/ (cross-cutting conventions and rules) and cs-specs/ (the
+      rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
       capabilities the system provides).
     path: .
     rs_specs:

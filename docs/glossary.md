@@ -14,18 +14,18 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: capability (`CS`) and rule (`RS`). The dividing line is capability versus convention: a specific capability the system must provide → `CS`; a rule every change must follow, enforceable repo-wide → `RS`.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: functional (`FS`) and rule (`RS`). The dividing line is capability versus convention: a specific capability the system must provide → `FS`; a rule every change must follow, enforceable repo-wide → `RS`.
 
-- **Capability Spec** (`CS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many capability specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
+- **Functional Spec** (`FS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many functional specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
 
   ```yaml
-  id: CS-PLACE-PIZZA-ORDER
+  id: FS-PLACE-PIZZA-ORDER
   title: Customer can place an order
   acceptance_criteria:
     - "[ ] MUST return 201 with the created order from POST /orders"
   ```
 
-- **Rule Spec** (`RS`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a capability spec (`CS`), not a rule spec.
+- **Rule Spec** (`RS`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a functional spec (`FS`), not a rule spec.
 
   ```yaml
   id: RS-SECRET-HANDLING
@@ -37,11 +37,11 @@
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
 
   ```text
-  CS-PLACE-PIZZA-ORDER
+  FS-PLACE-PIZZA-ORDER
   RS-SECRET-HANDLING
   ```
 
-- **Contract** — derived from a capability spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.
+- **Contract** — derived from a functional spec. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A repository's contracts live in the `spex` repository's `contracts/` folder.
 
   ```yaml
   paths:
@@ -53,7 +53,7 @@
             description: Order created
   ```
 
-- **Plan** — derived from one or more approved capability specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`.
+- **Plan** — derived from one or more approved functional specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`.
 
   ```md
   # Plan: Customer can place an order

@@ -3,8 +3,8 @@
 #
 # Validates spec-id annotation syntax. A comment annotation must read
 # `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl
-# CS-LIST-PIZZA-MENU`) and an OpenAPI annotation must read `x-spec: <spec-id>`
-# (e.g. `x-spec: CS-LIST-PIZZA-MENU`). Flags any line that opens an annotation
+# FS-LIST-PIZZA-MENU`) and an OpenAPI annotation must read `x-spec: <spec-id>`
+# (e.g. `x-spec: FS-LIST-PIZZA-MENU`). Flags any line that opens an annotation
 # but does not match its grammar. Receives candidate files as arguments
 # (Markdown excluded by the check's exclude patterns).
 #
@@ -14,7 +14,7 @@ set -u
 
 [ "$#" -eq 0 ] && exit 0
 
-id='(CS|RS)-[A-Z]+(-[A-Z]+)*'
+id='(FS|RS)-[A-Z]+(-[A-Z]+)*'
 comment="@spec (contract|impl|test) ${id}(, ${id})*"
 xspec="x-spec:[[:space:]]+\"?${id}\"?"
 

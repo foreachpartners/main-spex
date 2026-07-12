@@ -7,8 +7,8 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::capability_spec::{self, CapabilitySpec};
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
+use crate::functional_spec::{self, FunctionalSpec};
 use crate::rule_spec::{self, Check, CheckKind, RuleSpec, RunScope, Severity};
 use crate::spec::{self, Status};
 use crate::style::{Log, Style};
@@ -616,10 +616,10 @@ fn validate_specs(
         return Ok(());
     };
 
-    let cs_specs = workspace.cs_specs().change_context(CheckError::Workspace)?;
+    let fs_specs = workspace.fs_specs().change_context(CheckError::Workspace)?;
 
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
-    for spec in &cs_specs {
+    for spec in &fs_specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
     // Rule specs are global rules that always apply, so they count as
@@ -628,10 +628,10 @@ fn validate_specs(
         status_by_id.insert(spec.id.as_str(), Status::Active);
     }
 
-    for spec in &cs_specs {
+    for spec in &fs_specs {
         if let Some(finding) = status_finding(
             &spec.id,
-            capability_spec::CAPABILITY_SPECS_DIR,
+            functional_spec::FUNCTIONAL_SPECS_DIR,
             &spec.acceptance_criteria,
             spec.status,
         ) {
@@ -639,7 +639,7 @@ fn validate_specs(
         }
     }
 
-    for spec in &cs_specs {
+    for spec in &fs_specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
 
@@ -666,14 +666,14 @@ fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> O
 }
 
 fn validate_blocked_by(
-    spec: &CapabilitySpec,
+    spec: &FunctionalSpec,
     status_by_id: &HashMap<&str, Status>,
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
         let location = Some(format!(
             "{}/{}.yaml",
-            capability_spec::CAPABILITY_SPECS_DIR,
+            functional_spec::FUNCTIONAL_SPECS_DIR,
             spec.id
         ));
         match status_by_id.get(blocker.as_str()) {

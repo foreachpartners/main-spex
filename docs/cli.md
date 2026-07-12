@@ -107,7 +107,7 @@ spex check --repo frontend --fill-preexisting-errors
 
 ### `spex coverage`
 
-Reports how well the active capability specs are covered by spec-id annotations across the workspace. For every CS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active functional specs are covered by spec-id annotations across the workspace. For every FS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex coverage
@@ -118,14 +118,14 @@ A single annotation of each kind anywhere in any workspace repository counts —
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
 
 ```yaml
-id: CS-PLACE-PIZZA-ORDER
+id: FS-PLACE-PIZZA-ORDER
 status: active
 coverage_ignore: [contract]
 ```
 
 Each active spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. An active spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes.
 
-The report prints the total number of capability specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
+The report prints the total number of functional specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
 
 - `✓` — every required layer is annotated and every acceptance criterion is implemented.
 - `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `cs-specs/<spec-id>.yaml`, `rs-specs/<spec-id>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id>.yaml`, `rs-specs/<spec-id>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -149,7 +149,7 @@ spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/RS-NAMIN
 ```
 
 ```sh
-spex check-schema --schema schemas/cs-spec.schema.json --files cs-specs/CS-LIST-PIZZA-MENU.yaml cs-specs/CS-PLACE-PIZZA-ORDER.yaml
+spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/FS-LIST-PIZZA-MENU.yaml fs-specs/FS-PLACE-PIZZA-ORDER.yaml
 ```
 
 ## Development

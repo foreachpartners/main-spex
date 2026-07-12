@@ -71,7 +71,7 @@ describe("pizzaApi", () => {
     );
   });
 
-  // @spec test CS-DELIVERY-TIME
+  // @spec test FS-DELIVERY-TIME
   it("estimates the delivery time with a POST request and pizza ids", async () => {
     const estimate: DeliveryEstimate = { estimatedSeconds: 25 };
     const fetchMock = mockFetch(estimate);

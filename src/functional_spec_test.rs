@@ -2,9 +2,9 @@
 mod tests {
     use super::super::*;
 
-    fn spec(criteria: &[&str]) -> CapabilitySpec {
-        CapabilitySpec {
-            id: "CS-A".to_string(),
+    fn spec(criteria: &[&str]) -> FunctionalSpec {
+        FunctionalSpec {
+            id: "FS-A".to_string(),
             acceptance_criteria: criteria.iter().map(|c| c.to_string()).collect(),
             blocked_by: Vec::new(),
             status: Status::Active,

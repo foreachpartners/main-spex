@@ -10,25 +10,25 @@ use crate::util;
 pub use crate::spec::Status;
 
 #[cfg(test)]
-#[path = "capability_spec_test.rs"]
-mod capability_spec_test;
+#[path = "functional_spec_test.rs"]
+mod functional_spec_test;
 
-pub const CAPABILITY_SPECS_DIR: &str = "cs-specs";
+pub const FUNCTIONAL_SPECS_DIR: &str = "fs-specs";
 
-type Result<T> = core::result::Result<T, Report<CapabilitySpecError>>;
+type Result<T> = core::result::Result<T, Report<FunctionalSpecError>>;
 
 #[derive(Debug, Error)]
-pub enum CapabilitySpecError {
-    #[error("could not read the `{CAPABILITY_SPECS_DIR}` directory")]
+pub enum FunctionalSpecError {
+    #[error("could not read the `{FUNCTIONAL_SPECS_DIR}` directory")]
     ReadDir,
-    #[error("could not read capability spec `{0}`")]
+    #[error("could not read functional spec `{0}`")]
     ReadFile(String),
-    #[error("could not parse capability spec `{0}`")]
+    #[error("could not parse functional spec `{0}`")]
     Parse(String),
 }
 
 #[derive(Debug, Deserialize)]
-pub struct CapabilitySpec {
+pub struct FunctionalSpec {
     pub id: String,
     #[serde(default)]
     pub acceptance_criteria: Vec<String>,
@@ -40,7 +40,7 @@ pub struct CapabilitySpec {
     pub coverage_ignore: Vec<CoverageLayer>,
 }
 
-impl CapabilitySpec {
+impl FunctionalSpec {
     pub fn ac_counts(&self) -> (usize, usize) {
         spec::ac_counts(&self.acceptance_criteria)
     }
@@ -70,12 +70,12 @@ impl CoverageLayer {
     }
 }
 
-pub fn load_all(specs_dir: &Path) -> Result<Vec<CapabilitySpec>> {
-    let mut specs: Vec<CapabilitySpec> = util::load_yaml_dir(
+pub fn load_all(specs_dir: &Path) -> Result<Vec<FunctionalSpec>> {
+    let mut specs: Vec<FunctionalSpec> = util::load_yaml_dir(
         specs_dir,
-        || CapabilitySpecError::ReadDir,
-        CapabilitySpecError::ReadFile,
-        CapabilitySpecError::Parse,
+        || FunctionalSpecError::ReadDir,
+        FunctionalSpecError::ReadFile,
+        FunctionalSpecError::Parse,
     )?;
 
     specs.sort_by(|a, b| a.id.cmp(&b.id));

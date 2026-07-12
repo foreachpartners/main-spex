@@ -30,7 +30,7 @@ proj: 1 error, 1 warning
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.
 const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
 
-Capability specs (0)
+Functional specs (0)
   none found
 
 Active spec coverage (0)
@@ -57,16 +57,16 @@ pepperoni-pizza: 0 errors, 0 warnings
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
-// capability spec is `active`, has all of its acceptance criteria checked off,
+// functional spec is `active`, has all of its acceptance criteria checked off,
 // and is annotated across the contract, impl, and test layers, so it reports
 // as fully covered with no gaps.
 const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
 
-Capability specs (1)
+Functional specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  CS-DELIVERY-TIME  10/10 AC
+  ✓  FS-DELIVERY-TIME  10/10 AC
 
   1 fully covered · 0 gaps
 

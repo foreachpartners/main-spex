@@ -1,7 +1,7 @@
 # Tutorial Completion
 
 This document records the result of the spex tutorial: the verification command
-output, and an assessment of the capability spec, its implementation, and the
+output, and an assessment of the functional spec, its implementation, and the
 network-bind rule spec produced along the way.
 
 ## spex check
@@ -31,14 +31,14 @@ Business specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  CS-DELIVERY-TIME
+  ✓  FS-DELIVERY-TIME
 
   1 fully covered · 0 gaps
 
 pepperoni-pizza: no gaps
 ```
 
-## Rating: CS-DELIVERY-TIME spec and implementation
+## Rating: FS-DELIVERY-TIME spec and implementation
 
 **Requirement:** "show customers pizza delivery time based on number of pizzas
 ordered, other ongoing orders and today workers" (details left to the author).
@@ -54,7 +54,7 @@ from a perfect score.
   deliveries (`in_progress_pizzas`), divided across workers — covering "pizzas
   ordered", "other ongoing orders", and "workers" in one formula
   (`estimate_seconds`).
-- **The spec is precise and testable.** `CS-DELIVERY-TIME.yaml` breaks the
+- **The spec is precise and testable.** `FS-DELIVERY-TIME.yaml` breaks the
   vague requirement into 10 `MUST` acceptance criteria, each pinning a concrete
   rule (1 min/pizza, 2 workers, round up to the whole minute, return whole
   seconds) and a clear owner (`api` vs `frontend`).

@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://spex.dev/schemas/cs-spec.schema.json",
-  "title": "Capability Spec",
-  "description": "A capability spec (CS): one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules captured as acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities.",
+  "$id": "https://spex.dev/schemas/fs-spec.schema.json",
+  "title": "Functional Spec",
+  "description": "A functional spec (FS): one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules captured as acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities.",
   "type": "object",
   "properties": {
     "id": {
-      "$ref": "cs-spec-id.schema.json"
+      "$ref": "fs-spec-id.schema.json"
     },
     "title": {
       "type": "string",
@@ -40,11 +40,11 @@
     },
     "blocked_by": {
       "type": "array",
-      "description": "Spec IDs (CS or RS) that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
+      "description": "Spec IDs (FS or RS) that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
       "items": {
-        "description": "A CS or RS spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
+        "description": "A FS or RS spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
         "anyOf": [
-          { "$ref": "cs-spec-id.schema.json" },
+          { "$ref": "fs-spec-id.schema.json" },
           { "$ref": "rs-spec-id.schema.json" }
         ]
       }
@@ -69,7 +69,7 @@
   "additionalProperties": false,
   "examples": [
     {
-      "id": "CS-PLACE-PIZZA-ORDER",
+      "id": "FS-PLACE-PIZZA-ORDER",
       "title": "Allow customers to place an order from their cart",
       "description": "Lets authenticated shoppers turn their cart into a paid order.",
       "acceptance_criteria": [
@@ -79,7 +79,7 @@
         "[ ] SHOULD display an order confirmation with a unique order number"
       ],
       "scope": ["api", "frontend"],
-      "blocked_by": ["CS-CART-ADD-ITEM", "RS-PAYMENT-GATEWAY"],
+      "blocked_by": ["FS-CART-ADD-ITEM", "RS-PAYMENT-GATEWAY"],
       "status": "planned"
     }
   ]

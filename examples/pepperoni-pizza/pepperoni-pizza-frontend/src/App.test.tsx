@@ -69,7 +69,7 @@ describe("App", () => {
     expect(await screen.findByText(/Margherita — 25 s/)).toBeInTheDocument();
   });
 
-  // @spec test CS-DELIVERY-TIME
+  // @spec test FS-DELIVERY-TIME
   it("shows the estimated delivery time once a pizza is in the cart", async () => {
     vi.mocked(pizzaApi.estimateOrderDeliveryTime).mockResolvedValue({
       estimatedSeconds: 18,

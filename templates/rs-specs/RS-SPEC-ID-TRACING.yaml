@@ -6,8 +6,8 @@ title: Spec ID tracing
 description: >-
   Spec ID tracing annotations link a contract, implementation and test back to the spec it satisfies. It makes easy for human and AI to trace specification and related artifacts.
 acceptance_criteria:
-  - "MUST annotate capability (CS) spec contract, implementation and test at least once at the boundary, with additional annotations on other important artifacts being optional"
-  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: CS-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl CS-LIST-PIZZA-MENU`)"
+  - "MUST annotate capability (FS) spec contract, implementation and test at least once at the boundary, with additional annotations on other important artifacts being optional"
+  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: FS-LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl FS-LIST-PIZZA-MENU`)"
   - "MUST limit number of traces for one spec to 10 per repo in total"
   - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
@@ -22,7 +22,7 @@ checks:
       - "**/*.md"
     severity: warn
   - name: no-orphan-annotations
-    description: Spec-id annotations must reference a spec that exists in cs-specs or rs-specs
+    description: Spec-id annotations must reference a spec that exists in fs-specs or rs-specs
     type: script
     run: workspace
     script: no-orphan-annotations.sh
@@ -40,9 +40,9 @@ examples:
       /pizzas:
         get:
           operationId: listPizzaMenu
-          x-spec: CS-LIST-PIZZA-MENU
+          x-spec: FS-LIST-PIZZA-MENU
   implementation: |
-    // @spec impl CS-LIST-PIZZA-MENU
+    // @spec impl FS-LIST-PIZZA-MENU
     fn list_pizza_menu(req: Request) -> Response {
         // menu_service and its repository are NOT annotated (no nesting)
         menu_service.list()
@@ -52,5 +52,5 @@ examples:
     // @spec impl RS-RATE-LIMIT
     fn rate_limit(req: Request) -> Response { /* ... */ }
   test: |
-    // @spec test CS-LIST-PIZZA-MENU, CS-ORDER-PIZZA, RS-RATE-LIMIT
+    // @spec test FS-LIST-PIZZA-MENU, FS-ORDER-PIZZA, RS-RATE-LIMIT
     fn lists_available_pizzas() { /* ... */ }

@@ -1,9 +1,9 @@
 #!/bin/sh
 # RS-COMMIT-MESSAGE-FORMAT / commit-spec-id-trace
 #
-# Commits scoped to `cs` mark capability changes and must end their
+# Commits scoped to `fs` mark functional changes and must end their
 # subject line with a comma-separated list of Spec IDs, e.g.
-#   feat(cs): add order endpoint CS-PLACE-PIZZA-ORDER, RS-SECRET-HANDLING
+#   feat(fs): add order endpoint FS-PLACE-PIZZA-ORDER, RS-SECRET-HANDLING
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.
@@ -18,17 +18,17 @@ if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
   exit 0
 fi
 
-# Keep in sync with schemas/cs-spec-id.schema.json and schemas/rs-spec-id.schema.json
-id='(CS|RS)-[A-Z]+(-[A-Z]+)*'
+# Keep in sync with schemas/fs-spec-id.schema.json and schemas/rs-spec-id.schema.json
+id='(FS|RS)-[A-Z]+(-[A-Z]+)*'
 trailing=" ${id}(, ${id})*\$"
 
 bad=$(git log -2 --pretty=%s \
-  | grep -E '^[a-z]+\(cs\)!?:' \
+  | grep -E '^[a-z]+\(fs\)!?:' \
   | grep -vE "$trailing" || true)
 
 if [ -n "$bad" ]; then
   printf '%s\n' "$bad" | while IFS= read -r subject; do
-    printf 'cs-scoped commit missing a trailing Spec ID list: %s\n' "$subject"
+    printf 'fs-scoped commit missing a trailing Spec ID list: %s\n' "$subject"
   done
   exit 1
 fi

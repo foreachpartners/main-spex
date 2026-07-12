@@ -12,7 +12,7 @@ field rules.
 Framework helps to turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-Flow runs BRD (why) → PRD (what) → capability spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
+Flow runs BRD (why) → PRD (what) → functional spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
 
 ### BRD
 
@@ -22,17 +22,17 @@ Business goals and stakeholder needs that product owner must identify, prioritiz
 
 Features and user-facing behavior extracted from the BRD by product owner as actionable user stories and specifications for the development team.
 
-### Capability Spec
+### Functional Spec
 
-Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its individual rules captured as acceptance criteria. CS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
+Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its individual rules captured as acceptance criteria. FS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
 
 ### Contract
 
-The machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a capability spec if applicable (API, cross-service communication contracts). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
+The machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a functional spec if applicable (API, cross-service communication contracts). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
 
 ### Plan
 
-Plan turns capability specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
+Plan turns functional specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
 
 Plan should be simple, small and focused on interfaces instead of implementation or people will not review it.
 
@@ -43,9 +43,9 @@ A plan helps with large changes and is optional for small, self-contained ones.
 Two kinds of spec capture two kinds of requirement: a capability the system
 provides and a cross-cutting convention.
 
-- A capability spec (CS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules in the acceptance criteria.
+- A functional spec (FS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules in the acceptance criteria.
 - A rule spec (RS) captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
-- A rule spec applies repo-wide, not per feature. The test: a specific capability the system provides → CS; a rule every change must follow, enforceable repo-wide → RS.
+- A rule spec applies repo-wide, not per feature. The test: a specific capability the system provides → FS; a rule every change must follow, enforceable repo-wide → RS.
 
 # Workspace
 
@@ -56,7 +56,7 @@ A project spans several workspace repositories under one workspace root folder.
 - Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per RS-NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
 - The spex repository (`<project-name>-spex`) holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
 - spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
-- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its capability spec, a convention only in its rule spec.
+- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its functional spec, a convention only in its rule spec.
 - Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
 - Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
@@ -65,7 +65,7 @@ A project spans several workspace repositories under one workspace root folder.
 
 Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
-- The Spec ID (CS, RS) is the unit of traceability; every behavioral change traces to one, with no orphans.
+- The Spec ID (FS, RS) is the unit of traceability; every behavioral change traces to one, with no orphans.
 - Traceability is bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
@@ -90,7 +90,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `rs-specs/`, and skills.
-- Creates empty `cs-specs/`, `plans/`, and `contracts/` folders.
+- Creates empty `fs-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
 - Adds each default rs-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
@@ -110,7 +110,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's rule-spec checks and gates on errors.
 
 - Runs the rule-spec checks each repository lists in its `rs_specs`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a capability spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule spec, since those always apply) warns, since a satisfied blocker should be removed.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a functional spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule spec, since those always apply) warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -121,9 +121,9 @@ Runs each repository's rule-spec checks and gates on errors.
 
 ## coverage
 
-Reports annotation coverage for capability specs.
+Reports annotation coverage for functional specs.
 
-- Reports annotation coverage for every capability spec whose `status` is `active`.
+- Reports annotation coverage for every functional spec whose `status` is `active`.
 - Requires an implementation, test, and contract annotation per active spec; a single one anywhere in any repository counts.
 - Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
@@ -144,7 +144,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
 
-- A skill is triggered by name (for example `/spex-capability-spec`) or loaded on demand by the AI agent.
+- A skill is triggered by name (for example `/spex-functional-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
@@ -158,11 +158,11 @@ Fills in the descriptions and icons left blank by `spex init` and collects each 
 - Records each copied contract under its repository's `contracts` in `spex.yaml`.
 - Is run right after `spex init`.
 
-## spex-capability-spec
+## spex-functional-spec
 
-Turns a product need into schema-valid capability specs.
+Turns a product need into schema-valid functional specs.
 
-- Turns a PRD into one or more schema-valid capability specs `cs-specs/<spec-id>.yaml`.
+- Turns a PRD into one or more schema-valid functional specs `fs-specs/<spec-id>.yaml`.
 
 ## spex-rule-spec
 
@@ -174,12 +174,12 @@ Turns a convention into a schema-valid rule spec with checks.
 
 ## spex-contract
 
-Derives the machine-readable interface contract from approved capability specs.
+Derives the machine-readable interface contract from approved functional specs.
 
 - Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
 - Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-capability-spec` first.
-- Runs after `spex-capability-spec` and before `spex-plan`.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-functional-spec` first.
+- Runs after `spex-functional-spec` and before `spex-plan`.
 
 ## spex-plan
 
@@ -187,7 +187,7 @@ Splits approved specs into an ordered, parallel-safe plan.
 
 - Reads the target specs, the affected repositories, and the governing rs-specs, then inspects the current code.
 - Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-capability-spec` first.
+- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-functional-spec` first.
 - Requires the contract to be settled with `spex-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
 - Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
@@ -198,11 +198,11 @@ Executes a plan step by step, or a plain user request directly, and checks the r
 - Works through the units of work in order: a plan's steps top to bottom, or a bare request as one or more independent tasks; runs each unit's tasks as parallel agents.
 - Marks each task and step `completed` as it lands when a plan exists, so an interrupted run resumes from the first incomplete step.
 - Runs `spex check` on the affected repositories and fixes `error` findings.
-- Sets each capability spec the work implemented or advanced to `active`, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
+- Sets each functional spec the work implemented or advanced to `active`, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
 
 # Specs
 
-## Capability spec (CS)
+## Functional spec (FS)
 
 One coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules.
 
@@ -210,7 +210,7 @@ One coherent capability the system must provide — a product behavior, or a tec
 - Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
-- `blocked_by` lists CS or RS specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
+- `blocked_by` lists FS or RS specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
 ## Rule spec (RS)
@@ -246,7 +246,7 @@ A check proves an acceptance criterion.
 Annotations link a contract, implementation, or test to its spec.
 
 - Link a contract, implementation, or test to its spec at the layer boundary.
-- Capability spec traceability is required and enforced by `spex coverage`; rule spec traceability is optional.
+- Functional spec traceability is required and enforced by `spex coverage`; rule spec traceability is optional.
 - Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
 - Annotate once at the boundary, never nested.
 - Never reference a Spec ID with no spec file.

@@ -2,7 +2,7 @@
 # RS-SPEX-CONFORMANCE / spec-files-conform
 #
 # Validates the spex repository's own spec files: spex.yaml and every file in
-# cs-specs/ and rs-specs/ must satisfy its JSON Schema, each spec file must
+# fs-specs/ and rs-specs/ must satisfy its JSON Schema, each spec file must
 # be named <id>.yaml, and every script-type check in a rs-spec must point at
 # a script that exists under scripts/<spec-id>/. Schema validation runs through
 # `spex check-schema`, so the spex binary must be on PATH.
@@ -71,7 +71,7 @@ else
   fail_global "spex.yaml not found"
 fi
 
-validate_specs cs-specs schemas/cs-spec.schema.json
+validate_specs fs-specs schemas/fs-spec.schema.json
 validate_specs rs-specs schemas/rs-spec.schema.json
 
 # Every script a rs-spec check references must exist at scripts/<id>/<script>.

@@ -7,10 +7,10 @@
 # repositories from spex.yaml, lists each repository's git-tracked files (so
 # .gitignore is honored and each repository must be its own git repository),
 # and checks their @spec / x-spec annotations against the known Spec IDs — the
-# spec files in cs-specs/ and rs-specs/. An annotation pointing at an ID with
+# spec files in fs-specs/ and rs-specs/. An annotation pointing at an ID with
 # no spec file is an orphan, usually a spec that was renamed or removed. Markdown
 # files are skipped, as are the spex workspace's own spec and script files:
-# its cs-specs/ and rs-specs/ only contribute their Spec ID (the filename),
+# its fs-specs/ and rs-specs/ only contribute their Spec ID (the filename),
 # and its scripts/ holds framework helper code whose comments carry illustrative
 # example annotations — neither's contents are real references. Other repositories
 # are scanned in full, so an app repo's own scripts/ folder is still checked.
@@ -19,10 +19,10 @@
 #   <file><TAB>orphan annotation references unknown spec `<id>`
 set -u
 
-id='(CS|RS)-[A-Z]+(-[A-Z]+)*'
+id='(FS|RS)-[A-Z]+(-[A-Z]+)*'
 
 known=$(
-  for spec in cs-specs/*.yaml rs-specs/*.yaml; do
+  for spec in fs-specs/*.yaml rs-specs/*.yaml; do
     [ -f "$spec" ] || continue
     base=${spec##*/}
     echo "${base%.yaml}"
@@ -53,10 +53,10 @@ orphans=$(
     git -C "$repo" ls-files | while IFS= read -r rel; do
       case "$rel" in *.md) continue ;; esac
       # The spex workspace's own spec and script files hold example annotations,
-      # not real references: cs-specs/ and rs-specs/ only contribute their
+      # not real references: fs-specs/ and rs-specs/ only contribute their
       # Spec ID (the filename), and scripts/ is framework helper code.
       if [ "$repo_dir" = "$spex_dir" ]; then
-        case "$rel" in cs-specs/* | rs-specs/* | scripts/*) continue ;; esac
+        case "$rel" in fs-specs/* | rs-specs/* | scripts/*) continue ;; esac
       fi
       file="$repo/$rel"
       [ -f "$file" ] || continue

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/rs-spec.schema.json",
   "title": "Rule Spec",
-  "description": "A rule spec (RS): one coherent cross-cutting convention or rule for how the code and artifacts are built (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Applies repo-wide; a single concrete capability the system provides belongs in a capability spec (CS), not here.",
+  "description": "A rule spec (RS): one coherent cross-cutting convention or rule for how the code and artifacts are built (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Applies repo-wide; a single concrete capability the system provides belongs in a functional spec (FS), not here.",
   "type": "object",
   "properties": {
     "id": {

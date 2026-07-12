@@ -15,9 +15,9 @@ The schema at `<workspace-root>/<project-name>-spex/schemas/rs-spec.schema.json`
 
 Writes a schema-valid YAML file to `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml`
 
-## CS vs RS
+## FS vs RS
 
-A cross-cutting rule all code must obey, enforceable repo-wide → RS. A specific capability the system must provide (an endpoint, integration, health check, performance target) → CS.
+A cross-cutting rule all code must obey, enforceable repo-wide → RS. A specific capability the system must provide (an endpoint, integration, health check, performance target) → FS.
 
 ## Scope rule: one convention per spec
 

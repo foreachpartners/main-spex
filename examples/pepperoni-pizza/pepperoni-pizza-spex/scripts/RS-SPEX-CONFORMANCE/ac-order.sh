@@ -6,7 +6,7 @@
 # keyword (after the optional [ ]/[x] implementation checkbox) and reports a
 # finding wherever a criterion ranks below the criterion before it.
 #
-# Runs once in the spex repository directory over cs-specs/ and rs-specs/.
+# Runs once in the spex repository directory over fs-specs/ and rs-specs/.
 #
 # Emits one finding per out-of-order criterion following the script location
 # contract:
@@ -49,7 +49,7 @@ check_file() {
   ' "$file" || status=1
 }
 
-for dir in cs-specs rs-specs; do
+for dir in fs-specs rs-specs; do
   [ -d "$dir" ] || continue
   for file in "$dir"/*.yaml; do
     [ -e "$file" ] || continue

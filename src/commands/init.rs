@@ -6,8 +6,8 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use crate::capability_spec::CAPABILITY_SPECS_DIR;
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
 use crate::rule_spec::RuleSpec;
 use crate::templates;
 
@@ -41,8 +41,8 @@ const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rs-specs/ (cross-cutting conventions and rules) and cs-specs/ (the
-      capabilities the system provides).
+      rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
+      functionality the system provides).
 ";
 
 struct DiscoveredRepo {
@@ -94,10 +94,10 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir).change_context(InitError::Io)?;
     templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
 
-    let cs_specs = spex_dir.join(CAPABILITY_SPECS_DIR);
-    fs::create_dir_all(&cs_specs)
+    let fs_specs = spex_dir.join(FUNCTIONAL_SPECS_DIR);
+    fs::create_dir_all(&fs_specs)
         .change_context(InitError::Io)
-        .attach_with(|| format!("could not create `{}`", cs_specs.display()))?;
+        .attach_with(|| format!("could not create `{}`", fs_specs.display()))?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
     fs::create_dir_all(&plans)
