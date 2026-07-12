@@ -47,6 +47,10 @@ provides and a cross-cutting convention.
 - A rule spec (RS) captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
 - A rule spec applies repo-wide, not per feature. The test: a specific capability the system provides → FS; a rule every change must follow, enforceable repo-wide → RS.
 
+## Naming
+
+All names are chosen to match clear and presise meaning for human and AI.
+
 # Workspace
 
 ## Layout
