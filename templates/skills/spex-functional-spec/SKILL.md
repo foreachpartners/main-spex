@@ -5,7 +5,7 @@ description: Create new functional specs (FS) or extend/change existing ones by 
 
 # Create, extend or change Functional Specs (FS)
 
-A functional spec (`FS`) describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as verifiable acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities. A single source usually covers several capabilities, so it can produce one or more specs. Your job is to turn a fuzzy idea or PRD into schema-valid specs by asking the user focused questions, then writing one file per capability — or, when the user names an existing spec, to update/extend it in place.
+A functional spec (`FS`) describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as verifiable acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities. A single source usually covers several capabilities, so it can produce one or more specs. Your job is to turn a fuzzy idea or PRD into schema-valid specs by asking the user focused questions, then writing one file per capability — or, when the user names an existing spec, to update/extend it in place.
 
 ## Paths
 
@@ -21,7 +21,7 @@ A specific capability the system must provide (an endpoint, integration, health 
 
 ## Scope rule: one capability per spec
 
-A FS spec captures exactly one coherent capability; its individual rules are the acceptance criteria. A PRD typically breaks down into many functional specs, so a single source can yield several. When the source covers more than one capability, identify each distinct one, propose the split as a list of specs (one `id` and one-line summary each), and confirm it with the user before drafting. Write each confirmed capability as its own spec file.
+A FS spec captures exactly one coherent capability; its specifics are the acceptance criteria. A PRD typically breaks down into many functional specs, so a single source can yield several. When the source covers more than one capability, identify each distinct one, propose the split as a list of specs (one `id` and one-line summary each), and confirm it with the user before drafting. Write each confirmed capability as its own spec file.
 
 ## Step 0 — Establish create vs edit
 
@@ -51,12 +51,12 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 Draft each spec following the field rules in `<workspace-root>/<project-name>-spex/schemas/fs-spec.schema.json`, using its `examples` as the model for the YAML you write. Key points while drafting:
 
 - `id` must start with `FS-` and convey the capability so it reads without opening the spec.
-- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's individual rules. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
+- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's specifics. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
 - Be specific. When the user has given a concrete decision — a constant, default, threshold, rate, or rule (e.g. each pizza takes one minute to make, two workers are on shift, the estimate is rounded to whole minutes) — capture it verbatim as its own verifiable criterion. Do not soften a value the user supplied into a vague directional statement, and do not invent a value the user did not supply: if a detail needed to make a criterion verifiable is missing, ask for it (see Step 2) instead of guessing.
 - Set `scope` to the repositories that implement the capability, each matching a `repository_short_name` in `spex.yaml`.
 - When `scope` lists more than one repository, make the division of responsibility explicit: every acceptance criterion must name the repository that owns it (after the commitment level, since each criterion must start with one), so the boundary between repositories is unambiguous and no shared behavior is left unassigned. Split a behavior that crosses the boundary into separate per-repository criteria rather than one vague criterion. For example, the API owns producing a value and the frontend owns presenting it — write "MUST compute the delivery-time estimate in the `api` from the order's pizza count, the in-progress orders, and the workers on shift" and "MUST display the estimate in the `frontend` in the cart and on the order confirmation" as distinct criteria.
 - Set `blocked_by` only for specs (FS or RS) that must be in place before this one can be implemented and are not yet satisfied. Do not list a shared foundation that every capability rides on (e.g. the API surface), and never list an already-shipped or established spec. When nothing genuinely blocks the work, leave it absent.
-- Keep `description` short, simple, and concrete: a general summary of the capability and who or what is affected. Do not restate individual rules already covered by `acceptance_criteria`, and leave the step-by-step implementation to the plan.
+- Keep `description` short, simple, and concrete: a general summary of the capability and who or what is affected. Do not restate specifics already covered by `acceptance_criteria`, and leave the step-by-step implementation to the plan.
 
 ## Step 4 — Write, then offer edits
 

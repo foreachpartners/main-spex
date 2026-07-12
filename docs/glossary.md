@@ -16,7 +16,7 @@
 
 - **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: functional (`FS`) and rule (`RS`). The dividing line is capability versus convention: a specific capability the system must provide → `FS`; a rule every change must follow, enforceable repo-wide → `RS`.
 
-- **Functional Spec** (`FS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its individual rules captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many functional specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
+- **Functional Spec** (`FS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many functional specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
 
   ```yaml
   id: FS-PLACE-PIZZA-ORDER

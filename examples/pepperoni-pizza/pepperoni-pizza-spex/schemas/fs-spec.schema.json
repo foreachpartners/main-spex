@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/fs-spec.schema.json",
   "title": "Functional Spec",
-  "description": "A functional spec (FS): one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules captured as acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities.",
+  "description": "A functional spec (FS): one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics captured as acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities.",
   "type": "object",
   "properties": {
     "id": {
@@ -15,7 +15,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Short, concrete summary of the capability: the problem it solves and who or what is affected. General only — leave the individual rules to acceptance_criteria and the step-by-step implementation to plan.md.",
+      "description": "Short, concrete summary of the capability: the problem it solves and who or what is affected. General only — leave the specifics to acceptance_criteria and the step-by-step implementation to plan.md.",
       "minLength": 1
     },
     "acceptance_criteria": {

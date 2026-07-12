@@ -24,7 +24,7 @@ Features and user-facing behavior extracted from the BRD by product owner as act
 
 ### Functional Spec
 
-Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its individual rules captured as acceptance criteria. FS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
+Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its specifics captured as acceptance criteria. FS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
 
 ### Contract
 
@@ -43,13 +43,17 @@ A plan helps with large changes and is optional for small, self-contained ones.
 Two kinds of spec capture two kinds of requirement: a capability the system
 provides and a cross-cutting convention.
 
-- A functional spec (FS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its individual rules in the acceptance criteria.
+- A functional spec (FS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria.
 - A rule spec (RS) captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
 - A rule spec applies repo-wide, not per feature. The test: a specific capability the system provides → FS; a rule every change must follow, enforceable repo-wide → RS.
 
 ## Naming
 
-All names are chosen to match clear and presise meaning for human and AI.
+All names are chosen to match clear and precise meaning for human and AI.
+
+- **Functional** signals a system capability — a function the product performs — mirroring how product and engineering already talk about "functional requirements"; an FS answers what the system does.
+- **Rule** signals an enforceable convention every change must follow, matching how AI coding tools already use "rule" for repo-wide instructions (e.g. editor and agent rules files) and how linters name their checks (ESLint rules, Clippy lints); an RS answers how the system is built, and reads as a directive both a human and an AI agent treat as binding rather than optional.
+- "Rule" is reserved for RS. FS acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
 
 # Workspace
 
@@ -211,7 +215,7 @@ Executes a plan step by step, or a plain user request directly, and checks the r
 One coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules.
 
 - Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`.
-- Holds its individual rules in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
+- Holds its specifics in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
 - `blocked_by` lists FS or RS specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
