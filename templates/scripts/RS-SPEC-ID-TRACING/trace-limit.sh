@@ -1,7 +1,7 @@
 #!/bin/sh
 # RS-SPEC-ID-TRACING / trace-limit
 #
-# Flags a Spec ID with more than 10 total trace annotations within this
+# Flags a Spec ID with more than 20 total trace annotations within this
 # repository, so that searching for a spec's traces stays manageable. Runs
 # once per workspace repository, in that repository's directory, and
 # receives no arguments. It lists the repository's git-tracked files (so
@@ -17,11 +17,11 @@
 # Findings are file-less (the violation spans the whole repository, not a
 # single file), one per over-limit Spec ID, following the script location
 # contract:
-#   <TAB>too many traces for `<id>`: <count> (limit 10)
+#   <TAB>too many traces for `<id>`: <count> (limit 20)
 set -u
 
 id='(FS|RS)-[A-Z]+(-[A-Z]+)*'
-limit=10
+limit=20
 
 # Not a git repository means there are no tracked files to tally.
 top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
@@ -45,7 +45,7 @@ refs=$(
 over=$(printf '%s\n' "$refs" | sort | uniq -c | awk -v limit="$limit" '$1 > limit { print $1, $2 }')
 [ -n "$over" ] || exit 0
 
-printf '%s\n' "$over" | while IFS= read -r count spec_id; do
+printf '%s\n' "$over" | while read -r count spec_id; do
   printf '\ttoo many traces for `%s`: %s (limit %s)\n' "$spec_id" "$count" "$limit"
 done
 exit 1

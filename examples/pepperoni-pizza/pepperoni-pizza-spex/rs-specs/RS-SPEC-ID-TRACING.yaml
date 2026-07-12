@@ -28,7 +28,7 @@ checks:
     script: no-orphan-annotations.sh
     severity: warn
   - name: trace-limit
-    description: A Spec ID must not accumulate more than 10 trace annotations within one repository
+    description: A Spec ID must not accumulate more than 20 trace annotations within one repository
     type: script
     run: per-repo
     script: trace-limit.sh
