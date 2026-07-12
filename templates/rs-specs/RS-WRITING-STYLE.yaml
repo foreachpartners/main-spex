@@ -24,6 +24,7 @@ checks:
     exclude:
       - "**/RS-WRITING-STYLE.yaml"
       - "**/writing-style.sh"
+      - "**/plans/**/*.md"
     severity: warn
   - name: no-cyrillic
     description: Requirements and documentation must be in English
