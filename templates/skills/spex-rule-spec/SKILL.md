@@ -65,7 +65,7 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 - `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
 - `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
-- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments, `run: per-repo` to invoke it once in the repository directory with no arguments (for example inspecting git history), or `run: workspace` to invoke it once across the whole workspace with every repository's matched files as arguments (for example reasoning about cross-repository state).
+- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<spec-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments. Set `run: per-repo` to invoke it once per repository, in that repository's directory, with no arguments. Set `run: workspace` to invoke it exactly once, with no arguments.
 
 Guidance:
 

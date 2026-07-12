@@ -64,7 +64,7 @@
         },
         "run": {
           "type": "string",
-          "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments; `per-repo` runs it once in the repository directory with no file arguments; `workspace` runs it once in the spex directory with the matched files from every repository (as paths relative to the spex directory) as arguments. Defaults to `per-file`.",
+          "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments. `per-repo` runs it once per governed repository with no arguments. `workspace` runs it exactly once with no arguments",
           "enum": ["per-file", "per-repo", "workspace"],
           "default": "per-file"
         }

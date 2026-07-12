@@ -247,6 +247,7 @@ A check proves an acceptance criterion.
 - Script checks resolve at `scripts/<spec-id>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
 - `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
+- Choose `per-repo` when a check needs to run once per governed repository and `workspace` when script needs to run once.
 - A failing script reports one finding per line as `<location><TAB><message>`.
 
 ## Spec ID annotations

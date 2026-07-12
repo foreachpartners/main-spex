@@ -30,7 +30,7 @@ checks:
   - name: trace-limit
     description: A Spec ID must not accumulate more than 10 trace annotations within one repository
     type: script
-    run: workspace
+    run: per-repo
     script: trace-limit.sh
     severity: warn
 examples:
