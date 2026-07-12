@@ -84,7 +84,7 @@ The agent reads the spec, contract, code and proposes an implementation plan.
 
 Tip: you can combine skills in the future `/spex-capability-spec /spex-contract /spex-plan`
 
-### 5.4 Execute
+### 5.4 Implement
 
 ```text
 /spex-implement <spec-id>
@@ -92,7 +92,13 @@ Tip: you can combine skills in the future `/spex-capability-spec /spex-contract 
 
 The agent executes the plan tasks for each step in parallel.
 
-### 5.5 Verify with check and coverage
+### 5.5 Review
+
+```text
+/spex-review <spec-id>
+```
+
+### 5.6 Verify with check and coverage
 
 ```sh
 spex check

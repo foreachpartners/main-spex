@@ -49,16 +49,16 @@ Repository directories follow `<project-name>-<repository-short-name>` (RS-NAMIN
 
 Workflow core is AI agent skills and CLI commands.
 
-1. Create your first specification (spec):
-   - capability spec `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
-   - rule spec `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/RS-SECRET-HANDLING.yaml`
-2. Derive the contract for a capability spec `/spex-contract [place pizza order]`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. Create an implementation plan for a spec `/spex-plan [secret handling]`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
-4. Execute the plan `/spex-implement [secret handling]`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-5. Check the results with `spex check`. Will run all rule spec (RS) checks related to your changes.
-6. See coverage with `spex coverage`. Will check if all specs have a contract, implementation, and test.
+1. **Create capability spec** `/spex-capability-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/cs-specs/CS-PLACE-PIZZA-ORDER.yaml`
+2. **Derive the contract** for a capability spec `/spex-contract CS-PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. **Create an implementation plan** for a spec `/spex-plan CS-PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
+4. **Implement the plan** `/spex-implement CS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+5. **Review** `/spex-review CS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
+6. **Verify** check the results with `spex check` - will run all rule spec (RS) checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and test.
 
 Tip: you can combine skills `/spex-capability-spec /spex-contract /spex-plan`
+
+**Create a rule spec**: `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/RS-SECRET-HANDLING.yaml`
 
 ## Framework Principles
 
