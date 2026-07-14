@@ -190,6 +190,10 @@ Grills the user with one question at a time to stress-test a plan, decision, or 
 
 Reference for writing and editing agent skills well, so the user can create a new skill or review an existing one for quality.
 
+## spex-cavemen
+
+Switches the agent to terse, filler-free replies to save tokens.
+
 # Specs
 
 ## Functional spec (FS)
