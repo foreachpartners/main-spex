@@ -186,6 +186,10 @@ Executes a plan step by step, or a plain user request directly, and checks the r
 
 Grills the user with one question at a time to stress-test a plan, decision, or idea before acting on it.
 
+## spex-create-skill
+
+Reference for writing and editing agent skills well, so the user can create a new skill or review an existing one for quality.
+
 # Specs
 
 ## Functional spec (FS)
