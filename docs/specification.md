@@ -156,57 +156,35 @@ Skills are agent workflows that drive the spec → plan → execute → check lo
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
+See skill body for more details
+
 ## spex-setup
 
-Fills in the descriptions and icons left blank by `spex init` and collects each repository's contracts.
-
-- Fills the missing `description` fields in `spex.yaml` for the project and each repository by inspecting their contents.
-- Fills the folder icons in the editor workspace file.
-- Copies each repository's existing contract files into the spex repository's `contracts/` folder, renaming each with its repository short name as a prefix (for example `openapi.yaml` from the `api` repository becomes `contracts/api.openapi.yaml`).
-- Records each copied contract under its repository's `contracts` in `spex.yaml`.
-- Is run right after `spex init`.
+Complete setup step which requires AI and can't be done programmatically. Fills in the descriptions and icons left blank by `spex init` and collects each repository's contracts. Is run right after `spex init`.
 
 ## spex-functional-spec
 
-Turns a product need into schema-valid functional specs.
-
-- Turns a PRD into one or more schema-valid functional specs `fs-specs/<spec-id>.yaml`.
+Turns a PRD into one or more schema-valid functional specs `fs-specs/<spec-id>.yaml`.
 
 ## spex-rule-spec
 
-Turns a convention into a schema-valid rule spec with checks.
-
-- Turns a convention into one schema-valid rule spec.
-- Proposes the automated checks that verify it.
-- Writes `rs-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
+Turns a convention into a schema-valid rule spec with checks. Writes `rs-specs/<spec-id>.yaml` plus any script bodies under `scripts/<spec-id>/`.
 
 ## spex-contract
 
 Derives the machine-readable interface contract from approved functional specs.
 
-- Reads the target specs, the affected repositories, their existing contracts, and the governing contract conventions.
-- Writes or updates the endpoints, messages, and schemas in the `spex` repository's `contracts/` folder, annotated to their spec, and records new files in `spex.yaml`.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-functional-spec` first.
-- Runs after `spex-functional-spec` and before `spex-plan`.
-
 ## spex-plan
 
-Splits approved specs into an ordered, parallel-safe plan.
-
-- Reads the target specs, the affected repositories, and the governing rs-specs, then inspects the current code.
-- Splits the work into ordered steps of parallel-safe tasks with disjoint write scopes.
-- Requires each target spec to already exist; when a spec is missing, stops and creates it with `spex-functional-spec` first.
-- Requires the contract to be settled with `spex-contract` first when any acceptance criterion crosses a repository boundary; when the work needs no interface change, proceeds straight from spec to plan.
-- Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
+Splits approved specs into an ordered, parallel-safe implementation plan. Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
 
 ## spex-implement
 
 Executes a plan step by step, or a plain user request directly, and checks the result.
 
-- Works through the units of work in order: a plan's steps top to bottom, or a bare request as one or more independent tasks; runs each unit's tasks as parallel agents.
-- Marks each task and step `completed` as it lands when a plan exists, so an interrupted run resumes from the first incomplete step.
-- Runs `spex check` on the affected repositories and fixes `error` findings.
-- Sets each functional spec the work implemented or advanced to `active`, and ticks each implemented acceptance criterion's checkbox (`[ ]` → `[x]`), leaving any criterion that is not yet implemented as `[ ]`.
+## spex-grill-me
+
+Grills the user with one question at a time to stress-test a plan, decision, or idea before acting on it.
 
 # Specs
 
