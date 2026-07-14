@@ -200,7 +200,8 @@ Switches the agent to terse, filler-free replies to save tokens.
 
 One coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules.
 
-- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`.
+- Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`, `examples`.
+- `examples` holds named illustrative snippets showing the spec applied in context — placement and usage that prose cannot carry.
 - Holds its specifics in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.

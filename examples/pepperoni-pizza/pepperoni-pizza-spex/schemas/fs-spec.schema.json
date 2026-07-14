@@ -63,6 +63,15 @@
         "enum": ["contract", "impl", "test"]
       },
       "uniqueItems": true
+    },
+    "examples": {
+      "type": "object",
+      "description": "Named illustrative snippets showing the spec applied in context — placement and usage that prose cannot carry. Keys are short labels (e.g. `template`, `contract`, `avoid`, `prefer`); values are code or text blocks.",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minProperties": 1
     }
   },
   "required": ["id", "title", "description", "acceptance_criteria"],
@@ -80,7 +89,10 @@
       ],
       "scope": ["api", "frontend"],
       "blocked_by": ["FS-CART-ADD-ITEM", "RS-PAYMENT-GATEWAY"],
-      "status": "planned"
+      "status": "planned",
+      "examples": {
+        "request": "POST /orders { \"cart_id\": \"c_123\" }"
+      }
     }
   ]
 }
