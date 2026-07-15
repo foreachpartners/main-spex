@@ -1,4 +1,4 @@
-## Spex workspace
+# Spex workspace
 
 This repo (`spex`) is the workspace repository that holds the project's specs and config.
 
@@ -13,7 +13,12 @@ Each fact lives in exactly one of these files — reference it, never copy it el
 
 Each artifact needs the human's approval before the next is generated: functional spec → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
 
-## Rules
+## Tools
+
+- `spex check` — Runs the rule spec checks declared in `spex.yaml` against the workspace. Use `--repo <name>` to limit to specific repositories, `--files <path>...` to target specific files, and `--fill-preexisting-errors` to baseline current errors.
+- `spex coverage` — Reports how well the active functional specs are covered by spec-id annotations (`@spec impl`, `@spec test`, `@spec contract`) across the workspace, and tracks acceptance-criteria implementation progress.
+
+# Rules
 
 Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.
 
