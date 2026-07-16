@@ -53,8 +53,8 @@ Workflow core is AI agent skills and CLI commands.
 2. **Derive the contract** for a functional spec `/spex-contract FS-PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
 3. **Create an implementation plan** for a spec `/spex-plan FS-PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/RS-SECRET-HANDLING/2024-11-25_secret-handling.md`
 4. **Implement the plan** `/spex-implement FS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-5. **Review** `/spex-review FS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step.
-6. **Verify** check the results with `spex check` - will run all rule spec (RS) checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and test.
+5. **Verify** check the results with `spex check` - will run all rule spec (RS) checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and test.
+6. **Review** `/spex-review FS-PLACE-PIZZA-ORDER`.
 
 Tip: you can combine skills `/spex-functional-spec /spex-contract /spex-plan`
 

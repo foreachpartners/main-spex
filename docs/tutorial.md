@@ -92,13 +92,7 @@ Tip: you can combine skills in the future `/spex-functional-spec /spex-contract 
 
 The agent executes the plan tasks for each step in parallel.
 
-### 5.5 Review
-
-```text
-/spex-review <spec-id>
-```
-
-### 5.6 Verify with check and coverage
+### 5.5 Verify with check and coverage
 
 ```sh
 spex check
@@ -106,6 +100,12 @@ spex coverage
 ```
 
 Coverage should now show your new spec as `✓`.
+
+### 5.6 Review
+
+```text
+/spex-review <spec-id>
+```
 
 ## Step 6 — Rule spec workflow
 
