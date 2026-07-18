@@ -659,6 +659,63 @@ mod tests {
     }
 
     #[test]
+    fn check_repo_skips_negated_checks_when_files_provided() {
+        let workspace = tempdir().expect("workspace");
+        let spex = workspace.path().join("spex");
+        let repo = workspace.path().join("api");
+        std::fs::create_dir_all(&spex).expect("spex");
+        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(repo.join("src")).expect("src");
+        std::fs::write(repo.join("src/main.rs"), "fn main() {}").expect("file");
+
+        // A negated glob check: "dprint.json must exist"
+        let mut negated_glob =
+            named_check("dprint-config-present", CheckKind::Glob, Some("dprint.json"));
+        negated_glob.negate = true;
+        // A non-negated glob check: "*.rs files are forbidden"
+        let non_negated = named_check("no-rs-files", CheckKind::Glob, Some("**/*.rs"));
+
+        let specs = HashMap::from([(
+            "RS-X".to_string(),
+            rule_spec("RS-X", vec![negated_glob.clone(), non_negated]),
+        )]);
+
+        let repository = repository("../api", vec!["RS-X"]);
+
+        // Without --files: negated check fires because dprint.json is absent.
+        let mut findings = Vec::new();
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &[],
+            &Log::new(false),
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
+        assert_eq!(findings.len(), 2);
+        assert!(findings.iter().any(|f| f.check == "dprint-config-present"));
+        assert!(findings.iter().any(|f| f.check == "no-rs-files"));
+
+        // With --files: negated check is skipped, non-negated still fires.
+        let mut findings = Vec::new();
+        check_repo(
+            &repository,
+            &spex,
+            &specs,
+            &["src/main.rs".to_string()],
+            &Log::new(false),
+            &mut findings,
+            &mut Vec::new(),
+        )
+        .expect("check");
+        assert_eq!(findings.len(), 1);
+        assert!(findings.iter().all(|f| f.check != "dprint-config-present"));
+        assert!(findings.iter().any(|f| f.check == "no-rs-files"));
+    }
+
+    #[test]
     #[serial(script_exec)]
     fn workspace_check_runs_once_across_repos() {
         let workspace = tempdir().expect("workspace");

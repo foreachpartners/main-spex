@@ -412,6 +412,12 @@ fn check_repo(
         log,
     };
 
+    // Negated checks assert that something must exist in the repository
+    // (e.g. "dprint.json must be present"). When --files narrows the
+    // candidate set to an explicit subset, a negated check cannot be
+    // meaningfully evaluated, so we skip them to avoid false positives.
+    let has_files = !files.is_empty();
+
     let overridden: HashSet<(&str, &str)> = repo
         .checks_override
         .iter()
@@ -438,6 +444,9 @@ fn check_repo(
             if overridden.contains(&(spec_id.as_str(), check.name.as_str())) {
                 continue;
             }
+            if has_files && check.negate {
+                continue;
+            }
             dispatch_check(&ctx, &spec.id, check, findings, workspace_checks);
         }
     }
@@ -459,6 +468,9 @@ fn check_repo(
         }
 
         let effective = over.apply(base);
+        if has_files && effective.negate {
+            continue;
+        }
         dispatch_check(&ctx, &over.spec, &effective, findings, workspace_checks);
     }
 
@@ -471,6 +483,9 @@ fn check_repo(
                     additional.spec, additional.check.name, additional.spec
                 ),
             ));
+            continue;
+        }
+        if has_files && additional.check.negate {
             continue;
         }
         dispatch_check(
