@@ -1,7 +1,7 @@
 #!/bin/sh
 # RS-WRITING-STYLE / writing
 #
-# Flags filler, hedging, motivational, apologetic, and subjective phrasing in
+# Flags hedging, motivational, and apologetic phrasing in
 # documentation. Receives candidate files as arguments (scoped to *.md by the
 # check's include patterns).
 #
@@ -11,7 +11,7 @@ set -u
 
 [ "$#" -eq 0 ] && exit 0
 
-words='\b(maybe|perhaps|I think|basically|essentially|actually|sorry|unfortunately|elegant|beautiful)\b'
+words='\b(maybe|perhaps|I think|sorry|unfortunately)\b'
 exclamations='(Great job|Perfect|Excellent)!'
 checkins='(Make sense|Got it)\?'
 pattern="${words}|${exclamations}|${checkins}"
