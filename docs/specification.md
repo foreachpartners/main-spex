@@ -123,6 +123,7 @@ Runs each repository's rule-spec checks and gates on errors.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
 - `--files <path>...` limits the run to given files; a `per-repo` script then runs only in the repositories that own a listed file, unioned with any `--repo` named, while a `workspace` script always runs once.
+- Negated `regexp` and `glob` checks are skipped when `--files` is passed, because a negated check needs the full file set to prove a forbidden pattern is absent; running it on a subset would produce false positives.
 - Skips files ignored by `.gitignore`, plus well-known generated files (e.g. `Cargo.lock`, `package-lock.json`).
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
 - `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
@@ -226,7 +227,7 @@ A check proves an acceptance criterion.
 
 - Every criterion a script can verify is proven by a check; AI inspection covers only the criteria that require judgment.
 - Has type `regexp` (file contents), `glob` (file paths), or `script` (external program).
-- `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern.
+- `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern. Negated checks are skipped when `check --files` narrows the file set, since they need every file to prove a forbidden pattern is absent.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a spec's checks through `rs_specs`; `checks_override` patches one, `checks_additional` adds one.

@@ -34,15 +34,3 @@ checks:
       - "**/tests/**"
       - "**/test/**"
     severity: error
-examples:
-  avoid: |
-    it.skip("rejects a negative quantity", () => { ... })
-    describe.only("cart totals", () => { ... })
-
-    #[ignore]
-    fn rejects_negative_quantity() { ... }
-  prefer: |
-    it("rejects a negative quantity", () => { ... })
-    describe("cart totals", () => { ... })
-
-    fn rejects_negative_quantity() { ... }
