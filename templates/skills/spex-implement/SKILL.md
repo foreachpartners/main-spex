@@ -9,20 +9,17 @@ description: Carry out a plan existing plan, or implement ad-hoc user request. U
 
 ## Step 1 — Gather context
 
-**Do not edit, or write any code file until this step is done and don't skip it**. Every run needs the same four things:
-
-1. affected repositories aka scope (e.g. frontend, backend)
-2. governing rule specs
-3. governing functional specs
-4. units of work to perform (e.g. plan or ad-hoc user request)
-
-If you carry out existing plan it's already contains all the information, just read it.
+**Do not edit, or write any code file until this step is done and don't skip it**. Every run needs the same 3 things:
 
 If you carry out ad-hoc user request:
 
-1. determinate determinate scope based on affected repositories
-2. read all governing rule specs `rs_specs` in `<workspace-root>/<project-name>-spex/spex.yaml` for affected scope.
-3. determinate and read governing functional specs in `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml`
+1. determinate repositories we will work on (e.g. scope: frontend, backend)
+2. determinate all governing rule specs `rs_specs` listed in `<workspace-root>/<project-name>-spex/spex.yaml` for affected scope in step 1.
+3. determinate all governing functional specs in `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` related to request
+
+If you carry out existing plan it's already contains all the information, just read it.
+
+Read all rule and functional spec from plan gather context, each file for affected scope in `rs_specs`. Don't skip anything, this is not negotiable!
 
 ## Step 2 — Implement
 
