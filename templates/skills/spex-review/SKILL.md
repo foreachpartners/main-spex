@@ -3,7 +3,7 @@ name: spex-review
 description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — governing rule specs (does the code follow cross-cutting conventions, rules and coding standards?) and functional specs (does the code match what the spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+Two-axis review of a diff — committed changes since a fixed point, or uncommitted working-tree changes:
 
 - **Rule specs** — does the code conform to governing cross-cutting conventions and rules?
 - **Functional specs** — does the code faithfully implement the functional specs?
@@ -16,13 +16,19 @@ The functional spec should have been provided to you, ask user if not.
 
 ### 1. Pin the fixed point
 
-If any repository has uncommitted changes as user to commit them first.
+If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`.
 
-Whatever the user said is the fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. If they didn't specify one, ask for it.
+**Committed diff** (user gave a fixed point):
+- Capture: `git diff <fixed-point>...HEAD` (three-dot, merge-base diff).
+- Commit list: `git log <fixed-point>..HEAD --oneline`.
+- Confirm the ref resolves: `git rev-parse <fixed-point>`.
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+**Uncommitted diff** (no fixed point):
+- Capture: `git diff HEAD` (staged + unstaged vs `HEAD`).
+- Commit list: "working tree (uncommitted)".
+- If the working tree is clean, fail — nothing to review.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here — not inside two parallel sub-agents.
+A bad ref or empty diff should fail here — not inside two parallel sub-agents.
 
 ### 2. Identify the specs source
 
