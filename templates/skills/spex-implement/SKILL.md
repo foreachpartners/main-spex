@@ -1,51 +1,66 @@
 ---
 name: spex-implement
-description: Carry out a plan existing plan, or implement ad-hoc user request. Use when the user wants to carry out a plan from <workspace-root>/<project-name>-spex/plans/<spec-id>/<plan-name>, or asks for a change without a formal plan.
+description: Carry out an existing plan, or implement an ad-hoc user request. Use when the user wants to carry out a plan from <workspace-root>/<project-name>-spex/plans/<spec-id>/<plan-name>, or asks for a change without a formal plan.
 ---
 
 # Process
 
-**You MUST follow each process step without skipping** no matter if you implement existing plan or ad-hoc user request.
+**You MUST follow each process step without skipping**, no matter whether you are implementing an existing plan or an ad-hoc user request.
 
 ## Step 1 — Gather context
 
-**Do not edit, or write any code file until this step is done and don't skip it**. Every run needs the same 3 things:
+**Do not edit or write any code files until this step is done; do not skip it**.
 
-If you carry out ad-hoc user request:
+### With a plan
 
-1. determinate repositories we will work on (e.g. scope: frontend, backend)
-2. determinate all governing rule specs `rs_specs` listed in `<workspace-root>/<project-name>-spex/spex.yaml` for affected scope in step 1.
-3. determinate all governing functional specs in `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` related to request
+Plan already contains all the information — read it.
 
-If you carry out existing plan it's already contains all the information, just read it.
+### Without a plan (ad-hoc user request)
 
-Read all rule and functional spec from plan gather context, each file for affected scope in `rs_specs`. Don't skip anything, this is not negotiable!
+1. Determine repositories we will work on (e.g. scope: frontend, backend).
+2. Determine all governing rule specs (`rs_specs`) listed in `<workspace-root>/<project-name>-spex/spex.yaml` for the affected scope from step 1.
+3. Determine all governing functional specs in `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` related to the request.
+4. Produce a note in response with a list of governing rule and functional specs.
+
+### Both paths
+
+Read all rule and functional spec files listed. Don't skip anything, this is not negotiable!
 
 ## Step 2 — Implement
 
-Do not start until Step 2's context note exists in your response. Work through the units of work in order, top to bottom; do not start one until the previous is complete.
+### With a plan
 
-- With a plan, its steps are already ordered — skip any step or task already `completed` and resume at the first incomplete one.
-- Without a plan, split the request into tasks only when it spans independent repositories or clearly separable files; most requests are a single task.
+Its steps are already ordered — skip any step or task already `completed` and resume at the first incomplete one.
+
+Edit the `Status` in place as you go. Use only `not-started`, `in-progress` and `completed`. Leave every other line of the plan untouched.
+
+### Without a plan (ad-hoc user request)
+
+Split the request into tasks only when it spans independent repositories or clearly separable files; most requests are a single task.
+
+### Both paths
 
 Within a unit, run every task in parallel, one AI agent per task.
 
-For a plan, edit the `Status` in place as you go. Use only `not-started`, `in-progress` and `completed`. Leave every other line of the plan untouched.
-
 If a task fails or an agent cannot complete it, stop, report what failed, and ask the user how to proceed rather than pressing on with dependent work.
 
-## Step 3 — Finalize the functional specs
+## Step 3 — Add tests
 
-For every functional spec the work implemented or advanced — the plan's `Specs`, or a spec you identified in Step 1 — open `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml`:
+1. Add tests for each completed acceptance criterion of implemented functional specs.
+2. Add all necessary tests for new functionality or changes based on repository testing patterns.
+
+## Step 4 — Finalize the functional specs
+
+For every functional spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml`:
 
 - Tick the checkbox of every acceptance criterion the run implemented, `[ ]` to `[x]`; leave any criterion not yet implemented as `[ ]`.
-- Change `status:` to `active` (add the line if absent — it defaults to `planned`)..
+- Change `status:` to `active` (add the line if absent — it defaults to `planned`).
 
 Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 
-## Step 4 — Verify
+## Step 5 — Verify
 
-Run formatter, lint's and tests to verify implementation.
+Run formatters, linters, and tests to verify implementation.
 
 Prove the work respects the governing rs-specs:
 
@@ -59,14 +74,14 @@ Prove the work completes the governing fs-specs:
 spex coverage
 ```
 
-## Step 5 — Report
+## Step 6 — Report
 
 Summarize the run:
 
 - Which units of work completed.
 - Which specs you set to `active`, which acceptance criteria you ticked `[x]` or left `[ ]`, and why.
-- The format, lint's, tests, `spex check` and `spex coverage` run outcome.
+- The format, lints, tests, `spex check` and `spex coverage` run outcome.
 
-## Step 6 — Point to the next skill
+## Step 7 — Point to the next skill
 
-Ask user to do optional review with `spex-review` for implemented changes.
+Ask the user to do an optional review with `spex-review` for implemented changes.
