@@ -18,7 +18,7 @@ mod tests_unit {
     fn scaffold_writes_managed_content() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         for managed in [SCHEMA, SKILL, SCRIPT, RS_SPEC] {
             assert!(
@@ -31,12 +31,12 @@ mod tests_unit {
     #[test]
     fn scaffold_overwrites_modified_managed_file() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let schema = spex_dir.path().join(SCHEMA);
         fs::write(&schema, "tampered").expect("modify schema");
 
-        scaffold(spex_dir.path()).expect("re-scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
 
         let expected = TEMPLATES
             .get_file(SCHEMA)
@@ -48,7 +48,7 @@ mod tests_unit {
     #[test]
     fn scaffold_overwrites_rs_spec_marked_managed() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
@@ -59,7 +59,7 @@ mod tests_unit {
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "tampered").expect("tamper script");
 
-        scaffold(spex_dir.path()).expect("re-scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
 
         let expected_spec = strip_template_only_fields(
             TEMPLATES
@@ -78,7 +78,7 @@ mod tests_unit {
     #[test]
     fn scaffold_preserves_unmanaged_rs_spec() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(&spec, "id: RS-COMMIT-MESSAGE-FORMAT\ncustomized: true\n")
@@ -86,7 +86,7 @@ mod tests_unit {
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
 
-        scaffold(spex_dir.path()).expect("re-scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
@@ -96,9 +96,46 @@ mod tests_unit {
     }
 
     #[test]
+    fn scaffold_leaves_a_deliberately_deleted_rs_spec_deleted() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
+
+        let spec = spex_dir.path().join(MANAGED_SPEC);
+        fs::remove_file(&spec).expect("delete rs-spec");
+
+        // RS-COMMIT-MESSAGE-FORMAT's `first_created_in_spex_version` is 0.1.0,
+        // so re-scaffolding as of a later version must not resurrect it.
+        scaffold(spex_dir.path(), "1.0.0").expect("re-scaffold");
+
+        assert!(
+            !spec.exists(),
+            "deliberately deleted rs-spec should stay deleted"
+        );
+    }
+
+    #[test]
+    fn scaffold_deploys_an_rs_spec_new_since_the_recorded_version() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
+
+        let spec = spex_dir.path().join(MANAGED_SPEC);
+        fs::remove_file(&spec).expect("delete rs-spec");
+
+        // A version older than RS-COMMIT-MESSAGE-FORMAT's
+        // `first_created_in_spex_version` (0.1.0) means the spec is new since
+        // the repo's last update, so it must be (re)deployed.
+        scaffold(spex_dir.path(), "0.0.5").expect("re-scaffold");
+
+        assert!(
+            spec.exists(),
+            "rs-spec new since the recorded version should be deployed"
+        );
+    }
+
+    #[test]
     fn scaffold_preserves_additional_files() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let extra_skill = spex_dir
             .path()
@@ -111,7 +148,7 @@ mod tests_unit {
         let extra_script = spex_dir.path().join(SCRIPTS_DIR).join("custom.sh");
         fs::write(&extra_script, "echo custom").expect("write custom script");
 
-        scaffold(spex_dir.path()).expect("re-scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
 
         assert_eq!(fs::read_to_string(&extra_skill).unwrap(), "custom");
         assert_eq!(fs::read_to_string(&extra_script).unwrap(), "echo custom");
@@ -153,7 +190,7 @@ mod tests_unit {
     fn scaffold_leaves_agents_md_untouched() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         assert!(
             !spex_dir.path().join(AGENTS_FILE).exists(),
@@ -165,13 +202,44 @@ mod tests_unit {
     fn scaffold_strips_template_only_inclusion_fields_from_copied_rs_spec() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let spec = fs::read_to_string(spex_dir.path().join(MANAGED_SPEC)).expect("read spec");
         assert!(
             !spec.contains("include_for_all_repos") && !spec.contains("include_for_spex"),
             "copied rs-spec should not carry template-only inclusion fields:\n{spec}"
         );
+    }
+
+    // Every bundled rs-spec must explicitly set the template-only fields
+    // that gate deployment (`include_for_all_repos` and
+    // `first_created_in_spex_version`), rather than relying on a serde
+    // default, so `spex init`'s default inclusion and `spex update`'s
+    // new-vs-deleted deployment decision (see `copy_rule_specs`) are always
+    // deliberate, not accidental. `include_for_spex` stays optional: it only
+    // needs setting when it diverges from `include_for_all_repos`.
+    const REQUIRED_TEMPLATE_ONLY_FIELDS: [&str; 2] =
+        ["include_for_all_repos", "first_created_in_spex_version"];
+
+    #[test]
+    fn rs_spec_templates_set_required_template_only_fields() {
+        let dir = TEMPLATES
+            .get_dir(RULE_SPECS_DIR)
+            .expect("bundled rs-specs dir");
+
+        for file in dir.files() {
+            let text = file.contents_utf8().expect("utf8 rs-spec");
+            let value: Value = serde_yaml_ng::from_str(text).expect("parse rs-spec yaml");
+            let object = value.as_object().expect("rs-spec is a yaml mapping");
+
+            for field in REQUIRED_TEMPLATE_ONLY_FIELDS {
+                assert!(
+                    object.contains_key(field),
+                    "{} is missing required template-only field `{field}`",
+                    file.path().display()
+                );
+            }
+        }
     }
 
     // Every bundled rs-spec must satisfy `rs-spec.schema.json` once its
@@ -206,7 +274,7 @@ mod tests_unit {
     #[test]
     fn scaffold_replaces_managed_skill_removing_stale_files() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
 
         let stale = spex_dir
             .path()
@@ -215,7 +283,7 @@ mod tests_unit {
             .join("spex-setup/STALE.md");
         fs::write(&stale, "stale").expect("write stale file");
 
-        scaffold(spex_dir.path()).expect("re-scaffold");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
 
         assert!(
             !stale.exists(),

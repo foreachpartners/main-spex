@@ -54,13 +54,16 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     ensure_claude_md_link(spex_dir)
 }
 
-// Writes every bundled template into the spex repo, overwriting managed files
-// while leaving any additional files the user added in place.
-pub fn scaffold(spex_dir: &Path) -> Result<()> {
+// A version older than every `first_created_in_spex_version` a bundled
+// rs-spec could carry, so a fresh `spex init` deploys every bundled spec
+// regardless of when it was introduced.
+pub const BEFORE_ANY_SPEX_VERSION: &str = "0.0.0";
+
+pub fn scaffold(spex_dir: &Path, since_version: &str) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
-    copy_rule_specs(spex_dir)?;
+    copy_rule_specs(spex_dir, since_version)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
@@ -83,10 +86,30 @@ fn is_synced_with_upstream(spec_path: &Path) -> bool {
         .is_some_and(|flag| flag.sync_with_upstream)
 }
 
-// Bundled rs-spec fields that only govern `spex init`'s default inclusion
-// (see `commands::init::default_rule_specs`) and have no meaning on a
-// repository's own copy, since the schema does not define them.
-const TEMPLATE_ONLY_FIELDS: [&str; 2] = ["include_for_all_repos", "include_for_spex"];
+#[derive(Deserialize)]
+struct FirstCreatedInSpexVersion {
+    first_created_in_spex_version: String,
+}
+
+fn first_created_in_spex_version(template_contents: &[u8]) -> Option<String> {
+    let text = std::str::from_utf8(template_contents).ok()?;
+    serde_yaml_ng::from_str::<FirstCreatedInSpexVersion>(text)
+        .ok()
+        .map(|flag| flag.first_created_in_spex_version)
+}
+
+fn version_newer_than(candidate: &str, baseline: &str) -> bool {
+    fn parts(version: &str) -> Vec<u32> {
+        version.split('.').map(|p| p.parse().unwrap_or(0)).collect()
+    }
+    parts(candidate) > parts(baseline)
+}
+
+const TEMPLATE_ONLY_FIELDS: [&str; 3] = [
+    "include_for_all_repos",
+    "include_for_spex",
+    "first_created_in_spex_version",
+];
 
 // Drops top-level `key:` lines for template-only fields before a bundled
 // rs-spec is written into a repository's `rs-specs/`.
@@ -107,11 +130,7 @@ fn strip_template_only_fields(contents: &[u8]) -> Vec<u8> {
     result.into_bytes()
 }
 
-// Writes each bundled rs-spec, overwriting the local copy only when it is new
-// or already `sync_with_upstream`. Scripts for a spec are copied under the
-// same condition, so customizing a spec locally also keeps its scripts
-// untouched by `spex update`.
-fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
+fn copy_rule_specs(spex_dir: &Path, since_version: &str) -> Result<()> {
     let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
         return Ok(());
     };
@@ -131,8 +150,16 @@ fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
         let dest = specs_dest.join(name);
         let spec_id = dest.file_stem().unwrap_or_default().to_string_lossy();
 
-        if dest.exists() && !is_synced_with_upstream(&dest) {
-            continue;
+        if dest.exists() {
+            if !is_synced_with_upstream(&dest) {
+                continue;
+            }
+        } else {
+            let is_new_upstream = first_created_in_spex_version(file.contents())
+                .is_some_and(|version| version_newer_than(&version, since_version));
+            if !is_new_upstream {
+                continue;
+            }
         }
 
         fs::write(&dest, strip_template_only_fields(file.contents()))

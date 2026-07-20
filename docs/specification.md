@@ -109,7 +109,8 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 Refreshes the managed framework files from the installed binary.
 
 - Rewrites the bundled skills and schemas with the versions in the installed binary.
-- Rewrites a bundled rs-spec (and its scripts) only when the local copy is new or already has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Rewrites a bundled rs-spec (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Deploys a bundled rs-spec missing locally only when its `first_created_in_spex_version` is newer than the `cli_version` previously recorded in `spex.yaml`; a spec the user deliberately deleted is left deleted.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -218,7 +219,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A bundled template rs-spec additionally carries `include_for_all_repos` and `include_for_spex` to control default inclusion at `init`; `init`/`update` strip both from the copy written into a repository, so they never appear — and are not schema-valid — on a repository's own rs-spec files.
+- A bundled template rs-spec additionally carries `include_for_all_repos` (required), `include_for_spex` (optional, defaults to `include_for_all_repos`) to control default inclusion at `init`, and `first_created_in_spex_version` (required) recording the CLI version it was introduced in, which `update` uses to tell a spec new upstream apart from one a consumer deliberately deleted; `init`/`update` strip all three from the copy written into a repository, so they never appear — and are not schema-valid — on a repository's own rs-spec files.
 
 ## Checks
 

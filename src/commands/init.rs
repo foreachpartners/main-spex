@@ -105,7 +105,8 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    templates::scaffold(spex_dir).change_context(InitError::Io)?;
+    templates::scaffold(spex_dir, templates::BEFORE_ANY_SPEX_VERSION)
+        .change_context(InitError::Io)?;
     templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
 
     let fs_specs = spex_dir.join(FUNCTIONAL_SPECS_DIR);

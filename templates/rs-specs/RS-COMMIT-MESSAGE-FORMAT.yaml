@@ -1,5 +1,6 @@
 id: RS-COMMIT-MESSAGE-FORMAT
 include_for_all_repos: true
+first_created_in_spex_version: 0.1.0
 sync_with_upstream: true
 title: Commit message format
 description: >-

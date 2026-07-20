@@ -1,6 +1,7 @@
 id: RS-TESTING
 include_for_all_repos: true
 include_for_spex: false
+first_created_in_spex_version: 0.1.0
 sync_with_upstream: true
 title: Testing hygiene
 description: >-
