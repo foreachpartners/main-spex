@@ -109,7 +109,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 Refreshes the managed framework files from the installed binary.
 
 - Rewrites the bundled skills and schemas with the versions in the installed binary.
-- Rewrites a bundled rs-spec (and its scripts) only when the local copy is new or already has `managed: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Rewrites a bundled rs-spec (and its scripts) only when the local copy is new or already has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -216,7 +216,7 @@ One coherent cross-cutting convention or rule.
 - Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
 - Is a global rule that always applies; it has no lifecycle status and its acceptance criteria carry no implementation checkbox.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- `managed` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
+- `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
 - A bundled template rs-spec additionally carries `include_for_all_repos` and `include_for_spex` to control default inclusion at `init`; `init`/`update` strip both from the copy written into a repository, so they never appear — and are not schema-valid — on a repository's own rs-spec files.
 

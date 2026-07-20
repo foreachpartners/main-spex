@@ -1,5 +1,5 @@
 id: RS-SPEC-ID-TRACING
-managed: true
+sync_with_upstream: true
 title: Spec ID tracing
 description: >-
   Spec ID tracing annotations link a contract, implementation and test back to the spec it satisfies. It makes easy for human and AI to trace specification and related artifacts.

@@ -24,7 +24,7 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
 // `rs-specs/` and `scripts/` are handled separately: they are only overwritten
-// when the local spec opts in via `managed`.
+// when the local spec opts in via `sync_with_upstream`.
 const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
@@ -67,20 +67,20 @@ pub fn scaffold(spex_dir: &Path) -> Result<()> {
 }
 
 #[derive(Deserialize, Default)]
-struct ManagedFlag {
+struct SyncWithUpstreamFlag {
     #[serde(default)]
-    managed: bool,
+    sync_with_upstream: bool,
 }
 
 // A spec opts into `spex update` overwriting it (and its scripts) by setting
-// `managed: true`. If the local file is missing or fails to parse, it is
-// treated as unmanaged, so a brand-new local spec never gets silently
+// `sync_with_upstream: true`. If the local file is missing or fails to parse,
+// it is treated as not synced, so a brand-new local spec never gets silently
 // overwritten by a same-named bundled one.
-fn is_managed(spec_path: &Path) -> bool {
+fn is_synced_with_upstream(spec_path: &Path) -> bool {
     fs::read_to_string(spec_path)
         .ok()
-        .and_then(|raw| serde_yaml_ng::from_str::<ManagedFlag>(&raw).ok())
-        .is_some_and(|flag| flag.managed)
+        .and_then(|raw| serde_yaml_ng::from_str::<SyncWithUpstreamFlag>(&raw).ok())
+        .is_some_and(|flag| flag.sync_with_upstream)
 }
 
 // Bundled rs-spec fields that only govern `spex init`'s default inclusion
@@ -108,9 +108,9 @@ fn strip_template_only_fields(contents: &[u8]) -> Vec<u8> {
 }
 
 // Writes each bundled rs-spec, overwriting the local copy only when it is new
-// or already `managed`. Scripts for a spec are copied under the same
-// condition, so customizing a spec locally also keeps its scripts untouched
-// by `spex update`.
+// or already `sync_with_upstream`. Scripts for a spec are copied under the
+// same condition, so customizing a spec locally also keeps its scripts
+// untouched by `spex update`.
 fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
     let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
         return Ok(());
@@ -131,7 +131,7 @@ fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
         let dest = specs_dest.join(name);
         let spec_id = dest.file_stem().unwrap_or_default().to_string_lossy();
 
-        if dest.exists() && !is_managed(&dest) {
+        if dest.exists() && !is_synced_with_upstream(&dest) {
             continue;
         }
 

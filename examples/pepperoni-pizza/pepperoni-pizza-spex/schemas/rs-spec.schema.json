@@ -18,7 +18,7 @@
       "description": "Short, concrete summary of the rule and what it protects against. General only — leave the individual rules to acceptance_criteria.",
       "minLength": 1
     },
-    "managed": {
+    "sync_with_upstream": {
       "type": "boolean",
       "description": "When true, `spex update` overwrites this spec (and its scripts) from the bundled template on every run. Set to false, or omit, to customize this spec locally and keep your changes across updates. Defaults to false.",
       "default": false

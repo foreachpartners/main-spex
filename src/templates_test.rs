@@ -10,7 +10,7 @@ mod tests_unit {
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
     const SCRIPT: &str = "scripts/RS-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
     const RS_SPEC: &str = "rs-specs/RS-SECRET-HANDLING.yaml";
-    // Managed spec/script pair sharing a spec id, used to test `managed`
+    // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
     // gating together.
     const MANAGED_SPEC: &str = "rs-specs/RS-COMMIT-MESSAGE-FORMAT.yaml";
 
@@ -53,9 +53,9 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
             &spec,
-            "id: RS-COMMIT-MESSAGE-FORMAT\nmanaged: true\ntampered: true\n",
+            "id: RS-COMMIT-MESSAGE-FORMAT\nsync_with_upstream: true\ntampered: true\n",
         )
-        .expect("tamper spec, keeping managed");
+        .expect("tamper spec, keeping sync_with_upstream");
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "tampered").expect("tamper script");
 

@@ -48,7 +48,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
 
-Do not set `managed` on a consumer spec unless the user explicitly asks; it governs global framework specs. Ask which repositories the convention applies to, then list the spec's `id` under each of those repositories' `rs_specs` in `spex.yaml`.
+Do not set `sync_with_upstream` on a consumer spec unless the user explicitly asks; it governs global framework specs. Ask which repositories the convention applies to, then list the spec's `id` under each of those repositories' `rs_specs` in `spex.yaml`.
 
 ## Step 3 — Draft the fields
 

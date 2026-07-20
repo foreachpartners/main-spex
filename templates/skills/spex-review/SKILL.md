@@ -19,11 +19,13 @@ The functional spec should have been provided to you, ask user if not.
 If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`.
 
 **Committed diff** (user gave a fixed point):
+
 - Capture: `git diff <fixed-point>...HEAD` (three-dot, merge-base diff).
 - Commit list: `git log <fixed-point>..HEAD --oneline`.
 - Confirm the ref resolves: `git rev-parse <fixed-point>`.
 
 **Uncommitted diff** (no fixed point):
+
 - Capture: `git diff HEAD` (staged + unstaged vs `HEAD`).
 - Commit list: "working tree (uncommitted)".
 - If the working tree is clean, fail — nothing to review.

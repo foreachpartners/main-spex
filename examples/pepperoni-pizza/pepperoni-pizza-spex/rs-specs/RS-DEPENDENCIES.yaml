@@ -1,5 +1,5 @@
 id: RS-DEPENDENCIES
-managed: true
+sync_with_upstream: true
 title: Dependencies rules
 description: >-
   Floating version ranges resolve to different code across environments, breaking

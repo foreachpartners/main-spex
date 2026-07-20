@@ -1,5 +1,5 @@
 id: RS-TESTING
-managed: true
+sync_with_upstream: true
 title: Testing hygiene
 description: >-
   A test suite is only trustworthy if every test in it runs and can fail. Skipping,

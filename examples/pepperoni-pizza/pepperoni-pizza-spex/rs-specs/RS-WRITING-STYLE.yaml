@@ -1,5 +1,5 @@
 id: RS-WRITING-STYLE
-managed: true
+sync_with_upstream: true
 title: Writing style
 description: >-
   Specs, code and documentation are read by both engineers and AI agents. Direct,

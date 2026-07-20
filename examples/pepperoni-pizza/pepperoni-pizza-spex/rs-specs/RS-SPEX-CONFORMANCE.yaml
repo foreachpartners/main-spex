@@ -1,5 +1,5 @@
 id: RS-SPEX-CONFORMANCE
-managed: true
+sync_with_upstream: true
 title: Spec files stay schema-valid
 description: >-
   The spex repository is the single source of truth for the project's specs:
