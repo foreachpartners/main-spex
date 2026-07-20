@@ -294,4 +294,45 @@ mod tests_unit {
             "managed skill should be restored"
         );
     }
+
+    #[test]
+    fn scaffold_preserves_skill_opted_out_of_sync_with_upstream() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
+
+        let skill = spex_dir.path().join(SKILL);
+        fs::write(
+            &skill,
+            "---\nname: spex-setup\ndescription: customized\nmetadata:\n  sync-with-upstream: false\n---\ncustomized body\n",
+        )
+        .expect("opt skill out of sync");
+
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
+
+        assert_eq!(
+            fs::read_to_string(&skill).unwrap(),
+            "---\nname: spex-setup\ndescription: customized\nmetadata:\n  sync-with-upstream: false\n---\ncustomized body\n"
+        );
+    }
+
+    #[test]
+    fn scaffold_overwrites_skill_without_explicit_opt_out() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("scaffold");
+
+        let skill = spex_dir.path().join(SKILL);
+        fs::write(
+            &skill,
+            "---\nname: spex-setup\ndescription: tampered\n---\ntampered\n",
+        )
+        .expect("tamper skill");
+
+        scaffold(spex_dir.path(), BEFORE_ANY_SPEX_VERSION).expect("re-scaffold");
+
+        let expected = TEMPLATES
+            .get_file("skills/spex-setup/SKILL.md")
+            .expect("bundled skill")
+            .contents();
+        assert_eq!(fs::read(&skill).expect("read skill"), expected);
+    }
 }

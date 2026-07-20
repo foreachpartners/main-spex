@@ -24,7 +24,9 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
 // `rs-specs/` and `scripts/` are handled separately: they are only overwritten
-// when the local spec opts in via `sync_with_upstream`.
+// when the local spec opts in via `sync_with_upstream`. Skills are also
+// handled separately: a local skill is left untouched when its
+// `metadata.sync-with-upstream` is explicitly `false`.
 const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
@@ -84,6 +86,48 @@ fn is_synced_with_upstream(spec_path: &Path) -> bool {
         .ok()
         .and_then(|raw| serde_yaml_ng::from_str::<SyncWithUpstreamFlag>(&raw).ok())
         .is_some_and(|flag| flag.sync_with_upstream)
+}
+
+fn default_true() -> bool {
+    true
+}
+
+#[derive(Deserialize)]
+struct SkillMetadata {
+    #[serde(rename = "sync-with-upstream", default = "default_true")]
+    sync_with_upstream: bool,
+}
+
+impl Default for SkillMetadata {
+    fn default() -> Self {
+        Self {
+            sync_with_upstream: true,
+        }
+    }
+}
+
+#[derive(Deserialize, Default)]
+struct SkillFrontmatter {
+    #[serde(default)]
+    metadata: SkillMetadata,
+}
+
+// Extracts the YAML frontmatter (the block between the leading `---` lines)
+// from a `SKILL.md` file's contents.
+fn frontmatter(contents: &str) -> Option<&str> {
+    let rest = contents.strip_prefix("---")?;
+    let end = rest.find("\n---")?;
+    Some(&rest[..end])
+}
+
+fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
+    fs::read_to_string(skill_md_path)
+        .ok()
+        .and_then(|raw| {
+            let frontmatter = frontmatter(&raw)?;
+            serde_yaml_ng::from_str::<SkillFrontmatter>(frontmatter).ok()
+        })
+        .is_none_or(|parsed| parsed.metadata.sync_with_upstream)
 }
 
 #[derive(Deserialize)]
@@ -196,8 +240,12 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
     for skill in skills.dirs() {
         let name = skill.path().file_name().unwrap_or_default();
         let dest = dest_root.join(name);
-        // Replace each managed skill wholesale so renamed or removed files don't linger.
+
         if dest.exists() {
+            if !skill_synced_with_upstream(&dest.join("SKILL.md")) {
+                continue;
+            }
+            // Replace each managed skill wholesale so renamed or removed files don't linger.
             fs::remove_dir_all(&dest)
                 .change_context(TemplateError::Io)
                 .attach_with(|| format!("could not remove `{}`", dest.display()))?;

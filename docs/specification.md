@@ -108,7 +108,8 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 
 Refreshes the managed framework files from the installed binary.
 
-- Rewrites the bundled skills and schemas with the versions in the installed binary.
+- Rewrites the bundled schemas with the versions in the installed binary.
+- Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rs-spec (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
 - Deploys a bundled rs-spec missing locally only when its `first_created_in_spex_version` is newer than the `cli_version` previously recorded in `spex.yaml`; a spec the user deliberately deleted is left deleted.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
@@ -158,7 +159,7 @@ Skills are agent workflows that drive the spec → plan → execute → check lo
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
-See skill body for more details
+See skill body for more details. A skill's `SKILL.md` frontmatter follows the [Agent Skills specification](https://agentskills.io/specification); setting `metadata.sync-with-upstream: false` opts a locally customized skill out of being overwritten by `spex update`.
 
 ## spex-setup
 
