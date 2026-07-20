@@ -83,6 +83,30 @@ fn is_managed(spec_path: &Path) -> bool {
         .is_some_and(|flag| flag.managed)
 }
 
+// Bundled rs-spec fields that only govern `spex init`'s default inclusion
+// (see `commands::init::default_rule_specs`) and have no meaning on a
+// repository's own copy, since the schema does not define them.
+const TEMPLATE_ONLY_FIELDS: [&str; 2] = ["include_for_all_repos", "include_for_spex"];
+
+// Drops top-level `key:` lines for template-only fields before a bundled
+// rs-spec is written into a repository's `rs-specs/`.
+fn strip_template_only_fields(contents: &[u8]) -> Vec<u8> {
+    let Ok(text) = std::str::from_utf8(contents) else {
+        return contents.to_vec();
+    };
+
+    let mut result = String::with_capacity(text.len());
+    for line in text.split_inclusive('\n') {
+        let is_template_only = TEMPLATE_ONLY_FIELDS
+            .iter()
+            .any(|field| line.starts_with(&format!("{field}:")));
+        if !is_template_only {
+            result.push_str(line);
+        }
+    }
+    result.into_bytes()
+}
+
 // Writes each bundled rs-spec, overwriting the local copy only when it is new
 // or already `managed`. Scripts for a spec are copied under the same
 // condition, so customizing a spec locally also keeps its scripts untouched
@@ -111,7 +135,7 @@ fn copy_rule_specs(spex_dir: &Path) -> Result<()> {
             continue;
         }
 
-        fs::write(&dest, file.contents())
+        fs::write(&dest, strip_template_only_fields(file.contents()))
             .change_context(TemplateError::Io)
             .attach_with(|| format!("could not write `{}`", dest.display()))?;
 

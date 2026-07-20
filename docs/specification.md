@@ -101,7 +101,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Creates empty `fs-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
-- Adds each default rs-spec to repositories per its `include_for_all_repos` / `include_for_spex` flags.
+- Adds each bundled rs-spec to repositories per its template-only `include_for_all_repos` / `include_for_spex` flags, stripping both flags from the copy written into each repository's `rs-specs/`.
 - Directs the user to finish setup by running the `/spex-setup` skill.
 
 ## update
@@ -216,10 +216,9 @@ One coherent cross-cutting convention or rule.
 - Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
 - Is a global rule that always applies; it has no lifecycle status and its acceptance criteria carry no implementation checkbox.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- `include_for_all_repos` adds it to every repository at init.
-- `include_for_spex` overrides `include_for_all_repos` for the spex repository.
 - `managed` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
+- A bundled template rs-spec additionally carries `include_for_all_repos` and `include_for_spex` to control default inclusion at `init`; `init`/`update` strip both from the copy written into a repository, so they never appear — and are not schema-valid — on a repository's own rs-spec files.
 
 ## Checks
 

@@ -1,5 +1,4 @@
 id: RS-DEPENDENCIES
-include_for_all_repos: true
 managed: true
 title: Dependencies rules
 description: >-

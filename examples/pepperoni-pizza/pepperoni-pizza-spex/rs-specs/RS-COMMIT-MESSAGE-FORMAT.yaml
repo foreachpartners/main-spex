@@ -1,5 +1,4 @@
 id: RS-COMMIT-MESSAGE-FORMAT
-include_for_all_repos: true
 managed: true
 title: Commit message format
 description: >-

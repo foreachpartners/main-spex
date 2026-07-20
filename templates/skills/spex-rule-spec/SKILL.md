@@ -48,7 +48,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
 
-Do not set `managed` or `include_for_spex` on a consumer spec unless the user explicitly asks; those govern global framework specs. Ask whether the convention should apply to every repository (`include_for_all_repos: true`) or only to specific ones.
+Do not set `managed` on a consumer spec unless the user explicitly asks; it governs global framework specs. Ask which repositories the convention applies to, then list the spec's `id` under each of those repositories' `rs_specs` in `spex.yaml`.
 
 ## Step 3 — Draft the fields
 
@@ -84,8 +84,9 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 
 1. Write the spec to `<workspace-root>/<project-name>-spex/rs-specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<spec-id>/<name>.sh`) and make them executable.
-3. Run `spex check` to validate compliance.
-4. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
+3. For a new spec, add its `id` under `rs_specs` in `spex.yaml` for each repository the user said it applies to.
+4. Run `spex check` to validate compliance.
+5. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Example
 
@@ -98,7 +99,6 @@ description: >-
 acceptance_criteria:
   - "MUST NOT use `console.log` in application code — use the project logger"
   - "MUST log through the shared logger so output includes level and context"
-include_for_all_repos: true
 checks:
   - name: no-console-log
     description: Stray console.log calls should use the project logger instead

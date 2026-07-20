@@ -1,6 +1,4 @@
 id: RS-SPEC-ID-TRACING
-include_for_all_repos: true
-include_for_spex: false
 managed: true
 title: Spec ID tracing
 description: >-

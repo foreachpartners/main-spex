@@ -1,6 +1,4 @@
 id: RS-SPEX-CONFORMANCE
-include_for_all_repos: false
-include_for_spex: true
 managed: true
 title: Spec files stay schema-valid
 description: >-

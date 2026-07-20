@@ -326,8 +326,6 @@ mod tests {
     fn rule_spec(id: &str, checks: Vec<Check>) -> RuleSpec {
         RuleSpec {
             id: id.to_string(),
-            include_for_all_repos: false,
-            include_for_spex: None,
             checks,
         }
     }
@@ -669,8 +667,11 @@ mod tests {
         std::fs::write(repo.join("src/main.rs"), "fn main() {}").expect("file");
 
         // A negated glob check: "dprint.json must exist"
-        let mut negated_glob =
-            named_check("dprint-config-present", CheckKind::Glob, Some("dprint.json"));
+        let mut negated_glob = named_check(
+            "dprint-config-present",
+            CheckKind::Glob,
+            Some("dprint.json"),
+        );
         negated_glob.negate = true;
         // A non-negated glob check: "*.rs files are forbidden"
         let non_negated = named_check("no-rs-files", CheckKind::Glob, Some("**/*.rs"));

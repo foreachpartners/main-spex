@@ -6,9 +6,10 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
+use serde::Deserialize;
+
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
-use crate::rule_spec::RuleSpec;
 use crate::templates;
 
 #[cfg(test)]
@@ -54,6 +55,19 @@ struct DiscoveredRepo {
 struct DefaultRuleSpecs {
     all_repos: Vec<String>,
     spex: Vec<String>,
+}
+
+// Bundled rs-specs carry `include_for_all_repos` / `include_for_spex` only in
+// the template; `spex init` reads them here to decide default inclusion, then
+// strips both fields from the copy it writes into each repository's
+// `rs-specs/` (see `templates::copy_rule_specs`).
+#[derive(Deserialize)]
+struct RuleSpecTemplate {
+    id: String,
+    #[serde(default)]
+    include_for_all_repos: bool,
+    #[serde(default)]
+    include_for_spex: Option<bool>,
 }
 
 pub fn run() -> Result<ExitCode> {
@@ -187,7 +201,7 @@ fn default_rule_specs() -> Result<DefaultRuleSpecs> {
         let raw = file
             .contents_utf8()
             .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
-        let spec: RuleSpec = serde_yaml_ng::from_str(raw)
+        let spec: RuleSpecTemplate = serde_yaml_ng::from_str(raw)
             .change_context_lazy(|| InitError::Template(name.clone()))?;
         if spec.include_for_all_repos {
             all_repos.push(spec.id.clone());

@@ -63,7 +63,7 @@ pub fn run(args: CheckSchemaArgs) -> Result<ExitCode> {
     })
 }
 
-fn build_validator(schema_path: &Path) -> Result<Validator> {
+pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
     let text = fs::read_to_string(schema_path)
         .change_context_lazy(|| CheckSchemaError::Read(display(schema_path)))?;
     let schema: Value = serde_json::from_str(&text)
@@ -89,8 +89,14 @@ fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
     let instance: Value = serde_yaml_ng::from_str(&text)
         .change_context_lazy(|| CheckSchemaError::Parse(display(path)))?;
 
+    Ok(validate_instance(validator, &instance))
+}
+
+// Validates a single already-parsed instance, sorted and deduplicated so
+// callers get a stable, readable message list.
+pub(crate) fn validate_instance(validator: &Validator, instance: &Value) -> Vec<String> {
     let mut messages: Vec<String> = validator
-        .iter_errors(&instance)
+        .iter_errors(instance)
         .map(|err| {
             let location = err.instance_path().to_string();
             if location.is_empty() {
@@ -102,7 +108,7 @@ fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
         .collect();
     messages.sort();
     messages.dedup();
-    Ok(messages)
+    messages
 }
 
 fn display(path: &Path) -> String {

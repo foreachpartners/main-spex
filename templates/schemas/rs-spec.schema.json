@@ -18,15 +18,6 @@
       "description": "Short, concrete summary of the rule and what it protects against. General only — leave the individual rules to acceptance_criteria.",
       "minLength": 1
     },
-    "include_for_all_repos": {
-      "type": "boolean",
-      "description": "When true, `spex init` adds this spec to every workspace repository's rs-specs list, including spex itself. Defaults to false.",
-      "default": false
-    },
-    "include_for_spex": {
-      "type": "boolean",
-      "description": "Overrides spex-repo inclusion when present. When omitted, the spex repository follows `include_for_all_repos`; set explicitly to add or exclude this spec for the spex repository."
-    },
     "managed": {
       "type": "boolean",
       "description": "When true, `spex update` overwrites this spec (and its scripts) from the bundled template on every run. Set to false, or omit, to customize this spec locally and keep your changes across updates. Defaults to false.",

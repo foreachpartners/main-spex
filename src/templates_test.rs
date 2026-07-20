@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use std::path::Path;
+
+    use serde_json::Value;
     use tempfile::tempdir;
 
     const SCHEMA: &str = "schemas/spex.schema.json";
@@ -58,10 +61,12 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("re-scaffold");
 
-        let expected_spec = TEMPLATES
-            .get_file(MANAGED_SPEC)
-            .expect("bundled spec")
-            .contents();
+        let expected_spec = strip_template_only_fields(
+            TEMPLATES
+                .get_file(MANAGED_SPEC)
+                .expect("bundled spec")
+                .contents(),
+        );
         assert_eq!(fs::read(&spec).expect("read spec"), expected_spec);
         let expected_script = TEMPLATES
             .get_file(SCRIPT)
@@ -154,6 +159,48 @@ mod tests_unit {
             !spex_dir.path().join(AGENTS_FILE).exists(),
             "scaffold (update) must not create AGENTS.md"
         );
+    }
+
+    #[test]
+    fn scaffold_strips_template_only_inclusion_fields_from_copied_rs_spec() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        scaffold(spex_dir.path()).expect("scaffold");
+
+        let spec = fs::read_to_string(spex_dir.path().join(MANAGED_SPEC)).expect("read spec");
+        assert!(
+            !spec.contains("include_for_all_repos") && !spec.contains("include_for_spex"),
+            "copied rs-spec should not carry template-only inclusion fields:\n{spec}"
+        );
+    }
+
+    // Every bundled rs-spec must satisfy `rs-spec.schema.json` once its
+    // template-only inclusion fields are stripped, since that stripped form
+    // is exactly what `spex init`/`update` write into a repository's own
+    // `rs-specs/` (see `copy_rule_specs`).
+    #[test]
+    fn rs_spec_templates_conform_to_schema_once_template_only_fields_are_stripped() {
+        let validator = crate::commands::check_schema::build_validator(Path::new(
+            "templates/schemas/rs-spec.schema.json",
+        ))
+        .expect("build rs-spec validator");
+
+        let dir = TEMPLATES
+            .get_dir(RULE_SPECS_DIR)
+            .expect("bundled rs-specs dir");
+
+        for file in dir.files() {
+            let stripped = strip_template_only_fields(file.contents());
+            let text = std::str::from_utf8(&stripped).expect("utf8 rs-spec");
+            let instance: Value = serde_yaml_ng::from_str(text).expect("parse rs-spec yaml");
+
+            let messages = crate::commands::check_schema::validate_instance(&validator, &instance);
+            assert!(
+                messages.is_empty(),
+                "{} violates rs-spec.schema.json: {messages:?}",
+                file.path().display()
+            );
+        }
     }
 
     #[test]
