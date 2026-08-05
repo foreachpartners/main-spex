@@ -28,7 +28,7 @@ Extracted from the PRD by product owner and/or developer. It describes a capabil
 
 ### Contract
 
-The machine-readable interface (OpenAPI, proto, GraphQL SDL, AsyncAPI) derived from a functional spec if applicable (API, cross-service communication contracts). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
+The interface derived from a functional spec if applicable. For a machine-readable interface (API, cross-service communication) it's OpenAPI, proto, GraphQL SDL, or AsyncAPI. For a UI-facing spec with no machine-readable interface, it's a design reference: a markdown document linking the spec to its visual design (e.g. a Figma frame). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
 
 ### Plan
 

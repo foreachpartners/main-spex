@@ -30,6 +30,10 @@ repositories:
       React + TypeScript (Vite) web client where customers browse pizzas, place
       orders, and watch deliveries.
     path: ../pepperoni-pizza-frontend
+    contracts:
+      - path: contracts/figma.md
+        description: >-
+          Figma references for the frontend's UI.
     rs_specs:
       - RS-COMMIT-MESSAGE-FORMAT
       - RS-DEPENDENCIES
