@@ -149,7 +149,7 @@ Validates JSON or YAML files against a JSON Schema.
 - Validates JSON or YAML files against a JSON Schema, resolving cross-file `$ref`s offline.
 - Requires `--schema` and `--files`.
 - Exits non-zero when any file fails.
-- Used by `RS-SPEX-CONFORMANCE` to keep spex's own spec files valid.
+- `spex check` uses it, built in, to keep spex's own spec files valid.
 
 # Skills
 

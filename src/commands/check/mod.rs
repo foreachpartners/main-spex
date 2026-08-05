@@ -15,9 +15,11 @@ use crate::style::{Log, Style};
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
 
+mod conformance;
 mod report;
 mod runners;
 
+use conformance::validate_conformance;
 use report::report;
 use runners::*;
 
@@ -140,11 +142,11 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         });
     }
 
+    validate_specs(&workspace, &specs, &selected, &mut reports)?;
+
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&workspace.dir, &selected, &reports);
     }
-
-    validate_specs(&workspace, &specs, &selected, &mut reports)?;
 
     Ok(report(&workspace.config, &reports))
 }
@@ -657,6 +659,8 @@ fn validate_specs(
     for spec in &fs_specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
+
+    validate_conformance(&workspace.dir, rs_specs, &mut report.findings);
 
     Ok(())
 }

@@ -55,5 +55,4 @@ repositories:
       - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION
       - RS-SECRET-HANDLING
-      - RS-SPEX-CONFORMANCE
       - RS-WRITING-STYLE

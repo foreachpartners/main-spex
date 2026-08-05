@@ -105,6 +105,8 @@ spex check --repo api --files src/main.rs src/orders.rs
 spex check --repo frontend --fill-preexisting-errors
 ```
 
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule spec: `spex.yaml`, every `fs-specs/<spec-id>.yaml`, and every `rs-specs/<spec-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml`; every script a rs-spec check references must exist at `scripts/<spec-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
+
 ### `spex coverage`
 
 Reports how well the active functional specs are covered by spec-id annotations across the workspace. For every FS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
@@ -137,7 +139,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id-lowercase>.yaml`, `rs-specs/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id-lowercase>.yaml`, `rs-specs/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
 
 #### Flags
 

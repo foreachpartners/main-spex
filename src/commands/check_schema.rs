@@ -83,7 +83,7 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
         })
 }
 
-fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
+pub(crate) fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
     let text =
         fs::read_to_string(path).change_context_lazy(|| CheckSchemaError::Read(display(path)))?;
     let instance: Value = serde_yaml_ng::from_str(&text)

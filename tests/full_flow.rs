@@ -255,8 +255,6 @@ fn report_text(stdout: &[u8]) -> String {
 }
 
 fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
-    // The RS-SPEX-CONFORMANCE check shells out to `spex check-schema`, so the
-    // binary under test must be discoverable on PATH.
     let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
     let bin_dir = bin.parent().expect("binary directory");
     let path = match std::env::var_os("PATH") {
