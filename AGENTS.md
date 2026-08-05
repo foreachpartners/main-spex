@@ -61,5 +61,5 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Writing style**: Follow the authoring conventions in `templates/rs-specs/RS-WRITING-STYLE.yaml` (e.g. path placeholders) across docs, skills, and schemas.
+- **Writing style**: Follow the authoring conventions in `templates/rs-specs/rs-writing-style.yaml` (e.g. path placeholders) across docs, skills, and schemas.
 - **Single source of truth**: `docs/specification.md` defines how the framework behaves. Treat it as authoritative, and update it whenever you change framework behavior.

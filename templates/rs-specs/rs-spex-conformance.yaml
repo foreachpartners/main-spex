@@ -35,6 +35,6 @@ examples:
   layout: |
     pepperoni-pizza-spex/
       spex.yaml                              # validated against schemas/spex.schema.json
-      fs-specs/FS-LIST-PIZZA-MENU.yaml     # validated against schemas/fs-spec.schema.json
-      rs-specs/RS-NAMING-CONVENTION.yaml # validated against schemas/rs-spec.schema.json
+      fs-specs/fs-list-pizza-menu.yaml     # validated against schemas/fs-spec.schema.json
+      rs-specs/rs-naming-convention.yaml # validated against schemas/rs-spec.schema.json
       scripts/RS-NAMING-CONVENTION/repo-dir.sh

@@ -101,9 +101,9 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 | Fact                              | Single source                                                                     | Not duplicated to                                |
 | --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
 | HTTP / gRPC / event interface     | Native contract in `<project-name>-spex/contracts/` (OpenAPI, `.proto`, AsyncAPI) | No markdown copy of the interface                |
-| Capability (product or technical) | Functional spec (`<project-name>-spex/fs-specs/<spec-id>.yaml`)                   | No copy in code comments or plans                |
-| Cross-cutting convention          | Rule spec (`<project-name>-spex/rs-specs/<spec-id>.yaml`)                         | No copy in agent rules, READMEs, or service docs |
-| Check logic                       | Rule-spec `checks` and `scripts/<spec-id>/`                                       | No restated rule in CI config prose              |
+| Capability (product or technical) | Functional spec (`<project-name>-spex/fs-specs/<spec-id-lowercase>.yaml`)                   | No copy in code comments or plans                |
+| Cross-cutting convention          | Rule spec (`<project-name>-spex/rs-specs/<spec-id-lowercase>.yaml`)                         | No copy in agent rules, READMEs, or service docs |
+| Check logic                       | Rule-spec `checks` and `scripts/<spec-id-lowercase>/`                                       | No restated rule in CI config prose              |
 | Workspace layout                  | `<project-name>-spex/spex.yaml`                                                   | No second list of repositories anywhere          |
 | Term definitions                  | `docs/glossary.md`                                                                | No re-definition in other docs                   |
 
@@ -125,7 +125,7 @@ Three requirements:
 
 **Violation test**: a context is parsimonious when no essential part can be removed without introducing ambiguity or degrading quality, and the whole contains no redundant or irrelevant element.
 
-**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`RS-WRITING-STYLE`](../templates/rs-specs/RS-WRITING-STYLE.yaml).
+**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`RS-WRITING-STYLE`](../templates/rs-specs/rs-writing-style.yaml).
 
 ## 11. Traceability
 

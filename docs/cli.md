@@ -60,7 +60,7 @@ spex check
 
 The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
-A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<spec-id>/<script>` under the spex directory — including the scripts named by per-repo `checks_additional` and `checks_override`. Set `run: per-file` (the default) to pass the matched files as arguments. Set `run: per-repo` to run the script once per repository, in that repository's directory, with no arguments. Set `run: workspace` to run the script exactly once, with no arguments.
+A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<spec-id-lowercase>/<script>` under the spex directory — including the scripts named by per-repo `checks_additional` and `checks_override`. Set `run: per-file` (the default) to pass the matched files as arguments. Set `run: per-repo` to run the script once per repository, in that repository's directory, with no arguments. Set `run: workspace` to run the script exactly once, with no arguments.
 
 A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
 
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id>.yaml`, `rs-specs/<spec-id>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id-lowercase>.yaml`, `rs-specs/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -145,11 +145,11 @@ This is a general-purpose validator. The `RS-SPEX-CONFORMANCE` rule spec uses it
 - `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
 
 ```sh
-spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/RS-NAMING-CONVENTION.yaml
+spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/rs-naming-convention.yaml
 ```
 
 ```sh
-spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/FS-LIST-PIZZA-MENU.yaml fs-specs/FS-PLACE-PIZZA-ORDER.yaml
+spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/fs-list-pizza-menu.yaml fs-specs/fs-place-pizza-order.yaml
 ```
 
 ## Development

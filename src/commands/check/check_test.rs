@@ -148,11 +148,11 @@ mod tests {
     fn resolve_script_joins_scripts_and_spec_dir() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
-        std::fs::write(spex.join("scripts/RS-X/lint.sh"), "").expect("spex script");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
+        std::fs::write(spex.join("scripts/rs-x/lint.sh"), "").expect("spex script");
 
         let resolved = resolve_script("lint.sh", &spex, "RS-X").expect("resolved");
-        assert_eq!(resolved, spex.join("scripts/RS-X/lint.sh"));
+        assert_eq!(resolved, spex.join("scripts/rs-x/lint.sh"));
     }
 
     #[test]
@@ -174,10 +174,10 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/RS-COMMIT-MESSAGE-FORMAT"))
+        std::fs::create_dir_all(spex.join("scripts/rs-commit-message-format"))
             .expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/RS-COMMIT-MESSAGE-FORMAT/sample.sh");
+        let script = spex.join("scripts/rs-commit-message-format/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
@@ -204,9 +204,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/RS-WRITING-STYLE")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/rs-writing-style")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/RS-WRITING-STYLE/echo-args.sh");
+        let script = spex.join("scripts/rs-writing-style/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -240,9 +240,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/RS-WRITING-STYLE")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/rs-writing-style")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/RS-WRITING-STYLE/locations.sh");
+        let script = spex.join("scripts/rs-writing-style/locations.sh");
         // Emits two contract lines (one with a location, one file-less) plus a
         // blank line that must be ignored.
         std::fs::write(
@@ -373,8 +373,8 @@ mod tests {
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
         std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
-        let script = spex.join("scripts/RS-X/foo.sh");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
+        let script = spex.join("scripts/rs-x/foo.sh");
         std::fs::write(&script, "#!/bin/sh\necho spex\nexit 1\n").expect("script");
         make_executable(&script);
 
@@ -412,11 +412,11 @@ mod tests {
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
         std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
-        let inherited = spex.join("scripts/RS-X/foo.sh");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
+        let inherited = spex.join("scripts/rs-x/foo.sh");
         std::fs::write(&inherited, "#!/bin/sh\necho inherited\nexit 1\n").expect("inherited");
         make_executable(&inherited);
-        let custom = spex.join("scripts/RS-X/custom.sh");
+        let custom = spex.join("scripts/rs-x/custom.sh");
         std::fs::write(&custom, "#!/bin/sh\necho custom\nexit 1\n").expect("custom");
         make_executable(&custom);
 
@@ -481,8 +481,8 @@ mod tests {
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
         std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
-        let script = spex.join("scripts/RS-X/foo.sh");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
+        let script = spex.join("scripts/rs-x/foo.sh");
         std::fs::write(&script, "#!/bin/sh\necho spex\nexit 1\n").expect("script");
         make_executable(&script);
 
@@ -624,9 +624,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
         let repo = workspace.path().join("api");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/RS-X/added.sh");
+        let script = spex.join("scripts/rs-x/added.sh");
         std::fs::write(&script, "#!/bin/sh\necho added\nexit 1\n").expect("script");
         make_executable(&script);
 
@@ -723,11 +723,11 @@ mod tests {
         let spex = workspace.path().join("spex");
         let api = workspace.path().join("api");
         let web = workspace.path().join("web");
-        std::fs::create_dir_all(spex.join("scripts/RS-X")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
         std::fs::create_dir_all(&api).expect("api");
         std::fs::create_dir_all(&web).expect("web");
 
-        let script = spex.join("scripts/RS-X/list.sh");
+        let script = spex.join("scripts/rs-x/list.sh");
         // Fails if handed any file arguments, records each invocation, and emits
         // its own contract findings: a workspace script gets no files and must
         // discover its own paths.
@@ -918,7 +918,7 @@ mod tests {
         let finding = result.expect("expected a status finding");
         assert_eq!(finding.severity, Severity::Warn);
         assert_eq!(finding.check, "status");
-        assert_eq!(finding.location.as_deref(), Some("fs-specs/FS-A.yaml"));
+        assert_eq!(finding.location.as_deref(), Some("fs-specs/fs-a.yaml"));
     }
 
     #[test]

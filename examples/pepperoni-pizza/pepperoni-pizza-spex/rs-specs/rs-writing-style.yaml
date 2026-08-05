@@ -21,7 +21,7 @@ checks:
     run: per-file
     script: writing-style.sh
     exclude:
-      - "**/RS-WRITING-STYLE.yaml"
+      - "**/rs-writing-style.yaml"
       - "**/writing-style.sh"
       - "**/plans/**/*.md"
       - "**/.agents/skills/**"
@@ -39,4 +39,4 @@ examples:
     MUST load configuration at startup.
   placeholder: |
     <workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml
-    e.g. pepperoni-pizza/pepperoni-pizza-spex/fs-specs/FS-PLACE-PIZZA-ORDER.yaml
+    e.g. pepperoni-pizza/pepperoni-pizza-spex/fs-specs/fs-place-pizza-order.yaml

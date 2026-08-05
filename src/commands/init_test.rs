@@ -456,7 +456,7 @@ mod tests_unit {
 
         let script = spex_dir
             .path()
-            .join("scripts/RS-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh");
+            .join("scripts/rs-commit-message-format/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

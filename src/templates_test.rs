@@ -8,11 +8,11 @@ mod tests_unit {
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/RS-COMMIT-MESSAGE-FORMAT/commit-spec-id-trace.sh";
-    const RS_SPEC: &str = "rs-specs/RS-SECRET-HANDLING.yaml";
+    const SCRIPT: &str = "scripts/rs-commit-message-format/commit-spec-id-trace.sh";
+    const RS_SPEC: &str = "rs-specs/rs-secret-handling.yaml";
     // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
     // gating together.
-    const MANAGED_SPEC: &str = "rs-specs/RS-COMMIT-MESSAGE-FORMAT.yaml";
+    const MANAGED_SPEC: &str = "rs-specs/rs-commit-message-format.yaml";
 
     #[test]
     fn scaffold_writes_managed_content() {

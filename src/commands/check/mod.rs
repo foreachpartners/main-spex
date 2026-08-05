@@ -672,7 +672,7 @@ fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> O
         severity: Severity::Warn,
         spec_id: id.to_string(),
         check: "status".to_string(),
-        location: Some(format!("{dir}/{id}.yaml")),
+        location: Some(format!("{dir}/{}.yaml", id.to_lowercase())),
         message: format!(
             "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
             status.label()
@@ -689,7 +689,7 @@ fn validate_blocked_by(
         let location = Some(format!(
             "{}/{}.yaml",
             functional_spec::FUNCTIONAL_SPECS_DIR,
-            spec.id
+            spec.id.to_lowercase()
         ));
         match status_by_id.get(blocker.as_str()) {
             None => findings.push(Finding {

@@ -3,9 +3,10 @@
 #
 # Validates the spex repository's own spec files: spex.yaml and every file in
 # fs-specs/ and rs-specs/ must satisfy its JSON Schema, each spec file must
-# be named <id>.yaml, and every script-type check in a rs-spec must point at
-# a script that exists under scripts/<spec-id>/. Schema validation runs through
-# `spex check-schema`, so the spex binary must be on PATH.
+# be named <id-lowercase>.yaml (RS-NAMING-CONVENTION: uppercase id, lowercase
+# filename), and every script-type check in a rs-spec must point at a script
+# that exists under scripts/<spec-id-lowercase>/. Schema validation runs
+# through `spex check-schema`, so the spex binary must be on PATH.
 #
 # Runs once in the spex repository directory.
 #
@@ -59,8 +60,9 @@ validate_specs() {
 
     id=$(spec_id "$file")
     stem=$(basename "$file" .yaml)
-    if [ "$id" != "$stem" ]; then
-      fail "$file" "filename stem '$stem' does not match id '$id'"
+    id_lower=$(printf '%s' "$id" | tr '[:upper:]' '[:lower:]')
+    if [ "$id_lower" != "$stem" ]; then
+      fail "$file" "filename stem '$stem' does not match lowercased id '$id_lower'"
     fi
   done
 }
@@ -78,10 +80,11 @@ validate_specs rs-specs schemas/rs-spec.schema.json
 for file in rs-specs/*.yaml; do
   [ -e "$file" ] || continue
   id=$(spec_id "$file")
+  id_lower=$(printf '%s' "$id" | tr '[:upper:]' '[:lower:]')
   references=$(sed -n 's/^[[:space:]]*script:[[:space:]]*//p' "$file")
   for script in $references; do
-    if [ ! -f "scripts/$id/$script" ]; then
-      fail "$file" "missing script scripts/$id/$script"
+    if [ ! -f "scripts/$id_lower/$script" ]; then
+      fail "$file" "missing script scripts/$id_lower/$script"
     fi
   done
 done
