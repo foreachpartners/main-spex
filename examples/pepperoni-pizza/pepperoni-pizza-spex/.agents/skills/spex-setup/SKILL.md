@@ -1,6 +1,6 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yaml), collect each repository's interface contracts into the spex repository's contracts/ folder, and fill the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, copies any existing contract files (OpenAPI, proto, GraphQL SDL, AsyncAPI) into contracts/ with a repository prefix and records them in spex.yaml, and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yaml.
+description: Fill in the missing descriptions in the workspace config (spex.yaml), record each repository's existing interface contracts, if any, in spex.yaml, and fill the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, locates any existing contract files (OpenAPI, proto, GraphQL SDL, AsyncAPI) and records them in spex.yaml at their existing location (or copies them into contracts/ only when genuinely shared across repositories), and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yaml.
 ---
 
 # Describe the Workspace (spex.yaml)
@@ -65,17 +65,17 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 
 ## Step 4b — Collect contracts
 
-Each repository's interface contract is the single source of truth for its machine-readable interface. spex keeps every contract in the `spex` repository's `contracts/` folder so one Spec ID can trace across the contract and its implementations. Copy each repository's existing contract into that folder and record it in `spex.yaml`.
+Each repository's interface contract, if it has one, is the single source of truth for its machine-readable interface. The user owns where a contract file actually lives — most commonly inside the owning repository itself. The `spex` repository's own `contracts/` folder is only a convention for contracts genuinely shared across repositories, not the default location. Record each repository's contract in `spex.yaml` regardless of where the file lives.
 
 For each repository, using the contract files you noted in Step 2:
 
 1. Identify its interface contract files. Look for OpenAPI (`openapi.yaml`, `openapi.json`, `*.openapi.yaml`), proto (`*.proto`), GraphQL SDL (`schema.graphql`, `*.graphql`), and AsyncAPI (`asyncapi.yaml`). Skip repositories that ship no contract.
-2. Copy each contract file into `<workspace-root>/<project-name>-spex/contracts/`, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
-3. Add the copy under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
-4. Leave the original contract file in its repository untouched; the copy under `contracts/` is what spex tracks.
+2. For a contract already living in its own repository, record it in place; only copy it into `<workspace-root>/<project-name>-spex/contracts/` when it's genuinely shared across repositories, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
+3. Add an entry under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` or `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
+4. Leave the original contract file in its repository untouched unless it was moved into the shared `contracts/` folder by choice in step 2.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-Confirm the copied contracts and their descriptions with the user, the same way you confirm descriptions in Step 4.
+Confirm each repository's contract location and description with the user, the same way you confirm descriptions in Step 4.
 
 Example `spex.yaml` repository entry after collecting a contract:
 

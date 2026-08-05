@@ -107,7 +107,7 @@ spex check --repo frontend --fill-preexisting-errors
 
 ### `spex coverage`
 
-Reports how well the active functional specs are covered by spec-id annotations across the workspace. For every FS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active functional specs are covered by spec-id annotations across the workspace. For every FS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex coverage

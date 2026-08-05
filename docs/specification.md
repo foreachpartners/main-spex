@@ -66,7 +66,7 @@ A project spans several workspace repositories under one workspace root folder.
 - spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
 - Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its functional spec, a convention only in its rule spec.
 - Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
-- Each repository's interface contracts live in the `spex` repository's `contracts/` folder, declared per repository in `spex.yaml`.
+- Each repository's interface contracts are declared per repository in `spex.yaml`; the contract file's location is user-owned, most commonly inside the owning repository itself, with the `spex` repository's `contracts/` folder reserved for contracts genuinely shared across repositories.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
 
 ## Traceability
@@ -135,7 +135,7 @@ Runs each repository's rule-spec checks and gates on errors.
 Reports annotation coverage for functional specs.
 
 - Reports annotation coverage for every functional spec whose `status` is `active`.
-- Requires an implementation, test, and contract annotation per active spec; a single one anywhere in any repository counts.
+- Requires an implementation, test, and contract annotation per active spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
 - Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
 - Non-active specs appear only in the per-status totals.

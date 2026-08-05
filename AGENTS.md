@@ -39,7 +39,7 @@ templates/          Assets scaffolded into projects
   scripts/          Helper scripts
   skills/           Agent skills
   rs-specs/         Reusable rule-spec templates
-examples/           Sample projects (pepperoni-pizza)
+examples/           Sample projects (pepperoni-pizza, pepperoni-pizza-no-spex)
 tests/              Integration tests that build and run the spex binary
 ```
 
