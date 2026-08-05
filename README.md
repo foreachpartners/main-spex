@@ -86,7 +86,7 @@ For example, a pizza ordering feature moves through the flow like this:
 
    Acceptance criteria: POST /orders returns 201 with the created order
 
-4. **Contract (if applicable)** — OpenAPI definition of `placeOrder` returning `201`
+4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
 5. **Plan** — step-by-step build plan for the `placeOrder` endpoint
 6. **Implementation** — the `placeOrder()` handler in code
 7. **Test** — verifies that placing an order returns `201`
