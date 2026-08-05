@@ -1,6 +1,5 @@
 id: RS-NAMING-CONVENTION
 title: Derived naming convention
-first_created_in_spex_version: 0.1.0
 sync_with_upstream: true
 description: >-
   A workspace repository owns many cross-cutting identifiers: repository directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the repository short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.

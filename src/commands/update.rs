@@ -8,9 +8,10 @@ use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE};
 use crate::templates;
 use serde::Deserialize;
 
-#[derive(Deserialize)]
-struct CliVersionOnly {
-    cli_version: String,
+#[derive(Deserialize, Default)]
+struct RsSpecsRemoved {
+    #[serde(default)]
+    rs_specs_removed: Vec<String>,
 }
 
 type Result<T> = core::result::Result<T, Report<UpdateError>>;
@@ -41,11 +42,11 @@ pub fn run() -> Result<ExitCode> {
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
-    let since_version = serde_yaml_ng::from_str::<CliVersionOnly>(&raw)
-        .map(|config| config.cli_version)
-        .unwrap_or_else(|_| templates::BEFORE_ANY_SPEX_VERSION.to_string());
+    let removed_rs_specs = serde_yaml_ng::from_str::<RsSpecsRemoved>(&raw)
+        .unwrap_or_default()
+        .rs_specs_removed;
 
-    templates::scaffold(&spex_dir, &since_version).change_context(UpdateError::Templates)?;
+    templates::scaffold(&spex_dir, &removed_rs_specs).change_context(UpdateError::Templates)?;
 
     fs::write(&config_path, config::set_cli_version(&raw, CLI_VERSION))
         .change_context(UpdateError::Config)

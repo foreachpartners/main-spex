@@ -1,6 +1,5 @@
 id: RS-OPENAPI-CONVENTIONS
 title: OpenAPI conventions
-first_created_in_spex_version: 0.1.0
 sync_with_upstream: true
 description: >-
   The OpenAPI document is the contract that clients and servers must follow.

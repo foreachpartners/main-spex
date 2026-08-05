@@ -111,7 +111,7 @@ Refreshes the managed framework files from the installed binary.
 - Rewrites the bundled schemas with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rs-spec (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
-- Deploys a bundled rs-spec missing locally only when its `first_created_in_spex_version` is newer than the `cli_version` previously recorded in `spex.yaml`; a spec the user deliberately deleted is left deleted.
+- Deploys a bundled rs-spec missing locally, unless its id is listed in `rs_specs_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -220,7 +220,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A bundled template rs-spec additionally carries `first_created_in_spex_version` (required), recording the CLI version it was introduced in, which `update` uses to tell a spec new upstream apart from one a consumer deliberately deleted; `init`/`update` strip it from the copy written into a repository, so it never appears — and is not schema-valid — on a repository's own rs-spec files.
+- A deleted bundled rs-spec is only recognized as deliberate once its id is added to `rs_specs_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
 
 ## Checks
 

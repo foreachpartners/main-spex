@@ -52,16 +52,11 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     ensure_claude_md_link(spex_dir)
 }
 
-// A version older than every `first_created_in_spex_version` a bundled
-// rs-spec could carry, so a fresh `spex init` deploys every bundled spec
-// regardless of when it was introduced.
-pub const BEFORE_ANY_SPEX_VERSION: &str = "0.0.0";
-
-pub fn scaffold(spex_dir: &Path, since_version: &str) -> Result<()> {
+pub fn scaffold(spex_dir: &Path, removed_rs_specs: &[String]) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
-    copy_rule_specs(spex_dir, since_version)?;
+    copy_rule_specs(spex_dir, removed_rs_specs)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
@@ -126,47 +121,7 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
         .is_none_or(|parsed| parsed.metadata.sync_with_upstream)
 }
 
-#[derive(Deserialize)]
-struct FirstCreatedInSpexVersion {
-    first_created_in_spex_version: String,
-}
-
-fn first_created_in_spex_version(template_contents: &[u8]) -> Option<String> {
-    let text = std::str::from_utf8(template_contents).ok()?;
-    serde_yaml_ng::from_str::<FirstCreatedInSpexVersion>(text)
-        .ok()
-        .map(|flag| flag.first_created_in_spex_version)
-}
-
-fn version_newer_than(candidate: &str, baseline: &str) -> bool {
-    fn parts(version: &str) -> Vec<u32> {
-        version.split('.').map(|p| p.parse().unwrap_or(0)).collect()
-    }
-    parts(candidate) > parts(baseline)
-}
-
-const TEMPLATE_ONLY_FIELDS: [&str; 1] = ["first_created_in_spex_version"];
-
-// Drops top-level `key:` lines for template-only fields before a bundled
-// rs-spec is written into a repository's `rs-specs/`.
-fn strip_template_only_fields(contents: &[u8]) -> Vec<u8> {
-    let Ok(text) = std::str::from_utf8(contents) else {
-        return contents.to_vec();
-    };
-
-    let mut result = String::with_capacity(text.len());
-    for line in text.split_inclusive('\n') {
-        let is_template_only = TEMPLATE_ONLY_FIELDS
-            .iter()
-            .any(|field| line.starts_with(&format!("{field}:")));
-        if !is_template_only {
-            result.push_str(line);
-        }
-    }
-    result.into_bytes()
-}
-
-fn copy_rule_specs(spex_dir: &Path, since_version: &str) -> Result<()> {
+fn copy_rule_specs(spex_dir: &Path, removed_rs_specs: &[String]) -> Result<()> {
     let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
         return Ok(());
     };
@@ -190,15 +145,14 @@ fn copy_rule_specs(spex_dir: &Path, since_version: &str) -> Result<()> {
             if !is_synced_with_upstream(&dest) {
                 continue;
             }
-        } else {
-            let is_new_upstream = first_created_in_spex_version(file.contents())
-                .is_some_and(|version| version_newer_than(&version, since_version));
-            if !is_new_upstream {
-                continue;
-            }
+        } else if removed_rs_specs
+            .iter()
+            .any(|id| id.eq_ignore_ascii_case(spec_id.as_ref()))
+        {
+            continue;
         }
 
-        fs::write(&dest, strip_template_only_fields(file.contents()))
+        fs::write(&dest, file.contents())
             .change_context(TemplateError::Io)
             .attach_with(|| format!("could not write `{}`", dest.display()))?;
 
