@@ -1,13 +1,13 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yaml), record each repository's existing interface contracts, if any, in spex.yaml, and fill the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, locates any existing contract files (OpenAPI, proto, GraphQL SDL, AsyncAPI) and records them in spex.yaml at their existing location (or copies them into contracts/ only when genuinely shared across repositories), and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yaml.
+description: Fill in the missing descriptions in the workspace config (spex.yaml), add each repository's applicable rs-specs, and record each repository's existing interface contracts, if any, in spex.yaml. Use this skill to complete spex setup after running `spex init`.
 ---
 
 # Describe the Workspace (spex.yaml)
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-While inspecting each repository, collect any interface contract it ships into the `spex` repository's `contracts/` folder and record it in `spex.yaml` (see Step 4b). After describing the repositories and collecting contracts, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder but leaves `rs_specs` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rs-specs actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). After describing the repositories, adding rs-specs, and recording contracts, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -22,10 +22,6 @@ All paths are relative to the workspace root (the folder that holds every worksp
 | Editor workspace file   | `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` |
 
 The schema at `<workspace-root>/<project-name>-spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
-
-## When to use this skill
-
-Use it when the user wants to set up, describe, or document their spex project — typically right after `spex init`, when descriptions are missing and contracts have not yet been collected. Do not use it to add repositories or change paths; it only fills in `description` fields, collects contracts, and sets folder icons.
 
 ## Step 1 — Read the config
 
@@ -45,6 +41,7 @@ For each repository missing a description, look at its real contents (resolve `p
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
 - Skim the top-level directory layout and entry points when the above are missing.
 - Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 4b.
+- For each rs-spec file in the spex repository's `rs-specs/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `RS-OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `RS-GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 4c.
 
 Infer the project `description` from `project_name` and the combined picture of its repositories. If the repositories don't make the project's purpose clear, ask the user one short question rather than guessing.
 
@@ -63,17 +60,18 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 2. Edit `<workspace-root>/<project-name>-spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-## Step 4b — Collect contracts
+## Step 4b — Record contracts
 
-Each repository's interface contract, if it has one, is the single source of truth for its machine-readable interface. The user owns where a contract file actually lives — most commonly inside the owning repository itself. The `spex` repository's own `contracts/` folder is only a convention for contracts genuinely shared across repositories, not the default location. Record each repository's contract in `spex.yaml` regardless of where the file lives.
+Each repository's interface contract, if it has one, is the single source of truth for its machine-readable interface. The user owns where a contract file actually lives — most commonly inside the owning repository itself. The `spex` repository's own `contracts/` folder is only a convention for contracts genuinely shared across repositories, never a default to copy into. Do not move or copy any contract file without the user explicitly deciding to. Record each repository's contract in `spex.yaml` regardless of where the file lives.
 
 For each repository, using the contract files you noted in Step 2:
 
 1. Identify its interface contract files. Look for OpenAPI (`openapi.yaml`, `openapi.json`, `*.openapi.yaml`), proto (`*.proto`), GraphQL SDL (`schema.graphql`, `*.graphql`), and AsyncAPI (`asyncapi.yaml`). Skip repositories that ship no contract.
-2. For a contract already living in its own repository, record it in place; only copy it into `<workspace-root>/<project-name>-spex/contracts/` when it's genuinely shared across repositories, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
-3. Add an entry under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` or `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
-4. Leave the original contract file in its repository untouched unless it was moved into the shared `contracts/` folder by choice in step 2.
-5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+2. Ask the user where each contract should live: in place inside its own repository (the default), or moved into the shared `<workspace-root>/<project-name>-spex/contracts/` folder because it's genuinely shared across repositories. Never decide this yourself.
+3. Only if the user chooses the shared folder, move the file there, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
+4. Add an entry under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` or `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
+5. Leave the original contract file in its repository untouched unless the user chose to move it in step 2.
+6. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 Confirm each repository's contract location and description with the user, the same way you confirm descriptions in Step 4.
 
@@ -90,6 +88,26 @@ Example `spex.yaml` repository entry after collecting a contract:
   rs_specs:
     - RS-SECRET-HANDLING
 ```
+
+## Step 4c — Add rs-specs that apply
+
+`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder, but leaves `rs_specs` empty in `spex.yaml` for every repository. Not every rs-spec applies to every repository — a stack- or interface-specific one (for example `RS-OPENAPI-CONVENTIONS`, `RS-GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+
+1. For each repository, using the judgment from Step 2, list the rs-spec IDs whose file in `rs-specs/` genuinely applies to it.
+2. Show the user, per repository, which rs-specs you propose to add and a one-line reason each (for example "RS-OPENAPI-CONVENTIONS: this repository exposes a REST API").
+3. Only after the user confirms a given rs-spec applies, add its ID to that repository's `rs_specs` list in `spex.yaml`. Leave out any rs-spec the user is unsure about or doesn't want.
+4. Do not modify any rs-spec's file under `rs-specs/` while doing this; this only edits which repositories reference it in `spex.yaml`.
+5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+
+### Remove rs-specs that apply to no repository
+
+Once every repository's `rs_specs` is settled, an rs-spec in `rs-specs/` that ended up referenced by no repository at all is dead weight in this workspace.
+
+1. Compute the set of rs-spec IDs referenced by at least one repository's `rs_specs`. Any bundled rs-spec in `rs-specs/` outside that set is unused workspace-wide.
+2. Show the user the unused rs-spec IDs and confirm they should be removed. This is a deletion — no rs-spec is removed without the user's explicit confirmation.
+3. For each confirmed ID: delete its file from `rs-specs/` (and any scripts under `scripts/<spec-id>/` it owns), and add the ID to the top-level `rs_specs_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+4. Leave any rs-spec the user wants to keep untouched, even if unused today.
+5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 5 — Fill in the workspace folder icons
 
@@ -142,6 +160,8 @@ repositories:
 - Project has a one-line, business-level `description`.
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
-- Every existing contract is copied into `contracts/` with a repository-prefixed name and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
-- No existing field, path, or rs-spec is changed or removed.
+- Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
+- Each repository's `rs_specs` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
+- Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rs_specs_removed`) or deliberately kept, per the user's confirmation.
+- No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

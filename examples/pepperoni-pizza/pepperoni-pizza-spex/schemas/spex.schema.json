@@ -20,6 +20,13 @@
       "description": "Optional summary of what the project is and does.",
       "minLength": 1
     },
+    "rs_specs_removed": {
+      "type": "array",
+      "description": "Rule spec IDs deliberately removed from this workspace's `rs-specs/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rs-spec missing locally but not listed here is treated as newly available upstream and gets deployed.",
+      "items": {
+        "$ref": "rs-spec-id.schema.json"
+      }
+    },
     "repositories": {
       "type": "array",
       "description": "Workspace repositories that spex manages for this project.",
