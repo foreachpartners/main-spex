@@ -96,7 +96,17 @@ Example `spex.yaml` repository entry after collecting a contract:
 1. For each repository, using the judgment from Step 2, list the rs-spec IDs whose file in `rs-specs/` genuinely applies to it.
 2. Show the user, per repository, which rs-specs you propose to add and a one-line reason each (for example "RS-OPENAPI-CONVENTIONS: this repository exposes a REST API").
 3. Only after the user confirms a given rs-spec applies, add its ID to that repository's `rs_specs` list in `spex.yaml`. Leave out any rs-spec the user is unsure about or doesn't want.
-4. Do not delete or modify any rs-spec's file under `rs-specs/`; this only edits which repositories reference it in `spex.yaml`.
+4. Do not modify any rs-spec's file under `rs-specs/` while doing this; this only edits which repositories reference it in `spex.yaml`.
+5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+
+### Remove rs-specs that apply to no repository
+
+Once every repository's `rs_specs` is settled, an rs-spec in `rs-specs/` that ended up referenced by no repository at all is dead weight in this workspace.
+
+1. Compute the set of rs-spec IDs referenced by at least one repository's `rs_specs`. Any bundled rs-spec in `rs-specs/` outside that set is unused workspace-wide.
+2. Show the user the unused rs-spec IDs and confirm they should be removed. This is a deletion — no rs-spec is removed without the user's explicit confirmation.
+3. For each confirmed ID: delete its file from `rs-specs/` (and any scripts under `scripts/<spec-id>/` it owns), and add the ID to the top-level `rs_specs_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+4. Leave any rs-spec the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 5 — Fill in the workspace folder icons
@@ -152,5 +162,6 @@ repositories:
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rs_specs` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
-- No existing field or path is changed, and no rs-spec is added without user confirmation.
+- Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rs_specs_removed`) or deliberately kept, per the user's confirmation.
+- No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
