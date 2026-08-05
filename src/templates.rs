@@ -37,10 +37,6 @@ pub enum TemplateError {
     Io,
 }
 
-pub fn rule_specs_dir() -> Option<&'static Dir<'static>> {
-    TEMPLATES.get_dir(RULE_SPECS_DIR)
-}
-
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
 // `init`. It is a user-owned file, so neither this nor `update` overwrites an
 // existing one.
@@ -149,11 +145,7 @@ fn version_newer_than(candidate: &str, baseline: &str) -> bool {
     parts(candidate) > parts(baseline)
 }
 
-const TEMPLATE_ONLY_FIELDS: [&str; 3] = [
-    "include_for_all_repos",
-    "include_for_spex",
-    "first_created_in_spex_version",
-];
+const TEMPLATE_ONLY_FIELDS: [&str; 1] = ["first_created_in_spex_version"];
 
 // Drops top-level `key:` lines for template-only fields before a bundled
 // rs-spec is written into a repository's `rs-specs/`.

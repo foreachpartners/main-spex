@@ -21,9 +21,6 @@ proj-frontend
 proj-spex
   no issues
 
-workspace
-  no issues
-
 proj: 1 error, 1 warning
 "#;
 
@@ -97,6 +94,8 @@ fn init_then_check_pepperoni_pizza() {
         "init did not scaffold rs-specs"
     );
 
+    add_rs_specs(&project);
+
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
@@ -133,6 +132,8 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
 
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
+
+    add_rs_specs(&project);
 
     // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
     // error in any other file would still surface.
@@ -174,6 +175,8 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
+
+    add_rs_specs(&project);
 
     // The freshly initialized example has one error: the frontend README.
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
@@ -306,6 +309,28 @@ fn copy_no_spex(project: &Path) {
         )
         .expect("rename repository to follow naming convention");
     }
+}
+
+// `spex init` leaves every repository's `rs_specs` empty (that's `spex-setup`'s
+// job). Mimic what the skill would do for the no-spex example, so `check`
+// exercises the demo violations it ships.
+fn add_rs_specs(project: &Path) {
+    let config_path = project.join("proj-spex/spex.yaml");
+    let config = fs::read_to_string(&config_path).expect("read spex.yaml");
+    let patched = config
+        .replace(
+            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rs_specs: []\n",
+            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rs_specs:\n      - RS-SECRET-HANDLING\n",
+        )
+        .replace(
+            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rs_specs: []\n",
+            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rs_specs:\n      - RS-WRITING-STYLE\n",
+        );
+    assert_ne!(
+        patched, config,
+        "expected repositories not found in spex.yaml"
+    );
+    fs::write(&config_path, patched).expect("write spex.yaml");
 }
 
 fn copy_dir(src: &Path, dst: &Path) {

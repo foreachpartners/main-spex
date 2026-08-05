@@ -129,7 +129,10 @@ fn validate_schema_group(
                 }
             }
             Err(err) => {
-                findings.push(conform_finding(Some(rel(spex_dir, file)), format!("{err:?}")));
+                findings.push(conform_finding(
+                    Some(rel(spex_dir, file)),
+                    format!("{err:?}"),
+                ));
             }
         }
     }
@@ -144,7 +147,10 @@ fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Fi
     let Ok(parsed) = serde_yaml_ng::from_str::<IdOnly>(&text) else {
         return;
     };
-    let stem = file.file_stem().and_then(|s| s.to_str()).unwrap_or_default();
+    let stem = file
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or_default();
     let id_lower = parsed.id.to_lowercase();
     if id_lower != stem {
         findings.push(conform_finding(

@@ -101,8 +101,8 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Creates empty `fs-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
-- Adds each bundled rs-spec to repositories per its template-only `include_for_all_repos` / `include_for_spex` flags, stripping both flags from the copy written into each repository's `rs-specs/`.
-- Directs the user to finish setup by running the `/spex-setup` skill.
+- Copies every bundled rs-spec into the spex repository's `rs-specs/`, but leaves every repository's `rs_specs` in `spex.yaml` empty.
+- Directs the user to finish setup by running the `/spex-setup` skill, which adds each rs-spec that actually applies to a given repository.
 
 ## update
 
@@ -220,7 +220,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A bundled template rs-spec additionally carries `include_for_all_repos` (required), `include_for_spex` (optional, defaults to `include_for_all_repos`) to control default inclusion at `init`, and `first_created_in_spex_version` (required) recording the CLI version it was introduced in, which `update` uses to tell a spec new upstream apart from one a consumer deliberately deleted; `init`/`update` strip all three from the copy written into a repository, so they never appear — and are not schema-valid — on a repository's own rs-spec files.
+- A bundled template rs-spec additionally carries `first_created_in_spex_version` (required), recording the CLI version it was introduced in, which `update` uses to tell a spec new upstream apart from one a consumer deliberately deleted; `init`/`update` strip it from the copy written into a repository, so it never appears — and is not schema-valid — on a repository's own rs-spec files.
 
 ## Checks
 

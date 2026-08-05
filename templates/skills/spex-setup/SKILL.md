@@ -1,13 +1,13 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yaml), record each repository's existing interface contracts, if any, in spex.yaml, and fill the missing folder icons in the editor workspace file (<project-name>.code-workspace). Use when the user wants to set up, describe, or document their spex project — adds a short description for the whole project and for each workspace repository by inspecting their contents, locates any existing contract files (OpenAPI, proto, GraphQL SDL, AsyncAPI) and records them in spex.yaml at their existing location (or copies them into contracts/ only when genuinely shared across repositories), and picks a fitting emoji icon for each workspace folder. Writes a schema-valid spex.yaml.
+description: Fill in the missing descriptions in the workspace config (spex.yaml), add each repository's applicable rs-specs, and record each repository's existing interface contracts, if any, in spex.yaml. Use this skill to complete spex setup after running `spex init`.
 ---
 
 # Describe the Workspace (spex.yaml)
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-While inspecting each repository, collect any interface contract it ships into the `spex` repository's `contracts/` folder and record it in `spex.yaml` (see Step 4b). After describing the repositories and collecting contracts, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder but leaves `rs_specs` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rs-specs actually apply to it and add them (see Step 4c). Also collect any interface contract it ships into the `spex` repository's `contracts/` folder and record it in `spex.yaml` (see Step 4b). After describing the repositories, adding rs-specs, and collecting contracts, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -22,10 +22,6 @@ All paths are relative to the workspace root (the folder that holds every worksp
 | Editor workspace file   | `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` |
 
 The schema at `<workspace-root>/<project-name>-spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
-
-## When to use this skill
-
-Use it when the user wants to set up, describe, or document their spex project — typically right after `spex init`, when descriptions are missing and contracts have not yet been collected. Do not use it to add repositories or change paths; it only fills in `description` fields, collects contracts, and sets folder icons.
 
 ## Step 1 — Read the config
 
@@ -45,6 +41,7 @@ For each repository missing a description, look at its real contents (resolve `p
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
 - Skim the top-level directory layout and entry points when the above are missing.
 - Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 4b.
+- For each rs-spec file in the spex repository's `rs-specs/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `RS-OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `RS-GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 4c.
 
 Infer the project `description` from `project_name` and the combined picture of its repositories. If the repositories don't make the project's purpose clear, ask the user one short question rather than guessing.
 
@@ -90,6 +87,16 @@ Example `spex.yaml` repository entry after collecting a contract:
   rs_specs:
     - RS-SECRET-HANDLING
 ```
+
+## Step 4c — Add rs-specs that apply
+
+`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder, but leaves `rs_specs` empty in `spex.yaml` for every repository. Not every rs-spec applies to every repository — a stack- or interface-specific one (for example `RS-OPENAPI-CONVENTIONS`, `RS-GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+
+1. For each repository, using the judgment from Step 2, list the rs-spec IDs whose file in `rs-specs/` genuinely applies to it.
+2. Show the user, per repository, which rs-specs you propose to add and a one-line reason each (for example "RS-OPENAPI-CONVENTIONS: this repository exposes a REST API").
+3. Only after the user confirms a given rs-spec applies, add its ID to that repository's `rs_specs` list in `spex.yaml`. Leave out any rs-spec the user is unsure about or doesn't want.
+4. Do not delete or modify any rs-spec's file under `rs-specs/`; this only edits which repositories reference it in `spex.yaml`.
+5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 5 — Fill in the workspace folder icons
 
@@ -143,5 +150,6 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract is copied into `contracts/` with a repository-prefixed name and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
-- No existing field, path, or rs-spec is changed or removed.
+- Each repository's `rs_specs` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
+- No existing field or path is changed, and no rs-spec is added without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

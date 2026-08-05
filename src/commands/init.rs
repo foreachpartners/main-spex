@@ -6,8 +6,6 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use serde::Deserialize;
-
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
 use crate::templates;
@@ -29,8 +27,6 @@ pub enum InitError {
     NoWorkspaceRoot,
     #[error("initialization cancelled")]
     Cancelled,
-    #[error("could not parse the bundled rule spec `{0}`")]
-    Template(String),
     #[error("an I/O operation failed")]
     Io,
 }
@@ -50,24 +46,6 @@ struct DiscoveredRepo {
     name: String,
     short_name: String,
     path: String,
-}
-
-struct DefaultRuleSpecs {
-    all_repos: Vec<String>,
-    spex: Vec<String>,
-}
-
-// Bundled rs-specs carry `include_for_all_repos` / `include_for_spex` only in
-// the template; `spex init` reads them here to decide default inclusion, then
-// strips both fields from the copy it writes into each repository's
-// `rs-specs/` (see `templates::copy_rule_specs`).
-#[derive(Deserialize)]
-struct RuleSpecTemplate {
-    id: String,
-    #[serde(default)]
-    include_for_all_repos: bool,
-    #[serde(default)]
-    include_for_spex: Option<bool>,
 }
 
 pub fn run() -> Result<ExitCode> {
@@ -93,8 +71,7 @@ pub fn run() -> Result<ExitCode> {
     let repositories = discover_repositories(&workspace_root, &spex_dir_name, &project_name)?;
     let repositories = confirm_repositories(repositories)?;
 
-    let rs_specs = default_rule_specs()?;
-    write_config(&spex_dir, &project_name, &repositories, &rs_specs)?;
+    write_config(&spex_dir, &project_name, &repositories)?;
     write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
 
@@ -131,15 +108,11 @@ fn write_config(
     spex_dir: &Path,
     project_name: &str,
     repositories: &[DiscoveredRepo],
-    rs_specs: &DefaultRuleSpecs,
 ) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
-    fs::write(
-        &config_path,
-        config_to_yaml(project_name, repositories, rs_specs),
-    )
-    .change_context(InitError::Io)
-    .attach_with(|| format!("could not write `{}`", config_path.display()))?;
+    fs::write(&config_path, config_to_yaml(project_name, repositories))
+        .change_context(InitError::Io)
+        .attach_with(|| format!("could not write `{}`", config_path.display()))?;
     Ok(())
 }
 
@@ -181,40 +154,6 @@ fn workspace_folder_name(repo: &DiscoveredRepo) -> String {
 
 fn escape_json(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
-}
-
-fn default_rule_specs() -> Result<DefaultRuleSpecs> {
-    let Some(dir) = templates::rule_specs_dir() else {
-        return Ok(DefaultRuleSpecs {
-            all_repos: Vec::new(),
-            spex: Vec::new(),
-        });
-    };
-
-    let mut all_repos = Vec::new();
-    let mut spex = Vec::new();
-    for file in dir.files() {
-        if file.path().extension().and_then(|ext| ext.to_str()) != Some("yaml") {
-            continue;
-        }
-
-        let name = file.path().to_string_lossy().into_owned();
-        let raw = file
-            .contents_utf8()
-            .ok_or_else(|| Report::new(InitError::Template(name.clone())))?;
-        let spec: RuleSpecTemplate = serde_yaml_ng::from_str(raw)
-            .change_context_lazy(|| InitError::Template(name.clone()))?;
-        if spec.include_for_all_repos {
-            all_repos.push(spec.id.clone());
-        }
-        if spec.include_for_spex.unwrap_or(spec.include_for_all_repos) {
-            spex.push(spec.id);
-        }
-    }
-
-    all_repos.sort();
-    spex.sort();
-    Ok(DefaultRuleSpecs { all_repos, spex })
 }
 
 // The workspace root is the current directory, unless `spex init` runs from
@@ -347,11 +286,7 @@ fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<Discove
     }
 }
 
-fn config_to_yaml(
-    project_name: &str,
-    repositories: &[DiscoveredRepo],
-    rs_specs: &DefaultRuleSpecs,
-) -> String {
+fn config_to_yaml(project_name: &str, repositories: &[DiscoveredRepo]) -> String {
     let mut yaml = format!("project_name: {project_name}\ncli_version: {CLI_VERSION}\n");
 
     if repositories.is_empty() {
@@ -359,25 +294,13 @@ fn config_to_yaml(
     } else {
         yaml.push_str("repositories:\n");
         for repo in repositories {
-            let ids = if repo.path == SPEX_REPO_PATH {
-                &rs_specs.spex
-            } else {
-                &rs_specs.all_repos
-            };
             yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
             yaml.push_str(&format!("    repository_short_name: {}\n", repo.short_name));
             if repo.path == SPEX_REPO_PATH {
                 yaml.push_str(SPEX_REPO_DESCRIPTION);
             }
             yaml.push_str(&format!("    path: {}\n", repo.path));
-            if ids.is_empty() {
-                yaml.push_str("    rs_specs: []\n");
-            } else {
-                yaml.push_str("    rs_specs:\n");
-                for id in ids {
-                    yaml.push_str(&format!("      - {id}\n"));
-                }
-            }
+            yaml.push_str("    rs_specs: []\n");
         }
     }
 

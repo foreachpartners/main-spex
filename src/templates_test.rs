@@ -206,20 +206,17 @@ mod tests_unit {
 
         let spec = fs::read_to_string(spex_dir.path().join(MANAGED_SPEC)).expect("read spec");
         assert!(
-            !spec.contains("include_for_all_repos") && !spec.contains("include_for_spex"),
+            !spec.contains("first_created_in_spex_version"),
             "copied rs-spec should not carry template-only inclusion fields:\n{spec}"
         );
     }
 
-    // Every bundled rs-spec must explicitly set the template-only fields
-    // that gate deployment (`include_for_all_repos` and
-    // `first_created_in_spex_version`), rather than relying on a serde
-    // default, so `spex init`'s default inclusion and `spex update`'s
-    // new-vs-deleted deployment decision (see `copy_rule_specs`) are always
-    // deliberate, not accidental. `include_for_spex` stays optional: it only
-    // needs setting when it diverges from `include_for_all_repos`.
-    const REQUIRED_TEMPLATE_ONLY_FIELDS: [&str; 2] =
-        ["include_for_all_repos", "first_created_in_spex_version"];
+    // Every bundled rs-spec must explicitly set the template-only field
+    // that gates deployment (`first_created_in_spex_version`), rather than
+    // relying on a serde default, so `spex update`'s new-vs-deleted
+    // deployment decision (see `copy_rule_specs`) is always deliberate, not
+    // accidental.
+    const REQUIRED_TEMPLATE_ONLY_FIELDS: [&str; 1] = ["first_created_in_spex_version"];
 
     #[test]
     fn rs_spec_templates_set_required_template_only_fields() {
