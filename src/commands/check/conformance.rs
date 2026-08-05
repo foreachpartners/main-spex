@@ -14,7 +14,7 @@ use super::{Finding, Severity};
 // a real rule spec, since spex's own conformance checks are built into `spex
 // check` itself rather than declared in a rs-spec (they must run even before
 // any rs-specs can be trusted to parse).
-const SPEC_ID: &str = "RS-SPEX-CONFORMANCE";
+const SPEC_ID: &str = "RS-SPEX-INTERNAL-CONFORMANCE";
 const CONFORM_CHECK: &str = "spec-files-conform";
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
