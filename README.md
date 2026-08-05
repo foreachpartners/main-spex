@@ -84,9 +84,11 @@ For example, a pizza ordering feature moves through the flow like this:
 2. **PRD** — customers can pick a pizza on the website and pay online
 3. **Functional Spec** — `FS-PLACE-PIZZA-ORDER`: Customer can place an order.
 
-   Acceptance criteria: POST /orders returns 201 with the created order
+   Acceptance criteria:
+   - MUST return 201 from POST /orders with the created order
+   - MUST let the customer place the order from the order page
 
-4. **Contract** — OpenAPI definition of `placeOrder` returning `201`
+4. **Contract** — OpenAPI definition of `placeOrder` returning `201`, plus a Figma reference for the order page
 5. **Plan** — step-by-step build plan for the `placeOrder` endpoint
 6. **Implementation** — the `placeOrder()` handler in code
 7. **Test** — verifies that placing an order returns `201`
