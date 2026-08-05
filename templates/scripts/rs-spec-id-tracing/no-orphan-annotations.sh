@@ -25,7 +25,7 @@ known=$(
   for spec in fs-specs/*.yaml rs-specs/*.yaml; do
     [ -f "$spec" ] || continue
     base=${spec##*/}
-    echo "${base%.yaml}"
+    echo "${base%.yaml}" | tr '[:lower:]' '[:upper:]'
   done
 )
 
