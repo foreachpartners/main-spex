@@ -100,7 +100,7 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 
 | Fact                              | Single source                                                                     | Not duplicated to                                |
 | --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
-| HTTP / gRPC / event interface     | Native contract in `<project-name>-spex/contracts/` (OpenAPI, `.proto`, AsyncAPI) | No markdown copy of the interface                |
+| HTTP / gRPC / event interface     | Native contract at the `path` declared in `spex.yaml` (OpenAPI, `.proto`, AsyncAPI), usually inside the owning repository | No markdown copy of the interface                |
 | Capability (product or technical) | Functional spec (`<project-name>-spex/fs-specs/<spec-id-lowercase>.yaml`)                   | No copy in code comments or plans                |
 | Cross-cutting convention          | Rule spec (`<project-name>-spex/rs-specs/<spec-id-lowercase>.yaml`)                         | No copy in agent rules, READMEs, or service docs |
 | Check logic                       | Rule-spec `checks` and `scripts/<spec-id-lowercase>/`                                       | No restated rule in CI config prose              |

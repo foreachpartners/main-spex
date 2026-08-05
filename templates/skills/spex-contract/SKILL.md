@@ -11,7 +11,7 @@ A contract is the machine-readable _interface_ derived from a functional spec: e
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-Each repository's contracts live in the `spex` repository's `<workspace-root>/<project-name>-spex/contracts/` folder, named with the repository's prefix (for example `contracts/api.openapi.yaml`), and are declared per repository under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`.
+Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to the spex directory. The user owns where a contract file actually lives — most commonly inside the owning repository itself (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml`). The spex repository's own `<workspace-root>/<project-name>-spex/contracts/` folder is only a convention for contracts genuinely shared across repositories, not the default location.
 
 ## Step 0 — Establish the target specs
 
@@ -30,7 +30,7 @@ For each targeted spec, read `<workspace-root>/<project-name>-spex/fs-specs/<spe
 From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `contracts` list and open every contract file already in `<workspace-root>/<project-name>-spex/contracts/` so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
+- For each affected repository, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI).
 - For each affected repository, read its `rs_specs` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rs-specs/` — at minimum `RS-OPENAPI-CONVENTIONS` (for OpenAPI), `RS-GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `RS-SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
@@ -58,10 +58,11 @@ The contract is the consumer-facing interface and may be published, served, or t
 
 For each affected contract:
 
-1. Write it into `<workspace-root>/<project-name>-spex/contracts/`, naming a new file with its repository's prefix (for example `contracts/api.openapi.yaml`); never overwrite another repository's contract.
-2. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
-3. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
-4. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
+1. If the repository already has a matching entry under `contracts` in `spex.yaml`, write to its declared `path`.
+2. Otherwise, this is a new contract file: ask the user where it should live, defaulting to inside the owning repository itself (for example `<workspace-root>/<repository-name>/contracts/api.openapi.yaml`); offer `<workspace-root>/<project-name>-spex/contracts/` as the alternative for a contract meant to be shared across repositories. Write the file at whichever path the user confirms.
+3. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` (relative to the spex directory) and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
+4. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+5. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Example
 

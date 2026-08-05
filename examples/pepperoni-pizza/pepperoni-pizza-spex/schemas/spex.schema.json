@@ -55,7 +55,7 @@
         },
         "contracts": {
           "type": "array",
-          "description": "Machine-readable interface contracts this repository owns, copied into the spex repository's `contracts/` folder. Each entry points at a contract file and summarizes it.",
+          "description": "Machine-readable interface contracts this repository owns. Each entry points at a contract file wherever it lives (typically inside this repository's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across repositories) and summarizes it.",
           "items": {
             "$ref": "#/$defs/contract"
           }
@@ -94,11 +94,11 @@
     },
     "contract": {
       "type": "object",
-      "description": "A machine-readable interface contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) owned by a repository and stored in the spex repository's `contracts/` folder.",
+      "description": "A machine-readable interface contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) owned by a repository.",
       "properties": {
         "path": {
           "type": "string",
-          "description": "Path to the contract file inside the spex repository, relative to the spex directory (for example `contracts/api.openapi.yaml`).",
+          "description": "Path to the contract file, relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` when the contract lives in the owning repository, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
           "minLength": 1
         },
         "description": {
