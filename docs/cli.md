@@ -21,7 +21,7 @@ spex --help
 
 - **spex CLI**: Clone spex repository (repo) and install spex cli tool:
   ```sh
-  git clone https://github.com/ziimakc/spex
+  git clone https://github.com/foreachpartners/spex
   cd spex
   cargo install --path . --force
   ```

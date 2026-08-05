@@ -16,7 +16,7 @@ spex helps you move fast with AI, not stand in your way. Functional specs (FS) a
 - **Git**: [Install Git](https://git-scm.com/install/)
 - **spex CLI**: Clone spex repository (repo) and install spex cli tool:
   ```sh
-  git clone https://github.com/ziimakc/spex
+  git clone https://github.com/foreachpartners/spex
   cd spex
   cargo install --path . --force
   ```
