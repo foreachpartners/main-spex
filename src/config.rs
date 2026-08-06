@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use error_stack::{Report, ResultExt};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::rule_spec::{CheckOverride, RepoCheck};
@@ -30,7 +30,7 @@ pub enum ConfigError {
     Parse,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub project_name: String,
     pub cli_version: String,
@@ -38,7 +38,7 @@ pub struct Config {
     pub repositories: Vec<Repository>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Repository {
     #[serde(rename = "repository_name")]
     pub name: String,
@@ -67,7 +67,7 @@ impl Repository {
 
 // A repository's interface contract, stored inside the spex repository's
 // `contracts/` folder. `path` is relative to the spex directory.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Contract {
     pub path: String,
 }
@@ -76,7 +76,7 @@ pub struct Contract {
 // inherited or additional check identified by `spec` + `check`. An empty `files`
 // suppresses the whole check; otherwise only findings whose location file is
 // listed are suppressed, so new errors in other files still surface.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
     pub spec: String,
     pub check: String,

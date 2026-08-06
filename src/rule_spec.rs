@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use error_stack::Report;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::util;
@@ -29,7 +29,7 @@ pub struct RuleSpec {
     pub checks: Vec<Check>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Check {
     pub name: String,
     #[serde(default)]
@@ -53,7 +53,7 @@ pub struct Check {
 }
 
 // A full check declared per repository in `spex.yaml` under `checks_additional`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RepoCheck {
     pub spec: String,
     #[serde(flatten)]
@@ -63,7 +63,7 @@ pub struct RepoCheck {
 // A partial patch declared per repository in `spex.yaml` under `checks_override`.
 // `spec` + `name` identify the inherited check; every other field overrides it
 // when present and is inherited when absent.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct CheckOverride {
     pub spec: String,
     pub name: String,
@@ -109,7 +109,7 @@ impl CheckOverride {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CheckKind {
     Regexp,
@@ -117,7 +117,7 @@ pub enum CheckKind {
     Script,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RunScope {
     #[default]
@@ -126,7 +126,7 @@ pub enum RunScope {
     Workspace,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Severity {
     Warn,

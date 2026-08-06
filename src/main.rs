@@ -16,6 +16,7 @@ use error_stack::Report;
 
 use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
+use commands::info::InfoArgs;
 
 #[derive(Parser)]
 #[command(
@@ -49,6 +50,8 @@ enum Commands {
     CheckSchema(CheckSchemaArgs),
     #[command(about = "Report annotation coverage of active functional specs")]
     Coverage,
+    #[command(about = "Print the resolved spex configuration, for scripting")]
+    Info(InfoArgs),
 }
 
 fn main() -> ExitCode {
@@ -61,6 +64,7 @@ fn main() -> ExitCode {
         Commands::Check(args) => finish(commands::check::run(args, verbose)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
         Commands::Coverage => finish(commands::coverage::run()),
+        Commands::Info(args) => finish(commands::info::run(args)),
     }
 }
 

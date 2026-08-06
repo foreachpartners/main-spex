@@ -36,9 +36,9 @@ is_known() {
   return 1
 }
 
-# Repository paths (relative to the spex directory) declared in spex.yaml. A
-# contract's `path:` sits under a `- ` list item, so it never matches here.
-repo_paths=$(sed -n 's/^[[:space:]]*path:[[:space:]]*//p' spex.yaml)
+# Repository paths (relative to the spex directory), read from the resolved
+# workspace config rather than parsed by hand from spex.yaml.
+repo_paths=$(spex info --json | jq -r '.repositories[].path')
 
 spex_dir=$(pwd -P)
 

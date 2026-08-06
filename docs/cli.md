@@ -154,6 +154,28 @@ spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/rs-namin
 spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/fs-list-pizza-menu.yaml fs-specs/fs-place-pizza-order.yaml
 ```
 
+### `spex info`
+
+Prints the resolved `spex.yaml` configuration, for scripts (like `checks_additional` scripts) to consume instead of parsing `spex.yaml` by hand. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
+
+```sh
+spex info
+```
+
+Prints a short human-readable summary by default. `--json` prints the fully-resolved configuration as JSON instead, the general-purpose form scripts pipe into `jq` for whatever field they need:
+
+```sh
+spex info --json | jq -r '.repositories[].path'
+```
+
+`--print <field>` is a convenience for the common case of needing exactly one top-level scalar field, printing it bare with no quoting or JSON escaping:
+
+```sh
+spex info --print project_name
+```
+
+It errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use `--json` for that).
+
 ## Development
 
 These commands operate on the `spex` source checkout itself.

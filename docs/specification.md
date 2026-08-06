@@ -238,6 +238,7 @@ A check proves an acceptance criterion.
 - `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
 - Choose `per-repo` when a check needs to run once per governed repository and `workspace` when script needs to run once.
 - A failing script reports one finding per line as `<location><TAB><message>`.
+- A script that needs data from `spex.yaml` (the project name, the repository list) runs `spex info` rather than parsing `spex.yaml` by hand; see `spex info` in `docs/cli.md`.
 
 ## Spec ID annotations
 
