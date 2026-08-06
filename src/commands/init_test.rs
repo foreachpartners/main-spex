@@ -246,6 +246,49 @@ mod tests_unit {
     }
 
     #[test]
+    fn write_repo_skills_writes_dummy_skill_per_repository() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        write_repo_skills(spex_dir.path(), &[repo("server")]).expect("write repo skills");
+
+        let skill_md = spex_dir
+            .path()
+            .join(".agents")
+            .join("skills")
+            .join("server")
+            .join("SKILL.md");
+        let written = fs::read_to_string(&skill_md).expect("read skill");
+        assert_eq!(written, repo_skill_md("server"));
+    }
+
+    #[test]
+    fn write_repo_skills_skips_spex_repository() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        write_repo_skills(spex_dir.path(), &[spex_repo()]).expect("write repo skills");
+
+        let skill_dir = spex_dir
+            .path()
+            .join(".agents")
+            .join("skills")
+            .join("pizza-shop-spex");
+        assert!(!skill_dir.exists());
+    }
+
+    #[test]
+    fn write_repo_skills_does_not_overwrite_existing_skill() {
+        let spex_dir = tempdir().expect("create spex dir");
+        let skill_dir = spex_dir.path().join(".agents").join("skills").join("server");
+        fs::create_dir_all(&skill_dir).expect("create skill dir");
+        fs::write(skill_dir.join("SKILL.md"), "custom content").expect("write skill");
+
+        write_repo_skills(spex_dir.path(), &[repo("server")]).expect("write repo skills");
+
+        let written = fs::read_to_string(skill_dir.join("SKILL.md")).expect("read skill");
+        assert_eq!(written, "custom content");
+    }
+
+    #[test]
     fn workspace_root_defaults_to_current_directory() {
         let workspace = workspace_with(&["server"], &[]);
 

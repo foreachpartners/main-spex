@@ -9,6 +9,7 @@ use thiserror::Error;
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
 use crate::templates;
+use crate::templates::{AGENTS_DIR_NAME, SKILLS_DIR};
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -74,6 +75,7 @@ pub fn run() -> Result<ExitCode> {
     write_config(&spex_dir, &project_name, &repositories)?;
     write_code_workspace(&spex_dir, &project_name, &repositories)?;
     copy_templates(&spex_dir)?;
+    write_repo_skills(&spex_dir, &repositories)?;
 
     println!(
         "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to complete setup"
@@ -101,6 +103,42 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
         .attach_with(|| format!("could not create `{}`", contracts.display()))?;
 
     Ok(())
+}
+
+// Seeds a dummy skill for each repository (other than the spex repository
+// itself, which is already documented by AGENTS.md and spex.yaml). Each skill
+// starts with only its frontmatter; `spex-setup` fills in the body with the
+// repository's real commands and context. A skill left by the user (or filled
+// in by `spex-setup`) is never overwritten.
+fn write_repo_skills(spex_dir: &Path, repositories: &[DiscoveredRepo]) -> Result<()> {
+    for repo in repositories {
+        if repo.path == SPEX_REPO_PATH {
+            continue;
+        }
+
+        let skill_dir = spex_dir
+            .join(AGENTS_DIR_NAME)
+            .join(SKILLS_DIR)
+            .join(&repo.name);
+        let skill_md = skill_dir.join("SKILL.md");
+        if skill_md.exists() {
+            continue;
+        }
+
+        fs::create_dir_all(&skill_dir)
+            .change_context(InitError::Io)
+            .attach_with(|| format!("could not create `{}`", skill_dir.display()))?;
+        fs::write(&skill_md, repo_skill_md(&repo.name))
+            .change_context(InitError::Io)
+            .attach_with(|| format!("could not write `{}`", skill_md.display()))?;
+    }
+    Ok(())
+}
+
+fn repo_skill_md(repo_name: &str) -> String {
+    format!(
+        "---\nname: {repo_name}\ndescription: Information, rules, commands and other {repo_name} repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.\n---\n"
+    )
 }
 
 fn write_config(

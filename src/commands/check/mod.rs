@@ -327,10 +327,7 @@ fn matches_baseline(
 }
 
 fn finding_file(finding: &Finding) -> Option<String> {
-    finding
-        .location
-        .as_deref()
-        .map(|location| normalize_location(location))
+    finding.location.as_deref().map(normalize_location)
 }
 
 // Reduces a finding location to its file path by dropping a trailing `:<line>`,

@@ -7,7 +7,7 @@ description: Fill in the missing descriptions in the workspace config (spex.yaml
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder but leaves `rs_specs` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rs-specs actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). After describing the repositories, adding rs-specs, and recording contracts, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder but leaves `rs_specs` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rs-specs actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rs-specs, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -132,6 +132,13 @@ Example result:
 }
 ```
 
+## Step 5b — Fill in each repository's skill file
+
+`spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository except the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each an initial body from what you already learned inspecting the repository in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
+
+1. For each repository's `SKILL.md` add a short body: a one-line heading (`# <repository-name> repository context`) and a minimal list of the commands an agent actually needs — how to run the dev server, run tests (and any meaningful subsets, e.g. unit vs integration), lint, and format. Pull these from the repository's own `package.json` scripts, `Justfile`/`Makefile` targets, `README`, or CI config — do not invent commands that don't exist.
+2. Keep it minimal: commands and any other context an agent must know before touching the code (e.g. required env setup to run them).
+
 ## Step 6 — Point to the next skill
 
 Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-functional-spec` for a capability the system must provide, or `spex-rule-spec` for a cross-cutting convention or rule. Note that it is better to start a new chat first to save context.
@@ -163,5 +170,6 @@ repositories:
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rs_specs` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
 - Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rs_specs_removed`) or deliberately kept, per the user's confirmation.
+- Every repository's `SKILL.md` (other than the spex repository's) has a body with the real, minimal commands an agent needs, confirmed by the user.
 - No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
