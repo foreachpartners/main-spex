@@ -100,6 +100,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `rs-specs/`, and skills.
 - Creates empty `fs-specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
+- Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
 - Copies every bundled rs-spec into the spex repository's `rs-specs/`, but leaves every repository's `rs_specs` in `spex.yaml` empty.
 - Directs the user to finish setup by running the `/spex-setup` skill, which adds each rs-spec that actually applies to a given repository.
@@ -163,7 +164,7 @@ See skill body for more details. A skill's `SKILL.md` frontmatter follows the [A
 
 ## spex-setup
 
-Complete setup step which requires AI and can't be done programmatically. Fills in the descriptions and icons left blank by `spex init` and collects each repository's contracts. Is run right after `spex init`.
+Complete setup step which requires AI and can't be done programmatically. Fills in the descriptions and icons left blank by `spex init`, collects each repository's contracts, and writes each repository's real commands into the per-repository `SKILL.md` `spex init` seeded. Is run right after `spex init`.
 
 ## spex-functional-spec
 
