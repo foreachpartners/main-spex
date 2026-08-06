@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Instant;
@@ -420,15 +420,6 @@ fn check_repo(
     // meaningfully evaluated, so we skip them to avoid false positives.
     let has_files = !files.is_empty();
 
-    let overridden: HashSet<(&str, &str)> = repo
-        .checks_override
-        .iter()
-        .map(|over| (over.spec.as_str(), over.name.as_str()))
-        .collect();
-
-    // Inherited checks identified by `(spec_id, name)`, used to resolve overrides.
-    let mut inherited: HashMap<(&str, &str), &Check> = HashMap::new();
-
     for spec_id in &repo.rs_specs {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(repo_error(
@@ -442,61 +433,11 @@ fn check_repo(
         };
 
         for check in &spec.checks {
-            inherited.insert((spec_id.as_str(), check.name.as_str()), check);
-            if overridden.contains(&(spec_id.as_str(), check.name.as_str())) {
-                continue;
-            }
             if has_files && check.negate {
                 continue;
             }
             dispatch_check(&ctx, &spec.id, check, findings, workspace_checks);
         }
-    }
-
-    for over in &repo.checks_override {
-        let Some(base) = inherited.get(&(over.spec.as_str(), over.name.as_str())) else {
-            findings.push(repo_error(
-                &repo.name,
-                format!(
-                    "checks_override targets `{}/{}`, which is not an inherited check",
-                    over.spec, over.name
-                ),
-            ));
-            continue;
-        };
-
-        if over.disable {
-            continue;
-        }
-
-        let effective = over.apply(base);
-        if has_files && effective.negate {
-            continue;
-        }
-        dispatch_check(&ctx, &over.spec, &effective, findings, workspace_checks);
-    }
-
-    for additional in &repo.checks_additional {
-        if !repo.rs_specs.iter().any(|spec| spec == &additional.spec) {
-            findings.push(repo_error(
-                &repo.name,
-                format!(
-                    "checks_additional `{}/{}` references spec `{}`, which is not in this repository's rs_specs",
-                    additional.spec, additional.check.name, additional.spec
-                ),
-            ));
-            continue;
-        }
-        if has_files && additional.check.negate {
-            continue;
-        }
-        dispatch_check(
-            &ctx,
-            &additional.spec,
-            &additional.check,
-            findings,
-            workspace_checks,
-        );
     }
 
     Ok(())

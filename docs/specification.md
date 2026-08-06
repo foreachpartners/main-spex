@@ -231,7 +231,7 @@ A check proves an acceptance criterion.
 - `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern. Negated checks are skipped when `check --files` narrows the file set, since they need every file to prove a forbidden pattern is absent.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
-- A repository inherits a spec's checks through `rs_specs`; `checks_override` patches one, `checks_additional` adds one.
+- A repository inherits a spec's checks through `rs_specs`.
 - `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<spec-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
@@ -260,7 +260,7 @@ Declares the project and its repositories.
 - Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `rs_specs`.
 - `--repo` accepts either a repository's full name or its short name.
 - Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
-- Each repository may add per-repo `checks_override`, `checks_additional`, and `checks_preexisting_errors`.
+- Each repository may add per-repo `checks_preexisting_errors`.
 - Validated against `schemas/spex.schema.json`.
 
 ## Versioning

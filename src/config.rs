@@ -6,8 +6,6 @@ use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::rule_spec::{CheckOverride, RepoCheck};
-
 #[cfg(test)]
 #[path = "config_test.rs"]
 mod config_test;
@@ -49,10 +47,6 @@ pub struct Repository {
     pub contracts: Vec<Contract>,
     #[serde(default)]
     pub rs_specs: Vec<String>,
-    #[serde(default)]
-    pub checks_additional: Vec<RepoCheck>,
-    #[serde(default)]
-    pub checks_override: Vec<CheckOverride>,
     #[serde(default)]
     pub checks_preexisting_errors: Vec<PreexistingError>,
 }

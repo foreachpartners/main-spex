@@ -50,7 +50,7 @@
     },
     {
       "title": "script check",
-      "description": "Runs an external script stored in the spex directory at `scripts/<spec-id>/<script>`. Every script lives in spex, including those named by per-repo `checks_additional` and `checks_override`.",
+      "description": "Runs an external script stored in the spex directory at `scripts/<spec-id>/<script>`.",
       "allOf": [
         { "$ref": "#/$defs/check_base" },
         { "$ref": "#/$defs/file_scope" }

@@ -74,20 +74,6 @@
             "$ref": "rs-spec-id.schema.json"
           }
         },
-        "checks_additional": {
-          "type": "array",
-          "description": "Full checks that run for this repository in addition to the checks it inherits from its rs_specs. Each entry is a complete check plus the `spec` it belongs to (one of the repository's rs_specs). Script paths resolve in the spex directory.",
-          "items": {
-            "allOf": [{ "$ref": "check.schema.json" }, { "required": ["spec"] }]
-          }
-        },
-        "checks_override": {
-          "type": "array",
-          "description": "Partial patches applied to inherited checks. Each entry names the inherited check by `spec` + `name`; any other field present overrides that field, and the merged check runs instead of the inherited one. Set `disable: true` to turn the inherited check off entirely. A `script` set here resolves in the spex directory, the same as the inherited script.",
-          "items": {
-            "$ref": "#/$defs/check_override"
-          }
-        },
         "checks_preexisting_errors": {
           "type": "array",
           "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `spec` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
@@ -141,77 +127,6 @@
       },
       "required": ["spec", "check"],
       "additionalProperties": false
-    },
-    "check_override": {
-      "type": "object",
-      "description": "A partial patch for an inherited check. `spec` + `name` identify the target; every other field overrides the inherited check when present.",
-      "properties": {
-        "spec": {
-          "description": "Rule spec ID of the inherited check to override. Must be one of the repository's rs_specs.",
-          "$ref": "rs-spec-id.schema.json"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the inherited check to override.",
-          "minLength": 1
-        },
-        "disable": {
-          "type": "boolean",
-          "description": "When `true`, the inherited check is disabled entirely and never runs. Other override fields are ignored."
-        },
-        "description": {
-          "type": "string",
-          "description": "Overrides the inherited check's description.",
-          "minLength": 1
-        },
-        "type": {
-          "type": "string",
-          "description": "Overrides the inherited check's type.",
-          "enum": ["regexp", "glob", "script"]
-        },
-        "pattern": {
-          "type": "string",
-          "description": "Overrides the inherited check's regexp or glob pattern.",
-          "minLength": 1
-        },
-        "negate": {
-          "type": "boolean",
-          "description": "Overrides the inherited check's negate flag."
-        },
-        "script": {
-          "type": "string",
-          "description": "Overrides the inherited check's script filename. When set, it resolves in the spex directory at `scripts/<spec-id>/<script>`.",
-          "minLength": 1
-        },
-        "run": {
-          "type": "string",
-          "description": "Overrides the inherited script check's invocation granularity.",
-          "enum": ["per-file", "per-repo", "workspace"]
-        },
-        "include": {
-          "type": "array",
-          "description": "Overrides the inherited check's include globs.",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "exclude": {
-          "type": "array",
-          "description": "Overrides the inherited check's exclude globs.",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "severity": {
-          "type": "string",
-          "description": "Overrides the inherited check's severity.",
-          "enum": ["warn", "error"]
-        }
-      },
-      "required": ["spec", "name"],
-      "additionalProperties": false
     }
   },
   "required": ["project_name", "cli_version"],
@@ -240,25 +155,7 @@
           "repository_short_name": "frontend",
           "description": "React web client that lets customers place orders.",
           "path": "../pepperoni-pizza-frontend",
-          "rs_specs": ["RS-WRITING-STYLE", "RS-NAMING-CONVENTION"],
-          "checks_override": [
-            {
-              "spec": "RS-WRITING-STYLE",
-              "name": "no-cyrillic",
-              "severity": "warn"
-            }
-          ],
-          "checks_additional": [
-            {
-              "spec": "RS-WRITING-STYLE",
-              "name": "readme-has-title",
-              "description": "The frontend README must start with a top-level Markdown title.",
-              "type": "script",
-              "run": "per-repo",
-              "script": "readme-has-title.sh",
-              "severity": "warn"
-            }
-          ]
+          "rs_specs": ["RS-WRITING-STYLE", "RS-NAMING-CONVENTION"]
         }
       ]
     }
