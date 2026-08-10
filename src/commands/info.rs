@@ -16,20 +16,24 @@ pub enum InfoError {
     Serialize,
     #[error("no field `{0}` in the spex configuration")]
     UnknownField(String),
-    #[error("field `{0}` is not a single value (use --json to inspect it)")]
+    #[error("field `{0}` is not a single value")]
     NotScalar(String),
+    #[error("no repository named `{0}` in the spex configuration")]
+    UnknownRepo(String),
 }
 
 #[derive(Args)]
 pub struct InfoArgs {
-    #[arg(long, help = "Print the full resolved configuration as JSON")]
-    json: bool,
     #[arg(
         long,
-        help = "Print a single top-level scalar field (e.g. `project_name`)",
-        conflicts_with = "json"
+        help = "Print a single top-level scalar field (e.g. `project_name`)"
     )]
     print: Option<String>,
+    #[arg(
+        long,
+        help = "Limit output to the general fields plus the named repository (by name or short_name)"
+    )]
+    repo: Option<String>,
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
@@ -40,12 +44,26 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         return print_field(&value, field);
     }
 
-    if args.json {
+    let Some(repo_filter) = &args.repo else {
         let json = serde_json::to_string_pretty(&value).change_context(InfoError::Serialize)?;
         println!("{json}");
-    } else {
-        print_human(&workspace.config);
-    }
+        return Ok(ExitCode::SUCCESS);
+    };
+
+    let repo = workspace
+        .config
+        .repositories
+        .iter()
+        .find(|r| r.matches(repo_filter))
+        .ok_or_else(|| Report::new(InfoError::UnknownRepo(repo_filter.clone())))?;
+
+    let filtered = serde_json::json!({
+        "project_name": workspace.config.project_name,
+        "cli_version": workspace.config.cli_version,
+        "repositories": [repo],
+    });
+    let json = serde_json::to_string_pretty(&filtered).change_context(InfoError::Serialize)?;
+    println!("{json}");
 
     Ok(ExitCode::SUCCESS)
 }
@@ -63,13 +81,4 @@ fn print_field(value: &serde_json::Value, field: &str) -> Result<ExitCode> {
     }
 
     Ok(ExitCode::SUCCESS)
-}
-
-fn print_human(config: &crate::config::Config) {
-    println!("project_name: {}", config.project_name);
-    println!("cli_version: {}", config.cli_version);
-    println!("repositories:");
-    for repo in &config.repositories {
-        println!("  {} ({}) -> {}", repo.name, repo.short_name, repo.path);
-    }
 }

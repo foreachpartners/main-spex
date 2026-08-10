@@ -15,8 +15,14 @@ Each artifact needs the human's approval before the next is generated: functiona
 
 ## Tools
 
+`spex` can be run from any directory inside the workspace — it locates `spex.yaml` automatically.
+
+- `spex update` — Rewrites bundled skills, schemas, scripts and rs-specs with the latest versions.
 - `spex check` — Runs the rule spec checks declared in `spex.yaml` against the workspace. Use `--repo <name>` to limit to specific repositories, `--files <path>...` to target specific files, and `--fill-preexisting-errors` to baseline current errors.
+- `spex check-schema` — Validates JSON or YAML files against a JSON Schema. Use `--schema <path>` for the schema and pass the files to validate as positional args.
 - `spex coverage` — Reports how well the active functional specs are covered by spec-id annotations (`@spec impl`, `@spec test`, `@spec contract`) across the workspace, and tracks acceptance-criteria implementation progress.
+- `spex info` — Prints the resolved spex configuration, for scripting. Use `--field <name>` to print a single top-level scalar field, or `--repo <name>` to limit output to the general fields plus one repository.
+- `spex --help` / `spex <command> --help` — Prints usage help.
 
 # Rules
 
