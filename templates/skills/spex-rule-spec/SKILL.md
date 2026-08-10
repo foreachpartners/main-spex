@@ -77,7 +77,7 @@ Guidance:
   ```sh
   printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
   ```
-- When a script needs data from `spex.yaml` (the project name, the repository list), run `spex info` rather than parsing `spex.yaml` by hand — hand-parsing is brittle and duplicated across scripts. Use `spex info --print <field>` for a single top-level scalar (e.g. `spex info --print project_name`), or `spex info --json | jq ...` for anything else (e.g. `spex info --json | jq -r '.repositories[].path'`).
+- When a script needs data from `spex.yaml` (the project name, the repository list), run `spex info` rather than parsing `spex.yaml` by hand — hand-parsing is brittle and duplicated across scripts. `spex info` prints the fully-resolved configuration as JSON, ready for `jq` (e.g. `spex info | jq -r '.repositories[].path'`); `spex info --print <field>` prints a single top-level scalar bare (e.g. `spex info --print project_name`).
 
 Draft the checks (and any script bodies) into the spec; you write them and offer edits in Step 5.
 

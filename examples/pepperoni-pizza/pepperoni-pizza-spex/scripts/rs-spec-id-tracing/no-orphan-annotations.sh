@@ -38,7 +38,7 @@ is_known() {
 
 # Repository paths (relative to the spex directory), read from the resolved
 # workspace config rather than parsed by hand from spex.yaml.
-repo_paths=$(spex info --json | jq -r '.repositories[].path')
+repo_paths=$(spex info | jq -r '.repositories[].path')
 
 spex_dir=$(pwd -P)
 

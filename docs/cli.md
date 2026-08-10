@@ -156,14 +156,10 @@ spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/fs-list-
 
 Prints the resolved `spex.yaml` configuration, for scripts to consume instead of parsing `spex.yaml` by hand. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
 
-```sh
-spex info
-```
-
-Prints a short human-readable summary by default. `--json` prints the fully-resolved configuration as JSON instead, the general-purpose form scripts pipe into `jq` for whatever field they need:
+`spex info` prints the fully-resolved configuration as pretty JSON, the general-purpose form scripts pipe into `jq` for whatever field they need:
 
 ```sh
-spex info --json | jq -r '.repositories[].path'
+spex info | jq -r '.repositories[].path'
 ```
 
 `--print <field>` is a convenience for the common case of needing exactly one top-level scalar field, printing it bare with no quoting or JSON escaping:
@@ -172,7 +168,13 @@ spex info --json | jq -r '.repositories[].path'
 spex info --print project_name
 ```
 
-It errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use `--json` for that).
+`--repo <name>` limits output to the general fields (`project_name`, `cli_version`) plus the named repository, matched by either `repository_name` or `repository_short_name`:
+
+```sh
+spex info --repo api
+```
+
+`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when no repository matches the given name.
 
 ## Development
 
