@@ -125,9 +125,9 @@ mod tests {
         );
     }
 
-    fn entry(spec: &str, check: &str, files: &[&str]) -> PreexistingEntry {
+    fn entry(rs_spec_id: &str, check: &str, files: &[&str]) -> PreexistingEntry {
         PreexistingEntry {
-            spec: spec.to_string(),
+            rs_spec_id: rs_spec_id.to_string(),
             check: check.to_string(),
             files: files.iter().map(|file| file.to_string()).collect(),
         }
@@ -138,11 +138,11 @@ mod tests {
         repositories:
           - repository_name: api
             path: ../api
-            rs_specs:
+            rule_spec_ids:
               - RS-X
           - repository_name: web
             path: ../web
-            rs_specs:
+            rule_spec_ids:
               - RS-X
     "};
 
@@ -164,17 +164,17 @@ mod tests {
                 repositories:
                   - repository_name: api
                     path: ../api
-                    rs_specs:
+                    rule_spec_ids:
                       - RS-X
                     checks_preexisting_errors:
-                      - spec: RS-X
+                      - rs_spec_id: RS-X
                         check: no-cyrillic
                         files:
                           - README.md
                           - docs/intro.md
                   - repository_name: web
                     path: ../web
-                    rs_specs:
+                    rule_spec_ids:
                       - RS-X
             "}
         );
@@ -189,10 +189,10 @@ mod tests {
         assert!(out.ends_with(
             "  - repository_name: web
     path: ../web
-    rs_specs:
+    rule_spec_ids:
       - RS-X
     checks_preexisting_errors:
-      - spec: RS-Y
+      - rs_spec_id: RS-Y
         check: commit-format
 "
         ));
@@ -209,11 +209,11 @@ mod tests {
               - repository_name: api
                 path: ../api
                 checks_preexisting_errors:
-                  - spec: RS-X
+                  - rs_spec_id: RS-X
                     check: stale
                     files:
                       - old.md
-                rs_specs:
+                rule_spec_ids:
                   - RS-X
         "};
         let by_repo = HashMap::from([(
@@ -238,7 +238,7 @@ mod tests {
               - repository_name: api
                 path: ../api
                 checks_preexisting_errors:
-                  - spec: RS-X
+                  - rs_spec_id: RS-X
                     check: gone
         "};
         // api is in scope but has no current errors, so its block is dropped.

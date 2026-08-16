@@ -15,7 +15,7 @@ repositories:
         description: >-
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
-    rs_specs:
+    rule_spec_ids:
       - RS-COMMIT-MESSAGE-FORMAT
       - RS-CONFIGURABLE-NETWORK-BIND
       - RS-DEPENDENCIES
@@ -34,7 +34,7 @@ repositories:
       - path: contracts/figma.md
         description: >-
           Figma references for the frontend's UI.
-    rs_specs:
+    rule_spec_ids:
       - RS-COMMIT-MESSAGE-FORMAT
       - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION
@@ -50,7 +50,7 @@ repositories:
       rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
       capabilities the system provides).
     path: .
-    rs_specs:
+    rule_spec_ids:
       - RS-COMMIT-MESSAGE-FORMAT
       - RS-DEPENDENCIES
       - RS-NAMING-CONVENTION

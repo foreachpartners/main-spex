@@ -18,7 +18,7 @@ Plan already contains all the information — read it.
 ### Without a plan (ad-hoc user request)
 
 1. Determine repositories we will work on (e.g. scope: frontend, backend).
-2. Determine all governing rule specs (`rs_specs`) listed in `<workspace-root>/<project-name>-spex/spex.yaml` for the affected scope from step 1.
+2. Determine all governing rule specs (`rule_spec_ids`) listed in `<workspace-root>/<project-name>-spex/spex.yaml` for the affected scope from step 1.
 3. Determine all governing functional specs in `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` related to the request.
 4. Produce a note in response with a list of governing rule and functional specs.
 

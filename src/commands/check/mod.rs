@@ -92,7 +92,7 @@ struct RepoReport {
 pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
-    let specs = workspace.rs_specs().change_context(CheckError::Workspace)?;
+    let specs = workspace.rule_specs().change_context(CheckError::Workspace)?;
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -213,8 +213,8 @@ fn fill_preexisting_errors(
         .map(|(name, checks)| {
             let entries = checks
                 .into_iter()
-                .map(|((spec, check), baseline)| PreexistingEntry {
-                    spec,
+                .map(|((rs_spec_id, check), baseline)| PreexistingEntry {
+                    rs_spec_id,
                     check,
                     files: match baseline {
                         Baseline::WholeCheck => Vec::new(),
@@ -276,7 +276,7 @@ fn report_fill(
 }
 
 // Drops a finding when it matches a repository's pre-existing-error baseline: an
-// `error`-severity finding whose `(spec, check)` matches an entry and whose
+// `error`-severity finding whose `(rs_spec_id, check)` matches an entry and whose
 // location file is listed (or the entry lists no files, suppressing the whole
 // check). Warnings and unmatched errors always survive.
 fn is_preexisting(finding: &Finding, baseline: &[PreexistingError]) -> bool {
@@ -319,7 +319,7 @@ fn matches_baseline(
     file: Option<&str>,
 ) -> bool {
     baseline.iter().any(|entry| {
-        entry.spec == spec_id
+        entry.rs_spec_id == spec_id
             && entry.check == check
             && (entry.files.is_empty()
                 || file.is_some_and(|file| entry.files.iter().any(|listed| listed == file)))
@@ -417,7 +417,7 @@ fn check_repo(
     // meaningfully evaluated, so we skip them to avoid false positives.
     let has_files = !files.is_empty();
 
-    for spec_id in &repo.rs_specs {
+    for spec_id in &repo.rule_spec_ids {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(repo_error(
                 spec_id,
@@ -554,7 +554,7 @@ fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
 // Runs only when the spex repository is in scope.
 fn validate_specs(
     workspace: &Workspace,
-    rs_specs: &HashMap<String, RuleSpec>,
+    rule_specs: &HashMap<String, RuleSpec>,
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
@@ -579,7 +579,7 @@ fn validate_specs(
     }
     // Rule specs are global rules that always apply, so they count as
     // satisfied for `blocked_by` purposes.
-    for spec in rs_specs.values() {
+    for spec in rule_specs.values() {
         status_by_id.insert(spec.id.as_str(), Status::Active);
     }
 
@@ -598,7 +598,7 @@ fn validate_specs(
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
 
-    validate_conformance(&workspace.dir, rs_specs, &mut report.findings);
+    validate_conformance(&workspace.dir, rule_specs, &mut report.findings);
 
     Ok(())
 }

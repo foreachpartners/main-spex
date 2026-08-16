@@ -52,7 +52,7 @@ spex update
 
 ### `spex check`
 
-Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rule specs (RS) listed in its `rs_specs`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rule specs (RS) listed in its `rule_spec_ids`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -64,16 +64,16 @@ A `script` check runs the program named by its `script:` filename (for example `
 
 A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
 
-A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `spec` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
+A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rs_spec_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
 
 ```yaml
 repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    rs_specs: [RS-WRITING-STYLE]
+    rule_spec_ids: [RS-WRITING-STYLE]
     checks_preexisting_errors:
-      - spec: RS-WRITING-STYLE
+      - rs_spec_id: RS-WRITING-STYLE
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```

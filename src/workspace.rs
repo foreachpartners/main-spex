@@ -43,7 +43,7 @@ impl Workspace {
         Ok(Self { dir, config })
     }
 
-    pub fn rs_specs(&self) -> Result<HashMap<String, RuleSpec>> {
+    pub fn rule_specs(&self) -> Result<HashMap<String, RuleSpec>> {
         rule_spec::load_all(&self.dir.join(rule_spec::RULE_SPECS_DIR))
             .change_context(WorkspaceError::RuleSpecs)
     }

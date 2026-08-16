@@ -9,9 +9,9 @@ use crate::templates;
 use serde::Deserialize;
 
 #[derive(Deserialize, Default)]
-struct RsSpecsRemoved {
+struct RuleSpecIdsRemoved {
     #[serde(default)]
-    rs_specs_removed: Vec<String>,
+    rule_spec_ids_removed: Vec<String>,
 }
 
 type Result<T> = core::result::Result<T, Report<UpdateError>>;
@@ -42,11 +42,11 @@ pub fn run() -> Result<ExitCode> {
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
-    let removed_rs_specs = serde_yaml_ng::from_str::<RsSpecsRemoved>(&raw)
+    let removed_rule_spec_ids = serde_yaml_ng::from_str::<RuleSpecIdsRemoved>(&raw)
         .unwrap_or_default()
-        .rs_specs_removed;
+        .rule_spec_ids_removed;
 
-    templates::scaffold(&spex_dir, &removed_rs_specs).change_context(UpdateError::Templates)?;
+    templates::scaffold(&spex_dir, &removed_rule_spec_ids).change_context(UpdateError::Templates)?;
 
     fs::write(&config_path, config::set_cli_version(&raw, CLI_VERSION))
         .change_context(UpdateError::Config)

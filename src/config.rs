@@ -46,7 +46,7 @@ pub struct Repository {
     #[serde(default)]
     pub contracts: Vec<Contract>,
     #[serde(default)]
-    pub rs_specs: Vec<String>,
+    pub rule_spec_ids: Vec<String>,
     #[serde(default)]
     pub checks_preexisting_errors: Vec<PreexistingError>,
 }
@@ -67,12 +67,12 @@ pub struct Contract {
 }
 
 // A baseline entry that suppresses pre-existing `error`-severity findings for an
-// inherited or additional check identified by `spec` + `check`. An empty `files`
+// inherited or additional check identified by `rs_spec_id` + `check`. An empty `files`
 // suppresses the whole check; otherwise only findings whose location file is
 // listed are suppressed, so new errors in other files still surface.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
-    pub spec: String,
+    pub rs_spec_id: String,
     pub check: String,
     #[serde(default)]
     pub files: Vec<String>,
@@ -132,9 +132,9 @@ pub fn version_warning(config: &Config) -> Option<String> {
 }
 
 // A fully-resolved baseline entry to write into `spex.yaml`. An empty `files`
-// renders a bare `spec`/`check` entry that suppresses the whole check.
+// renders a bare `rs_spec_id`/`check` entry that suppresses the whole check.
 pub struct PreexistingEntry {
-    pub spec: String,
+    pub rs_spec_id: String,
     pub check: String,
     pub files: Vec<String>,
 }
@@ -214,7 +214,7 @@ fn indent_of(line: &str) -> usize {
 fn render_preexisting_block(entries: &[PreexistingEntry]) -> String {
     let mut block = String::from("    checks_preexisting_errors:\n");
     for entry in entries {
-        block.push_str(&format!("      - spec: {}\n", entry.spec));
+        block.push_str(&format!("      - rs_spec_id: {}\n", entry.rs_spec_id));
         block.push_str(&format!("        check: {}\n", entry.check));
         if !entry.files.is_empty() {
             block.push_str("        files:\n");

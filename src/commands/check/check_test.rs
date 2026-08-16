@@ -328,13 +328,13 @@ mod tests {
         }
     }
 
-    fn repository(path: &str, rs_specs: Vec<&str>) -> Repository {
+    fn repository(path: &str, rule_spec_ids: Vec<&str>) -> Repository {
         Repository {
             name: "api".to_string(),
             short_name: "api".to_string(),
             path: path.to_string(),
             contracts: Vec::new(),
-            rs_specs: rs_specs.into_iter().map(str::to_string).collect(),
+            rule_spec_ids: rule_spec_ids.into_iter().map(str::to_string).collect(),
             checks_preexisting_errors: Vec::new(),
         }
     }
@@ -529,7 +529,7 @@ mod tests {
 
     fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
         PreexistingError {
-            spec: "RS-X".to_string(),
+            rs_spec_id: "RS-X".to_string(),
             check: check.to_string(),
             files: files.into_iter().map(str::to_string).collect(),
         }

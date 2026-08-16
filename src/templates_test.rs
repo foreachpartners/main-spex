@@ -102,7 +102,7 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::remove_file(&spec).expect("delete rs-spec");
 
-        // Listing the spec id in `rs_specs_removed` records the deletion as
+        // Listing the spec id in `rule_spec_ids_removed` records the deletion as
         // deliberate, so re-scaffolding must not resurrect it.
         scaffold(spex_dir.path(), &[MANAGED_SPEC_ID.to_string()]).expect("re-scaffold");
 
@@ -120,7 +120,7 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::remove_file(&spec).expect("delete rs-spec");
 
-        // Without the spec id in `rs_specs_removed`, its absence is treated
+        // Without the spec id in `rule_spec_ids_removed`, its absence is treated
         // as newly available upstream, so it is (re)deployed.
         scaffold(spex_dir.path(), &[]).expect("re-scaffold");
 

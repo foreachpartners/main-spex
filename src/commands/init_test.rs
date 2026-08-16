@@ -155,11 +155,11 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                rs_specs: []
+                rule_spec_ids: []
               - repository_name: pizza-shop-client
                 repository_short_name: client
                 path: ../pizza-shop-client
-                rs_specs: []
+                rule_spec_ids: []
         "};
         assert_eq!(yaml, expected);
     }
@@ -178,7 +178,7 @@ mod tests_unit {
               - repository_name: pizza-shop-server
                 repository_short_name: server
                 path: ../pizza-shop-server
-                rs_specs: []
+                rule_spec_ids: []
               - repository_name: pizza-shop-spex
                 repository_short_name: spex
                 description: >-
@@ -187,7 +187,7 @@ mod tests_unit {
                   rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
                   functionality the system provides).
                 path: .
-                rs_specs: []
+                rule_spec_ids: []
         "};
         assert_eq!(yaml, expected);
     }
@@ -357,7 +357,7 @@ mod tests_unit {
     }
 
     #[test]
-    fn copy_templates_writes_rs_specs_and_scripts() {
+    fn copy_templates_writes_rule_spec_ids_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path()).expect("copy templates");

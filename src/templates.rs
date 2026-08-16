@@ -52,11 +52,11 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     ensure_claude_md_link(spex_dir)
 }
 
-pub fn scaffold(spex_dir: &Path, removed_rs_specs: &[String]) -> Result<()> {
+pub fn scaffold(spex_dir: &Path, removed_rule_spec_ids: &[String]) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
-    copy_rule_specs(spex_dir, removed_rs_specs)?;
+    copy_rule_specs(spex_dir, removed_rule_spec_ids)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
@@ -121,7 +121,7 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
         .is_none_or(|parsed| parsed.metadata.sync_with_upstream)
 }
 
-fn copy_rule_specs(spex_dir: &Path, removed_rs_specs: &[String]) -> Result<()> {
+fn copy_rule_specs(spex_dir: &Path, removed_rule_spec_ids: &[String]) -> Result<()> {
     let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
         return Ok(());
     };
@@ -145,7 +145,7 @@ fn copy_rule_specs(spex_dir: &Path, removed_rs_specs: &[String]) -> Result<()> {
             if !is_synced_with_upstream(&dest) {
                 continue;
             }
-        } else if removed_rs_specs
+        } else if removed_rule_spec_ids
             .iter()
             .any(|id| id.eq_ignore_ascii_case(spec_id.as_ref()))
         {

@@ -19,7 +19,7 @@ Read every planned fs spec in full. Confirm with the user how to handle any unre
 
 Resolve a `Repositories scope` for requested changes.
 
-Read all `rs_specs` in `spex.yaml` that apply to the resolved `Repositories scope`.
+Read all `rule_spec_ids` in `spex.yaml` that apply to the resolved `Repositories scope`.
 
 Read each affected repository in `Repositories scope` information `spex.yaml`.
 
@@ -41,7 +41,7 @@ Write `Functional specs` which user provided.
 
 Write `Repositories scope` based on changes we need to implement (don't include spex itself).
 
-Read all `rs_specs` in `spex.yaml` for resolved `Repositories scope` and write `Rule specs` in plan that are applicable to changes.
+Read all `rule_spec_ids` in `spex.yaml` for resolved `Repositories scope` and write `Rule specs` in plan that are applicable to changes.
 
 # Write the steps and tasks
 

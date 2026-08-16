@@ -119,7 +119,7 @@ for the API:
 The skill interviews you, proposes a `regexp` check that flags binding to a
 hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
 `pepperoni-pizza-spex/rs-specs/rs-*.yaml`. Make sure the new spec is in the `api` repository's
-`rs_specs` list in `spex.yaml` so the check runs against it.
+`rule_spec_ids` list in `spex.yaml` so the check runs against it.
 
 Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
 small change or create a plan if compliance with the new rule spec requires many changes.

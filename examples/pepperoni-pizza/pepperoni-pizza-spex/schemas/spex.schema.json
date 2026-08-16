@@ -20,7 +20,7 @@
       "description": "Optional summary of what the project is and does.",
       "minLength": 1
     },
-    "rs_specs_removed": {
+    "rule_spec_ids_removed": {
       "type": "array",
       "description": "Rule spec IDs deliberately removed from this workspace's `rs-specs/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rs-spec missing locally but not listed here is treated as newly available upstream and gets deployed.",
       "items": {
@@ -67,9 +67,9 @@
             "$ref": "#/$defs/contract"
           }
         },
-        "rs_specs": {
+        "rule_spec_ids": {
           "type": "array",
-          "description": "Rule spec IDs (RS) that apply to this repository.",
+          "description": "Rule spec IDs (RS) that apply to this repository. Each ID corresponds to a yaml file named after its lowercased spec ID under `rs-specs/` (for example `RS-SECRET-HANDLING` -> `rs-specs/rs-secret-handling.yaml`).",
           "items": {
             "$ref": "rs-spec-id.schema.json"
           }
@@ -107,8 +107,8 @@
       "type": "object",
       "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
       "properties": {
-        "spec": {
-          "description": "Rule spec ID of the check whose pre-existing errors are baselined. Must be one of the repository's rs_specs.",
+        "rs_spec_id": {
+          "description": "Rule spec ID of the check whose pre-existing errors are baselined. Must be one of the repository's rule_spec_ids.",
           "$ref": "rs-spec-id.schema.json"
         },
         "check": {
@@ -125,7 +125,7 @@
           }
         }
       },
-      "required": ["spec", "check"],
+      "required": ["rs_spec_id", "check"],
       "additionalProperties": false
     }
   },
@@ -148,14 +148,14 @@
               "description": "REST OpenAPI spec for the orders API."
             }
           ],
-          "rs_specs": ["RS-SECRET-HANDLING", "RS-NAMING-CONVENTION"]
+          "rule_spec_ids": ["RS-SECRET-HANDLING", "RS-NAMING-CONVENTION"]
         },
         {
           "repository_name": "pepperoni-pizza-frontend",
           "repository_short_name": "frontend",
           "description": "React web client that lets customers place orders.",
           "path": "../pepperoni-pizza-frontend",
-          "rs_specs": ["RS-WRITING-STYLE", "RS-NAMING-CONVENTION"]
+          "rule_spec_ids": ["RS-WRITING-STYLE", "RS-NAMING-CONVENTION"]
         }
       ]
     }

@@ -30,11 +30,11 @@ struct IdOnly {
 // spec's acceptance criteria must be ordered by RFC 2119 commitment level.
 pub(super) fn validate_conformance(
     spex_dir: &Path,
-    rs_specs: &std::collections::HashMap<String, RuleSpec>,
+    rule_specs: &std::collections::HashMap<String, RuleSpec>,
     findings: &mut Vec<Finding>,
 ) {
     validate_schema(spex_dir, findings);
-    validate_script_references(spex_dir, rs_specs, findings);
+    validate_script_references(spex_dir, rule_specs, findings);
     validate_ac_order(spex_dir, findings);
 }
 
@@ -164,10 +164,10 @@ fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Fi
 // `scripts/<spec-id-lowercase>/<script>`.
 fn validate_script_references(
     spex_dir: &Path,
-    rs_specs: &std::collections::HashMap<String, RuleSpec>,
+    rule_specs: &std::collections::HashMap<String, RuleSpec>,
     findings: &mut Vec<Finding>,
 ) {
-    let mut specs: Vec<&RuleSpec> = rs_specs.values().collect();
+    let mut specs: Vec<&RuleSpec> = rule_specs.values().collect();
     specs.sort_by(|a, b| a.id.cmp(&b.id));
 
     for spec in specs {
