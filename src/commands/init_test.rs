@@ -262,17 +262,19 @@ mod tests_unit {
     }
 
     #[test]
-    fn write_repo_skills_skips_spex_repository() {
+    fn write_repo_skills_for_spex() {
         let spex_dir = tempdir().expect("create spex dir");
 
         write_repo_skills(spex_dir.path(), &[spex_repo()]).expect("write repo skills");
 
-        let skill_dir = spex_dir
+        let skill_md = spex_dir
             .path()
             .join(".agents")
             .join("skills")
-            .join("pizza-shop-spex");
-        assert!(!skill_dir.exists());
+            .join("pizza-shop-spex")
+            .join("SKILL.md");
+        let written = fs::read_to_string(&skill_md).expect("read skill");
+        assert_eq!(written, repo_skill_md("pizza-shop-spex"));
     }
 
     #[test]

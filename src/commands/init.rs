@@ -105,17 +105,12 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-// Seeds a dummy skill for each repository (other than the spex repository
-// itself, which is already documented by AGENTS.md and spex.yaml). Each skill
-// starts with only its frontmatter; `spex-setup` fills in the body with the
-// repository's real commands and context. A skill left by the user (or filled
-// in by `spex-setup`) is never overwritten.
+// Seeds a dummy skill for each repository.
+// Each seeded skill starts with only its metadata.
+// `spex-setup` fills in the body with the repository's real commands and context.
+// A skill left by the user (or filled in by `spex-setup`) is never overwritten.
 fn write_repo_skills(spex_dir: &Path, repositories: &[DiscoveredRepo]) -> Result<()> {
     for repo in repositories {
-        if repo.path == SPEX_REPO_PATH {
-            continue;
-        }
-
         let skill_dir = spex_dir
             .join(AGENTS_DIR_NAME)
             .join(SKILLS_DIR)

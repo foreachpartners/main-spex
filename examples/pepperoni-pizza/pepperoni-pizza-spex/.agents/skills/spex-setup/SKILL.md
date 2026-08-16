@@ -134,7 +134,7 @@ Example result:
 
 ## Step 5b — Fill in each repository's skill file
 
-`spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository except the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each an initial body from what you already learned inspecting the repository in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
+`spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository, including the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each repository's skill an initial body from what you already learned inspecting it in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
 
 Fill in the body with four sections, in this order: `General`, `Paths`, `Commands`, `Rules`. Keep every section minimal — real facts pulled from the repository, never invented.
 
@@ -143,7 +143,10 @@ Fill in the body with four sections, in this order: `General`, `Paths`, `Command
 3. `# Commands` — a one-line note that commands run from the repository root, then a bullet list of the commands an agent actually needs: dev server, running tests (and meaningful subsets, e.g. unit vs e2e), lint, format. Pull these from the repository's own `package.json` scripts, `Justfile`/`Makefile` targets, `README`, or CI config — do not invent commands that don't exist. If the repository has its own task runner (e.g. `just`), say so and prefer its commands over calling the underlying tool directly.
 4. `# Rules` — a one-line note of which commands an agent must run after making changes (e.g. tests, lint, format), and after which kind of change (e.g. always vs. only for major changes). Pull this from CI config or existing contributor docs; if none exists, omit this section rather than inventing a policy.
 
-See [`references/REPO-SKILL-TEMPLATE.md`](references/REPO-SKILL-TEMPLATE.md) for an example of the resulting body shape.
+Use two different shapes depending on which repository this is:
+
+- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): fill in its seeded `SKILL.md` with a body shaped like [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md): its paths are `spex.yaml`, `fs-specs/`, `rs-specs/`, `contracts/`, `plans/`, `scripts/`, and its commands are `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`), not a language-specific build/test/lint toolchain.
+- **Every other repository**: fill in the seeded `SKILL.md` as described above. See [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) for an example of the resulting body shape.
 
 ## Step 6 — Point to the next skill
 
@@ -176,6 +179,6 @@ repositories:
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rule_spec_ids` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
 - Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rule_spec_ids_removed`) or deliberately kept, per the user's confirmation.
-- Every repository's `SKILL.md` (other than the spex repository's) has a body with `General`, `Paths` (if applicable), `Commands`, and `Rules` sections grounded in that repository's real layout and commands, confirmed by the user.
+- Every repository's `SKILL.md`, including the spex repository's own, has a body with `General`, `Paths` (if applicable), `Commands`, and `Rules` sections grounded in that repository's real layout and commands, confirmed by the user.
 - No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
