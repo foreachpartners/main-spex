@@ -1,3 +1,34 @@
+# General
+
+This project is governed by `spex` AI-first specification-driven development framework with human in control: the agent writes every artifact — specs, contracts, plans, code, and tests — and the human approves each one before the next is generated.
+
+## Artifact chain
+
+BRD (why) → PRD (what) → functional spec (FS, capability) → contract (interface, if applicable) → plan (how, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID (`FS-*`/`RS-*`), annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
+
+- **Functional spec (FS)** — one coherent capability the system must provide, with acceptance criteria.
+- **Rule spec (RS)** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
+
+## Workspace layout
+
+The workspace root holds this repo (`<project-name>-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for project for all configuration.
+
+## Everyday commands
+
+Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
+
+- `spex check` — runs rule-spec checks and gates on `error`-severity findings (`--repo <name>`, `--files <path>...` to scope).
+- `spex coverage` — reports `@spec` annotation and acceptance-criteria coverage for active functional specs.
+- `spex info` — prints the resolved config (repos, paths, contracts, rule specs).
+
+After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
+
+## Core discipline
+
+- **Human in control**: no artifact ships unapproved — spec before contract, contract before plan, plan before code and tests.
+- **Single source of truth**: reference a spec, contract, or convention — never copy it into code comments, docs, or agent rules.
+- **Traceability**: a behavioral change with no Spec ID annotation is a violation.
+
 # Rules
 
 Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.

@@ -13,6 +13,10 @@ Run `spex info --repo spex` for general repository information. This repository 
 
 Each fact lives in exactly one of these files — reference it, never copy it elsewhere.
 
+# Notes
+
+- `rule_spec_ids` lives per repository in `spex.yaml`, each id maps to its spec file lowercased, e.g. `RS-NAMING-CONVENTION` → `rs-specs/rs-naming-convention.yaml`:
+
 # Commands
 
 Run from anywhere inside the workspace — `spex` locates `spex.yaml` automatically.
@@ -22,7 +26,3 @@ Run from anywhere inside the workspace — `spex` locates `spex.yaml` automatica
 - `spex check-schema` - validates JSON or YAML files against a JSON Schema
 - `spex info` - prints the resolved spex configuration (`--print <name>` for a single field, `--repo <name>` to limit to one repository)
 - `spex update` - rewrites bundled skills, schemas, scripts and rs-specs with the latest versions
-
-# Rules
-
-After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
