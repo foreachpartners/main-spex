@@ -136,17 +136,10 @@ Example result:
 
 `spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository, including the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each repository's skill an initial body from what you already learned inspecting it in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
 
-Fill in the body with four sections, in this order: `General`, `Paths`, `Commands`, `Rules`. Keep every section minimal — real facts pulled from the repository, never invented.
+Use two different templates depending on which repository this is, and follow the chosen template's sections and order exactly — do not add, drop, reorder, or rename its sections, and do not blend in sections from the other template:
 
-1. `# General` — one line pointing the agent at `spex info --repo <repository-short-name>` for repository metadata and applicable rule specs.
-2. `# Paths` — a short bullet list of the directories/files an agent actually needs to know about to work in this repository (for example where routes, components, shared logic, tests, or config live). Pull these from the real directory layout, not a guess. Skip this section if the repository's layout is too flat or generic to be worth documenting.
-3. `# Commands` — a one-line note that commands run from the repository root, then a bullet list of the commands an agent actually needs: dev server, running tests (and meaningful subsets, e.g. unit vs e2e), lint, format. Pull these from the repository's own `package.json` scripts, `Justfile`/`Makefile` targets, `README`, or CI config — do not invent commands that don't exist. If the repository has its own task runner (e.g. `just`), say so and prefer its commands over calling the underlying tool directly.
-4. `# Rules` — a one-line note of which commands an agent must run after making changes (e.g. tests, lint, format), and after which kind of change (e.g. always vs. only for major changes). Pull this from CI config or existing contributor docs; if none exists, omit this section rather than inventing a policy.
-
-Use two different shapes depending on which repository this is:
-
-- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): fill in its seeded `SKILL.md` with a body shaped like [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md): its paths are `spex.yaml`, `fs-specs/`, `rs-specs/`, `contracts/`, `plans/`, `scripts/`, and its commands are `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`), not a language-specific build/test/lint toolchain.
-- **Every other repository**: fill in the seeded `SKILL.md` as described above. See [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) for an example of the resulting body shape.
+- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `fs-specs/`, `rs-specs/`, `contracts/`, `plans/`, `scripts/`) and its `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`) with this workspace's real values.
+- **Every other repository**: copy the shape of [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) exactly, filling each section with this repository's real facts, pulled from what you learned in Step 2 — never invented. Omit a section if the repository has nothing genuine to put in it (for example `# Paths` when the layout is too flat or generic to be worth documenting, or `# Rules` when no test/lint/format policy exists in CI config or contributor docs) rather than inventing content to keep the section.
 
 ## Step 6 — Point to the next skill
 
@@ -179,6 +172,6 @@ repositories:
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rule_spec_ids` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
 - Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rule_spec_ids_removed`) or deliberately kept, per the user's confirmation.
-- Every repository's `SKILL.md`, including the spex repository's own, has a body with `General`, `Paths` (if applicable), `Commands`, and `Rules` sections grounded in that repository's real layout and commands, confirmed by the user.
+- Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout and commands, confirmed by the user.
 - No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
