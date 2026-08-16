@@ -34,3 +34,4 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Change only what the task requires**: don't refactor, rename, or reformat adjacent code that isn't part of it.
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
+- **Run spex check after changes**: you must run `spex check` (supports `--repo` filter) and `spex coverage` after all changes.
