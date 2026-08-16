@@ -39,3 +39,20 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Change only what the task requires**: don't refactor, rename, or reformat adjacent code that isn't part of it.
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
+
+## Commit messages
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rs-specs/RS-COMMIT-MESSAGE-FORMAT.yaml`.
+
+- Use the `fs` scope for functional spec changes (e.g. `feat(fs)`, `fix(fs)`).
+- Use the `rs` scope for rule spec changes (e.g. `feat(rs)`, `fix(rs)`).
+- End every `fs`-scoped description with at least one comma-separated Spec ID: `<Spec ID>[, <Spec ID>]`.
+
+Examples:
+
+```
+style: format md files
+feat(rs): pin dependencies as required by RS-DEPENDENCIRS-RULES
+feat(fs): list available pizzas FS-LIST-PIZZA-MENU
+fix(fs): reject negative quantities FS-CART-ADD-ITEM, FS-CART-VALIDATE
+```
