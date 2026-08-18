@@ -90,7 +90,7 @@ Tip: you can combine skills in the future `/spex-functional-spec /spex-contract 
 /spex-implement <spec-id>
 ```
 
-The agent executes the plan tasks for each step in parallel.
+The agent executes the plan tasks for each step in parallel, then deletes the plan file once every step is `completed`.
 
 ### 5.5 Verify with check and coverage
 

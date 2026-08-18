@@ -38,6 +38,8 @@ Plan should be simple, small and focused on interfaces instead of implementation
 
 A plan helps with large changes and is optional for small, self-contained ones.
 
+A plan is a working document, not a permanent artifact: useful while a change is in flight, so a step splits a big task into reviewable pieces and a status line lets work pause and resume across sessions unchanged. Once every step is `completed` and the change has shipped, the plan has nothing left to say that the code, spec, and git history don't already say better and more accurately — the spec records what must be true, the code and tests record what is true, and the plan's blow-by-blow steps only drift out of date as the code evolves further. Left in the repository, a finished plan is pure noise: a stale, unmaintained document that AI and human search alike keep surfacing, and that outsiders (or agents) can mistake for current instructions. `spex-implement` therefore deletes a plan file once it finishes executing it — completed plans do not accumulate.
+
 ## Spec kinds
 
 Two kinds of spec capture two kinds of requirement: a capability the system
@@ -184,7 +186,7 @@ Splits approved specs into an ordered, parallel-safe implementation plan. Writes
 
 ## spex-implement
 
-Executes a plan step by step, or a plain user request directly, and checks the result.
+Executes a plan step by step, or a plain user request directly, and checks the result. Deletes the plan file once every step is `completed` — a finished plan has nothing left to say that the spec, code, and git history don't already say more accurately.
 
 ## spex-grill-me
 
