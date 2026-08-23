@@ -1,9 +1,13 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use ast_grep_config::{DeserializeEnv, RuleCoreError, SerializableRuleCore};
+use ast_grep_language::{Language, LanguageExt, SupportLang};
 use globset::{Glob, GlobSet, GlobSetBuilder};
 use regex::Regex;
+use serde_yaml_ng::{Mapping, Value};
 
 use super::*;
 
@@ -25,6 +29,7 @@ pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &
     match (check.kind, check.run) {
         (CheckKind::Regexp, _) => run_regexp(spec_id, check, &scoped, findings),
         (CheckKind::Glob, _) => run_glob(spec_id, check, &scoped, findings),
+        (CheckKind::AstGrep, _) => run_ast_grep(spec_id, check, &scoped, findings),
         (CheckKind::Script, RunScope::PerFile) => {
             run_per_file_script(
                 spec_id,
@@ -187,6 +192,116 @@ pub(super) fn run_glob(
             ));
         }
     }
+}
+
+pub(super) fn run_ast_grep(
+    spec_id: &str,
+    check: &Check,
+    files: &[&ScopedFile],
+    findings: &mut Vec<Finding>,
+) {
+    let rule_core = match ast_grep_rule_core_value(check) {
+        Ok(value) => value,
+        Err(message) => {
+            findings.push(config_error(spec_id, &check.name, message));
+            return;
+        }
+    };
+
+    let explicit_lang = match &check.language {
+        Some(name) => match name.parse::<SupportLang>() {
+            Ok(lang) => Some(lang),
+            Err(err) => {
+                findings.push(config_error(
+                    spec_id,
+                    &check.name,
+                    format!("unknown ast-grep language `{name}`: {err}"),
+                ));
+                return;
+            }
+        },
+        None => None,
+    };
+
+    let mut by_lang: HashMap<SupportLang, Vec<&&ScopedFile>> = HashMap::new();
+    for file in files {
+        let Some(lang) = explicit_lang.or_else(|| SupportLang::from_path(&file.rel)) else {
+            continue;
+        };
+        by_lang.entry(lang).or_default().push(file);
+    }
+
+    for (lang, files) in by_lang {
+        let matcher = match build_ast_grep_matcher(&rule_core, lang) {
+            Ok(matcher) => matcher,
+            Err(err) => {
+                findings.push(config_error(
+                    spec_id,
+                    &check.name,
+                    format!("invalid ast-grep rule: {err}"),
+                ));
+                return;
+            }
+        };
+
+        for file in files {
+            let Ok(content) = std::fs::read_to_string(&file.abs) else {
+                continue;
+            };
+            let tree = lang.ast_grep(&content);
+            let root = tree.root();
+            let mut matches = root.find_all(&matcher).peekable();
+
+            if check.negate {
+                if matches.peek().is_none() {
+                    findings.push(violation(
+                        check,
+                        spec_id,
+                        Some(rel_str(file)),
+                        message(check, "required pattern not found"),
+                    ));
+                }
+            } else {
+                for found in matches {
+                    let line = found.start_pos().line() + 1;
+                    findings.push(violation(
+                        check,
+                        spec_id,
+                        Some(format!("{}:{}", rel_str(file), line)),
+                        message(check, "matches forbidden pattern"),
+                    ));
+                }
+            }
+        }
+    }
+}
+
+// Builds the `SerializableRuleCore` YAML value (`{rule: ..., constraints: ...}`)
+// backing an ast-grep check: either the check's own `rule` object as-is, or a
+// simple `{rule: {pattern: <pattern>}}` wrapper around `pattern`, mirroring how
+// regexp/glob checks reuse the same `pattern` field.
+fn ast_grep_rule_core_value(check: &Check) -> core::result::Result<Value, String> {
+    if let Some(rule) = &check.rule {
+        return Ok(rule.clone());
+    }
+    let Some(pattern) = &check.pattern else {
+        return Err("ast-grep check requires `pattern` or `rule`".to_string());
+    };
+    let mut inner = Mapping::new();
+    inner.insert(Value::from("pattern"), Value::from(pattern.clone()));
+    let mut outer = Mapping::new();
+    outer.insert(Value::from("rule"), Value::Mapping(inner));
+    Ok(Value::Mapping(outer))
+}
+
+fn build_ast_grep_matcher(
+    rule_core: &Value,
+    lang: SupportLang,
+) -> core::result::Result<ast_grep_config::RuleCore, String> {
+    let json = serde_json::to_value(rule_core).map_err(|err| err.to_string())?;
+    let core: SerializableRuleCore = serde_json::from_value(json).map_err(|err| err.to_string())?;
+    core.get_matcher(DeserializeEnv::new(lang))
+        .map_err(|err: RuleCoreError| err.to_string())
 }
 
 pub(super) fn run_workspace_checks(

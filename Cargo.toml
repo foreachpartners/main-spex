@@ -1,6 +1,6 @@
 [package]
 name = "spex"
-version = "0.7.56"
+version = "0.7.57"
 edition = "2024"
 
 [dependencies]
@@ -15,6 +15,9 @@ regex = "1.12.4"
 ignore = "0.4.26"
 globset = "0.4.18"
 include_dir = "0.7.4"
+ast-grep-core = "0.45.1"
+ast-grep-config = "0.45.1"
+ast-grep-language = "0.45.1"
 
 [dev-dependencies]
 tempfile = "3.27.0"

@@ -41,6 +41,10 @@ pub struct Check {
     #[serde(default)]
     pub negate: bool,
     #[serde(default)]
+    pub language: Option<String>,
+    #[serde(default)]
+    pub rule: Option<serde_yaml_ng::Value>,
+    #[serde(default)]
     pub script: Option<String>,
     #[serde(default)]
     pub run: RunScope,
@@ -57,6 +61,8 @@ pub struct Check {
 pub enum CheckKind {
     Regexp,
     Glob,
+    #[serde(rename = "ast-grep")]
+    AstGrep,
     Script,
 }
 

@@ -49,6 +49,44 @@
       "unevaluatedProperties": false
     },
     {
+      "title": "ast-grep check",
+      "description": "Structural, AST-based match using ast-grep (https://ast-grep.github.io/), backed by tree-sitter. More precise than `regexp` for code patterns: matches by syntax tree shape, so it ignores comments/strings and tolerates reformatting, and can express relational constraints (a node inside/not-inside another, argument text matching a sub-pattern) that plain text matching cannot.",
+      "allOf": [
+        { "$ref": "#/$defs/check_base" },
+        { "$ref": "#/$defs/file_scope" },
+        {
+          "anyOf": [{ "required": ["pattern"] }, { "required": ["rule"] }]
+        }
+      ],
+      "properties": {
+        "type": { "const": "ast-grep" },
+        "language": {
+          "type": "string",
+          "description": "ast-grep language id (e.g. `typescript`, `tsx`, `javascript`, `python`, `go`, `rust`, `java`). Omitted: inferred per file from its extension, and files with no matching language are skipped."
+        },
+        "pattern": {
+          "type": "string",
+          "description": "An ast-grep structural pattern, e.g. `console.log($$$ARGS)`. `$VAR` binds one node, `$$$VAR` binds a list of nodes. Mutually exclusive with `rule`.",
+          "minLength": 1
+        },
+        "rule": {
+          "type": "object",
+          "description": "A full ast-grep rule object: `{rule: <atomic|relational|composite rule>, constraints: {<metavariable>: <rule>}}`. Supports `pattern`, `kind`, `regex`, `inside`, `has`, `not`, `all`, `any`, and metavariable `constraints` — see https://ast-grep.github.io/reference/yaml.html. Mutually exclusive with `pattern`.",
+          "properties": {
+            "rule": { "type": "object" },
+            "constraints": { "type": "object" }
+          },
+          "required": ["rule"]
+        },
+        "negate": {
+          "type": "boolean",
+          "description": "Inverts the check. When false (default), a match is a violation (forbidden). When true, a file with no match is a violation (required).",
+          "default": false
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    {
       "title": "script check",
       "description": "Runs an external script stored in the spex directory at `scripts/<rule-id>/<script>`.",
       "allOf": [
@@ -94,8 +132,8 @@
         },
         "type": {
           "type": "string",
-          "description": "How the check is executed: regexp matches file contents, glob matches file paths, script runs an external program.",
-          "enum": ["regexp", "glob", "script"]
+          "description": "How the check is executed: regexp matches file contents, glob matches file paths, ast-grep matches a code structure, script runs an external program.",
+          "enum": ["regexp", "glob", "ast-grep", "script"]
         },
         "severity": {
           "type": "string",

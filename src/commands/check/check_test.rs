@@ -14,6 +14,8 @@ mod tests {
             kind,
             pattern: pattern.map(str::to_string),
             negate: false,
+            language: None,
+            rule: None,
             script: None,
             run: RunScope::PerFile,
             include: Vec::new(),
@@ -140,6 +142,197 @@ mod tests {
 
         assert_eq!(findings.len(), 1);
         assert!(findings[0].location.is_none());
+    }
+
+    #[test]
+    fn ast_grep_pattern_matches_structurally_not_textually() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(
+            &dir,
+            "src/main.ts",
+            "// console.log(\"not real\")\nconsole.log(\"hi\");\nconsole.error(\"bye\");\n",
+        );
+        let check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+    }
+
+    #[test]
+    fn ast_grep_infers_language_from_extension() {
+        let dir = tempdir().expect("temp dir");
+        let ts = scoped(&dir, "src/main.ts", "console.log(1);\n");
+        let py = scoped(&dir, "src/main.py", "print(1)\n");
+        let check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&ts, &py], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:1"));
+    }
+
+    #[test]
+    fn ast_grep_negate_reports_when_absent() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(&dir, "src/main.ts", "console.error(1);\n");
+        let mut check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+        check.negate = true;
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts"));
+    }
+
+    #[test]
+    fn ast_grep_rule_supports_constraints_on_metavariables() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(
+            &dir,
+            "src/main.ts",
+            "console.log(userId);\nconsole.log(apiToken);\n",
+        );
+        let mut check = check(CheckKind::AstGrep, None);
+        check.rule = Some(
+            serde_yaml_ng::from_str(
+                r#"
+rule:
+  pattern: console.log($ARG)
+constraints:
+  ARG:
+    regex: "(?i)token|secret|password"
+"#,
+            )
+            .expect("valid rule yaml"),
+        );
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+    }
+
+    #[test]
+    fn ast_grep_reports_config_error_for_invalid_language() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(&dir, "src/main.ts", "console.log(1);\n");
+        let mut check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+        check.language = Some("not-a-real-language".to_string());
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].check, "sample");
+        assert!(findings[0].location.is_none());
+    }
+
+    #[test]
+    fn ast_grep_rule_constraint_on_multi_metavariable() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(
+            &dir,
+            "src/main.ts",
+            "console.log(userId);\nconsole.log(\"token=\", apiToken);\n",
+        );
+        let mut check = check(CheckKind::AstGrep, None);
+        check.rule = Some(
+            serde_yaml_ng::from_str(
+                r#"
+rule:
+  all:
+    - pattern: console.$METHOD($$$ARGS)
+    - has:
+        stopBy: end
+        regex: "(?i)(token|secret|password|credential|api[_-]?key)"
+"#,
+            )
+            .expect("valid rule yaml"),
+        );
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+    }
+
+    #[test]
+    fn ast_grep_rule_supports_any_composite_with_constraints() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(&dir, "src/main.rs", "info!(user_id);\nwarn!(api_token);\n");
+        let mut check = check(CheckKind::AstGrep, None);
+        check.language = Some("rust".to_string());
+        check.rule = Some(
+            serde_yaml_ng::from_str(
+                r#"
+rule:
+  all:
+    - any:
+        - pattern: info!($$$ARGS)
+        - pattern: warn!($$$ARGS)
+        - pattern: error!($$$ARGS)
+    - has:
+        stopBy: end
+        regex: "(?i)(token|secret|password|credential|api[_-]?key)"
+"#,
+            )
+            .expect("valid rule yaml"),
+        );
+
+        let mut findings = Vec::new();
+        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location.as_deref(), Some("src/main.rs:2"));
+    }
+
+    #[test]
+    fn ast_grep_rule_constraint_only_applies_when_var_is_bound() {
+        let dir = tempdir().expect("temp dir");
+        let file = scoped(
+            &dir,
+            "src/main.test.ts",
+            "fit('runs', () => {});\ndescribe.only('suite', () => {});\narr.only('nope', () => {});\n",
+        );
+        let mut check = check(CheckKind::AstGrep, None);
+        check.rule = Some(
+            serde_yaml_ng::from_str(
+                r#"
+rule:
+  any:
+    - pattern: fit($$$ARGS)
+    - pattern: fdescribe($$$ARGS)
+    - pattern: $OBJ.only($$$ARGS)
+constraints:
+  OBJ:
+    regex: "^(describe|it|test|context)$"
+"#,
+            )
+            .expect("valid rule yaml"),
+        );
+
+        let mut findings = Vec::new();
+        run_ast_grep("TESTING", &check, &[&file], &mut findings);
+
+        let mut locations: Vec<_> = findings
+            .iter()
+            .map(|finding| finding.location.clone().unwrap())
+            .collect();
+        locations.sort();
+        assert_eq!(
+            locations,
+            vec![
+                "src/main.test.ts:1".to_string(),
+                "src/main.test.ts:2".to_string(),
+            ]
+        );
     }
 
     #[test]
