@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/rule-id.schema.json",
   "title": "Rule ID",
-  "description": "Rule ID. Only uppercase English letters and hyphens. Max 50 characters. The name should convey the rule's contents so it can be understood without opening the spec.",
+  "description": "Rule ID. Only uppercase English letters and hyphens. Max 40 characters. The name should convey the rule's contents so it can be understood without opening the spec.",
   "type": "string",
   "pattern": "^[A-Z]+(-[A-Z]+)*$",
-  "maxLength": 50,
+  "maxLength": 40,
   "examples": ["SECRET-HANDLING"]
 }

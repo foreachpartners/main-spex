@@ -56,7 +56,8 @@ All names are chosen to match clear and precise meaning for human and AI.
 - **Spec** signals a system capability — a function the product performs — mirroring how product and engineering already talk about "functional requirements"; a spec answers what the system does.
 - **Rule** signals an enforceable convention every change must follow, matching how AI coding tools already use "rule" for repo-wide instructions (e.g. editor and agent rules files) and how linters name their checks (ESLint rules, Clippy lints); a rule answers how the system is built, and reads as a directive both a human and an AI agent treat as binding rather than optional.
 - "Rule" is reserved for rules. Spec acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
-- The spec type is conveyed only by which directory a spec lives in (`specs/` or `rules/`) — Spec IDs carry no type prefix.
+- The spec type is conveyed only by which directory a spec lives in (`specs/` or `rules/`) — IDs carry no type prefix.
+- A spec's identifier is a Spec ID (`schemas/spec-id.schema.json`); a rule's identifier is a Rule ID (`schemas/rule-id.schema.json`). Both follow the same uppercase-letters-and-hyphens format, limited to 40 characters to avoid long filenames/refs.
 
 # Workspace
 

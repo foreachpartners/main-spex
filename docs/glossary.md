@@ -39,6 +39,12 @@
   SECRET-HANDLING
   ```
 
+- **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability.
+
+  ```text
+  SECRET-HANDLING
+  ```
+
 - **Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.
 
   ```yaml
