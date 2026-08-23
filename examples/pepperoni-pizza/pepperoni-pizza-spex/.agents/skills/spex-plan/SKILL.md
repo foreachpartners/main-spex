@@ -31,7 +31,7 @@ Ground every interface you plan to change, extend or create.
 
 # Create the plan file
 
-Create a spec file in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`. `<date>` is today's real date (`YYYY-MM-DD`). `<slug>` is a short lowercase hyphenated summary. The filename stem must validate against `plan-filename.schema.json` and stay within 50 characters.
+Create a spec file in `<workspace-root>/<project-name>-spex/plans/<date>-<slug>.md`. `<date>` is today's real date (`YYYY-MM-DD`). `<slug>` is a short lowercase hyphenated summary. The filename stem must validate against `plan-filename.schema.json` and stay within 50 characters.
 
 If more than one spec is provided, pick a leading one for `<spec-id>` and generate the slug based on the main changes.
 
