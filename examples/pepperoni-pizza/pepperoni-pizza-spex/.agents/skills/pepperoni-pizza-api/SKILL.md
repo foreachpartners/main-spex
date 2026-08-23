@@ -5,7 +5,7 @@ description: Information, rules, commands and other pepperoni-pizza-api reposito
 
 # General
 
-Run `spex info --repo api` for general repository information and applicable rule specs.
+Run `spex info --repo api` for general repository information and applicable rules.
 
 # Paths
 

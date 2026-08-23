@@ -320,7 +320,7 @@ fn locate_script(
 
     let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
         let dir = spex_dir
-            .join(rule_spec::SCRIPTS_DIR)
+            .join(rule::SCRIPTS_DIR)
             .join(spec_id.to_lowercase());
         findings.push(config_error(
             spec_id,
@@ -381,7 +381,7 @@ pub(super) fn run_per_repo_script(
 // uppercase (NAMING-CONVENTION); the on-disk directory is lowercase.
 pub(super) fn resolve_script(reference: &str, base: &Path, spec_id: &str) -> Option<PathBuf> {
     let script = base
-        .join(rule_spec::SCRIPTS_DIR)
+        .join(rule::SCRIPTS_DIR)
         .join(spec_id.to_lowercase())
         .join(reference);
     script.is_file().then_some(script)

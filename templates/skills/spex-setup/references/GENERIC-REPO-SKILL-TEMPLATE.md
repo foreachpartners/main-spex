@@ -1,6 +1,6 @@
 # General
 
-Run `spex info --repo <repository-short-name>` for general repository information and applicable rule specs.
+Run `spex info --repo <repository-short-name>` for general repository information and applicable rules.
 
 # Paths
 

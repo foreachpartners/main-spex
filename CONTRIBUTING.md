@@ -41,6 +41,6 @@ metadata:
   sync-with-upstream: false
 ```
 
-## Adding new or improving existing rule spec
+## Adding new or improving existing rule
 
-We can have as many rule specs as we want and just pick the applicable ones for a project, so as long as they are useful and don't duplicate others, we will add many.
+We can have as many rules as we want and just pick the applicable ones for a project, so as long as they are useful and don't duplicate others, we will add many.

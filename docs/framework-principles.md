@@ -38,23 +38,23 @@ Each artifact is approved before the next is generated: spec before contract, co
 
 ## 5. Deterministic enforcement
 
-AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule-spec checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
+AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
 
 That is why every check that can be a script must be a script. AI fills only the gaps where judgment is required.
 
-The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule-spec checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings.
+The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings.
 
 **Deterministic — clear logic** (result unambiguous, repeatable):
 
-| Category            | Tools                              | Example                                         |
-| ------------------- | ---------------------------------- | ----------------------------------------------- |
-| Compilation         | `cargo build`, `tsc`, `protoc`     | Type checking, contract-code alignment          |
-| Linting             | `clippy`, `eslint`, `markdownlint` | Code style, formatting                          |
-| Spec checks         | `spex check`                       | rule-spec `regexp` / `glob` / `script` findings |
-| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active spec    |
-| Schema validation   | `spex check-schema`                | A spec file invalid against its bundled schema  |
-| Contract validation | OpenAPI validator, proto lint      | Contract syntax correctness                     |
-| Test execution      | `cargo test`, `vitest`             | Pass / fail — a factual result                  |
+| Category            | Tools                              | Example                                        |
+| ------------------- | ---------------------------------- | ---------------------------------------------- |
+| Compilation         | `cargo build`, `tsc`, `protoc`     | Type checking, contract-code alignment         |
+| Linting             | `clippy`, `eslint`, `markdownlint` | Code style, formatting                         |
+| Spec checks         | `spex check`                       | rule `regexp` / `glob` / `script` findings     |
+| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active spec   |
+| Schema validation   | `spex check-schema`                | A spec file invalid against its bundled schema |
+| Contract validation | OpenAPI validator, proto lint      | Contract syntax correctness                    |
+| Test execution      | `cargo test`, `vitest`             | Pass / fail — a factual result                 |
 
 **AI — fuzzy logic** (requires interpretation, context, judgment):
 
@@ -103,7 +103,7 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 | HTTP / gRPC / event interface     | Native contract at the `path` declared in `spex.yaml` (OpenAPI, `.proto`, AsyncAPI), usually inside the owning repository | No markdown copy of the interface                |
 | Capability (product or technical) | Spec (`<project-name>-spex/specs/<spec-id-lowercase>.yaml`)                                                               | No copy in code comments or plans                |
 | Cross-cutting convention          | Rule (`<project-name>-spex/rules/<rule-id-lowercase>.yaml`)                                                               | No copy in agent rules, READMEs, or service docs |
-| Check logic                       | Rule-spec `checks` and `scripts/<rule-id-lowercase>/`                                                                     | No restated rule in CI config prose              |
+| Check logic                       | Rule `checks` and `scripts/<rule-id-lowercase>/`                                                                          | No restated rule in CI config prose              |
 | Workspace layout                  | `<project-name>-spex/spex.yaml`                                                                                           | No second list of repositories anywhere          |
 | Term definitions                  | `docs/glossary.md`                                                                                                        | No re-definition in other docs                   |
 

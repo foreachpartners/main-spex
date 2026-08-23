@@ -7,23 +7,23 @@ use thiserror::Error;
 
 use crate::util;
 
-pub const RULE_SPECS_DIR: &str = "rules";
+pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
 
-type Result<T> = core::result::Result<T, Report<SpecError>>;
+type Result<T> = core::result::Result<T, Report<RuleError>>;
 
 #[derive(Debug, Error)]
-pub enum SpecError {
-    #[error("could not read the `{RULE_SPECS_DIR}` directory")]
+pub enum RuleError {
+    #[error("could not read the `{RULES_DIR}` directory")]
     ReadDir,
-    #[error("could not read rule spec `{0}`")]
+    #[error("could not read rule `{0}`")]
     ReadFile(String),
-    #[error("could not parse rule spec `{0}`")]
+    #[error("could not parse rule `{0}`")]
     Parse(String),
 }
 
 #[derive(Debug, Deserialize)]
-pub struct RuleSpec {
+pub struct Rule {
     pub id: String,
     #[serde(default)]
     pub checks: Vec<Check>,
@@ -77,16 +77,16 @@ pub enum Severity {
     Error,
 }
 
-pub fn load_all(specs_dir: &Path) -> Result<HashMap<String, RuleSpec>> {
-    let specs: Vec<RuleSpec> = util::load_yaml_dir(
-        specs_dir,
-        || SpecError::ReadDir,
-        SpecError::ReadFile,
-        SpecError::Parse,
+pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Rule>> {
+    let rules: Vec<Rule> = util::load_yaml_dir(
+        rules_dir,
+        || RuleError::ReadDir,
+        RuleError::ReadFile,
+        RuleError::Parse,
     )?;
 
-    Ok(specs
+    Ok(rules
         .into_iter()
-        .map(|spec| (spec.id.clone(), spec))
+        .map(|rule| (rule.id.clone(), rule))
         .collect())
 }

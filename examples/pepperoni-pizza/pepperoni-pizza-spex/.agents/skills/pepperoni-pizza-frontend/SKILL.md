@@ -5,7 +5,7 @@ description: Information, rules, commands and other pepperoni-pizza-frontend rep
 
 # General
 
-Run `spex info --repo frontend` for general repository information and applicable rule specs.
+Run `spex info --repo frontend` for general repository information and applicable rules.
 
 # Paths
 

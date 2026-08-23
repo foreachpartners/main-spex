@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use crate::commands::check_schema;
-use crate::rule_spec::{RULE_SPECS_DIR, RuleSpec, SCRIPTS_DIR};
+use crate::rule::{RULES_DIR, Rule, SCRIPTS_DIR};
 use crate::spec::SPECS_DIR;
 use crate::templates::SCHEMAS_DIR;
 
@@ -11,7 +11,7 @@ use super::runners::resolve_script;
 use super::{Finding, Severity};
 
 // Findings from this module are attributed to a synthetic spec id rather than
-// a real rule spec, since spex's own conformance checks are built into `spex
+// a real rule, since spex's own conformance checks are built into `spex
 // check` itself rather than declared in a rule (they must run even before
 // any rules can be trusted to parse).
 const SPEC_ID: &str = "SPEX-INTERNAL-CONFORMANCE";
@@ -30,11 +30,11 @@ struct IdOnly {
 // spec's acceptance criteria must be ordered by RFC 2119 commitment level.
 pub(super) fn validate_conformance(
     spex_dir: &Path,
-    rule_specs: &std::collections::HashMap<String, RuleSpec>,
+    rules: &std::collections::HashMap<String, Rule>,
     findings: &mut Vec<Finding>,
 ) {
     validate_schema(spex_dir, findings);
-    validate_script_references(spex_dir, rule_specs, findings);
+    validate_script_references(spex_dir, rules, findings);
     validate_ac_order(spex_dir, findings);
 }
 
@@ -87,7 +87,7 @@ fn validate_schema(spex_dir: &Path, findings: &mut Vec<Finding>) {
     );
     validate_schema_group(
         spex_dir,
-        &yaml_files(&spex_dir.join(RULE_SPECS_DIR)),
+        &yaml_files(&spex_dir.join(RULES_DIR)),
         "rule.schema.json",
         findings,
     );
@@ -95,7 +95,7 @@ fn validate_schema(spex_dir: &Path, findings: &mut Vec<Finding>) {
     for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
         check_filename_matches_id(spex_dir, &file, findings);
     }
-    for file in yaml_files(&spex_dir.join(RULE_SPECS_DIR)) {
+    for file in yaml_files(&spex_dir.join(RULES_DIR)) {
         check_filename_matches_id(spex_dir, &file, findings);
     }
 }
@@ -164,21 +164,21 @@ fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Fi
 // `scripts/<spec-id-lowercase>/<script>`.
 fn validate_script_references(
     spex_dir: &Path,
-    rule_specs: &std::collections::HashMap<String, RuleSpec>,
+    rules: &std::collections::HashMap<String, Rule>,
     findings: &mut Vec<Finding>,
 ) {
-    let mut specs: Vec<&RuleSpec> = rule_specs.values().collect();
-    specs.sort_by(|a, b| a.id.cmp(&b.id));
+    let mut rules: Vec<&Rule> = rules.values().collect();
+    rules.sort_by(|a, b| a.id.cmp(&b.id));
 
-    for spec in specs {
-        for check in &spec.checks {
+    for rule in rules {
+        for check in &rule.checks {
             let Some(script) = &check.script else {
                 continue;
             };
-            if resolve_script(script, spex_dir, &spec.id).is_none() {
-                let dir = spex_dir.join(SCRIPTS_DIR).join(spec.id.to_lowercase());
+            if resolve_script(script, spex_dir, &rule.id).is_none() {
+                let dir = spex_dir.join(SCRIPTS_DIR).join(rule.id.to_lowercase());
                 findings.push(conform_finding(
-                    Some(format!("{RULE_SPECS_DIR}/{}.yaml", spec.id.to_lowercase())),
+                    Some(format!("{RULES_DIR}/{}.yaml", rule.id.to_lowercase())),
                     format!("missing script {}/{script}", dir.display()),
                 ));
             }
@@ -205,7 +205,7 @@ fn rfc2119_rank(text: &str) -> Option<(u8, &'static str)> {
 // Verifies each spec file lists its `acceptance_criteria` in RFC 2119
 // commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
 fn validate_ac_order(spex_dir: &Path, findings: &mut Vec<Finding>) {
-    for dir_name in [SPECS_DIR, RULE_SPECS_DIR] {
+    for dir_name in [SPECS_DIR, RULES_DIR] {
         for file in yaml_files(&spex_dir.join(dir_name)) {
             check_ac_order(spex_dir, &file, findings);
         }

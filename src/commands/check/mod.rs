@@ -8,7 +8,7 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
-use crate::rule_spec::{self, Check, CheckKind, RuleSpec, RunScope, Severity};
+use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
 use crate::spec::{self, Spec, Status};
 use crate::style::{Log, Style};
 use crate::util::{self, plural};
@@ -91,9 +91,7 @@ struct RepoReport {
 pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
-    let specs = workspace
-        .rule_specs()
-        .change_context(CheckError::Workspace)?;
+    let rules = workspace.rules().change_context(CheckError::Workspace)?;
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -111,7 +109,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         check_repo(
             repo,
             &workspace.dir,
-            &specs,
+            &rules,
             &args.files,
             &log,
             &mut findings,
@@ -143,7 +141,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         });
     }
 
-    validate_specs(&workspace, &specs, &selected, &mut reports)?;
+    validate_specs(&workspace, &rules, &selected, &mut reports)?;
 
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&workspace.dir, &selected, &reports);
@@ -381,7 +379,7 @@ fn select_repos<'a>(
 fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
-    specs: &HashMap<String, RuleSpec>,
+    rules: &HashMap<String, Rule>,
     files: &[String],
     log: &Log,
     findings: &mut Vec<Finding>,
@@ -419,22 +417,19 @@ fn check_repo(
     let has_files = !files.is_empty();
 
     for spec_id in &repo.rules {
-        let Some(spec) = specs.get(spec_id) else {
+        let Some(rule) = rules.get(spec_id) else {
             findings.push(repo_error(
                 spec_id,
-                format!(
-                    "rule spec `{spec_id}` not found in {}/",
-                    rule_spec::RULE_SPECS_DIR
-                ),
+                format!("rule `{spec_id}` not found in {}/", rule::RULES_DIR),
             ));
             continue;
         };
 
-        for check in &spec.checks {
+        for check in &rule.checks {
             if has_files && check.negate {
                 continue;
             }
-            dispatch_check(&ctx, &spec.id, check, findings, workspace_checks);
+            dispatch_check(&ctx, &rule.id, check, findings, workspace_checks);
         }
     }
 
@@ -555,7 +550,7 @@ fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
 // Runs only when the spex repository is in scope.
 fn validate_specs(
     workspace: &Workspace,
-    rule_specs: &HashMap<String, RuleSpec>,
+    rules: &HashMap<String, Rule>,
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
@@ -578,10 +573,10 @@ fn validate_specs(
     for spec in &specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
-    // Rule specs are global rules that always apply, so they count as
-    // satisfied for `blocked_by` purposes.
-    for spec in rule_specs.values() {
-        status_by_id.insert(spec.id.as_str(), Status::Active);
+    // Rules are global and always apply, so they count as satisfied for
+    // `blocked_by` purposes.
+    for rule in rules.values() {
+        status_by_id.insert(rule.id.as_str(), Status::Active);
     }
 
     for spec in &specs {
@@ -599,7 +594,7 @@ fn validate_specs(
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
 
-    validate_conformance(&workspace.dir, rule_specs, &mut report.findings);
+    validate_conformance(&workspace.dir, rules, &mut report.findings);
 
     Ok(())
 }

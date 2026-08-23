@@ -5,7 +5,7 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config};
-use crate::rule_spec::{self, RuleSpec};
+use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
 use crate::style::Style;
 
@@ -17,8 +17,8 @@ pub enum WorkspaceError {
     CurrentDir,
     #[error("could not load spex configuration")]
     Config,
-    #[error("could not load rule specs")]
-    RuleSpecs,
+    #[error("could not load rules")]
+    Rules,
     #[error("could not load specs")]
     Specs,
 }
@@ -43,9 +43,8 @@ impl Workspace {
         Ok(Self { dir, config })
     }
 
-    pub fn rule_specs(&self) -> Result<HashMap<String, RuleSpec>> {
-        rule_spec::load_all(&self.dir.join(rule_spec::RULE_SPECS_DIR))
-            .change_context(WorkspaceError::RuleSpecs)
+    pub fn rules(&self) -> Result<HashMap<String, Rule>> {
+        rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {

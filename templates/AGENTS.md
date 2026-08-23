@@ -17,9 +17,9 @@ The workspace root holds this repo (`<project-name>-spex`, the single source of 
 
 Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
 
-- `spex check` — runs rule-spec checks and gates on `error`-severity findings (`--repo <name>`, `--files <path>...` to scope).
+- `spex check` — runs rule checks and gates on `error`-severity findings (`--repo <name>`, `--files <path>...` to scope).
 - `spex coverage` — reports `@spec` annotation and acceptance-criteria coverage for active specs.
-- `spex info` — prints the resolved config (repos, paths, contracts, rule specs).
+- `spex info` — prints the resolved config (repos, paths, contracts, rules).
 
 After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
 
@@ -46,7 +46,7 @@ Code should be simple enough that any teammate or AI — not just its author —
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/COMMIT-MESSAGE-FORMAT.yaml`.
 
 - Use the `spec` scope for spec changes (e.g. `feat(spec)`, `fix(spec)`).
-- Use the `rule` scope for rule spec changes (e.g. `feat(rule)`, `fix(rule)`).
+- Use the `rule` scope for rule changes (e.g. `feat(rule)`, `fix(rule)`).
 - End every `spec`-scoped description with at least one comma-separated Spec ID: `<Spec ID>[, <Spec ID>]`.
 
 Examples:

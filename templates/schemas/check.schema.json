@@ -79,7 +79,7 @@
       "description": "A single automated check.",
       "properties": {
         "spec": {
-          "description": "Rule spec ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside rule files, which supply the spec ID themselves.",
+          "description": "Rule ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside rule files, which supply the rule ID themselves.",
           "$ref": "rule-id.schema.json"
         },
         "name": {

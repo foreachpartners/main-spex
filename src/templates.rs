@@ -5,7 +5,7 @@ use error_stack::{Report, ResultExt};
 use include_dir::{Dir, DirEntry, include_dir};
 use thiserror::Error;
 
-use crate::rule_spec::{RULE_SPECS_DIR, SCRIPTS_DIR};
+use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use serde::Deserialize;
 
 #[cfg(test)]
@@ -56,7 +56,7 @@ pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
-    copy_rule_specs(spex_dir, removed_rules)?;
+    copy_rules(spex_dir, removed_rules)?;
     copy_skills(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
@@ -121,15 +121,15 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
         .is_none_or(|parsed| parsed.metadata.sync_with_upstream)
 }
 
-fn copy_rule_specs(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
-    let Some(dir) = TEMPLATES.get_dir(RULE_SPECS_DIR) else {
+fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
+    let Some(dir) = TEMPLATES.get_dir(RULES_DIR) else {
         return Ok(());
     };
 
-    let specs_dest = spex_dir.join(RULE_SPECS_DIR);
-    fs::create_dir_all(&specs_dest)
+    let rules_dest = spex_dir.join(RULES_DIR);
+    fs::create_dir_all(&rules_dest)
         .change_context(TemplateError::Io)
-        .attach_with(|| format!("could not create `{}`", specs_dest.display()))?;
+        .attach_with(|| format!("could not create `{}`", rules_dest.display()))?;
 
     let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
     let scripts_dest = spex_dir.join(SCRIPTS_DIR);
@@ -138,8 +138,8 @@ fn copy_rule_specs(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
         let Some(name) = file.path().file_name() else {
             continue;
         };
-        let dest = specs_dest.join(name);
-        let spec_id = dest.file_stem().unwrap_or_default().to_string_lossy();
+        let dest = rules_dest.join(name);
+        let rule_id = dest.file_stem().unwrap_or_default().to_string_lossy();
 
         if dest.exists() {
             if !is_synced_with_upstream(&dest) {
@@ -147,7 +147,7 @@ fn copy_rule_specs(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
             }
         } else if removed_rules
             .iter()
-            .any(|id| id.eq_ignore_ascii_case(spec_id.as_ref()))
+            .any(|id| id.eq_ignore_ascii_case(rule_id.as_ref()))
         {
             continue;
         }
@@ -157,9 +157,9 @@ fn copy_rule_specs(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
             .attach_with(|| format!("could not write `{}`", dest.display()))?;
 
         if let Some(scripts) = scripts_dir
-            && let Some(spec_scripts) = scripts.get_dir(format!("{SCRIPTS_DIR}/{spec_id}"))
+            && let Some(rule_scripts) = scripts.get_dir(format!("{SCRIPTS_DIR}/{rule_id}"))
         {
-            copy_tree(spec_scripts, Path::new(SCRIPTS_DIR), &scripts_dest)?;
+            copy_tree(rule_scripts, Path::new(SCRIPTS_DIR), &scripts_dest)?;
         }
     }
 

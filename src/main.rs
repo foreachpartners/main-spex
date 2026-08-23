@@ -1,6 +1,6 @@
 mod commands;
 mod config;
-mod rule_spec;
+mod rule;
 mod spec;
 mod style;
 mod templates;
@@ -43,7 +43,7 @@ enum Commands {
         about = "Rewrite bundled skills, schemas, scripts and rules with the latest versions"
     )]
     Update,
-    #[command(about = "Run rule spec checks against the workspace")]
+    #[command(about = "Run rule checks against the workspace")]
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),

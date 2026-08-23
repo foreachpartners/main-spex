@@ -25,7 +25,7 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
-  rule_spec.rs   Rule model
+  rule.rs           Rule model
   spec.rs           Spec model (status, acceptance-criteria checkbox)
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
@@ -37,7 +37,7 @@ templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
   skills/           Agent skills
-  rules/         Reusable rule-spec templates
+  rules/            Reusable rule templates
 examples/           Sample projects (pepperoni-pizza, pepperoni-pizza-no-spex)
 tests/              Integration tests that build and run the spex binary
 ```

@@ -2,7 +2,7 @@
 
 This document records the result of the spex tutorial: the verification command
 output, and an assessment of the spec, its implementation, and the
-network-bind rule spec produced along the way.
+network-bind rule produced along the way.
 
 ## spex check
 
@@ -92,7 +92,7 @@ from a perfect score.
 **Requirement:** "the API must not hardcode network bind addresses or ports —
 they must be read from configuration/environment".
 
-**Verdict: Excellent (5 / 5).** This is a model rule spec: it states the rule,
+**Verdict: Excellent (5 / 5).** This is a model rule: it states the rule,
 explains _why_, enforces it automatically, and the implementation conforms.
 
 ### What was done well

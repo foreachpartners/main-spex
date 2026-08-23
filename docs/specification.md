@@ -122,9 +122,9 @@ Refreshes the managed framework files from the installed binary.
 
 ## check
 
-Runs each repository's rule-spec checks and gates on errors.
+Runs each repository's rule checks and gates on errors.
 
-- Runs the rule-spec checks each repository lists in its `rules`, reporting findings per repository.
+- Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.

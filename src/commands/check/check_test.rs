@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::config::{Config, PreexistingError, Repository};
-    use crate::rule_spec::{Check, CheckKind, RuleSpec, RunScope, Severity};
+    use crate::rule::{Check, CheckKind, Rule, RunScope, Severity};
     use serial_test::serial;
     use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
@@ -308,8 +308,8 @@ mod tests {
         assert_eq!(names, vec!["src/main.rs".to_string()]);
     }
 
-    fn rule_spec(id: &str, checks: Vec<Check>) -> RuleSpec {
-        RuleSpec {
+    fn rule(id: &str, checks: Vec<Check>) -> Rule {
+        Rule {
             id: id.to_string(),
             checks,
         }
@@ -352,9 +352,9 @@ mod tests {
         // A non-negated glob check: "*.rs files are forbidden"
         let non_negated = named_check("no-rs-files", CheckKind::Glob, Some("**/*.rs"));
 
-        let specs = HashMap::from([(
+        let rules = HashMap::from([(
             "X".to_string(),
-            rule_spec("X", vec![negated_glob.clone(), non_negated]),
+            rule("X", vec![negated_glob.clone(), non_negated]),
         )]);
 
         let repository = repository("../api", vec!["X"]);
@@ -364,7 +364,7 @@ mod tests {
         check_repo(
             &repository,
             &spex,
-            &specs,
+            &rules,
             &[],
             &Log::new(false),
             &mut findings,
@@ -380,7 +380,7 @@ mod tests {
         check_repo(
             &repository,
             &spex,
-            &specs,
+            &rules,
             &["src/main.rs".to_string()],
             &Log::new(false),
             &mut findings,
@@ -416,14 +416,14 @@ mod tests {
 
         let mut listing = script_check("list.sh", RunScope::Workspace);
         listing.name = "list".to_string();
-        let specs = HashMap::from([("X".to_string(), rule_spec("X", vec![listing]))]);
+        let rules = HashMap::from([("X".to_string(), rule("X", vec![listing]))]);
 
         let mut collected = Vec::new();
         let mut findings = Vec::new();
         check_repo(
             &repository("../api", vec!["X"]),
             &spex,
-            &specs,
+            &rules,
             &[],
             &Log::new(false),
             &mut findings,
@@ -433,7 +433,7 @@ mod tests {
         check_repo(
             &repository("../web", vec!["X"]),
             &spex,
-            &specs,
+            &rules,
             &[],
             &Log::new(false),
             &mut findings,

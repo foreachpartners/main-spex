@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/rule.schema.json",
-  "title": "Rule Spec",
+  "title": "Rule",
   "description": "A rule: one coherent cross-cutting convention or rule for how the code and artifacts are built (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Applies repo-wide; a single concrete capability the system provides belongs in a spec, not here.",
   "type": "object",
   "properties": {
