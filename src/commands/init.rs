@@ -7,7 +7,7 @@ use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
-use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
+use crate::spec::SPECS_DIR;
 use crate::templates;
 use crate::templates::{AGENTS_DIR_NAME, SKILLS_DIR};
 
@@ -39,7 +39,7 @@ const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
+      rules/ (cross-cutting conventions and rules) and specs/ (the
       functionality the system provides).
 ";
 
@@ -87,10 +87,10 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir, &[]).change_context(InitError::Io)?;
     templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
 
-    let fs_specs = spex_dir.join(FUNCTIONAL_SPECS_DIR);
-    fs::create_dir_all(&fs_specs)
+    let specs = spex_dir.join(SPECS_DIR);
+    fs::create_dir_all(&specs)
         .change_context(InitError::Io)
-        .attach_with(|| format!("could not create `{}`", fs_specs.display()))?;
+        .attach_with(|| format!("could not create `{}`", specs.display()))?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
     fs::create_dir_all(&plans)
@@ -286,7 +286,7 @@ fn discover_repositories(
 }
 
 // The repository short name is the full repository name minus the
-// `<project-name>-` prefix, per RS-NAMING-CONVENTION.
+// `<project-name>-` prefix, per NAMING-CONVENTION.
 fn repository_short_name(name: &str, project_name: &str) -> String {
     name.strip_prefix(&format!("{project_name}-"))
         .unwrap_or(name)

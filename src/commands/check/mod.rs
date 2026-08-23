@@ -8,9 +8,8 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
-use crate::functional_spec::{self, FunctionalSpec};
 use crate::rule_spec::{self, Check, CheckKind, RuleSpec, RunScope, Severity};
-use crate::spec::{self, Status};
+use crate::spec::{self, Spec, Status};
 use crate::style::{Log, Style};
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
@@ -92,7 +91,9 @@ struct RepoReport {
 pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
-    let specs = workspace.rule_specs().change_context(CheckError::Workspace)?;
+    let specs = workspace
+        .rule_specs()
+        .change_context(CheckError::Workspace)?;
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -213,8 +214,8 @@ fn fill_preexisting_errors(
         .map(|(name, checks)| {
             let entries = checks
                 .into_iter()
-                .map(|((rs_spec_id, check), baseline)| PreexistingEntry {
-                    rs_spec_id,
+                .map(|((rule_spec_id, check), baseline)| PreexistingEntry {
+                    rule_spec_id,
                     check,
                     files: match baseline {
                         Baseline::WholeCheck => Vec::new(),
@@ -276,7 +277,7 @@ fn report_fill(
 }
 
 // Drops a finding when it matches a repository's pre-existing-error baseline: an
-// `error`-severity finding whose `(rs_spec_id, check)` matches an entry and whose
+// `error`-severity finding whose `(rule_spec_id, check)` matches an entry and whose
 // location file is listed (or the entry lists no files, suppressing the whole
 // check). Warnings and unmatched errors always survive.
 fn is_preexisting(finding: &Finding, baseline: &[PreexistingError]) -> bool {
@@ -319,7 +320,7 @@ fn matches_baseline(
     file: Option<&str>,
 ) -> bool {
     baseline.iter().any(|entry| {
-        entry.rs_spec_id == spec_id
+        entry.rule_spec_id == spec_id
             && entry.check == check
             && (entry.files.is_empty()
                 || file.is_some_and(|file| entry.files.iter().any(|listed| listed == file)))
@@ -571,10 +572,10 @@ fn validate_specs(
         return Ok(());
     };
 
-    let fs_specs = workspace.fs_specs().change_context(CheckError::Workspace)?;
+    let specs = workspace.specs().change_context(CheckError::Workspace)?;
 
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
-    for spec in &fs_specs {
+    for spec in &specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
     // Rule specs are global rules that always apply, so they count as
@@ -583,10 +584,10 @@ fn validate_specs(
         status_by_id.insert(spec.id.as_str(), Status::Active);
     }
 
-    for spec in &fs_specs {
+    for spec in &specs {
         if let Some(finding) = status_finding(
             &spec.id,
-            functional_spec::FUNCTIONAL_SPECS_DIR,
+            spec::SPECS_DIR,
             &spec.acceptance_criteria,
             spec.status,
         ) {
@@ -594,7 +595,7 @@ fn validate_specs(
         }
     }
 
-    for spec in &fs_specs {
+    for spec in &specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
     }
 
@@ -623,14 +624,14 @@ fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> O
 }
 
 fn validate_blocked_by(
-    spec: &FunctionalSpec,
+    spec: &Spec,
     status_by_id: &HashMap<&str, Status>,
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
         let location = Some(format!(
             "{}/{}.yaml",
-            functional_spec::FUNCTIONAL_SPECS_DIR,
+            spec::SPECS_DIR,
             spec.id.to_lowercase()
         ));
         match status_by_id.get(blocker.as_str()) {

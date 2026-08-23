@@ -378,7 +378,7 @@ pub(super) fn run_per_repo_script(
 
 // Scripts are stored at `<base>/scripts/<spec-id-lowercase>/<reference>`, so the
 // `script` field only carries the bare filename. The `id:` field stays
-// uppercase (RS-NAMING-CONVENTION); the on-disk directory is lowercase.
+// uppercase (NAMING-CONVENTION); the on-disk directory is lowercase.
 pub(super) fn resolve_script(reference: &str, base: &Path, spec_id: &str) -> Option<PathBuf> {
     let script = base
         .join(rule_spec::SCRIPTS_DIR)

@@ -5,8 +5,8 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config};
-use crate::functional_spec::{self, FunctionalSpec};
 use crate::rule_spec::{self, RuleSpec};
+use crate::spec::{self, Spec};
 use crate::style::Style;
 
 type Result<T> = core::result::Result<T, Report<WorkspaceError>>;
@@ -19,8 +19,8 @@ pub enum WorkspaceError {
     Config,
     #[error("could not load rule specs")]
     RuleSpecs,
-    #[error("could not load functional specs")]
-    FunctionalSpecs,
+    #[error("could not load specs")]
+    Specs,
 }
 
 // A resolved spex workspace: the spex directory plus its parsed configuration.
@@ -48,8 +48,7 @@ impl Workspace {
             .change_context(WorkspaceError::RuleSpecs)
     }
 
-    pub fn fs_specs(&self) -> Result<Vec<FunctionalSpec>> {
-        functional_spec::load_all(&self.dir.join(functional_spec::FUNCTIONAL_SPECS_DIR))
-            .change_context(WorkspaceError::FunctionalSpecs)
+    pub fn specs(&self) -> Result<Vec<Spec>> {
+        spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(WorkspaceError::Specs)
     }
 }

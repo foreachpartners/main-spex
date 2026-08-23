@@ -19,7 +19,7 @@ mod tests {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$id": "https://spex.test/schemas/id.schema.json",
         "type": "string",
-        "pattern": "^RS-[A-Z]+$"
+        "pattern": "^[A-Z]+$"
     }"#;
 
     fn schema_dir() -> tempfile::TempDir {
@@ -43,7 +43,7 @@ mod tests {
     fn accepts_valid_instance_resolving_cross_file_ref() {
         let dir = schema_dir();
         let validator = validator(&dir);
-        let instance = write(&dir, "ok.yaml", "id: RS-SECRET\n");
+        let instance = write(&dir, "ok.yaml", "id: SECRET\n");
 
         let messages = validate_file(&validator, &instance).expect("validate");
 
@@ -93,7 +93,7 @@ mod tests {
     fn accepts_json_instance() {
         let dir = schema_dir();
         let validator = validator(&dir);
-        let instance = write(&dir, "ok.json", r#"{ "id": "RS-SECRET" }"#);
+        let instance = write(&dir, "ok.json", r#"{ "id": "SECRET" }"#);
 
         let messages = validate_file(&validator, &instance).expect("validate");
 

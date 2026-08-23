@@ -4,10 +4,10 @@ This project is governed by `spex` AI-first specification-driven development fra
 
 ## Artifact chain
 
-BRD (why) → PRD (what) → functional spec (FS, capability) → contract (interface, if applicable) → plan (how, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID (`FS-*`/`RS-*`), annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
+BRD (why) → PRD (what) → spec (capability) → contract (interface, if applicable) → plan (how, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID (`SPEC-*`/`*`), annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
 
-- **Functional spec (FS)** — one coherent capability the system must provide, with acceptance criteria.
-- **Rule spec (RS)** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
+- **Spec** — one coherent capability the system must provide, with acceptance criteria.
+- **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
 
 ## Workspace layout
 
@@ -18,7 +18,7 @@ The workspace root holds this repo (`pepperoni-pizza-spex`, the single source of
 Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
 
 - `spex check` — runs rule-spec checks and gates on `error`-severity findings (`--repo <name>`, `--files <path>...` to scope).
-- `spex coverage` — reports `@spec` annotation and acceptance-criteria coverage for active functional specs.
+- `spex coverage` — reports `@spec` annotation and acceptance-criteria coverage for active specs.
 - `spex info` — prints the resolved config (repos, paths, contracts, rule specs).
 
 After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
@@ -43,17 +43,17 @@ Code should be simple enough that any teammate or AI — not just its author —
 
 ## Commit messages
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rs-specs/RS-COMMIT-MESSAGE-FORMAT.yaml`.
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/COMMIT-MESSAGE-FORMAT.yaml`.
 
-- Use the `fs` scope for functional spec changes (e.g. `feat(fs)`, `fix(fs)`).
-- Use the `rs` scope for rule spec changes (e.g. `feat(rs)`, `fix(rs)`).
-- End every `fs`-scoped description with at least one comma-separated Spec ID: `<Spec ID>[, <Spec ID>]`.
+- Use the `spec` scope for spec changes (e.g. `feat(spec)`, `fix(spec)`).
+- Use the `rule` scope for rule spec changes (e.g. `feat(rule)`, `fix(rule)`).
+- End every `spec`-scoped description with at least one comma-separated Spec ID: `<Spec ID>[, <Spec ID>]`.
 
 Examples:
 
 ```
 style: format md files
-feat(rs): pin dependencies as required by RS-DEPENDENCIRS-RULES
-feat(fs): list available pizzas FS-LIST-PIZZA-MENU
-fix(fs): reject negative quantities FS-CART-ADD-ITEM, FS-CART-VALIDATE
+feat(rule): pin dependencies as required by DEPENDENCIES
+feat(spec): list available pizzas LIST-PIZZA-MENU
+fix(spec): reject negative quantities CART-ADD-ITEM, CART-VALIDATE
 ```

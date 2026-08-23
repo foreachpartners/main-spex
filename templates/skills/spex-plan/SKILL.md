@@ -1,21 +1,21 @@
 ---
 name: spex-plan
-description: Creates a comprehensive implementation plan md file for large-scale, complex features or significant system changes across one or more functional specs. Use for breaking down major initiatives into development tasks, scoping high-effort engineering work, and planning multi-phase architectural rollouts.
+description: Creates a comprehensive implementation plan md file for large-scale, complex features or significant system changes across one or more specs. Use for breaking down major initiatives into development tasks, scoping high-effort engineering work, and planning multi-phase architectural rollouts.
 ---
 
 # Primary Directive
 
-Your goal is to create a new implementation plan markdown file from requested for planning fs specs to be executed by multiple AI agents working in parallel.
+Your goal is to create a new implementation plan markdown file from requested specs to be executed by multiple AI agents working in parallel.
 
 A plan captures the shape of a change — new or changed method signatures, database/schema changes, domain models, handler/endpoint signatures — never its logic, you must read `references/plan-example.md` and follow it's structure.
 
-Your must read requested for planning fs specs, governing rs-specs, contracts, inspect the current code and draft a plan.
+Your must read requested specs, governing rules, contracts, inspect the current code and draft a plan.
 
 Your output must be machine and human-readable, deterministic, and structured for autonomous execution by other AI systems or humans.
 
 # Gather context
 
-Read every planned fs spec in full. Confirm with the user how to handle any unresolved blocker.
+Read every planned spec in full. Confirm with the user how to handle any unresolved blocker.
 
 Resolve a `Repositories scope` for requested changes.
 
@@ -33,15 +33,15 @@ Ground every interface you plan to change, extend or create.
 
 Create a spec file in `<workspace-root>/<project-name>-spex/plans/<spec-id>/<date>-<slug>.md`. `<date>` is today's real date (`YYYY-MM-DD`). `<slug>` is a short lowercase hyphenated summary. The filename stem must validate against `plan-filename.schema.json` and stay within 50 characters.
 
-If more than one fs spec is provided, pick a leading one for `<spec-id>` and generate the slug based on the main changes.
+If more than one spec is provided, pick a leading one for `<spec-id>` and generate the slug based on the main changes.
 
 # Write plan metadata
 
-Write `Functional specs` which user provided.
+Write `Specs` which user provided.
 
 Write `Repositories scope` based on changes we need to implement (don't include spex itself).
 
-Read all `rule_spec_ids` in `spex.yaml` for resolved `Repositories scope` and write `Rule specs` in plan that are applicable to changes.
+Read all `rule_spec_ids` in `spex.yaml` for resolved `Repositories scope` and write `Rules` in plan that are applicable to changes.
 
 # Write the steps and tasks
 

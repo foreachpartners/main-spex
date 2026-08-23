@@ -1,13 +1,13 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yaml), add each repository's applicable rs-specs, and record each repository's existing interface contracts, if any, in spex.yaml. Use this skill to complete spex setup after running `spex init`.
+description: Fill in the missing descriptions in the workspace config (spex.yaml), add each repository's applicable rules, and record each repository's existing interface contracts, if any, in spex.yaml. Use this skill to complete spex setup after running `spex init`.
 ---
 
 # Describe the Workspace (spex.yaml)
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rs-specs actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rs-specs, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -41,7 +41,7 @@ For each repository missing a description, look at its real contents (resolve `p
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
 - Skim the top-level directory layout and entry points when the above are missing.
 - Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 4b.
-- For each rs-spec file in the spex repository's `rs-specs/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `RS-OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `RS-GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 4c.
+- For each rule file in the spex repository's `rules/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 4c.
 
 Infer the project `description` from `project_name` and the combined picture of its repositories. If the repositories don't make the project's purpose clear, ask the user one short question rather than guessing.
 
@@ -86,27 +86,27 @@ Example `spex.yaml` repository entry after collecting a contract:
     - path: contracts/api.openapi.yaml
       description: REST OpenAPI spec for the orders API.
   rule_spec_ids:
-    - RS-SECRET-HANDLING
+    - SECRET-HANDLING
 ```
 
-## Step 4c — Add rs-specs that apply
+## Step 4c — Add rules that apply
 
-`spex init` copies every bundled rs-spec into the spex repository's `rs-specs/` folder, but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. Not every rs-spec applies to every repository — a stack- or interface-specific one (for example `RS-OPENAPI-CONVENTIONS`, `RS-GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `OPENAPI-CONVENTIONS`, `GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
-1. For each repository, using the judgment from Step 2, list the rs-spec IDs whose file in `rs-specs/` genuinely applies to it.
-2. Show the user, per repository, which rs-specs you propose to add and a one-line reason each (for example "RS-OPENAPI-CONVENTIONS: this repository exposes a REST API").
-3. Only after the user confirms a given rs-spec applies, add its ID to that repository's `rule_spec_ids` list in `spex.yaml`. Leave out any rs-spec the user is unsure about or doesn't want.
-4. Do not modify any rs-spec's file under `rs-specs/` while doing this; this only edits which repositories reference it in `spex.yaml`.
+1. For each repository, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
+2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "OPENAPI-CONVENTIONS: this repository exposes a REST API").
+3. Only after the user confirms a given rule applies, add its ID to that repository's `rule_spec_ids` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
+4. Do not modify any rule's file under `rules/` while doing this; this only edits which repositories reference it in `spex.yaml`.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-### Remove rs-specs that apply to no repository
+### Remove rules that apply to no repository
 
-Once every repository's `rule_spec_ids` is settled, an rs-spec in `rs-specs/` that ended up referenced by no repository at all is dead weight in this workspace.
+Once every repository's `rule_spec_ids` is settled, an rule in `rules/` that ended up referenced by no repository at all is dead weight in this workspace.
 
-1. Compute the set of rs-spec IDs referenced by at least one repository's `rule_spec_ids`. Any bundled rs-spec in `rs-specs/` outside that set is unused workspace-wide.
-2. Show the user the unused rs-spec IDs and confirm they should be removed. This is a deletion — no rs-spec is removed without the user's explicit confirmation.
-3. For each confirmed ID: delete its file from `rs-specs/` (and any scripts under `scripts/<spec-id>/` it owns), and add the ID to the top-level `rule_spec_ids_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
-4. Leave any rs-spec the user wants to keep untouched, even if unused today.
+1. Compute the set of rule IDs referenced by at least one repository's `rule_spec_ids`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
+2. Show the user the unused rule IDs and confirm they should be removed. This is a deletion — no rule is removed without the user's explicit confirmation.
+3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<spec-id>/` it owns), and add the ID to the top-level `rule_spec_ids_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 5 — Fill in the workspace folder icons
@@ -138,12 +138,12 @@ Example result:
 
 Use two different templates depending on which repository this is, and follow the chosen template's sections and order exactly — do not add, drop, reorder, or rename its sections, and do not blend in sections from the other template:
 
-- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `fs-specs/`, `rs-specs/`, `contracts/`, `plans/`, `scripts/`) and its `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`) with this workspace's real values.
+- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `specs/`, `rules/`, `contracts/`, `plans/`, `scripts/`) and its `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`) with this workspace's real values.
 - **Every other repository**: copy the shape of [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) exactly, filling each section with this repository's real facts, pulled from what you learned in Step 2 — never invented. Omit a section if the repository has nothing genuine to put in it (for example `# Paths` when the layout is too flat or generic to be worth documenting, or `# Rules` when no test/lint/format policy exists in CI config or contributor docs) rather than inventing content to keep the section.
 
 ## Step 6 — Point to the next skill
 
-Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-functional-spec` for a capability the system must provide, or `spex-rule-spec` for a cross-cutting convention or rule. Note that it is better to start a new chat first to save context.
+Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-spec` for a capability the system must provide, or `spex-rule` for a cross-cutting convention or rule. Note that it is better to start a new chat first to save context.
 
 ## Field placement
 
@@ -161,7 +161,7 @@ repositories:
       - path: contracts/api.openapi.yaml
         description: REST OpenAPI spec for the orders API.
     rule_spec_ids:
-      - RS-SECRET-HANDLING
+      - SECRET-HANDLING
 ```
 
 ## Quality bar
@@ -170,8 +170,8 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
-- Each repository's `rule_spec_ids` lists exactly the rs-specs that genuinely apply to it; every addition was confirmed by the user with a reason.
-- Any rs-spec that applies to no repository was either removed (its file deleted from `rs-specs/` and its ID added to `rule_spec_ids_removed`) or deliberately kept, per the user's confirmation.
+- Each repository's `rule_spec_ids` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
+- Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rule_spec_ids_removed`) or deliberately kept, per the user's confirmation.
 - Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout and commands, confirmed by the user.
-- No existing field or path is changed, and no rs-spec is added or removed without user confirmation.
+- No existing field or path is changed, and no rule is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

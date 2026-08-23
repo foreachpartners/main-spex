@@ -25,9 +25,8 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
-  rule_spec.rs   Rule-spec model
-  functional_spec.rs    Functional-spec model
-  spec.rs           Shared spec primitives (status, acceptance-criteria checkbox)
+  rule_spec.rs   Rule model
+  spec.rs           Spec model (status, acceptance-criteria checkbox)
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
@@ -38,7 +37,7 @@ templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
   skills/           Agent skills
-  rs-specs/         Reusable rule-spec templates
+  rules/         Reusable rule-spec templates
 examples/           Sample projects (pepperoni-pizza, pepperoni-pizza-no-spex)
 tests/              Integration tests that build and run the spex binary
 ```
@@ -61,5 +60,5 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Writing style**: Follow the authoring conventions in `templates/rs-specs/rs-writing-style.yaml` (e.g. path placeholders) across docs, skills, and schemas.
+- **Writing style**: Follow the authoring conventions in `templates/rules/writing-style.yaml` (e.g. path placeholders) across docs, skills, and schemas.
 - **Single source of truth**: `docs/specification.md` defines how the framework behaves. Treat it as authoritative, and update it whenever you change framework behavior.

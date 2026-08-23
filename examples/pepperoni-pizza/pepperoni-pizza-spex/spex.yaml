@@ -16,14 +16,14 @@ repositories:
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
     rule_spec_ids:
-      - RS-COMMIT-MESSAGE-FORMAT
-      - RS-CONFIGURABLE-NETWORK-BIND
-      - RS-DEPENDENCIES
-      - RS-NAMING-CONVENTION
-      - RS-SECRET-HANDLING
-      - RS-SPEC-ID-TRACING
-      - RS-WRITING-STYLE
-      - RS-TESTING
+      - COMMIT-MESSAGE-FORMAT
+      - CONFIGURABLE-NETWORK-BIND
+      - DEPENDENCIES
+      - NAMING-CONVENTION
+      - SECRET-HANDLING
+      - SPEC-ID-TRACING
+      - WRITING-STYLE
+      - TESTING
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     description: >-
@@ -35,24 +35,24 @@ repositories:
         description: >-
           Figma references for the frontend's UI.
     rule_spec_ids:
-      - RS-COMMIT-MESSAGE-FORMAT
-      - RS-DEPENDENCIES
-      - RS-NAMING-CONVENTION
-      - RS-SECRET-HANDLING
-      - RS-SPEC-ID-TRACING
-      - RS-WRITING-STYLE
-      - RS-TESTING
+      - COMMIT-MESSAGE-FORMAT
+      - DEPENDENCIES
+      - NAMING-CONVENTION
+      - SECRET-HANDLING
+      - SPEC-ID-TRACING
+      - WRITING-STYLE
+      - TESTING
   - repository_name: pepperoni-pizza-spex
     repository_short_name: spex
     description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
+      rules/ (cross-cutting conventions and rules) and specs/ (the
       capabilities the system provides).
     path: .
     rule_spec_ids:
-      - RS-COMMIT-MESSAGE-FORMAT
-      - RS-DEPENDENCIES
-      - RS-NAMING-CONVENTION
-      - RS-SECRET-HANDLING
-      - RS-WRITING-STYLE
+      - COMMIT-MESSAGE-FORMAT
+      - DEPENDENCIES
+      - NAMING-CONVENTION
+      - SECRET-HANDLING
+      - WRITING-STYLE

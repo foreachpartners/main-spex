@@ -14,34 +14,32 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly. Comes in two types, distinguished by the Spec ID prefix: functional (`FS`) and rule (`RS`). The dividing line is capability versus convention: a specific capability the system must provide → `FS`; a rule every change must follow, enforceable repo-wide → `RS`.
-
-- **Functional Spec** (`FS`) — describes _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many functional specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target).
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
-  id: FS-PLACE-PIZZA-ORDER
+  id: PLACE-PIZZA-ORDER
   title: Customer can place an order
   acceptance_criteria:
     - "[ ] MUST return 201 with the created order from POST /orders"
   ```
 
-- **Rule Spec** (`RS`) — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a functional spec (`FS`), not a rule spec.
+- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
 
   ```yaml
-  id: RS-SECRET-HANDLING
+  id: SECRET-HANDLING
   title: Secret protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
   ```
 
-- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. The prefix encodes the spec type.
+- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability.
 
   ```text
-  FS-PLACE-PIZZA-ORDER
-  RS-SECRET-HANDLING
+  PLACE-PIZZA-ORDER
+  SECRET-HANDLING
   ```
 
-- **Contract** — derived from a functional spec, if applicable. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.
+- **Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.
 
   ```yaml
   paths:
@@ -55,7 +53,7 @@
 
 - **Design reference** — a contract variant for UI-facing specs: a markdown document linking each spec to its visual design (e.g. a Figma frame), annotated like any other contract. Used when the interface a spec exposes is visual rather than machine-readable.
 
-- **Plan** — derived from one or more approved functional specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`. A plan is a working document: it exists to split a large change into reviewable, resumable steps while it's in flight. Once every step is `completed`, `spex-implement` deletes the plan file — the spec, code, and tests already record what shipped, more accurately and durably than a step-by-step plan would.
+- **Plan** — derived from one or more approved specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`. A plan is a working document: it exists to split a large change into reviewable, resumable steps while it's in flight. Once every step is `completed`, `spex-implement` deletes the plan file — the spec, code, and tests already record what shipped, more accurately and durably than a step-by-step plan would.
 
   ```md
   # Plan: Customer can place an order

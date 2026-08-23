@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use crate::commands::check_schema;
-use crate::functional_spec::FUNCTIONAL_SPECS_DIR;
 use crate::rule_spec::{RULE_SPECS_DIR, RuleSpec, SCRIPTS_DIR};
+use crate::spec::SPECS_DIR;
 use crate::templates::SCHEMAS_DIR;
 
 use super::runners::resolve_script;
@@ -12,9 +12,9 @@ use super::{Finding, Severity};
 
 // Findings from this module are attributed to a synthetic spec id rather than
 // a real rule spec, since spex's own conformance checks are built into `spex
-// check` itself rather than declared in a rs-spec (they must run even before
-// any rs-specs can be trusted to parse).
-const SPEC_ID: &str = "RS-SPEX-INTERNAL-CONFORMANCE";
+// check` itself rather than declared in a rule (they must run even before
+// any rules can be trusted to parse).
+const SPEC_ID: &str = "SPEX-INTERNAL-CONFORMANCE";
 const CONFORM_CHECK: &str = "spec-files-conform";
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
@@ -24,8 +24,8 @@ struct IdOnly {
 }
 
 // Validates the spex repository's own spec files: `spex.yaml` and every file
-// in `fs-specs/` and `rs-specs/` must satisfy its JSON Schema, each spec file
-// must be named `<id-lowercase>.yaml`, every script a rs-spec check
+// in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
+// must be named `<id-lowercase>.yaml`, every script a rule check
 // references must exist under `scripts/<spec-id-lowercase>/`, and every
 // spec's acceptance criteria must be ordered by RFC 2119 commitment level.
 pub(super) fn validate_conformance(
@@ -81,18 +81,18 @@ fn validate_schema(spex_dir: &Path, findings: &mut Vec<Finding>) {
 
     validate_schema_group(
         spex_dir,
-        &yaml_files(&spex_dir.join(FUNCTIONAL_SPECS_DIR)),
-        "fs-spec.schema.json",
+        &yaml_files(&spex_dir.join(SPECS_DIR)),
+        "spec.schema.json",
         findings,
     );
     validate_schema_group(
         spex_dir,
         &yaml_files(&spex_dir.join(RULE_SPECS_DIR)),
-        "rs-spec.schema.json",
+        "rule.schema.json",
         findings,
     );
 
-    for file in yaml_files(&spex_dir.join(FUNCTIONAL_SPECS_DIR)) {
+    for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
         check_filename_matches_id(spex_dir, &file, findings);
     }
     for file in yaml_files(&spex_dir.join(RULE_SPECS_DIR)) {
@@ -139,7 +139,7 @@ fn validate_schema_group(
 }
 
 // A spec file must be named after its own id, lowercased
-// (RS-NAMING-CONVENTION: uppercase id, lowercase filename).
+// (NAMING-CONVENTION: uppercase id, lowercase filename).
 fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Finding>) {
     let Ok(text) = std::fs::read_to_string(file) else {
         return;
@@ -160,7 +160,7 @@ fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Fi
     }
 }
 
-// Every script a rs-spec check references must exist at
+// Every script a rule check references must exist at
 // `scripts/<spec-id-lowercase>/<script>`.
 fn validate_script_references(
     spex_dir: &Path,
@@ -205,7 +205,7 @@ fn rfc2119_rank(text: &str) -> Option<(u8, &'static str)> {
 // Verifies each spec file lists its `acceptance_criteria` in RFC 2119
 // commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
 fn validate_ac_order(spex_dir: &Path, findings: &mut Vec<Finding>) {
-    for dir_name in [FUNCTIONAL_SPECS_DIR, RULE_SPECS_DIR] {
+    for dir_name in [SPECS_DIR, RULE_SPECS_DIR] {
         for file in yaml_files(&spex_dir.join(dir_name)) {
             check_ac_order(spex_dir, &file, findings);
         }

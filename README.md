@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal
 
-spex helps you move fast with AI, not stand in your way. Functional specs (FS) and rule specs (RS) give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
+spex helps you move fast with AI, not stand in your way. Specs and rules give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
 
 ## Quickstart
 
@@ -34,7 +34,7 @@ pepperoni-pizza/                       # workspace root
     └── pepperoni-pizza.code-workspace # editor workspace file
 ```
 
-Repository directories follow `<project-name>-<repository-short-name>` (RS-NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
+Repository directories follow `<project-name>-<repository-short-name>` (NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
 
 1. Put all project git repos in one shared folder (workspace root folder)
 2. Run terminal command `spex init` in workspace root to create the `pepperoni-pizza-spex` repo
@@ -49,24 +49,24 @@ Repository directories follow `<project-name>-<repository-short-name>` (RS-NAMIN
 
 Workflow core is AI agent skills and CLI commands.
 
-1. **Create functional spec** `/spex-functional-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/fs-specs/fs-place-pizza-order.yaml`
-2. **Derive the contract** for a functional spec `/spex-contract FS-PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. **Create an implementation plan** for a spec `/spex-plan FS-PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/fs-place-pizza-order/2024-11-25_secret-handling.md`
-4. **Implement the plan** `/spex-implement FS-PLACE-PIZZA-ORDER`. Will execute the `RS-SECRET-HANDLING` plan using multiple agents working in parallel per step, then delete the plan file once every step is complete — the spec and code already record what shipped.
-5. **Verify** check the results with `spex check` - will run all rule spec (RS) checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and test.
-6. **Review** `/spex-review FS-PLACE-PIZZA-ORDER`.
+1. **Create spec** `/spex-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
+2. **Derive the contract** for a spec `/spex-contract PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. **Create an implementation plan** for a spec `/spex-plan PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/place-pizza-order/2024-11-25-place-pizza-order.md`
+4. **Implement the plan** `/spex-implement PLACE-PIZZA-ORDER`. Will execute the plan using multiple agents working in parallel per step and delete after completion.
+5. **Verify** check the results with `spex check` - will run all rule checks related to your changes and `spex coverage` - will check if all specs have a contract, implementation, and tests.
+6. **Review** self review with `/spex-review PLACE-PIZZA-ORDER` to recheck that everything was done correctly.
 
-Tip: you can combine skills `/spex-functional-spec /spex-contract /spex-plan`
+Tip: you can combine skills `/spex-spec /spex-contract`
 
-**Create a rule spec**: `/spex-rule-spec [secret handling]`. Will create `pepperoni-pizza-spex/rs-specs/rs-secret-handling.yaml`
+**Create a rule**: `/spex-rule [secret handling]`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml`
 
 ## Framework Principles
 
 **AI over Manual Coding**: Used right, AI writes code faster than a developer while keeping quality high. It's cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
 
-**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted a blue snake with big eyes! Clear, well-defined functional specifications (`FS`) eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
+**Specs over Guesswork**: Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. If I ask an AI to "make me a snake game", it will — but it will be the snake game the AI imagined, not the one I wanted, because I wanted a blue snake with big eyes! Clear, well-defined specs eliminate guesswork, providing explicit acceptance criteria for both the AI to follow and the developer to verify. Specs will stay relevant for a long time even if AI becomes much better and faster, because you need to describe an idea from your head that will meet your expectations, not someone else's.
 
-**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS`) instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a functional spec (`FS`), not a rule spec.
+**Technical rules and patterns as Specs**: Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rules instead of living as tribal knowledge to ensure project maintainability over the long term. They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is a spec, not a rule.
 
 **Human in control**: Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. With spex, the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything. The codebase stays maintainable, and every change traces back to a decision a human approved.
 
@@ -82,7 +82,7 @@ For example, a pizza ordering feature moves through the flow like this:
 
 1. **BRD** — sell pizza online to increase sales
 2. **PRD** — customers can pick a pizza on the website and pay online
-3. **Functional Spec** — `FS-PLACE-PIZZA-ORDER`: Customer can place an order.
+3. **Spec** — `PLACE-PIZZA-ORDER`: Customer can place an order.
 
    Acceptance criteria:
    - MUST return 201 from POST /orders with the created order
@@ -99,7 +99,7 @@ flowchart TD
     PRD --> Func
 
     subgraph Traced ["traced by spec ID"]
-        Func["Functional Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
+        Func["Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
         Contract --> Plan["Plan (optional) — how to build it"]
         Plan --> Impl["Implementation — code"]
         Impl --> Test["Test — proof"]
@@ -108,9 +108,9 @@ flowchart TD
 
 ### Rule specs live outside the feature flow — they govern how every artifact is built:
 
-For example, the rule `RS-SECRET-HANDLING` works like this:
+For example, the rule `SECRET-HANDLING` works like this:
 
-1. **Rule Spec** — `RS-SECRET-HANDLING`: "Secret protection"
+1. **Rule Spec** — `SECRET-HANDLING`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 

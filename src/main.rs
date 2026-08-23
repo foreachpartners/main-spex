@@ -1,6 +1,5 @@
 mod commands;
 mod config;
-mod functional_spec;
 mod rule_spec;
 mod spec;
 mod style;
@@ -41,14 +40,14 @@ enum Commands {
     #[command(about = "Initialize the spex workspace repository")]
     Init,
     #[command(
-        about = "Rewrite bundled skills, schemas, scripts and rs-specs with the latest versions"
+        about = "Rewrite bundled skills, schemas, scripts and rules with the latest versions"
     )]
     Update,
     #[command(about = "Run rule spec checks against the workspace")]
     Check(CheckArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
-    #[command(about = "Report annotation coverage of active functional specs")]
+    #[command(about = "Report annotation coverage of active specs")]
     Coverage,
     #[command(about = "Print the resolved spex configuration, for scripting")]
     Info(InfoArgs),

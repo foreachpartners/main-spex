@@ -8,7 +8,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::Config;
-use crate::functional_spec::{CoverageLayer, FunctionalSpec, Status};
+use crate::spec::{CoverageLayer, Spec, Status};
 use crate::style::Style;
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
@@ -71,9 +71,7 @@ impl SpecRow {
 
 pub fn run() -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
-    let specs = workspace
-        .fs_specs()
-        .change_context(CoverageError::Workspace)?;
+    let specs = workspace.specs().change_context(CoverageError::Workspace)?;
 
     let found = scan_workspace(&workspace.dir, &workspace.config)?;
 
@@ -131,7 +129,7 @@ struct Scanner {
 
 impl Scanner {
     fn new() -> Self {
-        let id = r"(?:FS|RS)-[A-Z]+(?:-[A-Z]+)*";
+        let id = r"[A-Z]+(?:-[A-Z]+)*";
         Self {
             spec: Regex::new(&format!(
                 r"@spec\s+(contract|impl|test)\s+({id}(?:\s*,\s*{id})*)"
@@ -171,7 +169,7 @@ fn canonical(path: &Path) -> std::path::PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
-fn active_rows(specs: &[FunctionalSpec], found: &Found) -> Vec<SpecRow> {
+fn active_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
         .filter(|spec| spec.status == Status::Active)
@@ -203,7 +201,7 @@ fn missing_summary(row: &SpecRow) -> String {
         .join(", ")
 }
 
-fn report(config: &Config, specs: &[FunctionalSpec], found: &Found) -> ExitCode {
+fn report(config: &Config, specs: &[Spec], found: &Found) -> ExitCode {
     let style = Style::detect();
 
     println!(
@@ -232,11 +230,8 @@ fn report(config: &Config, specs: &[FunctionalSpec], found: &Found) -> ExitCode 
     }
 }
 
-fn print_status_totals(style: &Style, specs: &[FunctionalSpec]) {
-    println!(
-        "{}",
-        style.bold(&format!("Functional specs ({})", specs.len()))
-    );
+fn print_status_totals(style: &Style, specs: &[Spec]) {
+    println!("{}", style.bold(&format!("Specs ({})", specs.len())));
     if specs.is_empty() {
         println!("  {}", style.dim("none found"));
         println!();

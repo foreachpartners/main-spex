@@ -1,0 +1,21 @@
+id: DELIVERY-TIME
+title: Show customers an estimated delivery time for their order
+description: >-
+  Shows customers how long their order will take based on the current kitchen
+  workload, both as a live estimate in the cart and as a countdown once the
+  order is placed.
+acceptance_criteria:
+  - "[x] MUST compute the delivery-time estimate in the `api` using 1 minute to make one pizza"
+  - "[x] MUST compute the delivery-time estimate in the `api` using 2 workers on shift, each making one pizza at a time"
+  - "[x] MUST base the delivery-time estimate in the `api` on the total pizzas to clear, equal to the pizzas in the order plus the pizzas across all in-progress deliveries"
+  - "[x] MUST calculate the delivery-time estimate in the `api` as the total pizzas to clear divided by the number of workers, rounded up to the next whole minute"
+  - "[x] MUST express the delivery-time estimate in the `api` in whole seconds, converting the whole-minute result at 60 seconds per minute"
+  - "[x] MUST expose the delivery-time estimate from the `api` for a given set of pizzas so the frontend can show it before the order is placed"
+  - "[x] MUST include the delivery-time estimate in the `api` on each delivery it returns, both for the created order and in the in-progress deliveries listing"
+  - "[x] MUST include on each in-progress delivery in the `api` the remaining whole seconds until it arrives, counting down from the estimate as time passes since the order was placed"
+  - "[x] MUST display the delivery-time estimate in the `frontend` in the cart as the customer adds pizzas"
+  - "[x] MUST display the remaining delivery time in the `frontend` as the delivery time on the in-progress order, refreshing as the `api` is polled"
+scope:
+  - api
+  - frontend
+status: active

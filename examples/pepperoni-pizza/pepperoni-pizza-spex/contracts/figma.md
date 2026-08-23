@@ -2,7 +2,7 @@
 
 Visual reference per UI part.
 
-<!-- @spec contract FS-DELIVERY-TIME -->
+<!-- @spec contract DELIVERY-TIME -->
 
 ## Delivery time
 

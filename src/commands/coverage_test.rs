@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::functional_spec::{CoverageLayer, FunctionalSpec, Status};
+    use crate::spec::{CoverageLayer, Spec, Status};
 
-    fn spec(id: &str, status: Status) -> FunctionalSpec {
-        FunctionalSpec {
+    fn spec(id: &str, status: Status) -> Spec {
+        Spec {
             id: id.to_string(),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
@@ -31,8 +31,8 @@ mod tests {
 
     #[test]
     fn scan_collects_each_layer_from_spec_annotations() {
-        let found = scan("// @spec contract FS-A\n// @spec impl FS-A\n// @spec test FS-A\n");
-        let layers = found.get("FS-A").expect("FS-A present");
+        let found = scan("// @spec contract A\n// @spec impl A\n// @spec test A\n");
+        let layers = found.get("A").expect("A present");
         assert!(layers.contains(&CoverageLayer::Contract));
         assert!(layers.contains(&CoverageLayer::Impl));
         assert!(layers.contains(&CoverageLayer::Test));
@@ -40,12 +40,12 @@ mod tests {
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
-        let found = scan("// @spec test FS-A, FS-B, RS-RATE-LIMIT\n");
-        assert!(found.get("FS-A").unwrap().contains(&CoverageLayer::Test));
-        assert!(found.get("FS-B").unwrap().contains(&CoverageLayer::Test));
+        let found = scan("// @spec test A, B, RATE-LIMIT\n");
+        assert!(found.get("A").unwrap().contains(&CoverageLayer::Test));
+        assert!(found.get("B").unwrap().contains(&CoverageLayer::Test));
         assert!(
             found
-                .get("RS-RATE-LIMIT")
+                .get("RATE-LIMIT")
                 .unwrap()
                 .contains(&CoverageLayer::Test)
         );
@@ -53,25 +53,15 @@ mod tests {
 
     #[test]
     fn scan_treats_xspec_as_contract() {
-        let found = scan("        x-spec: FS-A\n");
-        assert!(
-            found
-                .get("FS-A")
-                .unwrap()
-                .contains(&CoverageLayer::Contract)
-        );
-        assert!(!found.get("FS-A").unwrap().contains(&CoverageLayer::Impl));
+        let found = scan("        x-spec: A\n");
+        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
+        assert!(!found.get("A").unwrap().contains(&CoverageLayer::Impl));
     }
 
     #[test]
     fn scan_treats_quoted_xspec_as_contract() {
-        let found = scan("x-spec: \"FS-A\"\n");
-        assert!(
-            found
-                .get("FS-A")
-                .unwrap()
-                .contains(&CoverageLayer::Contract)
-        );
+        let found = scan("x-spec: \"A\"\n");
+        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
     }
 
     #[test]
@@ -81,7 +71,7 @@ mod tests {
         std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
         std::fs::write(
             spex_dir.join("contracts/api.openapi.yaml"),
-            "      x-spec: FS-A\n",
+            "      x-spec: A\n",
         )
         .expect("write contract");
 
@@ -91,30 +81,25 @@ mod tests {
         .expect("parse config");
 
         let found = scan_workspace(spex_dir, &config).expect("scan");
-        assert!(
-            found
-                .get("FS-A")
-                .unwrap()
-                .contains(&CoverageLayer::Contract)
-        );
+        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
     }
 
     #[test]
     fn active_rows_ignores_non_active_specs() {
         let specs = vec![
-            spec("FS-A", Status::Active),
-            spec("FS-B", Status::Planned),
-            spec("FS-C", Status::Deprecated),
+            spec("A", Status::Active),
+            spec("B", Status::Planned),
+            spec("C", Status::Deprecated),
         ];
         let found = Found::new();
         let rows = active_rows(&specs, &found);
         let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
-        assert_eq!(ids, vec!["FS-A"]);
+        assert_eq!(ids, vec!["A"]);
     }
 
     #[test]
     fn omitting_status_defaults_to_planned_and_is_ignored() {
-        let spec: FunctionalSpec = serde_yaml_ng::from_str("id: FS-A\n").expect("parse spec");
+        let spec: Spec = serde_yaml_ng::from_str("id: A\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
         let rows = active_rows(&[spec], &Found::new());
@@ -123,10 +108,9 @@ mod tests {
 
     #[test]
     fn active_rows_carries_coverage_ignore() {
-        let spec: FunctionalSpec = serde_yaml_ng::from_str(
-            "id: FS-A\nstatus: active\ncoverage_ignore: [contract, test]\n",
-        )
-        .expect("parse spec");
+        let spec: Spec =
+            serde_yaml_ng::from_str("id: A\nstatus: active\ncoverage_ignore: [contract, test]\n")
+                .expect("parse spec");
         let rows = active_rows(&[spec], &Found::new());
         let row = &rows[0];
         assert!(!row.is_required(CoverageLayer::Contract));
@@ -136,13 +120,13 @@ mod tests {
 
     #[test]
     fn missing_summary_lists_layers_in_order() {
-        let row = row("FS-A", &[], &[]);
+        let row = row("A", &[], &[]);
         assert_eq!(missing_summary(&row), "impl, test, contract");
     }
 
     #[test]
     fn missing_contract_is_a_gap_by_default() {
-        let row = row("FS-A", &[CoverageLayer::Impl, CoverageLayer::Test], &[]);
+        let row = row("A", &[CoverageLayer::Impl, CoverageLayer::Test], &[]);
         assert!(row.has_gap());
         assert!(!row.fully_covered());
         assert_eq!(missing_summary(&row), "contract");
@@ -151,7 +135,7 @@ mod tests {
     #[test]
     fn ignored_layer_is_not_a_gap() {
         let row = row(
-            "FS-A",
+            "A",
             &[CoverageLayer::Impl, CoverageLayer::Test],
             &[CoverageLayer::Contract],
         );
@@ -163,7 +147,7 @@ mod tests {
     #[test]
     fn missing_ignored_impl_is_not_a_gap() {
         let row = row(
-            "FS-A",
+            "A",
             &[CoverageLayer::Test, CoverageLayer::Contract],
             &[CoverageLayer::Impl],
         );
@@ -173,14 +157,14 @@ mod tests {
 
     #[test]
     fn missing_test_is_a_gap() {
-        let row = row("FS-A", &[CoverageLayer::Impl, CoverageLayer::Contract], &[]);
+        let row = row("A", &[CoverageLayer::Impl, CoverageLayer::Contract], &[]);
         assert!(row.has_gap());
         assert_eq!(missing_summary(&row), "test");
     }
 
     #[test]
     fn unimplemented_ac_is_a_gap() {
-        let mut row = row("FS-A", &CoverageLayer::ALL, &[]);
+        let mut row = row("A", &CoverageLayer::ALL, &[]);
         row.ac_done = 1;
         row.ac_total = 2;
         assert!(row.has_gap());
@@ -189,7 +173,7 @@ mod tests {
 
     #[test]
     fn all_layers_and_ac_complete_is_fully_covered() {
-        let mut row = row("FS-A", &CoverageLayer::ALL, &[]);
+        let mut row = row("A", &CoverageLayer::ALL, &[]);
         row.ac_done = 3;
         row.ac_total = 3;
         assert!(!row.has_gap());
@@ -198,8 +182,8 @@ mod tests {
 
     #[test]
     fn active_rows_carries_ac_counts() {
-        let spec: FunctionalSpec = serde_yaml_ng::from_str(
-            "id: FS-A\nstatus: active\nacceptance_criteria:\n  - \"[x] MUST do a\"\n  - \"[ ] MUST do b\"\n",
+        let spec: Spec = serde_yaml_ng::from_str(
+            "id: A\nstatus: active\nacceptance_criteria:\n  - \"[x] MUST do a\"\n  - \"[ ] MUST do b\"\n",
         )
         .expect("parse spec");
         let rows = active_rows(&[spec], &Found::new());
@@ -210,7 +194,7 @@ mod tests {
     #[test]
     fn full_coverage_has_no_gap() {
         let row = row(
-            "FS-A",
+            "A",
             &[
                 CoverageLayer::Impl,
                 CoverageLayer::Test,

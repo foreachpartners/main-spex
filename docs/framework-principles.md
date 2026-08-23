@@ -14,7 +14,7 @@ spex is built around this premise: the agent writes every artifact — specs, co
 
 Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Ask an AI to "make me a snake game" and it will — but it will be the snake game the AI imagined, not the one you wanted, because you wanted a blue snake with big eyes.
 
-Clear, well-defined functional specs (`FS-*`) eliminate guesswork: they provide explicit acceptance criteria for the AI to follow and for the developer to verify. Specs stay relevant for a long time even as models get faster and better, because they describe an idea from your head that must meet your — or your customer's — expectations, not someone else's.
+Clear, well-defined specs (`SPEC-*`) eliminate guesswork: they provide explicit acceptance criteria for the AI to follow and for the developer to verify. Specs stay relevant for a long time even as models get faster and better, because they describe an idea from your head that must meet your — or your customer's — expectations, not someone else's.
 
 Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
@@ -22,9 +22,9 @@ Asking an agent to "implement me a snake game where snake is blue and has big ey
 
 ## 3. Technical rules and patterns as Specs
 
-Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`RS-*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
+Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
 
-They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability, captured as a functional spec (`FS-*`).
+They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability, captured as a spec (`SPEC-*`).
 
 **Violation test**: a code-style or security rule lives only in someone's head or a chat message — it is applied inconsistently and cannot be enforced.
 
@@ -51,22 +51,22 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 | Compilation         | `cargo build`, `tsc`, `protoc`     | Type checking, contract-code alignment          |
 | Linting             | `clippy`, `eslint`, `markdownlint` | Code style, formatting                          |
 | Spec checks         | `spex check`                       | rule-spec `regexp` / `glob` / `script` findings |
-| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active FS spec |
+| Coverage            | `spex coverage`                    | Missing `@spec` annotation on an active spec    |
 | Schema validation   | `spex check-schema`                | A spec file invalid against its bundled schema  |
 | Contract validation | OpenAPI validator, proto lint      | Contract syntax correctness                     |
 | Test execution      | `cargo test`, `vitest`             | Pass / fail — a factual result                  |
 
 **AI — fuzzy logic** (requires interpretation, context, judgment):
 
-| Category             | Why it is not automatable                              | Example                          |
-| -------------------- | ------------------------------------------------------ | -------------------------------- |
-| Spec writing         | Translating a business need into acceptance criteria   | `spex-functional-spec` skill     |
-| Contract design      | Trade-off choices, schema shape                        | REST vs gRPC, response shape     |
-| Code generation      | Translating a spec and contract into an implementation | Implement `FS-PLACE-PIZZA-ORDER` |
-| Test generation      | Choosing scenarios and edge cases                      | E2E from acceptance criteria     |
-| Plan splitting       | Ordering work into parallel-safe steps                 | `spex-plan` skill                |
-| Check triage         | False positive vs real violation vs script bug         | `spex check` output review       |
-| Semantic code review | Logic errors beyond a linter's scope                   | Business logic, race conditions  |
+| Category             | Why it is not automatable                              | Example                         |
+| -------------------- | ------------------------------------------------------ | ------------------------------- |
+| Spec writing         | Translating a business need into acceptance criteria   | `spex-spec` skill               |
+| Contract design      | Trade-off choices, schema shape                        | REST vs gRPC, response shape    |
+| Code generation      | Translating a spec and contract into an implementation | Implement `PLACE-PIZZA-ORDER`   |
+| Test generation      | Choosing scenarios and edge cases                      | E2E from acceptance criteria    |
+| Plan splitting       | Ordering work into parallel-safe steps                 | `spex-plan` skill               |
+| Check triage         | False positive vs real violation vs script bug         | `spex check` output review      |
+| Semantic code review | Logic errors beyond a linter's scope                   | Business logic, race conditions |
 
 ## 6. Simplicity
 
@@ -98,14 +98,14 @@ Every fact has exactly one authoritative source. Everything else references it.
 
 Duplication has always been a source of bugs. With AI-assisted development it becomes critical: agents generate code fast, copies diverge faster, and a duplicated fact falls out of sync before anyone notices.
 
-| Fact                              | Single source                                                                     | Not duplicated to                                |
-| --------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| Fact                              | Single source                                                                                                             | Not duplicated to                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | HTTP / gRPC / event interface     | Native contract at the `path` declared in `spex.yaml` (OpenAPI, `.proto`, AsyncAPI), usually inside the owning repository | No markdown copy of the interface                |
-| Capability (product or technical) | Functional spec (`<project-name>-spex/fs-specs/<spec-id-lowercase>.yaml`)                   | No copy in code comments or plans                |
-| Cross-cutting convention          | Rule spec (`<project-name>-spex/rs-specs/<spec-id-lowercase>.yaml`)                         | No copy in agent rules, READMEs, or service docs |
-| Check logic                       | Rule-spec `checks` and `scripts/<spec-id-lowercase>/`                                       | No restated rule in CI config prose              |
-| Workspace layout                  | `<project-name>-spex/spex.yaml`                                                   | No second list of repositories anywhere          |
-| Term definitions                  | `docs/glossary.md`                                                                | No re-definition in other docs                   |
+| Capability (product or technical) | Spec (`<project-name>-spex/specs/<spec-id-lowercase>.yaml`)                                                               | No copy in code comments or plans                |
+| Cross-cutting convention          | Rule (`<project-name>-spex/rules/<spec-id-lowercase>.yaml`)                                                               | No copy in agent rules, READMEs, or service docs |
+| Check logic                       | Rule-spec `checks` and `scripts/<spec-id-lowercase>/`                                                                     | No restated rule in CI config prose              |
+| Workspace layout                  | `<project-name>-spex/spex.yaml`                                                                                           | No second list of repositories anywhere          |
+| Term definitions                  | `docs/glossary.md`                                                                                                        | No re-definition in other docs                   |
 
 **Violation test**: the same fact exists in two places — one is already wrong, or soon will be.
 
@@ -125,16 +125,16 @@ Three requirements:
 
 **Violation test**: a context is parsimonious when no essential part can be removed without introducing ambiguity or degrading quality, and the whole contains no redundant or irrelevant element.
 
-**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`RS-WRITING-STYLE`](../templates/rs-specs/rs-writing-style.yaml).
+**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`WRITING-STYLE`](../templates/rules/writing-style.yaml).
 
 ## 11. Traceability
 
 Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
 
-- The Spec ID (`FS-*`, `RS-*`) is the traceability unit.
+- The Spec ID (`SPEC-*`, `*`) is the traceability unit.
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI.
 - `spex coverage` computes coverage from those annotations.
 - Checking out a commit shows exactly which specs the code was built against.
-- Functional spec traceability is required, rule spec traceability is optional.
+- Spec traceability is required, rule traceability is optional.
 
 **Violation test**: a code change affects behavior and carries no Spec ID — it is a violation.

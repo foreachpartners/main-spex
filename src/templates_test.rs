@@ -8,12 +8,12 @@ mod tests_unit {
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/rs-commit-message-format/commit-spec-id-trace.sh";
-    const RS_SPEC: &str = "rs-specs/rs-secret-handling.yaml";
+    const SCRIPT: &str = "scripts/commit-message-format/commit-spec-id-trace.sh";
+    const RULE_SPEC: &str = "rules/secret-handling.yaml";
     // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
     // gating together.
-    const MANAGED_SPEC: &str = "rs-specs/rs-commit-message-format.yaml";
-    const MANAGED_SPEC_ID: &str = "RS-COMMIT-MESSAGE-FORMAT";
+    const MANAGED_SPEC: &str = "rules/commit-message-format.yaml";
+    const MANAGED_SPEC_ID: &str = "COMMIT-MESSAGE-FORMAT";
 
     #[test]
     fn scaffold_writes_managed_content() {
@@ -21,7 +21,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
-        for managed in [SCHEMA, SKILL, SCRIPT, RS_SPEC] {
+        for managed in [SCHEMA, SKILL, SCRIPT, RULE_SPEC] {
             assert!(
                 spex_dir.path().join(managed).is_file(),
                 "missing managed file `{managed}`"
@@ -47,14 +47,14 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_overwrites_rs_spec_marked_managed() {
+    fn scaffold_overwrites_rule_marked_managed() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
             &spec,
-            "id: RS-COMMIT-MESSAGE-FORMAT\nsync_with_upstream: true\ntampered: true\n",
+            "id: COMMIT-MESSAGE-FORMAT\nsync_with_upstream: true\ntampered: true\n",
         )
         .expect("tamper spec, keeping sync_with_upstream");
         let script = spex_dir.path().join(SCRIPT);
@@ -75,13 +75,12 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_preserves_unmanaged_rs_spec() {
+    fn scaffold_preserves_unmanaged_rule() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::write(&spec, "id: RS-COMMIT-MESSAGE-FORMAT\ncustomized: true\n")
-            .expect("customize spec");
+        fs::write(&spec, "id: COMMIT-MESSAGE-FORMAT\ncustomized: true\n").expect("customize spec");
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
 
@@ -89,18 +88,18 @@ mod tests_unit {
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
-            "id: RS-COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
+            "id: COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
         );
         assert_eq!(fs::read_to_string(&script).unwrap(), "customized");
     }
 
     #[test]
-    fn scaffold_leaves_a_deliberately_deleted_rs_spec_deleted() {
+    fn scaffold_leaves_a_deliberately_deleted_rule_deleted() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::remove_file(&spec).expect("delete rs-spec");
+        fs::remove_file(&spec).expect("delete rule");
 
         // Listing the spec id in `rule_spec_ids_removed` records the deletion as
         // deliberate, so re-scaffolding must not resurrect it.
@@ -108,17 +107,17 @@ mod tests_unit {
 
         assert!(
             !spec.exists(),
-            "deliberately deleted rs-spec should stay deleted"
+            "deliberately deleted rule should stay deleted"
         );
     }
 
     #[test]
-    fn scaffold_deploys_a_missing_rs_spec_not_marked_removed() {
+    fn scaffold_deploys_a_missing_rule_not_marked_removed() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::remove_file(&spec).expect("delete rs-spec");
+        fs::remove_file(&spec).expect("delete rule");
 
         // Without the spec id in `rule_spec_ids_removed`, its absence is treated
         // as newly available upstream, so it is (re)deployed.
@@ -126,7 +125,7 @@ mod tests_unit {
 
         assert!(
             spec.exists(),
-            "rs-spec missing but not marked removed should be deployed"
+            "rule missing but not marked removed should be deployed"
         );
     }
 
@@ -197,13 +196,13 @@ mod tests_unit {
     }
 
     #[test]
-    fn rs_spec_templates_have_no_leftover_template_only_fields() {
+    fn rule_templates_have_no_leftover_template_only_fields() {
         let dir = TEMPLATES
             .get_dir(RULE_SPECS_DIR)
-            .expect("bundled rs-specs dir");
+            .expect("bundled rules dir");
 
         for file in dir.files() {
-            let text = file.contents_utf8().expect("utf8 rs-spec");
+            let text = file.contents_utf8().expect("utf8 rule");
             assert!(
                 !text.contains("first_created_in_spex_version"),
                 "{} still carries the removed `first_created_in_spex_version` field",
@@ -213,24 +212,24 @@ mod tests_unit {
     }
 
     #[test]
-    fn rs_spec_templates_conform_to_schema() {
+    fn rule_templates_conform_to_schema() {
         let validator = crate::commands::check_schema::build_validator(Path::new(
-            "templates/schemas/rs-spec.schema.json",
+            "templates/schemas/rule.schema.json",
         ))
-        .expect("build rs-spec validator");
+        .expect("build rule validator");
 
         let dir = TEMPLATES
             .get_dir(RULE_SPECS_DIR)
-            .expect("bundled rs-specs dir");
+            .expect("bundled rules dir");
 
         for file in dir.files() {
-            let text = file.contents_utf8().expect("utf8 rs-spec");
-            let instance: Value = serde_yaml_ng::from_str(text).expect("parse rs-spec yaml");
+            let text = file.contents_utf8().expect("utf8 rule");
+            let instance: Value = serde_yaml_ng::from_str(text).expect("parse rule yaml");
 
             let messages = crate::commands::check_schema::validate_instance(&validator, &instance);
             assert!(
                 messages.is_empty(),
-                "{} violates rs-spec.schema.json: {messages:?}",
+                "{} violates rule.schema.json: {messages:?}",
                 file.path().display()
             );
         }

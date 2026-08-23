@@ -46,14 +46,13 @@ pub fn run() -> Result<ExitCode> {
         .unwrap_or_default()
         .rule_spec_ids_removed;
 
-    templates::scaffold(&spex_dir, &removed_rule_spec_ids).change_context(UpdateError::Templates)?;
+    templates::scaffold(&spex_dir, &removed_rule_spec_ids)
+        .change_context(UpdateError::Templates)?;
 
     fs::write(&config_path, config::set_cli_version(&raw, CLI_VERSION))
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
 
-    println!(
-        "spex skills, schemas, scripts and rs-specs updated, cli_version set to {CLI_VERSION}"
-    );
+    println!("spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}");
     Ok(ExitCode::SUCCESS)
 }

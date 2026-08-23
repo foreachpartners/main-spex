@@ -23,7 +23,7 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
 // and `update` so both manage the exact same set of bundled files.
-// `rs-specs/` and `scripts/` are handled separately: they are only overwritten
+// `rules/` and `scripts/` are handled separately: they are only overwritten
 // when the local spec opts in via `sync_with_upstream`. Skills are also
 // handled separately: a local skill is left untouched when its
 // `metadata.sync-with-upstream` is explicitly `false`.

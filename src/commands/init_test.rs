@@ -184,7 +184,7 @@ mod tests_unit {
                 description: >-
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-                  rs-specs/ (cross-cutting conventions and rules) and fs-specs/ (the
+                  rules/ (cross-cutting conventions and rules) and specs/ (the
                   functionality the system provides).
                 path: .
                 rule_spec_ids: []
@@ -280,7 +280,11 @@ mod tests_unit {
     #[test]
     fn write_repo_skills_does_not_overwrite_existing_skill() {
         let spex_dir = tempdir().expect("create spex dir");
-        let skill_dir = spex_dir.path().join(".agents").join("skills").join("server");
+        let skill_dir = spex_dir
+            .path()
+            .join(".agents")
+            .join("skills")
+            .join("server");
         fs::create_dir_all(&skill_dir).expect("create skill dir");
         fs::write(skill_dir.join("SKILL.md"), "custom content").expect("write skill");
 
@@ -364,8 +368,8 @@ mod tests_unit {
 
         copy_templates(spex_dir.path()).expect("copy templates");
 
-        assert!(spex_dir.path().join("rs-specs").is_dir());
-        assert!(spex_dir.path().join("fs-specs").is_dir());
+        assert!(spex_dir.path().join("rules").is_dir());
+        assert!(spex_dir.path().join("specs").is_dir());
         assert!(spex_dir.path().join("scripts").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
         assert!(spex_dir.path().join("contracts").is_dir());
@@ -378,12 +382,7 @@ mod tests_unit {
         copy_templates(spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("schemas").is_dir());
-        assert!(
-            spex_dir
-                .path()
-                .join("schemas/fs-spec.schema.json")
-                .is_file()
-        );
+        assert!(spex_dir.path().join("schemas/spec.schema.json").is_file());
     }
 
     #[test]
@@ -397,7 +396,7 @@ mod tests_unit {
         assert!(
             spex_dir
                 .path()
-                .join(".agents/skills/spex-functional-spec/SKILL.md")
+                .join(".agents/skills/spex-spec/SKILL.md")
                 .is_file()
         );
     }
@@ -413,9 +412,7 @@ mod tests_unit {
         let target = fs::read_link(&claude).expect("read .claude symlink");
         assert_eq!(target, std::path::Path::new(".agents"));
         assert!(
-            claude
-                .join("skills/spex-functional-spec/SKILL.md")
-                .is_file(),
+            claude.join("skills/spex-spec/SKILL.md").is_file(),
             ".claude/skills should resolve through the symlink"
         );
     }
@@ -431,7 +428,7 @@ mod tests_unit {
 
         let script = spex_dir
             .path()
-            .join("scripts/rs-commit-message-format/commit-spec-id-trace.sh");
+            .join("scripts/commit-message-format/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

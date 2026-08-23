@@ -12,7 +12,7 @@ field rules.
 Framework helps to turns business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-Flow runs BRD (why) → PRD (what) → functional spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
+Flow runs BRD (why) → PRD (what) → spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
 
 ### BRD
 
@@ -22,17 +22,17 @@ Business goals and stakeholder needs that product owner must identify, prioritiz
 
 Features and user-facing behavior extracted from the BRD by product owner as actionable user stories and specifications for the development team.
 
-### Functional Spec
+### Spec
 
-Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its specifics captured as acceptance criteria. FS serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
+Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its specifics captured as acceptance criteria. A spec serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
 
 ### Contract
 
-The interface derived from a functional spec if applicable. For a machine-readable interface (API, cross-service communication) it's OpenAPI, proto, GraphQL SDL, or AsyncAPI. For a UI-facing spec with no machine-readable interface, it's a design reference: a markdown document linking the spec to its visual design (e.g. a Figma frame). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
+The interface derived from a spec if applicable. For a machine-readable interface (API, cross-service communication) it's OpenAPI, proto, GraphQL SDL, or AsyncAPI. For a UI-facing spec with no machine-readable interface, it's a design reference: a markdown document linking the spec to its visual design (e.g. a Figma frame). It's small, easy to create, review and reason before bigger implementation and testing artifacts.
 
 ### Plan
 
-Plan turns functional specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
+Plan turns specs (and their contracts) into step by step implementation instructions for agent and human for review, with a status on every step and task so progress is trackable.
 
 Plan should be simple, small and focused on interfaces instead of implementation or people will not review it.
 
@@ -45,17 +45,18 @@ A plan is a working document, not a permanent artifact: useful while a change is
 Two kinds of spec capture two kinds of requirement: a capability the system
 provides and a cross-cutting convention.
 
-- A functional spec (FS) captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria.
-- A rule spec (RS) captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria.
-- A rule spec applies repo-wide, not per feature. The test: a specific capability the system provides → FS; a rule every change must follow, enforceable repo-wide → RS.
+- A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
+- A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
+- A rule applies repo-wide, not per feature. The test: a specific capability the system provides → spec; a rule every change must follow, enforceable repo-wide → rule.
 
 ## Naming
 
 All names are chosen to match clear and precise meaning for human and AI.
 
-- **Functional** signals a system capability — a function the product performs — mirroring how product and engineering already talk about "functional requirements"; an FS answers what the system does.
-- **Rule** signals an enforceable convention every change must follow, matching how AI coding tools already use "rule" for repo-wide instructions (e.g. editor and agent rules files) and how linters name their checks (ESLint rules, Clippy lints); an RS answers how the system is built, and reads as a directive both a human and an AI agent treat as binding rather than optional.
-- "Rule" is reserved for RS. FS acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
+- **Spec** signals a system capability — a function the product performs — mirroring how product and engineering already talk about "functional requirements"; a spec answers what the system does.
+- **Rule** signals an enforceable convention every change must follow, matching how AI coding tools already use "rule" for repo-wide instructions (e.g. editor and agent rules files) and how linters name their checks (ESLint rules, Clippy lints); a rule answers how the system is built, and reads as a directive both a human and an AI agent treat as binding rather than optional.
+- "Rule" is reserved for rules. Spec acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
+- The spec type is conveyed only by which directory a spec lives in (`specs/` or `rules/`) — Spec IDs carry no type prefix.
 
 # Workspace
 
@@ -63,10 +64,10 @@ All names are chosen to match clear and precise meaning for human and AI.
 
 A project spans several workspace repositories under one workspace root folder.
 
-- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per RS-NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
+- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
 - The spex repository (`<project-name>-spex`) holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
 - spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
-- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its functional spec, a convention only in its rule spec.
+- Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its spec, a convention only in its rule.
 - Specs, contracts, and checks are plain files and deterministic commands, so no step of the workflow depends on a specific editor, terminal, or AI model.
 - Each repository's interface contracts are declared per repository in `spex.yaml`; the contract file's location is user-owned, most commonly inside the owning repository itself, with the `spex` repository's `contracts/` folder reserved for contracts genuinely shared across repositories.
 - An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
@@ -75,7 +76,7 @@ A project spans several workspace repositories under one workspace root folder.
 
 Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
-- The Spec ID (FS, RS) is the unit of traceability; every behavioral change traces to one, with no orphans.
+- The Spec ID is the unit of traceability; every behavioral change traces to one, with no orphans.
 - Traceability is bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
@@ -99,13 +100,13 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Prompts to confirm the discovered workspace repositories, deriving each `repository_short_name` from its directory name minus the `<project-name>-` prefix.
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
-- Scaffolds the bundled templates: `schemas/`, `scripts/`, `rs-specs/`, and skills.
-- Creates empty `fs-specs/`, `plans/`, and `contracts/` folders.
+- Scaffolds the bundled templates: `schemas/`, `scripts/`, `rules/`, and skills.
+- Creates empty `specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
-- Copies every bundled rs-spec into the spex repository's `rs-specs/`, but leaves every repository's `rule_spec_ids` in `spex.yaml` empty.
-- Directs the user to finish setup by running the `/spex-setup` skill, which adds each rs-spec that actually applies to a given repository.
+- Copies every bundled rule into the spex repository's `rules/`, but leaves every repository's `rule_spec_ids` in `spex.yaml` empty.
+- Directs the user to finish setup by running the `/spex-setup` skill, which adds each rule that actually applies to a given repository.
 
 ## update
 
@@ -113,8 +114,8 @@ Refreshes the managed framework files from the installed binary.
 
 - Rewrites the bundled schemas with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
-- Rewrites a bundled rs-spec (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
-- Deploys a bundled rs-spec missing locally, unless its id is listed in `rule_spec_ids_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
+- Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Deploys a bundled rule missing locally, unless its id is listed in `rule_spec_ids_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -123,7 +124,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's rule-spec checks and gates on errors.
 
 - Runs the rule-spec checks each repository lists in its `rule_spec_ids`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a functional spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule spec, since those always apply) warns, since a satisfied blocker should be removed.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -135,9 +136,9 @@ Runs each repository's rule-spec checks and gates on errors.
 
 ## coverage
 
-Reports annotation coverage for functional specs.
+Reports annotation coverage for specs.
 
-- Reports annotation coverage for every functional spec whose `status` is `active`.
+- Reports annotation coverage for every spec whose `status` is `active`.
 - Requires an implementation, test, and contract annotation per active spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
 - Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
@@ -158,7 +159,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
 
-- A skill is triggered by name (for example `/spex-functional-spec`) or loaded on demand by the AI agent.
+- A skill is triggered by name (for example `/spex-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
 - Skills are portable instructions that work with any editor, terminal, or AI model, with no dependency on a specific vendor.
 
@@ -168,17 +169,17 @@ See skill body for more details. A skill's `SKILL.md` frontmatter follows the [A
 
 Complete setup step which requires AI and can't be done programmatically. Fills in the descriptions and icons left blank by `spex init`, collects each repository's contracts, and writes each repository's real commands into the per-repository `SKILL.md` `spex init` seeded. Is run right after `spex init`.
 
-## spex-functional-spec
+## spex-spec
 
-Turns a PRD into one or more schema-valid functional specs `fs-specs/<spec-id-lowercase>.yaml`.
+Turns a PRD into one or more schema-valid specs `specs/<spec-id-lowercase>.yaml`.
 
-## spex-rule-spec
+## spex-rule
 
-Turns a convention into a schema-valid rule spec with checks. Writes `rs-specs/<spec-id-lowercase>.yaml` plus any script bodies under `scripts/<spec-id-lowercase>/`.
+Turns a convention into a schema-valid rule with checks. Writes `rules/<spec-id-lowercase>.yaml` plus any script bodies under `scripts/<spec-id-lowercase>/`.
 
 ## spex-contract
 
-Derives the machine-readable interface contract from approved functional specs.
+Derives the machine-readable interface contract from approved specs.
 
 ## spex-plan
 
@@ -202,7 +203,7 @@ Switches the agent to terse, filler-free replies to save tokens.
 
 # Specs
 
-## Functional spec (FS)
+## Spec
 
 One coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules.
 
@@ -211,10 +212,10 @@ One coherent capability the system must provide — a product behavior, or a tec
 - Holds its specifics in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the repositories that implement the capability.
-- `blocked_by` lists FS or RS specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
+- `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
-## Rule spec (RS)
+## Rule
 
 One coherent cross-cutting convention or rule.
 
@@ -223,7 +224,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A deleted bundled rs-spec is only recognized as deliberate once its id is added to `rule_spec_ids_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
+- A deleted bundled rule is only recognized as deliberate once its id is added to `rule_spec_ids_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
 
 ## Checks
 
@@ -248,7 +249,7 @@ A check proves an acceptance criterion.
 Annotations link a contract, implementation, or test to its spec.
 
 - Link a contract, implementation, or test to its spec at the layer boundary.
-- Functional spec traceability is required and enforced by `spex coverage`; rule spec traceability is optional.
+- Spec traceability is required and enforced by `spex coverage`; rule traceability is optional.
 - Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
 - Annotate once at the boundary, never nested.
 - Never reference a Spec ID with no spec file.

@@ -1,7 +1,7 @@
 # Tutorial Completion
 
 This document records the result of the spex tutorial: the verification command
-output, and an assessment of the functional spec, its implementation, and the
+output, and an assessment of the spec, its implementation, and the
 network-bind rule spec produced along the way.
 
 ## spex check
@@ -31,14 +31,14 @@ Business specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  FS-DELIVERY-TIME
+  ✓  DELIVERY-TIME
 
   1 fully covered · 0 gaps
 
 pepperoni-pizza: no gaps
 ```
 
-## Rating: FS-DELIVERY-TIME spec and implementation
+## Rating: DELIVERY-TIME spec and implementation
 
 **Requirement:** "show customers pizza delivery time based on number of pizzas
 ordered, other ongoing orders and today workers" (details left to the author).
@@ -54,7 +54,7 @@ from a perfect score.
   deliveries (`in_progress_pizzas`), divided across workers — covering "pizzas
   ordered", "other ongoing orders", and "workers" in one formula
   (`estimate_seconds`).
-- **The spec is precise and testable.** `FS-DELIVERY-TIME.yaml` breaks the
+- **The spec is precise and testable.** `DELIVERY-TIME.yaml` breaks the
   vague requirement into 10 `MUST` acceptance criteria, each pinning a concrete
   rule (1 min/pizza, 2 workers, round up to the whole minute, return whole
   seconds) and a clear owner (`api` vs `frontend`).
@@ -87,7 +87,7 @@ from a perfect score.
   snapshot — fine for this in-memory toy, not a correctness guarantee under a
   real datastore.
 
-## Rating: RS-CONFIGURABLE-NETWORK-BIND spec
+## Rating: CONFIGURABLE-NETWORK-BIND spec
 
 **Requirement:** "the API must not hardcode network bind addresses or ports —
 they must be read from configuration/environment".
@@ -102,7 +102,7 @@ explains _why_, enforces it automatically, and the implementation conforms.
   reader understands the motivation rather than memorizing a ban.
 - **Precise, layered acceptance criteria.** It requires reading bind config from
   the environment, sourcing it from the repo's config-prefix (cross-referencing
-  `RS-NAMING-CONVENTION` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
+  `NAMING-CONVENTION` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
   embedded literal on the startup path, and adds a `SHOULD` to fail fast on
   missing/malformed config.
 - **It is enforced automatically.** The `no-hardcoded-bind-literal` regexp check

@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::util;
 
-pub const RULE_SPECS_DIR: &str = "rs-specs";
+pub const RULE_SPECS_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
 
 type Result<T> = core::result::Result<T, Report<SpecError>>;

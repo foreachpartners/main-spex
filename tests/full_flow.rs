@@ -9,12 +9,12 @@ use tempfile::tempdir;
 // `pepperoni-pizza-no-spex` example. The findings are intentional: the example
 // ships demo violations.
 const EXPECTED_CHECK_REPORT: &str = r#"proj-api
-  warn  RS-SECRET-HANDLING/no-backup-files  (data.backup)
+  warn  SECRET-HANDLING/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
   0 errors, 1 warning
 
 proj-frontend
-  error  RS-WRITING-STYLE/no-cyrillic  (README.md:1)
+  error  WRITING-STYLE/no-cyrillic  (README.md:1)
       Requirements and documentation must be in English
   1 error, 0 warnings
 
@@ -27,7 +27,7 @@ proj: 1 error, 1 warning
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.
 const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
 
-Functional specs (0)
+Specs (0)
   none found
 
 Active spec coverage (0)
@@ -54,16 +54,16 @@ pepperoni-pizza: 0 errors, 0 warnings
 "#;
 
 // Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
-// functional spec is `active`, has all of its acceptance criteria checked off,
+// spec is `active`, has all of its acceptance criteria checked off,
 // and is annotated across the contract, impl, and test layers, so it reports
 // as fully covered with no gaps.
 const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
 
-Functional specs (1)
+Specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  FS-DELIVERY-TIME  10/10 AC
+  ✓  DELIVERY-TIME  10/10 AC
 
   1 fully covered · 0 gaps
 
@@ -90,8 +90,8 @@ fn init_then_check_pepperoni_pizza() {
         "init did not write proj-spex/spex.yaml"
     );
     assert!(
-        project.join("proj-spex/rs-specs").is_dir(),
-        "init did not scaffold rs-specs"
+        project.join("proj-spex/rules").is_dir(),
+        "init did not scaffold rules"
     );
 
     add_rule_spec_ids(&project);
@@ -141,7 +141,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
         "  - repository_name: proj-frontend\n",
-        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - rs_spec_id: RS-WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - rule_spec_id: WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(
         patched, config,
@@ -152,7 +152,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let check = run_spex(&project, &["check"], "");
     let report = report_text(&check.stdout);
     assert!(
-        !report.contains("error  RS-WRITING-STYLE/no-cyrillic"),
+        !report.contains("error  WRITING-STYLE/no-cyrillic"),
         "baseline did not suppress the pre-existing error\n{report}",
     );
     assert!(
@@ -206,7 +206,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     let check = run_spex(&project, &["check"], "");
     let report = report_text(&check.stdout);
     assert!(
-        !report.contains("error  RS-WRITING-STYLE/no-cyrillic"),
+        !report.contains("error  WRITING-STYLE/no-cyrillic"),
         "generated baseline did not suppress the error\n{report}",
     );
     assert!(
@@ -290,7 +290,7 @@ fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
 }
 
 // Copies the no-spex example into `project` and, mirroring tutorial Step 2.1,
-// renames its repositories to follow RS-NAMING-CONVENTION
+// renames its repositories to follow NAMING-CONVENTION
 // (`<project-name>-<repository-short-name>`). The project name defaults to the
 // workspace folder name, so the prefix is derived from it.
 fn copy_no_spex(project: &Path) {
@@ -320,11 +320,11 @@ fn add_rule_spec_ids(project: &Path) {
     let patched = config
         .replace(
             "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rule_spec_ids: []\n",
-            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rule_spec_ids:\n      - RS-SECRET-HANDLING\n",
+            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rule_spec_ids:\n      - SECRET-HANDLING\n",
         )
         .replace(
             "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rule_spec_ids: []\n",
-            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rule_spec_ids:\n      - RS-WRITING-STYLE\n",
+            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rule_spec_ids:\n      - WRITING-STYLE\n",
         );
     assert_ne!(
         patched, config,

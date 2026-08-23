@@ -52,7 +52,7 @@ spex update
 
 ### `spex check`
 
-Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rule specs (RS) listed in its `rule_spec_ids`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rules listed in its `rule_spec_ids`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -64,16 +64,16 @@ A `script` check runs the program named by its `script:` filename (for example `
 
 A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
 
-A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rs_spec_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
+A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_spec_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
 
 ```yaml
 repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    rule_spec_ids: [RS-WRITING-STYLE]
+    rule_spec_ids: [WRITING-STYLE]
     checks_preexisting_errors:
-      - rs_spec_id: RS-WRITING-STYLE
+      - rule_spec_id: WRITING-STYLE
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```
@@ -103,11 +103,11 @@ spex check --repo api --files src/main.rs src/orders.rs
 spex check --repo frontend --fill-preexisting-errors
 ```
 
-When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule spec: `spex.yaml`, every `fs-specs/<spec-id>.yaml`, and every `rs-specs/<spec-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml`; every script a rs-spec check references must exist at `scripts/<spec-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule spec: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<spec-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<spec-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
 
 ### `spex coverage`
 
-Reports how well the active functional specs are covered by spec-id annotations across the workspace. For every FS spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active specs are covered by spec-id annotations across the workspace. For every spec whose `status` is `active`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex coverage
@@ -118,14 +118,14 @@ A single annotation of each kind anywhere in any workspace repository counts —
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
 
 ```yaml
-id: FS-PLACE-PIZZA-ORDER
+id: PLACE-PIZZA-ORDER
 status: active
 coverage_ignore: [contract]
 ```
 
 Each active spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. An active spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes.
 
-The report prints the total number of functional specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
+The report prints the total number of specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
 
 - `✓` — every required layer is annotated and every acceptance criterion is implemented.
 - `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `fs-specs/<spec-id-lowercase>.yaml`, `rs-specs/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -145,11 +145,11 @@ This is a general-purpose validator. `spex check` uses the same validation, buil
 - `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
 
 ```sh
-spex check-schema --schema schemas/rs-spec.schema.json --files rs-specs/rs-naming-convention.yaml
+spex check-schema --schema schemas/rule.schema.json --files rules/naming-convention.yaml
 ```
 
 ```sh
-spex check-schema --schema schemas/fs-spec.schema.json --files fs-specs/fs-list-pizza-menu.yaml fs-specs/fs-place-pizza-order.yaml
+spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-menu.yaml specs/place-pizza-order.yaml
 ```
 
 ### `spex info`

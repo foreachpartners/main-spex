@@ -1,11 +1,11 @@
 ---
 name: spex-contract
-description: Derive or update the interface contract from one or more functional specs. Use when the user wants to create, extend, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI, or a design reference for UI-facing specs) for a FS spec.
+description: Derive or update the interface contract from one or more specs. Use when the user wants to create, extend, or update the contract (OpenAPI, proto, GraphQL SDL, AsyncAPI, or a design reference for UI-facing specs) for a spec.
 ---
 
 # Create an Interface Contract
 
-A contract is the _interface_ derived from a functional spec. For a machine-readable interface: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec that exposes no machine-readable interface, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the _interface_ derived from a spec. For a machine-readable interface: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec that exposes no machine-readable interface, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 ## Paths
 
@@ -23,7 +23,7 @@ Determine which specs to contract before doing anything else:
 
 ## Step 1 — Gather context first
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/fs-specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+For each targeted spec, read `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 
@@ -31,7 +31,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
-- For each affected repository, read its `rule_spec_ids` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rs-specs/` — at minimum `RS-OPENAPI-CONVENTIONS` (for OpenAPI), `RS-GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `RS-SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, read its `rule_spec_ids` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rules/` — at minimum `OPENAPI-CONVENTIONS` (for OpenAPI), `GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -43,13 +43,13 @@ Map each acceptance criterion that crosses a boundary to the interface element t
 
 ## Step 4 — Draft the contract changes
 
-Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `RS-OPENAPI-CONVENTIONS`; for GraphQL SDL, apply `RS-GRAPHQL-CONVENTIONS`.
+Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `OPENAPI-CONVENTIONS`; for GraphQL SDL, apply `GRAPHQL-CONVENTIONS`.
 
 For a machine-readable interface:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec per `RS-SPEC-ID-TRACING` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
+- Annotate each operation with its spec per `SPEC-ID-TRACING` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 For a design reference:
@@ -82,7 +82,7 @@ paths:
     post:
       operationId: createOrder
       summary: Create an order
-      x-spec: FS-ORDER-CREATE
+      x-spec: ORDER-CREATE
       requestBody:
         content:
           application/json:
@@ -119,7 +119,7 @@ The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `O
 Design reference example, for a spec with no machine-readable interface, in `contracts/figma.md`:
 
 ```md
-<!-- @spec contract FS-DELIVERY-TIME -->
+<!-- @spec contract DELIVERY-TIME -->
 
 ## Delivery time
 

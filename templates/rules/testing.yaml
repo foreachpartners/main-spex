@@ -1,0 +1,34 @@
+id: TESTING
+sync_with_upstream: true
+title: Testing hygiene
+description: >-
+  A test suite is only trustworthy if every test in it runs and can fail. Skipping,
+  ignoring, or focusing a test silences its pass/fail signal covertly — the suite
+  still goes green while coverage quietly narrows.
+acceptance_criteria:
+  - "MUST fix a failing test at its root cause rather than loosening its assertions"
+  - "MUST NOT commit a skipped, ignored, or pending test"
+  - "MUST NOT commit a focused test (`.only`, `fit`, `fdescribe`) that excludes its siblings from running"
+checks:
+  - name: no-skipped-tests
+    description: Flag skipped, ignored, or pending tests
+    type: regexp
+    pattern: '\.skip\(|xit\(|xdescribe\(|#\[ignore\]|@pytest\.mark\.skip|@unittest\.skip|t\.Skip\('
+    include:
+      - "**/*_test.*"
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/tests/**"
+      - "**/test/**"
+    severity: warn
+  - name: no-focused-tests
+    description: Flag focused tests that exclude their siblings from running
+    type: regexp
+    pattern: '\.only\(|\bfit\(|\bfdescribe\('
+    include:
+      - "**/*_test.*"
+      - "**/*.test.*"
+      - "**/*.spec.*"
+      - "**/tests/**"
+      - "**/test/**"
+    severity: error

@@ -93,7 +93,7 @@ mod tests {
         let check = check(CheckKind::Regexp, Some("api_key\\s*=\\s*\"[^\"]{8,}\""));
 
         let mut findings = Vec::new();
-        run_regexp("RS-SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_regexp("SECRET-HANDLING", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -108,7 +108,7 @@ mod tests {
         check.negate = true;
 
         let mut findings = Vec::new();
-        run_regexp("RS-LICENSE", &check, &[&file], &mut findings);
+        run_regexp("LICENSE", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.rs"));
@@ -122,7 +122,7 @@ mod tests {
         let check = check(CheckKind::Glob, Some("**/*.bak"));
 
         let mut findings = Vec::new();
-        run_glob("RS-SECRET-HANDLING", &check, &[&bak, &src], &mut findings);
+        run_glob("SECRET-HANDLING", &check, &[&bak, &src], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("notes.bak"));
@@ -136,7 +136,7 @@ mod tests {
         check.negate = true;
 
         let mut findings = Vec::new();
-        run_glob("RS-LICENSE", &check, &[&src], &mut findings);
+        run_glob("LICENSE", &check, &[&src], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert!(findings[0].location.is_none());
@@ -146,11 +146,11 @@ mod tests {
     fn resolve_script_joins_scripts_and_spec_dir() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
-        std::fs::write(spex.join("scripts/rs-x/lint.sh"), "").expect("spex script");
+        std::fs::create_dir_all(spex.join("scripts/x")).expect("spex scripts");
+        std::fs::write(spex.join("scripts/x/lint.sh"), "").expect("spex script");
 
-        let resolved = resolve_script("lint.sh", &spex, "RS-X").expect("resolved");
-        assert_eq!(resolved, spex.join("scripts/rs-x/lint.sh"));
+        let resolved = resolve_script("lint.sh", &spex, "X").expect("resolved");
+        assert_eq!(resolved, spex.join("scripts/x/lint.sh"));
     }
 
     #[test]
@@ -159,7 +159,7 @@ mod tests {
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        assert!(resolve_script("lint.sh", &spex, "RS-X").is_none());
+        assert!(resolve_script("lint.sh", &spex, "X").is_none());
     }
 
     // Tests that create a script and then execute it run serially: `Command`
@@ -172,10 +172,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/rs-commit-message-format"))
-            .expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/commit-message-format")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/rs-commit-message-format/sample.sh");
+        let script = spex.join("scripts/commit-message-format/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
@@ -183,13 +182,7 @@ mod tests {
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_per_repo_script(
-            "RS-COMMIT-MESSAGE-FORMAT",
-            &check,
-            &repo,
-            &spex,
-            &mut findings,
-        );
+        run_per_repo_script("COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Warn);
@@ -202,9 +195,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/rs-writing-style")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/writing-style")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/rs-writing-style/echo-args.sh");
+        let script = spex.join("scripts/writing-style/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -220,7 +213,7 @@ mod tests {
 
         let mut findings = Vec::new();
         run_per_file_script(
-            "RS-WRITING-STYLE",
+            "WRITING-STYLE",
             &check,
             &repo,
             &spex,
@@ -238,9 +231,9 @@ mod tests {
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/rs-writing-style")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/writing-style")).expect("spex scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/rs-writing-style/locations.sh");
+        let script = spex.join("scripts/writing-style/locations.sh");
         // Emits two contract lines (one with a location, one file-less) plus a
         // blank line that must be ignored.
         std::fs::write(
@@ -253,7 +246,7 @@ mod tests {
         let check = script_check("locations.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_per_repo_script("RS-WRITING-STYLE", &check, &repo, &spex, &mut findings);
+        run_per_repo_script("WRITING-STYLE", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 2);
         assert_eq!(findings[0].location.as_deref(), Some("docs/intro.md:40"));
@@ -273,13 +266,7 @@ mod tests {
         let check = script_check("sample.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_per_repo_script(
-            "RS-COMMIT-MESSAGE-FORMAT",
-            &check,
-            &repo,
-            &spex,
-            &mut findings,
-        );
+        run_per_repo_script("COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -297,7 +284,7 @@ mod tests {
         let check = check(CheckKind::Script, None);
 
         let mut findings = Vec::new();
-        run_per_file_script("RS-WRITING-STYLE", &check, &repo, &spex, &[], &mut findings);
+        run_per_file_script("WRITING-STYLE", &check, &repo, &spex, &[], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -366,11 +353,11 @@ mod tests {
         let non_negated = named_check("no-rs-files", CheckKind::Glob, Some("**/*.rs"));
 
         let specs = HashMap::from([(
-            "RS-X".to_string(),
-            rule_spec("RS-X", vec![negated_glob.clone(), non_negated]),
+            "X".to_string(),
+            rule_spec("X", vec![negated_glob.clone(), non_negated]),
         )]);
 
-        let repository = repository("../api", vec!["RS-X"]);
+        let repository = repository("../api", vec!["X"]);
 
         // Without --files: negated check fires because dprint.json is absent.
         let mut findings = Vec::new();
@@ -412,11 +399,11 @@ mod tests {
         let spex = workspace.path().join("spex");
         let api = workspace.path().join("api");
         let web = workspace.path().join("web");
-        std::fs::create_dir_all(spex.join("scripts/rs-x")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("scripts/x")).expect("spex scripts");
         std::fs::create_dir_all(&api).expect("api");
         std::fs::create_dir_all(&web).expect("web");
 
-        let script = spex.join("scripts/rs-x/list.sh");
+        let script = spex.join("scripts/x/list.sh");
         // Fails if handed any file arguments, records each invocation, and emits
         // its own contract findings: a workspace script gets no files and must
         // discover its own paths.
@@ -429,12 +416,12 @@ mod tests {
 
         let mut listing = script_check("list.sh", RunScope::Workspace);
         listing.name = "list".to_string();
-        let specs = HashMap::from([("RS-X".to_string(), rule_spec("RS-X", vec![listing]))]);
+        let specs = HashMap::from([("X".to_string(), rule_spec("X", vec![listing]))]);
 
         let mut collected = Vec::new();
         let mut findings = Vec::new();
         check_repo(
-            &repository("../api", vec!["RS-X"]),
+            &repository("../api", vec!["X"]),
             &spex,
             &specs,
             &[],
@@ -444,7 +431,7 @@ mod tests {
         )
         .expect("api");
         check_repo(
-            &repository("../web", vec!["RS-X"]),
+            &repository("../web", vec!["X"]),
             &spex,
             &specs,
             &[],
@@ -470,7 +457,7 @@ mod tests {
         assert!(
             findings
                 .iter()
-                .all(|finding| finding.spec_id == "RS-X" && finding.check == "list")
+                .all(|finding| finding.spec_id == "X" && finding.check == "list")
         );
         let locations: Vec<&str> = findings
             .iter()
@@ -520,7 +507,7 @@ mod tests {
     fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {
         Finding {
             severity,
-            spec_id: "RS-X".to_string(),
+            spec_id: "X".to_string(),
             check: check.to_string(),
             location: location.map(str::to_string),
             message: "boom".to_string(),
@@ -529,7 +516,7 @@ mod tests {
 
     fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
         PreexistingError {
-            rs_spec_id: "RS-X".to_string(),
+            rule_spec_id: "X".to_string(),
             check: check.to_string(),
             files: files.into_iter().map(str::to_string).collect(),
         }
@@ -590,8 +577,8 @@ mod tests {
         items.iter().map(|item| item.to_string()).collect()
     }
 
-    fn functional_spec(id: &str, blocked_by: Vec<&str>) -> FunctionalSpec {
-        FunctionalSpec {
+    fn spec(id: &str, blocked_by: Vec<&str>) -> Spec {
+        Spec {
             id: id.to_string(),
             acceptance_criteria: Vec::new(),
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
@@ -603,37 +590,34 @@ mod tests {
     #[test]
     fn status_finding_flags_fully_checked_unimplemented_spec() {
         let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
-        let result = status_finding("FS-A", "fs-specs", &criteria, Status::Planned);
+        let result = status_finding("A", "specs", &criteria, Status::Planned);
         let finding = result.expect("expected a status finding");
         assert_eq!(finding.severity, Severity::Warn);
         assert_eq!(finding.check, "status");
-        assert_eq!(finding.location.as_deref(), Some("fs-specs/fs-a.yaml"));
+        assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
     }
 
     #[test]
     fn status_finding_is_silent_when_consistent_or_incomplete() {
         let full = ac(&["[x] MUST a", "[x] MUST b"]);
         // Fully checked and already implemented: nothing to flag.
-        assert!(status_finding("FS-A", "fs-specs", &full, Status::Active).is_none());
-        assert!(status_finding("FS-A", "fs-specs", &full, Status::Deprecated).is_none());
+        assert!(status_finding("A", "specs", &full, Status::Active).is_none());
+        assert!(status_finding("A", "specs", &full, Status::Deprecated).is_none());
         // A pending box means the spec isn't done, so any status is allowed.
         let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
-        assert!(status_finding("FS-A", "fs-specs", &partial, Status::Planned).is_none());
+        assert!(status_finding("A", "specs", &partial, Status::Planned).is_none());
         // No criteria at all: nothing to infer.
-        assert!(status_finding("FS-A", "fs-specs", &[], Status::Planned).is_none());
+        assert!(status_finding("A", "specs", &[], Status::Planned).is_none());
     }
 
     #[test]
     fn validate_blocked_by_flags_missing_and_active_references() {
         let status_by_id = HashMap::from([
-            ("FS-DONE", Status::Active),
-            ("FS-PENDING", Status::Planned),
-            ("RS-PENDING", Status::Blocked),
+            ("DONE", Status::Active),
+            ("PENDING", Status::Planned),
+            ("STILL-PENDING", Status::Blocked),
         ]);
-        let spec = functional_spec(
-            "FS-A",
-            vec!["FS-MISSING", "FS-DONE", "FS-PENDING", "RS-PENDING"],
-        );
+        let spec = spec("A", vec!["MISSING", "DONE", "PENDING", "STILL-PENDING"]);
 
         let mut findings = Vec::new();
         validate_blocked_by(&spec, &status_by_id, &mut findings);
@@ -643,12 +627,12 @@ mod tests {
         let missing = &findings[0];
         assert_eq!(missing.severity, Severity::Error);
         assert_eq!(missing.check, "blocked-by");
-        assert!(missing.message.contains("FS-MISSING"));
+        assert!(missing.message.contains("MISSING"));
         assert!(missing.message.contains("non-existing spec"));
 
         let active = &findings[1];
         assert_eq!(active.severity, Severity::Warn);
-        assert!(active.message.contains("FS-DONE"));
+        assert!(active.message.contains("DONE"));
         assert!(active.message.contains("already active"));
     }
 }
