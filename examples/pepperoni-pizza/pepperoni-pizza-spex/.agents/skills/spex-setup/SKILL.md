@@ -7,7 +7,7 @@ description: Fill in the missing descriptions in the workspace config (spex.yaml
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rules` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -85,27 +85,27 @@ Example `spex.yaml` repository entry after collecting a contract:
   contracts:
     - path: contracts/api.openapi.yaml
       description: REST OpenAPI spec for the orders API.
-  rule_spec_ids:
+  rules:
     - SECRET-HANDLING
 ```
 
 ## Step 4c — Add rules that apply
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rule_spec_ids` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `OPENAPI-CONVENTIONS`, `GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `OPENAPI-CONVENTIONS`, `GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
 1. For each repository, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
 2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "OPENAPI-CONVENTIONS: this repository exposes a REST API").
-3. Only after the user confirms a given rule applies, add its ID to that repository's `rule_spec_ids` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
+3. Only after the user confirms a given rule applies, add its ID to that repository's `rules` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
 4. Do not modify any rule's file under `rules/` while doing this; this only edits which repositories reference it in `spex.yaml`.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ### Remove rules that apply to no repository
 
-Once every repository's `rule_spec_ids` is settled, an rule in `rules/` that ended up referenced by no repository at all is dead weight in this workspace.
+Once every repository's `rules` is settled, an rule in `rules/` that ended up referenced by no repository at all is dead weight in this workspace.
 
-1. Compute the set of rule IDs referenced by at least one repository's `rule_spec_ids`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
+1. Compute the set of rule IDs referenced by at least one repository's `rules`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
 2. Show the user the unused rule IDs and confirm they should be removed. This is a deletion — no rule is removed without the user's explicit confirmation.
-3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<rule-id>/` it owns), and add the ID to the top-level `rule_spec_ids_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<rule-id>/` it owns), and add the ID to the top-level `rules_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
 4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
@@ -160,7 +160,7 @@ repositories:
     contracts:
       - path: contracts/api.openapi.yaml
         description: REST OpenAPI spec for the orders API.
-    rule_spec_ids:
+    rules:
       - SECRET-HANDLING
 ```
 
@@ -170,8 +170,8 @@ repositories:
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
-- Each repository's `rule_spec_ids` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
-- Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rule_spec_ids_removed`) or deliberately kept, per the user's confirmation.
+- Each repository's `rules` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
+- Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rules_removed`) or deliberately kept, per the user's confirmation.
 - Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout and commands, confirmed by the user.
 - No existing field or path is changed, and no rule is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

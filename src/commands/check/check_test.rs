@@ -315,13 +315,13 @@ mod tests {
         }
     }
 
-    fn repository(path: &str, rule_spec_ids: Vec<&str>) -> Repository {
+    fn repository(path: &str, rules: Vec<&str>) -> Repository {
         Repository {
             name: "api".to_string(),
             short_name: "api".to_string(),
             path: path.to_string(),
             contracts: Vec::new(),
-            rule_spec_ids: rule_spec_ids.into_iter().map(str::to_string).collect(),
+            rules: rules.into_iter().map(str::to_string).collect(),
             checks_preexisting_errors: Vec::new(),
         }
     }

@@ -5,7 +5,7 @@ description: Information, rules, commands and other pepperoni-pizza-spex reposit
 
 # General
 
-Run `spex info --repo spex` for general repository information. This repository holds the specs and config that govern the whole `pepperoni-pizza` workspace; it has no `rule_spec_ids` of its own.
+Run `spex info --repo spex` for general repository information. This repository holds the specs and config that govern the whole `pepperoni-pizza` workspace; it has no `rules` of its own.
 
 # Paths
 
@@ -20,7 +20,7 @@ Each fact lives in exactly one of these files — reference it, never copy it el
 
 # Notes
 
-- `rule_spec_ids` lives per repository in `spex.yaml`, each id maps to its spec file lowercased, e.g. `NAMING-CONVENTION` → `rules/naming-convention.yaml`:
+- `rules` lives per repository in `spex.yaml`, each id maps to its spec file lowercased, e.g. `NAMING-CONVENTION` → `rules/naming-convention.yaml`:
 
 # Commands
 

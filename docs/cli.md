@@ -52,7 +52,7 @@ spex update
 
 ### `spex check`
 
-Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rules listed in its `rule_spec_ids`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the rule spec checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rules listed in its `rules`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex check
@@ -71,7 +71,7 @@ repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    rule_spec_ids: [WRITING-STYLE]
+    rules: [WRITING-STYLE]
     checks_preexisting_errors:
       - rule_spec_id: WRITING-STYLE
         check: no-cyrillic

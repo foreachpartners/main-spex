@@ -94,7 +94,7 @@ fn init_then_check_pepperoni_pizza() {
         "init did not scaffold rules"
     );
 
-    add_rule_spec_ids(&project);
+    add_rules(&project);
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
@@ -133,7 +133,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
 
-    add_rule_spec_ids(&project);
+    add_rules(&project);
 
     // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
     // error in any other file would still surface.
@@ -176,7 +176,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     let init = run_spex(&project, &["init"], "\n\n");
     assert!(init.status.success(), "init failed");
 
-    add_rule_spec_ids(&project);
+    add_rules(&project);
 
     // The freshly initialized example has one error: the frontend README.
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
@@ -311,20 +311,20 @@ fn copy_no_spex(project: &Path) {
     }
 }
 
-// `spex init` leaves every repository's `rule_spec_ids` empty (that's `spex-setup`'s
+// `spex init` leaves every repository's `rules` empty (that's `spex-setup`'s
 // job). Mimic what the skill would do for the no-spex example, so `check`
 // exercises the demo violations it ships.
-fn add_rule_spec_ids(project: &Path) {
+fn add_rules(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config
         .replace(
-            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rule_spec_ids: []\n",
-            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rule_spec_ids:\n      - SECRET-HANDLING\n",
+            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules: []\n",
+            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules:\n      - SECRET-HANDLING\n",
         )
         .replace(
-            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rule_spec_ids: []\n",
-            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rule_spec_ids:\n      - WRITING-STYLE\n",
+            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules: []\n",
+            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - WRITING-STYLE\n",
         );
     assert_ne!(
         patched, config,

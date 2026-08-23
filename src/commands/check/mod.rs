@@ -418,7 +418,7 @@ fn check_repo(
     // meaningfully evaluated, so we skip them to avoid false positives.
     let has_files = !files.is_empty();
 
-    for spec_id in &repo.rule_spec_ids {
+    for spec_id in &repo.rules {
         let Some(spec) = specs.get(spec_id) else {
             findings.push(repo_error(
                 spec_id,

@@ -3,7 +3,7 @@ description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
 cli_version: 0.7.56
-rule_spec_ids_removed:
+rules_removed:
   - GRAPHQL-CONVENTIONS
 repositories:
   - repository_name: pepperoni-pizza-api
@@ -17,7 +17,7 @@ repositories:
         description: >-
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
-    rule_spec_ids:
+    rules:
       - COMMIT-MESSAGE-FORMAT
       - CONFIGURABLE-NETWORK-BIND
       - DEPENDENCIES
@@ -37,7 +37,7 @@ repositories:
       - path: contracts/figma.md
         description: >-
           Figma references for the frontend's UI.
-    rule_spec_ids:
+    rules:
       - COMMIT-MESSAGE-FORMAT
       - DEPENDENCIES
       - NAMING-CONVENTION
@@ -53,7 +53,7 @@ repositories:
       rules/ (cross-cutting conventions and rules) and specs/ (the
       capabilities the system provides).
     path: .
-    rule_spec_ids:
+    rules:
       - COMMIT-MESSAGE-FORMAT
       - DEPENDENCIES
       - NAMING-CONVENTION

@@ -138,11 +138,11 @@ mod tests {
         repositories:
           - repository_name: api
             path: ../api
-            rule_spec_ids:
+            rules:
               - X
           - repository_name: web
             path: ../web
-            rule_spec_ids:
+            rules:
               - X
     "};
 
@@ -160,7 +160,7 @@ mod tests {
                 repositories:
                   - repository_name: api
                     path: ../api
-                    rule_spec_ids:
+                    rules:
                       - X
                     checks_preexisting_errors:
                       - rule_spec_id: X
@@ -170,7 +170,7 @@ mod tests {
                           - docs/intro.md
                   - repository_name: web
                     path: ../web
-                    rule_spec_ids:
+                    rules:
                       - X
             "}
         );
@@ -184,7 +184,7 @@ mod tests {
         assert!(out.ends_with(
             "  - repository_name: web
     path: ../web
-    rule_spec_ids:
+    rules:
       - X
     checks_preexisting_errors:
       - rule_spec_id: Y
@@ -208,7 +208,7 @@ mod tests {
                     check: stale
                     files:
                       - old.md
-                rule_spec_ids:
+                rules:
                   - X
         "};
         let by_repo = HashMap::from([(

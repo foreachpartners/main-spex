@@ -48,7 +48,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — the rationale (what the convention protects against), the acceptance criteria, and which repositories it applies to. Confirm anything you inferred rather than assuming silently.
 
-Do not set `sync_with_upstream` on a consumer spec unless the user explicitly asks; it governs global framework specs. Ask which repositories the convention applies to, then list the spec's `id` under each of those repositories' `rule_spec_ids` in `spex.yaml`.
+Do not set `sync_with_upstream` on a consumer spec unless the user explicitly asks; it governs global framework specs. Ask which repositories the convention applies to, then list the spec's `id` under each of those repositories' `rules` in `spex.yaml`.
 
 ## Step 3 — Draft the fields
 
@@ -85,7 +85,7 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 
 1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id>.yaml` — the filename must equal the `<rule-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<rule-id>/<name>.sh`) and make them executable.
-3. For a new spec, add its `id` under `rule_spec_ids` in `spex.yaml` for each repository the user said it applies to.
+3. For a new spec, add its `id` under `rules` in `spex.yaml` for each repository the user said it applies to.
 4. Run `spex check` to validate compliance.
 5. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
 

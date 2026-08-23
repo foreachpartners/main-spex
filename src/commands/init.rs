@@ -332,7 +332,7 @@ fn config_to_yaml(project_name: &str, repositories: &[DiscoveredRepo]) -> String
                 yaml.push_str(SPEX_REPO_DESCRIPTION);
             }
             yaml.push_str(&format!("    path: {}\n", repo.path));
-            yaml.push_str("    rule_spec_ids: []\n");
+            yaml.push_str("    rules: []\n");
         }
     }
 

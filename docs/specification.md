@@ -106,7 +106,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
 - Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
 - Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
-- Copies every bundled rule into the spex repository's `rules/`, but leaves every repository's `rule_spec_ids` in `spex.yaml` empty.
+- Copies every bundled rule into the spex repository's `rules/`, but leaves every repository's `rules` in `spex.yaml` empty.
 - Directs the user to finish setup by running the `/spex-setup` skill, which adds each rule that actually applies to a given repository.
 
 ## update
@@ -116,7 +116,7 @@ Refreshes the managed framework files from the installed binary.
 - Rewrites the bundled schemas with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
-- Deploys a bundled rule missing locally, unless its id is listed in `rule_spec_ids_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
+- Deploys a bundled rule missing locally, unless its id is listed in `rules_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -124,7 +124,7 @@ Refreshes the managed framework files from the installed binary.
 
 Runs each repository's rule-spec checks and gates on errors.
 
-- Runs the rule-spec checks each repository lists in its `rule_spec_ids`, reporting findings per repository.
+- Runs the rule-spec checks each repository lists in its `rules`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
@@ -225,7 +225,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A deleted bundled rule is only recognized as deliberate once its id is added to `rule_spec_ids_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
+- A deleted bundled rule is only recognized as deliberate once its id is added to `rules_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
 
 ## Checks
 
@@ -236,7 +236,7 @@ A check proves an acceptance criterion.
 - `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern. Negated checks are skipped when `check --files` narrows the file set, since they need every file to prove a forbidden pattern is absent.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
-- A repository inherits a spec's checks through `rule_spec_ids`.
+- A repository inherits a spec's checks through `rules`.
 - `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<rule-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
@@ -262,7 +262,7 @@ Annotations link a contract, implementation, or test to its spec.
 Declares the project and its repositories.
 
 - Declares `project_name`, `cli_version`, an optional `description`, and the `repositories` list.
-- Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `rule_spec_ids`.
+- Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `rules`.
 - `--repo` accepts either a repository's full name or its short name.
 - Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
 - Each repository may add per-repo `checks_preexisting_errors`.

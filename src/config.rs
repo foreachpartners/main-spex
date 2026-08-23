@@ -46,7 +46,7 @@ pub struct Repository {
     #[serde(default)]
     pub contracts: Vec<Contract>,
     #[serde(default)]
-    pub rule_spec_ids: Vec<String>,
+    pub rules: Vec<String>,
     #[serde(default)]
     pub checks_preexisting_errors: Vec<PreexistingError>,
 }
