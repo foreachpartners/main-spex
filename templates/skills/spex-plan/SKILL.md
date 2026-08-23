@@ -7,9 +7,9 @@ description: Creates a comprehensive implementation plan md file for large-scale
 
 Your goal is to create a new implementation plan markdown file from requested specs to be executed by multiple AI agents working in parallel.
 
-A plan captures the shape of a change — new or changed method signatures, database/schema changes, domain models, handler/endpoint signatures — never its logic, you must read `references/plan-example.md` and follow it's structure.
+A plan captures the shape of a change — new or changed method signatures, database/schema changes, domain models, handler/endpoint signatures — never its logic. You must read `references/plan-example.md` and follow its structure.
 
-Your must read requested specs, governing rules, contracts, inspect the current code and draft a plan.
+You must read requested specs, governing rules, contracts, inspect the current code and draft a plan.
 
 Your output must be machine and human-readable, deterministic, and structured for autonomous execution by other AI systems or humans.
 
@@ -21,7 +21,7 @@ Resolve a `Repositories scope` for requested changes.
 
 Read all `rules` in `spex.yaml` that apply to the resolved `Repositories scope`.
 
-Read each affected repository in `Repositories scope` information `spex.yaml`.
+Read each affected repository's information in `Repositories scope` from `spex.yaml`.
 
 Read related contracts in `<workspace-root>/<project-name>-spex/contracts/`.
 
@@ -37,7 +37,7 @@ If more than one spec is provided, pick a leading one for `<spec-id>` and genera
 
 # Write plan metadata
 
-Write `Specs` which user provided.
+Write `Specs` that the user provided.
 
 Write `Repositories scope` based on changes we need to implement (don't include spex itself).
 

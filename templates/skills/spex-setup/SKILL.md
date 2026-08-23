@@ -101,7 +101,7 @@ Example `spex.yaml` repository entry after collecting a contract:
 
 ### Remove rules that apply to no repository
 
-Once every repository's `rules` is settled, an rule in `rules/` that ended up referenced by no repository at all is dead weight in this workspace.
+Once every repository's `rules` is settled, a rule in `rules/` that ended up referenced by no repository at all is dead weight in this workspace.
 
 1. Compute the set of rule IDs referenced by at least one repository's `rules`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
 2. Show the user the unused rule IDs and confirm they should be removed. This is a deletion — no rule is removed without the user's explicit confirmation.

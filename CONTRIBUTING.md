@@ -24,7 +24,7 @@ dprint check # Check md/yaml/json formatting
 
 ## Contributing new skills
 
-Skills, even when not used, have their metadata loaded in context on every session start. To avoid context pollution from a large number of skills, we don't want to exceed 100 skills or ~10_000 metadata tokens. This means we should include the most valuable ones, that will be used often and don't duplicate other skills.
+Skills, even when not used, have their metadata loaded in context on every session start. To avoid context pollution from a large number of skills, we don't want to exceed 100 skills or ~10_000 metadata tokens. This means we should include the most valuable ones that will be used often and don't duplicate other skills.
 
 If you find a skill really useful, please share it with others. Please describe a real use case for it and how it helped.
 
@@ -41,6 +41,6 @@ metadata:
   sync-with-upstream: false
 ```
 
-## Adding new or improving existing rule
+## Adding new or improving existing rules
 
 We can have as many rules as we want and just pick the applicable ones for a project, so as long as they are useful and don't duplicate others, we will add many.

@@ -9,7 +9,7 @@ field rules.
 
 ## Artifact chain
 
-Framework helps to turns business goals into verified code through a chain of artifacts, each
+Framework helps turn business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
 Flow runs BRD (why) → PRD (what) → spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).

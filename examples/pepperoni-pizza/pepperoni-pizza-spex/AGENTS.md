@@ -11,7 +11,7 @@ BRD (why) → PRD (what) → spec (capability) → contract (interface, if appli
 
 ## Workspace layout
 
-The workspace root holds this repo (`pepperoni-pizza-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for project for all configuration.
+The workspace root holds this repo (`pepperoni-pizza-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all configuration.
 
 ## Everyday commands
 
