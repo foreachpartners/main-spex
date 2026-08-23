@@ -105,7 +105,7 @@ Once every repository's `rule_spec_ids` is settled, an rule in `rules/` that end
 
 1. Compute the set of rule IDs referenced by at least one repository's `rule_spec_ids`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
 2. Show the user the unused rule IDs and confirm they should be removed. This is a deletion — no rule is removed without the user's explicit confirmation.
-3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<spec-id>/` it owns), and add the ID to the top-level `rule_spec_ids_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<rule-id>/` it owns), and add the ID to the top-level `rule_spec_ids_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
 4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 

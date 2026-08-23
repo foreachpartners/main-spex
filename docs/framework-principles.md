@@ -102,8 +102,8 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | HTTP / gRPC / event interface     | Native contract at the `path` declared in `spex.yaml` (OpenAPI, `.proto`, AsyncAPI), usually inside the owning repository | No markdown copy of the interface                |
 | Capability (product or technical) | Spec (`<project-name>-spex/specs/<spec-id-lowercase>.yaml`)                                                               | No copy in code comments or plans                |
-| Cross-cutting convention          | Rule (`<project-name>-spex/rules/<spec-id-lowercase>.yaml`)                                                               | No copy in agent rules, READMEs, or service docs |
-| Check logic                       | Rule-spec `checks` and `scripts/<spec-id-lowercase>/`                                                                     | No restated rule in CI config prose              |
+| Cross-cutting convention          | Rule (`<project-name>-spex/rules/<rule-id-lowercase>.yaml`)                                                               | No copy in agent rules, READMEs, or service docs |
+| Check logic                       | Rule-spec `checks` and `scripts/<rule-id-lowercase>/`                                                                     | No restated rule in CI config prose              |
 | Workspace layout                  | `<project-name>-spex/spex.yaml`                                                                                           | No second list of repositories anywhere          |
 | Term definitions                  | `docs/glossary.md`                                                                                                        | No re-definition in other docs                   |
 

@@ -176,7 +176,7 @@ Turns a PRD into one or more schema-valid specs `specs/<spec-id-lowercase>.yaml`
 
 ## spex-rule
 
-Turns a convention into a schema-valid rule with checks. Writes `rules/<spec-id-lowercase>.yaml` plus any script bodies under `scripts/<spec-id-lowercase>/`.
+Turns a convention into a schema-valid rule with checks. Writes `rules/<rule-id-lowercase>.yaml` plus any script bodies under `scripts/<rule-id-lowercase>/`.
 
 ## spex-contract
 
@@ -238,7 +238,7 @@ A check proves an acceptance criterion.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a spec's checks through `rule_spec_ids`.
 - `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
-- Script checks resolve at `scripts/<spec-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
+- Script checks resolve at `scripts/<rule-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
 - `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
 - Choose `per-repo` when a check needs to run once per governed repository and `workspace` when script needs to run once.

@@ -60,7 +60,7 @@ spex check
 
 The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
-A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<spec-id-lowercase>/<script>` under the spex directory. Set `run: per-file` (the default) to pass the matched files as arguments. Set `run: per-repo` to run the script once per repository, in that repository's directory, with no arguments. Set `run: workspace` to run the script exactly once, with no arguments.
+A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<rule-id-lowercase>/<script>` under the spex directory. Set `run: per-file` (the default) to pass the matched files as arguments. Set `run: per-repo` to run the script once per repository, in that repository's directory, with no arguments. Set `run: workspace` to run the script exactly once, with no arguments.
 
 A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
 
@@ -103,7 +103,7 @@ spex check --repo api --files src/main.rs src/orders.rs
 spex check --repo frontend --fill-preexisting-errors
 ```
 
-When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule spec: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<spec-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<spec-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule spec: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
 
 ### `spex coverage`
 
@@ -137,7 +137,7 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
 
-This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<spec-id-lowercase>.yaml`) valid against the bundled schemas.
+This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
 
 #### Flags
 

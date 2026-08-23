@@ -50,7 +50,7 @@
     },
     {
       "title": "script check",
-      "description": "Runs an external script stored in the spex directory at `scripts/<spec-id>/<script>`.",
+      "description": "Runs an external script stored in the spex directory at `scripts/<rule-id>/<script>`.",
       "allOf": [
         { "$ref": "#/$defs/check_base" },
         { "$ref": "#/$defs/file_scope" }
@@ -59,7 +59,7 @@
         "type": { "const": "script" },
         "script": {
           "type": "string",
-          "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<spec-id>/<script>`, so the `<spec-id>` folder keeps checks from different specs from sharing a path.",
+          "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<rule-id>/<script>`, so the `<rule-id>` folder keeps checks from different rules from sharing a path.",
           "minLength": 1
         },
         "run": {
