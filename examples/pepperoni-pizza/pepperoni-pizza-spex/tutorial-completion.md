@@ -54,7 +54,7 @@ from a perfect score.
   deliveries (`in_progress_pizzas`), divided across workers — covering "pizzas
   ordered", "other ongoing orders", and "workers" in one formula
   (`estimate_seconds`).
-- **The spec is precise and testable.** `DELIVERY-TIME.yaml` breaks the
+- **The spec is precise and testable.** `delivery-time.yaml` breaks the
   vague requirement into 10 `MUST` acceptance criteria, each pinning a concrete
   rule (1 min/pizza, 2 workers, round up to the whole minute, return whole
   seconds) and a clear owner (`api` vs `frontend`).
