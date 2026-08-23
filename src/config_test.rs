@@ -125,9 +125,9 @@ mod tests {
         );
     }
 
-    fn entry(rule_spec_id: &str, check: &str, files: &[&str]) -> PreexistingEntry {
+    fn entry(rule_id: &str, check: &str, files: &[&str]) -> PreexistingEntry {
         PreexistingEntry {
-            rule_spec_id: rule_spec_id.to_string(),
+            rule_id: rule_id.to_string(),
             check: check.to_string(),
             files: files.iter().map(|file| file.to_string()).collect(),
         }
@@ -162,8 +162,8 @@ mod tests {
                     path: ../api
                     rules:
                       - X
-                    checks_preexisting_errors:
-                      - rule_spec_id: X
+                    ignored_errors:
+                      - rule_id: X
                         check: no-cyrillic
                         files:
                           - README.md
@@ -186,14 +186,14 @@ mod tests {
     path: ../web
     rules:
       - X
-    checks_preexisting_errors:
-      - rule_spec_id: Y
+    ignored_errors:
+      - rule_id: Y
         check: commit-format
 "
         ));
         // The api repository is out of scope, so it keeps no block.
         assert!(!out.contains("check: commit-format\n  - repository_name: web"));
-        assert_eq!(out.matches("checks_preexisting_errors:").count(), 1);
+        assert_eq!(out.matches("ignored_errors:").count(), 1);
     }
 
     #[test]
@@ -203,8 +203,8 @@ mod tests {
             repositories:
               - repository_name: api
                 path: ../api
-                checks_preexisting_errors:
-                  - rule_spec_id: X
+                ignored_errors:
+                  - rule_id: X
                     check: stale
                     files:
                       - old.md
@@ -222,7 +222,7 @@ mod tests {
             "new block missing:\n{out}"
         );
         // The block is regenerated once, not duplicated.
-        assert_eq!(out.matches("checks_preexisting_errors:").count(), 1);
+        assert_eq!(out.matches("ignored_errors:").count(), 1);
     }
 
     #[test]
@@ -232,8 +232,8 @@ mod tests {
             repositories:
               - repository_name: api
                 path: ../api
-                checks_preexisting_errors:
-                  - rule_spec_id: X
+                ignored_errors:
+                  - rule_id: X
                     check: gone
         "};
         // api is in scope but has no current errors, so its block is dropped.

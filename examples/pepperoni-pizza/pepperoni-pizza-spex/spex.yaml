@@ -3,7 +3,7 @@ description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
 cli_version: 0.7.56
-rules_removed:
+rules_unused:
   - GRAPHQL-CONVENTIONS
 repositories:
   - repository_name: pepperoni-pizza-api

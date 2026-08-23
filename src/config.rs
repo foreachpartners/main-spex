@@ -48,7 +48,7 @@ pub struct Repository {
     #[serde(default)]
     pub rules: Vec<String>,
     #[serde(default)]
-    pub checks_preexisting_errors: Vec<PreexistingError>,
+    pub ignored_errors: Vec<PreexistingError>,
 }
 
 impl Repository {
@@ -67,12 +67,12 @@ pub struct Contract {
 }
 
 // A baseline entry that suppresses pre-existing `error`-severity findings for an
-// inherited or additional check identified by `rule_spec_id` + `check`. An empty `files`
+// inherited or additional check identified by `rule_id` + `check`. An empty `files`
 // suppresses the whole check; otherwise only findings whose location file is
 // listed are suppressed, so new errors in other files still surface.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
-    pub rule_spec_id: String,
+    pub rule_id: String,
     pub check: String,
     #[serde(default)]
     pub files: Vec<String>,
@@ -132,14 +132,14 @@ pub fn version_warning(config: &Config) -> Option<String> {
 }
 
 // A fully-resolved baseline entry to write into `spex.yaml`. An empty `files`
-// renders a bare `rule_spec_id`/`check` entry that suppresses the whole check.
+// renders a bare `rule_id`/`check` entry that suppresses the whole check.
 pub struct PreexistingEntry {
-    pub rule_spec_id: String,
+    pub rule_id: String,
     pub check: String,
     pub files: Vec<String>,
 }
 
-// Rewrites each in-scope repository's `checks_preexisting_errors` block in raw
+// Rewrites each in-scope repository's `ignored_errors` block in raw
 // `spex.yaml` text, leaving the rest of the file byte-stable. `by_repo` is keyed
 // on `repository_name` and holds every repository whose block should be
 // regenerated (an empty entry list removes a now-stale block); repositories
@@ -188,7 +188,7 @@ pub fn set_preexisting_errors(
 
         // Drop the existing block (its key line plus every more-indented child)
         // for in-scope repositories; the regenerated block replaces it.
-        if in_scope && indent == 4 && trimmed.starts_with("checks_preexisting_errors:") {
+        if in_scope && indent == 4 && trimmed.starts_with("ignored_errors:") {
             i += 1;
             while i < lines.len() && indent_of(lines[i]) > 4 {
                 i += 1;
@@ -212,9 +212,9 @@ fn indent_of(line: &str) -> usize {
 }
 
 fn render_preexisting_block(entries: &[PreexistingEntry]) -> String {
-    let mut block = String::from("    checks_preexisting_errors:\n");
+    let mut block = String::from("    ignored_errors:\n");
     for entry in entries {
-        block.push_str(&format!("      - rule_spec_id: {}\n", entry.rule_spec_id));
+        block.push_str(&format!("      - rule_id: {}\n", entry.rule_id));
         block.push_str(&format!("        check: {}\n", entry.check));
         if !entry.files.is_empty() {
             block.push_str("        files:\n");

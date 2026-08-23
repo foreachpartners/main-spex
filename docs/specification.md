@@ -116,7 +116,7 @@ Refreshes the managed framework files from the installed binary.
 - Rewrites the bundled schemas with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
-- Deploys a bundled rule missing locally, unless its id is listed in `rules_removed` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
+- Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 
@@ -225,7 +225,7 @@ One coherent cross-cutting convention or rule.
 - Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
 - Each criterion should be provable by an automated check or by AI inspection.
-- A deleted bundled rule is only recognized as deliberate once its id is added to `rules_removed` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
+- A deleted bundled rule is only recognized as deliberate once its id is added to `rules_unused` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
 
 ## Checks
 
@@ -237,7 +237,7 @@ A check proves an acceptance criterion.
 - `include` / `exclude` globs narrow the file set.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a spec's checks through `rules`.
-- `checks_preexisting_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
+- `ignored_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
 - Script checks resolve at `scripts/<rule-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
 - `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
 - `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
@@ -265,7 +265,7 @@ Declares the project and its repositories.
 - Each repository has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, `path` (relative to the spex directory), an optional `description`, an optional `contracts` list, and `rules`.
 - `--repo` accepts either a repository's full name or its short name.
 - Each `contracts` entry has a `path` (relative to the spex directory, inside `contracts/`) and a `description`, both required.
-- Each repository may add per-repo `checks_preexisting_errors`.
+- Each repository may add per-repo `ignored_errors`.
 - Validated against `schemas/spex.schema.json`.
 
 ## Versioning

@@ -11,7 +11,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Default)]
 struct RuleSpecIdsRemoved {
     #[serde(default)]
-    rules_removed: Vec<String>,
+    rules_unused: Vec<String>,
 }
 
 type Result<T> = core::result::Result<T, Report<UpdateError>>;
@@ -44,7 +44,7 @@ pub fn run() -> Result<ExitCode> {
 
     let removed_rules = serde_yaml_ng::from_str::<RuleSpecIdsRemoved>(&raw)
         .unwrap_or_default()
-        .rules_removed;
+        .rules_unused;
 
     templates::scaffold(&spex_dir, &removed_rules)
         .change_context(UpdateError::Templates)?;

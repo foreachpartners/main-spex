@@ -123,7 +123,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
             started.elapsed()
         ));
         if suppress {
-            findings.retain(|finding| !is_preexisting(finding, &repo.checks_preexisting_errors));
+            findings.retain(|finding| !is_preexisting(finding, &repo.ignored_errors));
         }
         reports.push(RepoReport {
             name: repo.name.clone(),
@@ -172,7 +172,7 @@ impl Baseline {
 }
 
 // Records the current error findings into each selected repository's
-// `checks_preexisting_errors` block in `spex.yaml`. File-less errors widen to a
+// `ignored_errors` block in `spex.yaml`. File-less errors widen to a
 // whole-check entry; repository-level errors with no check are skipped because
 // they cannot be keyed. Out-of-scope repositories are left untouched.
 fn fill_preexisting_errors(
@@ -214,8 +214,8 @@ fn fill_preexisting_errors(
         .map(|(name, checks)| {
             let entries = checks
                 .into_iter()
-                .map(|((rule_spec_id, check), baseline)| PreexistingEntry {
-                    rule_spec_id,
+                .map(|((rule_id, check), baseline)| PreexistingEntry {
+                    rule_id,
                     check,
                     files: match baseline {
                         Baseline::WholeCheck => Vec::new(),
@@ -277,7 +277,7 @@ fn report_fill(
 }
 
 // Drops a finding when it matches a repository's pre-existing-error baseline: an
-// `error`-severity finding whose `(rule_spec_id, check)` matches an entry and whose
+// `error`-severity finding whose `(rule_id, check)` matches an entry and whose
 // location file is listed (or the entry lists no files, suppressing the whole
 // check). Warnings and unmatched errors always survive.
 fn is_preexisting(finding: &Finding, baseline: &[PreexistingError]) -> bool {
@@ -304,7 +304,7 @@ fn is_preexisting_workspace(finding: &Finding, repos: &[&Repository]) -> bool {
         let prefix = format!("{}/", repo.path);
         location.strip_prefix(&prefix).is_some_and(|rel| {
             matches_baseline(
-                &repo.checks_preexisting_errors,
+                &repo.ignored_errors,
                 &finding.spec_id,
                 &finding.check,
                 Some(&normalize_location(rel)),
@@ -320,7 +320,7 @@ fn matches_baseline(
     file: Option<&str>,
 ) -> bool {
     baseline.iter().any(|entry| {
-        entry.rule_spec_id == spec_id
+        entry.rule_id == spec_id
             && entry.check == check
             && (entry.files.is_empty()
                 || file.is_some_and(|file| entry.files.iter().any(|listed| listed == file)))

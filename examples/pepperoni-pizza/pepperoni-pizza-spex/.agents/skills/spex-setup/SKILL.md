@@ -105,7 +105,7 @@ Once every repository's `rules` is settled, an rule in `rules/` that ended up re
 
 1. Compute the set of rule IDs referenced by at least one repository's `rules`. Any bundled rule in `rules/` outside that set is unused workspace-wide.
 2. Show the user the unused rule IDs and confirm they should be removed. This is a deletion — no rule is removed without the user's explicit confirmation.
-3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<rule-id>/` it owns), and add the ID to the top-level `rules_removed` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
+3. For each confirmed ID: delete its file from `rules/` (and any scripts under `scripts/<rule-id>/` it owns), and add the ID to the top-level `rules_unused` list in `spex.yaml` (create the list if absent). This records the deletion as deliberate so `spex update` never redeploys it.
 4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
@@ -171,7 +171,7 @@ repositories:
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rules` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
-- Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rules_removed`) or deliberately kept, per the user's confirmation.
+- Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rules_unused`) or deliberately kept, per the user's confirmation.
 - Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout and commands, confirmed by the user.
 - No existing field or path is changed, and no rule is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

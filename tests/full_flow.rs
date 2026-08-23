@@ -141,7 +141,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
         "  - repository_name: proj-frontend\n",
-        "  - repository_name: proj-frontend\n    checks_preexisting_errors:\n      - rule_spec_id: WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - repository_name: proj-frontend\n    ignored_errors:\n      - rule_id: WRITING-STYLE\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(
         patched, config,
@@ -189,7 +189,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     let config = fs::read_to_string(project.join("proj-spex/spex.yaml")).expect("read spex.yaml");
     assert!(
-        config.contains("checks_preexisting_errors:")
+        config.contains("ignored_errors:")
             && config.contains("check: no-cyrillic")
             && config.contains("- README.md"),
         "baseline was not written into spex.yaml:\n{config}",

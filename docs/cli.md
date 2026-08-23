@@ -64,7 +64,7 @@ A `script` check runs the program named by its `script:` filename (for example `
 
 A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
 
-A repository can also baseline pre-existing `error`-severity findings with `checks_preexisting_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_spec_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
+A repository can also baseline pre-existing `error`-severity findings with `ignored_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
 
 ```yaml
 repositories:
@@ -72,8 +72,8 @@ repositories:
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
     rules: [WRITING-STYLE]
-    checks_preexisting_errors:
-      - rule_spec_id: WRITING-STYLE
+    ignored_errors:
+      - rule_id: WRITING-STYLE
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```
@@ -82,7 +82,7 @@ repositories:
 
 - `--repo <name>...` — limit the run to the named workspace repositories, matched by either full `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files.
-- `--fill-preexisting-errors` — record the current `error`-severity findings as a `checks_preexisting_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
+- `--fill-preexisting-errors` — record the current `error`-severity findings as a `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
 - `--verbose` (`-v`) — stream progress to stderr as the run proceeds: each repository, then each check it runs (with the time each took), and the workspace checks at the end. The report on stdout is unchanged, so piping or redirecting it still works.
 
 ```sh
@@ -97,7 +97,7 @@ spex check --repo api frontend
 spex check --repo api --files src/main.rs src/orders.rs
 ```
 
-`--fill-preexisting-errors` runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `checks_preexisting_errors` entry per check into that repository's block in `spex.yaml`. A finding tied to a file is baselined for that file; a file-less error (for example a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. The command regenerates each selected repository's baseline from the current findings — dropping entries whose errors are gone — and leaves the rest of `spex.yaml`, and any unselected repository, byte-stable. It always exits `0`. Repository-level errors that belong to no named check (for example a misconfigured override) are not baselined; fix those directly.
+`--fill-preexisting-errors` runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `ignored_errors` entry per check into that repository's block in `spex.yaml`. A finding tied to a file is baselined for that file; a file-less error (for example a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. The command regenerates each selected repository's baseline from the current findings — dropping entries whose errors are gone — and leaves the rest of `spex.yaml`, and any unselected repository, byte-stable. It always exits `0`. Repository-level errors that belong to no named check (for example a misconfigured override) are not baselined; fix those directly.
 
 ```sh
 spex check --repo frontend --fill-preexisting-errors

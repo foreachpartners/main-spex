@@ -322,7 +322,7 @@ mod tests {
             path: path.to_string(),
             contracts: Vec::new(),
             rules: rules.into_iter().map(str::to_string).collect(),
-            checks_preexisting_errors: Vec::new(),
+            ignored_errors: Vec::new(),
         }
     }
 
@@ -516,7 +516,7 @@ mod tests {
 
     fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
         PreexistingError {
-            rule_spec_id: "X".to_string(),
+            rule_id: "X".to_string(),
             check: check.to_string(),
             files: files.into_iter().map(str::to_string).collect(),
         }
