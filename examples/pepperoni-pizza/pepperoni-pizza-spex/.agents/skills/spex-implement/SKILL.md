@@ -74,14 +74,27 @@ Prove the work completes the governing specs:
 spex coverage
 ```
 
-## Step 6 — Report
+## Step 6 — Delete the plan
+
+### With a plan
+
+Once every step and task in the plan is `completed`, delete the plan file. A finished plan is a working document with nothing left to say — the spec, code, git and tests already record what shipped. Leaving it in the repository only pollutes future search with an obsolete artifact.
+
+If any step or task is not yet `completed` (the run stopped partway through), leave the plan file in place so work can resume later.
+
+### Without a plan (ad-hoc user request)
+
+Nothing to delete.
+
+## Step 7 — Report
 
 Summarize the run:
 
 - Which units of work completed.
 - Which specs you set to `active`, which acceptance criteria you ticked `[x]` or left `[ ]`, and why.
 - The format, lints, tests, `spex check` and `spex coverage` run outcome.
+- Whether the plan file was deleted (fully completed) or left in place (partial run).
 
-## Step 7 — Point to the next skill
+## Step 8 — Point to the next skill
 
 Ask the user to do an optional review with `spex-review` for implemented changes.
