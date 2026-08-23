@@ -59,7 +59,7 @@
 
 - **Design reference** — a contract variant for UI-facing specs: a markdown document linking each spec to its visual design (e.g. a Figma frame), annotated like any other contract. Used when the interface a spec exposes is visual rather than machine-readable.
 
-- **Plan** — derived from one or more approved specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<spec-id>/<date>-<slug>.md`. A plan is a working document: it exists to split a large change into reviewable, resumable steps while it's in flight. Once every step is `completed`, `spex-implement` deletes the plan file — the spec, code, and tests already record what shipped, more accurately and durably than a step-by-step plan would.
+- **Plan** — derived from one or more approved specs (and their contracts). Turns specs into an ordered set of steps whose tasks AI agents execute, with a status on every step and task so progress is trackable. A spec's plans live in the `spex` repository under `plans/<date>-<slug>.md`. A plan is a working document: it exists to split a large change into reviewable, resumable steps while it's in flight. Once every step is `completed`, `spex-implement` deletes the plan file — the spec, code, and tests already record what shipped, more accurately and durably than a step-by-step plan would.
 
   ```md
   # Plan: Customer can place an order

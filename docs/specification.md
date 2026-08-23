@@ -184,7 +184,7 @@ Derives the machine-readable interface contract from approved specs.
 
 ## spex-plan
 
-Splits approved specs into an ordered, parallel-safe implementation plan. Writes `plans/<spec-id>/<date>-<slug>.md` with a status on every step and task.
+Splits approved specs into an ordered, parallel-safe implementation plan. Writes `plans/<date>-<slug>.md` with a status on every step and task.
 
 ## spex-implement
 

@@ -1,6 +1,6 @@
 ---
 name: spex-implement
-description: Carry out an existing plan, or implement an ad-hoc user request. Use when the user wants to carry out a plan from <workspace-root>/<project-name>-spex/plans/<spec-id>/<plan-name>, or asks for a change without a formal plan.
+description: Carry out an existing plan, or implement an ad-hoc user request. Use when the user wants to carry out a plan from <workspace-root>/<project-name>-spex/plans/<plan-name>, or asks for a change without a formal plan.
 ---
 
 # Process
