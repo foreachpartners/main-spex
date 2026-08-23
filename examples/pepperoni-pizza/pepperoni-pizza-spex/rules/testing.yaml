@@ -11,9 +11,9 @@ acceptance_criteria:
   - "MUST NOT commit a focused test (`.only`, `fit`, `fdescribe`) that excludes its siblings from running"
 checks:
   - name: no-skipped-tests
-    description: Flag skipped, ignored, or pending tests
+    description: Flag skipped, ignored, or pending tests (non-JS/TS runners)
     type: regexp
-    pattern: '\.skip\(|xit\(|xdescribe\(|#\[ignore\]|@pytest\.mark\.skip|@unittest\.skip|t\.Skip\('
+    pattern: '#\[ignore\]|@pytest\.mark\.skip|@unittest\.skip|t\.Skip\('
     include:
       - "**/*_test.*"
       - "**/*.test.*"
@@ -21,14 +21,49 @@ checks:
       - "**/tests/**"
       - "**/test/**"
     severity: warn
-  - name: no-focused-tests
-    description: Flag focused tests that exclude their siblings from running
-    type: regexp
-    pattern: '\.only\(|\bfit\(|\bfdescribe\('
+  - name: no-skipped-tests-js
+    description: >-
+      Flag `xit`/`xdescribe`, or a `describe`/`it`/`test`/`context.skip(...)`
+      call. Scoped to those four runner objects — unlike a plain `\.skip\(`
+      regex — so it does not flag an unrelated `.skip(...)` call (e.g. a
+      Rust-style iterator skip) that merely appears in a test file.
+    type: ast-grep
+    language: typescript
+    rule:
+      rule:
+        any:
+          - pattern: xit($$$ARGS)
+          - pattern: xdescribe($$$ARGS)
+          - pattern: $OBJ.skip($$$ARGS)
+      constraints:
+        OBJ:
+          regex: "^(describe|it|test|context)$"
     include:
-      - "**/*_test.*"
-      - "**/*.test.*"
-      - "**/*.spec.*"
-      - "**/tests/**"
-      - "**/test/**"
+      - "**/*_test.{ts,tsx,js,jsx}"
+      - "**/*.{test,spec}.{ts,tsx,js,jsx}"
+      - "**/{tests,test}/**/*.{ts,tsx,js,jsx}"
+    severity: warn
+  - name: no-focused-tests-js
+    description: >-
+      Flag focused tests (`fit`, `fdescribe`, or `describe`/`it`/`test`/`context.only(...)`)
+      that exclude their siblings from running. Constraining `.only` to those
+      four runner objects avoids flagging an unrelated `.only(...)` call that
+      merely appears in a test file. Fully covers the acceptance criterion —
+      `.only`/`fit`/`fdescribe` are JS/TS test-runner concepts with no Rust,
+      Python, or Go equivalent, so no regexp fallback is needed here.
+    type: ast-grep
+    language: typescript
+    rule:
+      rule:
+        any:
+          - pattern: fit($$$ARGS)
+          - pattern: fdescribe($$$ARGS)
+          - pattern: $OBJ.only($$$ARGS)
+      constraints:
+        OBJ:
+          regex: "^(describe|it|test|context)$"
+    include:
+      - "**/*_test.{ts,tsx,js,jsx}"
+      - "**/*.{test,spec}.{ts,tsx,js,jsx}"
+      - "**/{tests,test}/**/*.{ts,tsx,js,jsx}"
     severity: error
