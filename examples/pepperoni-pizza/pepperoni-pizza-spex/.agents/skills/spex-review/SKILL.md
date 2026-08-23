@@ -5,7 +5,7 @@ description: Review the changes since a fixed point (commit, branch, tag, or mer
 
 Two-axis review of a diff — committed changes since a fixed point, or uncommitted working-tree changes:
 
-- **Rule specs** — does the code conform to governing cross-cutting conventions and rules?
+- **Rules** — does the code conform to governing cross-cutting conventions and rules?
 - **Specs** — does the code faithfully implement the specs?
 
 Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
@@ -60,10 +60,10 @@ Each smell reads _what it is_ → _how to fix_; match it against the diff:
 
 Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
 
-**Rule spec sub-agent prompt** — include:
+**Rule sub-agent prompt** — include:
 
 - The full diff command and commit list.
-- The list of rule spec-source files you found in step 2 and smell baseline pasted in full — the sub-agent has no other access to it.
+- The list of rule-source files you found in step 2 and smell baseline pasted in full — the sub-agent has no other access to it.
 - The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented specs: cite the rule (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** — include:

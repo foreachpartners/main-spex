@@ -21,7 +21,7 @@ Each fact lives in exactly one of these files — reference it, never copy it el
 
 Run from anywhere inside the workspace — `spex` locates `spex.yaml` automatically.
 
-- `spex check` - runs the rule spec checks declared in `spex.yaml` against the workspace (`--repo <name>` to limit scope, `--files <path>...` to target specific files, `--fill-preexisting-errors` to baseline current errors)
+- `spex check` - runs the rule checks declared in `spex.yaml` against the workspace (`--repo <name>` to limit scope, `--files <path>...` to target specific files, `--fill-preexisting-errors` to baseline current errors)
 - `spex coverage` - reports how well the active specs are covered by spec-id annotations (`@spec impl`, `@spec test`, `@spec contract`) across the workspace
 - `spex check-schema` - validates JSON or YAML files against a JSON Schema
 - `spex info` - prints the resolved spex configuration (`--print <name>` for a single field, `--repo <name>` to limit to one repository)
