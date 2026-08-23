@@ -30,7 +30,7 @@ They apply repo-wide and are proven by automated checks (linters, CI gates) or A
 
 ## 4. Human in control
 
-Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability and trust in the codebase. spex keeps the speed without the mess: the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything, owning every decision by approving the artifact that records it.
+Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability, trust, and the team's comprehension of the codebase. spex keeps the speed without the mess: the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything, owning every decision by approving the artifact that records it.
 
 Each artifact is approved before the next is generated: spec before contract, contract before plan, plan before code and tests. This makes work streamlined without haphazard backward edits, keeps the codebase maintainable, and means every change traces back to a decision a human approved.
 
