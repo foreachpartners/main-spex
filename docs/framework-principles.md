@@ -14,7 +14,7 @@ spex is built around this premise: the agent writes every artifact — specs, co
 
 Casual requests force an AI to guess, leading to inaccurate repository navigation and assumption-based task completion. Ask an AI to "make me a snake game" and it will — but it will be the snake game the AI imagined, not the one you wanted, because you wanted a blue snake with big eyes.
 
-Clear, well-defined specs (`SPEC-*`) eliminate guesswork: they provide explicit acceptance criteria for the AI to follow and for the developer to verify. Specs stay relevant for a long time even as models get faster and better, because they describe an idea from your head that must meet your — or your customer's — expectations, not someone else's.
+Clear, well-defined specs eliminate guesswork: they provide explicit acceptance criteria for the AI to follow and for the developer to verify. Specs stay relevant for a long time even as models get faster and better, because they describe an idea from your head that must meet your — or your customer's — expectations, not someone else's.
 
 Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
@@ -24,7 +24,7 @@ Asking an agent to "implement me a snake game where snake is blue and has big ey
 
 Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rules (`*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
 
-They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability, captured as a spec (`SPEC-*`).
+They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability.
 
 **Violation test**: a code-style or security rule lives only in someone's head or a chat message — it is applied inconsistently and cannot be enforced.
 
@@ -131,7 +131,7 @@ Three requirements:
 
 Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
 
-- The Spec ID (`SPEC-*`, `*`) is the traceability unit.
+- The Spec ID (`DELIVERY-TIME`) is the traceability unit.
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI.
 - `spex coverage` computes coverage from those annotations.
 - Checking out a commit shows exactly which specs the code was built against.

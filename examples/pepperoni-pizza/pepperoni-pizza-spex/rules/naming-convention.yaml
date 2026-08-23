@@ -10,7 +10,7 @@ acceptance_criteria:
   - "MUST use <project_name>_<repository_short_name> for db (names both the database and its user)"
   - "MUST use <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA> for config and env variables"
   - "MUST use <project_name>.<repository_short_name>.<data> for proto_package"
-  - "MUST use uppercase for a Spec ID (`SPEC-*`, `*`) everywhere it is referenced — prose, `@spec` annotations, `x-spec:` — but lowercase it for the spec's filename and script directory (`specs/place-pizza-order.yaml` for `PLACE-PIZZA-ORDER`, `scripts/secret-handling/` for `SECRET-HANDLING`), matching the repository's kebab-case filename convention"
+  - "MUST use uppercase for a Spec ID (e.g. `DELIVERY-TIME`) everywhere it is referenced — prose, `@spec` annotations, `x-spec:` — but lowercase it for the spec's filename and script directory (`specs/place-pizza-order.yaml` for `PLACE-PIZZA-ORDER`, `scripts/secret-handling/` for `SECRET-HANDLING`), matching the repository's kebab-case filename convention"
   - "MUST extend this convention, not individual repositories, when a new cross-cutting identifier is needed"
 checks:
   - name: repo-dir
