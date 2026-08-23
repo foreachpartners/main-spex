@@ -106,17 +106,17 @@ flowchart TD
     end
 ```
 
-### Rule specs live outside the feature flow — they govern how every artifact is built:
+### Rules live outside the feature flow — they govern how every artifact is built:
 
 For example, the rule `SECRET-HANDLING` works like this:
 
-1. **Rule Spec** — `SECRET-HANDLING`: "Secret protection"
+1. **Rule** — `SECRET-HANDLING`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI
 
 ```mermaid
 flowchart TD
-    Eng["Rule Spec — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
+    Eng["Rule — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
     Eng -.proven by.-> Checks["Automated and AI checks"]
 ```
 

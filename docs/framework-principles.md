@@ -20,9 +20,9 @@ Asking an agent to "implement me a snake game where snake is blue and has big ey
 
 **Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted.
 
-## 3. Technical rules and patterns as Specs
+## 3. Rules over Tribal Knowledge
 
-Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rule specs (`*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
+Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rules (`*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
 
 They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability, captured as a spec (`SPEC-*`).
 
