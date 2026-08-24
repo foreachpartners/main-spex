@@ -45,6 +45,12 @@ Repository directories follow `<project-name>-<repository-short-name>` (NAMING-C
    - Zed: add project, pick all workspace repos (folders)
 4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
 
+### Adoption
+
+After setup is completed you get basic skills and rules which you can customize for your project or leave them as is to be synced from upstream.
+
+For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to user nickname registration length, ask AI to generate spec based on how user registration currently works, then do your changes.
+
 ### Workflow
 
 Workflow core is AI agent skills and CLI commands.

@@ -1,5 +1,7 @@
 # Plan: Show customers an estimated delivery time for their order
 
+Note: implemented plans are deleted after completion, this is just an example.
+
 - Specs: DELIVERY-TIME
 - Scope: api, frontend
 - Rules: COMMIT-MESSAGE-FORMAT, CONFIGURABLE-NETWORK-BIND, DEPENDENCIES, NAMING-CONVENTION, SECRET-HANDLING, SPEC-ID-TRACING, TESTING, WRITING-STYLE
