@@ -48,6 +48,7 @@ provides and a cross-cutting convention.
 - A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
 - A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
 - A rule applies repo-wide, not per feature. The test: a specific capability the system provides → spec; a rule every change must follow, enforceable repo-wide → rule.
+- `specs/` and `rules/` may each group files one subdirectory level deep (e.g. `rules/frontend/frontend-testing.yaml`); deeper nesting is not recognized. The Spec/Rule ID is always just the filename, regardless of nesting.
 
 ## Naming
 
@@ -58,6 +59,7 @@ All names are chosen to match clear and precise meaning for human and AI.
 - "Rule" is reserved for rules. Spec acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
 - The spec type is conveyed only by which directory a spec lives in (`specs/` or `rules/`) — IDs carry no type prefix.
 - A spec's identifier is a Spec ID (`schemas/spec-id.schema.json`); a rule's identifier is a Rule ID (`schemas/rule-id.schema.json`). Both follow the same uppercase-letters-and-hyphens format, limited to 40 characters to avoid long filenames/refs.
+- Every id must be unique across both `specs/` and `rules/`, since Spec IDs and Rule IDs share the same naming convention and could otherwise collide.
 
 # Workspace
 

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
@@ -6,9 +7,14 @@ use crate::commands::check_schema;
 use crate::rule::{RULES_DIR, Rule, SCRIPTS_DIR};
 use crate::spec::SPECS_DIR;
 use crate::templates::SCHEMAS_DIR;
+use crate::util::yaml_files;
 
 use super::runners::resolve_script;
 use super::{Finding, Severity};
+
+#[cfg(test)]
+#[path = "conformance_test.rs"]
+mod conformance_test;
 
 // Findings from this module are attributed to a synthetic spec id rather than
 // a real rule, since spex's own conformance checks are built into `spex
@@ -17,6 +23,7 @@ use super::{Finding, Severity};
 const SPEC_ID: &str = "SPEX-INTERNAL-CONFORMANCE";
 const CONFORM_CHECK: &str = "spec-files-conform";
 const AC_ORDER_CHECK: &str = "ac-ordered";
+const DUPLICATE_ID_CHECK: &str = "no-duplicate-ids";
 
 #[derive(Deserialize)]
 struct IdOnly {
@@ -36,19 +43,7 @@ pub(super) fn validate_conformance(
     validate_schema(spex_dir, findings);
     validate_script_references(spex_dir, rules, findings);
     validate_ac_order(spex_dir, findings);
-}
-
-fn yaml_files(dir: &Path) -> Vec<PathBuf> {
-    let Ok(entries) = std::fs::read_dir(dir) else {
-        return Vec::new();
-    };
-    let mut files: Vec<PathBuf> = entries
-        .filter_map(|entry| entry.ok())
-        .map(|entry| entry.path())
-        .filter(|path| path.extension().and_then(|ext| ext.to_str()) == Some("yaml"))
-        .collect();
-    files.sort();
-    files
+    validate_no_duplicate_ids(spex_dir, findings);
 }
 
 fn rel(spex_dir: &Path, file: &Path) -> String {
@@ -181,6 +176,39 @@ fn validate_script_references(
                     Some(format!("{RULES_DIR}/{}.yaml", rule.id.to_lowercase())),
                     format!("missing script {}/{script}", dir.display()),
                 ));
+            }
+        }
+    }
+}
+
+// Every id must be unique across both `rules/`
+// and `specs/`, since rule ids and spec ids share the same naming
+// convention and could otherwise collide.
+fn validate_no_duplicate_ids(spex_dir: &Path, findings: &mut Vec<Finding>) {
+    let mut seen: HashMap<String, PathBuf> = HashMap::new();
+    for dir_name in [SPECS_DIR, RULES_DIR] {
+        for file in yaml_files(&spex_dir.join(dir_name)) {
+            let Ok(text) = std::fs::read_to_string(&file) else {
+                continue;
+            };
+            let Ok(parsed) = serde_yaml_ng::from_str::<IdOnly>(&text) else {
+                continue;
+            };
+
+            if let Some(first_seen) = seen.get(&parsed.id) {
+                findings.push(Finding {
+                    severity: Severity::Error,
+                    spec_id: SPEC_ID.to_string(),
+                    check: DUPLICATE_ID_CHECK.to_string(),
+                    location: Some(rel(spex_dir, &file)),
+                    message: format!(
+                        "duplicate id `{}`: already defined in `{}`",
+                        parsed.id,
+                        rel(spex_dir, first_seen)
+                    ),
+                });
+            } else {
+                seen.insert(parsed.id, file);
             }
         }
     }

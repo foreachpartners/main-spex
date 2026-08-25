@@ -22,7 +22,10 @@ set -u
 id='[A-Z]+(-[A-Z]+)*'
 
 known=$(
-  for spec in specs/*.yaml rules/*.yaml; do
+  # specs/ and rules/ may group files one subdirectory level deep (e.g.
+  # `rules/frontend/frontend-testing.yaml`); the Spec ID is always just the
+  # filename, so both levels are globbed here.
+  for spec in specs/*.yaml specs/*/*.yaml rules/*.yaml rules/*/*.yaml; do
     [ -f "$spec" ] || continue
     base=${spec##*/}
     echo "${base%.yaml}" | tr '[:lower:]' '[:upper:]'

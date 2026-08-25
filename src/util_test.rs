@@ -1,9 +1,20 @@
 #[cfg(test)]
 mod tests {
-    use super::super::repo_walker;
+    use super::super::{load_yaml_dir, repo_walker, yaml_files};
+    use serde::Deserialize;
     use std::collections::HashSet;
     use std::path::PathBuf;
     use tempfile::tempdir;
+    use thiserror::Error;
+
+    #[derive(Debug, Deserialize)]
+    struct Item {
+        id: String,
+    }
+
+    #[derive(Debug, Error)]
+    #[error("test error")]
+    struct TestError;
 
     fn walked_files(root: &std::path::Path) -> HashSet<PathBuf> {
         repo_walker(root)
@@ -57,5 +68,54 @@ mod tests {
 
         assert!(files.contains(&PathBuf::from(".env")));
         assert!(!files.iter().any(|path| path.starts_with(".git")));
+    }
+
+    #[test]
+    fn load_yaml_dir_reads_one_subdirectory_level() {
+        let dir = tempdir().expect("temp dir");
+        std::fs::write(dir.path().join("top.yaml"), "id: TOP\n").expect("top");
+        std::fs::create_dir_all(dir.path().join("frontend")).expect("frontend dir");
+        std::fs::write(dir.path().join("frontend/nested.yaml"), "id: NESTED\n").expect("nested");
+
+        let items: Vec<Item> =
+            load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
+        let mut ids: Vec<&str> = items.iter().map(|item| item.id.as_str()).collect();
+        ids.sort();
+
+        assert_eq!(ids, vec!["NESTED", "TOP"]);
+    }
+
+    #[test]
+    fn load_yaml_dir_ignores_files_two_levels_deep() {
+        let dir = tempdir().expect("temp dir");
+        std::fs::create_dir_all(dir.path().join("frontend/too-deep")).expect("nested dirs");
+        std::fs::write(
+            dir.path().join("frontend/too-deep/ignored.yaml"),
+            "id: IGNORED\n",
+        )
+        .expect("ignored");
+
+        let items: Vec<Item> =
+            load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
+
+        assert!(items.is_empty());
+    }
+
+    #[test]
+    fn yaml_files_lists_one_subdirectory_level() {
+        let dir = tempdir().expect("temp dir");
+        std::fs::write(dir.path().join("top.yaml"), "").expect("top");
+        std::fs::create_dir_all(dir.path().join("backend")).expect("backend dir");
+        std::fs::write(dir.path().join("backend/nested.yaml"), "").expect("nested");
+
+        let files = yaml_files(dir.path());
+
+        assert_eq!(
+            files,
+            vec![
+                dir.path().join("backend/nested.yaml"),
+                dir.path().join("top.yaml"),
+            ]
+        );
     }
 }
