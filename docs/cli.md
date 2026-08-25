@@ -113,7 +113,7 @@ Reports how well the active specs are covered by spec-id annotations across the 
 spex coverage
 ```
 
-A single annotation of each kind anywhere in any workspace repository counts — the search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are not `active` are listed only in the per-status totals and are otherwise ignored.
+A single annotation of each kind anywhere in any workspace repository counts — the search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are not `active` are listed by ID under their status and are otherwise ignored.
 
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
 
@@ -125,7 +125,7 @@ coverage_ignore: [contract]
 
 Each active spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. An active spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes.
 
-The report prints the total number of specs per status (omitting any status with no specs), then lists each active spec with its acceptance-criteria progress and coverage:
+The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then lists each active spec with its acceptance-criteria progress and coverage:
 
 - `✓` — every required layer is annotated and every acceptance criterion is implemented.
 - `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.

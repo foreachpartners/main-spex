@@ -149,7 +149,7 @@ Reports annotation coverage for specs.
 - Requires an implementation, test, and contract annotation per active spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
 - Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
-- Non-active specs appear only in the per-status totals.
+- Non-active specs are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
 - Marks each spec ✓ (all layers present and every criterion implemented), ⚠ (only an ignored layer missing), or ✗ (a required layer missing or a criterion unimplemented).
 - Exits non-zero when any active spec has a missing required layer or an unimplemented acceptance criterion.
 

@@ -230,6 +230,21 @@ fn report(config: &Config, specs: &[Spec], found: &Found) -> ExitCode {
     }
 }
 
+// Spec ids per status, in Status::ALL order, skipping empty statuses.
+fn status_groups(specs: &[Spec]) -> Vec<(Status, Vec<&str>)> {
+    Status::ALL
+        .into_iter()
+        .filter_map(|status| {
+            let ids: Vec<&str> = specs
+                .iter()
+                .filter(|spec| spec.status == status)
+                .map(|spec| spec.id.as_str())
+                .collect();
+            (!ids.is_empty()).then_some((status, ids))
+        })
+        .collect()
+}
+
 fn print_status_totals(style: &Style, specs: &[Spec]) {
     println!("{}", style.bold(&format!("Specs ({})", specs.len())));
     if specs.is_empty() {
@@ -238,17 +253,15 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
         return;
     }
 
-    let width = Status::ALL
-        .iter()
-        .map(|status| status.label().len())
-        .max()
-        .unwrap_or(0);
-    for status in Status::ALL {
-        let count = specs.iter().filter(|spec| spec.status == status).count();
-        if count == 0 {
-            continue;
+    for (status, ids) in status_groups(specs) {
+        println!("  {} ({})", style.bold(status.label()), ids.len());
+        // Active specs are already listed below with their coverage detail,
+        // so listing their ids here would just duplicate that.
+        if status != Status::Active {
+            for id in ids {
+                println!("    {}", style.cyan(id));
+            }
         }
-        println!("  {:<width$}  {count}", status.label(), width = width);
     }
     println!();
 }

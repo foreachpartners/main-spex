@@ -192,6 +192,32 @@ mod tests {
     }
 
     #[test]
+    fn status_groups_lists_ids_per_non_empty_status_in_order() {
+        let specs = vec![
+            spec("A", Status::Active),
+            spec("B", Status::Planned),
+            spec("C", Status::Planned),
+            spec("D", Status::Deprecated),
+        ];
+        let groups = status_groups(&specs);
+        assert_eq!(
+            groups,
+            vec![
+                (Status::Active, vec!["A"]),
+                (Status::Planned, vec!["B", "C"]),
+                (Status::Deprecated, vec!["D"]),
+            ]
+        );
+    }
+
+    #[test]
+    fn status_groups_skips_empty_statuses() {
+        let specs = vec![spec("A", Status::Planned)];
+        let groups = status_groups(&specs);
+        assert_eq!(groups, vec![(Status::Planned, vec!["A"])]);
+    }
+
+    #[test]
     fn full_coverage_has_no_gap() {
         let row = row(
             "A",
