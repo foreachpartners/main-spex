@@ -1,6 +1,6 @@
 # Foundation principles
 
-These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, the spec kinds, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms and [specification.md](specification.md) for how the framework behaves.
+These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, specs and rules, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms and [specification.md](specification.md) for how the framework behaves.
 
 ## 1. AI over Manual Coding
 
@@ -72,7 +72,7 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 
 The tool should help the developer get work done, not stand in the way. Everything about spex is kept simple, so it can be adopted and put to use in five minutes.
 
-Simplicity is a constraint on the framework itself, not only on the code it governs: a new command, spec kind, or skill earns its place only when it removes more friction than it adds.
+Simplicity is a constraint on the framework itself, not only on the code it governs: a new command, artifact type, or skill earns its place only when it removes more friction than it adds.
 
 **Violation test**: a feature adds a step to the workflow without removing more friction than it introduces — the tool now stands in the way.
 

@@ -40,15 +40,19 @@ A plan helps with large changes and is optional for small, self-contained ones.
 
 A plan is a working document, not a permanent artifact: useful while a change is in flight, so a step splits a big task into reviewable pieces and a status line lets work pause and resume across sessions unchanged. Once every step is `completed` and the change has shipped, the plan has nothing left to say that the code, spec, and git history don't already say better and more accurately — the spec records what must be true, the code and tests record what is true, and the plan's blow-by-blow steps only drift out of date as the code evolves further. Left in the repository, a finished plan is pure noise: a stale, unmaintained document that AI and human search alike keep surfacing, and that outsiders (or agents) can mistake for current instructions. `spex-implement` therefore deletes a plan file once it finishes executing it — completed plans do not accumulate.
 
-## Spec kinds
+## Specs
 
-Two kinds of spec capture two kinds of requirement: a capability the system
-provides and a cross-cutting convention.
+A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
 
-- A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
-- A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
-- A rule applies repo-wide, not per feature. The test: a specific capability the system provides → spec; a rule every change must follow, enforceable repo-wide → rule.
-- `specs/` and `rules/` may each group files one subdirectory level deep (e.g. `rules/frontend/frontend-testing.yaml`); deeper nesting is not recognized. The Spec/Rule ID is always just the filename, regardless of nesting.
+- The test: a specific capability the system provides → spec.
+- `specs/` may group files one subdirectory level deep (e.g. `specs/frontend/checkout-flow.yaml`); deeper nesting is not recognized. The Spec ID is always just the filename, regardless of nesting.
+
+## Rules
+
+A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
+
+- A rule applies repo-wide, not per feature. The test: a rule every change must follow, enforceable repo-wide → rule.
+- `rules/` may group files one subdirectory level deep (e.g. `rules/frontend/frontend-testing.yaml`); deeper nesting is not recognized. The Rule ID is always just the filename, regardless of nesting.
 
 ## Naming
 
@@ -117,7 +121,7 @@ Refreshes the managed framework files from the installed binary.
 
 - Rewrites the bundled schemas with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
-- Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local spec without it is left untouched, letting consumers override a global spec.
+- Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local rule without it is left untouched, letting consumers override a global rule.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
@@ -218,35 +222,6 @@ One coherent capability the system must provide — a product behavior, or a tec
 - `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
-## Rule
-
-One coherent cross-cutting convention or rule.
-
-- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
-- Is a global rule that always applies; it has no lifecycle status and its acceptance criteria carry no implementation checkbox.
-- Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- `sync_with_upstream` marks a global framework spec that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the spec locally and keep their changes across updates.
-- Each criterion should be provable by an automated check or by AI inspection.
-- A deleted bundled rule is only recognized as deliberate once its id is added to `rules_unused` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
-
-## Checks
-
-A check proves an acceptance criterion.
-
-- Every criterion a script can verify is proven by a check; AI inspection covers only the criteria that require judgment.
-- Has type `regexp` (file contents), `glob` (file paths), or `script` (external program).
-- `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern. Negated checks are skipped when `check --files` narrows the file set, since they need every file to prove a forbidden pattern is absent.
-- `include` / `exclude` globs narrow the file set.
-- `severity` is `error` (default) or `warn`.
-- A repository inherits a spec's checks through `rules`.
-- `ignored_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
-- Script checks resolve at `scripts/<rule-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
-- `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
-- `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
-- Choose `per-repo` when a check needs to run once per governed repository and `workspace` when script needs to run once.
-- A failing script reports one finding per line as `<location><TAB><message>`.
-- A script that needs data from `spex.yaml` (the project name, the repository list) runs `spex info` rather than parsing `spex.yaml` by hand; see `spex info` in `docs/cli.md`.
-
 ## Spec ID annotations
 
 Annotations link a contract, implementation, or test to its spec.
@@ -256,6 +231,37 @@ Annotations link a contract, implementation, or test to its spec.
 - Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
 - Annotate once at the boundary, never nested.
 - Never reference a Spec ID with no spec file.
+
+# Rules
+
+## Rule
+
+One coherent cross-cutting convention or rule.
+
+- Has `id`, `title`, `description`, `acceptance_criteria`, and optional `checks`, `examples`.
+- Is a global rule that always applies; it has no lifecycle status and its acceptance criteria carry no implementation checkbox.
+- Holds its individual rules in the acceptance criteria, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
+- `sync_with_upstream` marks a global framework rule that `spex update` overwrites (with its scripts) from the bundled template on every run. Consumers can unset it to customize the rule locally and keep their changes across updates.
+- Each criterion should be provable by an automated check or by AI inspection.
+- A deleted bundled rule is only recognized as deliberate once its id is added to `rules_unused` in `spex.yaml`; otherwise `update` treats its absence as new upstream and redeploys it.
+
+## Checks
+
+A check proves a rule's acceptance criterion.
+
+- Every criterion a script can verify is proven by a check; AI inspection covers only the criteria that require judgment.
+- Has type `regexp` (file contents), `glob` (file paths), or `script` (external program).
+- `negate` inverts a regexp or glob: a forbidden pattern versus a required pattern. Negated checks are skipped when `check --files` narrows the file set, since they need every file to prove a forbidden pattern is absent.
+- `include` / `exclude` globs narrow the file set.
+- `severity` is `error` (default) or `warn`.
+- A repository inherits a rule's checks through `rules`.
+- `ignored_errors` baselines existing errors so a check can be enforced going forward, skipping listed errors.
+- Script checks resolve at `scripts/<rule-id-lowercase>/<script>`; `run` is `per-file`, `per-repo`, or `workspace`.
+- `per-file` runs once per in-scope file with the file paths as arguments (batched); `per-repo` runs once per repository with no arguments; `workspace` runs exactly once for the whole workspace with no arguments.
+- `per-repo` and `workspace` scripts receive no files and discover their own, relative to the repository and the spex directory respectively; `include`/`exclude` only narrow `per-file` and `regexp`/`glob` checks.
+- Choose `per-repo` when a check needs to run once per governed repository and `workspace` when script needs to run once.
+- A failing script reports one finding per line as `<location><TAB><message>`.
+- A script that needs data from `spex.yaml` (the project name, the repository list) runs `spex info` rather than parsing `spex.yaml` by hand; see `spex info` in `docs/cli.md`.
 
 # Config (spex.yaml)
 
