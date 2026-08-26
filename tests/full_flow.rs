@@ -60,7 +60,7 @@ pepperoni-pizza: 0 errors, 0 warnings
 const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
 
 Specs (1)
-  active      1
+  active (1)
 
 Active spec coverage (1)
   ✓  DELIVERY-TIME  10/10 AC
