@@ -130,6 +130,29 @@ mod tests_unit {
     }
 
     #[test]
+    fn scaffold_does_not_recreate_a_rule_moved_into_a_nested_folder() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        let flat_rule = spex_dir.path().join(RULE);
+        let nested_rule = spex_dir
+            .path()
+            .join("rules")
+            .join("security")
+            .join("secret-handling.yaml");
+        fs::create_dir_all(nested_rule.parent().unwrap()).expect("create nested folder");
+        fs::rename(&flat_rule, &nested_rule).expect("move rule into nested folder");
+
+        scaffold(spex_dir.path(), &[]).expect("re-scaffold");
+
+        assert!(
+            !flat_rule.exists(),
+            "rule already present in a nested folder should not be recreated flat"
+        );
+        assert!(nested_rule.exists(), "nested rule should still be present");
+    }
+
+    #[test]
     fn scaffold_preserves_additional_files() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");

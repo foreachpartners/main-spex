@@ -6,6 +6,7 @@ use include_dir::{Dir, DirEntry, include_dir};
 use thiserror::Error;
 
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
+use crate::util;
 use serde::Deserialize;
 
 #[cfg(test)]
@@ -134,11 +135,20 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
     let scripts_dest = spex_dir.join(SCRIPTS_DIR);
 
+    // Rules may be grouped one folder level deep (see `MAX_SUBDIR_DEPTH`), so a
+    // bundled rule already present under a nested folder must be matched there
+    // rather than re-created flat at `rules_dest/<name>`.
+    let existing_rules = util::yaml_files(&rules_dest);
+
     for file in dir.files() {
         let Some(name) = file.path().file_name() else {
             continue;
         };
-        let dest = rules_dest.join(name);
+        let dest = existing_rules
+            .iter()
+            .find(|path| path.file_name() == Some(name))
+            .cloned()
+            .unwrap_or_else(|| rules_dest.join(name));
         let rule_id = dest.file_stem().unwrap_or_default().to_string_lossy();
 
         if dest.exists() {
