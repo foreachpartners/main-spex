@@ -31,7 +31,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
-- For each affected repository, read its `rules` list and read the governing contract conventions in `<workspace-root>/<project-name>-spex/rules/` — at minimum `OPENAPI-CONVENTIONS` (for OpenAPI), `GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, run `spex info --repo <repo>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `OPENAPI-CONVENTIONS` (for OpenAPI), `GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 

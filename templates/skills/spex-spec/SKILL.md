@@ -39,6 +39,7 @@ Determine what the specs are based on before doing anything else:
 - Read `<workspace-root>/<project-name>-spex/spex.yaml` for the project overview. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role and use that to determine the spec's implementation `scope`.
 - Read `<workspace-root>/<project-name>-spex/specs/` for related specs.
 - Read the interface contracts in the `spex` repository's `contracts/` folder, listed per repository under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
+- Run `spex rules --id WRITING-STYLE --ai` for the writing conventions the spec's prose must follow.
 
 ## Step 2 — Identify the capabilities and clarify missing details
 
@@ -95,4 +96,4 @@ status: active
 
 After the specs are written, offer to draft each one's contract: run `spex-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
-Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
+Follow the `WRITING-STYLE` rule read in Step 1.

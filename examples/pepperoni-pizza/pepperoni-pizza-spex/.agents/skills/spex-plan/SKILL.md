@@ -19,7 +19,7 @@ Read every planned spec in full. Confirm with the user how to handle any unresol
 
 Resolve a `Repositories scope` for requested changes.
 
-Read all `rules` in `spex.yaml` that apply to the resolved `Repositories scope`.
+Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the resolved `Repositories scope`, then read `<tmp-path>` for the governing rules.
 
 Read each affected repository's information in `Repositories scope` from `spex.yaml`.
 
@@ -41,7 +41,7 @@ Write `Specs` that the user provided.
 
 Write `Repositories scope` based on changes we need to implement (don't include spex itself).
 
-Read all `rules` in `spex.yaml` for resolved `Repositories scope` and write `Rules` in plan that are applicable to changes.
+Write `Rules` in the plan from the governing rules already read in `<tmp-path>` that are applicable to changes.
 
 # Write the steps and tasks
 

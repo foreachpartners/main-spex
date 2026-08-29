@@ -35,6 +35,7 @@ Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
   - `--ai` — drop fields an agent doesn't need (`sync_with_upstream`, `checks`); adds a `path` field.
   - `--id <id>...` — limit to given Rule IDs (default: all).
   - `--repo <name>...` — limit to named repositories (default: all).
+  - `--output <path>` — write the rendered YAML to a file instead of stdout (the full rules list is large and can get truncated when printed to a terminal or piped through a shell).
 
 After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
 

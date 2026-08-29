@@ -34,7 +34,7 @@ A bad ref or empty diff should fail here — not inside two parallel sub-agents.
 
 ### 2. Identify the specs source
 
-Read provided spec and all rules for affected scope.
+Read the provided spec. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
@@ -63,7 +63,7 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 **Rule sub-agent prompt** — include:
 
 - The full diff command and commit list.
-- The list of rule-source files you found in step 2 and smell baseline pasted in full — the sub-agent has no other access to it.
+- The rules read from `<tmp-path>` in step 2 and smell baseline pasted in full — the sub-agent has no other access to it.
 - The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented specs: cite the rule (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 **Spec sub-agent prompt** — include:

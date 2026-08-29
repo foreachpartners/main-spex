@@ -18,13 +18,13 @@ Plan already contains all the information — read it.
 ### Without a plan (ad-hoc user request)
 
 1. Determine repositories we will work on (e.g. scope: frontend, backend).
-2. Determine all governing rules (`rules`) listed in `<workspace-root>/<project-name>-spex/spex.yaml` for the affected scope from step 1.
+2. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope from step 1, then read `<tmp-path>` for the governing rules.
 3. Determine all governing specs in `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` related to the request.
 4. Produce a note in response with a list of governing rules and specs.
 
 ### Both paths
 
-Read all rule and spec files listed. Don't skip anything, this is not negotiable!
+Read all spec files listed and the governing rules from `<tmp-path>`. Don't skip anything, this is not negotiable!
 
 ## Step 2 — Implement
 
