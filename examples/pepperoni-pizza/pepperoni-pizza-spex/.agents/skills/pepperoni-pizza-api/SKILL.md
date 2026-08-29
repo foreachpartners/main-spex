@@ -5,11 +5,11 @@ description: Information, rules, commands and other pepperoni-pizza-api reposito
 
 # General
 
-Run `spex info --repo api` for general repository information and applicable rules.
+Run `spex info --repo api` for general repository information and applicable rules. Rust/axum backend that serves the pizza menu, accepts orders, and tracks in-progress deliveries.
 
-# Paths
+# Project structure
 
-- `src/main.rs` - the whole server: config loading, routes, handlers, in-memory state
+- `src/main.rs` - entry point: config loading, routes, handlers, in-memory state
 - `src/tests.rs` - tests exercising the handlers directly
 
 # Commands

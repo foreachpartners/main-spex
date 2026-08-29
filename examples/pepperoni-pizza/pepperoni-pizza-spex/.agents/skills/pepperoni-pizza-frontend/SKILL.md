@@ -5,14 +5,16 @@ description: Information, rules, commands and other pepperoni-pizza-frontend rep
 
 # General
 
-Run `spex info --repo frontend` for general repository information and applicable rules.
+Run `spex info --repo frontend` for general repository information and applicable rules. React + TypeScript (Vite) web client where customers browse pizzas, place orders, and watch deliveries.
 
-# Paths
+# Project structure
 
+- `src/main.tsx` - entry point, mounts `App`
 - `src/App.tsx` - single-page UI: menu, cart, order placement, live deliveries
 - `src/api.ts` - API client for the backend
 - `src/types.ts` - shared types (`Pizza`, `Delivery`, `DeliveryEstimate`)
 - `src/*.test.ts(x)` - unit tests, colocated with the sources
+- `src/test-setup.ts` - test environment setup for Vitest
 
 # Commands
 

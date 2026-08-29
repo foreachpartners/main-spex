@@ -1,12 +1,13 @@
 # General
 
-Run `spex info --repo <repository-short-name>` for general repository information and applicable rules.
+Run `spex info --repo <repository-short-name>` for general repository information and applicable rules. <One-line description of what this repository is and does>.
 
-# Paths
+# Project structure
 
-- `src/routes` - route definitions
+- `src/main.ts` - entry point, boots the server
+- `src/routes` - route definitions, one file per endpoint; add new endpoints here
 - `src/components` - reusable UI components, one subfolder per component
-- `src/lib` - shared logic: auth, config, validation, error handling
+- `src/lib` - shared logic reused across routes and components: auth, config, validation, error handling
 - `tests/e2e` - end-to-end tests
 
 # Commands
