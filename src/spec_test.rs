@@ -7,6 +7,7 @@ mod tests {
             id: "A".to_string(),
             acceptance_criteria: criteria.iter().map(|c| c.to_string()).collect(),
             blocked_by: Vec::new(),
+            scope: Vec::new(),
             status: Status::Active,
             coverage_ignore: Vec::new(),
         }

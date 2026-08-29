@@ -32,6 +32,8 @@ pub struct Spec {
     #[serde(default)]
     pub blocked_by: Vec<String>,
     #[serde(default)]
+    pub scope: Vec<String>,
+    #[serde(default)]
     pub status: Status,
     #[serde(default)]
     pub coverage_ignore: Vec<CoverageLayer>,

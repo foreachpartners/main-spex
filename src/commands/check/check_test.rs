@@ -797,6 +797,7 @@ constraints:
             id: id.to_string(),
             acceptance_criteria: Vec::new(),
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
+            scope: Vec::new(),
             status: Status::Planned,
             coverage_ignore: Vec::new(),
         }
@@ -849,5 +850,22 @@ constraints:
         assert_eq!(active.severity, Severity::Warn);
         assert!(active.message.contains("DONE"));
         assert!(active.message.contains("already active"));
+    }
+
+    #[test]
+    fn validate_scope_flags_unknown_repository_short_name() {
+        let mut spec = spec("A", Vec::new());
+        spec.scope = vec!["api".to_string(), "unknown".to_string()];
+        let repositories = vec![repository("../api", Vec::new())];
+
+        let mut findings = Vec::new();
+        validate_scope(&spec, &repositories, &mut findings);
+
+        assert_eq!(findings.len(), 1);
+        let finding = &findings[0];
+        assert_eq!(finding.severity, Severity::Error);
+        assert_eq!(finding.check, "scope");
+        assert!(finding.message.contains("unknown"));
+        assert!(finding.message.contains("repository_short_name"));
     }
 }

@@ -8,6 +8,7 @@ mod tests {
             id: id.to_string(),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
+            scope: Vec::new(),
             status,
             coverage_ignore: Vec::new(),
         }

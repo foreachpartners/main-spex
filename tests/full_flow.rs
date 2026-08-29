@@ -272,7 +272,11 @@ fn rules_output_flag_writes_file_matching_stdout() {
     let output_path = workspace.path().join("rules.yaml");
     let file_run = run_spex(
         &project,
-        &["rules", "--output", output_path.to_str().expect("utf8 path")],
+        &[
+            "rules",
+            "--output",
+            output_path.to_str().expect("utf8 path"),
+        ],
         "",
     );
     assert!(

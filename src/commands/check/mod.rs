@@ -598,6 +598,7 @@ fn validate_specs(
 
     for spec in &specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
+        validate_scope(spec, &workspace.config.repositories, &mut report.findings);
     }
 
     validate_conformance(&workspace.dir, rules, &mut report.findings);
@@ -654,5 +655,29 @@ fn validate_blocked_by(
             }),
             Some(_) => {}
         }
+    }
+}
+
+fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<Finding>) {
+    for short_name in &spec.scope {
+        if repositories
+            .iter()
+            .any(|repo| &repo.short_name == short_name)
+        {
+            continue;
+        }
+        findings.push(Finding {
+            severity: Severity::Error,
+            spec_id: spec.id.clone(),
+            check: "scope".to_string(),
+            location: Some(format!(
+                "{}/{}.yaml",
+                spec::SPECS_DIR,
+                spec.id.to_lowercase()
+            )),
+            message: format!(
+                "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
+            ),
+        });
     }
 }

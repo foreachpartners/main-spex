@@ -103,7 +103,7 @@ spex check --repo api --files src/main.rs src/orders.rs
 spex check --repo frontend --fill-preexisting-errors
 ```
 
-When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, that a `scope` entry matches a repository's `repository_short_name` in `spex.yaml`, and that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`.
 
 ### `spex coverage`
 

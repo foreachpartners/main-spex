@@ -131,7 +131,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's rule checks and gates on errors.
 
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -228,7 +228,7 @@ One coherent capability the system must provide — a product behavior, or a tec
 - `examples` holds named illustrative snippets showing the spec applied in context — placement and usage that prose cannot carry.
 - Holds its specifics in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
-- `scope` lists the repositories that implement the capability.
+- `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
 - `status` defaults to `planned`.
 
