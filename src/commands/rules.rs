@@ -99,7 +99,15 @@ fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
         .filter(|rule| id_selected(rule, &args.id))
         .collect();
 
-    serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize)
+    if output.is_empty() {
+        return serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize);
+    }
+
+    output
+        .iter()
+        .map(|rule| serde_yaml_ng::to_string(&[rule]).change_context(RulesError::Serialize))
+        .collect::<Result<Vec<_>>>()
+        .map(|docs| docs.join("\n"))
 }
 
 fn repo_has_rule(repo: &Repository, rule: &serde_json::Value) -> bool {

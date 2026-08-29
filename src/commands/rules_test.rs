@@ -170,6 +170,7 @@ mod tests {
                   - name: sample
                     type: glob
                     pattern: '**/*.bak'
+
                 - id: WRITING-STYLE
                   title: Writing style
                   description: consistent prose
@@ -295,6 +296,7 @@ mod tests {
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
+
                 - id: WRITING-STYLE
                   path: rules/writing-style.yaml
                   title: Writing style
@@ -344,6 +346,7 @@ mod tests {
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
+
                 - id: WRITING-STYLE
                   path: rules/writing-style.yaml
                   title: Writing style
