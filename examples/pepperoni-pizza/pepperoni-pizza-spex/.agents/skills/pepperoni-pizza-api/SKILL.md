@@ -25,4 +25,4 @@ Run from the `pepperoni-pizza-api` repository root.
 
 Read individual files for detailed explanations and code examples:
 
-- `references/delivery-time-estimate.md` - how the kitchen-capacity delivery estimate and its countdown/expiry are computed
+- `references/architecture.md` - how state, handlers, and config fit together

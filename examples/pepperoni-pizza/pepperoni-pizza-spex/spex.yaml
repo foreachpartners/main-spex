@@ -2,7 +2,7 @@ project_name: pepperoni-pizza
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
-cli_version: 0.7.72
+cli_version: 0.7.73
 rules_unused:
   - GRAPHQL-CONVENTIONS
 repositories:

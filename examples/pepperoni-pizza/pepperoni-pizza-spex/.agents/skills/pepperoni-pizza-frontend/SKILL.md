@@ -29,4 +29,4 @@ Run from the `pepperoni-pizza-frontend` repository root.
 
 Read individual files for detailed explanations and code examples:
 
-- `references/live-delivery-polling.md` - how the "Delivering" section stays in sync with the backend via polling
+- `references/architecture.md` - how the single-component UI, API client, and state fit together

@@ -91,7 +91,7 @@ Nothing to delete.
 
 For every repository touched, check whether its `<repo-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
 
-Update only what's now inaccurate or missing — don't rewrite unrelated sections. Add a new `references/*.md` file only when the change introduces a piece of repository-specific context worth documenting (e.g. a non-obvious computation or workflow), and index it in `SKILL.md`.
+Update only what's now inaccurate or missing — don't rewrite unrelated sections. The skill doc's job is agent-facing instructions and context that specs and rules don't cover — e.g. project/directory structure, build/test/run commands, architecture and how components fit together, non-obvious computations or workflows, tooling quirks, or where to find things. Don't duplicate what specs or rules already state — reference them instead. Add a new `references/*.md` file only when the change introduces repository-specific context worth documenting this way, and index it in `SKILL.md`.
 
 ## Step 8 — Report
 
