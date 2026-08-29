@@ -7,7 +7,7 @@ description: Fill in the missing descriptions in the workspace config (spex.yaml
 
 Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rules` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 4c). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 4b). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 5b). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rules` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 6). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 5). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 8). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
 
 ## Paths
 
@@ -40,8 +40,8 @@ For each repository missing a description, look at its real contents (resolve `p
 - Read its `README` if present.
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
 - Skim the top-level directory layout and entry points when the above are missing.
-- Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 4b.
-- For each rule file in the spex repository's `rules/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 4c.
+- Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 5.
+- For each rule file in the spex repository's `rules/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 6.
 
 Infer the project `description` from `project_name` and the combined picture of its repositories. If the repositories don't make the project's purpose clear, ask the user one short question rather than guessing.
 
@@ -60,7 +60,7 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 2. Edit `<workspace-root>/<project-name>-spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-## Step 4b — Record contracts
+## Step 5 — Record contracts
 
 Each repository's interface contract, if it has one, is the single source of truth for its machine-readable interface. The user owns where a contract file actually lives — most commonly inside the owning repository itself. The `spex` repository's own `contracts/` folder is only a convention for contracts genuinely shared across repositories, never a default to copy into. Do not move or copy any contract file without the user explicitly deciding to. Record each repository's contract in `spex.yaml` regardless of where the file lives.
 
@@ -89,7 +89,7 @@ Example `spex.yaml` repository entry after collecting a contract:
     - SECRET-HANDLING
 ```
 
-## Step 4c — Add rules that apply
+## Step 6 — Add rules that apply
 
 `spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `OPENAPI-CONVENTIONS`, `GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
@@ -109,7 +109,7 @@ Once every repository's `rules` is settled, a rule in `rules/` that ended up ref
 4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-## Step 5 — Fill in the workspace folder icons
+## Step 7 — Fill in the workspace folder icons
 
 `spex init` writes `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` with a `folders` list. The `spex` folder already has its icon (🧰); every other folder starts without one. Give each remaining folder a single emoji icon that fits its role.
 
@@ -132,7 +132,7 @@ Example result:
 }
 ```
 
-## Step 5b — Fill in each repository's skill file
+## Step 8 — Fill in each repository's skill file
 
 `spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository, including the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each repository's skill an initial body from what you already learned inspecting it in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
 
@@ -147,7 +147,7 @@ Per the [Agent Skills specification](https://agentskills.io/specification.md)'s 
 
 For each file you create this way, add a one-line entry to the `# Index` section at the end of the repository's `SKILL.md`, following the pattern shown in `GENERIC-REPO-SKILL-TEMPLATE.md`: the file's path relative to the skill folder, a hyphen, and a short description of what it covers. Omit the `# Index` section entirely for a repository with no such files — do not invent one to keep the section.
 
-## Step 6 — Point to the next skill
+## Step 9 — Point to the next skill
 
 Once `spex.yaml` is described and the workspace folders are iconified, the workspace is ready. Offer to author their first spec: run `spex-spec` for a capability the system must provide, or `spex-rule` for a cross-cutting convention or rule. Note that it is better to start a new chat first to save context.
 
