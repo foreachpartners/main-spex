@@ -23,7 +23,7 @@ Determine which specs to contract before doing anything else:
 
 ## Step 1 — Gather context first
 
-For each targeted spec, read `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` in full. Capture its `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs. Capture each spec's `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 

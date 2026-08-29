@@ -15,7 +15,7 @@ Your output must be machine and human-readable, deterministic, and structured fo
 
 # Gather context
 
-Read every planned spec in full. Confirm with the user how to handle any unresolved blocker.
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for every planned spec. Confirm with the user how to handle any unresolved blocker.
 
 Resolve a `Repositories scope` for requested changes.
 

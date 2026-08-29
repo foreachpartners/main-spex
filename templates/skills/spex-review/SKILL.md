@@ -34,7 +34,7 @@ A bad ref or empty diff should fail here — not inside two parallel sub-agents.
 
 ### 2. Identify the specs source
 
-Read the provided spec. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the provided spec. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
 
 On top of whatever the repo documents, the Standards axis always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
 
@@ -69,7 +69,7 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 **Spec sub-agent prompt** — include:
 
 - The diff command and commit list.
-- The path or fetched contents of the spec.
+- The spec contents fetched in step 2.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.

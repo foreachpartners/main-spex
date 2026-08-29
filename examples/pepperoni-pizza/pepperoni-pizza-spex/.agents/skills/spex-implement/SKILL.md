@@ -13,18 +13,19 @@ description: Carry out an existing plan, or implement an ad-hoc user request. Us
 
 ### With a plan
 
-Plan already contains all the information — read it.
+Read the plan. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the plan's `Specs` to read the governing specs.
 
 ### Without a plan (ad-hoc user request)
 
 1. Determine repositories we will work on (e.g. scope: frontend, backend).
 2. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope from step 1, then read `<tmp-path>` for the governing rules.
-3. Determine all governing specs in `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` related to the request.
-4. Produce a note in response with a list of governing rules and specs.
+3. Determine all governing spec IDs related to the request.
+4. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
+5. Produce a note in response with a list of governing rules and specs.
 
 ### Both paths
 
-Read all spec files listed and the governing rules from `<tmp-path>`. Don't skip anything, this is not negotiable!
+Read all specs from step 1 and the governing rules from `<tmp-path>`. Don't skip anything, this is not negotiable!
 
 ## Step 2 — Implement
 
