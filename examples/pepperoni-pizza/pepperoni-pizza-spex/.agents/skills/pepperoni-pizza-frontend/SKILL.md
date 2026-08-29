@@ -22,3 +22,9 @@ Run from the `pepperoni-pizza-frontend` repository root.
 - `npm run build` - type-check and build for production
 - `npm test` - run the test suite
 - `npm run test:watch` - run tests in watch mode
+
+# Index
+
+Read individual files for detailed explanations and code examples:
+
+- `references/live-delivery-polling.md` - how the "Delivering" section stays in sync with the backend via polling

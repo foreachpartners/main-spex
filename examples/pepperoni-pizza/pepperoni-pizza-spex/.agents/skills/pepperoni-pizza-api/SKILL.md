@@ -20,3 +20,9 @@ Run from the `pepperoni-pizza-api` repository root.
 - `cargo test` - run the whole test suite
 - `cargo clippy --all-targets` - lint
 - `cargo fmt` - format files
+
+# Index
+
+Read individual files for detailed explanations and code examples:
+
+- `references/delivery-time-estimate.md` - how the kitchen-capacity delivery estimate and its countdown/expiry are computed

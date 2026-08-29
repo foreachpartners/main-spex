@@ -21,3 +21,11 @@ Run from the `<repository-name>` repository root.
 # Rules
 
 After all changes run `npm format`, `npm lint` and `npm test`.
+
+# Index
+
+Read individual files for detailed explanations and code examples:
+
+- `references/error-handling.md` - error handling patterns used in this repository
+- `references/testing.md` - testing strategy and conventions
+- `scripts/migrate.sh` - runs the database migration
