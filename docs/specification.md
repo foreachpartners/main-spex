@@ -216,6 +216,10 @@ Splits approved specs into an ordered, parallel-safe implementation plan. Writes
 
 Executes a plan step by step, or a plain user request directly, and checks the result. Deletes the plan file once every step is `completed` — a finished plan has nothing left to say that the spec, code, and git history don't already say more accurately.
 
+## spex-assembly-line
+
+Runs `spex-implement` once, then loops `spex-review` and a fix agent until a pass finds nothing or a 3-pass cap is hit.
+
 ## spex-grill-me
 
 Grills the user with one question at a time to stress-test a plan, decision, or idea before acting on it.
