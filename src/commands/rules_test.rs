@@ -2,6 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::config::Repository;
+    use indoc::indoc;
     use tempfile::tempdir;
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
@@ -39,28 +40,25 @@ mod tests {
     }
 
     #[test]
-    fn repo_entry_includes_only_assigned_and_id_selected_rules() {
+    fn repo_has_rule_and_id_selected_together_filter_assigned_and_selected_rules() {
         let api = repo("demo-api", &["A", "B"]);
-        let rules = vec![rule("A", ""), rule("B", ""), rule("C", "")];
+        let rules = [rule("A", ""), rule("B", ""), rule("C", "")];
 
-        let entry = repo_entry(&api, &rules, &[]);
-        let ids: Vec<&str> = entry["rules"]
-            .as_array()
-            .unwrap()
+        let ids: Vec<&str> = rules
             .iter()
+            .filter(|rule| repo_has_rule(&api, rule))
+            .filter(|rule| id_selected(rule, &[]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
         assert_eq!(ids, vec!["A", "B"]);
-        assert_eq!(entry["repository_name"], "demo-api");
 
-        let filtered = repo_entry(&api, &rules, &["A".to_string()]);
-        let ids: Vec<&str> = filtered["rules"]
-            .as_array()
-            .unwrap()
+        let filtered_ids: Vec<&str> = rules
             .iter()
+            .filter(|rule| repo_has_rule(&api, rule))
+            .filter(|rule| id_selected(rule, &["A".to_string()]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
-        assert_eq!(ids, vec!["A"]);
+        assert_eq!(filtered_ids, vec!["A"]);
     }
 
     #[test]
@@ -86,70 +84,242 @@ mod tests {
     fn write_workspace(dir: &std::path::Path) {
         std::fs::write(
             dir.join("spex.yaml"),
-            "project_name: demo\ncli_version: 0.0.0\nrepositories:\n  - repository_name: demo-api\n    repository_short_name: api\n    path: ../demo-api\n    rules: [SECRET-HANDLING]\n  - repository_name: demo-frontend\n    repository_short_name: frontend\n    path: ../demo-frontend\n    rules: [WRITING-STYLE]\n",
+            indoc! {"
+                project_name: demo
+                cli_version: 0.0.0
+                repositories:
+                  - repository_name: demo-api
+                    repository_short_name: api
+                    path: ../demo-api
+                    rules: [SECRET-HANDLING]
+                  - repository_name: demo-frontend
+                    repository_short_name: frontend
+                    path: ../demo-frontend
+                    rules: [WRITING-STYLE]
+            "},
         )
         .expect("write spex.yaml");
         std::fs::create_dir_all(dir.join("rules")).expect("rules dir");
         std::fs::write(
             dir.join("rules/secret-handling.yaml"),
-            "id: SECRET-HANDLING\ntitle: Secret protection\ndescription: no secrets\nsync_with_upstream: true\nacceptance_criteria:\n  - \"MUST not commit secrets\"\nchecks:\n  - name: sample\n    type: glob\n    pattern: \"**/*.bak\"\n",
+            indoc! {r#"
+                id: SECRET-HANDLING
+                title: Secret protection
+                description: no secrets
+                sync_with_upstream: true
+                acceptance_criteria:
+                  - "MUST not commit secrets"
+                checks:
+                  - name: sample
+                    type: glob
+                    pattern: "**/*.bak"
+            "#},
         )
         .expect("write rule");
         std::fs::write(
             dir.join("rules/writing-style.yaml"),
-            "id: WRITING-STYLE\ntitle: Writing style\ndescription: consistent prose\nacceptance_criteria:\n  - \"MUST use plain language\"\n",
+            indoc! {r#"
+                id: WRITING-STYLE
+                title: Writing style
+                description: consistent prose
+                acceptance_criteria:
+                  - "MUST use plain language"
+            "#},
         )
         .expect("write rule");
     }
 
-    #[test]
-    #[serial_test::serial]
-    fn run_prints_each_repositorys_assigned_rules() {
-        let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let original = std::env::current_dir().expect("cwd");
-        std::env::set_current_dir(dir.path()).expect("chdir");
-
-        let result = run(RulesArgs {
-            ai: false,
-            id: Vec::new(),
-            repo: Vec::new(),
-        });
-
-        std::env::set_current_dir(original).expect("restore cwd");
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    #[serial_test::serial]
-    fn run_errors_on_unknown_repo() {
-        let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let original = std::env::current_dir().expect("cwd");
-        std::env::set_current_dir(dir.path()).expect("chdir");
-
-        let result = run(RulesArgs {
-            ai: false,
-            id: Vec::new(),
-            repo: vec!["missing".to_string()],
-        });
-
-        std::env::set_current_dir(original).expect("restore cwd");
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn ai_flag_strips_sync_with_upstream_and_checks() {
-        let mut value = rule(
-            "A",
-            r#", "sync_with_upstream": true, "checks": [{"name": "x"}], "title": "kept""#,
-        );
-        if let Some(obj) = value.as_object_mut() {
-            obj.remove("sync_with_upstream");
-            obj.remove("checks");
+    fn workspace(dir: &std::path::Path) -> Workspace {
+        Workspace {
+            dir: dir.to_path_buf(),
+            config: crate::config::load(dir).expect("load config"),
         }
-        assert!(value.get("sync_with_upstream").is_none());
-        assert!(value.get("checks").is_none());
-        assert_eq!(value["title"], "kept");
+    }
+
+    fn args(ai: bool, id: &[&str], repo: &[&str]) -> RulesArgs {
+        RulesArgs {
+            ai,
+            id: id.iter().map(|s| s.to_string()).collect(),
+            repo: repo.iter().map(|s| s.to_string()).collect(),
+        }
+    }
+
+    #[test]
+    fn render_with_no_flags_prints_every_assigned_rule() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(false, &[], &[])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SECRET-HANDLING
+                  title: Secret protection
+                  description: no secrets
+                  sync_with_upstream: true
+                  acceptance_criteria:
+                  - MUST not commit secrets
+                  checks:
+                  - name: sample
+                    type: glob
+                    pattern: '**/*.bak'
+                - id: WRITING-STYLE
+                  title: Writing style
+                  description: consistent prose
+                  acceptance_criteria:
+                  - MUST use plain language
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_ai_flag_strips_sync_with_upstream_and_checks() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(true, &["SECRET-HANDLING"], &[])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SECRET-HANDLING
+                  title: Secret protection
+                  description: no secrets
+                  acceptance_criteria:
+                  - MUST not commit secrets
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_single_id_returns_only_that_rule() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(false, &["WRITING-STYLE"], &[])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: WRITING-STYLE
+                  title: Writing style
+                  description: consistent prose
+                  acceptance_criteria:
+                  - MUST use plain language
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_multiple_ids_returns_matching_rules_only() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(
+            &workspace,
+            &args(true, &["SECRET-HANDLING", "WRITING-STYLE"], &[]),
+        )
+        .expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SECRET-HANDLING
+                  title: Secret protection
+                  description: no secrets
+                  acceptance_criteria:
+                  - MUST not commit secrets
+                - id: WRITING-STYLE
+                  title: Writing style
+                  description: consistent prose
+                  acceptance_criteria:
+                  - MUST use plain language
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_single_repo_returns_only_that_repos_rule() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(true, &[], &["demo-frontend"])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: WRITING-STYLE
+                  title: Writing style
+                  description: consistent prose
+                  acceptance_criteria:
+                  - MUST use plain language
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_multiple_repos_returns_union_of_their_rules() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(
+            &workspace,
+            &args(true, &[], &["demo-api", "demo-frontend"]),
+        )
+        .expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SECRET-HANDLING
+                  title: Secret protection
+                  description: no secrets
+                  acceptance_criteria:
+                  - MUST not commit secrets
+                - id: WRITING-STYLE
+                  title: Writing style
+                  description: consistent prose
+                  acceptance_criteria:
+                  - MUST use plain language
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_repo_short_name_matches_same_as_full_name() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(true, &[], &["api"])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SECRET-HANDLING
+                  title: Secret protection
+                  description: no secrets
+                  acceptance_criteria:
+                  - MUST not commit secrets
+            "}
+        );
+    }
+
+    #[test]
+    fn render_errors_on_unknown_repo() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let result = render(&workspace, &args(false, &[], &["missing"]));
+
+        assert!(result.is_err());
     }
 }

@@ -45,7 +45,12 @@ pub struct RulesArgs {
 
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(RulesError::Workspace)?;
+    let yaml = render(&workspace, &args)?;
+    print!("{yaml}");
+    Ok(ExitCode::SUCCESS)
+}
 
+fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
     for name in &args.repo {
         if !workspace
             .config
@@ -74,28 +79,13 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
         .filter(|repo| args.repo.is_empty() || args.repo.iter().any(|name| repo.matches(name)))
         .collect();
 
-    let output: Vec<serde_json::Value> = repositories
-        .into_iter()
-        .map(|repo| repo_entry(repo, &rules, &args.id))
-        .collect();
-
-    let yaml = serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize)?;
-    print!("{yaml}");
-
-    Ok(ExitCode::SUCCESS)
-}
-
-fn repo_entry(repo: &Repository, rules: &[serde_json::Value], ids: &[String]) -> serde_json::Value {
-    let repo_rules: Vec<&serde_json::Value> = rules
+    let output: Vec<&serde_json::Value> = rules
         .iter()
-        .filter(|rule| repo_has_rule(repo, rule))
-        .filter(|rule| id_selected(rule, ids))
+        .filter(|rule| repositories.iter().any(|repo| repo_has_rule(repo, rule)))
+        .filter(|rule| id_selected(rule, &args.id))
         .collect();
 
-    serde_json::json!({
-        "repository_name": repo.name,
-        "rules": repo_rules,
-    })
+    serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize)
 }
 
 fn repo_has_rule(repo: &Repository, rule: &serde_json::Value) -> bool {
