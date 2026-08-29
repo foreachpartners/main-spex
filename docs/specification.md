@@ -163,6 +163,16 @@ Prints each repository's active rules as YAML.
 - `--repo <name>...` limits output to the named repositories, matched by either `repository_name` or `repository_short_name`.
 - `--output <path>` writes the rendered YAML to a file instead of stdout, since the full rules list is large and can get truncated when printed to a terminal or piped through a shell.
 
+## specs
+
+Prints the workspace specs as YAML.
+
+- Prints every spec in the workspace, so an agent can read exactly what is specified before touching it.
+- `--ai` adds a `path` field after `id` with the spec file's location relative to the workspace root (e.g. `specs/place-pizza-order.yaml`), so an agent can reference or edit the spec directly.
+- `--id <id>...` filters to one or more given Spec IDs.
+- `--scope <name>...` limits output to specs whose `scope` includes the given repository short name (`repository_short_name`).
+- `--output <path>` writes the rendered YAML to a file instead of stdout, since the full specs list is large and can get truncated when printed to a terminal or piped through a shell.
+
 ## check-schema
 
 Validates JSON or YAML files against a JSON Schema.

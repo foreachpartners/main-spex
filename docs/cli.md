@@ -164,6 +164,35 @@ spex rules --ai --repo api
 spex rules --id SECRET-HANDLING NAMING-CONVENTION
 ```
 
+### `spex specs`
+
+Prints the workspace specs as YAML. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
+
+```sh
+spex specs
+```
+
+```yaml
+- id: PLACE-PIZZA-ORDER
+  title: Place a pizza order
+  # ...
+```
+
+#### Flags
+
+- `--ai` — add a `path` field after `id` with the spec file's location relative to the workspace root (e.g. `specs/place-pizza-order.yaml`).
+- `--id <id>...` — limit output to the given Spec IDs.
+- `--scope <name>...` — limit output to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
+- `--output <path>` — write the rendered YAML to this file instead of stdout, since the full specs list is large and can get truncated when printed to a terminal or piped through a shell.
+
+```sh
+spex specs --ai --scope api
+```
+
+```sh
+spex specs --id PLACE-PIZZA-ORDER LIST-PIZZA-MENU
+```
+
 ### `spex check-schema`
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.

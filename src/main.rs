@@ -17,6 +17,7 @@ use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
 use commands::info::InfoArgs;
 use commands::rules::RulesArgs;
+use commands::specs::SpecsArgs;
 
 #[derive(Parser)]
 #[command(
@@ -54,6 +55,8 @@ enum Commands {
     Info(InfoArgs),
     #[command(about = "Print the active rules per repository, as JSON")]
     Rules(RulesArgs),
+    #[command(about = "Print the workspace specs, as YAML")]
+    Specs(SpecsArgs),
 }
 
 fn main() -> ExitCode {
@@ -68,6 +71,7 @@ fn main() -> ExitCode {
         Commands::Coverage => finish(commands::coverage::run()),
         Commands::Info(args) => finish(commands::info::run(args)),
         Commands::Rules(args) => finish(commands::rules::run(args)),
+        Commands::Specs(args) => finish(commands::specs::run(args)),
     }
 }
 

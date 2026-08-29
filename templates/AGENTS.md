@@ -32,10 +32,15 @@ Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
   - `--print <field>` — print a single top-level scalar field (e.g. `project_name`).
   - `--repo <name>` — limit output to the general fields plus the named repository.
 - `spex rules` — print the active rules per repository, as YAML.
-  - `--ai` — drop fields an agent doesn't need (`sync_with_upstream`, `checks`); adds a `path` field.
+  - `--ai` — drop fields an agent doesn't need (`sync_with_upstream`, `checks`); adds a `path` field for relative to spex filename location.
   - `--id <id>...` — limit to given Rule IDs (default: all).
   - `--repo <name>...` — limit to named repositories (default: all).
   - `--output <path>` — write the rendered YAML to a file instead of stdout (the full rules list is large and can get truncated when printed to a terminal or piped through a shell).
+- `spex specs` — print the workspace specs, as YAML.
+  - `--ai` — add a `path` field for relative to spex filename location.
+  - `--id <id>...` — limit to given Spec IDs (default: all).
+  - `--scope <name>...` — limit to specs whose `scope` includes the given repository short name (default: all).
+  - `--output <path>` — write the rendered YAML to a file instead of stdout (the full specs list is large and can get truncated when printed to a terminal or piped through a shell).
 
 After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
 

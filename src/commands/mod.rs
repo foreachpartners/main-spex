@@ -4,4 +4,5 @@ pub mod coverage;
 pub mod info;
 pub mod init;
 pub mod rules;
+pub mod specs;
 pub mod update;
