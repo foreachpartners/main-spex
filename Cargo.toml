@@ -1,6 +1,6 @@
 [package]
 name = "spex"
-version = "0.7.70"
+version = "0.7.71"
 edition = "2024"
 
 [dependencies]

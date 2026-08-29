@@ -216,9 +216,21 @@ Splits approved specs into an ordered, parallel-safe implementation plan. Writes
 
 Executes a plan step by step, or a plain user request directly, and checks the result. Deletes the plan file once every step is `completed` — a finished plan has nothing left to say that the spec, code, and git history don't already say more accurately.
 
+## spex-review-rule
+
+Reviews a diff against governing cross-cutting rules and coding standards, plus a baseline of Fowler code smells.
+
+## spex-review-spec
+
+Reviews a diff against a spec, checking for missing, extra, or wrong implementation of its requirements.
+
+## spex-review
+
+Runs `spex-review-rule` and `spex-review-spec` as parallel sub-agents against the same diff and reports both axes side by side.
+
 ## spex-assembly-line
 
-Runs `spex-implement` once, then loops `spex-review` and a fix agent until a pass finds nothing or a 3-pass cap is hit.
+Runs `spex-implement` once, then a rule review/fix loop followed by a spec review/fix loop, each until a pass finds nothing or a 3-pass cap is hit.
 
 ## spex-grill-me
 
