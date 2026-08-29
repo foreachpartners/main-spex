@@ -66,11 +66,11 @@ fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
     if args.ai {
         for (rule, path) in &mut rules {
             if let Some(obj) = rule.as_object_mut() {
-                obj.remove("sync_with_upstream");
-                obj.remove("checks");
-
                 let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
                 for (key, value) in std::mem::take(obj) {
+                    if key == "sync_with_upstream" || key == "checks" {
+                        continue;
+                    }
                     let is_id = key == "id";
                     with_path.insert(key, value);
                     if is_id {

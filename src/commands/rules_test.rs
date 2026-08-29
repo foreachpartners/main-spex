@@ -201,6 +201,60 @@ mod tests {
     }
 
     #[test]
+    fn render_with_ai_flag_preserves_field_order_after_dropping_checks() {
+        let dir = tempdir().expect("temp dir");
+        std::fs::write(
+            dir.path().join("spex.yaml"),
+            indoc! {"
+                project_name: demo
+                cli_version: 0.0.0
+                repositories:
+                  - repository_name: demo-api
+                    repository_short_name: api
+                    path: ../demo-api
+                    rules: [SPEC-ID-TRACING]
+            "},
+        )
+        .expect("write spex.yaml");
+        std::fs::create_dir_all(dir.path().join("rules")).expect("rules dir");
+        std::fs::write(
+            dir.path().join("rules/spec-id-tracing.yaml"),
+            indoc! {r#"
+                id: SPEC-ID-TRACING
+                title: Spec ID tracing
+                description: Traces artifacts back to their spec.
+                sync_with_upstream: true
+                acceptance_criteria:
+                  - "MUST annotate the boundary"
+                checks:
+                  - name: sample
+                    type: glob
+                    pattern: "**/*.bak"
+                examples:
+                  contract: "x-spec: LIST-PIZZA-MENU"
+            "#},
+        )
+        .expect("write rule");
+        let workspace = workspace(dir.path());
+
+        let yaml = render(&workspace, &args(true, &[], &[])).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: SPEC-ID-TRACING
+                  path: rules/spec-id-tracing.yaml
+                  title: Spec ID tracing
+                  description: Traces artifacts back to their spec.
+                  acceptance_criteria:
+                  - MUST annotate the boundary
+                  examples:
+                    contract: 'x-spec: LIST-PIZZA-MENU'
+            "}
+        );
+    }
+
+    #[test]
     fn render_with_single_id_returns_only_that_rule() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
