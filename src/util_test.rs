@@ -89,11 +89,8 @@ mod tests {
     fn load_yaml_dir_reads_files_two_levels_deep() {
         let dir = tempdir().expect("temp dir");
         std::fs::create_dir_all(dir.path().join("frontend/deep")).expect("nested dirs");
-        std::fs::write(
-            dir.path().join("frontend/deep/nested.yaml"),
-            "id: NESTED\n",
-        )
-        .expect("nested");
+        std::fs::write(dir.path().join("frontend/deep/nested.yaml"), "id: NESTED\n")
+            .expect("nested");
 
         let items: Vec<Item> =
             load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");

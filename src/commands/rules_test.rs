@@ -69,9 +69,14 @@ mod tests {
         std::fs::write(dir.path().join("nested/b.yaml"), "id: B\n").expect("write b.yaml");
 
         let docs = load_docs(dir.path()).expect("load docs");
-        let ids: Vec<&str> = docs.iter().map(|d| d["id"].as_str().unwrap()).collect();
+        let ids: Vec<&str> = docs
+            .iter()
+            .map(|(d, _)| d["id"].as_str().unwrap())
+            .collect();
         assert_eq!(ids, vec!["A", "B"]);
-        assert_eq!(docs[0]["title"], "A rule");
+        assert_eq!(docs[0].0["title"], "A rule");
+        assert_eq!(docs[0].1, "a.yaml");
+        assert_eq!(docs[1].1, "nested/b.yaml");
     }
 
     #[test]
@@ -186,6 +191,7 @@ mod tests {
             yaml,
             indoc! {"
                 - id: SECRET-HANDLING
+                  path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
@@ -230,11 +236,13 @@ mod tests {
             yaml,
             indoc! {"
                 - id: SECRET-HANDLING
+                  path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
                 - id: WRITING-STYLE
+                  path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
@@ -255,6 +263,7 @@ mod tests {
             yaml,
             indoc! {"
                 - id: WRITING-STYLE
+                  path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
@@ -269,21 +278,20 @@ mod tests {
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
 
-        let yaml = render(
-            &workspace,
-            &args(true, &[], &["demo-api", "demo-frontend"]),
-        )
-        .expect("render");
+        let yaml =
+            render(&workspace, &args(true, &[], &["demo-api", "demo-frontend"])).expect("render");
 
         assert_eq!(
             yaml,
             indoc! {"
                 - id: SECRET-HANDLING
+                  path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
                 - id: WRITING-STYLE
+                  path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
@@ -304,6 +312,7 @@ mod tests {
             yaml,
             indoc! {"
                 - id: SECRET-HANDLING
+                  path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:

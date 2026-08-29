@@ -64,13 +64,27 @@ fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
 
     let mut rules = load_docs(&workspace.dir.join(RULES_DIR))?;
     if args.ai {
-        for rule in &mut rules {
+        for (rule, path) in &mut rules {
             if let Some(obj) = rule.as_object_mut() {
                 obj.remove("sync_with_upstream");
                 obj.remove("checks");
+
+                let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
+                for (key, value) in std::mem::take(obj) {
+                    let is_id = key == "id";
+                    with_path.insert(key, value);
+                    if is_id {
+                        with_path.insert(
+                            "path".to_string(),
+                            serde_json::Value::String(format!("{RULES_DIR}/{path}")),
+                        );
+                    }
+                }
+                *obj = with_path;
             }
         }
     }
+    let rules: Vec<serde_json::Value> = rules.into_iter().map(|(rule, _)| rule).collect();
 
     let repositories: Vec<&Repository> = workspace
         .config
@@ -106,7 +120,7 @@ fn id_selected(value: &serde_json::Value, ids: &[String]) -> bool {
 // subdirectories, but the Rule ID is always just the filename), so the full
 // document — every field the schema allows, not just the subset `Rule`
 // deserializes for running checks — is available to filter and print.
-fn load_docs(dir: &Path) -> Result<Vec<serde_json::Value>> {
+fn load_docs(dir: &Path) -> Result<Vec<(serde_json::Value, String)>> {
     let mut docs = Vec::new();
     for path in util::yaml_files(dir) {
         let rel_name = path
@@ -120,7 +134,7 @@ fn load_docs(dir: &Path) -> Result<Vec<serde_json::Value>> {
             .change_context_lazy(|| RulesError::Parse(rel_name.clone()))?;
         let json = serde_json::to_value(yaml)
             .change_context_lazy(|| RulesError::Parse(rel_name.clone()))?;
-        docs.push(json);
+        docs.push((json, rel_name));
     }
     Ok(docs)
 }
