@@ -26,11 +26,14 @@ pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &
         }
     };
 
-    match (check.kind, check.run) {
-        (CheckKind::Regexp, _) => run_regexp(spec_id, check, &scoped, findings),
-        (CheckKind::Glob, _) => run_glob(spec_id, check, &scoped, findings),
-        (CheckKind::AstGrep, _) => run_ast_grep(spec_id, check, &scoped, findings),
-        (CheckKind::Script, RunScope::PerFile) => {
+    match &check.kind {
+        CheckKind::Regexp { .. } => run_regexp(spec_id, check, &scoped, findings),
+        CheckKind::Glob { .. } => run_glob(spec_id, check, &scoped, findings),
+        CheckKind::AstGrep { .. } => run_ast_grep(spec_id, check, &scoped, findings),
+        CheckKind::Script {
+            run: RunScope::PerFile,
+            ..
+        } => {
             run_per_file_script(
                 spec_id,
                 check,
@@ -40,10 +43,16 @@ pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &
                 findings,
             );
         }
-        (CheckKind::Script, RunScope::PerRepo) => {
+        CheckKind::Script {
+            run: RunScope::PerRepo,
+            ..
+        } => {
             run_per_repo_script(spec_id, check, ctx.repo_path, ctx.spex_dir, findings);
         }
-        (CheckKind::Script, RunScope::Workspace) => {}
+        CheckKind::Script {
+            run: RunScope::Workspace,
+            ..
+        } => {}
     }
 }
 
@@ -93,13 +102,8 @@ pub(super) fn run_regexp(
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
-    let Some(pattern) = &check.pattern else {
-        findings.push(config_error(
-            spec_id,
-            &check.name,
-            "regexp check requires `pattern`".to_string(),
-        ));
-        return;
+    let CheckKind::Regexp { pattern, negate } = &check.kind else {
+        unreachable!("run_regexp called with non-regexp check")
     };
     let regex = match Regex::new(pattern) {
         Ok(regex) => regex,
@@ -118,7 +122,7 @@ pub(super) fn run_regexp(
             continue;
         };
 
-        if check.negate {
+        if *negate {
             if !content.lines().any(|line| regex.is_match(line)) {
                 findings.push(violation(
                     check,
@@ -148,13 +152,8 @@ pub(super) fn run_glob(
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
-    let Some(pattern) = &check.pattern else {
-        findings.push(config_error(
-            spec_id,
-            &check.name,
-            "glob check requires `pattern`".to_string(),
-        ));
-        return;
+    let CheckKind::Glob { pattern, negate } = &check.kind else {
+        unreachable!("run_glob called with non-glob check")
     };
     let matcher = match Glob::new(pattern) {
         Ok(glob) => glob.compile_matcher(),
@@ -173,7 +172,7 @@ pub(super) fn run_glob(
         .filter(|file| matcher.is_match(&file.rel))
         .collect();
 
-    if check.negate {
+    if *negate {
         if matched.is_empty() {
             findings.push(violation(
                 check,
@@ -200,7 +199,17 @@ pub(super) fn run_ast_grep(
     files: &[&ScopedFile],
     findings: &mut Vec<Finding>,
 ) {
-    let rule_core = match ast_grep_rule_core_value(check) {
+    let CheckKind::AstGrep {
+        pattern,
+        rule,
+        language,
+        negate,
+    } = &check.kind
+    else {
+        unreachable!("run_ast_grep called with non-ast-grep check")
+    };
+
+    let rule_core = match ast_grep_rule_core_value(pattern, rule) {
         Ok(value) => value,
         Err(message) => {
             findings.push(config_error(spec_id, &check.name, message));
@@ -208,7 +217,7 @@ pub(super) fn run_ast_grep(
         }
     };
 
-    let explicit_lang = match &check.language {
+    let explicit_lang = match language {
         Some(name) => match name.parse::<SupportLang>() {
             Ok(lang) => Some(lang),
             Err(err) => {
@@ -252,7 +261,7 @@ pub(super) fn run_ast_grep(
             let root = tree.root();
             let mut matches = root.find_all(&matcher).peekable();
 
-            if check.negate {
+            if *negate {
                 if matches.peek().is_none() {
                     findings.push(violation(
                         check,
@@ -280,11 +289,14 @@ pub(super) fn run_ast_grep(
 // backing an ast-grep check: either the check's own `rule` object as-is, or a
 // simple `{rule: {pattern: <pattern>}}` wrapper around `pattern`, mirroring how
 // regexp/glob checks reuse the same `pattern` field.
-fn ast_grep_rule_core_value(check: &Check) -> core::result::Result<Value, String> {
-    if let Some(rule) = &check.rule {
+fn ast_grep_rule_core_value(
+    pattern: &Option<String>,
+    rule: &Option<Value>,
+) -> core::result::Result<Value, String> {
+    if let Some(rule) = rule {
         return Ok(rule.clone());
     }
-    let Some(pattern) = &check.pattern else {
+    let Some(pattern) = pattern else {
         return Err("ast-grep check requires `pattern` or `rule`".to_string());
     };
     let mut inner = Mapping::new();
@@ -424,13 +436,11 @@ fn locate_script(
     spex_dir: &Path,
     findings: &mut Vec<Finding>,
 ) -> Option<PathBuf> {
-    let Some(reference) = &check.script else {
-        findings.push(config_error(
-            spec_id,
-            &check.name,
-            "script check requires `script`".to_string(),
-        ));
-        return None;
+    let CheckKind::Script {
+        script: reference, ..
+    } = &check.kind
+    else {
+        unreachable!("locate_script called with non-script check")
     };
 
     let Some(script) = resolve_script(reference, spex_dir, spec_id) else {

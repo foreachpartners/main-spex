@@ -7,28 +7,68 @@ mod tests {
     use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
 
-    fn check(kind: CheckKind, pattern: Option<&str>) -> Check {
+    fn check(kind: CheckKind) -> Check {
         Check {
             name: "sample".to_string(),
             description: None,
             kind,
-            pattern: pattern.map(str::to_string),
-            negate: false,
-            language: None,
-            rule: None,
-            script: None,
-            run: RunScope::PerFile,
             include: Vec::new(),
             exclude: Vec::new(),
             severity: Severity::Error,
         }
     }
 
+    fn regexp_check(pattern: &str) -> Check {
+        check(CheckKind::Regexp {
+            pattern: pattern.to_string(),
+            negate: false,
+        })
+    }
+
+    fn glob_check(pattern: &str) -> Check {
+        check(CheckKind::Glob {
+            pattern: pattern.to_string(),
+            negate: false,
+        })
+    }
+
+    fn ast_grep_check(pattern: Option<&str>) -> Check {
+        check(CheckKind::AstGrep {
+            pattern: pattern.map(str::to_string),
+            rule: None,
+            language: None,
+            negate: false,
+        })
+    }
+
     fn script_check(reference: &str, run: RunScope) -> Check {
-        let mut check = check(CheckKind::Script, None);
-        check.script = Some(reference.to_string());
-        check.run = run;
-        check
+        check(CheckKind::Script {
+            script: reference.to_string(),
+            run,
+        })
+    }
+
+    fn set_negate(check: &mut Check, value: bool) {
+        match &mut check.kind {
+            CheckKind::Regexp { negate, .. }
+            | CheckKind::Glob { negate, .. }
+            | CheckKind::AstGrep { negate, .. } => *negate = value,
+            CheckKind::Script { .. } => panic!("script checks have no `negate`"),
+        }
+    }
+
+    fn set_rule(check: &mut Check, value: serde_yaml_ng::Value) {
+        let CheckKind::AstGrep { rule, .. } = &mut check.kind else {
+            panic!("only ast-grep checks have `rule`")
+        };
+        *rule = Some(value);
+    }
+
+    fn set_language(check: &mut Check, value: &str) {
+        let CheckKind::AstGrep { language, .. } = &mut check.kind else {
+            panic!("only ast-grep checks have `language`")
+        };
+        *language = Some(value.to_string());
     }
 
     fn make_executable(path: &Path) {
@@ -92,7 +132,7 @@ mod tests {
             "src/main.rs",
             "let api_key = \"superSecretValue\";\nok();\n",
         );
-        let check = check(CheckKind::Regexp, Some("api_key\\s*=\\s*\"[^\"]{8,}\""));
+        let check = regexp_check("api_key\\s*=\\s*\"[^\"]{8,}\"");
 
         let mut findings = Vec::new();
         run_regexp("SECRET-HANDLING", &check, &[&file], &mut findings);
@@ -106,8 +146,8 @@ mod tests {
     fn regexp_negate_reports_when_absent() {
         let dir = tempdir().expect("temp dir");
         let file = scoped(&dir, "src/main.rs", "fn main() {}\n");
-        let mut check = check(CheckKind::Regexp, Some("Copyright"));
-        check.negate = true;
+        let mut check = regexp_check("Copyright");
+        set_negate(&mut check, true);
 
         let mut findings = Vec::new();
         run_regexp("LICENSE", &check, &[&file], &mut findings);
@@ -121,7 +161,7 @@ mod tests {
         let dir = tempdir().expect("temp dir");
         let bak = scoped(&dir, "notes.bak", "");
         let src = scoped(&dir, "src/main.rs", "");
-        let check = check(CheckKind::Glob, Some("**/*.bak"));
+        let check = glob_check("**/*.bak");
 
         let mut findings = Vec::new();
         run_glob("SECRET-HANDLING", &check, &[&bak, &src], &mut findings);
@@ -134,8 +174,8 @@ mod tests {
     fn glob_negate_reports_when_required_absent() {
         let dir = tempdir().expect("temp dir");
         let src = scoped(&dir, "src/main.rs", "");
-        let mut check = check(CheckKind::Glob, Some("**/LICENSE"));
-        check.negate = true;
+        let mut check = glob_check("**/LICENSE");
+        set_negate(&mut check, true);
 
         let mut findings = Vec::new();
         run_glob("LICENSE", &check, &[&src], &mut findings);
@@ -152,7 +192,7 @@ mod tests {
             "src/main.ts",
             "// console.log(\"not real\")\nconsole.log(\"hi\");\nconsole.error(\"bye\");\n",
         );
-        let check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+        let check = ast_grep_check(Some("console.log($$$ARGS)"));
 
         let mut findings = Vec::new();
         run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
@@ -166,7 +206,7 @@ mod tests {
         let dir = tempdir().expect("temp dir");
         let ts = scoped(&dir, "src/main.ts", "console.log(1);\n");
         let py = scoped(&dir, "src/main.py", "print(1)\n");
-        let check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
+        let check = ast_grep_check(Some("console.log($$$ARGS)"));
 
         let mut findings = Vec::new();
         run_ast_grep("SECRET-HANDLING", &check, &[&ts, &py], &mut findings);
@@ -179,8 +219,8 @@ mod tests {
     fn ast_grep_negate_reports_when_absent() {
         let dir = tempdir().expect("temp dir");
         let file = scoped(&dir, "src/main.ts", "console.error(1);\n");
-        let mut check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
-        check.negate = true;
+        let mut check = ast_grep_check(Some("console.log($$$ARGS)"));
+        set_negate(&mut check, true);
 
         let mut findings = Vec::new();
         run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
@@ -197,8 +237,9 @@ mod tests {
             "src/main.ts",
             "console.log(userId);\nconsole.log(apiToken);\n",
         );
-        let mut check = check(CheckKind::AstGrep, None);
-        check.rule = Some(
+        let mut check = ast_grep_check(None);
+        set_rule(
+            &mut check,
             serde_yaml_ng::from_str(
                 r#"
 rule:
@@ -222,8 +263,8 @@ constraints:
     fn ast_grep_reports_config_error_for_invalid_language() {
         let dir = tempdir().expect("temp dir");
         let file = scoped(&dir, "src/main.ts", "console.log(1);\n");
-        let mut check = check(CheckKind::AstGrep, Some("console.log($$$ARGS)"));
-        check.language = Some("not-a-real-language".to_string());
+        let mut check = ast_grep_check(Some("console.log($$$ARGS)"));
+        set_language(&mut check, "not-a-real-language");
 
         let mut findings = Vec::new();
         run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
@@ -241,8 +282,9 @@ constraints:
             "src/main.ts",
             "console.log(userId);\nconsole.log(\"token=\", apiToken);\n",
         );
-        let mut check = check(CheckKind::AstGrep, None);
-        check.rule = Some(
+        let mut check = ast_grep_check(None);
+        set_rule(
+            &mut check,
             serde_yaml_ng::from_str(
                 r#"
 rule:
@@ -267,9 +309,10 @@ rule:
     fn ast_grep_rule_supports_any_composite_with_constraints() {
         let dir = tempdir().expect("temp dir");
         let file = scoped(&dir, "src/main.rs", "info!(user_id);\nwarn!(api_token);\n");
-        let mut check = check(CheckKind::AstGrep, None);
-        check.language = Some("rust".to_string());
-        check.rule = Some(
+        let mut check = ast_grep_check(None);
+        set_language(&mut check, "rust");
+        set_rule(
+            &mut check,
             serde_yaml_ng::from_str(
                 r#"
 rule:
@@ -301,8 +344,9 @@ rule:
             "src/main.test.ts",
             "fit('runs', () => {});\ndescribe.only('suite', () => {});\narr.only('nope', () => {});\n",
         );
-        let mut check = check(CheckKind::AstGrep, None);
-        check.rule = Some(
+        let mut check = ast_grep_check(None);
+        set_rule(
+            &mut check,
             serde_yaml_ng::from_str(
                 r#"
 rule:
@@ -467,24 +511,6 @@ constraints:
     }
 
     #[test]
-    fn script_reports_config_error_when_unset() {
-        let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(&spex).expect("spex");
-
-        let check = check(CheckKind::Script, None);
-
-        let mut findings = Vec::new();
-        run_per_file_script("WRITING-STYLE", &check, &repo, &spex, &[], &mut findings);
-
-        assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].severity, Severity::Error);
-        assert!(findings[0].message.contains("requires `script`"));
-    }
-
-    #[test]
     fn scope_files_applies_include_and_exclude() {
         let dir = tempdir().expect("temp dir");
         let rs = scoped(&dir, "src/main.rs", "");
@@ -492,7 +518,7 @@ constraints:
         let test = scoped(&dir, "src/main_test.rs", "");
         let files = vec![rs, ts, test];
 
-        let mut check = check(CheckKind::Regexp, Some("x"));
+        let mut check = regexp_check("x");
         check.include = vec!["**/*.rs".to_string()];
         check.exclude = vec!["**/*_test.rs".to_string()];
 
@@ -519,8 +545,8 @@ constraints:
         }
     }
 
-    fn named_check(name: &str, kind: CheckKind, pattern: Option<&str>) -> Check {
-        let mut check = check(kind, pattern);
+    fn named_glob_check(name: &str, pattern: &str) -> Check {
+        let mut check = glob_check(pattern);
         check.name = name.to_string();
         check
     }
@@ -536,14 +562,10 @@ constraints:
         std::fs::write(repo.join("src/main.rs"), "fn main() {}").expect("file");
 
         // A negated glob check: "dprint.json must exist"
-        let mut negated_glob = named_check(
-            "dprint-config-present",
-            CheckKind::Glob,
-            Some("dprint.json"),
-        );
-        negated_glob.negate = true;
+        let mut negated_glob = named_glob_check("dprint-config-present", "dprint.json");
+        set_negate(&mut negated_glob, true);
         // A non-negated glob check: "*.rs files are forbidden"
-        let non_negated = named_check("no-rs-files", CheckKind::Glob, Some("**/*.rs"));
+        let non_negated = named_glob_check("no-rs-files", "**/*.rs");
 
         let rules = HashMap::from([(
             "X".to_string(),

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use crate::commands::check_schema;
-use crate::rule::{RULES_DIR, Rule, SCRIPTS_DIR};
+use crate::rule::{CheckKind, RULES_DIR, Rule, SCRIPTS_DIR};
 use crate::spec::SPECS_DIR;
 use crate::templates::SCHEMAS_DIR;
 use crate::util::yaml_files;
@@ -167,7 +167,7 @@ fn validate_script_references(
 
     for rule in rules {
         for check in &rule.checks {
-            let Some(script) = &check.script else {
+            let CheckKind::Script { script, .. } = &check.kind else {
                 continue;
             };
             if resolve_script(script, spex_dir, &rule.id).is_none() {

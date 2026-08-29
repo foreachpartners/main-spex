@@ -426,7 +426,7 @@ fn check_repo(
         };
 
         for check in &rule.checks {
-            if has_files && check.negate {
+            if has_files && check.kind.negate() {
                 continue;
             }
             dispatch_check(&ctx, &rule.id, check, findings, workspace_checks);
@@ -468,7 +468,13 @@ fn dispatch_check(
     findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) {
-    if check.kind == CheckKind::Script && check.run == RunScope::Workspace {
+    if matches!(
+        check.kind,
+        CheckKind::Script {
+            run: RunScope::Workspace,
+            ..
+        }
+    ) {
         // Workspace checks only collect here; they run once in `run_workspace_checks`.
         collect_workspace_check(spec_id, check, workspace_checks);
     } else {

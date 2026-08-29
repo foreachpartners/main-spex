@@ -34,20 +34,8 @@ pub struct Check {
     pub name: String,
     #[serde(default)]
     pub description: Option<String>,
-    #[serde(rename = "type")]
+    #[serde(flatten)]
     pub kind: CheckKind,
-    #[serde(default)]
-    pub pattern: Option<String>,
-    #[serde(default)]
-    pub negate: bool,
-    #[serde(default)]
-    pub language: Option<String>,
-    #[serde(default)]
-    pub rule: Option<serde_yaml_ng::Value>,
-    #[serde(default)]
-    pub script: Option<String>,
-    #[serde(default)]
-    pub run: RunScope,
     #[serde(default)]
     pub include: Vec<String>,
     #[serde(default)]
@@ -56,14 +44,45 @@ pub struct Check {
     pub severity: Severity,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(tag = "type", rename_all = "kebab-case")]
 pub enum CheckKind {
-    Regexp,
-    Glob,
-    #[serde(rename = "ast-grep")]
-    AstGrep,
-    Script,
+    Regexp {
+        pattern: String,
+        #[serde(default)]
+        negate: bool,
+    },
+    Glob {
+        pattern: String,
+        #[serde(default)]
+        negate: bool,
+    },
+    AstGrep {
+        #[serde(default)]
+        pattern: Option<String>,
+        #[serde(default)]
+        rule: Option<serde_yaml_ng::Value>,
+        #[serde(default)]
+        language: Option<String>,
+        #[serde(default)]
+        negate: bool,
+    },
+    Script {
+        script: String,
+        #[serde(default)]
+        run: RunScope,
+    },
+}
+
+impl CheckKind {
+    pub fn negate(&self) -> bool {
+        match self {
+            CheckKind::Regexp { negate, .. }
+            | CheckKind::Glob { negate, .. }
+            | CheckKind::AstGrep { negate, .. } => *negate,
+            CheckKind::Script { .. } => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
