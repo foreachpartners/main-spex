@@ -1,4 +1,4 @@
-# Foundation principles
+# Framework principles
 
 These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, specs and rules, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms and [specification.md](specification.md) for how the framework behaves.
 
@@ -28,7 +28,15 @@ They apply repo-wide and are proven by automated checks (linters, CI gates) or A
 
 **Violation test**: a code-style or security rule lives only in someone's head or a chat message — it is applied inconsistently and cannot be enforced.
 
-## 4. Human in control
+## 4. Skills as Instructions
+
+Ad hoc prompting reproduces the guesswork specs exist to eliminate: every request re-explains context that already lives in the repository, and the outcome depends on what the developer remembers to say to the agent that day. A skill writes that context and workflow down once — commands, structure, conventions, a step of the spec → plan → execute → check loop — so any developer or any session gets the same instructions the person who authored the skill intended, instead of reconstructing them from memory each time.
+
+Skills are how instructions reach the agent, not chat. A repository skill (for example `pepperoni-pizza-api`) is autoloaded before any read, write, test, or run in that repository, giving the agent commands and structure it would otherwise have to guess or ask for. A task skill (`spex-spec`, `spex-plan`, `spex-implement`, `spex-review`, ...) is invoked by name to carry one step of the loop with the right inputs and acceptance criteria already written in. Freeform chat fills the judgment calls a skill leaves open — it doesn't replace the skill.
+
+**Violation test**: a developer explains a repository's structure and commands to the agent freehand instead of the agent autoloading a skill for it — the instructions live in the developer's memory, not in the framework.
+
+## 5. Human in control
 
 Vibe coding ships working code fast, but every unreviewed decision adds mess that compounds — eroding maintainability, trust, and the team's comprehension of the codebase. spex keeps the speed without the mess: the AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything, owning every decision by approving the artifact that records it.
 
@@ -36,7 +44,7 @@ Each artifact is approved before the next is generated: spec before contract, co
 
 **Violation test**: an artifact ships that no human reviewed and approved — control was lost.
 
-## 5. Deterministic enforcement
+## 6. Deterministic enforcement
 
 AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
 
@@ -68,7 +76,7 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 | Check triage         | False positive vs real violation vs script bug         | `spex check` output review      |
 | Semantic code review | Logic errors beyond a linter's scope                   | Business logic, race conditions |
 
-## 6. Simplicity
+## 7. Simplicity
 
 The tool should help the developer get work done, not stand in the way. Everything about spex is kept simple, so it can be adopted and put to use in five minutes.
 
@@ -76,7 +84,7 @@ Simplicity is a constraint on the framework itself, not only on the code it gove
 
 **Violation test**: a feature adds a step to the workflow without removing more friction than it introduces — the tool now stands in the way.
 
-## 7. Tool-agnostic
+## 8. Tool-agnostic
 
 To avoid lock-in and restrictions, the framework works with any IDE, terminal, or AI model.
 
@@ -84,7 +92,7 @@ Specs, contracts, and checks are plain files and deterministic commands, so no p
 
 **Violation test**: a step in the workflow functions only in one specific editor or with one specific model — the framework has acquired a lock-in.
 
-## 8. Ubiquitous language
+## 9. Ubiquitous language
 
 A shared vocabulary connects business, specs, and code so humans and AI mean the same thing by the same term.
 
@@ -92,7 +100,7 @@ spex defines its terms in the [glossary](glossary.md) and uses them consistently
 
 **Violation test**: the same concept is named two different ways across specs, code, and docs — every reader, human or agent, must translate, and some translate wrong.
 
-## 9. Single source of truth
+## 10. Single source of truth
 
 Every fact has exactly one authoritative source. Everything else references it.
 
@@ -111,7 +119,7 @@ Duplication has always been a source of bugs. With AI-assisted development it be
 
 **Agent-specific risk**: AI agents copy context between files for convenience ("let me add this to the agent rules too"). Every such copy is a future inconsistency. Reference, do not copy.
 
-## 10. Parsimony
+## 11. Parsimony
 
 The minimum representation that preserves full semantics and enforceability.
 
@@ -127,7 +135,7 @@ Three requirements:
 
 **Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`WRITING-STYLE`](../templates/rules/writing-style.yaml).
 
-## 11. Traceability
+## 12. Traceability
 
 Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
 
