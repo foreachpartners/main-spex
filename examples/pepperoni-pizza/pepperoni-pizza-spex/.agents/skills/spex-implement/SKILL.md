@@ -87,7 +87,13 @@ If any step or task is not yet `completed` (the run stopped partway through), le
 
 Nothing to delete.
 
-## Step 7 — Report
+## Step 7 — Update repo skill documentation
+
+For every repository touched, check whether its `<repo-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
+
+Update only what's now inaccurate or missing — don't rewrite unrelated sections. Add a new `references/*.md` file only when the change introduces a piece of repository-specific context worth documenting (e.g. a non-obvious computation or workflow), and index it in `SKILL.md`.
+
+## Step 8 — Report
 
 Summarize the run:
 
@@ -95,7 +101,8 @@ Summarize the run:
 - Which specs you set to `active`, which acceptance criteria you ticked `[x]` or left `[ ]`, and why.
 - The format, lints, tests, `spex check` and `spex coverage` run outcome.
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
+- Which repo skill docs you updated or added, and why.
 
-## Step 8 — Point to the next skill
+## Step 9 — Point to the next skill
 
 Ask the user to do an optional review with `spex-review` for implemented changes.
