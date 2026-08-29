@@ -153,6 +153,15 @@ Reports annotation coverage for specs.
 - Marks each spec ✓ (all layers present and every criterion implemented), ⚠ (only an ignored layer missing), or ✗ (a required layer missing or a criterion unimplemented).
 - Exits non-zero when any active spec has a missing required layer or an unimplemented acceptance criterion.
 
+## rules
+
+Prints each repository's active rules as JSON.
+
+- For every repository in `spex.yaml`, prints every rule listed in its `rules`, so an agent can read exactly what currently governs a repository before touching it.
+- `--ai` drops fields an agent doesn't need to follow a rule: `sync_with_upstream` and `checks`.
+- `--id <id>...` filters to one or more given Rule IDs.
+- `--repo <name>...` limits output to the named repositories, matched by either `repository_name` or `repository_short_name`.
+
 ## check-schema
 
 Validates JSON or YAML files against a JSON Schema.

@@ -133,6 +133,39 @@ The report lists specs grouped by status (omitting any status with no specs), ea
 
 Each incomplete spec lists what is missing (for example `missing: test, contract (ignored)`). A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The command exits with a non-zero status when any active spec has a gap (a missing required layer or an unimplemented acceptance criterion).
 
+### `spex rules`
+
+Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules` — as JSON. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
+
+```sh
+spex rules
+```
+
+```json
+[
+  {
+    "repository_name": "pepperoni-pizza-api",
+    "rules": [
+      { "id": "SECRET-HANDLING", "title": "Secret protection", "...": "..." }
+    ]
+  }
+]
+```
+
+#### Flags
+
+- `--ai` — drop fields an agent doesn't need to follow a rule: `sync_with_upstream` and `checks`.
+- `--id <id>...` — limit output to the given Rule IDs.
+- `--repo <name>...` — limit output to the named repositories, matched by either `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`; errors on an unrecognized name.
+
+```sh
+spex rules --ai --repo api
+```
+
+```sh
+spex rules --id SECRET-HANDLING NAMING-CONVENTION
+```
+
 ### `spex check-schema`
 
 Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
