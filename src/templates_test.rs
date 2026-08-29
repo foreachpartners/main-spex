@@ -234,10 +234,10 @@ mod tests_unit {
 
     #[test]
     fn rule_templates_conform_to_schema() {
-        let validator = crate::commands::check_schema::build_validator(Path::new(
-            "templates/schemas/rule.schema.json",
-        ))
-        .expect("build rule validator");
+        let schema_path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas/rule.schema.json");
+        let validator = crate::commands::check_schema::build_validator(&schema_path)
+            .expect("build rule validator");
 
         let dir = TEMPLATES.get_dir(RULES_DIR).expect("bundled rules dir");
 
