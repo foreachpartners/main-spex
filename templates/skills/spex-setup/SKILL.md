@@ -138,7 +138,7 @@ Example result:
 
 Use two different templates depending on which repository this is, and follow the chosen template's sections and order exactly — do not add, drop, reorder, or rename its sections, and do not blend in sections from the other template:
 
-- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `specs/`, `rules/`, `contracts/`, `plans/`, `scripts/`) and its `spex` subcommands (`spex check`, `spex coverage`, `spex info`, `spex check-schema`, `spex update`) with this workspace's real values.
+- **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `specs/`, `rules/`, `contracts/`, `plans/`, `scripts/`) with this workspace's real values (`spex` subcommands are documented in `AGENTS.md`).
 - **Every other repository**: copy the shape of [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) exactly, filling each section with this repository's real facts, pulled from what you learned in Step 2 — never invented. Omit a section if the repository has nothing genuine to put in it (for example `# Paths` when the layout is too flat or generic to be worth documenting, or `# Rules` when no test/lint/format policy exists in CI config or contributor docs) rather than inventing content to keep the section.
 
 ## Step 6 — Point to the next skill
@@ -172,6 +172,6 @@ repositories:
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rules` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
 - Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rules_unused`) or deliberately kept, per the user's confirmation.
-- Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout and commands, confirmed by the user.
+- Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout (and, for other repositories, real commands), confirmed by the user.
 - No existing field or path is changed, and no rule is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

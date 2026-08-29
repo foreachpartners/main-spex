@@ -15,11 +15,26 @@ The workspace root holds this repo (`<project-name>-spex`, the single source of 
 
 ## Everyday commands
 
-Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
+Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically. Global flag: `--verbose`/`-v` (stream progress to stderr; used by `check`).
 
-- `spex check` — runs rule checks and gates on `error`-severity findings (`--repo <name>`, `--files <path>...` to scope).
-- `spex coverage` — reports `@spec` annotation and acceptance-criteria coverage for active specs.
-- `spex info` — prints the resolved config (repos, paths, contracts, rules).
+- `spex init` — initialize the spex workspace repository.
+- `spex update` — rewrite bundled skills, schemas, scripts, and rules with the versions shipped in the installed CLI.
+- `spex check` — run rule checks and gate on `error`-severity findings.
+  - `--repo <name>...` — limit to named repositories (default: all).
+  - `--files <path>...` — limit to given files (default: all non-ignored files).
+  - `--fill-preexisting-errors` — record current error findings as a per-repository baseline in `spex.yaml`.
+  - `--verbose`/`-v` — stream per-repository/per-check progress to stderr.
+- `spex check-schema` — validate JSON or YAML files against a JSON Schema.
+  - `--schema <path>` — schema to validate against (required).
+  - `--files <path>...` — files to validate (required).
+- `spex coverage` — report `@spec` annotation and acceptance-criteria coverage for active specs.
+- `spex info` — print the resolved config (repos, paths, contracts, rules).
+  - `--print <field>` — print a single top-level scalar field (e.g. `project_name`).
+  - `--repo <name>` — limit output to the general fields plus the named repository.
+- `spex rules` — print the active rules per repository, as YAML.
+  - `--ai` — drop fields an agent doesn't need (`sync_with_upstream`, `checks`); adds a `path` field.
+  - `--id <id>...` — limit to given Rule IDs (default: all).
+  - `--repo <name>...` — limit to named repositories (default: all).
 
 After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
 
