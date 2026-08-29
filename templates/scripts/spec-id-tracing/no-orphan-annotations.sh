@@ -22,11 +22,10 @@ set -u
 id='[A-Z]+(-[A-Z]+)*'
 
 known=$(
-  # specs/ and rules/ may group files one subdirectory level deep (e.g.
+  # specs/ and rules/ may group files in nested subdirectories (e.g.
   # `rules/frontend/frontend-testing.yaml`); the Spec ID is always just the
-  # filename, so both levels are globbed here.
-  for spec in specs/*.yaml specs/*/*.yaml rules/*.yaml rules/*/*.yaml; do
-    [ -f "$spec" ] || continue
+  # filename, so every depth is found here.
+  find specs rules -type f -name '*.yaml' 2>/dev/null | while IFS= read -r spec; do
     base=${spec##*/}
     echo "${base%.yaml}" | tr '[:lower:]' '[:upper:]'
   done

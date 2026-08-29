@@ -71,7 +71,7 @@ mod tests {
     }
 
     #[test]
-    fn load_yaml_dir_reads_one_subdirectory_level() {
+    fn load_yaml_dir_reads_nested_subdirectories() {
         let dir = tempdir().expect("temp dir");
         std::fs::write(dir.path().join("top.yaml"), "id: TOP\n").expect("top");
         std::fs::create_dir_all(dir.path().join("frontend")).expect("frontend dir");
@@ -86,33 +86,36 @@ mod tests {
     }
 
     #[test]
-    fn load_yaml_dir_ignores_files_two_levels_deep() {
+    fn load_yaml_dir_reads_files_two_levels_deep() {
         let dir = tempdir().expect("temp dir");
-        std::fs::create_dir_all(dir.path().join("frontend/too-deep")).expect("nested dirs");
+        std::fs::create_dir_all(dir.path().join("frontend/deep")).expect("nested dirs");
         std::fs::write(
-            dir.path().join("frontend/too-deep/ignored.yaml"),
-            "id: IGNORED\n",
+            dir.path().join("frontend/deep/nested.yaml"),
+            "id: NESTED\n",
         )
-        .expect("ignored");
+        .expect("nested");
 
         let items: Vec<Item> =
             load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
 
-        assert!(items.is_empty());
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].id, "NESTED");
     }
 
     #[test]
-    fn yaml_files_lists_one_subdirectory_level() {
+    fn yaml_files_lists_nested_subdirectories() {
         let dir = tempdir().expect("temp dir");
         std::fs::write(dir.path().join("top.yaml"), "").expect("top");
-        std::fs::create_dir_all(dir.path().join("backend")).expect("backend dir");
+        std::fs::create_dir_all(dir.path().join("backend/deep")).expect("backend dir");
         std::fs::write(dir.path().join("backend/nested.yaml"), "").expect("nested");
+        std::fs::write(dir.path().join("backend/deep/deeper.yaml"), "").expect("deeper");
 
         let files = yaml_files(dir.path());
 
         assert_eq!(
             files,
             vec![
+                dir.path().join("backend/deep/deeper.yaml"),
                 dir.path().join("backend/nested.yaml"),
                 dir.path().join("top.yaml"),
             ]

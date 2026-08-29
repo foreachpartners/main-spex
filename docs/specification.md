@@ -45,14 +45,14 @@ A plan is a working document, not a permanent artifact: useful while a change is
 A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
 
 - The test: a specific capability the system provides → spec.
-- `specs/` may group files one subdirectory level deep (e.g. `specs/frontend/checkout-flow.yaml`); deeper nesting is not recognized. The Spec ID is always just the filename, regardless of nesting.
+- `specs/` may group files in nested subdirectories (e.g. `specs/frontend/checkout-flow.yaml`). The Spec ID is always just the filename, regardless of nesting.
 
 ## Rules
 
 A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
 
 - A rule applies repo-wide, not per feature. The test: a rule every change must follow, enforceable repo-wide → rule.
-- `rules/` may group files one subdirectory level deep (e.g. `rules/frontend/frontend-testing.yaml`); deeper nesting is not recognized. The Rule ID is always just the filename, regardless of nesting.
+- `rules/` may group files in nested subdirectories (e.g. `rules/frontend/frontend-testing.yaml`). The Rule ID is always just the filename, regardless of nesting.
 
 ## Naming
 

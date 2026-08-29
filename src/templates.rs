@@ -135,9 +135,9 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
     let scripts_dest = spex_dir.join(SCRIPTS_DIR);
 
-    // Rules may be grouped one folder level deep (see `MAX_SUBDIR_DEPTH`), so a
-    // bundled rule already present under a nested folder must be matched there
-    // rather than re-created flat at `rules_dest/<name>`.
+    // Rules may be grouped into nested folders, so a bundled rule already
+    // present under a nested folder must be matched there rather than
+    // re-created flat at `rules_dest/<name>`.
     let existing_rules = util::yaml_files(&rules_dest);
 
     for file in dir.files() {
