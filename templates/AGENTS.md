@@ -13,6 +13,8 @@ BRD (why) → PRD (what) → spec (capability) → contract (interface, if appli
 
 The workspace root holds this repo (`<project-name>-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configuration.
 
+Skills live under `.agents/skills`; `.claude` is a symlink to `.agents`, so `.claude/skills` is the same directory — edit skill files under `.agents/skills` only.
+
 ## spex commands
 
 Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically. Global flag: `--verbose`/`-v` (stream progress to stderr; used by `check`).
