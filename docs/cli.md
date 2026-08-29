@@ -135,21 +135,18 @@ Each incomplete spec lists what is missing (for example `missing: test, contract
 
 ### `spex rules`
 
-Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules` — as JSON. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
+Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules` — as YAML. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
 
 ```sh
 spex rules
 ```
 
-```json
-[
-  {
-    "repository_name": "pepperoni-pizza-api",
-    "rules": [
-      { "id": "SECRET-HANDLING", "title": "Secret protection", "...": "..." }
-    ]
-  }
-]
+```yaml
+- repository_name: pepperoni-pizza-api
+  rules:
+    - id: SECRET-HANDLING
+      title: Secret protection
+      # ...
 ```
 
 #### Flags

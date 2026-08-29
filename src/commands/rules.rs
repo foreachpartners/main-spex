@@ -79,8 +79,8 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
         .map(|repo| repo_entry(repo, &rules, &args.id))
         .collect();
 
-    let json = serde_json::to_string_pretty(&output).change_context(RulesError::Serialize)?;
-    println!("{json}");
+    let yaml = serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize)?;
+    print!("{yaml}");
 
     Ok(ExitCode::SUCCESS)
 }

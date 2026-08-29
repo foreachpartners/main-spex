@@ -155,7 +155,7 @@ Reports annotation coverage for specs.
 
 ## rules
 
-Prints each repository's active rules as JSON.
+Prints each repository's active rules as YAML.
 
 - For every repository in `spex.yaml`, prints every rule listed in its `rules`, so an agent can read exactly what currently governs a repository before touching it.
 - `--ai` drops fields an agent doesn't need to follow a rule: `sync_with_upstream` and `checks`.
