@@ -146,6 +146,7 @@ mod tests {
             ai,
             id: id.iter().map(|s| s.to_string()).collect(),
             repo: repo.iter().map(|s| s.to_string()).collect(),
+            output: None,
         }
     }
 

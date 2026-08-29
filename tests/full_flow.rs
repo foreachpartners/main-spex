@@ -251,6 +251,48 @@ fn workflow() {
     );
 }
 
+#[test]
+fn rules_output_flag_writes_file_matching_stdout() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza");
+    copy_dir(&example, &project);
+
+    let stdout_run = run_spex(&project, &["rules"], "");
+    assert!(
+        stdout_run.status.success(),
+        "rules failed (exit {:?})\nstderr:\n{}",
+        stdout_run.status.code(),
+        String::from_utf8_lossy(&stdout_run.stderr),
+    );
+    let stdout_yaml = String::from_utf8_lossy(&stdout_run.stdout).into_owned();
+    assert!(!stdout_yaml.is_empty(), "expected rules on stdout");
+
+    let output_path = workspace.path().join("rules.yaml");
+    let file_run = run_spex(
+        &project,
+        &["rules", "--output", output_path.to_str().expect("utf8 path")],
+        "",
+    );
+    assert!(
+        file_run.status.success(),
+        "rules --output failed (exit {:?})\nstderr:\n{}",
+        file_run.status.code(),
+        String::from_utf8_lossy(&file_run.stderr),
+    );
+    assert!(
+        file_run.stdout.is_empty(),
+        "rules --output should not print to stdout"
+    );
+
+    let file_yaml = fs::read_to_string(&output_path).expect("read --output file");
+    assert_eq!(
+        file_yaml, stdout_yaml,
+        "--output file contents should match stdout output"
+    );
+}
+
 // `/bin/sh` echo interprets the literal `\b` in writing-style.sh into backspace
 // bytes; drop them so snapshots stay portable across shells.
 fn report_text(stdout: &[u8]) -> String {

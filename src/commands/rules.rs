@@ -28,6 +28,8 @@ pub enum RulesError {
     Serialize,
     #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
     UnknownRepo(String),
+    #[error("could not write `{0}`")]
+    WriteFile(String),
 }
 
 #[derive(Args)]
@@ -41,12 +43,23 @@ pub struct RulesArgs {
     id: Vec<String>,
     #[arg(long, num_args = 1.., help = "Workspace repository names to include (default: all)")]
     repo: Vec<String>,
+    #[arg(
+        long,
+        help = "Write the rendered YAML to this file instead of stdout — the full rules list is large and can get truncated when printed to a terminal or piped through a shell"
+    )]
+    output: Option<String>,
 }
 
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(RulesError::Workspace)?;
     let yaml = render(&workspace, &args)?;
-    print!("{yaml}");
+    match &args.output {
+        Some(path) => {
+            std::fs::write(path, &yaml)
+                .change_context_lazy(|| RulesError::WriteFile(path.clone()))?;
+        }
+        None => print!("{yaml}"),
+    }
     Ok(ExitCode::SUCCESS)
 }
 

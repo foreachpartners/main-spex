@@ -161,6 +161,7 @@ Prints each repository's active rules as YAML.
 - `--ai` drops fields an agent doesn't need to follow a rule: `sync_with_upstream` and `checks`, and adds a `path` field after `id` with the rule file's location relative to the workspace root (e.g. `rules/secret-handling.yaml`), so an agent can reference or edit the rule directly.
 - `--id <id>...` filters to one or more given Rule IDs.
 - `--repo <name>...` limits output to the named repositories, matched by either `repository_name` or `repository_short_name`.
+- `--output <path>` writes the rendered YAML to a file instead of stdout, since the full rules list is large and can get truncated when printed to a terminal or piped through a shell.
 
 ## check-schema
 
