@@ -30,9 +30,10 @@ src/                CLI source
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
-  commands/         Subcommands (init, update, check, check_schema, coverage)
-    check/          check command: orchestration (mod), runners, report
-docs/               Glossary, conventions, CLI reference, FAQ
+  commands/         Subcommands (init, update, check, check_schema, coverage, rules, info)
+    check/          check command: orchestration (mod), report
+      runners/      One runner per check type (ast_grep, glob, regexp, script)
+docs/               Glossary, framework principles, tutorial, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
