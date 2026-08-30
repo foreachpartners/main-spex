@@ -48,14 +48,11 @@ After all changes across the workspace, run `spex check` (optionally scoped with
 
 ## Core discipline
 
+Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.
+
 - **Human in control**: no artifact ships unapproved — spec before contract, contract before plan, plan before code and tests.
 - **Single source of truth**: reference a spec, contract, or convention — never copy it into code comments, docs, or agent rules.
 - **Traceability**: a behavioral change with no Spec ID annotation is a violation.
-
-# Rules
-
-Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.
-
 - **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works. Avoid unnecessary abstraction, comments, indirection, and premature generalization.
 - **DRY** (Don't Repeat Yourself): Extract shared logic into a single source of truth instead of duplicating it. Reuse existing code, types, and systems before adding new ones.
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables instead of comments. Never add a comment — not for WHAT the code does, not for WHY it exists, not to note an extraction, refactor, or design rationale. Write no comments at all unless the user explicitly asks for one in that exact request.
