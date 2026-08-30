@@ -8,6 +8,11 @@
 # but does not match its grammar. Receives candidate files as arguments
 # (Markdown excluded by the check's exclude patterns).
 #
+# The spex workspace repo's own specs/, rules/ and scripts/ hold illustrative
+# example annotations in prose and framework helper code, not real
+# references, so they are skipped there (identified by a spex.yaml at the
+# repository root, since only the spex workspace repo has one).
+#
 # Emits one finding per malformed line following the script location contract:
 #   <file>:<line><TAB>malformed spec-id annotation
 set -u
@@ -21,6 +26,9 @@ xspec="x-spec:[[:space:]]+\"?${id}\"?"
 status=0
 for file in "$@"; do
   [ -f "$file" ] || continue
+  if [ -f spex.yaml ]; then
+    case "$file" in specs/* | rules/* | scripts/*) continue ;; esac
+  fi
   bad=$(
     grep -nE '@spec ' "$file" | grep -Ev "$comment"
     grep -nE 'x-spec:' "$file" | grep -Ev "$xspec"
