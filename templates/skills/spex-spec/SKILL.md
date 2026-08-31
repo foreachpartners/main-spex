@@ -65,11 +65,13 @@ Draft each spec following the field rules in `<workspace-root>/<project-name>-sp
 
 For each drafted or edited spec:
 
-1. Write it to `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
+1. Write it to `<workspace-root>/<project-name>-spex/specs/<spec-id-lowercase>.yaml` — the filename must equal the `<spec-id>` lowercased. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`.
 3. Tell the user the path you wrote (or the diff you applied, for an edit) and ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Example
+
+Written to `specs/reset-password.yaml`:
 
 ```yaml
 id: RESET-PASSWORD

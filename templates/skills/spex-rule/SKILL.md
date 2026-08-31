@@ -83,13 +83,15 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 
 ## Step 5 — Write, then offer edits
 
-1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id>.yaml` — the filename must equal the `<rule-id>`. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
+1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id-lowercase>.yaml` — the filename must equal the `<rule-id>` lowercased. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<rule-id>/<name>.sh`) and make them executable.
 3. For a new spec, add its `id` under `rules` in `spex.yaml` for each repository the user said it applies to.
 4. Run `spex check` to validate compliance.
 5. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Example
+
+Written to `rules/no-console-log.yaml`:
 
 ```yaml
 id: NO-CONSOLE-LOG
