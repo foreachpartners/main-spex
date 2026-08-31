@@ -80,6 +80,8 @@ Once every step and task in the plan is `completed`, delete the plan file. A fin
 
 If any step or task is not yet `completed` (the run stopped partway through), leave the plan file in place so work can resume later.
 
+Don't ask user for confirmation about plan deletion.
+
 ### Without a plan (ad-hoc user request)
 
 Nothing to delete.
