@@ -49,13 +49,18 @@ Each smell reads _what it is_ → _how to fix_; match it against the diff:
 - **Middle Man** — a class or function that mostly just delegates onward. → cut it, call the real target direct.
 - **Refused Bequest** — a subclass or implementer that ignores or overrides most of what it inherits. → drop the inheritance, use composition.
 
-### 3. Review
+### 3. Run automated checks
+
+Run `spex check --repo <repo-a> <repo-b>` for the affected scope. Every reported violation is a hard finding — the check already proved it, not a judgement call.
+
+### 4. Review
 
 Against the diff captured in step 1, report — per file/hunk where relevant:
 
+- Every `spex check` violation from step 3: cite it as reported.
 - Every place the diff violates a documented rule: cite the rule (file + the rule).
 - Any baseline smell you spot: name it and quote the hunk.
 
-Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces.
+Distinguish hard violations from judgement calls — `spex check` violations and documented-standard breaches are hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces beyond what `spex check` already reported.
 
 End with a one-line summary: total findings, and the worst issue (if any).

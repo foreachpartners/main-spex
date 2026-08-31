@@ -45,12 +45,9 @@ Within a unit, run every task in parallel, one AI agent per task.
 
 If a task fails or an agent cannot complete it, stop, report what failed, and ask the user how to proceed rather than pressing on with dependent work.
 
-## Step 3 — Add tests
+This step implements the change only — it does not write tests. Use `spex-test` for that once implementation is done.
 
-1. Add tests for each completed acceptance criterion of implemented specs.
-2. Add all necessary tests for new functionality or changes based on repository testing patterns.
-
-## Step 4 — Finalize the specs
+## Step 3 — Finalize the specs
 
 For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
 
@@ -59,9 +56,9 @@ For every spec the work implemented or advanced — the plan's `Specs`, or the s
 
 Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 
-## Step 5 — Verify
+## Step 4 — Verify
 
-Run formatters, linters, and tests to verify implementation.
+Run formatters and linters, and run the existing test suite to confirm the change didn't break anything.
 
 Prove the work respects the governing rules:
 
@@ -75,7 +72,7 @@ Prove the work completes the governing specs:
 spex coverage
 ```
 
-## Step 6 — Delete the plan
+## Step 5 — Delete the plan
 
 ### With a plan
 
@@ -87,13 +84,13 @@ If any step or task is not yet `completed` (the run stopped partway through), le
 
 Nothing to delete.
 
-## Step 7 — Update repo skill documentation
+## Step 6 — Update repo skill documentation
 
 For every repository touched, check whether its `<repo-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
 
 Update only what's now inaccurate or missing — don't rewrite unrelated sections. The skill doc's job is agent-facing instructions and context that specs and rules don't cover — e.g. project/directory structure, build/test/run commands, architecture and how components fit together, non-obvious computations or workflows, tooling quirks, or where to find things. Don't duplicate what specs or rules already state — reference them instead. Add a new `references/*.md` file only when the change introduces repository-specific context worth documenting this way, and index it in `SKILL.md`.
 
-## Step 8 — Report
+## Step 7 — Report
 
 Summarize the run:
 
@@ -103,6 +100,6 @@ Summarize the run:
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
 - Which repo skill docs you updated or added, and why.
 
-## Step 9 — Point to the next skill
+## Step 8 — Point to the next skill
 
-Ask the user to do an optional review with `spex-review` for implemented changes.
+Ask the user to do an optional review with `spex-review`, then to add test coverage for the change with `spex-test`.

@@ -107,6 +107,14 @@ Coverage should now show your new spec as `✓`.
 /spex-review <spec-id>
 ```
 
+### 5.7 Add tests
+
+```text
+/spex-test <spec-id>
+```
+
+The agent adds tests for each implemented acceptance criterion, following the repository's testing patterns.
+
 ## Step 6 — Rule workflow
 
 Rules capture cross-cutting conventions that apply repo-wide. Create one

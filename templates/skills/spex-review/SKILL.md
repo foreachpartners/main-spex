@@ -50,6 +50,10 @@ Present the two reports under `## Rules` and `## Specs` headings, verbatim or li
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
 
+### 4. Point to the next skill
+
+Once both axes are clean (or the user has resolved what they want to resolve), offer to add test coverage for the change with `spex-test`.
+
 ## Why two axes
 
 A change can pass one axis and fail the other:
