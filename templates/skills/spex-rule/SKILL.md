@@ -23,6 +23,17 @@ A cross-cutting rule all code must obey, enforceable repo-wide → rule. A speci
 
 A rule captures exactly one coherent cross-cutting convention; its individual rules are the acceptance criteria. If the user describes several unrelated conventions, propose splitting them into multiple specs and confirm the split before writing.
 
+### Small conventions: use general-rules instead of a new file
+
+Not every convention earns its own file. If the requested convention is small — a single terse acceptance criterion (for example "no console.log", "always run gofmt before commit") — and doesn't share a theme with any existing rule, don't create a dedicated spec for it. Instead propose adding it as one more acceptance criterion (with its check) to the catch-all bucket for the repositories it applies to:
+
+- `rules/general-rules.yaml` (`id: GENERAL-RULES`) when it applies workspace-wide or to every repository the user names.
+- `rules/general-rules-<repo>.yaml` (`id: GENERAL-RULES-<REPO>`) when it applies to one specific repository only.
+
+If the matching bucket file already exists, treat this as an edit to it (see Step 0): read it in full and append the new acceptance criterion and check, preserving everything else untouched. If it doesn't exist yet, create it fresh with this single criterion — it will grow as more small, unrelated conventions come in.
+
+A convention still gets its own dedicated file when it has multiple related acceptance criteria, a clear theme of its own, or the user asks for a separate file. Confirm which path you're taking with the user before writing.
+
 ## Step 0 — Establish create vs. edit
 
 First decide whether this is a new spec or a change to one that already exists:
@@ -42,7 +53,7 @@ Determine what the spec is based on before doing anything else:
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
 - Read `<workspace-root>/<project-name>-spex/spex.yaml` for the project overview, the workspace repositories, and which rules they already list. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role.
-- Read `<workspace-root>/<project-name>-spex/rules/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention.
+- Read `<workspace-root>/<project-name>-spex/rules/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention. Note whether `general-rules.yaml` or a repository-scoped `general-rules-<repo>.yaml` already exists — see "Small conventions" below.
 
 ## Step 2 — Clarify missing details with the user
 
@@ -83,25 +94,43 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 
 ## Step 5 — Write, then offer edits
 
-1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id-lowercase>.yaml` — the filename must equal the `<rule-id>` lowercased. Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
+1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id-lowercase>.yaml` — the filename must equal the `<rule-id>` lowercased (`general-rules.yaml` or `general-rules-<repo>.yaml` when folding into the catch-all bucket). Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec — including appending to an existing general-rules bucket — change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<rule-id>/<name>.sh`) and make them executable.
-3. For a new spec, add its `id` under `rules` in `spex.yaml` for each repository the user said it applies to.
+3. For a new spec (including a newly created general-rules bucket), add its `id` under `rules` in `spex.yaml` for each repository the user said it applies to.
 4. Run `spex check` to validate compliance.
 5. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.
 
 ## Example
 
-Written to `rules/no-console-log.yaml`:
+A themed, multi-criterion convention earns its own file — written to `rules/writing-style.yaml`:
 
 ```yaml
-id: NO-CONSOLE-LOG
-title: No stray console.log statements
+id: WRITING-STYLE
+title: Writing style
 description: >-
-  Stray console.log calls left over from debugging clutter production output
-  and can leak internal state. Use the project logger instead.
+  Specs, code, and docs are read by engineers and AI agents alike. Direct,
+  imperative prose with explicit commitment levels keeps rules unambiguous.
+acceptance_criteria:
+  - "MUST use imperative, directive language: 'Load config at startup.' not 'We'll load config...'"
+  - "MUST use RFC 2119 commitment levels — MUST, SHOULD, MAY, MUST NOT, SHOULD NOT"
+  - "MUST NOT use motivational or hedging phrases ('Great job!', 'maybe', 'I think')"
+checks:
+  - name: no-hedging-language
+    description: Flag hedging and motivational phrasing
+    type: regexp
+    pattern: "(?i)\\b(maybe|perhaps|great job)\\b"
+    severity: warn
+```
+
+A small, single-criterion convention with no theme of its own joins the shared bucket instead — appended as one more entry in `rules/general-rules.yaml`:
+
+```yaml
+id: GENERAL-RULES
+title: General rules
+description: >-
+  Miscellaneous cross-cutting conventions too small to warrant their own spec.
 acceptance_criteria:
   - "MUST NOT use `console.log` in application code — use the project logger"
-  - "MUST log through the shared logger so output includes level and context"
 checks:
   - name: no-console-log
     description: Stray console.log calls should use the project logger instead
