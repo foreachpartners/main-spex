@@ -64,7 +64,7 @@ Workflow core is AI agent skills and CLI commands.
 
 Tip: you can combine skills `/spex-spec /spex-contract` or run implementation/review and test loop `spex-assembly-line`
 
-**Create a rule**: `/spex-rule [secret handling]`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml`
+**Create a rule**: `/spex-rule secret handling`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml`
 
 ## Framework Principles
 
