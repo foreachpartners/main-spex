@@ -55,14 +55,14 @@ For existing project you can generate all specs based on existing code or gradua
 
 Workflow core is AI agent skills and CLI commands.
 
-1. **Create spec** `/spex-spec [backend place pizza order endpoint]`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
+1. **Create spec** `/spex-spec backend place pizza order endpoint`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
 2. **Derive the contract** for a spec `/spex-contract PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
 3. **Create an implementation plan** for a spec `/spex-plan PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/place-pizza-order/2024-11-25-place-pizza-order.md`
 4. **Implement the plan** `/spex-implement PLACE-PIZZA-ORDER`. Will execute the plan using multiple agents working in parallel per step and delete after completion.
 5. **Review** self review with `/spex-review PLACE-PIZZA-ORDER` to ensure conformance with applicable rules, `spec check` and implemented spec.
 6. **Add tests** `/spex-test PLACE-PIZZA-ORDER`. Will add test coverage for the implemented acceptance criteria.
 
-Tip: you can combine skills `/spex-spec /spex-contract`
+Tip: you can combine skills `/spex-spec /spex-contract` or run implementation/review and test loop `spex-assembly-line`
 
 **Create a rule**: `/spex-rule [secret handling]`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml`
 
