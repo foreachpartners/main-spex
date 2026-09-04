@@ -58,20 +58,21 @@ After setup is completed you get basic skills and rules which you can customize 
 
 For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to change user nickname registration length, ask AI to generate spec based on how user registration currently works, then do your changes.
 
-### Workflow
+### Typical workflow
 
-Workflow core is AI agent skills and CLI commands.
+Say you're want to add pizza ordering functionality to the backend. Here's what you will do:
 
 1. **Create spec** `/spex-spec backend place pizza order endpoint`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
 2. **Derive the contract** for a spec `/spex-contract place-pizza-order`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. **Create an implementation plan** for a spec `/spex-plan place-pizza-order`. Will create `pepperoni-pizza-spex/plans/place-pizza-order/2024-11-25-place-pizza-order.md`
-4. **Implement the plan** `/spex-implement place-pizza-order`. Will execute the plan using multiple agents working in parallel per step and delete after completion.
-5. **Review** self review with `/spex-review place-pizza-order` to ensure conformance with applicable rules, `spec check` and implemented spec.
-6. **Add tests** `/spex-test place-pizza-order`. Will add test coverage for the implemented acceptance criteria.
+3. **Implement it** `/spex-implement place-pizza-order`. Will implement a spec as writen following applicable rules and skill instructions.
+4. **Review** review implementation with `/spex-review place-pizza-order` to ensure conformance with spec and applicable rules.
+5. **Add tests** `/spex-test place-pizza-order`. Will add tests coverage for the implemented spec.
 
-Tip: you can combine skills `/spex-spec /spex-contract` or run implementation/review and test loop `spex-assembly-line`
+Tip: you can combine skills `/spex-spec /spex-contract` or run `spex-assembly-line` to implement, review and fix in loop and test. 
 
-**Create a rule**: `/spex-rule secret handling`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml`
+Say you're want to add rule. Here's what you will do:
+
+**Create a rule**: `/spex-rule secret handling`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml` with scripts to verify it.
 
 ## Framework Principles
 
