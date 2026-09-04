@@ -128,7 +128,7 @@ For example, the rule `secret-handling` works like this:
 
 1. **Rule** — `secret-handling`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
-3. **Proven by** — a secret scan check passing on every commit in CI, review by human or another agent
+3. **Proven by** — a secret scan check running in CI or manually with `spex check`
 
 Even if a deterministic check is not possible, rules are read and followed by AI and can be used for a review by a human or another agent, which gives pretty good results.
 
