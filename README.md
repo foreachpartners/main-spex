@@ -135,7 +135,7 @@ Even if a deterministic check is not possible, rules are read and followed by AI
 ```mermaid
 flowchart TD
     Eng["Rule — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
-    Eng -.proven by.-> Checks["Automated checks, human or another agent review"]
+    Eng -.proven by.-> Checks["Automated checks, human or agent review"]
 ```
 
 ## Learn more
