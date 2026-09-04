@@ -1,4 +1,4 @@
-id: COMMIT-MESSAGE-FORMAT
+id: commit-message-format
 sync_with_upstream: true
 title: Commit message format
 description: >-
@@ -30,10 +30,10 @@ examples:
   subject: |
     style: format md files
     feat(rule): cache catalog responses for 60s
-    feat(spec): list available pizzas LIST-PIZZA-MENU
-    fix(spec): reject negative quantities CART-ADD-ITEM, CART-VALIDATE
+    feat(spec): list available pizzas list-pizza-menu
+    fix(spec): reject negative quantities cart-add-item, cart-validate
   with_body: |
-    feat(spec): list available pizzas LIST-PIZZA-MENU
+    feat(spec): list available pizzas list-pizza-menu
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.
@@ -44,4 +44,4 @@ examples:
     when no items match the query. Return an empty list instead
     of panicking.
 
-    LIST-PIZZA-MENU, CATALOG-CACHE
+    list-pizza-menu, catalog-cache

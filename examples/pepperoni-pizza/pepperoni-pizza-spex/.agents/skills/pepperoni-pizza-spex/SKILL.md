@@ -20,4 +20,4 @@ Each fact lives in exactly one of these files — reference it, never copy it el
 
 # Notes
 
-- `rules` lives per repository in `spex.yaml`, each id maps to its spec file lowercased, e.g. `NAMING-CONVENTION` → `rules/naming-convention.yaml`:
+- `rules` lives per repository in `spex.yaml`, each id maps to its spec file lowercased, e.g. `naming-convention` → `rules/naming-convention.yaml`:

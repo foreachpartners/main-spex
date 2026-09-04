@@ -81,7 +81,7 @@ mod tests {
         std::fs::write(
             dir.join("specs/place-pizza-order.yaml"),
             indoc! {r#"
-                id: PLACE-PIZZA-ORDER
+                id: place-pizza-order
                 title: Place a pizza order
                 description: Lets a customer place an order.
                 acceptance_criteria:
@@ -93,7 +93,7 @@ mod tests {
         std::fs::write(
             dir.join("specs/list-pizza-menu.yaml"),
             indoc! {r#"
-                id: LIST-PIZZA-MENU
+                id: list-pizza-menu
                 title: List the pizza menu
                 description: Lets a customer browse the menu.
                 acceptance_criteria:
@@ -131,7 +131,7 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: LIST-PIZZA-MENU
+                - id: list-pizza-menu
                   title: List the pizza menu
                   description: Lets a customer browse the menu.
                   acceptance_criteria:
@@ -139,7 +139,7 @@ mod tests {
                   scope:
                   - frontend
 
-                - id: PLACE-PIZZA-ORDER
+                - id: place-pizza-order
                   title: Place a pizza order
                   description: Lets a customer place an order.
                   acceptance_criteria:
@@ -156,12 +156,12 @@ mod tests {
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
 
-        let yaml = render(&workspace, &args(true, &["PLACE-PIZZA-ORDER"], &[])).expect("render");
+        let yaml = render(&workspace, &args(true, &["place-pizza-order"], &[])).expect("render");
 
         assert_eq!(
             yaml,
             indoc! {"
-                - id: PLACE-PIZZA-ORDER
+                - id: place-pizza-order
                   path: specs/place-pizza-order.yaml
                   title: Place a pizza order
                   description: Lets a customer place an order.
@@ -184,7 +184,7 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: LIST-PIZZA-MENU
+                - id: list-pizza-menu
                   title: List the pizza menu
                   description: Lets a customer browse the menu.
                   acceptance_criteria:

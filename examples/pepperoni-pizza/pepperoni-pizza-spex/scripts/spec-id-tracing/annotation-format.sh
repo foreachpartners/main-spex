@@ -1,10 +1,10 @@
 #!/bin/sh
-# SPEC-ID-TRACING / annotation-format
+# spec-id-tracing / annotation-format
 #
 # Validates spec-id annotation syntax. A comment annotation must read
 # `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl
-# LIST-PIZZA-MENU`) and an OpenAPI annotation must read `x-spec: <spec-id>`
-# (e.g. `x-spec: LIST-PIZZA-MENU`). Flags any line that opens an annotation
+# list-pizza-menu`) and an OpenAPI annotation must read `x-spec: <spec-id>`
+# (e.g. `x-spec: list-pizza-menu`). Flags any line that opens an annotation
 # but does not match its grammar. Receives candidate files as arguments
 # (Markdown excluded by the check's exclude patterns).
 #
@@ -19,7 +19,7 @@ set -u
 
 [ "$#" -eq 0 ] && exit 0
 
-id='[A-Z]+(-[A-Z]+)*'
+id='[a-z]+(-[a-z]+)*'
 comment="@spec (contract|impl|test) ${id}(, ${id})*"
 xspec="x-spec:[[:space:]]+\"?${id}\"?"
 

@@ -135,7 +135,7 @@ mod tests {
         let check = regexp_check("api_key\\s*=\\s*\"[^\"]{8,}\"");
 
         let mut findings = Vec::new();
-        run_regexp("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_regexp("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -164,7 +164,7 @@ mod tests {
         let check = glob_check("**/*.bak");
 
         let mut findings = Vec::new();
-        run_glob("SECRET-HANDLING", &check, &[&bak, &src], &mut findings);
+        run_glob("secret-handling", &check, &[&bak, &src], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("notes.bak"));
@@ -195,7 +195,7 @@ mod tests {
         let check = ast_grep_check(Some("console.log($$$ARGS)"));
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
@@ -209,7 +209,7 @@ mod tests {
         let check = ast_grep_check(Some("console.log($$$ARGS)"));
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&ts, &py], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&ts, &py], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:1"));
@@ -223,7 +223,7 @@ mod tests {
         set_negate(&mut check, true);
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.ts"));
@@ -253,7 +253,7 @@ constraints:
         );
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
@@ -267,7 +267,7 @@ constraints:
         set_language(&mut check, "not-a-real-language");
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, "sample");
@@ -299,7 +299,7 @@ rule:
         );
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
@@ -330,7 +330,7 @@ rule:
         );
 
         let mut findings = Vec::new();
-        run_ast_grep("SECRET-HANDLING", &check, &[&file], &mut findings);
+        run_ast_grep("secret-handling", &check, &[&file], &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.rs:2"));
@@ -363,7 +363,7 @@ constraints:
         );
 
         let mut findings = Vec::new();
-        run_ast_grep("TESTING", &check, &[&file], &mut findings);
+        run_ast_grep("testing", &check, &[&file], &mut findings);
 
         let mut locations: Vec<_> = findings
             .iter()
@@ -386,7 +386,7 @@ constraints:
         std::fs::create_dir_all(spex.join("scripts/x")).expect("spex scripts");
         std::fs::write(spex.join("scripts/x/lint.sh"), "").expect("spex script");
 
-        let resolved = resolve_script("lint.sh", &spex, "X").expect("resolved");
+        let resolved = resolve_script("lint.sh", &spex, "x").expect("resolved");
         assert_eq!(resolved, spex.join("scripts/x/lint.sh"));
     }
 
@@ -419,7 +419,7 @@ constraints:
         check.severity = Severity::Warn;
 
         let mut findings = Vec::new();
-        run_per_repo_script("COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
+        run_per_repo_script("commit-message-format", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Warn);
@@ -450,7 +450,7 @@ constraints:
 
         let mut findings = Vec::new();
         run_per_file_script(
-            "WRITING-STYLE",
+            "writing-style",
             &check,
             &repo,
             &spex,
@@ -483,7 +483,7 @@ constraints:
         let check = script_check("locations.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_per_repo_script("WRITING-STYLE", &check, &repo, &spex, &mut findings);
+        run_per_repo_script("writing-style", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 2);
         assert_eq!(findings[0].location.as_deref(), Some("docs/intro.md:40"));
@@ -503,7 +503,7 @@ constraints:
         let check = script_check("sample.sh", RunScope::PerRepo);
 
         let mut findings = Vec::new();
-        run_per_repo_script("COMMIT-MESSAGE-FORMAT", &check, &repo, &spex, &mut findings);
+        run_per_repo_script("commit-message-format", &check, &repo, &spex, &mut findings);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -631,12 +631,12 @@ constraints:
 
         let mut listing = script_check("list.sh", RunScope::Workspace);
         listing.name = "list".to_string();
-        let rules = HashMap::from([("X".to_string(), rule("X", vec![listing]))]);
+        let rules = HashMap::from([("x".to_string(), rule("x", vec![listing]))]);
 
         let mut collected = Vec::new();
         let mut findings = Vec::new();
         check_repo(
-            &repository("../api", vec!["X"]),
+            &repository("../api", vec!["x"]),
             &spex,
             &rules,
             &[],
@@ -646,7 +646,7 @@ constraints:
         )
         .expect("api");
         check_repo(
-            &repository("../web", vec!["X"]),
+            &repository("../web", vec!["x"]),
             &spex,
             &rules,
             &[],
@@ -672,7 +672,7 @@ constraints:
         assert!(
             findings
                 .iter()
-                .all(|finding| finding.spec_id == "X" && finding.check == "list")
+                .all(|finding| finding.spec_id == "x" && finding.check == "list")
         );
         let locations: Vec<&str> = findings
             .iter()
@@ -806,7 +806,7 @@ constraints:
     #[test]
     fn status_finding_flags_fully_checked_unimplemented_spec() {
         let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
-        let result = status_finding("A", "specs", &criteria, Status::Planned);
+        let result = status_finding("a", "specs", &criteria, Status::Planned);
         let finding = result.expect("expected a status finding");
         assert_eq!(finding.severity, Severity::Warn);
         assert_eq!(finding.check, "status");

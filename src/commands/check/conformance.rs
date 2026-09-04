@@ -20,7 +20,7 @@ mod conformance_test;
 // a real rule, since spex's own conformance checks are built into `spex
 // check` itself rather than declared in a rule (they must run even before
 // any rules can be trusted to parse).
-const SPEC_ID: &str = "SPEX-INTERNAL-CONFORMANCE";
+const SPEC_ID: &str = "spex-internal-conformance";
 const CONFORM_CHECK: &str = "spec-files-conform";
 const AC_ORDER_CHECK: &str = "ac-ordered";
 const DUPLICATE_ID_CHECK: &str = "no-duplicate-ids";
@@ -32,8 +32,8 @@ struct IdOnly {
 
 // Validates the spex repository's own spec files: `spex.yaml` and every file
 // in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
-// must be named `<id-lowercase>.yaml`, every script a rule check
-// references must exist under `scripts/<spec-id-lowercase>/`, and every
+// must be named `<id>.yaml`, every script a rule check
+// references must exist under `scripts/<spec-id>/`, and every
 // spec's acceptance criteria must be ordered by RFC 2119 commitment level.
 pub(super) fn validate_conformance(
     spex_dir: &Path,
@@ -133,8 +133,8 @@ fn validate_schema_group(
     }
 }
 
-// A spec file must be named after its own id, lowercased
-// (NAMING-CONVENTION: uppercase id, lowercase filename).
+// A spec file must be named after its own id (naming-convention: id and
+// filename are identical).
 fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Finding>) {
     let Ok(text) = std::fs::read_to_string(file) else {
         return;
@@ -146,11 +146,10 @@ fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Fi
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or_default();
-    let id_lower = parsed.id.to_lowercase();
-    if id_lower != stem {
+    if parsed.id != stem {
         findings.push(conform_finding(
             Some(rel(spex_dir, file)),
-            format!("filename stem `{stem}` does not match lowercased id `{id_lower}`"),
+            format!("filename stem `{stem}` does not match id `{}`", parsed.id),
         ));
     }
 }
@@ -171,9 +170,9 @@ fn validate_script_references(
                 continue;
             };
             if resolve_script(script, spex_dir, &rule.id).is_none() {
-                let dir = spex_dir.join(SCRIPTS_DIR).join(rule.id.to_lowercase());
+                let dir = spex_dir.join(SCRIPTS_DIR).join(&rule.id);
                 findings.push(conform_finding(
-                    Some(format!("{RULES_DIR}/{}.yaml", rule.id.to_lowercase())),
+                    Some(format!("{RULES_DIR}/{}.yaml", rule.id)),
                     format!("missing script {}/{script}", dir.display()),
                 ));
             }

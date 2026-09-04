@@ -286,7 +286,7 @@ fn discover_repositories(
 }
 
 // The repository short name is the full repository name minus the
-// `<project-name>-` prefix, per NAMING-CONVENTION.
+// `<project-name>-` prefix, per naming-convention.
 fn repository_short_name(name: &str, project_name: &str) -> String {
     name.strip_prefix(&format!("{project_name}-"))
         .unwrap_or(name)

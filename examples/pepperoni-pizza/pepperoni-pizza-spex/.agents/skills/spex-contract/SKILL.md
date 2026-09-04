@@ -31,7 +31,7 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 - Collect the union of every targeted spec's `scope` — these are the affected repositories.
 - For each affected repository, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
-- For each affected repository, run `spex info --repo <repo>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `OPENAPI-CONVENTIONS` (for OpenAPI), `GRAPHQL-CONVENTIONS` (for GraphQL SDL), and `SPEC-ID-TRACING` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
+- For each affected repository, run `spex info --repo <repo>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `openapi-conventions` (for OpenAPI), `graphql-conventions` (for GraphQL SDL), and `spec-id-tracing` — so the contract respects naming, casing, error responses, secret handling, and annotation rules.
 
 ## Step 3 — Decide what the contract needs
 
@@ -43,13 +43,13 @@ Map each acceptance criterion that crosses a boundary to the interface element t
 
 ## Step 4 — Draft the contract changes
 
-Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `OPENAPI-CONVENTIONS`; for GraphQL SDL, apply `GRAPHQL-CONVENTIONS`.
+Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `openapi-conventions`; for GraphQL SDL, apply `graphql-conventions`.
 
 For a machine-readable interface:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec per `SPEC-ID-TRACING` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
+- Annotate each operation with its spec per `spec-id-tracing` — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 For a design reference:
@@ -82,7 +82,7 @@ paths:
     post:
       operationId: createOrder
       summary: Create an order
-      x-spec: ORDER-CREATE
+      x-spec: order-create
       requestBody:
         content:
           application/json:
@@ -119,7 +119,7 @@ The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `O
 Design reference example, for a spec with no machine-readable interface, in `contracts/figma.md`:
 
 ```md
-<!-- @spec contract DELIVERY-TIME -->
+<!-- @spec contract delivery-time -->
 
 ## Delivery time
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# SPEC-ID-TRACING / no-orphan-annotations
+# spec-id-tracing / no-orphan-annotations
 #
 # Flags spec-id annotations that reference a Spec ID with no matching spec.
 # Runs once for the whole workspace from the spex directory (its working
@@ -19,7 +19,7 @@
 #   <file><TAB>orphan annotation references unknown spec `<id>`
 set -u
 
-id='[A-Z]+(-[A-Z]+)*'
+id='[a-z]+(-[a-z]+)*'
 
 known=$(
   # specs/ and rules/ may group files in nested subdirectories (e.g.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# NAMING-CONVENTION / repo-dir
+# naming-convention / repo-dir
 #
 # The repository directory name is a derived identifier and must equal
 # <project-name>-<repository-short-name>, e.g.

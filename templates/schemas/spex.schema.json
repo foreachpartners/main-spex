@@ -42,12 +42,12 @@
       "properties": {
         "repository_name": {
           "type": "string",
-          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per NAMING-CONVENTION.",
+          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per naming-convention.",
           "minLength": 1
         },
         "repository_short_name": {
           "type": "string",
-          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in NAMING-CONVENTION.",
+          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in naming-convention.",
           "minLength": 1
         },
         "description": {
@@ -69,7 +69,7 @@
         },
         "rules": {
           "type": "array",
-          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after its lowercased spec ID under `rules/` (for example `SECRET-HANDLING` -> `rules/secret-handling.yaml`).",
+          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after its lowercased spec ID under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
           "items": {
             "$ref": "rule-id.schema.json"
           }
@@ -148,14 +148,14 @@
               "description": "REST OpenAPI spec for the orders API."
             }
           ],
-          "rules": ["SECRET-HANDLING", "NAMING-CONVENTION"]
+          "rules": ["secret-handling", "naming-convention"]
         },
         {
           "repository_name": "pepperoni-pizza-frontend",
           "repository_short_name": "frontend",
           "description": "React web client that lets customers place orders.",
           "path": "../pepperoni-pizza-frontend",
-          "rules": ["WRITING-STYLE", "NAMING-CONVENTION"]
+          "rules": ["writing-style", "naming-convention"]
         }
       ]
     }

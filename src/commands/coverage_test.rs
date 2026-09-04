@@ -32,8 +32,8 @@ mod tests {
 
     #[test]
     fn scan_collects_each_layer_from_spec_annotations() {
-        let found = scan("// @spec contract A\n// @spec impl A\n// @spec test A\n");
-        let layers = found.get("A").expect("A present");
+        let found = scan("// @spec contract a\n// @spec impl a\n// @spec test a\n");
+        let layers = found.get("a").expect("a present");
         assert!(layers.contains(&CoverageLayer::Contract));
         assert!(layers.contains(&CoverageLayer::Impl));
         assert!(layers.contains(&CoverageLayer::Test));
@@ -41,12 +41,12 @@ mod tests {
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
-        let found = scan("// @spec test A, B, RATE-LIMIT\n");
-        assert!(found.get("A").unwrap().contains(&CoverageLayer::Test));
-        assert!(found.get("B").unwrap().contains(&CoverageLayer::Test));
+        let found = scan("// @spec test a, b, rate-limit\n");
+        assert!(found.get("a").unwrap().contains(&CoverageLayer::Test));
+        assert!(found.get("b").unwrap().contains(&CoverageLayer::Test));
         assert!(
             found
-                .get("RATE-LIMIT")
+                .get("rate-limit")
                 .unwrap()
                 .contains(&CoverageLayer::Test)
         );
@@ -54,15 +54,15 @@ mod tests {
 
     #[test]
     fn scan_treats_xspec_as_contract() {
-        let found = scan("        x-spec: A\n");
-        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
-        assert!(!found.get("A").unwrap().contains(&CoverageLayer::Impl));
+        let found = scan("        x-spec: a\n");
+        assert!(found.get("a").unwrap().contains(&CoverageLayer::Contract));
+        assert!(!found.get("a").unwrap().contains(&CoverageLayer::Impl));
     }
 
     #[test]
     fn scan_treats_quoted_xspec_as_contract() {
-        let found = scan("x-spec: \"A\"\n");
-        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
+        let found = scan("x-spec: \"a\"\n");
+        assert!(found.get("a").unwrap().contains(&CoverageLayer::Contract));
     }
 
     #[test]
@@ -72,7 +72,7 @@ mod tests {
         std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
         std::fs::write(
             spex_dir.join("contracts/api.openapi.yaml"),
-            "      x-spec: A\n",
+            "      x-spec: a\n",
         )
         .expect("write contract");
 
@@ -82,7 +82,7 @@ mod tests {
         .expect("parse config");
 
         let found = scan_workspace(spex_dir, &config).expect("scan");
-        assert!(found.get("A").unwrap().contains(&CoverageLayer::Contract));
+        assert!(found.get("a").unwrap().contains(&CoverageLayer::Contract));
     }
 
     #[test]

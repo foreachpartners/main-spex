@@ -70,7 +70,7 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 | -------------------- | ------------------------------------------------------ | ------------------------------- |
 | Spec writing         | Translating a business need into acceptance criteria   | `spex-spec` skill               |
 | Contract design      | Trade-off choices, schema shape                        | REST vs gRPC, response shape    |
-| Code generation      | Translating a spec and contract into an implementation | Implement `PLACE-PIZZA-ORDER`   |
+| Code generation      | Translating a spec and contract into an implementation | Implement `place-pizza-order`   |
 | Test generation      | Choosing scenarios and edge cases                      | E2E from acceptance criteria    |
 | Plan splitting       | Ordering work into parallel-safe steps                 | `spex-plan` skill               |
 | Check triage         | False positive vs real violation vs script bug         | `spex check` output review      |
@@ -133,13 +133,13 @@ Three requirements:
 
 **Violation test**: a context is parsimonious when no essential part can be removed without introducing ambiguity or degrading quality, and the whole contains no redundant or irrelevant element.
 
-**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`WRITING-STYLE`](../templates/rules/writing-style.yaml).
+**Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`writing-style`](../templates/rules/writing-style.yaml).
 
 ## 12. Traceability
 
 Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
 
-- The Spec ID (`DELIVERY-TIME`) is the traceability unit.
+- The Spec ID (`delivery-time`) is the traceability unit.
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI.
 - `spex coverage` computes coverage from those annotations.
 - Checking out a commit shows exactly which specs the code was built against.

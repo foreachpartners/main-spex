@@ -1,5 +1,5 @@
 #!/bin/sh
-# WRITING-STYLE / writing
+# writing-style / writing
 #
 # Flags hedging, motivational, and apologetic phrasing in
 # documentation. Receives candidate files as arguments (scoped to *.md by the

@@ -17,7 +17,7 @@
 - **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
-  id: PLACE-PIZZA-ORDER
+  id: place-pizza-order
   title: Customer can place an order
   acceptance_criteria:
     - "[ ] MUST return 201 with the created order from POST /orders"
@@ -26,7 +26,7 @@
 - **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
 
   ```yaml
-  id: SECRET-HANDLING
+  id: secret-handling
   title: Secret protection
   acceptance_criteria:
     - "Secret scan check passes on every commit in CI."
@@ -35,14 +35,14 @@
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability.
 
   ```text
-  PLACE-PIZZA-ORDER
-  SECRET-HANDLING
+  place-pizza-order
+  secret-handling
   ```
 
 - **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability.
 
   ```text
-  SECRET-HANDLING
+  secret-handling
   ```
 
 - **Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. AI implements from spec and contract. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.

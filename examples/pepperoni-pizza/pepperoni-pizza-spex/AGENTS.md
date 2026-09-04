@@ -42,7 +42,7 @@ Code should be simple enough that any teammate or AI — not just its author —
 
 ## Commit messages
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/COMMIT-MESSAGE-FORMAT.yaml`.
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/commit-message-format.yaml`.
 
 - Use the `spec` scope for spec changes (e.g. `feat(spec)`, `fix(spec)`).
 - Use the `rule` scope for rule changes (e.g. `feat(rule)`, `fix(rule)`).
@@ -52,7 +52,7 @@ Examples:
 
 ```
 style: format md files
-feat(rule): pin dependencies as required by DEPENDENCIES
-feat(spec): list available pizzas LIST-PIZZA-MENU
-fix(spec): reject negative quantities CART-ADD-ITEM, CART-VALIDATE
+feat(rule): pin dependencies as required by dependencies
+feat(spec): list available pizzas list-pizza-menu
+fix(spec): reject negative quantities cart-add-item, cart-validate
 ```

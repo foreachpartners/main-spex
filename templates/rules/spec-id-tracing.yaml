@@ -1,11 +1,11 @@
-id: SPEC-ID-TRACING
+id: spec-id-tracing
 sync_with_upstream: true
 title: Spec ID tracing
 description: >-
   Spec ID tracing annotations link a contract, implementation and test back to the spec it satisfies. It makes easy for human and AI to trace specification and related artifacts.
 acceptance_criteria:
   - "MUST annotate capability spec contract, implementation and test at least once at the boundary, with additional annotations on other important artifacts being optional"
-  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: LIST-PIZZA-MENU`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl LIST-PIZZA-MENU`)"
+  - "MUST annotate as the OpenAPI property `x-spec: <spec-id>` (e.g. `x-spec: list-pizza-menu`), otherwise as a comment `@spec contract|impl|test <spec-id>[, <spec-id>]...` (e.g. `@spec impl list-pizza-menu`)"
   - "MUST NOT reference a Spec ID that has no matching spec file (no orphan annotations)"
   - "SHOULD NOT do nested annotations, e.g. handler->service->repository"
   - "MAY annotate a rule following same rules"
@@ -31,17 +31,17 @@ examples:
       /pizzas:
         get:
           operationId: listPizzaMenu
-          x-spec: LIST-PIZZA-MENU
+          x-spec: list-pizza-menu
   implementation: |
-    // @spec impl LIST-PIZZA-MENU
+    // @spec impl list-pizza-menu
     fn list_pizza_menu(req: Request) -> Response {
         // menu_service and its repository are NOT annotated (no nesting)
         menu_service.list()
     }
   rule: |
     // Rules follow the same rules — optional, at the boundary, no nesting
-    // @spec impl RATE-LIMIT
+    // @spec impl rate-limit
     fn rate_limit(req: Request) -> Response { /* ... */ }
   test: |
-    // @spec test LIST-PIZZA-MENU, ORDER-PIZZA, RATE-LIMIT
+    // @spec test list-pizza-menu, order-pizza, rate-limit
     fn lists_available_pizzas() { /* ... */ }

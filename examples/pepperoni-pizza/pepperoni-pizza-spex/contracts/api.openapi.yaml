@@ -81,7 +81,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-spec: DELIVERY-TIME
+      x-spec: delivery-time
 components:
   schemas:
     Pizza:

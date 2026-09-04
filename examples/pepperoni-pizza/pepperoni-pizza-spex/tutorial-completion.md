@@ -31,14 +31,14 @@ Business specs (1)
   active      1
 
 Active spec coverage (1)
-  ✓  DELIVERY-TIME
+  ✓  delivery-time
 
   1 fully covered · 0 gaps
 
 pepperoni-pizza: no gaps
 ```
 
-## Rating: DELIVERY-TIME spec and implementation
+## Rating: delivery-time spec and implementation
 
 **Requirement:** "show customers pizza delivery time based on number of pizzas
 ordered, other ongoing orders and today workers" (details left to the author).
@@ -87,7 +87,7 @@ from a perfect score.
   snapshot — fine for this in-memory toy, not a correctness guarantee under a
   real datastore.
 
-## Rating: CONFIGURABLE-NETWORK-BIND spec
+## Rating: configurable-network-bind spec
 
 **Requirement:** "the API must not hardcode network bind addresses or ports —
 they must be read from configuration/environment".
@@ -102,7 +102,7 @@ explains _why_, enforces it automatically, and the implementation conforms.
   reader understands the motivation rather than memorizing a ban.
 - **Precise, layered acceptance criteria.** It requires reading bind config from
   the environment, sourcing it from the repo's config-prefix (cross-referencing
-  `NAMING-CONVENTION` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
+  `naming-convention` for `PEPPERONI_PIZZA_API__BIND_ADDR`), forbids any
   embedded literal on the startup path, and adds a `SHOULD` to fail fast on
   missing/malformed config.
 - **It is enforced automatically.** The `no-hardcoded-bind-literal` regexp check

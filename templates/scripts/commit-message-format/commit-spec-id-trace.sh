@@ -1,9 +1,9 @@
 #!/bin/sh
-# COMMIT-MESSAGE-FORMAT / commit-spec-id-trace
+# commit-message-format / commit-spec-id-trace
 #
 # Commits scoped to `spec` mark functional changes and must include
 # a comma-separated list of Spec IDs in their subject or body, e.g.
-#   feat(spec): add order endpoint PLACE-PIZZA-ORDER, SECRET-HANDLING
+#   feat(spec): add order endpoint place-pizza-order, secret-handling
 #
 # Runs once in the repository directory and inspects git history, not the
 # working tree.
@@ -19,7 +19,7 @@ if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
 fi
 
 # Keep in sync with schemas/spec-id.schema.json and schemas/rule-id.schema.json
-id='[A-Z]+(-[A-Z]+)*'
+id='[a-z]+(-[a-z]+)*'
 spec_ids=" ${id}(, ${id})*"
 
 bad=""

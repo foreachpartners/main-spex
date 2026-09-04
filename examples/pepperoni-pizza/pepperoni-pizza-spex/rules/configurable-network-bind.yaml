@@ -1,14 +1,14 @@
-id: CONFIGURABLE-NETWORK-BIND
+id: configurable-network-bind
 title: Configurable network bind address
 description: >-
   Hardcoded bind addresses and ports lock the service to one environment, leak
   deployment topology into source, and force a rebuild to move between local,
   CI, and production. The listen address and port must come from configuration
   or environment at startup, sourced from the repository's config-prefix
-  (`PEPPERONI_PIZZA_API__...`, per NAMING-CONVENTION).
+  (`PEPPERONI_PIZZA_API__...`, per naming-convention).
 acceptance_criteria:
   - "MUST read the server's listen/bind address and port from configuration or environment at startup"
-  - "MUST source the bind configuration from the repository config-prefix defined by NAMING-CONVENTION (e.g. `PEPPERONI_PIZZA_API__BIND_ADDR`)"
+  - "MUST source the bind configuration from the repository config-prefix defined by naming-convention (e.g. `PEPPERONI_PIZZA_API__BIND_ADDR`)"
   - "MUST NOT embed a bind address, host, or port literal in source code anywhere on the server startup path"
   - "SHOULD fail fast with a clear error when the required bind configuration is missing or malformed"
 checks:

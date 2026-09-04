@@ -55,7 +55,7 @@
   "additionalProperties": false,
   "examples": [
     {
-      "id": "SECRET-HANDLING",
+      "id": "secret-handling",
       "title": "Secret protection",
       "description": "Prevents committing secrets by requiring they load from environment variables or a secrets manager at runtime.",
       "acceptance_criteria": [

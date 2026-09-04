@@ -1,10 +1,10 @@
 #!/bin/sh
-# COMMIT-MESSAGE-FORMAT / commit-conventional-format
+# commit-message-format / commit-conventional-format
 #
 # Recent commit subjects must follow the Conventional Commits format:
 #   <type>[optional scope][!]: <description>
 # e.g.
-#   feat(spec): list available pizzas LIST-PIZZA-MENU
+#   feat(spec): list available pizzas list-pizza-menu
 # See https://www.conventionalcommits.org/
 #
 # Runs once in the repository directory and inspects git history, not the

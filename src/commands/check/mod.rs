@@ -617,7 +617,7 @@ fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> O
         severity: Severity::Warn,
         spec_id: id.to_string(),
         check: "status".to_string(),
-        location: Some(format!("{dir}/{}.yaml", id.to_lowercase())),
+        location: Some(format!("{dir}/{id}.yaml")),
         message: format!(
             "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
             status.label()
@@ -631,11 +631,7 @@ fn validate_blocked_by(
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
-        let location = Some(format!(
-            "{}/{}.yaml",
-            spec::SPECS_DIR,
-            spec.id.to_lowercase()
-        ));
+        let location = Some(format!("{}/{}.yaml", spec::SPECS_DIR, spec.id));
         match status_by_id.get(blocker.as_str()) {
             None => findings.push(Finding {
                 severity: Severity::Error,
@@ -670,11 +666,7 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
             severity: Severity::Error,
             spec_id: spec.id.clone(),
             check: "scope".to_string(),
-            location: Some(format!(
-                "{}/{}.yaml",
-                spec::SPECS_DIR,
-                spec.id.to_lowercase()
-            )),
+            location: Some(format!("{}/{}.yaml", spec::SPECS_DIR, spec.id)),
             message: format!(
                 "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
             ),

@@ -4,7 +4,7 @@ description: >-
   live delivery tracking.
 cli_version: 0.7.79
 rules_unused:
-  - GRAPHQL-CONVENTIONS
+  - graphql-conventions
 repositories:
   - repository_name: pepperoni-pizza-api
     repository_short_name: api
@@ -18,15 +18,15 @@ repositories:
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
     rules:
-      - COMMIT-MESSAGE-FORMAT
-      - CONFIGURABLE-NETWORK-BIND
-      - DEPENDENCIES
-      - NAMING-CONVENTION
-      - SECRET-HANDLING
-      - SPEC-ID-TRACING
-      - WRITING-STYLE
-      - TESTING
-      - OPENAPI-CONVENTIONS
+      - commit-message-format
+      - configurable-network-bind
+      - dependencies
+      - naming-convention
+      - secret-handling
+      - spec-id-tracing
+      - writing-style
+      - testing
+      - openapi-conventions
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     description: >-
@@ -38,13 +38,13 @@ repositories:
         description: >-
           Figma references for the frontend's UI.
     rules:
-      - COMMIT-MESSAGE-FORMAT
-      - DEPENDENCIES
-      - NAMING-CONVENTION
-      - SECRET-HANDLING
-      - SPEC-ID-TRACING
-      - WRITING-STYLE
-      - TESTING
+      - commit-message-format
+      - dependencies
+      - naming-convention
+      - secret-handling
+      - spec-id-tracing
+      - writing-style
+      - testing
   - repository_name: pepperoni-pizza-spex
     repository_short_name: spex
     description: >-
@@ -54,8 +54,8 @@ repositories:
       capabilities the system provides).
     path: .
     rules:
-      - COMMIT-MESSAGE-FORMAT
-      - DEPENDENCIES
-      - NAMING-CONVENTION
-      - SECRET-HANDLING
-      - WRITING-STYLE
+      - commit-message-format
+      - dependencies
+      - naming-convention
+      - secret-handling
+      - writing-style

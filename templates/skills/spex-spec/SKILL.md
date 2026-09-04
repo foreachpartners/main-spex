@@ -27,7 +27,7 @@ A spec captures exactly one coherent capability; its specifics are the acceptanc
 
 First decide whether this is a new spec or a change to one that already exists:
 
-- If the user names an existing spec ID (for example `PLACE-PIZZA-ORDER`) or asks to update, extend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Confirm with the user what should change (new or revised acceptance criteria, a scope change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field.
+- If the user names an existing spec ID (for example `place-pizza-order`) or asks to update, extend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Confirm with the user what should change (new or revised acceptance criteria, a scope change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field.
 - Otherwise, this is a **new spec** — continue with Step 1.
 
 ## Step 1 — Gather context first
@@ -39,7 +39,7 @@ Determine what the specs are based on before doing anything else:
 - Read `<workspace-root>/<project-name>-spex/spex.yaml` for the project overview. Repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role and use that to determine the spec's implementation `scope`.
 - Run `spex specs --ai --output <tmp-path>`, then read `<tmp-path>` for related specs.
 - Read the interface contracts in the `spex` repository's `contracts/` folder, listed per repository under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
-- Run `spex rules --id WRITING-STYLE --ai` for the writing conventions the spec's prose must follow.
+- Run `spex rules --id writing-style --ai` for the writing conventions the spec's prose must follow.
 
 ## Step 2 — Identify the capabilities and clarify missing details
 
@@ -65,7 +65,7 @@ Draft each spec following the field rules in `<workspace-root>/<project-name>-sp
 
 For each drafted or edited spec:
 
-1. Write it to `<workspace-root>/<project-name>-spex/specs/<spec-id-lowercase>.yaml` — the filename must equal the `<spec-id>` lowercased. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
+1. Write it to `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`.
 3. Tell the user the path you wrote (or the diff you applied, for an edit) and ask whether they want to change anything further. Apply any requested edits in place.
 
@@ -74,7 +74,7 @@ For each drafted or edited spec:
 Written to `specs/reset-password.yaml`:
 
 ```yaml
-id: RESET-PASSWORD
+id: reset-password
 title: Let users reset a forgotten password
 description: >-
   Lets a user who forgot their password regain access by requesting a reset
@@ -98,4 +98,4 @@ status: active
 
 After the specs are written, offer to draft each one's contract: run `spex-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
-Follow the `WRITING-STYLE` rule read in Step 1.
+Follow the `writing-style` rule read in Step 1.

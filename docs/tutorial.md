@@ -18,7 +18,7 @@ Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
 copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
 `api` and `frontend` repositories side by side.
 
-## Step 2.1 — Rename folders to follow NAMING-CONVENTION
+## Step 2.1 — Rename folders to follow naming-convention
 
 Repository directory naming is <project-name>-<repository-short-name>
 

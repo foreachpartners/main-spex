@@ -34,7 +34,7 @@ pepperoni-pizza/                       # workspace root
     └── pepperoni-pizza.code-workspace # editor workspace file
 ```
 
-Repository directories follow `<project-name>-<repository-short-name>` (NAMING-CONVENTION), so rename existing repositories to match before running `spex init`.
+Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `spex init`.
 
 1. Put all project git repos in one shared folder (workspace root folder)
 2. Run terminal command `spex init` in workspace root to create the `pepperoni-pizza-spex` repo
@@ -56,11 +56,11 @@ For existing project you can generate all specs based on existing code or gradua
 Workflow core is AI agent skills and CLI commands.
 
 1. **Create spec** `/spex-spec backend place pizza order endpoint`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
-2. **Derive the contract** for a spec `/spex-contract PLACE-PIZZA-ORDER`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. **Create an implementation plan** for a spec `/spex-plan PLACE-PIZZA-ORDER`. Will create `pepperoni-pizza-spex/plans/place-pizza-order/2024-11-25-place-pizza-order.md`
-4. **Implement the plan** `/spex-implement PLACE-PIZZA-ORDER`. Will execute the plan using multiple agents working in parallel per step and delete after completion.
-5. **Review** self review with `/spex-review PLACE-PIZZA-ORDER` to ensure conformance with applicable rules, `spec check` and implemented spec.
-6. **Add tests** `/spex-test PLACE-PIZZA-ORDER`. Will add test coverage for the implemented acceptance criteria.
+2. **Derive the contract** for a spec `/spex-contract place-pizza-order`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
+3. **Create an implementation plan** for a spec `/spex-plan place-pizza-order`. Will create `pepperoni-pizza-spex/plans/place-pizza-order/2024-11-25-place-pizza-order.md`
+4. **Implement the plan** `/spex-implement place-pizza-order`. Will execute the plan using multiple agents working in parallel per step and delete after completion.
+5. **Review** self review with `/spex-review place-pizza-order` to ensure conformance with applicable rules, `spec check` and implemented spec.
+6. **Add tests** `/spex-test place-pizza-order`. Will add test coverage for the implemented acceptance criteria.
 
 Tip: you can combine skills `/spex-spec /spex-contract` or run implementation/review and test loop `spex-assembly-line`
 
@@ -90,7 +90,7 @@ For example, a pizza ordering feature moves through the flow like this:
 
 1. **BRD** — sell pizza online to increase sales
 2. **PRD** — customers can pick a pizza on the website and pay online
-3. **Spec** — `PLACE-PIZZA-ORDER`: Customer can place an order.
+3. **Spec** — `place-pizza-order`: Customer can place an order.
 
    Acceptance criteria:
    - MUST return 201 from POST /orders with the created order
@@ -116,9 +116,9 @@ flowchart TD
 
 ### Rules live outside the feature flow — they govern how every artifact is built:
 
-For example, the rule `SECRET-HANDLING` works like this:
+For example, the rule `secret-handling` works like this:
 
-1. **Rule** — `SECRET-HANDLING`: "Secret protection"
+1. **Rule** — `secret-handling`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
 3. **Proven by** — a secret scan check passing on every commit in CI, review by human or another agent
 

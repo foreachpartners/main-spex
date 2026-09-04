@@ -41,7 +41,7 @@ For each repository missing a description, look at its real contents (resolve `p
 - Check manifest/metadata files to identify the stack and purpose (for example `package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`).
 - Skim the top-level directory layout and entry points when the above are missing.
 - Note any interface contract files it ships (OpenAPI, proto, GraphQL SDL, AsyncAPI). You collect these in Step 5.
-- For each rule file in the spex repository's `rules/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `OPENAPI-CONVENTIONS` applies only to a repository that exposes a REST API; `GRAPHQL-CONVENTIONS` only to one that exposes GraphQL). You add the ones that apply in Step 6.
+- For each rule file in the spex repository's `rules/` folder, read it and judge whether it genuinely applies to this repository given its stack and role (for example `openapi-conventions` applies only to a repository that exposes a REST API; `graphql-conventions` only to one that exposes GraphQL). You add the ones that apply in Step 6.
 
 Infer the project `description` from `project_name` and the combined picture of its repositories. If the repositories don't make the project's purpose clear, ask the user one short question rather than guessing.
 
@@ -86,15 +86,15 @@ Example `spex.yaml` repository entry after collecting a contract:
     - path: contracts/api.openapi.yaml
       description: REST OpenAPI spec for the orders API.
   rules:
-    - SECRET-HANDLING
+    - secret-handling
 ```
 
 ## Step 6 — Add rules that apply
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `OPENAPI-CONVENTIONS`, `GRAPHQL-CONVENTIONS`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `openapi-conventions`, `graphql-conventions`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
 1. For each repository, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
-2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "OPENAPI-CONVENTIONS: this repository exposes a REST API").
+2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "openapi-conventions: this repository exposes a REST API").
 3. Only after the user confirms a given rule applies, add its ID to that repository's `rules` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
 4. Do not modify any rule's file under `rules/` while doing this; this only edits which repositories reference it in `spex.yaml`.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
@@ -167,7 +167,7 @@ repositories:
       - path: contracts/api.openapi.yaml
         description: REST OpenAPI spec for the orders API.
     rules:
-      - SECRET-HANDLING
+      - secret-handling
 ```
 
 ## Quality bar

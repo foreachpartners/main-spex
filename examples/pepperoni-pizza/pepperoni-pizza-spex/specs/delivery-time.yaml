@@ -1,4 +1,4 @@
-id: DELIVERY-TIME
+id: delivery-time
 title: Show customers an estimated delivery time for their order
 description: >-
   Shows customers how long their order will take based on the current kitchen

@@ -135,9 +135,7 @@ fn locate_script(
     };
 
     let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
-        let dir = spex_dir
-            .join(rule::SCRIPTS_DIR)
-            .join(spec_id.to_lowercase());
+        let dir = spex_dir.join(rule::SCRIPTS_DIR).join(spec_id);
         findings.push(config_error(
             spec_id,
             &check.name,
@@ -192,18 +190,14 @@ pub(in crate::commands::check) fn run_per_repo_script(
     );
 }
 
-// Scripts are stored at `<base>/scripts/<spec-id-lowercase>/<reference>`, so the
-// `script` field only carries the bare filename. The `id:` field stays
-// uppercase (NAMING-CONVENTION); the on-disk directory is lowercase.
+// Scripts are stored at `<base>/scripts/<spec-id>/<reference>`, so the
+// `script` field only carries the bare filename.
 pub(in crate::commands::check) fn resolve_script(
     reference: &str,
     base: &Path,
     spec_id: &str,
 ) -> Option<PathBuf> {
-    let script = base
-        .join(rule::SCRIPTS_DIR)
-        .join(spec_id.to_lowercase())
-        .join(reference);
+    let script = base.join(rule::SCRIPTS_DIR).join(spec_id).join(reference);
     script.is_file().then_some(script)
 }
 

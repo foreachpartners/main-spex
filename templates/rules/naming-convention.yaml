@@ -1,4 +1,4 @@
-id: NAMING-CONVENTION
+id: naming-convention
 title: Derived naming convention
 sync_with_upstream: true
 description: >-
@@ -10,7 +10,7 @@ acceptance_criteria:
   - "MUST use <project_name>_<repository_short_name> for db (names both the database and its user)"
   - "MUST use <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA> for config and env variables"
   - "MUST use <project_name>.<repository_short_name>.<data> for proto_package"
-  - "MUST use uppercase for a Spec ID (e.g. `DELIVERY-TIME`) everywhere it is referenced — prose, `@spec` annotations, `x-spec:` — but lowercase it for the spec's filename and script directory (`specs/place-pizza-order.yaml` for `PLACE-PIZZA-ORDER`, `scripts/secret-handling/` for `SECRET-HANDLING`), matching the repository's kebab-case filename convention"
+  - "MUST use lowercase for a Spec ID or Rule ID (e.g. `delivery-time`) everywhere it is referenced — prose, `@spec` annotations, `x-spec:`, filename, script directory — so the id is always identical to the spec's filename and script directory (`specs/place-pizza-order.yaml` and `place-pizza-order`, `scripts/secret-handling/` and `secret-handling`)"
   - "MUST extend this convention, not individual repositories, when a new cross-cutting identifier is needed"
 checks:
   - name: repo-dir
@@ -41,12 +41,9 @@ examples:
     example:  pepperoni_pizza.api.v1
     example:  pepperoni_pizza.web.v1
 
-    used by:  Spec ID (prose, `@spec` annotations, `x-spec:`)
-    format:   <NAME>
-    example:  PLACE-PIZZA-ORDER
-    example:  SECRET-HANDLING
-
-    used by:  spec filename, script directory
+    used by:  Spec ID / Rule ID (prose, `@spec` annotations, `x-spec:`), spec/rule filename, script directory
     format:   <name>
+    example:  place-pizza-order
     example:  specs/place-pizza-order.yaml
+    example:  secret-handling
     example:  scripts/secret-handling/

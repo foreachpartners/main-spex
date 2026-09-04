@@ -62,7 +62,7 @@ All names are chosen to match clear and precise meaning for human and AI.
 - **Rule** signals an enforceable convention every change must follow, matching how AI coding tools already use "rule" for repo-wide instructions (e.g. editor and agent rules files) and how linters name their checks (ESLint rules, Clippy lints); a rule answers how the system is built, and reads as a directive both a human and an AI agent treat as binding rather than optional.
 - "Rule" is reserved for rules. Spec acceptance criteria are called specifics or criteria, never rules, so the word "rule" always means "repo-wide, enforceable convention" and never collides with a single capability's acceptance criteria.
 - The spec type is conveyed only by which directory a spec lives in (`specs/` or `rules/`) — IDs carry no type prefix.
-- A spec's identifier is a Spec ID (`schemas/spec-id.schema.json`); a rule's identifier is a Rule ID (`schemas/rule-id.schema.json`). Both follow the same uppercase-letters-and-hyphens format, limited to 40 characters to avoid long filenames/refs.
+- A spec's identifier is a Spec ID (`schemas/spec-id.schema.json`); a rule's identifier is a Rule ID (`schemas/rule-id.schema.json`). Both follow the same lowercase-letters-and-hyphens format, limited to 40 characters to avoid long filenames/refs.
 - Every id must be unique across both `specs/` and `rules/`, since Spec IDs and Rule IDs share the same naming convention and could otherwise collide.
 
 # Workspace
@@ -71,7 +71,7 @@ All names are chosen to match clear and precise meaning for human and AI.
 
 A project spans several workspace repositories under one workspace root folder.
 
-- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per NAMING-CONVENTION (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
+- Each workspace repository is its own git repository, with its directory named `<project-name>-<repository-short-name>` per naming-convention (for example `pepperoni-pizza-spex`, `pepperoni-pizza-api`, `pepperoni-pizza-frontend`).
 - The spex repository (`<project-name>-spex`) holds the specs, schemas, scripts, skills, config, and contracts — the single source of truth.
 - spex locates the spex repository by finding the `spex.yaml` it contains, so commands work from the workspace root or any workspace repository regardless of the repository directory names.
 - Every fact has one authoritative source and is referenced, not copied: the interface lives only in its native contract, a capability only in its spec, a convention only in its rule.

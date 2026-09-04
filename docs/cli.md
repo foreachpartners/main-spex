@@ -71,9 +71,9 @@ repositories:
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
     path: ../pepperoni-pizza-frontend
-    rules: [WRITING-STYLE]
+    rules: [writing-style]
     ignored_errors:
-      - rule_id: WRITING-STYLE
+      - rule_id: writing-style
         check: no-cyrillic
         files: [README.md, docs/intro.md]
 ```
@@ -118,7 +118,7 @@ A single annotation of each kind anywhere in any workspace repository counts —
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
 
 ```yaml
-id: PLACE-PIZZA-ORDER
+id: place-pizza-order
 status: active
 coverage_ignore: [contract]
 ```
@@ -144,7 +144,7 @@ spex rules
 ```yaml
 - repository_name: pepperoni-pizza-api
   rules:
-    - id: SECRET-HANDLING
+    - id: secret-handling
       title: Secret protection
       # ...
 ```
@@ -161,7 +161,7 @@ spex rules --ai --repo api
 ```
 
 ```sh
-spex rules --id SECRET-HANDLING NAMING-CONVENTION
+spex rules --id secret-handling naming-convention
 ```
 
 ### `spex specs`
@@ -173,7 +173,7 @@ spex specs
 ```
 
 ```yaml
-- id: PLACE-PIZZA-ORDER
+- id: place-pizza-order
   title: Place a pizza order
   # ...
 ```
@@ -190,7 +190,7 @@ spex specs --ai --scope api
 ```
 
 ```sh
-spex specs --id PLACE-PIZZA-ORDER LIST-PIZZA-MENU
+spex specs --id place-pizza-order list-pizza-menu
 ```
 
 ### `spex check-schema`

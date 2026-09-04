@@ -78,7 +78,7 @@
   "additionalProperties": false,
   "examples": [
     {
-      "id": "PLACE-PIZZA-ORDER",
+      "id": "place-pizza-order",
       "title": "Allow customers to place an order from their cart",
       "description": "Lets authenticated shoppers turn their cart into a paid order.",
       "acceptance_criteria": [
@@ -88,7 +88,7 @@
         "[ ] SHOULD display an order confirmation with a unique order number"
       ],
       "scope": ["api", "frontend"],
-      "blocked_by": ["CART-ADD-ITEM", "PAYMENT-GATEWAY"],
+      "blocked_by": ["cart-add-item", "payment-gateway"],
       "status": "planned",
       "examples": {
         "request": "POST /orders { \"cart_id\": \"c_123\" }"

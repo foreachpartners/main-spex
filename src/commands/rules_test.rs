@@ -22,9 +22,9 @@ mod tests {
 
     #[test]
     fn repo_has_rule_matches_assigned_ids_only() {
-        let api = repo("demo-api", &["SECRET-HANDLING"]);
-        assert!(repo_has_rule(&api, &rule("SECRET-HANDLING", "")));
-        assert!(!repo_has_rule(&api, &rule("WRITING-STYLE", "")));
+        let api = repo("demo-api", &["secret-handling"]);
+        assert!(repo_has_rule(&api, &rule("secret-handling", "")));
+        assert!(!repo_has_rule(&api, &rule("writing-style", "")));
     }
 
     #[test]
@@ -96,11 +96,11 @@ mod tests {
                   - repository_name: demo-api
                     repository_short_name: api
                     path: ../demo-api
-                    rules: [SECRET-HANDLING]
+                    rules: [secret-handling]
                   - repository_name: demo-frontend
                     repository_short_name: frontend
                     path: ../demo-frontend
-                    rules: [WRITING-STYLE]
+                    rules: [writing-style]
             "},
         )
         .expect("write spex.yaml");
@@ -108,7 +108,7 @@ mod tests {
         std::fs::write(
             dir.join("rules/secret-handling.yaml"),
             indoc! {r#"
-                id: SECRET-HANDLING
+                id: secret-handling
                 title: Secret protection
                 description: no secrets
                 sync_with_upstream: true
@@ -124,7 +124,7 @@ mod tests {
         std::fs::write(
             dir.join("rules/writing-style.yaml"),
             indoc! {r#"
-                id: WRITING-STYLE
+                id: writing-style
                 title: Writing style
                 description: consistent prose
                 acceptance_criteria:
@@ -161,7 +161,7 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SECRET-HANDLING
+                - id: secret-handling
                   title: Secret protection
                   description: no secrets
                   sync_with_upstream: true
@@ -172,7 +172,7 @@ mod tests {
                     type: glob
                     pattern: '**/*.bak'
 
-                - id: WRITING-STYLE
+                - id: writing-style
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
@@ -187,12 +187,12 @@ mod tests {
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
 
-        let yaml = render(&workspace, &args(true, &["SECRET-HANDLING"], &[])).expect("render");
+        let yaml = render(&workspace, &args(true, &["secret-handling"], &[])).expect("render");
 
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SECRET-HANDLING
+                - id: secret-handling
                   path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
@@ -214,7 +214,7 @@ mod tests {
                   - repository_name: demo-api
                     repository_short_name: api
                     path: ../demo-api
-                    rules: [SPEC-ID-TRACING]
+                    rules: [spec-id-tracing]
             "},
         )
         .expect("write spex.yaml");
@@ -222,7 +222,7 @@ mod tests {
         std::fs::write(
             dir.path().join("rules/spec-id-tracing.yaml"),
             indoc! {r#"
-                id: SPEC-ID-TRACING
+                id: spec-id-tracing
                 title: Spec ID tracing
                 description: Traces artifacts back to their spec.
                 sync_with_upstream: true
@@ -233,7 +233,7 @@ mod tests {
                     type: glob
                     pattern: "**/*.bak"
                 examples:
-                  contract: "x-spec: LIST-PIZZA-MENU"
+                  contract: "x-spec: list-pizza-menu"
             "#},
         )
         .expect("write rule");
@@ -244,14 +244,14 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SPEC-ID-TRACING
+                - id: spec-id-tracing
                   path: rules/spec-id-tracing.yaml
                   title: Spec ID tracing
                   description: Traces artifacts back to their spec.
                   acceptance_criteria:
                   - MUST annotate the boundary
                   examples:
-                    contract: 'x-spec: LIST-PIZZA-MENU'
+                    contract: 'x-spec: list-pizza-menu'
             "}
         );
     }
@@ -262,12 +262,12 @@ mod tests {
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
 
-        let yaml = render(&workspace, &args(false, &["WRITING-STYLE"], &[])).expect("render");
+        let yaml = render(&workspace, &args(false, &["writing-style"], &[])).expect("render");
 
         assert_eq!(
             yaml,
             indoc! {"
-                - id: WRITING-STYLE
+                - id: writing-style
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
@@ -284,21 +284,21 @@ mod tests {
 
         let yaml = render(
             &workspace,
-            &args(true, &["SECRET-HANDLING", "WRITING-STYLE"], &[]),
+            &args(true, &["secret-handling", "writing-style"], &[]),
         )
         .expect("render");
 
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SECRET-HANDLING
+                - id: secret-handling
                   path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
 
-                - id: WRITING-STYLE
+                - id: writing-style
                   path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
@@ -319,7 +319,7 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: WRITING-STYLE
+                - id: writing-style
                   path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
@@ -341,14 +341,14 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SECRET-HANDLING
+                - id: secret-handling
                   path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
 
-                - id: WRITING-STYLE
+                - id: writing-style
                   path: rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
@@ -369,7 +369,7 @@ mod tests {
         assert_eq!(
             yaml,
             indoc! {"
-                - id: SECRET-HANDLING
+                - id: secret-handling
                   path: rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets

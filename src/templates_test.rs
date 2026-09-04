@@ -13,7 +13,7 @@ mod tests_unit {
     // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
     // gating together.
     const MANAGED_SPEC: &str = "rules/commit-message-format.yaml";
-    const MANAGED_SPEC_ID: &str = "COMMIT-MESSAGE-FORMAT";
+    const MANAGED_SPEC_ID: &str = "commit-message-format";
 
     #[test]
     fn scaffold_writes_managed_content() {
@@ -54,7 +54,7 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
             &spec,
-            "id: COMMIT-MESSAGE-FORMAT\nsync_with_upstream: true\ntampered: true\n",
+            "id: commit-message-format\nsync_with_upstream: true\ntampered: true\n",
         )
         .expect("tamper spec, keeping sync_with_upstream");
         let script = spex_dir.path().join(SCRIPT);
@@ -80,7 +80,7 @@ mod tests_unit {
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::write(&spec, "id: COMMIT-MESSAGE-FORMAT\ncustomized: true\n").expect("customize spec");
+        fs::write(&spec, "id: commit-message-format\ncustomized: true\n").expect("customize spec");
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
 
@@ -88,7 +88,7 @@ mod tests_unit {
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
-            "id: COMMIT-MESSAGE-FORMAT\ncustomized: true\n"
+            "id: commit-message-format\ncustomized: true\n"
         );
         assert_eq!(fs::read_to_string(&script).unwrap(), "customized");
     }
