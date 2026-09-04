@@ -30,8 +30,7 @@ pepperoni-pizza/                       # workspace root
 ├── pepperoni-pizza-api/               # existing api repository
 ├── pepperoni-pizza-frontend/          # existing frontend repository
 ├── ...                                # repeat for other repositories
-└── pepperoni-pizza-spex/              # new spex repository (created by cli)
-    └── pepperoni-pizza.code-workspace # editor workspace file
+└── pepperoni-pizza-spex/              # new spex repository (created by spex cli)
 ```
 
 Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `spex init`.
@@ -49,7 +48,7 @@ Repository directories follow `<project-name>-<repository-short-name>` (naming-c
 
 After setup is completed you get basic skills and rules which you can customize for your project or leave them as is to be synced from upstream.
 
-For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to user nickname registration length, ask AI to generate spec based on how user registration currently works, then do your changes.
+For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to change user nickname registration length, ask AI to generate spec based on how user registration currently works, then do your changes.
 
 ### Workflow
 
