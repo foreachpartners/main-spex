@@ -8,6 +8,14 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 spex helps you move fast with AI, not stand in your way. You just formulate the task and review the result. Specs, rules, and skill instructions give AI the context it needs to implement it right, quickly.
 
+## Core Concepts
+
+spex is built on three simple pieces:
+
+- **Specs** define _what_ a feature does — a capability with acceptance criteria.
+- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing that apply repo-wide.
+- **Skills** are the instructions an AI agent follows to do the job — taking all applicable rules and implementing a spec.
+
 ## Quickstart
 
 ### Prerequisites
