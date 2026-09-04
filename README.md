@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal
 
-spex helps you move fast with AI, not stand in your way. Specs and rules give AI the context it needs to get the implementation right the first time — resulting in high-quality, maintainable code that's easy to change, with minimal or no rework of AI output.
+spex helps you move fast with AI, not stand in your way. You just formulate the task and review the result. Specs, rules, and skill instructions give AI the context it needs to implement it right, quickly.
 
 ## Quickstart
 
