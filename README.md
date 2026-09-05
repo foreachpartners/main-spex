@@ -4,9 +4,9 @@ AI-first specification-driven development framework with human in control.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
-## Goal: unleash AI's full speed, safely
+## Goal: unleash AI's full speed, without slop
 
-AI keeps getting faster — the framework's job is to keep the human and process from becoming the bottleneck once the model isn't. Every principle below exists to make AI-speed output trustworthy without slowing it down; if a spec, rule, or check ever becomes slower than the judgment it replaces, it has failed its purpose.
+AI keeps getting faster — the framework's job is to keep the human and process from becoming the bottleneck once the model isn't. Every principle below exists to keep AI-speed output slop-free without slowing it down; if a spec, rule, or check ever becomes slower than the judgment it replaces, it has failed its purpose.
 
 ## Core Concepts
 
