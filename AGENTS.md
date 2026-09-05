@@ -33,7 +33,7 @@ src/                CLI source
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info)
     check/          check command: orchestration (mod), report
       runners/      One runner per check type (ast_grep, glob, regexp, script)
-docs/               Glossary, framework principles, tutorial, CLI reference, FAQ
+docs/               Glossary, framework principles, conventions, tutorial, CLI reference, FAQ
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
