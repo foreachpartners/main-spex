@@ -2,6 +2,10 @@
 
 These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, specs and rules, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms, [specification.md](specification.md) for how the framework behaves, and [conventions.md](conventions.md) for the engineering values spex follows but didn't invent.
 
+## Goal: unleash AI's full speed, safely
+
+AI keeps getting faster — the framework's job is to keep the human and process from becoming the bottleneck once the model isn't. Every principle below exists to make AI-speed output trustworthy without slowing it down; if a spec, rule, or check ever becomes slower than the judgment it replaces, it has failed its purpose.
+
 ## 1. AI over Manual Coding
 
 Used right, AI writes code faster than a developer while keeping quality high. It is cheap — it can even run locally for the price of electricity — and it keeps getting faster and better over time. Developers who insist on writing every line by hand will simply lose the competition.
