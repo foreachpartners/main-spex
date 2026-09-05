@@ -18,9 +18,9 @@ Clear, well-defined specs eliminate guesswork: they provide explicit acceptance 
 
 Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
-The same guesswork happens at the repository level: ad hoc prompting re-explains context that already lives in the repo — commands, structure, conventions — every time, and the outcome depends on what the developer remembers to say that day. A repository skill (for example `pepperoni-pizza-api`) writes that context down once and is autoloaded before any read, write, test, or run in that repository, so the agent gets it without guessing or asking.
+The same problem shows up at the repository level: without a skill, every session re-explains the same commands and conventions from scratch. A repository skill (for example `pepperoni-pizza-api`) writes that down once and autoloads before any read, write, test, or run, so the agent doesn't have to guess or ask.
 
-**Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted. Likewise, a developer explains a repository's structure and commands to the agent freehand instead of the agent autoloading a skill for it — the instructions live in the developer's memory, not in the framework.
+**Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted. Likewise, a developer explains a repo's structure and commands by hand instead of relying on an autoloaded skill — the knowledge stays in the developer's head, not in the framework.
 
 ## 3. Rules over Tribal Knowledge
 
@@ -28,9 +28,9 @@ Cross-cutting technical rules and patterns — code style, structure, testing, s
 
 They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability.
 
-A task skill (`spex-spec`, `spex-plan`, `spex-implement`, `spex-test`, `spex-review`, ...) carries this the same way for workflow steps: it is invoked by name to run one step of the spec → plan → implement → check loop with the right rules and acceptance criteria already written in, so any developer or any session follows the same steps instead of reconstructing them from memory. Freeform chat fills the judgment calls a skill leaves open — it doesn't replace the skill.
+Task skills (`spex-spec`, `spex-plan`, `spex-implement`, `spex-test`, `spex-review`, ...) do the same for workflow steps: invoke one by name and it runs that step with the right rules and acceptance criteria already built in, instead of everyone reconstructing them from memory. Chat still handles the judgment calls a skill leaves open, but it doesn't replace the skill.
 
-**Violation test**: a code-style or security rule lives only in someone's head or a chat message — it is applied inconsistently and cannot be enforced. Likewise, a developer runs a workflow step ad hoc instead of invoking the task skill for it — the step's rules and inputs depend on what that developer remembers that day, not on what the framework enforces.
+**Violation test**: a code-style or security rule lives only in someone's head or a chat message — it is applied inconsistently and cannot be enforced. Likewise, someone runs a workflow step ad hoc instead of using its task skill — the result depends on what they remembered that day, not on what the framework enforces.
 
 ## 4. Human in control
 
@@ -44,11 +44,11 @@ Each artifact is approved before the next is generated: spec before contract, co
 
 AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
 
-That is why every check that can be a script must be a script. AI fills only the gaps where judgment is required — spec and contract design, code and test generation, plan splitting, check triage, semantic review — the interpretive work no deterministic tool can do.
+That is why every check that can be a script must be a script. AI is left to handle what a script can't: writing specs and contracts, generating code and tests, splitting plans, triaging check output, reviewing logic.
 
-The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings. See [specification.md](specification.md) for the full set of deterministic checks (`cargo build`/`tsc`, linters, `spex check`, `spex coverage`, `spex check-schema`, contract validators, test runners).
+The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings. See [specification.md](specification.md) for the full list of deterministic checks.
 
-**Violation test**: a check that could give a deterministic pass/fail is instead left to human or AI judgment — it will eventually miss something a script would have caught every time.
+**Violation test**: a check that could be a deterministic pass/fail is left to human or AI judgment instead — it will eventually miss something a script would have caught every time.
 
 ## 6. Traceability
 
