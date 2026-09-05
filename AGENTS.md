@@ -33,7 +33,14 @@ src/                CLI source
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info)
     check/          check command: orchestration (mod), report
       runners/      One runner per check type (ast_grep, glob, regexp, script)
-docs/               Glossary, framework principles, conventions, tutorial, CLI reference, FAQ
+docs/
+  glossary.md              Terms used across code, messages, schemas, and docs
+  framework-principles.md  Non-negotiable foundation spex is built on
+  conventions.md           Engineering values spex follows but didn't invent
+  specification.md         Single source of truth for framework behavior
+  cli.md                   CLI command reference
+  tutorial.md              Hands-on walkthrough of adopting spex
+  faq.md                   Frequently asked questions
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas
   scripts/          Helper scripts
