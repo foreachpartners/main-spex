@@ -1,0 +1,18 @@
+id: login-api
+title: Let customers log in with email and password
+description: >-
+  Lets a registered customer authenticate with their email and password and
+  receive a session bearer token to use on subsequent requests. Sessions are
+  held in memory for this example project, with no persistent database.
+acceptance_criteria:
+  - "[ ] MUST authenticate the customer given a registered email and its matching password"
+  - "[ ] MUST return a session bearer token on successful authentication"
+  - "[ ] MUST reject login with a generic error when the email is unknown or the password does not match, without revealing which one failed"
+  - "[ ] MUST store active sessions in memory, with no persistent database"
+  - "[ ] MUST NOT expire the session bearer token"
+  - "[ ] MUST NOT persist active sessions across process restarts, given the in-memory storage"
+scope:
+  - api
+blocked_by:
+  - register-user-api
+status: planned

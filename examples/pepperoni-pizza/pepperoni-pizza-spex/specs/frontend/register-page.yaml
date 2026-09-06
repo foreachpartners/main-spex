@@ -1,0 +1,20 @@
+id: register-page
+title: Let customers register a new account from the frontend
+description: >-
+  Lets a new customer create an account through a register page, submitting
+  an email, password, and nickname to the api's register-user-api endpoint.
+acceptance_criteria:
+  - "[ ] MUST let the customer submit an email, a password, and a nickname to register a new account"
+  - "[ ] MUST validate the email is a syntactically valid email address before submit"
+  - "[ ] MUST validate the password is between 8 and 32 characters before submit"
+  - "[ ] MUST validate the nickname is between 1 and 60 characters before submit"
+  - "[ ] MUST display an inline error on the relevant field when client-side validation fails"
+  - "[ ] MUST display an inline error on the email field when the api rejects registration because the email is already registered"
+  - "[ ] MUST redirect the customer to the login page with a success message once registration succeeds"
+  - "[ ] MUST link to the login page for a customer who already has an account"
+  - "[ ] MUST NOT submit the register request while client-side validation is failing"
+scope:
+  - frontend
+blocked_by:
+  - register-user-api
+status: planned

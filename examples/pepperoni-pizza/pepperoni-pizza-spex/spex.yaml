@@ -13,7 +13,7 @@ repositories:
       in-progress deliveries.
     path: ../pepperoni-pizza-api
     contracts:
-      - path: contracts/api.openapi.yaml
+      - path: ./contracts/api.openapi.yaml
         description: >-
           REST OpenAPI spec for the pizza menu, orders, and deliveries
           endpoints.
@@ -34,7 +34,7 @@ repositories:
       orders, and watch deliveries.
     path: ../pepperoni-pizza-frontend
     contracts:
-      - path: contracts/figma.md
+      - path: ./contracts/figma.md
         description: >-
           Figma references for the frontend's UI.
     rules:

@@ -1,0 +1,19 @@
+id: register-user-api
+title: Let customers register a new account
+description: >-
+  Lets a new customer create an account with an email, password, and nickname.
+  Accounts are held in memory for this example project, with no persistent database.
+acceptance_criteria:
+  - "[ ] MUST create a new account given an email, a password, and a nickname"
+  - "[ ] MUST require the email to be a syntactically valid email address"
+  - "[ ] MUST reject registration when the email is already registered to an existing account"
+  - "[ ] MUST require the password to be between 8 and 32 characters"
+  - "[ ] MUST require the nickname to be between 1 and 60 characters"
+  - "[ ] MUST store registered accounts in memory, with no persistent database"
+  - "[ ] MUST NOT require nicknames to be unique across accounts"
+  - "[ ] MUST NOT require email confirmation before the account is usable"
+  - "[ ] MUST NOT store the account's password as plaintext"
+  - "[ ] MUST NOT persist registered accounts across process restarts, given the in-memory storage"
+scope:
+  - api
+status: planned
