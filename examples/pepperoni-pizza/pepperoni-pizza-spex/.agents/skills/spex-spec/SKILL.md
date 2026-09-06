@@ -51,7 +51,7 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 
 Draft each spec following the field rules in `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`, using its `examples` as the model for the YAML you write. Key points while drafting:
 
-- `id` must convey the capability so it reads without opening the spec.
+- `id` must convey the capability so it reads without opening the spec. It should be unique enough so that global search will find no other matches, prefer two or more words with dash as it's unlikelly to match anything.
 - Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's specifics. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
 - Be specific. When the user has given a concrete decision — a constant, default, threshold, rate, or rule (e.g. each pizza takes one minute to make, two workers are on shift, the estimate is rounded to whole minutes) — capture it verbatim as its own verifiable criterion. Do not soften a value the user supplied into a vague directional statement, and do not invent a value the user did not supply: if a detail needed to make a criterion verifiable is missing, ask for it (see Step 2) instead of guessing.
 - Describe end behavior, not implementation steps. A criterion must be verifiable from the outside — what the system does or exposes — not the internal steps taken to build it (installing a package, adding a dependency, creating a file, writing a migration).

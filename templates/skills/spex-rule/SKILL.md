@@ -65,7 +65,7 @@ Do not set `sync_with_upstream` on a consumer spec unless the user explicitly as
 
 Follow the field rules in `<workspace-root>/<project-name>-spex/schemas/rule.schema.json` and use its `examples` as the model for the YAML you write. Key points while drafting:
 
-- `id` must convey the convention so it reads without opening the spec.
+- `id` must convey the convention so it reads without opening the spec. It should be unique enough so that global search will find no other matches, prefer two or more words with dash as it's unlikelly to match anything.
 - Keep `description` short, simple, and concrete: a general summary of the rule and what it protects against. Do not restate individual rules already covered by `acceptance_criteria`.
 - Write `acceptance_criteria` as verifiable statements, each beginning with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A rule is a global rule that always applies, so its criteria carry no implementation checkbox.
 - Keep each criterion provable by an automated check or by AI inspection.
