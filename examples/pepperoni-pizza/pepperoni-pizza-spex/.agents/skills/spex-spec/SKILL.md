@@ -68,6 +68,7 @@ For each drafted or edited spec:
 1. Write it to `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml` — the filename must equal the `<spec-id>`. Use literal block scalars for multi-paragraph `description`. When editing an existing spec, change only what the user asked for and leave every other field, its ordering, and formatting untouched.
 2. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`.
 3. Tell the user the path you wrote (or the diff you applied, for an edit) and ask whether they want to change anything further. Apply any requested edits in place.
+4. When `scope` lists more than one repository (for example `frontend` and `api`), name each in its acceptance criteria as shown in the example. For a single-scoped spec, omit the repository name from acceptance criteria — it's already redundant with `scope`.
 
 ## Example
 

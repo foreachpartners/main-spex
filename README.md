@@ -68,7 +68,7 @@ Say you're want to add pizza ordering functionality to the backend. Here's what 
 4. **Review** review implementation with `/spex-review place-pizza-order` to ensure conformance with spec and applicable rules.
 5. **Add tests** `/spex-test place-pizza-order`. Will add tests coverage for the implemented spec.
 
-Tip: you can combine skills `/spex-spec /spex-contract` or run `spex-assembly-line` to implement, review and fix in loop and test. 
+Tip: you can combine skills `/spex-spec /spex-contract` or run `spex-assembly-line` to implement, review and fix in loop and test.
 
 Say you're want to add rule. Here's what you will do:
 

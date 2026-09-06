@@ -125,6 +125,7 @@ Refreshes the managed framework files from the installed binary.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
+- Prints the `CHANGELOG.md` entries newer than the previous `cli_version`, newest first; prints nothing if there are none, and prints every entry if the previous `cli_version` isn't found in the changelog.
 
 ## check
 
