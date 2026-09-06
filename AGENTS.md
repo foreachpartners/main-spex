@@ -18,6 +18,10 @@ cargo install --path . --force  # Reinstall cli
 spex --help # CLI command
 ```
 
+## Rules
+
+On version change fill `CHANGELOG.md`
+
 ## Project structure
 
 ```
