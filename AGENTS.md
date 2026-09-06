@@ -1,6 +1,18 @@
 # spex
 
-AI-first specification-driven development framework with human in control.
+The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
+
+## Goal: unleash AI's full speed without slop
+
+AI operates fast and getting even faster — the framework's job is unleash it speed while ensuring slop-free results.
+
+## Core Concepts
+
+spex is built on three simple pieces:
+
+- **Specs** define _what_ a feature does — a capability with acceptance criteria.
+- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing that apply repo-wide.
+- **Skills** are the instructions an AI agent follows to do the job — taking all applicable rules and implementing a spec.
 
 ## Specification
 
