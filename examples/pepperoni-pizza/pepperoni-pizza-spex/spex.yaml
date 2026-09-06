@@ -25,7 +25,7 @@ repositories:
       - secret-handling
       - spec-id-tracing
       - writing-style
-      - testing
+      - testing-rules
       - openapi-conventions
   - repository_name: pepperoni-pizza-frontend
     repository_short_name: frontend
