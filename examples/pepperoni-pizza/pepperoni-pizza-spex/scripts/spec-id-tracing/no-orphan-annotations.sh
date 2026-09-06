@@ -24,10 +24,11 @@ id='[a-z]+(-[a-z]+)*'
 known=$(
   # specs/ and rules/ may group files in nested subdirectories (e.g.
   # `rules/frontend/frontend-testing.yaml`); the Spec ID is always just the
-  # filename, so every depth is found here.
+  # filename, so every depth is found here. Spec/Rule IDs are always lowercase
+  # (see NAMING-CONVENTION), matching the filename as-is.
   find specs rules -type f -name '*.yaml' 2>/dev/null | while IFS= read -r spec; do
     base=${spec##*/}
-    echo "${base%.yaml}" | tr '[:lower:]' '[:upper:]'
+    echo "${base%.yaml}"
   done
 )
 
@@ -62,7 +63,10 @@ orphans=$(
       fi
       file="$repo/$rel"
       [ -f "$file" ] || continue
-      refs=$(grep -hE '@spec |x-spec:' "$file" 2>/dev/null | grep -oE "$id" | sort -u)
+      refs=$(grep -hE '@spec (contract|impl|test) |x-spec:' "$file" 2>/dev/null |
+        sed -E 's/^.*@spec (contract|impl|test) //; s/^.*x-spec: *//' |
+        tr ',' '\n' |
+        grep -oE "$id" | sort -u)
       for ref in $refs; do
         is_known "$ref" ||
           printf '%s\torphan annotation references unknown spec `%s`\n' "$file" "$ref"
