@@ -1,10 +1,10 @@
 # General
 
-This project is governed by `spex` AI-first specification-driven development framework with human in control: the agent writes every artifact — specs, contracts, plans, code, and tests — and the human approves each one before the next is generated.
+This project is governed by `spex`. The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat. AI operates fast and getting even faster — the framework's job is unleash it speed while ensuring slop-free results.
 
 ## Artifact chain
 
-BRD (why) → PRD (what) → spec (capability) → contract (interface, if applicable) → plan (how, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
+BRD (why, optional) → PRD (what, optional) → spec (capability) → contract (interface, if applicable) → plan (how to implement, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
@@ -65,15 +65,13 @@ Code should be simple enough that any teammate or AI — not just its author —
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/commit-message-format.yaml`.
 
-- Use the `spec` scope for spec changes (e.g. `feat(spec)`, `fix(spec)`).
-- Use the `rule` scope for rule changes (e.g. `feat(rule)`, `fix(rule)`).
-- End every `spec`-scoped description with at least one comma-separated Spec ID: `<Spec ID>[, <Spec ID>]`.
+Tag every spec- or rule-related commit with its ID(s) using @spec or @rule: `@spec <Spec ID>[, <Spec ID>]` or `@rule <Rule ID>[, <Rule ID>]`.
 
 Examples:
 
 ```
 style: format md files
-feat(rule): pin dependencies as required by dependencies-rules
-feat(spec): list available pizzas list-pizza-menu
-fix(spec): reject negative quantities cart-add-item, cart-validate
+feat(deps): pin dependencies @rule dependencies-rules
+feat(ui): list available pizzas @spec list-pizza-menu
+fix(cart): reject negative quantities @spec cart-add-item, cart-validate
 ```

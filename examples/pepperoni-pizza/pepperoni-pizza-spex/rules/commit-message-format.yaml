@@ -3,16 +3,14 @@ sync_with_upstream: true
 title: Commit message format
 description: >-
   Commits are the unit of traceability between code and the specs that justify
-  it. The `spec` scope marks functional commits, and including the affected
-  Spec IDs in the Conventional Commit subject or body lets every functional
-  change trace back to an approved requirement; the `rule` scope marks rule
-  changes. See https://www.conventionalcommits.org/ for the Conventional Commits
-  specification.
+  it. Scope names the affected area freely; the `@spec`/`@rule` tag and its
+  attached ID list is what lets every spec- or rule-related change trace back
+  to an approved requirement. See https://www.conventionalcommits.org/ for the
+  Conventional Commits specification.
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "MUST use the `spec` scope for functional changes (e.g. `feat(spec)`, `fix(spec)`)"
-  - "MUST include at least one `<Spec ID>[, <Spec ID>]` in every `spec`-scoped commit description or body"
-  - "SHOULD use the `rule` scope for rule changes (e.g. `feat(rule)`, `fix(rule)`)"
+  - "MUST tag a commit related to a spec with `@spec <Spec ID>[, <Spec ID>]` in the description or body"
+  - "MUST tag a commit related to a rule with `@rule <Rule ID>[, <Rule ID>]` in the description or body"
 checks:
   - name: commit-conventional-format
     description: Recent commits must follow the Conventional Commits subject format
@@ -21,7 +19,7 @@ checks:
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
-    description: Recent `spec`-scoped commits must include a comma-separated Spec ID list
+    description: Recent commits adding a spec annotation or touching rules/ must carry a matching @spec/@rule ID list
     type: script
     run: per-repo
     script: commit-spec-id-trace.sh
@@ -29,19 +27,19 @@ checks:
 examples:
   subject: |
     style: format md files
-    feat(rule): cache catalog responses for 60s
-    feat(spec): list available pizzas list-pizza-menu
-    fix(spec): reject negative quantities cart-add-item, cart-validate
-  with_body: |
-    feat(spec): list available pizzas list-pizza-menu
+    feat(deps): pin dependencies @rule dependencies-rules
+    feat(ui): list available pizzas @spec list-pizza-menu
+    fix(cart): reject negative quantities @spec cart-add-item, cart-validate
+  spec_ids_in_description: |
+    feat(ui): list available pizzas @spec list-pizza-menu
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.
   spec_ids_in_body: |
-    fix(spec): handle empty catalog response
+    fix(cart): handle empty catalog response
 
     The catalog service sometimes returns 200 with an empty body
     when no items match the query. Return an empty list instead
     of panicking.
 
-    list-pizza-menu, catalog-cache
+    @spec list-pizza-menu, catalog-cache

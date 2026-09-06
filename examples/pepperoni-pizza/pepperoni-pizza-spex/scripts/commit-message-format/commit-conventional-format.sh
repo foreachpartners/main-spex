@@ -4,7 +4,7 @@
 # Recent commit subjects must follow the Conventional Commits format:
 #   <type>[optional scope][!]: <description>
 # e.g.
-#   feat(spec): list available pizzas list-pizza-menu
+#   feat(ui): list available pizzas @spec list-pizza-menu
 # See https://www.conventionalcommits.org/
 #
 # Runs once in the repository directory and inspects git history, not the

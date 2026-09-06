@@ -1,12 +1,18 @@
 #!/bin/sh
 # commit-message-format / commit-spec-id-trace
 #
-# Commits scoped to `spec` mark functional changes and must include
-# a comma-separated list of Spec IDs in their subject or body, e.g.
-#   feat(spec): add order endpoint place-pizza-order, secret-handling
+# A commit related to a spec must carry a matching @spec <id>[, <id>] tag in
+# its message; a commit related to a rule must carry a matching @rule
+# <id>[, <id>] tag, e.g.
+#   feat(ui): add order endpoint @spec place-pizza-order, secret-handling
 #
-# Runs once in the repository directory and inspects git history, not the
-# working tree.
+# "Related" can't be determined exactly from git history alone, so this check
+# is a proxy: it flags a commit whose diff adds a @spec contract|impl|test /
+# x-spec annotation, or one that touches rules/ — other spec/rule-related
+# commits can still slip through untagged.
+#
+# Runs once in the repository directory and inspects the last 10 commits'
+# diffs, not the working tree.
 #
 # Findings are file-less (git history has no working-tree path): one line per
 # offending commit subject.
@@ -20,23 +26,28 @@ fi
 
 # Keep in sync with schemas/spec-id.schema.json and schemas/rule-id.schema.json
 id='[a-z]+(-[a-z]+)*'
-spec_ids=" ${id}(, ${id})*"
+id_list=" ${id}(, ${id})*"
 
-bad=""
-for sha in $(git log -2 --pretty=%H); do
+bad=0
+for sha in $(git log -10 --pretty=%H); do
+  subject=$(git log -1 --pretty=%s "$sha")
   msg=$(git log -1 --pretty=%B "$sha")
-  subject=$(printf '%s' "$msg" | head -1)
-  if printf '%s' "$subject" | grep -qE '^[a-z]+\(spec\)!?:'; then
-    if ! printf '%s' "$msg" | grep -qE "$spec_ids"; then
-      bad="${bad}${subject}\n"
+
+  if git diff-tree -p --no-commit-id -r "$sha" \
+      | grep -E '^\+' \
+      | grep -qE '@spec (contract|impl|test) |x-spec: *'; then
+    if ! printf '%s' "$msg" | grep -qE "@spec${id_list}"; then
+      printf 'commit adds a @spec annotation but is missing an @spec ID list: %s\n' "$subject"
+      bad=1
+    fi
+  fi
+
+  if git diff-tree --no-commit-id --name-only -r "$sha" | grep -q '^rules/'; then
+    if ! printf '%s' "$msg" | grep -qE "@rule${id_list}"; then
+      printf 'rules/ commit missing an @rule ID list: %s\n' "$subject"
+      bad=1
     fi
   fi
 done
-bad=$(printf '%b' "$bad" | sed '/^$/d')
 
-if [ -n "$bad" ]; then
-  printf '%s\n' "$bad" | while IFS= read -r subject; do
-    printf 'spec-scoped commit missing a Spec ID list: %s\n' "$subject"
-  done
-  exit 1
-fi
+exit "$bad"
