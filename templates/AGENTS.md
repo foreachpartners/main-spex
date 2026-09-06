@@ -73,7 +73,7 @@ Examples:
 
 ```
 style: format md files
-feat(rule): pin dependencies as required by dependencies
+feat(rule): pin dependencies as required by dependencies-rules
 feat(spec): list available pizzas list-pizza-menu
 fix(spec): reject negative quantities cart-add-item, cart-validate
 ```

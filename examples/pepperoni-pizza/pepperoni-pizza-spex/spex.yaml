@@ -20,7 +20,7 @@ repositories:
     rules:
       - commit-message-format
       - configurable-network-bind
-      - dependencies
+      - dependencies-rules
       - naming-convention
       - secret-handling
       - spec-id-tracing
@@ -39,12 +39,12 @@ repositories:
           Figma references for the frontend's UI.
     rules:
       - commit-message-format
-      - dependencies
+      - dependencies-rules
       - naming-convention
       - secret-handling
       - spec-id-tracing
       - writing-style
-      - testing
+      - testing-rules
   - repository_name: pepperoni-pizza-spex
     repository_short_name: spex
     description: >-
@@ -55,7 +55,7 @@ repositories:
     path: .
     rules:
       - commit-message-format
-      - dependencies
+      - dependencies-rules
       - naming-convention
       - secret-handling
       - writing-style

@@ -4,7 +4,7 @@ Note: implemented plans are deleted after completion, this is just an example.
 
 - Specs: delivery-time
 - Scope: api, frontend
-- Rules: commit-message-format, configurable-network-bind, dependencies, naming-convention, secret-handling, spec-id-tracing, testing, writing-style
+- Rules: commit-message-format, configurable-network-bind, dependencies-rules, naming-convention, secret-handling, spec-id-tracing, testing-rules, writing-style
 
 ## Step 1 — Compute, expose, and display the delivery-time estimate
 
