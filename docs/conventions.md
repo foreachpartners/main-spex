@@ -51,3 +51,11 @@ Three requirements:
 **Violation test**: a context is parsimonious when no essential part can be removed without introducing ambiguity or degrading quality, and the whole contains no redundant or irrelevant element.
 
 **Parsimony is not unreadability**: imperative, filler-free prose reads easily for a competent person who knows the domain. Parsimony removes noise, not meaning. The operational rules that implement it are captured in [`writing-style`](../templates/rules/writing-style.yaml).
+
+## 6. Adaptable
+
+spex fits the project, not the other way around. The framework itself has no built-in opinion on language, framework, or architecture — those come only from the rules and skills a project chooses to use. Templates ship ready-made rules and skills for common stacks, but none are mandatory: a project picks the ones that match its stack, or writes its own.
+
+The same framework scales from a solo script to a large multi-team repo: no minimum ceremony is forced on a small project, no ceiling is placed on a large one, adoption is incremental.
+
+**Violation test**: the framework core, a command, or a scaffolded default doesn't allow to change a specific language, framework, or all-or-nothing adoption instead of leaving it to the project's chosen rules and skills — a project that doesn't match breaks or is forced into unneeded ceremony.
