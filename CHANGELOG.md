@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.84] - 2026-09-08
+
+- `check`: render each finding's location as a terminal hyperlink to the absolute file, so it opens correctly regardless of the shell's current directory, while still displaying the short repository-relative path.
+
 ## [0.7.83] - 2026-09-06
 
 - `commit-message-format` rule: replace the `spec`/`rule` scope restriction with free-form scope plus `@spec`/`@rule` ID tags on spec/rule-related commits.

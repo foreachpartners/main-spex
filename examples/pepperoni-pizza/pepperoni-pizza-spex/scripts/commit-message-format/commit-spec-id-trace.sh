@@ -29,7 +29,7 @@ id='[a-z]+(-[a-z]+)*'
 id_list=" ${id}(, ${id})*"
 
 bad=0
-for sha in $(git log -10 --pretty=%H); do
+for sha in $(git log -3 --pretty=%H); do
   subject=$(git log -1 --pretty=%s "$sha")
   msg=$(git log -1 --pretty=%B "$sha")
 

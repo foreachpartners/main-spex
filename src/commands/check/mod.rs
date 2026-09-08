@@ -147,7 +147,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         return fill_preexisting_errors(&workspace.dir, &selected, &reports);
     }
 
-    Ok(report(&workspace.config, &reports))
+    Ok(report(&workspace.config, &workspace.dir, &reports))
 }
 
 // Either the whole check is baselined (a file-less error) or a specific set of

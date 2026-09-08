@@ -1,5 +1,9 @@
 use std::io::IsTerminal;
 
+#[cfg(test)]
+#[path = "style_test.rs"]
+mod style_test;
+
 pub struct Style {
     enabled: bool,
 }
@@ -48,6 +52,14 @@ impl Style {
 
     pub fn cyan(&self, text: &str) -> String {
         self.paint("36", text)
+    }
+
+    pub fn hyperlink(&self, url: &str, text: &str) -> String {
+        if self.enabled {
+            format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")
+        } else {
+            text.to_string()
+        }
     }
 }
 
