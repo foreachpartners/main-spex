@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -75,7 +74,11 @@ fn render(workspace: &Workspace, args: &SpecsArgs) -> Result<String> {
         }
     }
 
-    let mut specs = load_docs(&workspace.dir.join(SPECS_DIR))?;
+    let mut specs = util::load_yaml_docs(
+        &workspace.dir.join(SPECS_DIR),
+        SpecsError::ReadFile,
+        SpecsError::Parse,
+    )?;
     if args.ai {
         for (spec, path) in &mut specs {
             if let Some(obj) = spec.as_object_mut() {
@@ -135,26 +138,4 @@ fn id_selected(value: &serde_json::Value, ids: &[String]) -> bool {
             .get("id")
             .and_then(|v| v.as_str())
             .is_some_and(|value_id| ids.iter().any(|id| id == value_id))
-}
-
-// Loads every spec under `dir` as generic JSON, so the full document — every
-// field the schema allows, not just the subset `Spec` deserializes for
-// coverage and checks — is available to filter and print.
-fn load_docs(dir: &Path) -> Result<Vec<(serde_json::Value, String)>> {
-    let mut docs = Vec::new();
-    for path in util::yaml_files(dir) {
-        let rel_name = path
-            .strip_prefix(dir)
-            .unwrap_or(&path)
-            .to_string_lossy()
-            .into_owned();
-        let raw = std::fs::read_to_string(&path)
-            .change_context_lazy(|| SpecsError::ReadFile(rel_name.clone()))?;
-        let yaml: serde_yaml_ng::Value = serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| SpecsError::Parse(rel_name.clone()))?;
-        let json = serde_json::to_value(yaml)
-            .change_context_lazy(|| SpecsError::Parse(rel_name.clone()))?;
-        docs.push((json, rel_name));
-    }
-    Ok(docs)
 }

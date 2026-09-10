@@ -61,31 +61,6 @@ mod tests {
         assert_eq!(filtered_ids, vec!["A"]);
     }
 
-    #[test]
-    fn load_docs_reads_yaml_files_recursively() {
-        let dir = tempdir().expect("temp dir");
-        std::fs::write(dir.path().join("a.yaml"), "id: A\ntitle: A rule\n").expect("write a.yaml");
-        std::fs::create_dir_all(dir.path().join("nested")).expect("nested dir");
-        std::fs::write(dir.path().join("nested/b.yaml"), "id: B\n").expect("write b.yaml");
-
-        let docs = load_docs(dir.path()).expect("load docs");
-        let ids: Vec<&str> = docs
-            .iter()
-            .map(|(d, _)| d["id"].as_str().unwrap())
-            .collect();
-        assert_eq!(ids, vec!["A", "B"]);
-        assert_eq!(docs[0].0["title"], "A rule");
-        assert_eq!(docs[0].1, "a.yaml");
-        assert_eq!(docs[1].1, "nested/b.yaml");
-    }
-
-    #[test]
-    fn load_docs_on_missing_dir_is_empty() {
-        let dir = tempdir().expect("temp dir");
-        let docs = load_docs(&dir.path().join("missing")).expect("load docs");
-        assert!(docs.is_empty());
-    }
-
     fn write_workspace(dir: &std::path::Path) {
         std::fs::write(
             dir.join("spex.yaml"),

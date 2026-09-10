@@ -141,6 +141,7 @@ Runs each repository's rule checks and gates on errors.
 - Skips files ignored by `.gitignore`, plus well-known generated files (e.g. `Cargo.lock`, `package-lock.json`).
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
 - `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
+- Every finding with a location renders it as a terminal hyperlink to the absolute file it actually points at, so it opens correctly no matter the shell's current working directory; the displayed text stays the short repository-relative path.
 
 ## coverage
 

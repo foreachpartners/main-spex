@@ -108,16 +108,17 @@ pub fn yaml_files(dir: &Path) -> Vec<PathBuf> {
     files
 }
 
-// Parses every `*.yaml` file under `dir`, at any nesting depth, into `T`.
-// Missing directories yield an empty list; the closures let each caller
-// surface its own error context while the directory walk and per-file
-// read/parse logic stays in one place.
+// Parses every `*.yaml` file under `dir`, at any nesting depth, into `T`,
+// paired with its path relative to `dir` (e.g. `admin/foo.yaml`) so callers
+// can locate the file that produced each item. Missing directories yield an
+// empty list; the closures let each caller surface its own error context
+// while the directory walk and per-file read/parse logic stays in one place.
 pub fn load_yaml_dir<T, E>(
     dir: &Path,
     read_dir_err: impl Fn() -> E,
     read_file_err: impl Fn(String) -> E,
     parse_err: impl Fn(String) -> E,
-) -> Result<Vec<T>, Report<E>>
+) -> Result<Vec<(T, String)>, Report<E>>
 where
     T: DeserializeOwned,
     E: std::error::Error + Send + Sync + 'static,
@@ -139,10 +140,40 @@ where
             .into_owned();
         let raw =
             fs::read_to_string(&path).change_context_lazy(|| read_file_err(rel_name.clone()))?;
-        let item =
+        let item: T =
             serde_yaml_ng::from_str(&raw).change_context_lazy(|| parse_err(rel_name.clone()))?;
-        items.push(item);
+        items.push((item, rel_name));
     }
 
     Ok(items)
+}
+
+// Loads every `*.yaml` file under `dir`, at any nesting depth, as generic
+// JSON, paired with its path relative to `dir` — so the full document, every
+// field the schema allows rather than just the subset a typed struct
+// deserializes, is available to a command that filters and prints it.
+pub fn load_yaml_docs<E>(
+    dir: &Path,
+    read_file_err: impl Fn(String) -> E,
+    parse_err: impl Fn(String) -> E,
+) -> Result<Vec<(serde_json::Value, String)>, Report<E>>
+where
+    E: std::error::Error + Send + Sync + 'static,
+{
+    let mut docs = Vec::new();
+    for path in yaml_files(dir) {
+        let rel_name = path
+            .strip_prefix(dir)
+            .unwrap_or(&path)
+            .to_string_lossy()
+            .into_owned();
+        let raw =
+            fs::read_to_string(&path).change_context_lazy(|| read_file_err(rel_name.clone()))?;
+        let yaml: serde_yaml_ng::Value =
+            serde_yaml_ng::from_str(&raw).change_context_lazy(|| parse_err(rel_name.clone()))?;
+        let json =
+            serde_json::to_value(yaml).change_context_lazy(|| parse_err(rel_name.clone()))?;
+        docs.push((json, rel_name));
+    }
+    Ok(docs)
 }

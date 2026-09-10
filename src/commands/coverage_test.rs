@@ -6,6 +6,7 @@ mod tests {
     fn spec(id: &str, status: Status) -> Spec {
         Spec {
             id: id.to_string(),
+            path: format!("{id}.yaml"),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
             scope: Vec::new(),

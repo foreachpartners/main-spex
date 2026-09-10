@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.85] - 2026-09-10
+
+- `check`: fix the `status`, `blocked_by` and `scope` findings' location to point at the spec's actual file, honoring specs nested in subdirectories under `specs/` instead of assuming `specs/<id>.yaml` — the wrong, non-existent path made the finding's hyperlink dead.
+- `check`: fix the conformance `missing script` finding's location the same way for rules nested under `rules/`.
+- `check`: canonicalize a finding's location hyperlink so it never contains a `/./` segment (e.g. for the spex repository itself, whose `path` is `.`), which some terminals refused to recognize as a clickable link.
+
 ## [0.7.84] - 2026-09-08
 
 - `check`: render each finding's location as a terminal hyperlink to the absolute file, so it opens correctly regardless of the shell's current directory, while still displaying the short repository-relative path.

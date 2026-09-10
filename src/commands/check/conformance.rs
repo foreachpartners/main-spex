@@ -172,7 +172,7 @@ fn validate_script_references(
             if resolve_script(script, spex_dir, &rule.id).is_none() {
                 let dir = spex_dir.join(SCRIPTS_DIR).join(&rule.id);
                 findings.push(conform_finding(
-                    Some(format!("{RULES_DIR}/{}.yaml", rule.id)),
+                    Some(format!("{RULES_DIR}/{}", rule.path)),
                     format!("missing script {}/{script}", dir.display()),
                 ));
             }

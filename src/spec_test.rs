@@ -5,6 +5,7 @@ mod tests {
     fn spec(criteria: &[&str]) -> Spec {
         Spec {
             id: "A".to_string(),
+            path: "A.yaml".to_string(),
             acceptance_criteria: criteria.iter().map(|c| c.to_string()).collect(),
             blocked_by: Vec::new(),
             scope: Vec::new(),

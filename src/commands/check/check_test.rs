@@ -530,6 +530,7 @@ constraints:
     fn rule(id: &str, checks: Vec<Check>) -> Rule {
         Rule {
             id: id.to_string(),
+            path: format!("{id}.yaml"),
             checks,
         }
     }
@@ -793,9 +794,18 @@ constraints:
     }
 
     fn spec(id: &str, blocked_by: Vec<&str>) -> Spec {
+        spec_with_criteria(id, Vec::new(), blocked_by)
+    }
+
+    fn spec_with_criteria(
+        id: &str,
+        acceptance_criteria: Vec<String>,
+        blocked_by: Vec<&str>,
+    ) -> Spec {
         Spec {
             id: id.to_string(),
-            acceptance_criteria: Vec::new(),
+            path: format!("{id}.yaml"),
+            acceptance_criteria,
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
             scope: Vec::new(),
             status: Status::Planned,
@@ -806,7 +816,8 @@ constraints:
     #[test]
     fn status_finding_flags_fully_checked_unimplemented_spec() {
         let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
-        let result = status_finding("a", "specs", &criteria, Status::Planned);
+        let spec = spec_with_criteria("a", criteria, Vec::new());
+        let result = status_finding(&spec);
         let finding = result.expect("expected a status finding");
         assert_eq!(finding.severity, Severity::Warn);
         assert_eq!(finding.check, "status");
@@ -817,13 +828,17 @@ constraints:
     fn status_finding_is_silent_when_consistent_or_incomplete() {
         let full = ac(&["[x] MUST a", "[x] MUST b"]);
         // Fully checked and already implemented: nothing to flag.
-        assert!(status_finding("A", "specs", &full, Status::Active).is_none());
-        assert!(status_finding("A", "specs", &full, Status::Deprecated).is_none());
+        let mut active = spec_with_criteria("A", full.clone(), Vec::new());
+        active.status = Status::Active;
+        assert!(status_finding(&active).is_none());
+        let mut deprecated = spec_with_criteria("A", full, Vec::new());
+        deprecated.status = Status::Deprecated;
+        assert!(status_finding(&deprecated).is_none());
         // A pending box means the spec isn't done, so any status is allowed.
         let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
-        assert!(status_finding("A", "specs", &partial, Status::Planned).is_none());
+        assert!(status_finding(&spec_with_criteria("A", partial, Vec::new())).is_none());
         // No criteria at all: nothing to infer.
-        assert!(status_finding("A", "specs", &[], Status::Planned).is_none());
+        assert!(status_finding(&spec_with_criteria("A", Vec::new(), Vec::new())).is_none());
     }
 
     #[test]

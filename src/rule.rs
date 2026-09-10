@@ -25,6 +25,8 @@ pub enum RuleError {
 #[derive(Debug, Deserialize)]
 pub struct Rule {
     pub id: String,
+    #[serde(skip, default)]
+    pub path: String,
     #[serde(default)]
     pub checks: Vec<Check>,
 }
@@ -103,7 +105,7 @@ pub enum Severity {
 }
 
 pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Rule>> {
-    let rules: Vec<Rule> = util::load_yaml_dir(
+    let rules = util::load_yaml_dir(
         rules_dir,
         || RuleError::ReadDir,
         RuleError::ReadFile,
@@ -112,6 +114,9 @@ pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Rule>> {
 
     Ok(rules
         .into_iter()
-        .map(|rule| (rule.id.clone(), rule))
+        .map(|(mut rule, path): (Rule, String)| {
+            rule.path = path;
+            (rule.id.clone(), rule)
+        })
         .collect())
 }

@@ -586,12 +586,7 @@ fn validate_specs(
     }
 
     for spec in &specs {
-        if let Some(finding) = status_finding(
-            &spec.id,
-            spec::SPECS_DIR,
-            &spec.acceptance_criteria,
-            spec.status,
-        ) {
+        if let Some(finding) = status_finding(spec) {
             report.findings.push(finding);
         }
     }
@@ -606,21 +601,27 @@ fn validate_specs(
     Ok(())
 }
 
+// The spec file's location relative to the workspace root (e.g.
+// `specs/admin/foo.yaml`), honoring however the spec is nested under `specs/`.
+fn spec_location(spec: &Spec) -> String {
+    format!("{}/{}", spec::SPECS_DIR, spec.path)
+}
+
 // A spec with every acceptance criterion checked off is implemented, so its
 // status must say so. Specs with no criteria or any unchecked box are exempt.
-fn status_finding(id: &str, dir: &str, criteria: &[String], status: Status) -> Option<Finding> {
-    let (done, total) = spec::ac_counts(criteria);
-    if total == 0 || done != total || status.is_implemented() {
+fn status_finding(spec: &Spec) -> Option<Finding> {
+    let (done, total) = spec.ac_counts();
+    if total == 0 || done != total || spec.status.is_implemented() {
         return None;
     }
     Some(Finding {
         severity: Severity::Warn,
-        spec_id: id.to_string(),
+        spec_id: spec.id.clone(),
         check: "status".to_string(),
-        location: Some(format!("{dir}/{id}.yaml")),
+        location: Some(spec_location(spec)),
         message: format!(
             "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
-            status.label()
+            spec.status.label()
         ),
     })
 }
@@ -631,7 +632,7 @@ fn validate_blocked_by(
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
-        let location = Some(format!("{}/{}.yaml", spec::SPECS_DIR, spec.id));
+        let location = Some(spec_location(spec));
         match status_by_id.get(blocker.as_str()) {
             None => findings.push(Finding {
                 severity: Severity::Error,
@@ -666,7 +667,7 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
             severity: Severity::Error,
             spec_id: spec.id.clone(),
             check: "scope".to_string(),
-            location: Some(format!("{}/{}.yaml", spec::SPECS_DIR, spec.id)),
+            location: Some(spec_location(spec)),
             message: format!(
                 "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
             ),

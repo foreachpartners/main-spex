@@ -27,6 +27,8 @@ pub enum SpecError {
 #[derive(Debug, Deserialize)]
 pub struct Spec {
     pub id: String,
+    #[serde(skip, default)]
+    pub path: String,
     #[serde(default)]
     pub acceptance_criteria: Vec<String>,
     #[serde(default)]
@@ -114,13 +116,20 @@ impl CoverageLayer {
 }
 
 pub fn load_all(specs_dir: &Path) -> Result<Vec<Spec>> {
-    let mut specs: Vec<Spec> = util::load_yaml_dir(
+    let loaded = util::load_yaml_dir(
         specs_dir,
         || SpecError::ReadDir,
         SpecError::ReadFile,
         SpecError::Parse,
     )?;
 
+    let mut specs: Vec<Spec> = loaded
+        .into_iter()
+        .map(|(mut spec, path): (Spec, String)| {
+            spec.path = path;
+            spec
+        })
+        .collect();
     specs.sort_by(|a, b| a.id.cmp(&b.id));
     Ok(specs)
 }

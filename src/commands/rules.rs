@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -75,7 +74,11 @@ fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
         }
     }
 
-    let mut rules = load_docs(&workspace.dir.join(RULES_DIR))?;
+    let mut rules = util::load_yaml_docs(
+        &workspace.dir.join(RULES_DIR),
+        RulesError::ReadFile,
+        RulesError::Parse,
+    )?;
     if args.ai {
         for (rule, path) in &mut rules {
             if let Some(obj) = rule.as_object_mut() {
@@ -135,27 +138,4 @@ fn id_selected(value: &serde_json::Value, ids: &[String]) -> bool {
             .get("id")
             .and_then(|v| v.as_str())
             .is_some_and(|value_id| ids.iter().any(|id| id == value_id))
-}
-
-// Loads every rule under `dir` as generic JSON (rules may nest in
-// subdirectories, but the Rule ID is always just the filename), so the full
-// document — every field the schema allows, not just the subset `Rule`
-// deserializes for running checks — is available to filter and print.
-fn load_docs(dir: &Path) -> Result<Vec<(serde_json::Value, String)>> {
-    let mut docs = Vec::new();
-    for path in util::yaml_files(dir) {
-        let rel_name = path
-            .strip_prefix(dir)
-            .unwrap_or(&path)
-            .to_string_lossy()
-            .into_owned();
-        let raw = std::fs::read_to_string(&path)
-            .change_context_lazy(|| RulesError::ReadFile(rel_name.clone()))?;
-        let yaml: serde_yaml_ng::Value = serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| RulesError::Parse(rel_name.clone()))?;
-        let json = serde_json::to_value(yaml)
-            .change_context_lazy(|| RulesError::Parse(rel_name.clone()))?;
-        docs.push((json, rel_name));
-    }
-    Ok(docs)
 }

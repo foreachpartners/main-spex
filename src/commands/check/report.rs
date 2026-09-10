@@ -96,6 +96,7 @@ fn location_link(style: &Style, base: &Path, location: &str) -> String {
 
 fn location_url(base: &Path, location: &str) -> String {
     let file = base.join(normalize_location(location));
+    let file = file.canonicalize().unwrap_or(file);
     format!("file://{}", encode_path(&file))
 }
 
