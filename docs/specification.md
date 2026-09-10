@@ -154,7 +154,7 @@ Reports annotation coverage for specs.
 - Specs that are neither `active` nor `in-progress` are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
 - Its "Gaps" section only lists tracked specs with a gap (✗: a required layer missing or a criterion unimplemented); specs with no gap (fully covered, or only an ignored layer missing) are counted in the section header but not listed individually.
 - Ends with a one-line summary: the spec count per status (`in-progress`, `planned`, `active`) and the gap count.
-- Exits non-zero when any active or in-progress spec has a missing required layer or an unimplemented acceptance criterion.
+- Exits non-zero only when an **active** spec has a missing required layer or an unimplemented acceptance criterion; gaps on `in-progress` specs are reported but don't affect the exit code.
 
 ## rules
 

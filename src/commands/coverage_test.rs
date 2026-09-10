@@ -18,6 +18,7 @@ mod tests {
     fn row(id: &str, present: &[CoverageLayer], ignored: &[CoverageLayer]) -> SpecRow {
         SpecRow {
             id: id.to_string(),
+            status: Status::Active,
             present: present.iter().copied().collect(),
             ignored: ignored.iter().copied().collect(),
             ac_done: 0,
@@ -229,5 +230,16 @@ mod tests {
         );
         assert!(!row.has_gap());
         assert_eq!(missing_summary(&row), "");
+    }
+
+    #[test]
+    fn active_gaps_ignores_in_progress_gaps() {
+        let mut active = row("A", &[], &[]);
+        active.status = Status::Active;
+
+        let mut in_progress = row("B", &[], &[]);
+        in_progress.status = Status::InProgress;
+
+        assert_eq!(active_gaps(&[active, in_progress]), 1);
     }
 }

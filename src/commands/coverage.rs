@@ -32,6 +32,7 @@ type Found = HashMap<String, HashSet<CoverageLayer>>;
 
 struct SpecRow {
     id: String,
+    status: Status,
     present: HashSet<CoverageLayer>,
     ignored: HashSet<CoverageLayer>,
     ac_done: usize,
@@ -170,6 +171,7 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
             let (ac_done, ac_total) = spec.ac_counts();
             SpecRow {
                 id: spec.id.clone(),
+                status: spec.status,
                 present: found.get(&spec.id).cloned().unwrap_or_default(),
                 ignored: spec.coverage_ignore.iter().copied().collect(),
                 ac_done,
@@ -204,11 +206,19 @@ fn report(specs: &[Spec], found: &Found) -> ExitCode {
 
     println!("{}", summary_line(&style, specs, gaps));
 
-    if gaps == 0 {
+    if active_gaps(&rows) == 0 {
         ExitCode::SUCCESS
     } else {
         ExitCode::from(1)
     }
+}
+
+// Only active spec gaps fail the command; in-progress gaps are reported but
+// don't block, since an in-progress spec is expected to still have gaps.
+fn active_gaps(rows: &[SpecRow]) -> usize {
+    rows.iter()
+        .filter(|row| row.status == Status::Active && row.has_gap())
+        .count()
 }
 
 fn count_status(specs: &[Spec], status: Status) -> usize {
