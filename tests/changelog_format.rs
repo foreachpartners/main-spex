@@ -18,9 +18,16 @@ fn cargo_version() -> String {
 fn parse_semver(version: &str) -> (u64, u64, u64) {
     let parts: Vec<u64> = version
         .split('.')
-        .map(|part| part.parse().unwrap_or_else(|_| panic!("invalid version segment: {version}")))
+        .map(|part| {
+            part.parse()
+                .unwrap_or_else(|_| panic!("invalid version segment: {version}"))
+        })
         .collect();
-    assert_eq!(parts.len(), 3, "version must be MAJOR.MINOR.PATCH: {version}");
+    assert_eq!(
+        parts.len(),
+        3,
+        "version must be MAJOR.MINOR.PATCH: {version}"
+    );
     (parts[0], parts[1], parts[2])
 }
 

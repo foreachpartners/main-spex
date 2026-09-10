@@ -87,16 +87,17 @@ mod tests {
     }
 
     #[test]
-    fn active_rows_ignores_non_active_specs() {
+    fn tracked_rows_includes_active_and_in_progress_and_ignores_the_rest() {
         let specs = vec![
             spec("A", Status::Active),
             spec("B", Status::Planned),
             spec("C", Status::Deprecated),
+            spec("D", Status::InProgress),
         ];
         let found = Found::new();
-        let rows = active_rows(&specs, &found);
+        let rows = tracked_rows(&specs, &found);
         let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
-        assert_eq!(ids, vec!["A"]);
+        assert_eq!(ids, vec!["A", "D"]);
     }
 
     #[test]
@@ -104,16 +105,16 @@ mod tests {
         let spec: Spec = serde_yaml_ng::from_str("id: A\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
-        let rows = active_rows(&[spec], &Found::new());
+        let rows = tracked_rows(&[spec], &Found::new());
         assert!(rows.is_empty());
     }
 
     #[test]
-    fn active_rows_carries_coverage_ignore() {
+    fn tracked_rows_carries_coverage_ignore() {
         let spec: Spec =
             serde_yaml_ng::from_str("id: A\nstatus: active\ncoverage_ignore: [contract, test]\n")
                 .expect("parse spec");
-        let rows = active_rows(&[spec], &Found::new());
+        let rows = tracked_rows(&[spec], &Found::new());
         let row = &rows[0];
         assert!(!row.is_required(CoverageLayer::Contract));
         assert!(!row.is_required(CoverageLayer::Test));
@@ -183,12 +184,12 @@ mod tests {
     }
 
     #[test]
-    fn active_rows_carries_ac_counts() {
+    fn tracked_rows_carries_ac_counts() {
         let spec: Spec = serde_yaml_ng::from_str(
             "id: A\nstatus: active\nacceptance_criteria:\n  - \"[x] MUST do a\"\n  - \"[ ] MUST do b\"\n",
         )
         .expect("parse spec");
-        let rows = active_rows(&[spec], &Found::new());
+        let rows = tracked_rows(&[spec], &Found::new());
         assert_eq!(rows[0].ac_done, 1);
         assert_eq!(rows[0].ac_total, 2);
     }

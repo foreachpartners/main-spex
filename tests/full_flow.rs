@@ -30,8 +30,8 @@ const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
 Specs (0)
   none found
 
-Active spec coverage (0)
-  no active specs
+Tracked spec coverage (0)
+  no active or in-progress specs
 
 proj: no gaps
 "#;
@@ -62,7 +62,7 @@ const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pi
 Specs (1)
   active (1)
 
-Active spec coverage (1)
+Tracked spec coverage (1)
   ✓  delivery-time  10/10 AC
 
   1 fully covered · 0 gaps

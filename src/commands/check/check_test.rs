@@ -842,6 +842,31 @@ constraints:
     }
 
     #[test]
+    fn active_incomplete_finding_flags_active_with_unchecked_criteria() {
+        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+        let mut spec = spec_with_criteria("a", partial, Vec::new());
+        spec.status = Status::Active;
+        let finding = active_incomplete_finding(&spec).expect("expected a finding");
+        assert_eq!(finding.severity, Severity::Error);
+        assert_eq!(finding.check, "status");
+        assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
+        assert!(finding.message.contains("1/2"));
+    }
+
+    #[test]
+    fn active_incomplete_finding_is_silent_when_complete_or_not_active() {
+        let full = ac(&["[x] MUST a", "[x] MUST b"]);
+        let mut active = spec_with_criteria("a", full, Vec::new());
+        active.status = Status::Active;
+        assert!(active_incomplete_finding(&active).is_none());
+
+        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+        let mut in_progress = spec_with_criteria("a", partial, Vec::new());
+        in_progress.status = Status::InProgress;
+        assert!(active_incomplete_finding(&in_progress).is_none());
+    }
+
+    #[test]
     fn validate_blocked_by_flags_missing_and_active_references() {
         let status_by_id = HashMap::from([
             ("DONE", Status::Active),

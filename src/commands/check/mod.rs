@@ -589,6 +589,9 @@ fn validate_specs(
         if let Some(finding) = status_finding(spec) {
             report.findings.push(finding);
         }
+        if let Some(finding) = active_incomplete_finding(spec) {
+            report.findings.push(finding);
+        }
     }
 
     for spec in &specs {
@@ -622,6 +625,25 @@ fn status_finding(spec: &Spec) -> Option<Finding> {
         message: format!(
             "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
             spec.status.label()
+        ),
+    })
+}
+
+// `active` means fully implemented, so it requires every acceptance
+// criterion checked off; a spec still being worked on belongs in
+// `in-progress` until then.
+fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
+    let (done, total) = spec.ac_counts();
+    if spec.status != Status::Active || done == total {
+        return None;
+    }
+    Some(Finding {
+        severity: Severity::Error,
+        spec_id: spec.id.clone(),
+        check: "status".to_string(),
+        location: Some(spec_location(spec)),
+        message: format!(
+            "status is `active` but only {done}/{total} acceptance criteria are checked off — use `in-progress` until all are done"
         ),
     })
 }

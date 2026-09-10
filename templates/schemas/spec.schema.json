@@ -51,8 +51,8 @@
     },
     "status": {
       "type": "string",
-      "description": "Lifecycle status. Omitting is equivalent to 'planned'.",
-      "enum": ["active", "planned", "blocked", "deprecated"],
+      "description": "Lifecycle status. Omitting is equivalent to 'planned'. 'active' requires every acceptance criterion to be checked off; a spec being implemented but not yet complete is 'in-progress'.",
+      "enum": ["active", "in-progress", "planned", "blocked", "deprecated"],
       "default": "planned"
     },
     "coverage_ignore": {

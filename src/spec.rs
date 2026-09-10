@@ -51,6 +51,8 @@ impl Spec {
 #[serde(rename_all = "lowercase")]
 pub enum Status {
     Active,
+    #[serde(rename = "in-progress")]
+    InProgress,
     #[default]
     Planned,
     Blocked,
@@ -58,8 +60,9 @@ pub enum Status {
 }
 
 impl Status {
-    pub const ALL: [Status; 4] = [
+    pub const ALL: [Status; 5] = [
         Status::Active,
+        Status::InProgress,
         Status::Planned,
         Status::Blocked,
         Status::Deprecated,
@@ -68,6 +71,7 @@ impl Status {
     pub fn label(self) -> &'static str {
         match self {
             Status::Active => "active",
+            Status::InProgress => "in-progress",
             Status::Planned => "planned",
             Status::Blocked => "blocked",
             Status::Deprecated => "deprecated",

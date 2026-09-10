@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.86] - 2026-09-10
+
+- Add `in-progress` spec `status`, for a spec being implemented but not yet complete.
+- `check`: error when a spec's `status` is `active` but not every acceptance criterion is checked off — `active` now means fully implemented; use `in-progress` until then.
+- `coverage`: track and report `in-progress` specs alongside `active` ones, renaming the "Active spec coverage" section to "Tracked spec coverage".
+
 ## [0.7.85] - 2026-09-10
 
 - `check`: fix the `status`, `blocked_by` and `scope` findings' location to point at the spec's actual file, honoring specs nested in subdirectories under `specs/` instead of assuming `specs/<id>.yaml` — the wrong, non-existent path made the finding's hyperlink dead.

@@ -92,7 +92,7 @@ acceptance_criteria:
 scope:
   - api
   - frontend
-status: active
+status: planned
 ```
 
 ## Step 5 — Point to the next skill

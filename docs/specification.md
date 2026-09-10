@@ -132,7 +132,7 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's rule checks and gates on errors.
 
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors.
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still unchecked errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -147,13 +147,13 @@ Runs each repository's rule checks and gates on errors.
 
 Reports annotation coverage for specs.
 
-- Reports annotation coverage for every spec whose `status` is `active`.
-- Requires an implementation, test, and contract annotation per active spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
-- Reports how many of each active spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
+- Reports annotation coverage for every spec whose `status` is `active` or `in-progress`.
+- Requires an implementation, test, and contract annotation per tracked spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
+- Reports how many of each tracked spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
-- Non-active specs are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
+- Specs that are neither `active` nor `in-progress` are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
 - Marks each spec ✓ (all layers present and every criterion implemented), ⚠ (only an ignored layer missing), or ✗ (a required layer missing or a criterion unimplemented).
-- Exits non-zero when any active spec has a missing required layer or an unimplemented acceptance criterion.
+- Exits non-zero when any active or in-progress spec has a missing required layer or an unimplemented acceptance criterion.
 
 ## rules
 
@@ -262,7 +262,7 @@ One coherent capability the system must provide — a product behavior, or a tec
 - Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
-- `status` defaults to `planned`.
+- `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion checked off, `in-progress` is for a spec being implemented but not yet complete.
 
 ## Spec ID annotations
 

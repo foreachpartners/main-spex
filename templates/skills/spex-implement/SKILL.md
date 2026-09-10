@@ -52,7 +52,7 @@ This step implements the change only — it does not write tests. Use `spex-test
 For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
 
 - Tick the checkbox of every acceptance criterion the run implemented, `[ ]` to `[x]`; leave any criterion not yet implemented as `[ ]`.
-- Change `status:` to `active` (add the line if absent — it defaults to `planned`).
+- Change `status:` to `active` once every acceptance criterion is checked off (add the line if absent — it defaults to `planned`); if any criterion is still `[ ]`, set it to `in-progress` instead — `active` requires full completion and `spex check` errors otherwise.
 
 Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
 

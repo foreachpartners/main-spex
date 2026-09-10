@@ -169,10 +169,10 @@ fn canonical(path: &Path) -> std::path::PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
-fn active_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
+fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
-        .filter(|spec| spec.status == Status::Active)
+        .filter(|spec| matches!(spec.status, Status::Active | Status::InProgress))
         .map(|spec| {
             let (ac_done, ac_total) = spec.ac_counts();
             SpecRow {
@@ -213,7 +213,7 @@ fn report(config: &Config, specs: &[Spec], found: &Found) -> ExitCode {
 
     print_status_totals(&style, specs);
 
-    let rows = active_rows(specs, found);
+    let rows = tracked_rows(specs, found);
     let gaps = print_coverage(&style, &rows);
 
     let footer = if gaps == 0 {
@@ -255,9 +255,9 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
 
     for (status, ids) in status_groups(specs) {
         println!("  {} ({})", style.bold(status.label()), ids.len());
-        // Active specs are already listed below with their coverage detail,
-        // so listing their ids here would just duplicate that.
-        if status != Status::Active {
+        // Active and in-progress specs are already listed below with their
+        // coverage detail, so listing their ids here would just duplicate that.
+        if !matches!(status, Status::Active | Status::InProgress) {
             for id in ids {
                 println!("    {}", style.cyan(id));
             }
@@ -269,10 +269,10 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
 fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
     println!(
         "{}",
-        style.bold(&format!("Active spec coverage ({})", rows.len()))
+        style.bold(&format!("Tracked spec coverage ({})", rows.len()))
     );
     if rows.is_empty() {
-        println!("  {}", style.dim("no active specs"));
+        println!("  {}", style.dim("no active or in-progress specs"));
         println!();
         return 0;
     }
