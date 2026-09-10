@@ -25,15 +25,13 @@ proj: 1 error, 1 warning
 "#;
 
 // Snapshot of `spex coverage` for the freshly initialized no-spex example.
-const EXPECTED_COVERAGE_REPORT: &str = r#"spex coverage · proj
-
-Specs (0)
+const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
   none found
 
-Tracked spec coverage (0)
+Gaps (0)
   no active or in-progress specs
 
-proj: no gaps
+in-progress (0), planned (0), active (0), gaps (0)
 "#;
 
 // Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
@@ -53,21 +51,21 @@ workspace
 pepperoni-pizza: 0 errors, 0 warnings
 "#;
 
-// Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its single
-// spec is `active`, has all of its acceptance criteria checked off,
-// and is annotated across the contract, impl, and test layers, so it reports
-// as fully covered with no gaps.
-const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"spex coverage · pepperoni-pizza
-
-Specs (1)
+// Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its one
+// active spec, `delivery-time`, has all of its acceptance criteria checked
+// off and is annotated across the contract, impl, and test layers, so it
+// reports as fully covered with no gaps; the other three specs are `planned`.
+const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"Specs (4)
   active (1)
+  planned (3)
+    login-api
+    register-page
+    register-user-api
 
-Tracked spec coverage (1)
-  ✓  delivery-time  10/10 AC
+Gaps (0)
+  none
 
-  1 fully covered · 0 gaps
-
-pepperoni-pizza: no gaps
+in-progress (0), planned (3), active (1), gaps (0)
 "#;
 
 #[test]

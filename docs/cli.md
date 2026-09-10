@@ -125,13 +125,7 @@ coverage_ignore: [contract]
 
 Each tracked spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. A tracked spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes. `spex check` requires an `active` spec's criteria to already be all checked off, so this gap is expected to show up only on `in-progress` specs in practice.
 
-The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then lists each active or in-progress spec with its acceptance-criteria progress and coverage:
-
-- `✓` — every required layer is annotated and every acceptance criterion is implemented.
-- `⚠` — every required layer is present and every criterion is implemented, but an ignored layer is still missing.
-- `✗` — a required layer is missing, or an acceptance criterion is unimplemented.
-
-Each incomplete spec lists what is missing (for example `missing: test, contract (ignored)`). A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The command exits with a non-zero status when any active or in-progress spec has a gap (a missing required layer or an unimplemented acceptance criterion).
+The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — a required layer missing, or an acceptance criterion unimplemented), each with its acceptance-criteria progress and what's missing (for example `missing: test, contract (ignored)`). Specs with no gap — fully covered, or only an ignored layer missing — aren't listed individually; they're only reflected in the "Gaps" count. A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
 
 ### `spex rules`
 

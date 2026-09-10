@@ -152,7 +152,8 @@ Reports annotation coverage for specs.
 - Reports how many of each tracked spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
 - `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
 - Specs that are neither `active` nor `in-progress` are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
-- Marks each spec ✓ (all layers present and every criterion implemented), ⚠ (only an ignored layer missing), or ✗ (a required layer missing or a criterion unimplemented).
+- Its "Gaps" section only lists tracked specs with a gap (✗: a required layer missing or a criterion unimplemented); specs with no gap (fully covered, or only an ignored layer missing) are counted in the section header but not listed individually.
+- Ends with a one-line summary: the spec count per status (`in-progress`, `planned`, `active`) and the gap count.
 - Exits non-zero when any active or in-progress spec has a missing required layer or an unimplemented acceptance criterion.
 
 ## rules

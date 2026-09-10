@@ -131,7 +131,6 @@ mod tests {
     fn missing_contract_is_a_gap_by_default() {
         let row = row("A", &[CoverageLayer::Impl, CoverageLayer::Test], &[]);
         assert!(row.has_gap());
-        assert!(!row.fully_covered());
         assert_eq!(missing_summary(&row), "contract");
     }
 
@@ -143,7 +142,6 @@ mod tests {
             &[CoverageLayer::Contract],
         );
         assert!(!row.has_gap());
-        assert!(!row.fully_covered());
         assert_eq!(missing_summary(&row), "contract (ignored)");
     }
 
@@ -171,16 +169,14 @@ mod tests {
         row.ac_done = 1;
         row.ac_total = 2;
         assert!(row.has_gap());
-        assert!(!row.fully_covered());
     }
 
     #[test]
-    fn all_layers_and_ac_complete_is_fully_covered() {
+    fn all_layers_and_ac_complete_has_no_gap() {
         let mut row = row("A", &CoverageLayer::ALL, &[]);
         row.ac_done = 3;
         row.ac_total = 3;
         assert!(!row.has_gap());
-        assert!(row.fully_covered());
     }
 
     #[test]
@@ -232,7 +228,6 @@ mod tests {
             &[],
         );
         assert!(!row.has_gap());
-        assert!(row.fully_covered());
         assert_eq!(missing_summary(&row), "");
     }
 }

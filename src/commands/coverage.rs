@@ -10,7 +10,7 @@ use thiserror::Error;
 use crate::config::Config;
 use crate::spec::{CoverageLayer, Spec, Status};
 use crate::style::Style;
-use crate::util::{self, plural};
+use crate::util;
 use crate::workspace::Workspace;
 
 #[cfg(test)]
@@ -60,13 +60,6 @@ impl SpecRow {
                 .iter()
                 .any(|&layer| self.is_required(layer) && !self.is_present(layer))
     }
-
-    fn fully_covered(&self) -> bool {
-        self.ac_complete()
-            && CoverageLayer::ALL
-                .iter()
-                .all(|&layer| self.is_present(layer))
-    }
 }
 
 pub fn run() -> Result<ExitCode> {
@@ -75,7 +68,7 @@ pub fn run() -> Result<ExitCode> {
 
     let found = scan_workspace(&workspace.dir, &workspace.config)?;
 
-    Ok(report(&workspace.config, &specs, &found))
+    Ok(report(&specs, &found))
 }
 
 // Scans every workspace repository except spex itself for spec-id annotations.
@@ -201,33 +194,37 @@ fn missing_summary(row: &SpecRow) -> String {
         .join(", ")
 }
 
-fn report(config: &Config, specs: &[Spec], found: &Found) -> ExitCode {
+fn report(specs: &[Spec], found: &Found) -> ExitCode {
     let style = Style::detect();
-
-    println!(
-        "{} {}",
-        style.bold("spex coverage"),
-        style.dim(&format!("· {}", config.project_name))
-    );
-    println!();
 
     print_status_totals(&style, specs);
 
     let rows = tracked_rows(specs, found);
     let gaps = print_coverage(&style, &rows);
 
-    let footer = if gaps == 0 {
-        style.green("no gaps")
-    } else {
-        style.red(&plural(gaps, "gap"))
-    };
-    println!("{}: {footer}", style.bold(&config.project_name));
+    println!("{}", summary_line(&style, specs, gaps));
 
     if gaps == 0 {
         ExitCode::SUCCESS
     } else {
         ExitCode::from(1)
     }
+}
+
+fn count_status(specs: &[Spec], status: Status) -> usize {
+    specs.iter().filter(|spec| spec.status == status).count()
+}
+
+fn summary_line(style: &Style, specs: &[Spec], gaps: usize) -> String {
+    let in_progress = count_status(specs, Status::InProgress);
+    let planned = count_status(specs, Status::Planned);
+    let active = count_status(specs, Status::Active);
+    let gaps_text = if gaps == 0 {
+        style.green(&format!("gaps ({gaps})"))
+    } else {
+        style.red(&format!("gaps ({gaps})"))
+    };
+    format!("in-progress ({in_progress}), planned ({planned}), active ({active}), {gaps_text}")
 }
 
 // Spec ids per status, in Status::ALL order, skipping empty statuses.
@@ -267,60 +264,42 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
 }
 
 fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
-    println!(
-        "{}",
-        style.bold(&format!("Tracked spec coverage ({})", rows.len()))
-    );
+    let gapped: Vec<&SpecRow> = rows.iter().filter(|row| row.has_gap()).collect();
+    let gaps = gapped.len();
+
+    println!("{}", style.bold(&format!("Gaps ({gaps})")));
     if rows.is_empty() {
         println!("  {}", style.dim("no active or in-progress specs"));
         println!();
         return 0;
     }
 
-    let width = rows.iter().map(|row| row.id.len()).max().unwrap_or(0);
-    let mut covered = 0usize;
-    for row in rows {
-        let symbol = if row.has_gap() {
-            style.red("✗")
-        } else if row.fully_covered() {
-            covered += 1;
-            style.green("✓")
-        } else {
-            // No gap: every required layer is present and all acceptance
-            // criteria are implemented, but an ignored layer is still missing,
-            // so coverage is not complete.
-            style.yellow("⚠")
-        };
+    if gapped.is_empty() {
+        println!("  {}", style.dim("none"));
+    } else {
+        let width = gapped.iter().map(|row| row.id.len()).max().unwrap_or(0);
+        for row in &gapped {
+            let id = style.cyan(&format!("{:<width$}", row.id, width = width));
+            let ac_text = format!("{}/{} AC", row.ac_done, row.ac_total);
+            let ac = if row.ac_complete() {
+                style.dim(&ac_text)
+            } else {
+                style.red(&ac_text)
+            };
 
-        let id = style.cyan(&format!("{:<width$}", row.id, width = width));
-        let ac_text = format!("{}/{} AC", row.ac_done, row.ac_total);
-        let ac = if row.ac_complete() {
-            style.dim(&ac_text)
-        } else {
-            style.red(&ac_text)
-        };
-
-        let layers = missing_summary(row);
-        if layers.is_empty() {
-            println!("  {symbol}  {id}  {ac}");
-        } else {
-            println!(
-                "  {symbol}  {id}  {ac}  {}",
-                style.dim(&format!("missing: {layers}"))
-            );
+            let layers = missing_summary(row);
+            if layers.is_empty() {
+                println!("  {}  {id}  {ac}", style.red("✗"));
+            } else {
+                println!(
+                    "  {}  {id}  {ac}  {}",
+                    style.red("✗"),
+                    style.dim(&format!("missing: {layers}"))
+                );
+            }
         }
     }
 
-    let gaps = rows.iter().filter(|row| row.has_gap()).count();
-    println!();
-    println!(
-        "  {}",
-        style.dim(&format!(
-            "{} fully covered · {}",
-            covered,
-            plural(gaps, "gap")
-        ))
-    );
     println!();
     gaps
 }

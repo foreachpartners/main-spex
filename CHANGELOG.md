@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.87] - 2026-09-10
+
+- `coverage`: rename the "Tracked spec coverage" section to "Gaps", and list only tracked specs that actually have a gap (fully covered specs, and ones missing only an ignored layer, are counted in the section header instead of listed individually).
+- `coverage`: drop the `spex coverage · <project>` header line and the trailing `<project>: N gaps`/`no gaps` line, replacing them with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`.
+
 ## [0.7.86] - 2026-09-10
 
 - Add `in-progress` spec `status`, for a spec being implemented but not yet complete.
