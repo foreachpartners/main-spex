@@ -12,7 +12,7 @@ field rules.
 Framework helps turn business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-Flow runs BRD (why) → PRD (what) → spec (what it provides) → contract (interface, if applicable) → plan (how to build it, optional) → implementation (code) → test (proof).
+Flow runs BRD (why) -> PRD (what) -> spec (what it provides) -> contract (interface, if applicable) -> plan (how to build it, optional) -> implementation (code) -> test (proof).
 
 ### BRD
 
@@ -44,14 +44,14 @@ A plan is a working document, not a permanent artifact: useful while a change is
 
 A spec captures one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics in the acceptance criteria. Lives in `specs/`.
 
-- The test: a specific capability the system provides → spec.
+- The test: a specific capability the system provides -> spec.
 - `specs/` may group files in nested subdirectories (e.g. `specs/frontend/checkout-flow.yaml`). The Spec ID is always just the filename, regardless of nesting.
 
 ## Rules
 
 A rule captures one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules in the acceptance criteria. Lives in `rules/`.
 
-- A rule applies repo-wide, not per feature. The test: a rule every change must follow, enforceable repo-wide → rule.
+- A rule applies repo-wide, not per feature. The test: a rule every change must follow, enforceable repo-wide -> rule.
 - `rules/` may group files in nested subdirectories (e.g. `rules/frontend/frontend-testing.yaml`). The Rule ID is always just the filename, regardless of nesting.
 
 ## Naming
@@ -84,7 +84,7 @@ A project spans several workspace repositories under one workspace root folder.
 Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
 - The Spec ID is the unit of traceability; every behavioral change traces to one, with no orphans.
-- Traceability is bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec).
+- Traceability is bidirectional: top-down (spec -> contract -> plan -> code -> test) and bottom-up (test -> code -> plan -> contract -> spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
 - Checking out a commit shows exactly which specs the code was built against.
@@ -109,9 +109,9 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Writes the editor workspace file with a folder per repository.
 - Scaffolds the bundled templates: `schemas/`, `scripts/`, `rules/`, and skills.
 - Creates empty `specs/`, `plans/`, and `contracts/` folders.
-- Installs skills under `.agents/skills/` and symlinks `.claude` → `.agents` so different agent tools detect the same skills.
+- Installs skills under `.agents/skills/` and symlinks `.claude` -> `.agents` so different agent tools detect the same skills.
 - Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
-- Writes a root `AGENTS.md` and symlinks `CLAUDE.md` → `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
+- Writes a root `AGENTS.md` and symlinks `CLAUDE.md` -> `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
 - Copies every bundled rule into the spex repository's `rules/`, but leaves every repository's `rules` in `spex.yaml` empty.
 - Directs the user to finish setup by running the `/spex-setup` skill, which adds each rule that actually applies to a given repository.
 
@@ -187,7 +187,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 # Skills
 
-Skills are agent workflows that drive the spec → plan → execute → check loop and other use cases.
+Skills are agent workflows that drive the spec -> plan -> execute -> check loop and other use cases.
 
 - A skill is triggered by name (for example `/spex-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.

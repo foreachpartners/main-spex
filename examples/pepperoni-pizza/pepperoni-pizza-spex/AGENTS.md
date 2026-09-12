@@ -4,7 +4,7 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-BRD (why, optional) → PRD (what, optional) → spec (capability) → contract (interface, if applicable) → plan (how to implement, optional) → implementation (code) → test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
+BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.

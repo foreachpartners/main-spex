@@ -17,7 +17,7 @@ For new specs write the result into the spex repository's `<workspace-root>/<pro
 
 ## Spec vs Rule
 
-A specific capability the system must provide (an endpoint, integration, health check, performance target) → spec. A cross-cutting rule all code must obey, enforceable repo-wide → rule.
+A specific capability the system must provide (an endpoint, integration, health check, performance target) -> spec. A cross-cutting rule all code must obey, enforceable repo-wide -> rule.
 
 ## Scope rule: one capability per spec
 

@@ -58,7 +58,7 @@ Once both axes are clean (or the user has resolved what they want to resolve), o
 
 A change can pass one axis and fail the other:
 
-- Code that follows every rule but implements the wrong thing → **Rule pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Rule fail.**
+- Code that follows every rule but implements the wrong thing -> **Rule pass, Spec fail.**
+- Code that does exactly what the issue asked but breaks the project's conventions -> **Spec pass, Rule fail.**
 
 Reporting them separately stops one axis from masking the other.

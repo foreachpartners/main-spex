@@ -17,7 +17,7 @@ Writes a schema-valid YAML file to `<workspace-root>/<project-name>-spex/rules/<
 
 ## Spec vs Rule
 
-A cross-cutting rule all code must obey, enforceable repo-wide → rule. A specific capability the system must provide (an endpoint, integration, health check, performance target) → spec.
+A cross-cutting rule all code must obey, enforceable repo-wide -> rule. A specific capability the system must provide (an endpoint, integration, health check, performance target) -> spec.
 
 ## Scope rule: one convention per spec
 

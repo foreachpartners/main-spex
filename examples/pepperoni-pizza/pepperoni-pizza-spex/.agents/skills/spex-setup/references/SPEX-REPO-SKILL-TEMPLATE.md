@@ -15,4 +15,4 @@ Each fact lives in exactly one of these files — reference it, never copy it el
 
 # Notes
 
-- `rules` applicable to each repositoy defined in `spex.yaml`, each rule id maps to its file, e.g. `naming-convention` → `rules/**/naming-convention.yaml`:
+- `rules` applicable to each repositoy defined in `spex.yaml`, each rule id maps to its file, e.g. `naming-convention` -> `rules/**/naming-convention.yaml`:

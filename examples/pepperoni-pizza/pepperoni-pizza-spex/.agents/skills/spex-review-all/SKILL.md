@@ -54,7 +54,7 @@ End with a one-line summary: total findings per axis, and the worst issue _withi
 
 A change can pass one axis and fail the other:
 
-- Code that follows every rule but implements the wrong thing → **Rule pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Rule fail.**
+- Code that follows every rule but implements the wrong thing -> **Rule pass, Spec fail.**
+- Code that does exactly what the issue asked but breaks the project's conventions -> **Spec pass, Rule fail.**
 
 Reporting them separately stops one axis from masking the other.

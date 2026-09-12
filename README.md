@@ -81,7 +81,7 @@ Say you're want to add rule. Here's what you will do:
 - **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules instead of living as tribal knowledge.
 - **Human in control**: AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything.
 - **Deterministic enforcement**: every check that can be a script must be a script, proving the change does what the spec demands.
-- **Traceability**: every behavioral change traces to a spec, bidirectionally — spec → contract → plan → code → test, and back.
+- **Traceability**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> plan -> code -> test, and back.
 
 See full principles in [framework-principles.md](docs/framework-principles.md).
 

@@ -50,13 +50,13 @@ AI writes code fast, but along the way it may change things nobody asked it to a
 
 That is why every check that can be a script must be a script. AI is left to handle what a script can't: writing specs and contracts, generating code and tests, splitting plans, triaging check output, reviewing logic.
 
-The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input → output. In spex, rule checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings. See [specification.md](specification.md) for the full list of deterministic checks.
+The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input -> output. In spex, rule checks are the deterministic layer: `regexp`, `glob`, and `script` checks run through `spex check` and gate on `error`-severity findings. See [specification.md](specification.md) for the full list of deterministic checks.
 
 **Violation test**: a check that could be a deterministic pass/fail is left to human or AI judgment instead — it will eventually miss something a script would have caught every time.
 
 ## 6. Traceability
 
-Every behavioral change traces to a spec. Bidirectional: top-down (spec → contract → plan → code → test) and bottom-up (test → code → plan → contract → spec). No orphans.
+Every behavioral change traces to a spec. Bidirectional: top-down (spec -> contract -> plan -> code -> test) and bottom-up (test -> code -> plan -> contract -> spec). No orphans.
 
 - The Spec ID (`delivery-time`) is the traceability unit.
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>` in code, `x-spec: <spec-id>` in OpenAPI.
