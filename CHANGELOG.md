@@ -4,7 +4,7 @@ Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com
 
 ## [0.7.89] - 2026-09-12
 
-- `spex-review-rule`: improve review skill to avoid unnecessary abstractions and give main clear main review goal.
+- `spex-review-rule`: improve review skill to avoid unnecessary abstractions and give clear main review goal.
 - replace `→` with `->` for better tokenization.
 
 ## [0.7.88] - 2026-09-10
