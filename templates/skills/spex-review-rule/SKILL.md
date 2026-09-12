@@ -29,7 +29,7 @@ A bad ref or empty diff should fail here rather than partway through the review.
 
 Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
 
-On top of whatever the repo documents, the review always carries the **smell baseline** below — a fixed set of Fowler code smells (_Refactoring_, ch.3) that applies even when a repo documents nothing. Two rules bind it:
+On top of whatever the repo documents, the review always carries the **smell baseline** below — a fixed set of Fowler code smells that applies even when a repo documents nothing. Two rules bind it:
 
 - **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
 - **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation — and, like any standard here, skip anything tooling already enforces.
@@ -37,7 +37,7 @@ On top of whatever the repo documents, the review always carries the **smell bas
 Each smell reads _what it is_ → _how to fix_; match it against the diff:
 
 - **Mysterious Name** — a function, variable, or type whose name doesn't reveal what it does or holds. → rename it; if no honest name comes, the design's murky.
-- **Duplicated Code** — the same logic shape appears in more than one hunk or file in the change. → extract the shared shape, call it from both.
+- **Duplicated Code** — the same logic shape appears in more than one hunk or file in the change → extract the shared shape, call it from both. If duplication is simple and abstraction makes it less readable → leave it as is, simplicity and redability always wins.
 - **Feature Envy** — a method that reaches into another object's data more than its own. → move the method onto the data it envies.
 - **Data Clumps** — the same few fields or params keep travelling together (a type wanting to be born). → bundle them into one type, pass that.
 - **Primitive Obsession** — a primitive or string standing in for a domain concept that deserves its own type. → give the concept its own small type.
@@ -54,6 +54,8 @@ Each smell reads _what it is_ → _how to fix_; match it against the diff:
 Run `spex check --repo <repo-a> <repo-b>` for the affected scope. Every reported violation is a hard finding — the check already proved it, not a judgement call.
 
 ### 4. Review
+
+The primary objective of a review is to enforce coding rules and ensure simplicity. Code should be self-contained and locally clear, allowing anyone to fully understand the logic and impact of functions and methods strictly within their immediate context.
 
 Against the diff captured in step 1, report — per file/hunk where relevant:
 

@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.89] - 2026-09-12
+
+- `spex-review-rule`: improve review skill to avoid unnecessary abstractions and give main clear main review goal. 
+
 ## [0.7.88] - 2026-09-10
 
 - `coverage`: only exit non-zero for gaps on `active` specs; gaps on `in-progress` specs are still reported but no longer fail the command.
