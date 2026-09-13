@@ -6,10 +6,13 @@
 # <id>[, <id>] tag, e.g.
 #   feat(ui): add order endpoint @spec place-pizza-order, secret-handling
 #
-# "Related" can't be determined exactly from git history alone, so this check
-# is a proxy: it flags a commit whose diff adds a @spec contract|impl|test /
-# x-spec annotation, or one that touches rules/ — other spec/rule-related
-# commits can still slip through untagged.
+# Only a feat commit is required to carry an @spec tag — other commit types
+# (fix, refactor, docs, ...) may touch spec-related code (e.g. mechanical
+# spex update reformatting) without being new spec work.
+#
+# "Related" can't be determined exactly from git history alone, so a rules/
+# commit is used as a proxy for @rule relevance — other rule-related commits
+# can still slip through untagged.
 #
 # Runs once in the repository directory and inspects the last 10 commits'
 # diffs, not the working tree.
@@ -33,11 +36,9 @@ for sha in $(git log -3 --pretty=%H); do
   subject=$(git log -1 --pretty=%s "$sha")
   msg=$(git log -1 --pretty=%B "$sha")
 
-  if git diff-tree -p --no-commit-id -r "$sha" \
-      | grep -E '^\+' \
-      | grep -qE '@spec (contract|impl|test) |x-spec: *'; then
+  if printf '%s' "$subject" | grep -qE '^feat(\([a-z0-9-]+\))?!?: '; then
     if ! printf '%s' "$msg" | grep -qE "@spec${id_list}"; then
-      printf 'commit adds a @spec annotation but is missing an @spec ID list: %s\n' "$subject"
+      printf 'feat commit missing an @spec ID list: %s\n' "$subject"
       bad=1
     fi
   fi

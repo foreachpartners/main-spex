@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.91] - 2026-09-13
+
+- `commit-message-format` (`commit-spec-id-trace`): trigger the `@spec` ID check off the commit's Conventional Commits type (only `feat` requires it) instead of the diff content, avoiding false positives.
+
 ## [0.7.90] - 2026-09-13
 
 - `check`: add a built-in `property-order` conformance check that errors when a spec file, rule file, or `spex.yaml` declares its top-level properties out of order relative to their JSON Schema.
