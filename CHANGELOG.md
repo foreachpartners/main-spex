@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.94] - 2026-09-13
+
+- `info`, `specs`: reworded "unknown repository" error messages to match `check`/`rules`' style (`unknown ... `{name}` — not listed in spex.yaml`).
+
 ## [0.7.93] - 2026-09-13
 
 - `check`: `--files` now errors when a given file doesn't exist in any workspace repository, instead of silently dropping it, matching `check-schema --files`.

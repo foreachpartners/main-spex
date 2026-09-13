@@ -18,7 +18,7 @@ pub enum InfoError {
     UnknownField(String),
     #[error("field `{0}` is not a single value")]
     NotScalar(String),
-    #[error("no repository named `{0}` in the spex configuration")]
+    #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
     UnknownRepo(String),
 }
 

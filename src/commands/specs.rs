@@ -24,7 +24,7 @@ pub enum SpecsError {
     Parse(String),
     #[error("could not serialize output")]
     Serialize,
-    #[error("unknown repository_short_name `{0}` — not listed in spex.yaml")]
+    #[error("unknown repository short name `{0}` — not listed in spex.yaml")]
     UnknownScope(String),
     #[error("unknown spec id `{0}` — not found in {SPECS_DIR}")]
     UnknownId(String),
