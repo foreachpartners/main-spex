@@ -53,7 +53,7 @@ enum Commands {
     Coverage,
     #[command(about = "Print the resolved spex configuration, for scripting")]
     Info(InfoArgs),
-    #[command(about = "Print the active rules per repository, as JSON")]
+    #[command(about = "Print the active rules per repository, as YAML")]
     Rules(RulesArgs),
     #[command(about = "Print the workspace specs, as YAML")]
     Specs(SpecsArgs),
