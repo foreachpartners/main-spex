@@ -364,4 +364,15 @@ mod tests {
 
         assert!(result.is_err());
     }
+
+    #[test]
+    fn render_errors_on_unknown_id() {
+        let dir = tempdir().expect("temp dir");
+        write_workspace(dir.path());
+        let workspace = workspace(dir.path());
+
+        let result = render(&workspace, &args(false, &["missing"], &[]));
+
+        assert!(result.is_err());
+    }
 }

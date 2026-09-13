@@ -27,6 +27,8 @@ pub enum RulesError {
     Serialize,
     #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
     UnknownRepo(String),
+    #[error("unknown rule id `{0}` — not found in {RULES_DIR}")]
+    UnknownId(String),
     #[error("could not write `{0}`")]
     WriteFile(String),
 }
@@ -101,6 +103,15 @@ fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
         }
     }
     let rules: Vec<serde_json::Value> = rules.into_iter().map(|(rule, _)| rule).collect();
+
+    for id in &args.id {
+        if !rules
+            .iter()
+            .any(|rule| rule.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
+        {
+            return Err(Report::new(RulesError::UnknownId(id.clone())));
+        }
+    }
 
     let repositories: Vec<&Repository> = workspace
         .config

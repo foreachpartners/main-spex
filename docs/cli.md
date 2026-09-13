@@ -146,7 +146,7 @@ spex rules
 #### Flags
 
 - `--ai` — drop fields an agent doesn't need to follow a rule (`sync_with_upstream` and `checks`), and add a `path` field after `id` with the rule file's location relative to the workspace root (e.g. `rules/secret-handling.yaml`).
-- `--id <id>...` — limit output to the given Rule IDs.
+- `--id <id>...` — limit output to the given Rule IDs. Defaults to all rules; errors on an unrecognized ID.
 - `--repo <name>...` — limit output to the named repositories, matched by either `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`; errors on an unrecognized name.
 - `--output <path>` — write the rendered YAML to this file instead of stdout, since the full rules list is large and can get truncated when printed to a terminal or piped through a shell.
 
@@ -175,7 +175,7 @@ spex specs
 #### Flags
 
 - `--ai` — add a `path` field after `id` with the spec file's location relative to the workspace root (e.g. `specs/place-pizza-order.yaml`).
-- `--id <id>...` — limit output to the given Spec IDs.
+- `--id <id>...` — limit output to the given Spec IDs. Defaults to all specs; errors on an unrecognized ID.
 - `--scope <name>...` — limit output to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
 - `--output <path>` — write the rendered YAML to this file instead of stdout, since the full specs list is large and can get truncated when printed to a terminal or piped through a shell.
 

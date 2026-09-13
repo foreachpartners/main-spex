@@ -26,6 +26,8 @@ pub enum SpecsError {
     Serialize,
     #[error("unknown repository_short_name `{0}` — not listed in spex.yaml")]
     UnknownScope(String),
+    #[error("unknown spec id `{0}` — not found in {SPECS_DIR}")]
+    UnknownId(String),
     #[error("could not write `{0}`")]
     WriteFile(String),
 }
@@ -98,6 +100,15 @@ fn render(workspace: &Workspace, args: &SpecsArgs) -> Result<String> {
         }
     }
     let specs: Vec<serde_json::Value> = specs.into_iter().map(|(spec, _)| spec).collect();
+
+    for id in &args.id {
+        if !specs
+            .iter()
+            .any(|spec| spec.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
+        {
+            return Err(Report::new(SpecsError::UnknownId(id.clone())));
+        }
+    }
 
     let output: Vec<&serde_json::Value> = specs
         .iter()
