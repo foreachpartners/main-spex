@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.90] - 2026-09-13
+
+- `check`: add a built-in `property-order` conformance check that errors when a spec file, rule file, or `spex.yaml` declares its top-level properties out of order relative to their JSON Schema.
+
 ## [0.7.89] - 2026-09-12
 
 - `spex-review-rule`: improve review skill to avoid unnecessary abstractions and give clear main review goal.

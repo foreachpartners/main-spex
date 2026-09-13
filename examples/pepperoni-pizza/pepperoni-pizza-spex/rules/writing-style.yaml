@@ -1,6 +1,6 @@
 id: writing-style
-sync_with_upstream: true
 title: Writing style
+sync_with_upstream: true
 description: >-
   Specs, code and documentation are read by both engineers and AI agents. Direct,
   imperative prose with explicit commitment levels and no filler keeps rules
