@@ -138,8 +138,8 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
-        "  - repository_name: proj-frontend\n",
-        "  - repository_name: proj-frontend\n    ignored_errors:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
+        "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n    ignored_errors:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(
         patched, config,

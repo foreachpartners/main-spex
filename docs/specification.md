@@ -133,7 +133,7 @@ Runs each repository's rule checks and gates on errors.
 
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still unchecked errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors.
-- Also errors when a spec file, rule file, or `spex.yaml` declares its top-level properties out of order relative to their JSON Schema's declared property order.
+- Also errors when a spec file, rule file, or `spex.yaml` declares its properties out of order relative to their JSON Schema's declared property order, at every nesting level the schema describes (for example a rule's `checks[].*` items, or `spex.yaml`'s `repositories[].*` and `repositories[].contracts[].*`).
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.

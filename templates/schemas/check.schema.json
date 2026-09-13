@@ -24,12 +24,6 @@
       "description": "How the check is executed: regexp matches file contents, glob matches file paths, ast-grep matches a code structure, script runs an external program.",
       "enum": ["regexp", "glob", "ast-grep", "script"]
     },
-    "severity": {
-      "type": "string",
-      "description": "Severity when the check fails. Defaults to error when omitted.",
-      "enum": ["warn", "error"],
-      "default": "error"
-    },
     "include": {
       "type": "array",
       "description": "Glob patterns that narrow this check's file set to matching paths. When omitted, all non-ignored files are in scope.",
@@ -45,6 +39,12 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "severity": {
+      "type": "string",
+      "description": "Severity when the check fails. Defaults to error when omitted.",
+      "enum": ["warn", "error"],
+      "default": "error"
     }
   },
   "required": ["name", "type"],
@@ -123,16 +123,16 @@
       "then": {
         "description": "Runs an external script stored in the spex directory at `scripts/<rule-id>/<script>`.",
         "properties": {
-          "script": {
-            "type": "string",
-            "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<rule-id>/<script>`, so the `<rule-id>` folder keeps checks from different rules from sharing a path.",
-            "minLength": 1
-          },
           "run": {
             "type": "string",
             "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments. `per-repo` runs it once per governed repository with no arguments. `workspace` runs it exactly once with no arguments",
             "enum": ["per-file", "per-repo", "workspace"],
             "default": "per-file"
+          },
+          "script": {
+            "type": "string",
+            "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<rule-id>/<script>`, so the `<rule-id>` folder keeps checks from different rules from sharing a path.",
+            "minLength": 1
           }
         },
         "required": ["script"]
