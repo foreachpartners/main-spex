@@ -25,8 +25,8 @@ mod tests {
             indoc::indoc! {r#"
                 id: ordered
                 title: Ordered rule
-                description: A rule with properties in schema order.
                 sync_with_upstream: true
+                description: A rule with properties in schema order.
                 acceptance_criteria:
                   - "MUST do the thing"
                 checks:
@@ -85,8 +85,8 @@ mod tests {
             indoc::indoc! {r#"
                 id: misordered-check
                 title: Misordered check
-                description: The check's own field order is not enforced, only the rule's top-level order.
                 sync_with_upstream: true
+                description: The check's own field order is not enforced, only the rule's top-level order.
                 acceptance_criteria:
                   - "MUST do the thing"
                 checks:
