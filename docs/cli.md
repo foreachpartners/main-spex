@@ -81,7 +81,7 @@ repositories:
 #### Flags
 
 - `--repo <name>...` — limit the run to the named workspace repositories, matched by either full `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`.
-- `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files.
+- `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files; errors when a given file doesn't exist in any workspace repository.
 - `--fill-preexisting-errors` — record the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
 - `--verbose` (`-v`) — stream progress to stderr as the run proceeds: each repository, then each check it runs (with the time each took), and the workspace checks at the end. The report on stdout is unchanged, so piping or redirecting it still works.
 

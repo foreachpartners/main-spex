@@ -718,6 +718,10 @@ constraints:
 
         // An unknown --repo name still errors.
         assert!(select_repos(&config, spex, &["ghost".to_string()], &files).is_err());
+
+        // A --files entry that doesn't exist in any repository errors.
+        let missing = vec!["missing.txt".to_string()];
+        assert!(select_repos(&config, spex, &[], &missing).is_err());
     }
 
     fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {

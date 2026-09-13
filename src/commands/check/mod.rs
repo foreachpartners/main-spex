@@ -34,6 +34,8 @@ pub enum CheckError {
     Workspace,
     #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
     UnknownRepo(String),
+    #[error("unknown file `{0}` — not found in any workspace repository")]
+    UnknownFile(String),
     #[error("could not walk workspace repository files")]
     Walk,
     #[error("could not update `{}`", config::SPEX_CONFIG_FILE)]
@@ -355,6 +357,15 @@ fn select_repos<'a>(
     for name in names {
         if !config.repositories.iter().any(|repo| repo.matches(name)) {
             return Err(Report::new(CheckError::UnknownRepo(name.clone())));
+        }
+    }
+
+    for file in files {
+        let found = config.repositories.iter().any(|repo| {
+            !provided_files(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
+        });
+        if !found {
+            return Err(Report::new(CheckError::UnknownFile(file.clone())));
         }
     }
 
