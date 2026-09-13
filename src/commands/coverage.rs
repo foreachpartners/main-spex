@@ -209,7 +209,7 @@ fn report(specs: &[Spec], found: &Found) -> ExitCode {
     if active_gaps(&rows) == 0 {
         ExitCode::SUCCESS
     } else {
-        ExitCode::from(1)
+        ExitCode::FAILURE
     }
 }
 

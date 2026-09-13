@@ -2,9 +2,17 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.7.95] - 2026-09-13
+
+- `check`: `--repo` help text now reads "to include", matching `rules`/`specs`/`info`.
+- `init`, `update`: success messages now use the shared terminal styling, matching every other command.
+- `check`, `coverage`: both now return `ExitCode::FAILURE` on a failing report, instead of mixing it with `ExitCode::from(1)`.
+- `docs/cli.md`: command order now matches `--help` order (`check-schema` and `info` were out of sequence).
+- the CLI now warns on stderr when `--verbose` is passed to a command other than `check`, where it has no effect.
+
 ## [0.7.94] - 2026-09-13
 
-- `info`, `specs`: reworded "unknown repository" error messages to match `check`/`rules`' style (`unknown ... `{name}` — not listed in spex.yaml`).
+- `info`, `specs`: reworded "unknown repository" error messages to match `check`/`rules`' style (`unknown ...`{name}`— not listed in spex.yaml`).
 
 ## [0.7.93] - 2026-09-13
 

@@ -63,6 +63,10 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     let verbose = cli.verbose;
 
+    if verbose && !matches!(cli.command, Commands::Check(_)) {
+        eprintln!("warning: --verbose has no effect outside of `spex check`");
+    }
+
     match cli.command {
         Commands::Init => finish(commands::init::run()),
         Commands::Update => finish(commands::update::run()),

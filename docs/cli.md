@@ -105,6 +105,25 @@ spex check --repo frontend --fill-preexisting-errors
 
 When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, that a `scope` entry matches a repository's `repository_short_name` in `spex.yaml`, that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`, and that a spec whose `status` is `active` has every acceptance criterion checked off (use `in-progress` while it's still being implemented).
 
+### `spex check-schema`
+
+Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
+
+This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
+
+#### Flags
+
+- `--schema <path>` — the JSON Schema the files are validated against (required).
+- `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
+
+```sh
+spex check-schema --schema schemas/rule.schema.json --files rules/naming-convention.yaml
+```
+
+```sh
+spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-menu.yaml specs/place-pizza-order.yaml
+```
+
 ### `spex coverage`
 
 Reports how well the active and in-progress specs are covered by spec-id annotations across the workspace. For every spec whose `status` is `active` or `in-progress`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
@@ -126,6 +145,30 @@ coverage_ignore: [contract]
 Each tracked spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. A tracked spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes. `spex check` requires an `active` spec's criteria to already be all checked off, so this gap is expected to show up only on `in-progress` specs in practice.
 
 The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — a required layer missing, or an acceptance criterion unimplemented), each with its acceptance-criteria progress and what's missing (for example `missing: test, contract (ignored)`). Specs with no gap — fully covered, or only an ignored layer missing — aren't listed individually; they're only reflected in the "Gaps" count. A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
+
+### `spex info`
+
+Prints the resolved `spex.yaml` configuration, for scripts to consume instead of parsing `spex.yaml` by hand. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
+
+`spex info` prints the fully-resolved configuration as pretty JSON, the general-purpose form scripts pipe into `jq` for whatever field they need:
+
+```sh
+spex info | jq -r '.repositories[].path'
+```
+
+`--print <field>` is a convenience for the common case of needing exactly one top-level scalar field, printing it bare with no quoting or JSON escaping:
+
+```sh
+spex info --print project_name
+```
+
+`--repo <name>...` limits output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`:
+
+```sh
+spex info --repo api frontend
+```
+
+`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when any given name matches no repository.
 
 ### `spex rules`
 
@@ -186,49 +229,6 @@ spex specs --ai --scope api
 ```sh
 spex specs --id place-pizza-order list-pizza-menu
 ```
-
-### `spex check-schema`
-
-Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
-
-This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
-
-#### Flags
-
-- `--schema <path>` — the JSON Schema the files are validated against (required).
-- `--files <path>...` — one or more JSON or YAML files to validate against the schema (required).
-
-```sh
-spex check-schema --schema schemas/rule.schema.json --files rules/naming-convention.yaml
-```
-
-```sh
-spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-menu.yaml specs/place-pizza-order.yaml
-```
-
-### `spex info`
-
-Prints the resolved `spex.yaml` configuration, for scripts to consume instead of parsing `spex.yaml` by hand. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
-
-`spex info` prints the fully-resolved configuration as pretty JSON, the general-purpose form scripts pipe into `jq` for whatever field they need:
-
-```sh
-spex info | jq -r '.repositories[].path'
-```
-
-`--print <field>` is a convenience for the common case of needing exactly one top-level scalar field, printing it bare with no quoting or JSON escaping:
-
-```sh
-spex info --print project_name
-```
-
-`--repo <name>...` limits output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`:
-
-```sh
-spex info --repo api frontend
-```
-
-`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when any given name matches no repository.
 
 ## Development
 

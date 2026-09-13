@@ -8,6 +8,7 @@ use thiserror::Error;
 
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::spec::SPECS_DIR;
+use crate::style::Style;
 use crate::templates;
 use crate::templates::{AGENTS_DIR_NAME, SKILLS_DIR};
 
@@ -77,8 +78,12 @@ pub fn run() -> Result<ExitCode> {
     copy_templates(&spex_dir)?;
     write_repo_skills(&spex_dir, &repositories)?;
 
+    let style = Style::detect();
     println!(
-        "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to complete setup"
+        "{}",
+        style.green(
+            "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to complete setup"
+        )
     );
     Ok(ExitCode::SUCCESS)
 }

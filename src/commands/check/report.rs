@@ -47,7 +47,7 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
     );
 
     if total_errors > 0 {
-        ExitCode::from(1)
+        ExitCode::FAILURE
     } else {
         ExitCode::SUCCESS
     }

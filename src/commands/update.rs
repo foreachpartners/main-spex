@@ -5,6 +5,7 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE};
+use crate::style::Style;
 use crate::templates;
 use serde::Deserialize;
 
@@ -59,11 +60,20 @@ pub fn run() -> Result<ExitCode> {
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
 
-    println!("spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}");
+    let style = Style::detect();
+    println!(
+        "{}",
+        style.green(&format!(
+            "spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}"
+        ))
+    );
 
     let entries = changelog_since(CHANGELOG, &previous.cli_version);
     if !entries.is_empty() {
-        println!("\nChanges since {}:\n", previous.cli_version);
+        println!(
+            "\n{}\n",
+            style.bold(&format!("Changes since {}:", previous.cli_version))
+        );
         println!("{}", entries.join("\n\n"));
     }
 

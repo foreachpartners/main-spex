@@ -44,7 +44,7 @@ pub enum CheckError {
 
 #[derive(Args)]
 pub struct CheckArgs {
-    #[arg(long, num_args = 1.., help = "Workspace repository names to check (default: all)")]
+    #[arg(long, num_args = 1.., help = "Workspace repository names to include (default: all)")]
     repo: Vec<String>,
     #[arg(long, num_args = 1.., help = "Files to check (default: all non-ignored files)")]
     files: Vec<String>,
