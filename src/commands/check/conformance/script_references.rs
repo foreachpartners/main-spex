@@ -1,0 +1,33 @@
+use std::collections::HashMap;
+use std::path::Path;
+
+use crate::rule::{CheckKind, RULES_DIR, Rule, SCRIPTS_DIR};
+
+use super::super::runners::resolve_script;
+use super::{Finding, conform_finding};
+
+// Every script a rule check references must exist at
+// `scripts/<spec-id-lowercase>/<script>`.
+pub(super) fn validate_script_references(
+    spex_dir: &Path,
+    rules: &HashMap<String, Rule>,
+    findings: &mut Vec<Finding>,
+) {
+    let mut rules: Vec<&Rule> = rules.values().collect();
+    rules.sort_by(|a, b| a.id.cmp(&b.id));
+
+    for rule in rules {
+        for check in &rule.checks {
+            let CheckKind::Script { script, .. } = &check.kind else {
+                continue;
+            };
+            if resolve_script(script, spex_dir, &rule.id).is_none() {
+                let dir = spex_dir.join(SCRIPTS_DIR).join(&rule.id);
+                findings.push(conform_finding(
+                    Some(format!("{RULES_DIR}/{}", rule.path)),
+                    format!("missing script {}/{script}", dir.display()),
+                ));
+            }
+        }
+    }
+}

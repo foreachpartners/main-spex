@@ -1,0 +1,63 @@
+use std::path::Path;
+
+use serde::Deserialize;
+
+use super::{Finding, Severity};
+
+mod ac_order;
+mod duplicate_ids;
+mod property_order;
+mod schema;
+mod script_references;
+
+use ac_order::validate_ac_order;
+use duplicate_ids::validate_no_duplicate_ids;
+use property_order::validate_property_order;
+use schema::validate_schema;
+use script_references::validate_script_references;
+
+// Findings from this module are attributed to a synthetic spec id rather than
+// a real rule, since spex's own conformance checks are built into `spex
+// check` itself rather than declared in a rule (they must run even before
+// any rules can be trusted to parse).
+const SPEC_ID: &str = "spex-internal-conformance";
+const CONFORM_CHECK: &str = "spec-files-conform";
+
+#[derive(Deserialize)]
+struct IdOnly {
+    id: String,
+}
+
+// Validates the spex repository's own spec files: `spex.yaml` and every file
+// in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
+// must be named `<id>.yaml`, every script a rule check
+// references must exist under `scripts/<spec-id>/`, and every
+// spec's acceptance criteria must be ordered by RFC 2119 commitment level.
+pub(super) fn validate_conformance(
+    spex_dir: &Path,
+    rules: &std::collections::HashMap<String, crate::rule::Rule>,
+    findings: &mut Vec<Finding>,
+) {
+    validate_schema(spex_dir, findings);
+    validate_script_references(spex_dir, rules, findings);
+    validate_ac_order(spex_dir, findings);
+    validate_no_duplicate_ids(spex_dir, findings);
+    validate_property_order(spex_dir, findings);
+}
+
+fn rel(spex_dir: &Path, file: &Path) -> String {
+    file.strip_prefix(spex_dir)
+        .unwrap_or(file)
+        .to_string_lossy()
+        .into_owned()
+}
+
+fn conform_finding(location: Option<String>, message: String) -> Finding {
+    Finding {
+        severity: Severity::Error,
+        spec_id: SPEC_ID.to_string(),
+        check: CONFORM_CHECK.to_string(),
+        location,
+        message,
+    }
+}
