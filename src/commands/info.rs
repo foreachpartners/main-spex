@@ -31,9 +31,10 @@ pub struct InfoArgs {
     print: Option<String>,
     #[arg(
         long,
-        help = "Limit output to the general fields plus the named repository (by name or short_name)"
+        num_args = 1..,
+        help = "Limit output to the general fields plus the named repositories (by name or short_name)"
     )]
-    repo: Option<String>,
+    repo: Vec<String>,
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
@@ -44,23 +45,29 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         return print_field(&value, field);
     }
 
-    let Some(repo_filter) = &args.repo else {
+    if args.repo.is_empty() {
         let json = serde_json::to_string_pretty(&value).change_context(InfoError::Serialize)?;
         println!("{json}");
         return Ok(ExitCode::SUCCESS);
-    };
+    }
 
-    let repo = workspace
-        .config
-        .repositories
+    let repos = args
+        .repo
         .iter()
-        .find(|r| r.matches(repo_filter))
-        .ok_or_else(|| Report::new(InfoError::UnknownRepo(repo_filter.clone())))?;
+        .map(|repo_filter| {
+            workspace
+                .config
+                .repositories
+                .iter()
+                .find(|r| r.matches(repo_filter))
+                .ok_or_else(|| Report::new(InfoError::UnknownRepo(repo_filter.clone())))
+        })
+        .collect::<Result<Vec<_>>>()?;
 
     let filtered = serde_json::json!({
         "project_name": workspace.config.project_name,
         "cli_version": workspace.config.cli_version,
-        "repositories": [repo],
+        "repositories": repos,
     });
     let json = serde_json::to_string_pretty(&filtered).change_context(InfoError::Serialize)?;
     println!("{json}");

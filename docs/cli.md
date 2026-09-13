@@ -222,13 +222,13 @@ spex info | jq -r '.repositories[].path'
 spex info --print project_name
 ```
 
-`--repo <name>` limits output to the general fields (`project_name`, `cli_version`) plus the named repository, matched by either `repository_name` or `repository_short_name`:
+`--repo <name>...` limits output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`:
 
 ```sh
-spex info --repo api
+spex info --repo api frontend
 ```
 
-`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when no repository matches the given name.
+`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when any given name matches no repository.
 
 ## Development
 
