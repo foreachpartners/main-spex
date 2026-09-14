@@ -1,5 +1,5 @@
 project_name: pepperoni-pizza
-cli_version: 0.8.0
+cli_version: 0.8.1
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.

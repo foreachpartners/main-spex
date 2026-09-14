@@ -7,6 +7,7 @@ mod tests_unit {
     use tempfile::tempdir;
 
     const SCHEMA: &str = "schemas/spex.schema.json";
+    const DOC: &str = "docs/glossary.md";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
     const SCRIPT: &str = "scripts/commit-message-format/commit-spec-id-trace.sh";
     const RULE: &str = "rules/secret-handling.yaml";
@@ -21,7 +22,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
-        for managed in [SCHEMA, SKILL, SCRIPT, RULE] {
+        for managed in [SCHEMA, DOC, SKILL, SCRIPT, RULE] {
             assert!(
                 spex_dir.path().join(managed).is_file(),
                 "missing managed file `{managed}`"
@@ -44,6 +45,20 @@ mod tests_unit {
             .expect("bundled schema")
             .contents();
         assert_eq!(fs::read(&schema).expect("read schema"), expected);
+    }
+
+    #[test]
+    fn scaffold_overwrites_modified_managed_doc() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        let doc = spex_dir.path().join(DOC);
+        fs::write(&doc, "tampered").expect("modify doc");
+
+        scaffold(spex_dir.path(), &[]).expect("re-scaffold");
+
+        let expected = TEMPLATES.get_file(DOC).expect("bundled doc").contents();
+        assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 
     #[test]

@@ -59,6 +59,7 @@ docs/
   faq.md                   Frequently asked questions
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas
+  docs/             Framework reference docs (glossary, principles, CLI)
   scripts/          Helper scripts
   skills/           Agent skills
   rules/            Reusable rule templates

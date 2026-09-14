@@ -16,6 +16,7 @@ mod templates_test;
 static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 pub const SCHEMAS_DIR: &str = "schemas";
+pub const DOCS_DIR: &str = "docs";
 pub const SKILLS_DIR: &str = "skills";
 pub const AGENTS_DIR_NAME: &str = ".agents";
 pub const CLAUDE_DIR_NAME: &str = ".claude";
@@ -28,7 +29,7 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 // when the local spec opts in via `sync_with_upstream`. Skills are also
 // handled separately: a local skill is left untouched when its
 // `metadata.sync-with-upstream` is explicitly `false`.
-const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
+const MANAGED_FLAT_DIRS: [&str; 2] = [SCHEMAS_DIR, DOCS_DIR];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
 

@@ -107,7 +107,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Prompts to confirm the discovered workspace repositories, deriving each `repository_short_name` from its directory name minus the `<project-name>-` prefix.
 - Writes `spex.yaml`, recording the installed CLI version as `cli_version`.
 - Writes the editor workspace file with a folder per repository.
-- Scaffolds the bundled templates: `schemas/`, `scripts/`, `rules/`, and skills.
+- Scaffolds the bundled templates: `schemas/`, `docs/`, `scripts/`, `rules/`, and skills.
 - Creates empty `specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` -> `.agents` so different agent tools detect the same skills.
 - Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
@@ -119,7 +119,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 
 Refreshes the managed framework files from the installed binary.
 
-- Rewrites the bundled schemas with the versions in the installed binary.
+- Rewrites the bundled schemas and docs with the versions in the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local rule without it is left untouched, letting consumers override a global rule.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.

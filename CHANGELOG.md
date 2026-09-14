@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.1] - 2026-09-14
+
+- `init`, `update`: now scaffold a bundled `docs/` folder (`glossary.md`, `framework-principles.md`, `cli.md`) into the spex repository, always overwritten on `update` like `schemas/`.
+- `AGENTS.md` template: replaced the inline `spex commands` list with a link to `docs/cli.md`, and added a `## Docs` index linking `docs/glossary.md`, `docs/framework-principles.md`, and `docs/cli.md`.
+
 ## [0.8.0] - 2026-09-14
 
 - **Breaking**: `acceptance_criteria` is now a list of `{id, must|must_not|should|should_not|may, is_done}` objects instead of checkbox-prefixed strings. `id` is a kebab-case slug, unique within the spec, naming the criterion's behavior rather than its position — immutable once an annotation references it. Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the criterion text. `is_done` is optional (absent counts as `true`); a newly authored criterion is written `is_done: false` and cleared once done. Existing specs must migrate.

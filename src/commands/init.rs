@@ -40,8 +40,9 @@ const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const SPEX_REPO_DESCRIPTION: &str = "    description: >-
       Spex workspace repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rules/ (cross-cutting conventions and rules) and specs/ (the
-      functionality the system provides).
+      rules/ (cross-cutting conventions and rules), specs/ (the
+      functionality the system provides) and docs/ (framework reference:
+      glossary, principles, CLI).
 ";
 
 struct DiscoveredRepo {

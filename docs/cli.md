@@ -32,7 +32,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
 
-It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default rules).
+It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, docs, skills, scripts, and default rules).
 
 ```sh
 spex init
@@ -42,9 +42,9 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or rules you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, docs, or rules you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
