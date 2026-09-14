@@ -52,11 +52,11 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 Draft each spec following the field rules in `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`, using its `examples` as the model for the YAML you write. Key points while drafting:
 
 - `id` must convey the capability so it reads without opening the spec. It should be unique enough so that global search will find no other matches, prefer two or more words with dash as it's unlikelly to match anything.
-- Write `acceptance_criteria` as verifiable statements, each beginning with an implementation checkbox followed by a commitment level — write `[ ]` for every newly drafted criterion, since none is implemented yet — ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's specifics. Double-quote each criterion in YAML so the leading `[ ]` is read as text, not a flow sequence.
+- Write `acceptance_criteria` as a list of `{id, must|must_not|should|should_not|may, is_done}` objects. Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, naming the commitment level; its value is the verifiable statement. Order criteria MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's specifics. `id` is a kebab-case slug unique within the spec that names the criterion's behavior, not its position (e.g. `empty-string-for-unset`, not `ac-1`) — it's immutable once an implementation or test annotates it with `@spec impl|test <spec-id>#<ac-id>`, so a change in meaning needs a new id, never a rename of the old one. Every criterion you write — new spec or new criterion added to an existing one — gets `is_done: false`, since nothing is implemented yet; `spex-test` clears it once `spex coverage` shows the criterion fully traced. Never set `is_done: false` on a criterion the user didn't ask you to add or change.
 - Be specific. When the user has given a concrete decision — a constant, default, threshold, rate, or rule (e.g. each pizza takes one minute to make, two workers are on shift, the estimate is rounded to whole minutes) — capture it verbatim as its own verifiable criterion. Do not soften a value the user supplied into a vague directional statement, and do not invent a value the user did not supply: if a detail needed to make a criterion verifiable is missing, ask for it (see Step 2) instead of guessing.
 - Describe end behavior, not implementation steps. A criterion must be verifiable from the outside — what the system does or exposes — not the internal steps taken to build it (installing a package, adding a dependency, creating a file, writing a migration).
 - Set `scope` to the repositories that implement the capability, each matching a `repository_short_name` in `spex.yaml`.
-- When `scope` lists more than one repository, make the division of responsibility explicit: every acceptance criterion must name the repository that owns it (after the commitment level, since each criterion must start with one), so the boundary between repositories is unambiguous and no shared behavior is left unassigned. Split a behavior that crosses the boundary into separate per-repository criteria rather than one vague criterion. For example, the API owns producing a value and the frontend owns presenting it — write "MUST compute the delivery-time estimate in the `api` from the order's pizza count, the in-progress orders, and the workers on shift" and "MUST display the estimate in the `frontend` in the cart and on the order confirmation" as distinct criteria.
+- When `scope` lists more than one repository, make the division of responsibility explicit: every acceptance criterion must name the repository that owns it at the start of its text, so the boundary between repositories is unambiguous and no shared behavior is left unassigned. Split a behavior that crosses the boundary into separate per-repository criteria rather than one vague criterion. For example, the API owns producing a value and the frontend owns presenting it — write must: "compute the delivery-time estimate in the `api` from the order's pizza count, the in-progress orders, and the workers on shift" and must: "display the estimate in the `frontend` in the cart and on the order confirmation" as distinct criteria.
 - Set `blocked_by` only for specs that must be in place before this one can be implemented and their status is not `active`. Do not list a shared foundation that every capability rides on (e.g. the API surface), and never list an already-shipped or established spec. When nothing genuinely blocks the work, leave it absent.
 - Keep `description` short, simple, and concrete: a general summary of the capability and who or what is affected. Do not restate specifics already covered by `acceptance_criteria`, and leave the step-by-step implementation to the plan.
 - Add `examples` only when a request/response, payload, or usage snippet clarifies the capability better than prose. Key each entry with a short label (e.g. `request`, `response`).
@@ -81,14 +81,30 @@ description: >-
   Lets a user who forgot their password regain access by requesting a reset
   link by email and choosing a new password.
 acceptance_criteria:
-  - "[ ] MUST send a reset link to the account's email in the `api` when the user requests a reset with a registered email"
-  - "[ ] MUST expire the reset link in the `api` 30 minutes after it is sent"
-  - "[ ] MUST invalidate the reset link in the `api` once it has been used"
-  - "[ ] MUST require the new password in the `api` to meet the account's standard password rules"
-  - "[ ] MUST NOT reveal in the `api` whether an email is registered when a reset is requested for an unknown email"
-  - "[ ] MUST let the user request a reset link in the `frontend` from the sign-in screen"
-  - "[ ] MUST let the user choose a new password in the `frontend` from the reset link"
-  - "[ ] SHOULD sign the user out of all other active sessions in the `api` once the password is reset"
+  - id: send-reset-link
+    must: "send a reset link to the account's email in the `api` when the user requests a reset with a registered email"
+    is_done: false
+  - id: reset-link-expiry
+    must: "expire the reset link in the `api` 30 minutes after it is sent"
+    is_done: false
+  - id: reset-link-single-use
+    must: "invalidate the reset link in the `api` once it has been used"
+    is_done: false
+  - id: new-password-meets-rules
+    must: "require the new password in the `api` to meet the account's standard password rules"
+    is_done: false
+  - id: no-email-enumeration
+    must_not: "reveal in the `api` whether an email is registered when a reset is requested for an unknown email"
+    is_done: false
+  - id: request-reset-from-sign-in
+    must: "let the user request a reset link in the `frontend` from the sign-in screen"
+    is_done: false
+  - id: choose-new-password-from-link
+    must: "let the user choose a new password in the `frontend` from the reset link"
+    is_done: false
+  - id: sign-out-other-sessions
+    should: "sign the user out of all other active sessions in the `api` once the password is reset"
+    is_done: false
 scope:
   - api
   - frontend

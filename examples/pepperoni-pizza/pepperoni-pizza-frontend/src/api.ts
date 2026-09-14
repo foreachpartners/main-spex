@@ -27,7 +27,7 @@ export const pizzaApi = {
 
   listDeliveries: () => request<Delivery[]>("/deliveries"),
 
-  // @spec impl delivery-time
+  // @spec impl delivery-time#cart-estimate-display
   estimateOrderDeliveryTime: (pizzaIds: number[]) =>
     request<DeliveryEstimate>("/order-estimate", {
       method: "POST",

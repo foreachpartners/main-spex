@@ -2,6 +2,16 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.0] - 2026-09-14
+
+- **Breaking**: `acceptance_criteria` is now a list of `{id, must|must_not|should|should_not|may, is_done}` objects instead of checkbox-prefixed strings. `id` is a kebab-case slug, unique within the spec, naming the criterion's behavior rather than its position — immutable once an annotation references it. Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the criterion text. `is_done` is optional (absent counts as `true`); a newly authored criterion is written `is_done: false` and cleared once done. Existing specs must migrate.
+- **Breaking**: `@spec impl|test <spec-id>` annotations may now carry the acceptance criterion they satisfy as `<spec-id>#<ac-id>`.
+- **Breaking**: `coverage_ignore` entries are now always `{layer, ac}` objects; `ac` is optional (waives the whole spec's layer when absent) and invalid with `layer: contract`. The old bare layer-name string form (`- contract`) no longer parses.
+- `coverage`: now requires an impl and a test annotation per acceptance criterion, each qualified with `#<ac-id>` — a bare, unqualified annotation no longer satisfies any criterion's requirement, closing the gap where a single annotation anywhere trivially passed every criterion.
+- `check`: a spec's `active`/`in-progress` status validation now reads each acceptance criterion's `is_done` field instead of impl+test annotation coverage or the old `[ ]`/`[x]` checkbox — `spex check` validates spec correctness, `spex coverage` proves `is_done` is actually backed by annotations; also errors on a duplicate acceptance criterion id within one spec.
+- `spex-test` now finalizes specs it tests: clears `is_done: false` on criteria `spex coverage` shows fully impl+test traced, and sets `status: active` once every criterion is done — `spex-implement`'s finalize step no longer sets `active`, only `in-progress`.
+- `spec-id-tracing` rule, and the `spex-spec`/`spex-test`/`spex-implement` skills: updated for the `id`/`must`|`must_not`|`should`|`should_not`|`may`/`is_done` acceptance-criteria format and `#<ac-id>` annotation extension.
+
 ## [0.7.95] - 2026-09-13
 
 - `check`: `--repo` help text now reads "to include", matching `rules`/`specs`/`info`.

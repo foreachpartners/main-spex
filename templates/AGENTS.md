@@ -4,7 +4,7 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>`, or `x-spec: <spec-id>` in OpenAPI).
+BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>[#<ac-id>]`, or `x-spec: <spec-id>` in OpenAPI). Tag `impl` and `test` annotations with the specific acceptance criterion id they satisfy so `spex coverage` can verify each one individually.
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
@@ -29,7 +29,7 @@ Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically.
 - `spex check-schema` — validate JSON or YAML files against a JSON Schema.
   - `--schema <path>` — schema to validate against (required).
   - `--files <path>...` — files to validate (required).
-- `spex coverage` — report `@spec` annotation and acceptance-criteria coverage for active specs.
+- `spex coverage` — report `@spec` annotation coverage for active specs, per acceptance criterion.
 - `spex info` — print the resolved config (repos, paths, contracts, rules).
   - `--print <field>` — print a single top-level scalar field (e.g. `project_name`).
   - `--repo <name>` — limit output to the general fields plus the named repository.

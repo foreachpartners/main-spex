@@ -132,8 +132,8 @@ Refreshes the managed framework files from the installed binary.
 Runs each repository's rule checks and gates on errors.
 
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
-- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all checked off (`[x]`) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still unchecked errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors.
-- Also errors when a spec file, rule file, or `spex.yaml` declares its properties out of order relative to their JSON Schema's declared property order, at every nesting level the schema describes (for example a rule's `checks[].*` items, or `spex.yaml`'s `repositories[].*` and `repositories[].contracts[].*`).
+- When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still `is_done: false` errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors. This reads only `is_done`, never annotations — proving `is_done` is actually true is `spex coverage`'s job, not `spex check`'s.
+- Also errors when a spec file, rule file, or `spex.yaml` declares its properties out of order relative to their JSON Schema's declared property order, at every nesting level the schema describes (for example a rule's `checks[].*` items, or `spex.yaml`'s `repositories[].*` and `repositories[].contracts[].*`), and when an acceptance criterion id is duplicated within the same spec.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -146,16 +146,30 @@ Runs each repository's rule checks and gates on errors.
 
 ## coverage
 
-Reports annotation coverage for specs.
+Reports annotation coverage for specs, per acceptance criterion.
 
 - Reports annotation coverage for every spec whose `status` is `active` or `in-progress`.
-- Requires an implementation, test, and contract annotation per tracked spec by default; a single one anywhere in any repository counts. `coverage_ignore` can waive any of these per spec (see below).
-- Reports how many of each tracked spec's acceptance criteria are implemented, read from each criterion's `[ ]`/`[x]` checkbox.
-- `coverage_ignore` relaxes named layers; it does not relax the acceptance-criteria checkboxes.
+- Requires a contract annotation per tracked spec (spec-level; a single one anywhere in any repository counts), and requires an impl and a test annotation for every acceptance criterion, each qualified with that criterion's id (`@spec impl|test <spec-id>#<ac-id>`). A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement — only a `#<ac-id>`-qualified annotation does, since a single bare annotation would otherwise trivially satisfy every criterion.
+- `coverage_ignore` can waive the contract layer for the whole spec, the impl or test layer for the whole spec, or the impl or test layer for one specific acceptance criterion (see below).
+- Reports how many of each tracked spec's acceptance criteria are fully traced (both a required impl and a required test annotation present).
 - Specs that are neither `active` nor `in-progress` are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
-- Its "Gaps" section only lists tracked specs with a gap (✗: a required layer missing or a criterion unimplemented); specs with no gap (fully covered, or only an ignored layer missing) are counted in the section header but not listed individually.
+- Its "Gaps" section only lists tracked specs with a gap (✗: the contract missing, or any acceptance criterion missing a required impl or test annotation); specs with no gap (fully covered, or only ignored requirements missing) are counted in the section header but not listed individually. A gapped spec's missing detail names which acceptance criterion ids are missing which layer.
 - Ends with a one-line summary: the spec count per status (`in-progress`, `planned`, `active`) and the gap count.
-- Exits non-zero only when an **active** spec has a missing required layer or an unimplemented acceptance criterion; gaps on `in-progress` specs are reported but don't affect the exit code.
+- Exits non-zero only when an **active** spec has a missing required layer or acceptance criterion; gaps on `in-progress` specs are reported but don't affect the exit code.
+
+### coverage_ignore
+
+Waives a coverage requirement. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional.
+
+- Without `ac`, waives that layer for the whole spec (every acceptance criterion, for `impl`/`test`).
+- With `ac`, an acceptance criterion id, waives just that one criterion's impl or test requirement. Not valid with `layer: contract`, since `x-spec` has no acceptance-criterion granularity.
+
+```yaml
+coverage_ignore:
+  - layer: contract
+  - layer: impl
+    ac: no-null-typed-string
+```
 
 ## rules
 
@@ -218,7 +232,7 @@ Splits approved specs into an ordered, parallel-safe implementation plan. Writes
 
 ## spex-implement
 
-Executes a plan step by step, or a plain user request directly, then finalizes the touched specs and checks the result. Deletes the plan file once every step is `completed` — a finished plan has nothing left to say that the spec, code, and git history don't already say more accurately. Does not write tests — that's `spex-test`.
+Executes a plan step by step, or a plain user request directly, then finalizes the touched specs' status and checks the result. Deletes the plan file once every step is `completed` — a finished plan has nothing left to say that the spec, code, and git history don't already say more accurately. Does not write tests, and never sets a spec's status to `active` — that's `spex-test`'s job, since only it knows both impl and test annotations are in place.
 
 ## spex-review-rule
 
@@ -234,7 +248,7 @@ Runs `spex-review-rule` and `spex-review-spec` as parallel sub-agents against th
 
 ## spex-test
 
-Adds or updates tests for an already-implemented change — from a plan, a diff, or an ad-hoc request. Never edits plan files, spec files, or non-test code.
+Adds or updates tests for an already-implemented change — from a plan, a diff, or an ad-hoc request. Never edits plan files, non-test code, or a spec's acceptance criteria — the only spec edits it makes are clearing `is_done: false` on a criterion `spex coverage` now shows fully impl+test traced, and setting `status: active` once every criterion is done.
 
 ## spex-assembly-line
 
@@ -261,19 +275,20 @@ One coherent capability the system must provide — a product behavior, or a tec
 - Has `id`, `title`, `description`, `acceptance_criteria`, `scope`, and optional `blocked_by`, `status`, `coverage_ignore`, `examples`.
 - `examples` holds named illustrative snippets showing the spec applied in context — placement and usage that prose cannot carry.
 - Holds its specifics in the acceptance criteria as verifiable, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY - RFC 2119.
-- Each acceptance criterion begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — that `spex coverage` reads to report how many of an active spec's criteria are implemented.
+- Each acceptance criterion is `{id, must|must_not|should|should_not|may, is_done}`: exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the verifiable statement; `id` is a kebab-case slug, unique within the spec, naming the criterion's behavior rather than its position, and immutable once an annotation references it — a change in meaning takes a new id, never a rename of the old one. `is_done` is optional and defaults to `true` when absent — set it to `false` to flag a criterion as not actually done yet; `spex check` reads it (not annotations) to decide whether a spec's status can be `active`. `spex coverage` separately reads `#<ac-id>`-qualified annotations to report how many of an active or in-progress spec's criteria are impl+test traced, regardless of `is_done`.
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so a spec already shipped or established is never listed.
-- `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion checked off, `in-progress` is for a spec being implemented but not yet complete.
+- `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion's `is_done` to be `true` or absent, `in-progress` is for a spec being implemented but not yet complete.
 
 ## Spec ID annotations
 
-Annotations link a contract, implementation, or test to its spec.
+Annotations link a contract, implementation, or test to its spec, and optionally to one specific acceptance criterion.
 
 - Link a contract, implementation, or test to its spec at the layer boundary.
 - Spec traceability is required and enforced by `spex coverage`; rule traceability is optional.
-- Comment form is `@spec contract|impl|test <spec-id>`; OpenAPI form is `x-spec: <spec-id>`.
-- Annotate once at the boundary, never nested.
+- Comment form is `@spec contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`; OpenAPI form is `x-spec: <spec-id>` (no `#<ac-id>` form — contracts have no per-criterion granularity).
+- An impl or test annotation should carry the `#<ac-id>` of the acceptance criterion it satisfies, since `spex coverage` only counts a bare, unqualified annotation toward a target with no acceptance-criteria ids (e.g. a rule); a bare annotation on a spec never satisfies any of its criteria.
+- Annotate once at the boundary, never nested; list every acceptance criterion id the boundary satisfies rather than adding a second nested annotation.
 - Never reference a Spec ID with no spec file.
 
 # Rules

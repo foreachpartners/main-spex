@@ -1,3 +1,4 @@
+mod annotations;
 mod commands;
 mod config;
 mod rule;

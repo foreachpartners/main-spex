@@ -621,10 +621,21 @@ fn spec_location(spec: &Spec) -> String {
     format!("{}/{}", spec::SPECS_DIR, spec.path)
 }
 
-// A spec with every acceptance criterion checked off is implemented, so its
-// status must say so. Specs with no criteria or any unchecked box are exempt.
+fn ac_done_total(spec: &Spec) -> (usize, usize) {
+    let done = spec
+        .acceptance_criteria
+        .iter()
+        .filter(|ac| ac.is_done())
+        .count();
+    (done, spec.acceptance_criteria.len())
+}
+
+// A spec with every acceptance criterion marked done is implemented, so its
+// status must say so. Specs with no criteria or any not-done criterion are
+// exempt. This only reads `is_done`; whether that's actually true (proven by
+// impl/test annotations) is `spex coverage`'s job, not `spex check`'s.
 fn status_finding(spec: &Spec) -> Option<Finding> {
-    let (done, total) = spec.ac_counts();
+    let (done, total) = ac_done_total(spec);
     if total == 0 || done != total || spec.status.is_implemented() {
         return None;
     }
@@ -634,17 +645,17 @@ fn status_finding(spec: &Spec) -> Option<Finding> {
         check: "status".to_string(),
         location: Some(spec_location(spec)),
         message: format!(
-            "all acceptance criteria are checked off but status is `{}` — set status to active or deprecated",
+            "every acceptance criterion is done but status is `{}` — set status to active or deprecated",
             spec.status.label()
         ),
     })
 }
 
 // `active` means fully implemented, so it requires every acceptance
-// criterion checked off; a spec still being worked on belongs in
-// `in-progress` until then.
+// criterion to be marked done (`is_done` absent or `true`); a spec still
+// being worked on belongs in `in-progress` until then.
 fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
-    let (done, total) = spec.ac_counts();
+    let (done, total) = ac_done_total(spec);
     if spec.status != Status::Active || done == total {
         return None;
     }
@@ -654,7 +665,7 @@ fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
         check: "status".to_string(),
         location: Some(spec_location(spec)),
         message: format!(
-            "status is `active` but only {done}/{total} acceptance criteria are checked off — use `in-progress` until all are done"
+            "status is `active` but only {done}/{total} acceptance criteria are done — use `in-progress` until every `is_done: false` is cleared"
         ),
     })
 }

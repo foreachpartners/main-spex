@@ -1,16 +1,11 @@
-use std::collections::{HashMap, HashSet};
-use std::fs;
-use std::path::Path;
 use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt};
-use regex::Regex;
 use thiserror::Error;
 
-use crate::config::Config;
-use crate::spec::{CoverageLayer, Spec, Status};
+use crate::annotations::{self, AcCoverage, Found};
+use crate::spec::{Spec, Status};
 use crate::style::Style;
-use crate::util;
 use crate::workspace::Workspace;
 
 #[cfg(test)]
@@ -27,39 +22,35 @@ pub enum CoverageError {
     Walk,
 }
 
-// Spec-id annotations found across the workspace, keyed by spec id.
-type Found = HashMap<String, HashSet<CoverageLayer>>;
-
 struct SpecRow {
     id: String,
     status: Status,
-    present: HashSet<CoverageLayer>,
-    ignored: HashSet<CoverageLayer>,
-    ac_done: usize,
-    ac_total: usize,
+    contract_required: bool,
+    contract_present: bool,
+    ac_rows: Vec<AcCoverage>,
 }
 
 impl SpecRow {
-    fn is_present(&self, layer: CoverageLayer) -> bool {
-        self.present.contains(&layer)
+    fn ac_done(&self) -> usize {
+        self.ac_rows.iter().filter(|ac| ac.is_ok()).count()
     }
 
-    fn is_required(&self, layer: CoverageLayer) -> bool {
-        !self.ignored.contains(&layer)
+    fn ac_total(&self) -> usize {
+        self.ac_rows.len()
     }
 
     fn ac_complete(&self) -> bool {
-        self.ac_done == self.ac_total
+        self.ac_done() == self.ac_total()
     }
 
-    // A gap is a required layer with no annotation, or an unimplemented
-    // acceptance criterion. Layers listed in `coverage_ignore` are treated as
-    // ok even when missing; the acceptance-criteria checkboxes are not relaxed.
+    fn contract_ok(&self) -> bool {
+        !self.contract_required || self.contract_present
+    }
+
+    // A gap is a missing required contract annotation, or any acceptance
+    // criterion still missing a required impl or test annotation.
     fn has_gap(&self) -> bool {
-        !self.ac_complete()
-            || CoverageLayer::ALL
-                .iter()
-                .any(|&layer| self.is_required(layer) && !self.is_present(layer))
+        !self.contract_ok() || !self.ac_complete()
     }
 }
 
@@ -67,100 +58,10 @@ pub fn run() -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
     let specs = workspace.specs().change_context(CoverageError::Workspace)?;
 
-    let found = scan_workspace(&workspace.dir, &workspace.config)?;
+    let found = annotations::scan_workspace(&workspace.dir, &workspace.config)
+        .change_context(CoverageError::Walk)?;
 
     Ok(report(&specs, &found))
-}
-
-// Scans every workspace repository except spex itself for spec-id annotations.
-fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Found> {
-    let scanner = Scanner::new();
-    let spex_canon = canonical(spex_dir);
-    let mut found = Found::new();
-
-    for repo in &config.repositories {
-        // Interface contracts live inside the spex repository's `contracts/`
-        // folder, so scan them explicitly even though the spex dir itself is
-        // skipped below; their `x-spec` annotations are the contract layer.
-        for contract in &repo.contracts {
-            let contract_path = spex_dir.join(&contract.path);
-            if let Ok(content) = fs::read_to_string(&contract_path) {
-                scanner.scan(&content, &mut found);
-            }
-        }
-
-        let repo_path = spex_dir.join(&repo.path);
-        if !repo_path.is_dir() || canonical(&repo_path) == spex_canon {
-            continue;
-        }
-        scan_repo(&scanner, &repo_path, &mut found)?;
-    }
-
-    Ok(found)
-}
-
-fn scan_repo(scanner: &Scanner, repo_path: &Path, found: &mut Found) -> Result<()> {
-    for result in util::repo_walker(repo_path) {
-        let entry = result.change_context(CoverageError::Walk)?;
-        if !entry.file_type().is_some_and(|kind| kind.is_file()) {
-            continue;
-        }
-        // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
-        let Ok(content) = fs::read_to_string(entry.path()) else {
-            continue;
-        };
-        scanner.scan(&content, found);
-    }
-
-    Ok(())
-}
-
-struct Scanner {
-    spec: Regex,
-    xspec: Regex,
-    id: Regex,
-}
-
-impl Scanner {
-    fn new() -> Self {
-        let id = r"[a-z]+(?:-[a-z]+)*";
-        Self {
-            spec: Regex::new(&format!(
-                r"@spec\s+(contract|impl|test)\s+({id}(?:\s*,\s*{id})*)"
-            ))
-            .expect("valid @spec regex"),
-            xspec: Regex::new(&format!(r#"x-spec:\s*"?({id})"?"#)).expect("valid x-spec regex"),
-            id: Regex::new(id).expect("valid id regex"),
-        }
-    }
-
-    fn scan(&self, content: &str, found: &mut Found) {
-        for caps in self.spec.captures_iter(content) {
-            let layer = match &caps[1] {
-                "contract" => CoverageLayer::Contract,
-                "impl" => CoverageLayer::Impl,
-                "test" => CoverageLayer::Test,
-                _ => continue,
-            };
-            for id in self.id.find_iter(&caps[2]) {
-                found
-                    .entry(id.as_str().to_string())
-                    .or_default()
-                    .insert(layer);
-            }
-        }
-
-        for caps in self.xspec.captures_iter(content) {
-            found
-                .entry(caps[1].to_string())
-                .or_default()
-                .insert(CoverageLayer::Contract);
-        }
-    }
-}
-
-fn canonical(path: &Path) -> std::path::PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
 fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
@@ -168,32 +69,52 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
         .iter()
         .filter(|spec| matches!(spec.status, Status::Active | Status::InProgress))
         .map(|spec| {
-            let (ac_done, ac_total) = spec.ac_counts();
+            let (contract_required, contract_present) = annotations::contract_coverage(spec, found);
             SpecRow {
                 id: spec.id.clone(),
                 status: spec.status,
-                present: found.get(&spec.id).cloned().unwrap_or_default(),
-                ignored: spec.coverage_ignore.iter().copied().collect(),
-                ac_done,
-                ac_total,
+                contract_required,
+                contract_present,
+                ac_rows: annotations::ac_coverage(spec, found),
             }
         })
         .collect()
 }
 
+// Lists what's missing on a gapped row: the contract annotation, then which
+// acceptance criteria still lack a required impl or test annotation.
 fn missing_summary(row: &SpecRow) -> String {
-    CoverageLayer::ALL
-        .iter()
-        .filter(|&&layer| !row.is_present(layer))
-        .map(|&layer| {
-            if row.is_required(layer) {
-                layer.label().to_string()
-            } else {
-                format!("{} (ignored)", layer.label())
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(", ")
+    let mut parts = Vec::new();
+
+    if !row.contract_ok() {
+        parts.push("contract".to_string());
+    }
+
+    let by_layer: [(&str, Vec<&str>); 2] = [
+        (
+            "impl",
+            row.ac_rows
+                .iter()
+                .filter(|ac| ac.impl_required && !ac.impl_present)
+                .map(|ac| ac.id.as_str())
+                .collect(),
+        ),
+        (
+            "test",
+            row.ac_rows
+                .iter()
+                .filter(|ac| ac.test_required && !ac.test_present)
+                .map(|ac| ac.id.as_str())
+                .collect(),
+        ),
+    ];
+    for (layer, missing) in by_layer {
+        if !missing.is_empty() {
+            parts.push(format!("{layer}({})", missing.join(", ")));
+        }
+    }
+
+    parts.join(", ")
 }
 
 fn report(specs: &[Spec], found: &Found) -> ExitCode {
@@ -290,7 +211,7 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
         let width = gapped.iter().map(|row| row.id.len()).max().unwrap_or(0);
         for row in &gapped {
             let id = style.cyan(&format!("{:<width$}", row.id, width = width));
-            let ac_text = format!("{}/{} AC", row.ac_done, row.ac_total);
+            let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
             let ac = if row.ac_complete() {
                 style.dim(&ac_text)
             } else {

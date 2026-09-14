@@ -7,7 +7,7 @@ description: Add or update tests for an already-implemented change. Use after sp
 
 **You MUST follow each process step without skipping.**
 
-This skill only writes tests. It never edits plan files, spec files, or non-test code — implementation is `spex-implement`'s job.
+This skill only writes tests and finalizes spec completion — it never edits plan files, a spec's acceptance criteria, or non-test code; implementation is `spex-implement`'s job.
 
 ## Step 1 — Gather context
 
@@ -31,15 +31,24 @@ Read all specs from step 1 and the governing rules from `<tmp-path>`. Inspect th
 
 ## Step 2 — Add tests
 
-1. For each governing spec, add tests for every acceptance criterion already implemented (`[x]`) that isn't yet covered.
+1. For each governing spec, run `spex coverage` and add tests for every acceptance criterion that has an `impl` annotation but is missing its `test` annotation.
 2. Add any other tests the implementation needs based on repository testing patterns.
-3. Annotate new tests with their spec IDs where the governing rules require test-layer traceability.
+3. Annotate new tests with their spec ID and the specific acceptance criterion they prove, `@spec test <spec-id>#<ac-id>`, where the governing rules require test-layer traceability.
 
 Split into tasks only when work spans independent repositories or clearly separable files; most requests are a single task. Within a unit, run every task in parallel, one AI agent per task.
 
 If a task fails or an agent cannot complete it, stop, report what failed, and ask the user how to proceed rather than pressing on with dependent work.
 
-## Step 3 — Verify
+## Step 3 — Finalize the specs
+
+For every governing spec, run `spex coverage` and open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
+
+- For each acceptance criterion `spex coverage` now shows fully impl+test traced, clear its `is_done: false` (remove the line — absent counts as done).
+- Once every criterion in the spec is done (`is_done` `true` or absent), set `status: active`.
+
+Touch only `is_done` lines and `status` — leave the rest of each spec, including acceptance criteria text and ids, untouched.
+
+## Step 4 — Verify
 
 Run formatters, linters, and the test suite to confirm the new tests pass and nothing else broke.
 
@@ -49,10 +58,11 @@ Prove the new tests respect the governing rules:
 spex check --repo <repo-a> <repo-b>
 ```
 
-## Step 4 — Report
+## Step 5 — Report
 
 Summarize the run:
 
 - Which units of work completed.
 - Which specs and acceptance criteria you added coverage for.
 - The format, lints, tests, and `spex check` run outcome.
+- Which specs you set to `active`, and which acceptance criteria still show `is_done: false` because `spex coverage` doesn't yet show them traced.

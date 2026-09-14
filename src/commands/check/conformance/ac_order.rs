@@ -8,13 +8,16 @@ use super::{Finding, SPEC_ID, Severity, rel};
 
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
-// Verifies each spec file lists its `acceptance_criteria` in RFC 2119
-// commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
+// Verifies each spec and rule file lists its `acceptance_criteria` in RFC
+// 2119 commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A spec's
+// criteria carry the commitment level as a key (`must`, `must_not`, ...); a
+// rule's are still plain, MUST/MUST NOT-prefixed strings.
 pub(super) fn validate_ac_order(spex_dir: &Path, findings: &mut Vec<Finding>) {
-    for dir_name in [SPECS_DIR, RULES_DIR] {
-        for file in yaml_files(&spex_dir.join(dir_name)) {
-            check_ac_order(spex_dir, &file, findings);
-        }
+    for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
+        check_ac_order(spex_dir, &file, findings, spec_item_rank);
+    }
+    for file in yaml_files(&spex_dir.join(RULES_DIR)) {
+        check_ac_order(spex_dir, &file, findings, rule_item_rank);
     }
 }
 
@@ -34,7 +37,40 @@ fn rfc2119_rank(text: &str) -> Option<(u8, &'static str)> {
     }
 }
 
-fn check_ac_order(spex_dir: &Path, file: &Path, findings: &mut Vec<Finding>) {
+// A spec's acceptance criteria are `- id: ...` / `  must: "..."` (or
+// `must_not`/`should`/`should_not`/`may`) objects: the commitment level is
+// the key itself.
+fn spec_item_rank(trimmed: &str) -> Option<(u8, &'static str)> {
+    if trimmed.starts_with("must_not:") {
+        Some((2, "MUST NOT"))
+    } else if trimmed.starts_with("must:") {
+        Some((1, "MUST"))
+    } else if trimmed.starts_with("should_not:") {
+        Some((4, "SHOULD NOT"))
+    } else if trimmed.starts_with("should:") {
+        Some((3, "SHOULD"))
+    } else if trimmed.starts_with("may:") {
+        Some((5, "MAY"))
+    } else {
+        None
+    }
+}
+
+// A rule's acceptance criteria are still plain `- "MUST ..."` strings.
+fn rule_item_rank(trimmed: &str) -> Option<(u8, &'static str)> {
+    let mut item = trimmed.strip_prefix("- ")?.trim();
+    if item.len() >= 2 && item.starts_with('"') && item.ends_with('"') {
+        item = &item[1..item.len() - 1];
+    }
+    rfc2119_rank(item)
+}
+
+fn check_ac_order(
+    spex_dir: &Path,
+    file: &Path,
+    findings: &mut Vec<Finding>,
+    item_rank: fn(&str) -> Option<(u8, &'static str)>,
+) {
     let Ok(text) = std::fs::read_to_string(file) else {
         return;
     };
@@ -58,20 +94,7 @@ fn check_ac_order(spex_dir: &Path, file: &Path, findings: &mut Vec<Finding>) {
             continue;
         }
 
-        let Some(mut item) = line.trim_start().strip_prefix("- ") else {
-            continue;
-        };
-        item = item.trim();
-        if item.len() >= 2 && item.starts_with('"') && item.ends_with('"') {
-            item = &item[1..item.len() - 1];
-        }
-        let item = item
-            .strip_prefix("[ ]")
-            .or_else(|| item.strip_prefix("[x]"))
-            .unwrap_or(item)
-            .trim_start();
-
-        let Some((rank, label)) = rfc2119_rank(item) else {
+        let Some((rank, label)) = item_rank(line.trim_start()) else {
             continue;
         };
         if prev_rank != 0 && rank < prev_rank {

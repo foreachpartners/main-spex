@@ -47,14 +47,15 @@ If a task fails or an agent cannot complete it, stop, report what failed, and as
 
 This step implements the change only — it does not write tests. Use `spex-test` for that once implementation is done.
 
+As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or the OpenAPI `x-spec: <spec-id>` property for a contract), tagging the specific criterion id it satisfies — see the `spec-id-tracing` rule. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap.
+
 ## Step 3 — Finalize the specs
 
 For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
 
-- Tick the checkbox of every acceptance criterion the run implemented, `[ ]` to `[x]`; leave any criterion not yet implemented as `[ ]`.
-- Change `status:` to `active` once every acceptance criterion is checked off (add the line if absent — it defaults to `planned`); if any criterion is still `[ ]`, set it to `in-progress` instead — `active` requires full completion and `spex check` errors otherwise.
+- If `status:` is absent or `planned`, set it to `in-progress` (add the line if absent). Never set it to `active` here — this skill doesn't write tests, so it can't know a criterion is actually done; that determination, and clearing each criterion's `is_done: false`, is `spex-test`'s job once it verifies impl+test tracing with `spex coverage`.
 
-Touch only the `status` line and the acceptance-criteria checkboxes — leave the rest of each spec untouched.
+Touch only the `status` line — leave the rest of each spec, including `is_done`, untouched.
 
 ## Step 4 — Verify
 
@@ -97,7 +98,7 @@ Update only what's now inaccurate or missing — don't rewrite unrelated section
 Summarize the run:
 
 - Which units of work completed.
-- Which specs you set to `active`, which acceptance criteria you ticked `[x]` or left `[ ]`, and why.
+- Which specs you set to `in-progress` (or left as-is), and which acceptance criteria `spex coverage` still shows untraced.
 - The format, lints, tests, `spex check` and `spex coverage` run outcome.
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
 - Which repo skill docs you updated or added, and why.

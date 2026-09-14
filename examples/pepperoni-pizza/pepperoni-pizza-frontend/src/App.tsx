@@ -15,6 +15,7 @@ export default function App() {
 
   // Poll the API every 2 seconds so the delivering window clears itself
   // once the API drops a delivery (when its estimated delivery time elapses).
+  // @spec impl delivery-time#in-progress-countdown-display
   useEffect(() => {
     function refresh() {
       pizzaApi.listDeliveries().then(setDeliveries).catch(showError);
@@ -26,6 +27,7 @@ export default function App() {
 
   // Fetch the live delivery estimate whenever the cart changes; reset to null
   // once the cart is empty so the cart shows no stale estimate.
+  // @spec impl delivery-time#cart-estimate-display
   useEffect(() => {
     if (cart.length === 0) {
       setEstimate(null);

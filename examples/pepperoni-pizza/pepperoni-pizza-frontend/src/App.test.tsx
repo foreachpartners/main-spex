@@ -69,7 +69,7 @@ describe("App", () => {
     expect(await screen.findByText(/Margherita — 25 s/)).toBeInTheDocument();
   });
 
-  // @spec test delivery-time
+  // @spec test delivery-time#cart-estimate-display
   it("shows the estimated delivery time once a pizza is in the cart", async () => {
     vi.mocked(pizzaApi.estimateOrderDeliveryTime).mockResolvedValue({
       estimatedSeconds: 18,
@@ -84,6 +84,7 @@ describe("App", () => {
     ).toBeInTheDocument();
   });
 
+  // @spec test delivery-time#in-progress-countdown-display
   it("shows the remaining delivery time for an in-progress delivery", async () => {
     const delivery: Delivery = {
       id: 1,

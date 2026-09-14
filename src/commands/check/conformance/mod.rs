@@ -5,12 +5,14 @@ use serde::Deserialize;
 use super::{Finding, Severity};
 
 mod ac_order;
+mod duplicate_ac_ids;
 mod duplicate_ids;
 mod property_order;
 mod schema;
 mod script_references;
 
 use ac_order::validate_ac_order;
+use duplicate_ac_ids::validate_no_duplicate_ac_ids;
 use duplicate_ids::validate_no_duplicate_ids;
 use property_order::validate_property_order;
 use schema::validate_schema;
@@ -31,8 +33,9 @@ struct IdOnly {
 // Validates the spex repository's own spec files: `spex.yaml` and every file
 // in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
 // must be named `<id>.yaml`, every script a rule check
-// references must exist under `scripts/<spec-id>/`, and every
-// spec's acceptance criteria must be ordered by RFC 2119 commitment level.
+// references must exist under `scripts/<spec-id>/`, every
+// spec's acceptance criteria must be ordered by RFC 2119 commitment level,
+// and every acceptance criterion id must be unique within its spec.
 pub(super) fn validate_conformance(
     spex_dir: &Path,
     rules: &std::collections::HashMap<String, crate::rule::Rule>,
@@ -42,6 +45,7 @@ pub(super) fn validate_conformance(
     validate_script_references(spex_dir, rules, findings);
     validate_ac_order(spex_dir, findings);
     validate_no_duplicate_ids(spex_dir, findings);
+    validate_no_duplicate_ac_ids(spex_dir, findings);
     validate_property_order(spex_dir, findings);
 }
 

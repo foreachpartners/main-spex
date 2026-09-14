@@ -3,6 +3,7 @@ mod tests {
     use super::super::*;
     use crate::config::{Config, PreexistingError, Repository};
     use crate::rule::{Check, CheckKind, Rule, RunScope, Severity};
+    use crate::spec::{AcceptanceCriterion, Commitment};
     use serial_test::serial;
     use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
@@ -793,8 +794,20 @@ constraints:
         ));
     }
 
-    fn ac(items: &[&str]) -> Vec<String> {
-        items.iter().map(|item| item.to_string()).collect()
+    fn ac(ids: &[&str]) -> Vec<AcceptanceCriterion> {
+        ac_with_done(ids, &[])
+    }
+
+    // Builds acceptance criteria for the given ids, marking `not_done` ones
+    // with `is_done: false` and leaving the rest at the (done) default.
+    fn ac_with_done(ids: &[&str], not_done: &[&str]) -> Vec<AcceptanceCriterion> {
+        ids.iter()
+            .map(|id| AcceptanceCriterion {
+                id: id.to_string(),
+                commitment: Commitment::Must(id.to_string()),
+                is_done: not_done.contains(id).then_some(false),
+            })
+            .collect()
     }
 
     fn spec(id: &str, blocked_by: Vec<&str>) -> Spec {
@@ -803,7 +816,7 @@ constraints:
 
     fn spec_with_criteria(
         id: &str,
-        acceptance_criteria: Vec<String>,
+        acceptance_criteria: Vec<AcceptanceCriterion>,
         blocked_by: Vec<&str>,
     ) -> Spec {
         Spec {
@@ -818,8 +831,8 @@ constraints:
     }
 
     #[test]
-    fn status_finding_flags_fully_checked_unimplemented_spec() {
-        let criteria = ac(&["[x] MUST a", "[x] SHOULD b"]);
+    fn status_finding_flags_fully_done_unimplemented_spec() {
+        let criteria = ac(&["a", "b"]);
         let spec = spec_with_criteria("a", criteria, Vec::new());
         let result = status_finding(&spec);
         let finding = result.expect("expected a status finding");
@@ -830,24 +843,24 @@ constraints:
 
     #[test]
     fn status_finding_is_silent_when_consistent_or_incomplete() {
-        let full = ac(&["[x] MUST a", "[x] MUST b"]);
-        // Fully checked and already implemented: nothing to flag.
+        let full = ac(&["a", "b"]);
+        // Fully done and already implemented: nothing to flag.
         let mut active = spec_with_criteria("A", full.clone(), Vec::new());
         active.status = Status::Active;
         assert!(status_finding(&active).is_none());
         let mut deprecated = spec_with_criteria("A", full, Vec::new());
         deprecated.status = Status::Deprecated;
         assert!(status_finding(&deprecated).is_none());
-        // A pending box means the spec isn't done, so any status is allowed.
-        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+        // A not-done criterion means the spec isn't done, so any status is allowed.
+        let partial = ac_with_done(&["a", "b"], &["b"]);
         assert!(status_finding(&spec_with_criteria("A", partial, Vec::new())).is_none());
         // No criteria at all: nothing to infer.
         assert!(status_finding(&spec_with_criteria("A", Vec::new(), Vec::new())).is_none());
     }
 
     #[test]
-    fn active_incomplete_finding_flags_active_with_unchecked_criteria() {
-        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+    fn active_incomplete_finding_flags_active_with_not_done_criteria() {
+        let partial = ac_with_done(&["a", "b"], &["b"]);
         let mut spec = spec_with_criteria("a", partial, Vec::new());
         spec.status = Status::Active;
         let finding = active_incomplete_finding(&spec).expect("expected a finding");
@@ -859,12 +872,12 @@ constraints:
 
     #[test]
     fn active_incomplete_finding_is_silent_when_complete_or_not_active() {
-        let full = ac(&["[x] MUST a", "[x] MUST b"]);
+        let full = ac(&["a", "b"]);
         let mut active = spec_with_criteria("a", full, Vec::new());
         active.status = Status::Active;
         assert!(active_incomplete_finding(&active).is_none());
 
-        let partial = ac(&["[x] MUST a", "[ ] MUST b"]);
+        let partial = ac_with_done(&["a", "b"], &["b"]);
         let mut in_progress = spec_with_criteria("a", partial, Vec::new());
         in_progress.status = Status::InProgress;
         assert!(active_incomplete_finding(&in_progress).is_none());

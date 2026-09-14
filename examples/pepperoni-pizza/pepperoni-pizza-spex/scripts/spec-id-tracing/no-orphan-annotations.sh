@@ -6,7 +6,8 @@
 # directory) and receives no file arguments. It reads the workspace
 # repositories from spex.yaml, lists each repository's git-tracked files (so
 # .gitignore is honored and each repository must be its own git repository),
-# and checks their @spec / x-spec annotations against the known Spec IDs — the
+# and checks their @spec / x-spec annotations against the known Spec IDs (a
+# `#<ac-id>` suffix, if present, is stripped before comparing) — the
 # spec files in specs/ and rules/. An annotation pointing at an ID with
 # no spec file is an orphan, usually a spec that was renamed or removed. Markdown
 # files are skipped, as are the spex workspace's own spec and script files:
@@ -66,6 +67,7 @@ orphans=$(
       refs=$(grep -hE '@spec (contract|impl|test) |x-spec:' "$file" 2>/dev/null |
         sed -E 's/^.*@spec (contract|impl|test) //; s/^.*x-spec: *//' |
         tr ',' '\n' |
+        sed -E 's/#.*//' |
         grep -oE "$id" | sort -u)
       for ref in $refs; do
         is_known "$ref" ||

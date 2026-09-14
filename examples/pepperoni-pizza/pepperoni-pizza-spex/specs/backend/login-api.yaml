@@ -5,12 +5,24 @@ description: >-
   receive a session bearer token to use on subsequent requests. Sessions are
   held in memory for this example project, with no persistent database.
 acceptance_criteria:
-  - "[ ] MUST authenticate the customer given a registered email and its matching password"
-  - "[ ] MUST return a session bearer token on successful authentication"
-  - "[ ] MUST reject login with a generic error when the email is unknown or the password does not match, without revealing which one failed"
-  - "[ ] MUST store active sessions in memory, with no persistent database"
-  - "[ ] MUST NOT expire the session bearer token"
-  - "[ ] MUST NOT persist active sessions across process restarts, given the in-memory storage"
+  - id: authenticate-matching-credentials
+    must: "authenticate the customer given a registered email and its matching password"
+    is_done: false
+  - id: session-token-on-success
+    must: "return a session bearer token on successful authentication"
+    is_done: false
+  - id: generic-error-on-mismatch
+    must: "reject login with a generic error when the email is unknown or the password does not match, without revealing which one failed"
+    is_done: false
+  - id: in-memory-session-store
+    must: "store active sessions in memory, with no persistent database"
+    is_done: false
+  - id: no-session-expiry
+    must_not: "expire the session bearer token"
+    is_done: false
+  - id: no-session-persistence
+    must_not: "persist active sessions across process restarts, given the in-memory storage"
+    is_done: false
 scope:
   - api
 blocked_by:

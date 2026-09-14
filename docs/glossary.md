@@ -20,7 +20,8 @@
   id: place-pizza-order
   title: Customer can place an order
   acceptance_criteria:
-    - "[ ] MUST return 201 with the created order from POST /orders"
+    - id: created-order-status
+      must: "return 201 with the created order from POST /orders"
   ```
 
 - **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
@@ -37,6 +38,12 @@
   ```text
   place-pizza-order
   secret-handling
+  ```
+
+- **Acceptance Criterion ID** (AC ID) — a unique identifier assigned to one acceptance criterion, scoped to its own spec. Names the criterion's behavior, not its position, so it survives reordering or inserting other criteria, and is immutable once an `@spec impl|test <spec-id>#<ac-id>` annotation references it — a change in meaning takes a new id.
+
+  ```text
+  empty-string-for-unset
   ```
 
 - **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability.

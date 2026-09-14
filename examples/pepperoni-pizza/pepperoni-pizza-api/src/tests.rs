@@ -65,7 +65,7 @@ async fn create_order_rejects_unknown_pizza() {
     assert!(list_deliveries(State(state)).await.0.is_empty());
 }
 
-// @spec test delivery-time
+// @spec test delivery-time#one-minute-per-pizza, delivery-time#two-workers-on-shift, delivery-time#round-up-to-whole-minute, delivery-time#whole-seconds-output
 #[tokio::test]
 async fn estimate_rounds_up_over_two_workers() {
     let response = estimate_order_delivery_time(
@@ -80,6 +80,7 @@ async fn estimate_rounds_up_over_two_workers() {
     assert_eq!(body["estimatedSeconds"], 120);
 }
 
+// @spec test delivery-time#total-pizzas-to-clear
 #[tokio::test]
 async fn estimate_counts_in_progress_workload() {
     let state = state();
@@ -97,6 +98,7 @@ async fn estimate_counts_in_progress_workload() {
     assert_eq!(body["estimatedSeconds"], 120);
 }
 
+// @spec test delivery-time#estimate-endpoint
 #[tokio::test]
 async fn order_estimate_validates_pizza_ids() {
     let valid = estimate_order_delivery_time(
@@ -122,6 +124,7 @@ async fn order_estimate_validates_pizza_ids() {
     assert!(body["message"].is_string());
 }
 
+// @spec test delivery-time#estimate-on-delivery
 #[tokio::test]
 async fn deliveries_carry_the_estimate() {
     let state = state();
@@ -160,6 +163,7 @@ async fn list_deliveries_keeps_orders_within_their_estimate() {
     assert_eq!(list_deliveries(State(state)).await.0.len(), 1);
 }
 
+// @spec test delivery-time#remaining-seconds-countdown
 #[tokio::test]
 async fn list_deliveries_counts_down_remaining_time() {
     let state = state();

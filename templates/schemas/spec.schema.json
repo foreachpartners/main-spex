@@ -20,12 +20,53 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria. Each begins with an implementation checkbox — `[ ]` not implemented, `[x]` implemented — then a commitment level. Order by commitment level: MUST, then MUST NOT, then SHOULD, then SHOULD NOT, then MAY.",
+      "description": "Verifiable acceptance criteria, each with a stable id and its commitment level as a key (`must`, `must_not`, `should`, `should_not`, or `may`) holding the criterion text. Order by commitment level: must, then must_not, then should, then should_not, then may. `spex coverage` requires every criterion to have its own impl and test annotation (`@spec impl|test <spec-id>#<ac-id>`), and reports how many of an active spec's criteria are traced.",
       "items": {
-        "type": "string",
-        "description": "A single verifiable acceptance criterion. Starts with an implementation checkbox (`[ ]` or `[x]`) followed by a commitment level. `spex coverage` reads the checkbox to report how many of an active spec's criteria are implemented.",
-        "pattern": "^\\[[ x]\\] (MUST NOT|MUST|SHOULD NOT|SHOULD|MAY) .+",
-        "minLength": 1
+        "type": "object",
+        "description": "A single verifiable acceptance criterion, exactly one of `must`/`must_not`/`should`/`should_not`/`may` present.",
+        "properties": {
+          "id": {
+            "$ref": "ac-id.schema.json"
+          },
+          "must": {
+            "type": "string",
+            "description": "The criterion text for a mandatory requirement.",
+            "minLength": 1
+          },
+          "must_not": {
+            "type": "string",
+            "description": "The criterion text for a prohibition.",
+            "minLength": 1
+          },
+          "should": {
+            "type": "string",
+            "description": "The criterion text for a recommendation.",
+            "minLength": 1
+          },
+          "should_not": {
+            "type": "string",
+            "description": "The criterion text for a discouraged behavior.",
+            "minLength": 1
+          },
+          "may": {
+            "type": "string",
+            "description": "The criterion text for an optional behavior.",
+            "minLength": 1
+          },
+          "is_done": {
+            "type": "boolean",
+            "description": "Whether this criterion is actually done. Optional; omitting it counts as true. `spex-spec` sets it false on every criterion of a newly authored spec; `spex-test` clears it (removes the field) once `spex coverage` shows the criterion fully impl+test traced. `spex check` requires every criterion true (or absent) before a spec's status can be active."
+          }
+        },
+        "oneOf": [
+          { "required": ["must"] },
+          { "required": ["must_not"] },
+          { "required": ["should"] },
+          { "required": ["should_not"] },
+          { "required": ["may"] }
+        ],
+        "required": ["id"],
+        "additionalProperties": false
       },
       "minItems": 1
     },
@@ -51,16 +92,35 @@
     },
     "status": {
       "type": "string",
-      "description": "Lifecycle status. Omitting is equivalent to 'planned'. 'active' requires every acceptance criterion to be checked off; a spec being implemented but not yet complete is 'in-progress'.",
+      "description": "Lifecycle status. Omitting is equivalent to 'planned'. 'active' requires every acceptance criterion to have a required impl and test annotation (see `spex coverage`); a spec being implemented but not yet complete is 'in-progress'.",
       "enum": ["active", "in-progress", "planned", "blocked", "deprecated"],
       "default": "planned"
     },
     "coverage_ignore": {
       "type": "array",
-      "description": "Coverage layers to skip for this spec. A listed layer is treated as ok even when its annotation is missing, so it never counts as a gap. By default coverage requires all three layers.",
+      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one's impl or test annotation. `ac` is not valid with `layer: contract`, since `x-spec` has no per-criterion granularity. By default coverage requires contract at the spec level, and impl and test per acceptance criterion.",
       "items": {
-        "type": "string",
-        "enum": ["contract", "impl", "test"]
+        "type": "object",
+        "properties": {
+          "layer": {
+            "type": "string",
+            "enum": ["contract", "impl", "test"]
+          },
+          "ac": {
+            "$ref": "ac-id.schema.json"
+          }
+        },
+        "required": ["layer"],
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "layer": { "const": "contract" }
+          },
+          "required": ["layer"]
+        },
+        "then": {
+          "not": { "required": ["ac"] }
+        }
       },
       "uniqueItems": true
     },
@@ -82,10 +142,22 @@
       "title": "Allow customers to place an order from their cart",
       "description": "Lets authenticated shoppers turn their cart into a paid order.",
       "acceptance_criteria": [
-        "[x] MUST create an order only when the cart contains at least one item",
-        "[x] MUST capture payment before the order is marked as confirmed",
-        "[ ] MUST empty the customer's cart after the order is successfully placed",
-        "[ ] SHOULD display an order confirmation with a unique order number"
+        {
+          "id": "order-requires-items",
+          "must": "create an order only when the cart contains at least one item"
+        },
+        {
+          "id": "payment-before-confirmed",
+          "must": "capture payment before the order is marked as confirmed"
+        },
+        {
+          "id": "empty-cart-after-order",
+          "must": "empty the customer's cart after the order is successfully placed"
+        },
+        {
+          "id": "order-confirmation-number",
+          "should": "display an order confirmation with a unique order number"
+        }
       ],
       "scope": ["api", "frontend"],
       "blocked_by": ["cart-add-item", "payment-gateway"],

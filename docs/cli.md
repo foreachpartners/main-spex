@@ -103,7 +103,7 @@ spex check --repo api --files src/main.rs src/orders.rs
 spex check --repo frontend --fill-preexisting-errors
 ```
 
-When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; and each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`). It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, that a `scope` entry matches a repository's `repository_short_name` in `spex.yaml`, that a spec with every acceptance criterion checked off has its `status` set to `active` or `deprecated`, and that a spec whose `status` is `active` has every acceptance criterion checked off (use `in-progress` while it's still being implemented).
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`); and each acceptance criterion's `id` must be unique within its spec. It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, that a `scope` entry matches a repository's `repository_short_name` in `spex.yaml`, that a spec whose acceptance criteria are all done (`is_done` `true` or absent) has its `status` set to `active` or `deprecated`, and that a spec whose `status` is `active` has every acceptance criterion done (use `in-progress` while any is still `is_done: false`). This reads only each criterion's `is_done` field — whether that's actually backed by impl/test annotations is `spex coverage`'s job.
 
 ### `spex check-schema`
 
@@ -126,25 +126,28 @@ spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-men
 
 ### `spex coverage`
 
-Reports how well the active and in-progress specs are covered by spec-id annotations across the workspace. For every spec whose `status` is `active` or `in-progress`, it requires that the code carries an implementation annotation (`@spec impl <spec-id>`), a test annotation (`@spec test <spec-id>`), and a contract annotation (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property). All three layers are required by default, though any of them — including `contract` — can be waived per spec via `coverage_ignore` (see below). A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active and in-progress specs are covered by spec-id annotations across the workspace, per acceptance criterion. For every spec whose `status` is `active` or `in-progress`, it requires a contract annotation at the spec level (`@spec contract <spec-id>`, or the OpenAPI `x-spec: <spec-id>` property — a single one anywhere in any workspace repository counts), and requires an implementation and a test annotation for every acceptance criterion, each qualified with that criterion's id: `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`. A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
 
 ```sh
 spex coverage
 ```
 
-A single annotation of each kind anywhere in any workspace repository counts — the search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
+The search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
 
-A spec can relax the requirement with the optional `coverage_ignore` field in its YAML, listing any of `contract`, `impl`, or `test`. A layer listed there is treated as ok even when its annotation is missing, so it never counts as a gap:
+A spec can relax the requirement with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec, given (an acceptance criterion id), it waives just that one criterion's impl or test requirement. `ac` is invalid with `layer: contract` — contract has no per-criterion form:
 
 ```yaml
 id: place-pizza-order
 status: active
-coverage_ignore: [contract]
+coverage_ignore:
+  - layer: contract
+  - layer: impl
+    ac: no-null-typed-string
 ```
 
-Each tracked spec's acceptance criteria carry an implementation checkbox — `[ ]` not implemented, `[x]` implemented — and the report shows how many are implemented as `done/total AC`. A tracked spec with any unimplemented criterion has a gap; `coverage_ignore` does not relax the checkboxes. `spex check` requires an `active` spec's criteria to already be all checked off, so this gap is expected to show up only on `in-progress` specs in practice.
+The report shows how many of each tracked spec's acceptance criteria are fully traced (a required impl and a required test annotation both present) as `done/total AC`. A tracked spec with any untraced required criterion has a gap.
 
-The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — a required layer missing, or an acceptance criterion unimplemented), each with its acceptance-criteria progress and what's missing (for example `missing: test, contract (ignored)`). Specs with no gap — fully covered, or only an ignored layer missing — aren't listed individually; they're only reflected in the "Gaps" count. A missing layer listed in `coverage_ignore` is reported but never counts as a gap. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
+The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — the contract missing, or an acceptance criterion missing a required impl or test annotation), each with its acceptance-criteria progress and what's missing, naming the acceptance criterion ids involved (for example `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`). Specs with no gap — fully covered, or only ignored requirements missing — aren't listed individually; they're only reflected in the "Gaps" count. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
 
 ### `spex info`
 

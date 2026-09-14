@@ -62,6 +62,7 @@ struct AppState {
 // Delivery-time estimate in whole seconds: the workers share the pizzas at
 // MINUTES_PER_PIZZA each, rounded up to the next whole minute, then returned in
 // seconds.
+// @spec impl delivery-time#one-minute-per-pizza, delivery-time#two-workers-on-shift, delivery-time#total-pizzas-to-clear, delivery-time#round-up-to-whole-minute, delivery-time#whole-seconds-output
 fn estimate_seconds(order_pizzas: i64, in_progress_pizzas: i64) -> i64 {
     let total = order_pizzas + in_progress_pizzas;
     let minutes = (total * MINUTES_PER_PIZZA + WORKERS - 1) / WORKERS;
@@ -77,6 +78,7 @@ impl Delivery {
 
     // Whole seconds left until this delivery arrives, counting down from the
     // estimate as time passes, never negative.
+    // @spec impl delivery-time#remaining-seconds-countdown
     fn remaining_seconds(&self) -> i64 {
         (self.estimated_seconds - self.created_at.elapsed().as_secs() as i64).max(0)
     }
@@ -143,6 +145,7 @@ async fn list_pizzas(State(state): State<AppState>) -> Json<Vec<Pizza>> {
     Json(state.menu.as_ref().clone())
 }
 
+// @spec impl delivery-time#estimate-on-delivery
 async fn create_order(State(state): State<AppState>, Json(input): Json<NewOrder>) -> Response {
     if input.pizza_ids.is_empty() {
         return error(
@@ -179,7 +182,7 @@ async fn create_order(State(state): State<AppState>, Json(input): Json<NewOrder>
     (StatusCode::CREATED, Json(delivery)).into_response()
 }
 
-// @spec impl delivery-time
+// @spec impl delivery-time#estimate-endpoint
 async fn estimate_order_delivery_time(
     State(state): State<AppState>,
     Json(input): Json<EstimateRequest>,
