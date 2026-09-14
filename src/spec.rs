@@ -65,6 +65,7 @@ impl Spec {
 pub struct AcceptanceCriterion {
     pub id: String,
     #[serde(flatten)]
+    #[allow(dead_code)]
     pub commitment: Commitment,
     #[serde(default)]
     pub is_done: Option<bool>,
@@ -83,6 +84,7 @@ impl AcceptanceCriterion {
 // text.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
+#[allow(dead_code)]
 pub enum Commitment {
     Must(String),
     MustNot(String),
