@@ -2,17 +2,12 @@
 # commit-message-format / commit-spec-id-trace
 #
 # A commit related to a spec must carry a matching @spec <id>[, <id>] tag in
-# its message; a commit related to a rule must carry a matching @rule
-# <id>[, <id>] tag, e.g.
+# its message, e.g.
 #   feat(ui): add order endpoint @spec place-pizza-order, secret-handling
 #
 # Only a feat commit is required to carry an @spec tag — other commit types
 # (fix, refactor, docs, ...) may touch spec-related code (e.g. mechanical
 # spex update reformatting) without being new spec work.
-#
-# "Related" can't be determined exactly from git history alone, so a rules/
-# commit is used as a proxy for @rule relevance — other rule-related commits
-# can still slip through untagged.
 #
 # Runs once in the repository directory and inspects the last 10 commits'
 # diffs, not the working tree.
@@ -27,7 +22,7 @@ if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
   exit 0
 fi
 
-# Keep in sync with schemas/spec-id.schema.json and schemas/rule-id.schema.json
+# Keep in sync with schemas/spec-id.schema.json
 id='[a-z]+(-[a-z]+)*'
 id_list=" ${id}(, ${id})*"
 
@@ -39,13 +34,6 @@ for sha in $(git log -3 --pretty=%H); do
   if printf '%s' "$subject" | grep -qE '^feat(\([a-z0-9-]+\))?!?: '; then
     if ! printf '%s' "$msg" | grep -qE "@spec${id_list}"; then
       printf 'feat commit missing an @spec ID list: %s\n' "$subject"
-      bad=1
-    fi
-  fi
-
-  if git diff-tree --no-commit-id --name-only -r "$sha" | grep -q '^rules/'; then
-    if ! printf '%s' "$msg" | grep -qE "@rule${id_list}"; then
-      printf 'rules/ commit missing an @rule ID list: %s\n' "$subject"
       bad=1
     fi
   fi
