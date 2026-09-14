@@ -4,9 +4,9 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>[#<ac-id>]`, or `x-spec: <spec-id>` in OpenAPI). Tag `impl` and `test` annotations with the specific acceptance criterion id they satisfy so `spex coverage` can verify each one individually.
+BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>[#<ac-id>]`, or `x-spec: <spec-id>` in OpenAPI). Tag `impl` and `test` annotations with the specific acceptance criterion id are required for each so `spex coverage` can verify each one individually.
 
-- **Spec** — one coherent capability the system must provide, with acceptance criteria.
+- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
 
 ## Workspace layout
@@ -65,7 +65,7 @@ Code should be simple enough that any teammate or AI — not just its author —
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/commit-message-format.yaml`.
 
-Tag every spec- or rule-related commit with its ID(s) using @spec or @rule: `@spec <Spec ID>[, <Spec ID>]` or `@rule <Rule ID>[, <Rule ID>]`.
+Tag every spec- or rule-related commit with its ID(s) using @spec or @rule: `@spec <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]` or `@rule <Rule ID>[, <Rule ID>]`.
 
 Examples:
 
@@ -74,4 +74,5 @@ style: format md files
 feat(deps): pin dependencies @rule dependencies-rules
 feat(ui): list available pizzas @spec list-pizza-menu
 fix(cart): reject negative quantities @spec cart-add-item, cart-validate
+feat(orders): set status on order creation @spec place-pizza-order#created-order-status
 ```
