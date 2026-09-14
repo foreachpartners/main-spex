@@ -42,12 +42,14 @@ src/                CLI source
   config.rs         Config loading
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
   rule.rs           Rule model
-  spec.rs           Spec model (status, acceptance-criteria checkbox)
+  spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
+  annotations.rs    @spec impl|test annotation parsing (source for coverage)
   style.rs          Terminal color styling (shared by commands)
   util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
-  commands/         Subcommands (init, update, check, check_schema, coverage, rules, info)
+  commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
     check/          check command: orchestration (mod), report
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs)
       runners/      One runner per check type (ast_grep, glob, regexp, script)
 docs/
   glossary.md              Terms used across code, messages, schemas, and docs
