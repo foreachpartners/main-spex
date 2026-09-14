@@ -9,6 +9,14 @@ BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (in
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
 
+## Definition of done
+
+A change isn't finished until:
+
+- `spex check` passes (no error-severity findings) for every affected repository.
+- `spex coverage` shows no gap for any spec or acceptance criterion the change touches.
+- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` annotations.
+
 ## Workspace layout
 
 The workspace root holds this repo (`<project-name>-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configuration.
