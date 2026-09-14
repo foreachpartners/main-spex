@@ -47,6 +47,12 @@ impl Workspace {
         rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
     }
 
+    // Every rule file, keeping files with colliding ids separate — see
+    // `rule::load_all_list`.
+    pub fn rules_list(&self) -> Result<Vec<Rule>> {
+        rule::load_all_list(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
+    }
+
     pub fn specs(&self) -> Result<Vec<Spec>> {
         spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(WorkspaceError::Specs)
     }

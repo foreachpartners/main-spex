@@ -532,6 +532,7 @@ constraints:
         Rule {
             id: id.to_string(),
             path: format!("{id}.yaml"),
+            acceptance_criteria: Vec::new(),
             checks,
         }
     }
@@ -806,6 +807,7 @@ constraints:
                 id: id.to_string(),
                 commitment: Commitment::Must(id.to_string()),
                 is_done: not_done.contains(id).then_some(false),
+                line: 0,
             })
             .collect()
     }

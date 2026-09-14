@@ -1,14 +1,19 @@
 use std::path::{Path, PathBuf};
 
 use crate::commands::check_schema;
-use crate::rule::RULES_DIR;
-use crate::spec::SPECS_DIR;
+use crate::rule::{RULES_DIR, Rule};
+use crate::spec::{SPECS_DIR, Spec};
 use crate::templates::SCHEMAS_DIR;
 use crate::util::yaml_files;
 
-use super::{Finding, IdOnly, conform_finding, rel};
+use super::{Finding, conform_finding, rel};
 
-pub(super) fn validate_schema(spex_dir: &Path, findings: &mut Vec<Finding>) {
+pub(super) fn validate_schema(
+    spex_dir: &Path,
+    specs: &[Spec],
+    rules: &[Rule],
+    findings: &mut Vec<Finding>,
+) {
     let spex_yaml = spex_dir.join(crate::config::SPEX_CONFIG_FILE);
     if spex_yaml.is_file() {
         validate_schema_group(spex_dir, &[spex_yaml], "spex.schema.json", findings);
@@ -32,11 +37,11 @@ pub(super) fn validate_schema(spex_dir: &Path, findings: &mut Vec<Finding>) {
         findings,
     );
 
-    for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
-        check_filename_matches_id(spex_dir, &file, findings);
+    for spec in specs {
+        check_filename_matches_id(spec.location(), &spec.path, &spec.id, findings);
     }
-    for file in yaml_files(&spex_dir.join(RULES_DIR)) {
-        check_filename_matches_id(spex_dir, &file, findings);
+    for rule in rules {
+        check_filename_matches_id(rule.location(), &rule.path, &rule.id, findings);
     }
 }
 
@@ -78,23 +83,17 @@ fn validate_schema_group(
     }
 }
 
-// A spec file must be named after its own id (naming-convention: id and
-// filename are identical).
-fn check_filename_matches_id(spex_dir: &Path, file: &Path, findings: &mut Vec<Finding>) {
-    let Ok(text) = std::fs::read_to_string(file) else {
-        return;
-    };
-    let Ok(parsed) = serde_yaml_ng::from_str::<IdOnly>(&text) else {
-        return;
-    };
-    let stem = file
+// A spec or rule file must be named after its own id (naming-convention: id
+// and filename are identical).
+fn check_filename_matches_id(location: String, path: &str, id: &str, findings: &mut Vec<Finding>) {
+    let stem = Path::new(path)
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or_default();
-    if parsed.id != stem {
+    if id != stem {
         findings.push(conform_finding(
-            Some(rel(spex_dir, file)),
-            format!("filename stem `{stem}` does not match id `{}`", parsed.id),
+            Some(location),
+            format!("filename stem `{stem}` does not match id `{id}`"),
         ));
     }
 }

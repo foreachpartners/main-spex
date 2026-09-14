@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
 use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
-use crate::spec::{self, Spec, Status};
+use crate::spec::{Spec, Status};
 use crate::style::{Log, Style};
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
@@ -610,15 +610,18 @@ fn validate_specs(
         validate_scope(spec, &workspace.config.repositories, &mut report.findings);
     }
 
-    validate_conformance(&workspace.dir, rules, &mut report.findings);
+    let rules_list = workspace
+        .rules_list()
+        .change_context(CheckError::Workspace)?;
+    validate_conformance(
+        &workspace.dir,
+        &specs,
+        rules,
+        &rules_list,
+        &mut report.findings,
+    );
 
     Ok(())
-}
-
-// The spec file's location relative to the workspace root (e.g.
-// `specs/admin/foo.yaml`), honoring however the spec is nested under `specs/`.
-fn spec_location(spec: &Spec) -> String {
-    format!("{}/{}", spec::SPECS_DIR, spec.path)
 }
 
 fn ac_done_total(spec: &Spec) -> (usize, usize) {
@@ -643,7 +646,7 @@ fn status_finding(spec: &Spec) -> Option<Finding> {
         severity: Severity::Warn,
         spec_id: spec.id.clone(),
         check: "status".to_string(),
-        location: Some(spec_location(spec)),
+        location: Some(spec.location()),
         message: format!(
             "every acceptance criterion is done but status is `{}` — set status to active or deprecated",
             spec.status.label()
@@ -663,7 +666,7 @@ fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
         severity: Severity::Error,
         spec_id: spec.id.clone(),
         check: "status".to_string(),
-        location: Some(spec_location(spec)),
+        location: Some(spec.location()),
         message: format!(
             "status is `active` but only {done}/{total} acceptance criteria are done — use `in-progress` until every `is_done: false` is cleared"
         ),
@@ -676,7 +679,7 @@ fn validate_blocked_by(
     findings: &mut Vec<Finding>,
 ) {
     for blocker in &spec.blocked_by {
-        let location = Some(spec_location(spec));
+        let location = Some(spec.location());
         match status_by_id.get(blocker.as_str()) {
             None => findings.push(Finding {
                 severity: Severity::Error,
@@ -711,7 +714,7 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
             severity: Severity::Error,
             spec_id: spec.id.clone(),
             check: "scope".to_string(),
-            location: Some(spec_location(spec)),
+            location: Some(spec.location()),
             message: format!(
                 "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
             ),

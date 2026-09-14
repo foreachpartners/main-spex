@@ -13,6 +13,7 @@ mod tests {
                     id: id.to_string(),
                     commitment: Commitment::Must(id.to_string()),
                     is_done: None,
+                    line: 0,
                 })
                 .collect(),
             blocked_by: Vec::new(),

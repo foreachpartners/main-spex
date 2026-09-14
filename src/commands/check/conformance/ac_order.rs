@@ -1,114 +1,57 @@
-use std::path::Path;
+use crate::rule::Rule;
+use crate::spec::Spec;
 
-use crate::rule::RULES_DIR;
-use crate::spec::SPECS_DIR;
-use crate::util::yaml_files;
-
-use super::{Finding, SPEC_ID, Severity, rel};
+use super::{Finding, SPEC_ID, Severity};
 
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
-// Verifies each spec and rule file lists its `acceptance_criteria` in RFC
-// 2119 commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A spec's
+// Verifies each spec and rule lists its `acceptance_criteria` in RFC 2119
+// commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A spec's
 // criteria carry the commitment level as a key (`must`, `must_not`, ...); a
 // rule's are still plain, MUST/MUST NOT-prefixed strings.
-pub(super) fn validate_ac_order(spex_dir: &Path, findings: &mut Vec<Finding>) {
-    for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
-        check_ac_order(spex_dir, &file, findings, spec_item_rank);
+pub(super) fn validate_ac_order(specs: &[Spec], rules: &[Rule], findings: &mut Vec<Finding>) {
+    for spec in specs {
+        let mut prev: Option<(u8, &'static str)> = None;
+        for ac in &spec.acceptance_criteria {
+            let rank = ac.commitment.rank();
+            let label = ac.commitment.label();
+            check_order(prev, (rank, label), &spec.location(), ac.line, findings);
+            prev = Some((rank, label));
+        }
     }
-    for file in yaml_files(&spex_dir.join(RULES_DIR)) {
-        check_ac_order(spex_dir, &file, findings, rule_item_rank);
+
+    for rule in rules {
+        let mut prev: Option<(u8, &'static str)> = None;
+        for ac in &rule.acceptance_criteria {
+            let Some((rank, label)) = ac.rank() else {
+                continue;
+            };
+            check_order(prev, (rank, label), &rule.location(), ac.line, findings);
+            prev = Some((rank, label));
+        }
     }
 }
 
-fn rfc2119_rank(text: &str) -> Option<(u8, &'static str)> {
-    if text.starts_with("MUST NOT") {
-        Some((2, "MUST NOT"))
-    } else if text.starts_with("MUST") {
-        Some((1, "MUST"))
-    } else if text.starts_with("SHOULD NOT") {
-        Some((4, "SHOULD NOT"))
-    } else if text.starts_with("SHOULD") {
-        Some((3, "SHOULD"))
-    } else if text.starts_with("MAY") {
-        Some((5, "MAY"))
-    } else {
-        None
-    }
-}
-
-// A spec's acceptance criteria are `- id: ...` / `  must: "..."` (or
-// `must_not`/`should`/`should_not`/`may`) objects: the commitment level is
-// the key itself.
-fn spec_item_rank(trimmed: &str) -> Option<(u8, &'static str)> {
-    if trimmed.starts_with("must_not:") {
-        Some((2, "MUST NOT"))
-    } else if trimmed.starts_with("must:") {
-        Some((1, "MUST"))
-    } else if trimmed.starts_with("should_not:") {
-        Some((4, "SHOULD NOT"))
-    } else if trimmed.starts_with("should:") {
-        Some((3, "SHOULD"))
-    } else if trimmed.starts_with("may:") {
-        Some((5, "MAY"))
-    } else {
-        None
-    }
-}
-
-// A rule's acceptance criteria are still plain `- "MUST ..."` strings.
-fn rule_item_rank(trimmed: &str) -> Option<(u8, &'static str)> {
-    let mut item = trimmed.strip_prefix("- ")?.trim();
-    if item.len() >= 2 && item.starts_with('"') && item.ends_with('"') {
-        item = &item[1..item.len() - 1];
-    }
-    rfc2119_rank(item)
-}
-
-fn check_ac_order(
-    spex_dir: &Path,
-    file: &Path,
+fn check_order(
+    prev: Option<(u8, &'static str)>,
+    current: (u8, &'static str),
+    location: &str,
+    line: usize,
     findings: &mut Vec<Finding>,
-    item_rank: fn(&str) -> Option<(u8, &'static str)>,
 ) {
-    let Ok(text) = std::fs::read_to_string(file) else {
+    let (rank, label) = current;
+    let Some((prev_rank, prev_label)) = prev else {
         return;
     };
-
-    let mut in_ac = false;
-    let mut prev_rank: u8 = 0;
-    let mut prev_label = "";
-
-    for (index, line) in text.lines().enumerate() {
-        if line.starts_with("acceptance_criteria:") {
-            in_ac = true;
-            prev_rank = 0;
-            prev_label = "";
-            continue;
-        }
-        if !in_ac {
-            continue;
-        }
-        if !line.starts_with(' ') && !line.starts_with('\t') {
-            in_ac = false;
-            continue;
-        }
-
-        let Some((rank, label)) = item_rank(line.trim_start()) else {
-            continue;
-        };
-        if prev_rank != 0 && rank < prev_rank {
-            findings.push(Finding {
-                severity: Severity::Error,
-                spec_id: SPEC_ID.to_string(),
-                check: AC_ORDER_CHECK.to_string(),
-                location: Some(format!("{}:{}", rel(spex_dir, file), index + 1)),
-                message: format!(
-                    "acceptance criteria out of order: {label} must not follow {prev_label} (order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY)"
-                ),
-            });
-        }
-        prev_rank = rank;
-        prev_label = label;
+    if rank < prev_rank {
+        findings.push(Finding {
+            severity: Severity::Error,
+            spec_id: SPEC_ID.to_string(),
+            check: AC_ORDER_CHECK.to_string(),
+            location: Some(format!("{location}:{line}")),
+            message: format!(
+                "acceptance criteria out of order: {label} must not follow {prev_label} (order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY)"
+            ),
+        });
     }
 }

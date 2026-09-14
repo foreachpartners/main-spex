@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use serde::Deserialize;
+use crate::spec::Spec;
 
 use super::{Finding, Severity};
 
@@ -25,11 +25,6 @@ use script_references::validate_script_references;
 const SPEC_ID: &str = "spex-internal-conformance";
 const CONFORM_CHECK: &str = "spec-files-conform";
 
-#[derive(Deserialize)]
-struct IdOnly {
-    id: String,
-}
-
 // Validates the spex repository's own spec files: `spex.yaml` and every file
 // in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
 // must be named `<id>.yaml`, every script a rule check
@@ -38,14 +33,16 @@ struct IdOnly {
 // and every acceptance criterion id must be unique within its spec.
 pub(super) fn validate_conformance(
     spex_dir: &Path,
+    specs: &[Spec],
     rules: &std::collections::HashMap<String, crate::rule::Rule>,
+    rules_list: &[crate::rule::Rule],
     findings: &mut Vec<Finding>,
 ) {
-    validate_schema(spex_dir, findings);
+    validate_schema(spex_dir, specs, rules_list, findings);
     validate_script_references(spex_dir, rules, findings);
-    validate_ac_order(spex_dir, findings);
-    validate_no_duplicate_ids(spex_dir, findings);
-    validate_no_duplicate_ac_ids(spex_dir, findings);
+    validate_ac_order(specs, rules_list, findings);
+    validate_no_duplicate_ids(specs, rules_list, findings);
+    validate_no_duplicate_ac_ids(specs, findings);
     validate_property_order(spex_dir, findings);
 }
 

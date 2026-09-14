@@ -77,16 +77,16 @@ mod tests {
         std::fs::create_dir_all(dir.path().join("frontend")).expect("frontend dir");
         std::fs::write(dir.path().join("frontend/nested.yaml"), "id: NESTED\n").expect("nested");
 
-        let items: Vec<(Item, String)> =
+        let items: Vec<(Item, String, String)> =
             load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
-        let mut ids: Vec<&str> = items.iter().map(|(item, _)| item.id.as_str()).collect();
+        let mut ids: Vec<&str> = items.iter().map(|(item, _, _)| item.id.as_str()).collect();
         ids.sort();
 
         assert_eq!(ids, vec!["NESTED", "TOP"]);
         assert!(
             items
                 .iter()
-                .any(|(item, path)| item.id == "NESTED" && path == "frontend/nested.yaml")
+                .any(|(item, path, _)| item.id == "NESTED" && path == "frontend/nested.yaml")
         );
     }
 
@@ -97,7 +97,7 @@ mod tests {
         std::fs::write(dir.path().join("frontend/deep/nested.yaml"), "id: NESTED\n")
             .expect("nested");
 
-        let items: Vec<(Item, String)> =
+        let items: Vec<(Item, String, String)> =
             load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
 
         assert_eq!(items.len(), 1);

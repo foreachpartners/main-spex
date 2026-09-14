@@ -68,6 +68,7 @@ mod tests {
             id: "a".to_string(),
             commitment: Commitment::Must("a".to_string()),
             is_done: None,
+            line: 0,
         };
         assert!(ac.is_done());
     }
@@ -78,6 +79,7 @@ mod tests {
             id: "a".to_string(),
             commitment: Commitment::Must("a".to_string()),
             is_done: Some(false),
+            line: 0,
         };
         assert!(!ac.is_done());
     }

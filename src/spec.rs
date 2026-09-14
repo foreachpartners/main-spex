@@ -42,6 +42,12 @@ pub struct Spec {
 }
 
 impl Spec {
+    // Where the spec is defined, relative to the workspace root (e.g.
+    // `specs/admin/foo.yaml`).
+    pub fn location(&self) -> String {
+        format!("{SPECS_DIR}/{}", self.path)
+    }
+
     // A layer waived for the whole spec, via a `coverage_ignore` entry with
     // no `ac`.
     pub fn layer_ignored(&self, layer: CoverageLayer) -> bool {
@@ -65,10 +71,13 @@ impl Spec {
 pub struct AcceptanceCriterion {
     pub id: String,
     #[serde(flatten)]
-    #[allow(dead_code)]
     pub commitment: Commitment,
     #[serde(default)]
     pub is_done: Option<bool>,
+    // The 1-indexed source line of this criterion's `- id: ...` entry, filled
+    // in by `load_all` from the raw file text (serde tracks no spans).
+    #[serde(skip, default)]
+    pub line: usize,
 }
 
 impl AcceptanceCriterion {
@@ -84,13 +93,35 @@ impl AcceptanceCriterion {
 // text.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-#[allow(dead_code)]
 pub enum Commitment {
-    Must(String),
-    MustNot(String),
-    Should(String),
-    ShouldNot(String),
-    May(String),
+    Must(#[allow(dead_code)] String),
+    MustNot(#[allow(dead_code)] String),
+    Should(#[allow(dead_code)] String),
+    ShouldNot(#[allow(dead_code)] String),
+    May(#[allow(dead_code)] String),
+}
+
+impl Commitment {
+    // RFC 2119 order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
+    pub fn rank(&self) -> u8 {
+        match self {
+            Commitment::Must(_) => 1,
+            Commitment::MustNot(_) => 2,
+            Commitment::Should(_) => 3,
+            Commitment::ShouldNot(_) => 4,
+            Commitment::May(_) => 5,
+        }
+    }
+
+    pub fn label(&self) -> &'static str {
+        match self {
+            Commitment::Must(_) => "MUST",
+            Commitment::MustNot(_) => "MUST NOT",
+            Commitment::Should(_) => "SHOULD",
+            Commitment::ShouldNot(_) => "SHOULD NOT",
+            Commitment::May(_) => "MAY",
+        }
+    }
 }
 
 // A `coverage_ignore` entry: `layer` is required, `ac` is optional. Without
@@ -159,8 +190,12 @@ pub fn load_all(specs_dir: &Path) -> Result<Vec<Spec>> {
 
     let mut specs: Vec<Spec> = loaded
         .into_iter()
-        .map(|(mut spec, path): (Spec, String)| {
+        .map(|(mut spec, path, raw): (Spec, String, String)| {
             spec.path = path;
+            let lines = util::acceptance_criteria_lines(&raw);
+            for (ac, line) in spec.acceptance_criteria.iter_mut().zip(lines) {
+                ac.line = line;
+            }
             spec
         })
         .collect();

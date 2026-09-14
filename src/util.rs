@@ -109,16 +109,18 @@ pub fn yaml_files(dir: &Path) -> Vec<PathBuf> {
 }
 
 // Parses every `*.yaml` file under `dir`, at any nesting depth, into `T`,
-// paired with its path relative to `dir` (e.g. `admin/foo.yaml`) so callers
-// can locate the file that produced each item. Missing directories yield an
-// empty list; the closures let each caller surface its own error context
-// while the directory walk and per-file read/parse logic stays in one place.
+// paired with its path relative to `dir` (e.g. `admin/foo.yaml`) and its raw
+// source text (so a caller can derive line numbers for parts of `T` that
+// serde doesn't track spans for), so callers can locate the file that
+// produced each item. Missing directories yield an empty list; the closures
+// let each caller surface its own error context while the directory walk and
+// per-file read/parse logic stays in one place.
 pub fn load_yaml_dir<T, E>(
     dir: &Path,
     read_dir_err: impl Fn() -> E,
     read_file_err: impl Fn(String) -> E,
     parse_err: impl Fn(String) -> E,
-) -> Result<Vec<(T, String)>, Report<E>>
+) -> Result<Vec<(T, String, String)>, Report<E>>
 where
     T: DeserializeOwned,
     E: std::error::Error + Send + Sync + 'static,
@@ -142,10 +144,36 @@ where
             fs::read_to_string(&path).change_context_lazy(|| read_file_err(rel_name.clone()))?;
         let item: T =
             serde_yaml_ng::from_str(&raw).change_context_lazy(|| parse_err(rel_name.clone()))?;
-        items.push((item, rel_name));
+        items.push((item, rel_name, raw));
     }
 
     Ok(items)
+}
+
+// The 1-indexed source line of each `acceptance_criteria` list item (`- ...`),
+// in appearance order — the criterion's own line for a rule's plain-string
+// items, or its `- id: ...` line for a spec's object items. Serde doesn't
+// track source spans, so callers zip this against the parsed list by index.
+pub fn acceptance_criteria_lines(text: &str) -> Vec<usize> {
+    let mut lines = Vec::new();
+    let mut in_block = false;
+    for (index, line) in text.lines().enumerate() {
+        if line.starts_with("acceptance_criteria:") {
+            in_block = true;
+            continue;
+        }
+        if !in_block {
+            continue;
+        }
+        if !line.starts_with(' ') && !line.starts_with('\t') {
+            in_block = false;
+            continue;
+        }
+        if line.trim_start().starts_with("- ") {
+            lines.push(index + 1);
+        }
+    }
+    lines
 }
 
 // Loads every `*.yaml` file under `dir`, at any nesting depth, as generic
