@@ -154,6 +154,7 @@ Reports annotation coverage for specs, per acceptance criterion.
 - Reports how many of each tracked spec's acceptance criteria are fully traced (both a required impl and a required test annotation present).
 - Specs that are neither `active` nor `in-progress` are listed by ID under their status (e.g. `planned`, `blocked`), not just counted.
 - Its "Gaps" section only lists tracked specs with a gap (✗: the contract missing, or any acceptance criterion missing a required impl or test annotation); specs with no gap (fully covered, or only ignored requirements missing) are counted in the section header but not listed individually. A gapped spec's missing detail names which acceptance criterion ids are missing which layer.
+- Gaps are grouped by `scope`, sorted alphabetically, with specs that have no scope grouped last under `unscoped`. A spec listed under more than one `scope` is duplicated under each of its scope groups; the "Gaps" header count still reflects each gapped spec once.
 - Ends with a one-line summary: the spec count per status (`in-progress`, `planned`, `active`) and the gap count.
 - Exits non-zero only when an **active** spec has a missing required layer or acceptance criterion; gaps on `in-progress` specs are reported but don't affect the exit code.
 

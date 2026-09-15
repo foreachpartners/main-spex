@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.2] - 2026-09-15
+
+- `coverage`: the "Gaps" section is now grouped by `scope`, sorted alphabetically with unscoped specs listed last; a spec with more than one scope is duplicated under each of its scope groups.
+
 ## [0.8.1] - 2026-09-14
 
 - `init`, `update`: now scaffold a bundled `docs/` folder (`glossary.md`, `framework-principles.md`, `cli.md`) into the spex repository, always overwritten on `update` like `schemas/`.

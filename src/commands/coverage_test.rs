@@ -35,6 +35,7 @@ mod tests {
         SpecRow {
             id: id.to_string(),
             status: Status::Active,
+            scope: Vec::new(),
             contract_required,
             contract_present,
             ac_rows,
@@ -164,6 +165,27 @@ mod tests {
         let specs = vec![spec("A", Status::Planned)];
         let groups = status_groups(&specs);
         assert_eq!(groups, vec![(Status::Planned, vec!["A"])]);
+    }
+
+    #[test]
+    fn scope_groups_duplicates_multi_scope_rows_and_lists_unscoped_last() {
+        let mut a = row("A", true, true, Vec::new());
+        a.scope = vec!["web".to_string(), "api".to_string()];
+        let mut b = row("B", true, true, Vec::new());
+        b.scope = vec!["web".to_string()];
+        let c = row("C", true, true, Vec::new());
+
+        let rows = [&a, &b, &c];
+        let groups = scope_groups(&rows);
+
+        let scopes: Vec<Option<&str>> = groups.iter().map(|(scope, _)| *scope).collect();
+        assert_eq!(scopes, vec![Some("api"), Some("web"), None]);
+
+        let ids: Vec<Vec<&str>> = groups
+            .iter()
+            .map(|(_, rows)| rows.iter().map(|row| row.id.as_str()).collect())
+            .collect();
+        assert_eq!(ids, vec![vec!["A"], vec!["A", "B"], vec!["C"]]);
     }
 
     #[test]

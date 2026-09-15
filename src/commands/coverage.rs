@@ -25,6 +25,7 @@ pub enum CoverageError {
 struct SpecRow {
     id: String,
     status: Status,
+    scope: Vec<String>,
     contract_required: bool,
     contract_present: bool,
     ac_rows: Vec<AcCoverage>,
@@ -73,6 +74,7 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
             SpecRow {
                 id: spec.id.clone(),
                 status: spec.status,
+                scope: spec.scope.clone(),
                 contract_required,
                 contract_present,
                 ac_rows: annotations::ac_coverage(spec, found),
@@ -194,6 +196,62 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
     println!();
 }
 
+// Groups gapped rows by scope, sorted alphabetically; a row with more than
+// one scope is duplicated under each of its scopes. Rows with no scope are
+// grouped last under `None`.
+fn scope_groups<'a>(gapped: &[&'a SpecRow]) -> Vec<(Option<&'a str>, Vec<&'a SpecRow>)> {
+    let mut scopes: Vec<&str> = gapped
+        .iter()
+        .flat_map(|row| row.scope.iter().map(String::as_str))
+        .collect();
+    scopes.sort_unstable();
+    scopes.dedup();
+
+    let mut groups: Vec<(Option<&str>, Vec<&SpecRow>)> = scopes
+        .into_iter()
+        .map(|scope| {
+            let rows = gapped
+                .iter()
+                .filter(|row| row.scope.iter().any(|s| s == scope))
+                .copied()
+                .collect();
+            (Some(scope), rows)
+        })
+        .collect();
+
+    let unscoped: Vec<&SpecRow> = gapped
+        .iter()
+        .filter(|row| row.scope.is_empty())
+        .copied()
+        .collect();
+    if !unscoped.is_empty() {
+        groups.push((None, unscoped));
+    }
+
+    groups
+}
+
+fn print_gap_row(style: &Style, row: &SpecRow, width: usize) {
+    let id = style.cyan(&format!("{:<width$}", row.id, width = width));
+    let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
+    let ac = if row.ac_complete() {
+        style.dim(&ac_text)
+    } else {
+        style.red(&ac_text)
+    };
+
+    let layers = missing_summary(row);
+    if layers.is_empty() {
+        println!("    {}  {id}  {ac}", style.red("✗"));
+    } else {
+        println!(
+            "    {}  {id}  {ac}  {}",
+            style.red("✗"),
+            style.dim(&format!("missing: {layers}"))
+        );
+    }
+}
+
 fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
     let gapped: Vec<&SpecRow> = rows.iter().filter(|row| row.has_gap()).collect();
     let gaps = gapped.len();
@@ -209,24 +267,10 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
         println!("  {}", style.dim("none"));
     } else {
         let width = gapped.iter().map(|row| row.id.len()).max().unwrap_or(0);
-        for row in &gapped {
-            let id = style.cyan(&format!("{:<width$}", row.id, width = width));
-            let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
-            let ac = if row.ac_complete() {
-                style.dim(&ac_text)
-            } else {
-                style.red(&ac_text)
-            };
-
-            let layers = missing_summary(row);
-            if layers.is_empty() {
-                println!("  {}  {id}  {ac}", style.red("✗"));
-            } else {
-                println!(
-                    "  {}  {id}  {ac}  {}",
-                    style.red("✗"),
-                    style.dim(&format!("missing: {layers}"))
-                );
+        for (scope, scope_rows) in scope_groups(&gapped) {
+            println!("  {}", style.bold(scope.unwrap_or("unscoped")));
+            for row in scope_rows {
+                print_gap_row(style, row, width);
             }
         }
     }
