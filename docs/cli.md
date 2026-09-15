@@ -132,7 +132,13 @@ Reports how well the active and in-progress specs are covered by spec-id annotat
 spex coverage
 ```
 
-The search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
+- `--scope <name>...` — limit the report to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
+
+```sh
+spex coverage --scope api frontend
+```
+
+The annotation search itself is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
 
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec, given (an acceptance criterion id), it waives just that one criterion's impl or test requirement. `ac` is invalid with `layer: contract` — contract has no per-criterion form:
 

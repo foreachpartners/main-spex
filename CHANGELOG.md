@@ -5,6 +5,7 @@ Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com
 ## [0.8.2] - 2026-09-15
 
 - `coverage`: the "Gaps" section is now grouped by `scope`, sorted alphabetically with unscoped specs listed last; a spec with more than one scope is duplicated under each of its scope groups.
+- `coverage`: added `--scope <name>...`, limiting the report to specs whose `scope` includes one of the given repository short names; errors on an unrecognized name.
 
 ## [0.8.1] - 2026-09-14
 

@@ -189,6 +189,19 @@ mod tests {
     }
 
     #[test]
+    fn scope_selected_matches_any_requested_scope() {
+        let mut a = spec("A", Status::Active);
+        a.scope = vec!["api".to_string(), "web".to_string()];
+        let mut b = spec("B", Status::Active);
+        b.scope = vec!["web".to_string()];
+        let c = spec("C", Status::Active);
+
+        assert!(scope_selected(&a, &["api".to_string()]));
+        assert!(!scope_selected(&b, &["api".to_string()]));
+        assert!(scope_selected(&c, &[]));
+    }
+
+    #[test]
     fn active_gaps_ignores_in_progress_gaps() {
         let mut active = row("A", true, false, Vec::new());
         active.status = Status::Active;

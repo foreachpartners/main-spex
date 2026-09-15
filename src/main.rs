@@ -16,6 +16,7 @@ use error_stack::Report;
 
 use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
+use commands::coverage::CoverageArgs;
 use commands::info::InfoArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
@@ -51,7 +52,7 @@ enum Commands {
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
     #[command(about = "Report annotation coverage of active specs")]
-    Coverage,
+    Coverage(CoverageArgs),
     #[command(about = "Print the resolved spex configuration, for scripting")]
     Info(InfoArgs),
     #[command(about = "Print the active rules per repository, as YAML")]
@@ -73,7 +74,7 @@ fn main() -> ExitCode {
         Commands::Update => finish(commands::update::run()),
         Commands::Check(args) => finish(commands::check::run(args, verbose)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
-        Commands::Coverage => finish(commands::coverage::run()),
+        Commands::Coverage(args) => finish(commands::coverage::run(args)),
         Commands::Info(args) => finish(commands::info::run(args)),
         Commands::Rules(args) => finish(commands::rules::run(args)),
         Commands::Specs(args) => finish(commands::specs::run(args)),

@@ -149,6 +149,7 @@ Runs each repository's rule checks and gates on errors.
 Reports annotation coverage for specs, per acceptance criterion.
 
 - Reports annotation coverage for every spec whose `status` is `active` or `in-progress`.
+- `--scope <name>...` limits the report to specs whose `scope` includes one of the given repository short names; the annotation search itself still spans every workspace repository. Defaults to all specs; errors on an unrecognized name.
 - Requires a contract annotation per tracked spec (spec-level; a single one anywhere in any repository counts), and requires an impl and a test annotation for every acceptance criterion, each qualified with that criterion's id (`@spec impl|test <spec-id>#<ac-id>`). A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement — only a `#<ac-id>`-qualified annotation does, since a single bare annotation would otherwise trivially satisfy every criterion.
 - `coverage_ignore` can waive the contract layer for the whole spec, the impl or test layer for the whole spec, or the impl or test layer for one specific acceptance criterion (see below).
 - Reports how many of each tracked spec's acceptance criteria are fully traced (both a required impl and a required test annotation present).

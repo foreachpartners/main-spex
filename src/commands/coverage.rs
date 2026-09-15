@@ -1,5 +1,6 @@
 use std::process::ExitCode;
 
+use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
@@ -20,6 +21,18 @@ pub enum CoverageError {
     Workspace,
     #[error("could not walk workspace repository files")]
     Walk,
+    #[error("unknown repository short name `{0}` — not listed in spex.yaml")]
+    UnknownScope(String),
+}
+
+#[derive(Args)]
+pub struct CoverageArgs {
+    #[arg(
+        long,
+        num_args = 1..,
+        help = "Repository short names to include by spec `scope` (default: all)"
+    )]
+    scope: Vec<String>,
 }
 
 struct SpecRow {
@@ -55,14 +68,37 @@ impl SpecRow {
     }
 }
 
-pub fn run() -> Result<ExitCode> {
+pub fn run(args: CoverageArgs) -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
     let specs = workspace.specs().change_context(CoverageError::Workspace)?;
+
+    for short_name in &args.scope {
+        if !workspace
+            .config
+            .repositories
+            .iter()
+            .any(|repo| &repo.short_name == short_name)
+        {
+            return Err(Report::new(CoverageError::UnknownScope(short_name.clone())));
+        }
+    }
+
+    let specs: Vec<Spec> = specs
+        .into_iter()
+        .filter(|spec| scope_selected(spec, &args.scope))
+        .collect();
 
     let found = annotations::scan_workspace(&workspace.dir, &workspace.config)
         .change_context(CoverageError::Walk)?;
 
     Ok(report(&specs, &found))
+}
+
+fn scope_selected(spec: &Spec, scopes: &[String]) -> bool {
+    scopes.is_empty()
+        || scopes
+            .iter()
+            .any(|short_name| spec.scope.contains(short_name))
 }
 
 fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
