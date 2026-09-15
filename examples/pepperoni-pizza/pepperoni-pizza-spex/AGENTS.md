@@ -1,4 +1,4 @@
-# General
+# spex
 
 This project is governed by `spex`. The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat. AI operates fast and getting even faster — the framework's job is unleash it speed while ensuring slop-free results.
 
@@ -19,15 +19,9 @@ A change isn't finished until:
 
 ## Workspace layout
 
-The workspace root holds this repo (`pepperoni-pizza-spex`, the single source of truth for specs, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configuration.
+The workspace root holds this repo (the single source of truth for specs, rules, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configurarition.
 
 Skills live under `.agents/skills`; `.claude` is a symlink to `.agents`, so `.claude/skills` is the same directory — edit skill files under `.agents/skills` only.
-
-## spex commands
-
-Run from anywhere in the workspace — `spex` locates `spex.yaml` automatically. Full command reference: [docs/cli.md](docs/cli.md).
-
-After all changes across the workspace, run `spex check` (optionally scoped with `--repo`) and `spex coverage`.
 
 ## Docs
 
@@ -65,3 +59,9 @@ feat(ui): list available pizzas @spec list-pizza-menu
 fix(cart): reject negative quantities @spec cart-add-item, cart-validate
 feat(orders): set status on order creation @spec place-pizza-order#created-order-status
 ```
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

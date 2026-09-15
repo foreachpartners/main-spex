@@ -40,8 +40,8 @@ pub enum TemplateError {
 }
 
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
-// `init`. It is a user-owned file, so neither this nor `update` overwrites an
-// existing one.
+// `init`. `update` never seeds it, but does keep the managed section of an
+// existing one in sync; see `sync_agents_md`.
 pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     let agents = spex_dir.join(AGENTS_FILE);
     if !agents.exists()
@@ -54,12 +54,61 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     ensure_claude_md_link(spex_dir)
 }
 
+// Marks where the user-owned section of `AGENTS.md` begins. Content before
+// this marker is bundled and kept in sync by `update`; content from the
+// marker onward (the "Project" section and anything the user adds under it)
+// is preserved untouched.
+const AGENTS_MD_SPLIT_MARKER: &str = "\n---\n\n# Project";
+
+fn split_agents_md(contents: &str) -> Option<(&str, &str)> {
+    let idx = contents.find(AGENTS_MD_SPLIT_MARKER)?;
+    Some(contents.split_at(idx))
+}
+
+// Keeps `AGENTS.md` in sync with the bundled template. If the local file has
+// `AGENTS_MD_SPLIT_MARKER`, only the managed section above it is replaced,
+// preserving the user's "Project" section untouched; a file that lacks the
+// marker (e.g. one written before this split existed) is fully overwritten,
+// since there is no safe way to tell managed from user content in it.
+fn sync_agents_md(spex_dir: &Path) -> Result<()> {
+    let Some(template) = TEMPLATES.get_file(AGENTS_FILE) else {
+        return Ok(());
+    };
+
+    let agents = spex_dir.join(AGENTS_FILE);
+    let Ok(local_contents) = fs::read_to_string(&agents) else {
+        return Ok(());
+    };
+
+    let updated = match split_agents_md(&local_contents) {
+        Some((_, preserved)) => {
+            let Some(managed) = std::str::from_utf8(template.contents())
+                .ok()
+                .and_then(split_agents_md)
+                .map(|(managed, _)| managed)
+            else {
+                return Ok(());
+            };
+            format!("{managed}{preserved}").into_bytes()
+        }
+        None => template.contents().to_vec(),
+    };
+
+    if updated != local_contents.as_bytes() {
+        fs::write(&agents, updated)
+            .change_context(TemplateError::Io)
+            .attach_with(|| format!("could not write `{}`", agents.display()))?;
+    }
+    Ok(())
+}
+
 pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
     copy_rules(spex_dir, removed_rules)?;
     copy_skills(spex_dir)?;
+    sync_agents_md(spex_dir)?;
     ensure_claude_link(spex_dir)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
 }

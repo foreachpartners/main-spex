@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.3] - 2026-09-15
+
+- `AGENTS.md` template: added a `# Project` marker splitting the file into a managed section and a user-owned section. `update` now overwrites the managed section with the bundled template while preserving everything from the marker onward; a local `AGENTS.md` predating the marker is fully overwritten instead.
+
 ## [0.8.2] - 2026-09-15
 
 - `coverage`: the "Gaps" section is now grouped by `scope`, sorted alphabetically with unscoped specs listed last; a spec with more than one scope is duplicated under each of its scope groups.

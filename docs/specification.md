@@ -111,7 +111,7 @@ Creates the spex repository (`<project-name>-spex`) in the workspace root and sc
 - Creates empty `specs/`, `plans/`, and `contracts/` folders.
 - Installs skills under `.agents/skills/` and symlinks `.claude` -> `.agents` so different agent tools detect the same skills.
 - Seeds a dummy `SKILL.md` for each workspace repository other than the spex repository itself, named after the repository with only a frontmatter `description` (no body). The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace can autoload it from context — not just on an explicit `/name` invocation. This gives every repository a stable place for its own commands and context, without waiting on a human to write it first; `spex-setup` fills in the body.
-- Writes a root `AGENTS.md` and symlinks `CLAUDE.md` -> `AGENTS.md`; both are user-owned, so `init` seeds them only when absent and `update` never touches them.
+- Writes a root `AGENTS.md` and symlinks `CLAUDE.md` -> `AGENTS.md`; `init` seeds them only when absent. The bundled `AGENTS.md` is split by a `# Project` marker: content above it is managed and kept in sync by `update`, content from the marker onward is the user's own and is never touched.
 - Copies every bundled rule into the spex repository's `rules/`, but leaves every repository's `rules` in `spex.yaml` empty.
 - Directs the user to finish setup by running the `/spex-setup` skill, which adds each rule that actually applies to a given repository.
 
@@ -123,6 +123,7 @@ Refreshes the managed framework files from the installed binary.
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a local skill that opts out is left untouched, letting consumers override a global skill.
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local rule without it is left untouched, letting consumers override a global rule.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there is how a user records a deliberate deletion so it stays deleted on future updates.
+- Rewrites the managed section of the root `AGENTS.md` (everything above the `# Project` marker) with the bundled version, preserving everything from that marker onward untouched; a local `AGENTS.md` predating the marker is fully overwritten instead, since there is no way to separate managed from user content in it.
 - Overwrites managed files only; leaves plans and any files the user added untouched.
 - Updates `cli_version` in `spex.yaml`.
 - Prints the `CHANGELOG.md` entries newer than the previous `cli_version`, newest first; prints nothing if there are none, and prints every entry if the previous `cli_version` isn't found in the changelog.

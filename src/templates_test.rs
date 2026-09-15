@@ -234,6 +234,54 @@ mod tests_unit {
     }
 
     #[test]
+    fn scaffold_syncs_managed_section_of_agents_md_preserving_project_data() {
+        let spex_dir = tempdir().expect("create spex dir");
+        let agents = spex_dir.path().join(AGENTS_FILE);
+        fs::write(
+            &agents,
+            "stale managed content\n\n---\n\n# Project\n\nmy custom notes\n",
+        )
+        .expect("seed AGENTS.md");
+
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        let updated = fs::read_to_string(&agents).expect("read AGENTS.md");
+        let template = TEMPLATES
+            .get_file(AGENTS_FILE)
+            .expect("bundled AGENTS.md")
+            .contents_utf8()
+            .expect("utf8 AGENTS.md");
+        let (managed, _) = template
+            .split_once("\n---\n\n# Project")
+            .expect("bundled AGENTS.md has the project marker");
+
+        assert!(updated.starts_with(managed), "managed section not synced");
+        assert!(
+            updated.ends_with("# Project\n\nmy custom notes\n"),
+            "project-specific section not preserved"
+        );
+    }
+
+    #[test]
+    fn scaffold_overwrites_agents_md_without_marker() {
+        let spex_dir = tempdir().expect("create spex dir");
+        let agents = spex_dir.path().join(AGENTS_FILE);
+        fs::write(&agents, "a pre-split AGENTS.md with no marker\n").expect("seed AGENTS.md");
+
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        let expected = TEMPLATES
+            .get_file(AGENTS_FILE)
+            .expect("bundled AGENTS.md")
+            .contents();
+        assert_eq!(
+            fs::read(&agents).expect("read AGENTS.md"),
+            expected,
+            "AGENTS.md without the marker must be fully overwritten"
+        );
+    }
+
+    #[test]
     fn rule_templates_have_no_leftover_template_only_fields() {
         let dir = TEMPLATES.get_dir(RULES_DIR).expect("bundled rules dir");
 
