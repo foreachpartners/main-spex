@@ -580,12 +580,14 @@ constraints:
         // Without --files: negated check fires because dprint.json is absent.
         let mut findings = Vec::new();
         check_repo(
-            &repository,
-            &spex,
-            &rules,
-            &HashMap::new(),
-            &[],
-            &Log::new(false),
+            CheckRepoArgs {
+                repo: &repository,
+                spex_dir: &spex,
+                rules: &rules,
+                known_ids: &HashMap::new(),
+                files: &[],
+                log: &Log::new(false),
+            },
             &mut findings,
             &mut Vec::new(),
         )
@@ -597,12 +599,14 @@ constraints:
         // With --files: negated check is skipped, non-negated still fires.
         let mut findings = Vec::new();
         check_repo(
-            &repository,
-            &spex,
-            &rules,
-            &HashMap::new(),
-            &["src/main.rs".to_string()],
-            &Log::new(false),
+            CheckRepoArgs {
+                repo: &repository,
+                spex_dir: &spex,
+                rules: &rules,
+                known_ids: &HashMap::new(),
+                files: &["src/main.rs".to_string()],
+                log: &Log::new(false),
+            },
             &mut findings,
             &mut Vec::new(),
         )
@@ -641,23 +645,27 @@ constraints:
         let mut collected = Vec::new();
         let mut findings = Vec::new();
         check_repo(
-            &repository("../api", vec!["x"]),
-            &spex,
-            &rules,
-            &HashMap::new(),
-            &[],
-            &Log::new(false),
+            CheckRepoArgs {
+                repo: &repository("../api", vec!["x"]),
+                spex_dir: &spex,
+                rules: &rules,
+                known_ids: &HashMap::new(),
+                files: &[],
+                log: &Log::new(false),
+            },
             &mut findings,
             &mut collected,
         )
         .expect("api");
         check_repo(
-            &repository("../web", vec!["x"]),
-            &spex,
-            &rules,
-            &HashMap::new(),
-            &[],
-            &Log::new(false),
+            CheckRepoArgs {
+                repo: &repository("../web", vec!["x"]),
+                spex_dir: &spex,
+                rules: &rules,
+                known_ids: &HashMap::new(),
+                files: &[],
+                log: &Log::new(false),
+            },
             &mut findings,
             &mut collected,
         )

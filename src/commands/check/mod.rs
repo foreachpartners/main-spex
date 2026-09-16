@@ -71,6 +71,17 @@ struct RepoCtx<'a> {
     log: &'a Log,
 }
 
+// Read-only inputs for `check_repo`, grouped so callers can't accidentally
+// transpose same-typed positional arguments.
+struct CheckRepoArgs<'a> {
+    repo: &'a Repository,
+    spex_dir: &'a Path,
+    rules: &'a HashMap<String, Rule>,
+    known_ids: &'a HashMap<String, HashSet<String>>,
+    files: &'a [String],
+    log: &'a Log,
+}
+
 // A `workspace`-scoped script check, deferred until every repository has been
 // scanned so it runs exactly once across the whole workspace. It receives no
 // files; the script discovers its own from the spex directory.
@@ -126,12 +137,14 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
         log.step(&format!("checking repository `{}`", repo.name));
         let mut findings = Vec::new();
         check_repo(
-            repo,
-            &workspace.dir,
-            &rules,
-            &known_ids,
-            &args.files,
-            &log,
+            CheckRepoArgs {
+                repo,
+                spex_dir: &workspace.dir,
+                rules: &rules,
+                known_ids: &known_ids,
+                files: &args.files,
+                log: &log,
+            },
             &mut findings,
             &mut workspace_checks,
         )?;
@@ -406,15 +419,19 @@ fn select_repos<'a>(
 }
 
 fn check_repo(
-    repo: &Repository,
-    spex_dir: &Path,
-    rules: &HashMap<String, Rule>,
-    known_ids: &HashMap<String, HashSet<String>>,
-    files: &[String],
-    log: &Log,
+    args: CheckRepoArgs,
     findings: &mut Vec<Finding>,
     workspace_checks: &mut Vec<WorkspaceCheck>,
 ) -> Result<()> {
+    let CheckRepoArgs {
+        repo,
+        spex_dir,
+        rules,
+        known_ids,
+        files,
+        log,
+    } = args;
+
     let repo_path = spex_dir.join(&repo.path);
     if !repo_path.is_dir() {
         findings.push(repo_error(
