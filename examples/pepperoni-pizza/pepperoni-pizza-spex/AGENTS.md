@@ -15,7 +15,7 @@ A change isn't finished until:
 
 - `spex check` passes (no error-severity findings) for every affected repository.
 - `spex coverage` shows no gap for any spec or acceptance criterion the change touches.
-- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` annotations.
+- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
 
 ## Workspace layout
 
