@@ -33,20 +33,20 @@
     - "Secret scan check passes on every commit in CI."
   ```
 
-- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability.
+- **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. Should convey the spec's contents so it can be understood without opening the spec.
 
   ```text
   place-pizza-order
   secret-handling
   ```
 
-- **Acceptance Criterion ID** (AC ID) — a unique identifier assigned to one acceptance criterion, scoped to its own spec. Names the criterion's behavior, not its position, so it survives reordering or inserting other criteria, and is immutable once an `@spec impl|test <spec-id>#<ac-id>` annotation references it — a change in meaning takes a new id.
+- **Acceptance Criterion ID** (AC ID) — an identifier assigned to one acceptance criterion, unique within its own spec. Names the criterion's behavior, not its position, so it survives reordering or inserting other criteria, and should convey the criterion's contents so it can be understood without opening the spec.
 
   ```text
-  empty-string-for-unset
+  auth-required
   ```
 
-- **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability.
+- **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability. Should convey the rule's contents so it can be understood without opening the rule.
 
   ```text
   secret-handling
