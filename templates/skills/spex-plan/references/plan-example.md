@@ -2,7 +2,7 @@
 
 - Specs: reset-password
 - Repositories scope: api, frontend
-- Rules: naming-convention, secret-handling, spec-id-tracing
+- Rules: naming-convention, secret-handling
 
 ## Step 1 — Store reset tokens and expose the reset endpoints
 
@@ -87,4 +87,4 @@ Changed `SessionRepository` in `src/api/session_repo.rs` (repo: api):
 async fn delete_all_for_user_except(&self, user_id: UserId, keep: SessionId) -> Result<(), ApiError>;
 ```
 
-Called from `confirm_reset` (Task 1.1), which already carries the spec annotation — spec-id-tracing forbids re-annotating this repository method (no nested annotations).
+Called from `confirm_reset` (Task 1.1), which already carries the spec annotation — never re-annotate this repository method (no nested annotations).

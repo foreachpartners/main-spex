@@ -135,6 +135,7 @@ Runs each repository's rule checks and gates on errors.
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still `is_done: false` errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors. This reads only `is_done`, never annotations — proving `is_done` is actually true is `spex coverage`'s job, not `spex check`'s.
 - Also errors when a spec file, rule file, or `spex.yaml` declares its properties out of order relative to their JSON Schema's declared property order, at every nesting level the schema describes (for example a rule's `checks[].*` items, or `spex.yaml`'s `repositories[].*` and `repositories[].contracts[].*`), and when an acceptance criterion id is duplicated within the same spec.
+- Also validates spec-id annotations across every repository's candidate files, built in rather than declared as a rule: a comment annotation not matching `@spec contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`, or an `x-spec` extension not matching `x-spec: <spec-id>`, errors; an annotation referencing a Spec ID with no matching spec or rule file (an orphan) errors; a `#<ac-id>` suffix that names no acceptance criterion of its spec errors too. Markdown files are skipped, as are the spex repository's own `specs/`, `rules/`, and `scripts/` directories, since both hold illustrative example annotations rather than real references.
 - Exits non-zero when any `error`-severity finding is reported.
 - `warn` findings do not affect the exit status.
 - `--repo <name>...` limits the run to named repositories.
@@ -293,6 +294,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - An impl or test annotation should carry the `#<ac-id>` of the acceptance criterion it satisfies, since `spex coverage` only counts a bare, unqualified annotation toward a target with no acceptance-criteria ids (e.g. a rule); a bare annotation on a spec never satisfies any of its criteria.
 - Annotate once at the boundary, never nested; list every acceptance criterion id the boundary satisfies rather than adding a second nested annotation.
 - Never reference a Spec ID with no spec file.
+- The grammar and the no-orphan rule are enforced by `spex check`, built in, in every repository regardless of which rules it opts into (see `check` above).
 
 # Rules
 

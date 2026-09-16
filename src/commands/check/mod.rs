@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::time::Instant;
@@ -17,10 +17,12 @@ use crate::workspace::Workspace;
 mod conformance;
 mod report;
 mod runners;
+mod spec_id_tracing;
 
 use conformance::validate_conformance;
 use report::report;
 use runners::*;
+use spec_id_tracing::validate_annotations;
 
 #[cfg(test)]
 #[path = "check_test.rs"]
@@ -94,6 +96,21 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
     let log = Log::new(verbose);
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
     let rules = workspace.rules().change_context(CheckError::Workspace)?;
+    let specs = workspace.specs().change_context(CheckError::Workspace)?;
+    let mut known_ids: HashMap<String, HashSet<String>> = specs
+        .iter()
+        .map(|spec| {
+            let ac_ids = spec
+                .acceptance_criteria
+                .iter()
+                .map(|ac| ac.id.clone())
+                .collect();
+            (spec.id.clone(), ac_ids)
+        })
+        .collect();
+    for rule_id in rules.keys() {
+        known_ids.entry(rule_id.clone()).or_default();
+    }
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 
@@ -112,6 +129,7 @@ pub fn run(args: CheckArgs, verbose: bool) -> Result<ExitCode> {
             repo,
             &workspace.dir,
             &rules,
+            &known_ids,
             &args.files,
             &log,
             &mut findings,
@@ -391,6 +409,7 @@ fn check_repo(
     repo: &Repository,
     spex_dir: &Path,
     rules: &HashMap<String, Rule>,
+    known_ids: &HashMap<String, HashSet<String>>,
     files: &[String],
     log: &Log,
     findings: &mut Vec<Finding>,
@@ -420,6 +439,8 @@ fn check_repo(
         candidates: &candidates,
         log,
     };
+
+    validate_annotations(&ctx, is_spex_repo(repo, spex_dir), known_ids, findings);
 
     // Negated checks assert that something must exist in the repository
     // (e.g. "dprint.json must be present"). When --files narrows the

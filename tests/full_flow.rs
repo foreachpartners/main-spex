@@ -45,9 +45,6 @@ pepperoni-pizza-frontend
 pepperoni-pizza-spex
   no issues
 
-workspace
-  no issues
-
 pepperoni-pizza: 0 errors, 0 warnings
 "#;
 

@@ -4,7 +4,7 @@ Note: implemented plans are deleted after completion, this is just an example.
 
 - Specs: delivery-time
 - Scope: api, frontend
-- Rules: commit-message-format, configurable-network-bind, dependencies-rules, naming-convention, secret-handling, spec-id-tracing, testing-rules, writing-style
+- Rules: commit-message-format, configurable-network-bind, dependencies-rules, naming-convention, secret-handling, testing-rules, writing-style
 
 ## Step 1 — Compute, expose, and display the delivery-time estimate
 
@@ -67,7 +67,7 @@ async fn estimate_order_delivery_time(
 
 `create_order` and `list_deliveries` keep their existing signatures; their bodies populate and refresh the new `Delivery` fields (`estimated_seconds` at creation, `remaining_seconds` on every read, with elapsed deliveries dropped).
 
-Applies: spec-id-tracing (annotate `estimate_order_delivery_time`, the boundary), testing (cover rounding, in-progress workload, validation, and the countdown, with no skipped or focused tests).
+Applies: spec-id annotation (annotate `estimate_order_delivery_time`, the boundary), testing (cover rounding, in-progress workload, validation, and the countdown, with no skipped or focused tests).
 
 ### Task 1.2 — Cart estimate and delivery countdown UI (repo: frontend)
 
@@ -100,4 +100,4 @@ estimateOrderDeliveryTime: (pizzaIds: number[]) => Promise<DeliveryEstimate>;
 
 `App.tsx` calls `estimateOrderDeliveryTime` whenever the cart changes to show the live estimate, and renders each polled delivery's `remainingSeconds` as its countdown.
 
-Applies: spec-id-tracing (annotate `estimateOrderDeliveryTime`, the boundary), testing (cover the API client call and the cart/delivery UI states, with no skipped or focused tests).
+Applies: spec-id annotation (annotate `estimateOrderDeliveryTime`, the boundary), testing (cover the API client call and the cart/delivery UI states, with no skipped or focused tests).

@@ -1,5 +1,5 @@
 project_name: pepperoni-pizza
-cli_version: 0.8.3
+cli_version: 0.8.4
 description: >-
   Online pizza ordering for a pizzeria, with menu browsing, cart checkout, and
   live delivery tracking.
@@ -23,7 +23,6 @@ repositories:
       - dependencies-rules
       - naming-convention
       - secret-handling
-      - spec-id-tracing
       - writing-style
       - testing-rules
       - openapi-conventions
@@ -42,7 +41,6 @@ repositories:
       - dependencies-rules
       - naming-convention
       - secret-handling
-      - spec-id-tracing
       - writing-style
       - testing-rules
   - repository_name: pepperoni-pizza-spex

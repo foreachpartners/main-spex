@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.4] - 2026-09-16
+
+- `check`: spec-id annotation checks (malformed `@spec`/`x-spec` grammar, orphan Spec ID references) are now built into `spex check` itself reflecting it's more important role — replacing the removed `spec-id-tracing` rule and its scripts.
+- `check`: the orphan annotation check now also flags a `#<ac-id>` suffix that names no acceptance criterion of its spec, and no longer misses an unknown Spec ID that shares a prefix with a known one (e.g. `delivery-time2` silently matching `delivery-time`).
+
 ## [0.8.3] - 2026-09-15
 
 - `AGENTS.md` template: added a `# Project` marker splitting the file into a managed section and a user-owned section. `update` now overwrites the managed section with the bundled template while preserving everything from the marker onward; a local `AGENTS.md` predating the marker is fully overwritten instead.
