@@ -8,6 +8,8 @@ BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (in
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
+- **Skill** — the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
+- **Traceability** — the `@spec`/`@rule` annotations stitching together spec, contract, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
 ## Definition of done
 
@@ -15,7 +17,7 @@ A change isn't finished until:
 
 - `spex check` passes (no error-severity findings) for every affected repository.
 - `spex coverage` shows no gap for any spec or acceptance criterion the change touches.
-- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
+- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
 
 ## Workspace layout
 

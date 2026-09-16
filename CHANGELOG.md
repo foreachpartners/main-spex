@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.5] - 2026-09-16
+
+- `ac-id`/`spec-id`/`rule-id` schemas: update id naming guidance now emphasizes readability.
+- `AGENTS.md` template: added `Skill` and `Traceability` to the core-concepts list, and an example annotation pair to the "Definition of done" tracing bullet to reflect their bigger role in framework.
+
 ## [0.8.4] - 2026-09-16
 
 - `check`: spec-id annotation checks (malformed `@spec`/`x-spec` grammar, orphan Spec ID references) are now built into `spex check` itself reflecting it's more important role — replacing the removed `spec-id-tracing` rule and its scripts.
