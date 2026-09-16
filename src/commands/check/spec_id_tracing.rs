@@ -24,7 +24,7 @@ pub(super) fn validate_annotations(
 ) {
     let checker = Checker::new();
     for file in ctx.candidates {
-        if is_excluded(file, is_spex_repo) {
+        if is_excluded(ctx, file, is_spex_repo) {
             continue;
         }
         let Ok(content) = fs::read_to_string(&file.abs) else {
@@ -36,18 +36,25 @@ pub(super) fn validate_annotations(
 }
 
 // Markdown files carry illustrative example annotations in prose, not real
-// references; the spex workspace repo's own specs/, rules/, scripts/, and
-// schemas/ hold the same kind of illustrative content rather than real
-// references (e.g. a JSON Schema description showing the `<spec-id>` grammar
-// placeholder).
-fn is_excluded(file: &ScopedFile, is_spex_repo: bool) -> bool {
+// references; every workspace's schemas/ directory holds the same kind of
+// illustrative content (e.g. a JSON Schema description showing the
+// `<spec-id>` grammar placeholder), and the spex workspace repo's own
+// specs/, rules/, and scripts/ hold real-looking but illustrative examples
+// too.
+fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
     if file.rel.extension().is_some_and(|ext| ext == "md") {
+        return true;
+    }
+    if file
+        .abs
+        .starts_with(ctx.spex_dir.join(crate::templates::SCHEMAS_DIR))
+    {
         return true;
     }
     if is_spex_repo {
         if let Some(first) = file.rel.components().next() {
             let first = first.as_os_str();
-            if first == "specs" || first == "rules" || first == "scripts" || first == "schemas" {
+            if first == "specs" || first == "rules" || first == "scripts" {
                 return true;
             }
         }

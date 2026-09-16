@@ -100,6 +100,26 @@ mod tests {
     }
 
     #[test]
+    fn skips_schemas_dir_in_any_repo() {
+        let dir = tempdir().expect("temp dir");
+        let candidates = vec![write_candidate(
+            dir.path(),
+            "schemas/spec.schema.json",
+            "@spec bogus\n",
+        )];
+        let ctx = RepoCtx {
+            repo_path: dir.path(),
+            spex_dir: dir.path(),
+            candidates: &candidates,
+            log: &Log::new(false),
+        };
+        let mut findings = Vec::new();
+        validate_annotations(&ctx, false, &HashMap::new(), &mut findings);
+
+        assert!(findings.is_empty());
+    }
+
+    #[test]
     fn flags_unknown_ac_id_but_allows_known_ones() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![write_candidate(
