@@ -399,12 +399,41 @@ fn print_wrapped(style: &Style, indent: usize, text: &str) {
 // width; continuation lines are indented to align under `prefix`, whose
 // rendered (non-ANSI) width is `prefix_len`.
 fn print_wrapped_after(style: &Style, prefix: &str, prefix_len: usize, text: &str) {
+    print_wrapped_after_colored(style, prefix, prefix_len, text, Style::dim);
+}
+
+// Like `print_wrapped_after`, but colors each wrapped line with `color`
+// instead of always dimming it — used to highlight a "missing: ..." message
+// red.
+fn print_wrapped_after_colored(
+    style: &Style,
+    prefix: &str,
+    prefix_len: usize,
+    text: &str,
+    color: fn(&Style, &str) -> String,
+) {
     let avail = terminal_width().saturating_sub(prefix_len).max(20);
     let pad = " ".repeat(prefix_len);
     let mut lines = wrap_text(text, avail).into_iter();
-    println!("{prefix}{}", style.dim(&lines.next().unwrap_or_default()));
+    println!(
+        "{prefix}{}",
+        color(style, &lines.next().unwrap_or_default())
+    );
     for line in lines {
-        println!("{pad}{}", style.dim(&line));
+        println!("{pad}{}", color(style, &line));
+    }
+}
+
+// Describes which layers a single gapped acceptance criterion is missing, as
+// `missing impl & test`, `missing impl`, or `missing test`.
+fn ac_gap_label(ac: &AcCoverage) -> String {
+    let missing_impl = ac.impl_required && !ac.impl_present;
+    let missing_test = ac.test_required && !ac.test_present;
+    match (missing_impl, missing_test) {
+        (true, true) => "missing impl & test".to_string(),
+        (true, false) => "missing impl".to_string(),
+        (false, true) => "missing test".to_string(),
+        (false, false) => String::new(),
     }
 }
 
@@ -420,13 +449,29 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     };
     let prefix_len = 4 + 1 + 2 + width + 2 + ac_text.len() + 2;
 
-    if row.has_gap() {
+    // In verbose mode the per-criterion gap is already shown inline below, so
+    // the header only needs to call out a missing contract, which isn't
+    // per-AC.
+    let header_summary = if verbose {
+        (!row.contract_ok()).then(|| "contract".to_string())
+    } else {
         let layers = missing_summary(row);
-        if layers.is_empty() {
-            println!("    {}  {id}  {ac}", style.red("✗"));
-        } else {
-            let prefix = format!("    {}  {id}  {ac}  ", style.red("✗"));
-            print_wrapped_after(style, &prefix, prefix_len, &format!("missing: {layers}"));
+        (!layers.is_empty()).then_some(layers)
+    };
+
+    if row.has_gap() {
+        match header_summary {
+            None => println!("    {}  {id}  {ac}", style.red("✗")),
+            Some(layers) => {
+                let prefix = format!("    {}  {id}  {ac}  ", style.red("✗"));
+                print_wrapped_after_colored(
+                    style,
+                    &prefix,
+                    prefix_len,
+                    &format!("missing: {layers}"),
+                    Style::red,
+                );
+            }
         }
     } else {
         let prefix = format!("    {}  {id}  {ac}  ", style.blue("●"));
@@ -438,7 +483,7 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
         );
     }
 
-    if row.has_gap() && row.has_pending() {
+    if row.has_gap() && row.has_pending() && !verbose {
         let pad = " ".repeat(prefix_len);
         print_wrapped_after(
             style,
@@ -451,8 +496,9 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     if verbose {
         print_wrapped(style, 8, &row.description);
         for ac in gapped_ac(row) {
-            let prefix_len = 8 + ac.id.len() + 2;
-            let prefix = format!("        {}: ", style.cyan(&ac.id));
+            let label = ac_gap_label(ac);
+            let prefix = format!("        {} ({}): ", style.cyan(&ac.id), style.red(&label));
+            let prefix_len = 8 + ac.id.len() + 3 + label.len() + 3;
             print_wrapped_after(style, &prefix, prefix_len, &ac.text);
         }
         println!();
