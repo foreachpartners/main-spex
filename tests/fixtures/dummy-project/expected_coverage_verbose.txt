@@ -9,10 +9,9 @@ Specs (6)
       Lets an administrator export a date range of orders as a CSV file for offline reporting.
 
   in-progress (2)
-    ●  in-progress-pending  1/2 AC  in-progress: impl(shows-tooltip), test(shows-tooltip)
+    ●  in-progress-pending  1/2 AC
         Warns the customer when an item they're viewing is low in stock, so they know to order soon.
-        shows-tooltip (missing impl & test): show a tooltip on the banner explaining what low stock
-                                              means
+        shows-tooltip: show a tooltip on the banner explaining what low stock means
 
 Gaps (2)
   api
@@ -21,8 +20,6 @@ Gaps (2)
         failures and a follow-up reminder later.
         retries-on-failure (missing impl & test): retry sending the notification once if the first
                                                    attempt fails
-        schedules-followup (missing impl & test): schedule a follow-up reminder email a week after
-                                                   shipping
 
   frontend
     ✗  active-with-gap      2/4 AC  missing: contract
@@ -39,7 +36,5 @@ Gaps (2)
         failures and a follow-up reminder later.
         retries-on-failure (missing impl & test): retry sending the notification once if the first
                                                    attempt fails
-        schedules-followup (missing impl & test): schedule a follow-up reminder email a week after
-                                                   shipping
 
 planned (2), in-progress (2), active (2), gaps (2)

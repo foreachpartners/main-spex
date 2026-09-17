@@ -185,12 +185,7 @@ fn missing_summary(row: &SpecRow) -> String {
         parts.push("contract".to_string());
     }
 
-    let gapped: Vec<&AcCoverage> = row
-        .ac_rows
-        .iter()
-        .filter(|ac| !ac.is_ok() && !ac.is_pending())
-        .collect();
-    let layers = ac_layer_summary(&gapped);
+    let layers = ac_layer_summary(&gapped_ac(row));
     if !layers.is_empty() {
         parts.push(layers);
     }
@@ -356,9 +351,18 @@ fn scope_groups<'a>(gapped: &[&'a SpecRow]) -> Vec<(Option<&'a str>, Vec<&'a Spe
     groups
 }
 
-// The acceptance criteria still missing a required impl or test annotation.
+// The acceptance criteria still missing a required impl or test annotation,
+// other than ones flagged `is_done: false` (those are pending, not a gap).
 fn gapped_ac(row: &SpecRow) -> Vec<&AcCoverage> {
-    row.ac_rows.iter().filter(|ac| !ac.is_ok()).collect()
+    row.ac_rows
+        .iter()
+        .filter(|ac| !ac.is_ok() && !ac.is_pending())
+        .collect()
+}
+
+// The acceptance criteria flagged `is_done: false` and not yet traced.
+fn pending_ac(row: &SpecRow) -> Vec<&AcCoverage> {
+    row.ac_rows.iter().filter(|ac| ac.is_pending()).collect()
 }
 
 fn terminal_width() -> usize {
@@ -473,6 +477,8 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
                 );
             }
         }
+    } else if verbose {
+        println!("    {}  {id}  {ac}", style.blue("●"));
     } else {
         let prefix = format!("    {}  {id}  {ac}  ", style.blue("●"));
         print_wrapped_after(
@@ -500,6 +506,17 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
             let prefix = format!("        {} ({}): ", style.cyan(&ac.id), style.red(&label));
             let prefix_len = 8 + ac.id.len() + 3 + label.len() + 3;
             print_wrapped_after(style, &prefix, prefix_len, &ac.text);
+        }
+        // Pending detail only belongs here for a pending-only row (listed
+        // under its spec's in-progress status group); a row shown here
+        // because of a real gap must not have its pending criteria mistaken
+        // for gaps.
+        if !row.has_gap() {
+            for ac in pending_ac(row) {
+                let prefix = format!("        {}: ", style.cyan(&ac.id));
+                let prefix_len = 8 + ac.id.len() + 2;
+                print_wrapped_after(style, &prefix, prefix_len, &ac.text);
+            }
         }
         println!();
     }
