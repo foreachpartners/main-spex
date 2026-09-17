@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.8] - 2026-09-17
+
+- `coverage`: an acceptance criterion flagged `is_done: false` and still missing a required impl or test annotation is now reported as pending, not a gap — it no longer counts toward the exit code or the "Gaps" section, and is instead listed (●, blue, "in-progress: ...") under its spec's `in-progress` status group.
+- `coverage`: the `X/Y AC` counter now tracks implementation only — a criterion counts as done once its impl annotation is present, regardless of whether its test annotation is; a still-missing test annotation is reported separately as a gap or as pending.
+- `coverage`: the status summary and totals now list `planned` before `in-progress`, matching a spec's natural lifecycle order.
+
 ## [0.8.7] - 2026-09-17
 
 - `coverage`: long text — a gapped row's "missing: ..." detail, `--verbose` spec/acceptance-criterion descriptions — now wraps to the terminal width with continuation lines indented to align, instead of relying on the terminal's own wrap and losing alignment with the row.

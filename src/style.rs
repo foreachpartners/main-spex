@@ -50,6 +50,10 @@ impl Style {
         self.paint("36", text)
     }
 
+    pub fn blue(&self, text: &str) -> String {
+        self.paint("34", text)
+    }
+
     pub fn hyperlink(&self, url: &str, text: &str) -> String {
         if self.enabled {
             format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")

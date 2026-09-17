@@ -163,8 +163,8 @@ pub enum Status {
 impl Status {
     pub const ALL: [Status; 5] = [
         Status::Active,
-        Status::InProgress,
         Status::Planned,
+        Status::InProgress,
         Status::Blocked,
         Status::Deprecated,
     ];

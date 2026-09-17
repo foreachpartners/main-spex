@@ -18,9 +18,14 @@ mod tests {
     }
 
     fn ac(id: &str, impl_present: bool, test_present: bool) -> AcCoverage {
+        pending_ac(id, impl_present, test_present, true)
+    }
+
+    fn pending_ac(id: &str, impl_present: bool, test_present: bool, is_done: bool) -> AcCoverage {
         AcCoverage {
             id: id.to_string(),
             text: String::new(),
+            is_done,
             impl_required: true,
             impl_present,
             test_required: true,
@@ -134,6 +139,20 @@ mod tests {
     }
 
     #[test]
+    fn ac_done_counts_impl_only_ignoring_missing_test() {
+        let row = row(
+            "A",
+            true,
+            true,
+            vec![ac("ac-1", true, false), ac("ac-2", false, false)],
+        );
+        assert_eq!(row.ac_done(), 1);
+        assert_eq!(row.ac_total(), 2);
+        assert!(row.has_gap());
+        assert_eq!(missing_summary(&row), "impl(ac-2), test(ac-1, ac-2)");
+    }
+
+    #[test]
     fn all_layers_and_ac_complete_has_no_gap() {
         let row = row(
             "A",
@@ -142,6 +161,36 @@ mod tests {
             vec![ac("ac-1", true, true), ac("ac-2", true, true)],
         );
         assert!(!row.has_gap());
+    }
+
+    #[test]
+    fn unimplemented_ac_flagged_not_done_is_pending_not_a_gap() {
+        let row = row(
+            "A",
+            true,
+            true,
+            vec![
+                ac("ac-1", true, true),
+                pending_ac("ac-2", false, false, false),
+            ],
+        );
+        assert!(!row.has_gap());
+        assert!(row.has_pending());
+        assert_eq!(missing_summary(&row), "");
+        assert_eq!(pending_summary(&row), "impl(ac-2), test(ac-2)");
+    }
+
+    #[test]
+    fn unimplemented_ac_not_flagged_is_still_a_gap() {
+        let row = row(
+            "A",
+            true,
+            true,
+            vec![pending_ac("ac-1", false, false, true)],
+        );
+        assert!(row.has_gap());
+        assert!(!row.has_pending());
+        assert_eq!(missing_summary(&row), "impl(ac-1), test(ac-1)");
     }
 
     #[test]

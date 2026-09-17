@@ -58,6 +58,7 @@ impl Found {
 pub struct AcCoverage {
     pub id: String,
     pub text: String,
+    pub is_done: bool,
     pub impl_required: bool,
     pub impl_present: bool,
     pub test_required: bool,
@@ -65,8 +66,22 @@ pub struct AcCoverage {
 }
 
 impl AcCoverage {
+    // Implemented, regardless of whether it's tested yet — what the
+    // `X/Y AC` counter tracks, since implementation is the milestone that
+    // marks a criterion as built.
+    pub fn impl_ok(&self) -> bool {
+        !self.impl_required || self.impl_present
+    }
+
     pub fn is_ok(&self) -> bool {
-        (!self.impl_required || self.impl_present) && (!self.test_required || self.test_present)
+        self.impl_ok() && (!self.test_required || self.test_present)
+    }
+
+    // Not yet traced, but not a gap either: the criterion is itself flagged
+    // `is_done: false`, so missing impl/test annotations are expected, not a
+    // slip — that's what makes an in-progress spec in-progress.
+    pub fn is_pending(&self) -> bool {
+        !self.is_done && !self.is_ok()
     }
 }
 
@@ -76,6 +91,7 @@ pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
         .map(|ac| AcCoverage {
             id: ac.id.clone(),
             text: ac.commitment.text().to_string(),
+            is_done: ac.is_done(),
             impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
             impl_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
             test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),

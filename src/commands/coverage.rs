@@ -52,8 +52,11 @@ struct SpecRow {
 }
 
 impl SpecRow {
+    // The `X/Y AC` counter tracks implementation, not testing — a criterion
+    // still missing its test annotation still counts as done here, and shows
+    // up separately in `missing`/`in-progress` instead.
     fn ac_done(&self) -> usize {
-        self.ac_rows.iter().filter(|ac| ac.is_ok()).count()
+        self.ac_rows.iter().filter(|ac| ac.impl_ok()).count()
     }
 
     fn ac_total(&self) -> usize {
@@ -68,10 +71,26 @@ impl SpecRow {
         !self.contract_required || self.contract_present
     }
 
+    // An acceptance criterion still missing a required impl or test
+    // annotation, but not flagged `is_done: false` — that's not expected
+    // (a real gap), unlike a pending one.
+    fn has_real_ac_gap(&self) -> bool {
+        self.ac_rows
+            .iter()
+            .any(|ac| !ac.is_ok() && !ac.is_pending())
+    }
+
+    // An acceptance criterion flagged `is_done: false` and not yet traced —
+    // expected on an in-progress spec, so it's not a gap.
+    fn has_pending(&self) -> bool {
+        self.ac_rows.iter().any(|ac| ac.is_pending())
+    }
+
     // A gap is a missing required contract annotation, or any acceptance
-    // criterion still missing a required impl or test annotation.
+    // criterion still missing a required impl or test annotation that isn't
+    // itself flagged `is_done: false`.
     fn has_gap(&self) -> bool {
-        !self.contract_ok() || !self.ac_complete()
+        !self.contract_ok() || self.has_real_ac_gap()
     }
 }
 
@@ -127,19 +146,13 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
         .collect()
 }
 
-// Lists what's missing on a gapped row: the contract annotation, then which
-// acceptance criteria still lack a required impl or test annotation.
-fn missing_summary(row: &SpecRow) -> String {
-    let mut parts = Vec::new();
-
-    if !row.contract_ok() {
-        parts.push("contract".to_string());
-    }
-
+// Renders which of the given acceptance criteria still lack a required impl
+// or test annotation, as `impl(ac-1), test(ac-1, ac-2)`.
+fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
     let by_layer: [(&str, Vec<&str>); 2] = [
         (
             "impl",
-            row.ac_rows
+            ac_rows
                 .iter()
                 .filter(|ac| ac.impl_required && !ac.impl_present)
                 .map(|ac| ac.id.as_str())
@@ -147,29 +160,66 @@ fn missing_summary(row: &SpecRow) -> String {
         ),
         (
             "test",
-            row.ac_rows
+            ac_rows
                 .iter()
                 .filter(|ac| ac.test_required && !ac.test_present)
                 .map(|ac| ac.id.as_str())
                 .collect(),
         ),
     ];
-    for (layer, missing) in by_layer {
-        if !missing.is_empty() {
-            parts.push(format!("{layer}({})", missing.join(", ")));
-        }
+    by_layer
+        .into_iter()
+        .filter(|(_, missing)| !missing.is_empty())
+        .map(|(layer, missing)| format!("{layer}({})", missing.join(", ")))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+// Lists what's missing on a gapped row: the contract annotation, then which
+// acceptance criteria still lack a required impl or test annotation, other
+// than ones flagged `is_done: false` (those are pending, not a gap).
+fn missing_summary(row: &SpecRow) -> String {
+    let mut parts = Vec::new();
+
+    if !row.contract_ok() {
+        parts.push("contract".to_string());
+    }
+
+    let gapped: Vec<&AcCoverage> = row
+        .ac_rows
+        .iter()
+        .filter(|ac| !ac.is_ok() && !ac.is_pending())
+        .collect();
+    let layers = ac_layer_summary(&gapped);
+    if !layers.is_empty() {
+        parts.push(layers);
     }
 
     parts.join(", ")
 }
 
+// Lists which acceptance criteria are flagged `is_done: false` and not yet
+// traced — expected on an in-progress spec, reported but not a gap.
+fn pending_summary(row: &SpecRow) -> String {
+    let pending: Vec<&AcCoverage> = row.ac_rows.iter().filter(|ac| ac.is_pending()).collect();
+    ac_layer_summary(&pending)
+}
+
 fn report(specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let style = Style::detect();
-
-    print_status_totals(&style, specs, verbose);
-
     let rows = tracked_rows(specs, found);
-    let gaps = print_coverage(&style, &rows, verbose);
+    // Shared across the pending list (in the "Specs" totals) and the "Gaps"
+    // list, so the `id`/`AC` columns line up between the two sections.
+    let id_width = rows
+        .iter()
+        .filter(|row| row.has_gap() || row.has_pending())
+        .map(|row| row.id.len())
+        .max()
+        .unwrap_or(0);
+
+    print_status_totals(&style, specs, &rows, id_width, verbose);
+
+    let gaps = print_coverage(&style, &rows, id_width, verbose);
 
     println!("{}", summary_line(&style, specs, gaps));
 
@@ -201,7 +251,7 @@ fn summary_line(style: &Style, specs: &[Spec], gaps: usize) -> String {
     } else {
         style.red(&format!("gaps ({gaps})"))
     };
-    format!("in-progress ({in_progress}), planned ({planned}), active ({active}), {gaps_text}")
+    format!("planned ({planned}), in-progress ({in_progress}), active ({active}), {gaps_text}")
 }
 
 // Specs per status, in Status::ALL order, skipping empty statuses.
@@ -215,7 +265,13 @@ fn status_groups(specs: &[Spec]) -> Vec<(Status, Vec<&Spec>)> {
         .collect()
 }
 
-fn print_status_totals(style: &Style, specs: &[Spec], verbose: bool) {
+fn print_status_totals(
+    style: &Style,
+    specs: &[Spec],
+    rows: &[SpecRow],
+    id_width: usize,
+    verbose: bool,
+) {
     println!("{}", style.bold(&format!("Specs ({})", specs.len())));
     if specs.is_empty() {
         println!("  {}", style.dim("none found"));
@@ -227,16 +283,35 @@ fn print_status_totals(style: &Style, specs: &[Spec], verbose: bool) {
     for (status, group) in status_groups(specs) {
         println!("  {} ({})", style.bold(status.label()), group.len());
         printed_blank = false;
-        // Active and in-progress specs are already listed below with their
-        // coverage detail, so listing their ids here would just duplicate that.
-        if !matches!(status, Status::Active | Status::InProgress) {
-            for spec in group {
-                println!("    {}", style.cyan(&spec.id));
-                printed_blank = false;
-                if verbose && status == Status::Planned {
-                    print_wrapped(style, 6, &spec.description);
-                    println!();
-                    printed_blank = true;
+        match status {
+            // A gapped in-progress spec is already listed below with its
+            // coverage detail; a fully covered one has nothing to show. Only
+            // a pending-only one (an `is_done: false` criterion not yet
+            // traced, and nothing else wrong) is listed here — it's not a
+            // gap, just this spec's in-progress detail.
+            Status::InProgress => {
+                let pending: Vec<&SpecRow> = group
+                    .iter()
+                    .filter_map(|spec| rows.iter().find(|row| row.id == spec.id))
+                    .filter(|row| row.has_pending() && !row.has_gap())
+                    .collect();
+                for row in pending {
+                    print_gap_row(style, row, id_width, verbose);
+                    printed_blank = verbose;
+                }
+            }
+            // Active specs are already listed below with their coverage
+            // detail, so listing their ids here would just duplicate that.
+            Status::Active => {}
+            _ => {
+                for spec in group {
+                    println!("    {}", style.cyan(&spec.id));
+                    printed_blank = false;
+                    if verbose && status == Status::Planned {
+                        print_wrapped(style, 6, &spec.description);
+                        println!();
+                        printed_blank = true;
+                    }
                 }
             }
         }
@@ -338,17 +413,39 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
     let ac = if row.ac_complete() {
         style.dim(&ac_text)
-    } else {
+    } else if row.has_gap() {
         style.red(&ac_text)
-    };
-
-    let layers = missing_summary(row);
-    if layers.is_empty() {
-        println!("    {}  {id}  {ac}", style.red("✗"));
     } else {
-        let prefix_len = 4 + 1 + 2 + width + 2 + ac_text.len() + 2;
-        let prefix = format!("    {}  {id}  {ac}  ", style.red("✗"));
-        print_wrapped_after(style, &prefix, prefix_len, &format!("missing: {layers}"));
+        style.blue(&ac_text)
+    };
+    let prefix_len = 4 + 1 + 2 + width + 2 + ac_text.len() + 2;
+
+    if row.has_gap() {
+        let layers = missing_summary(row);
+        if layers.is_empty() {
+            println!("    {}  {id}  {ac}", style.red("✗"));
+        } else {
+            let prefix = format!("    {}  {id}  {ac}  ", style.red("✗"));
+            print_wrapped_after(style, &prefix, prefix_len, &format!("missing: {layers}"));
+        }
+    } else {
+        let prefix = format!("    {}  {id}  {ac}  ", style.blue("●"));
+        print_wrapped_after(
+            style,
+            &prefix,
+            prefix_len,
+            &format!("in-progress: {}", pending_summary(row)),
+        );
+    }
+
+    if row.has_gap() && row.has_pending() {
+        let pad = " ".repeat(prefix_len);
+        print_wrapped_after(
+            style,
+            &pad,
+            prefix_len,
+            &format!("in-progress: {}", pending_summary(row)),
+        );
     }
 
     if verbose {
@@ -362,7 +459,7 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     }
 }
 
-fn print_coverage(style: &Style, rows: &[SpecRow], verbose: bool) -> usize {
+fn print_coverage(style: &Style, rows: &[SpecRow], id_width: usize, verbose: bool) -> usize {
     let gapped: Vec<&SpecRow> = rows.iter().filter(|row| row.has_gap()).collect();
     let gaps = gapped.len();
 
@@ -377,12 +474,11 @@ fn print_coverage(style: &Style, rows: &[SpecRow], verbose: bool) -> usize {
     if gapped.is_empty() {
         println!("  {}", style.dim("none"));
     } else {
-        let width = gapped.iter().map(|row| row.id.len()).max().unwrap_or(0);
         for (scope, scope_rows) in scope_groups(&gapped) {
             println!("  {}", style.bold(scope.unwrap_or("unscoped")));
             printed_blank = false;
             for row in scope_rows {
-                print_gap_row(style, row, width, verbose);
+                print_gap_row(style, row, id_width, verbose);
                 printed_blank = verbose;
             }
         }

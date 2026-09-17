@@ -31,7 +31,7 @@ const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
 Gaps (0)
   no active or in-progress specs
 
-in-progress (0), planned (0), active (0), gaps (0)
+planned (0), in-progress (0), active (0), gaps (0)
 "#;
 
 // Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
@@ -62,7 +62,7 @@ const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"Specs (4)
 Gaps (0)
   none
 
-in-progress (0), planned (3), active (1), gaps (0)
+planned (3), in-progress (0), active (1), gaps (0)
 "#;
 
 #[test]
