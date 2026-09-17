@@ -1,0 +1,11 @@
+id: planned-one
+title: Let customers save a favorite order
+description: >-
+  Lets a returning customer save an order as a favorite so they can
+  reorder it in one click next time.
+acceptance_criteria:
+  - id: save-as-favorite
+    must: "let a customer save a completed order as a favorite"
+scope:
+  - frontend
+status: planned

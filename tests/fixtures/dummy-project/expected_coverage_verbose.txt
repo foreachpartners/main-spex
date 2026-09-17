@@ -1,0 +1,45 @@
+Specs (6)
+  active (2)
+  planned (2)
+    planned-one
+      Lets a returning customer save an order as a favorite so they can reorder it in one click next
+      time.
+
+    planned-two
+      Lets an administrator export a date range of orders as a CSV file for offline reporting.
+
+  in-progress (2)
+    ●  in-progress-pending  1/2 AC  in-progress: impl(shows-tooltip), test(shows-tooltip)
+        Warns the customer when an item they're viewing is low in stock, so they know to order soon.
+        shows-tooltip (missing impl & test): show a tooltip on the banner explaining what low stock
+                                              means
+
+Gaps (2)
+  api
+    ✗  in-progress-mixed    1/3 AC
+        Notifies a customer by email when their order ships, with a retry for transient delivery
+        failures and a follow-up reminder later.
+        retries-on-failure (missing impl & test): retry sending the notification once if the first
+                                                   attempt fails
+        schedules-followup (missing impl & test): schedule a follow-up reminder email a week after
+                                                   shipping
+
+  frontend
+    ✗  active-with-gap      2/4 AC  missing: contract
+        Validates a new account's registration input before it is created, rejecting invalid or
+        duplicate submissions.
+        normalizes-format (missing test): normalize the submitted email to lowercase before storing
+                                           it
+        rejects-duplicate (missing impl): reject a registration request for an email already
+                                           registered
+        logs-attempt (missing impl & test): log every registration attempt, successful or not
+
+    ✗  in-progress-mixed    1/3 AC
+        Notifies a customer by email when their order ships, with a retry for transient delivery
+        failures and a follow-up reminder later.
+        retries-on-failure (missing impl & test): retry sending the notification once if the first
+                                                   attempt fails
+        schedules-followup (missing impl & test): schedule a follow-up reminder email a week after
+                                                   shipping
+
+planned (2), in-progress (2), active (2), gaps (2)

@@ -1,0 +1,15 @@
+id: no-todo-comments
+title: No TODO comments
+description: >-
+  TODO comments left in source code signal unfinished work that should be
+  tracked as a spec instead of left inline.
+acceptance_criteria:
+  - "MUST NOT leave a TODO comment in source code"
+checks:
+  - name: no-todo
+    description: Flags a TODO comment left in source
+    type: regexp
+    pattern: "TODO"
+    include:
+      - "src/**/*.rs"
+    severity: error

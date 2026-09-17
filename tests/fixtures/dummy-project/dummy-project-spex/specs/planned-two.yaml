@@ -1,0 +1,11 @@
+id: planned-two
+title: Let admins export orders as CSV
+description: >-
+  Lets an administrator export a date range of orders as a CSV file for
+  offline reporting.
+acceptance_criteria:
+  - id: export-date-range
+    must: "let an administrator export all orders in a chosen date range as CSV"
+scope:
+  - api
+status: planned

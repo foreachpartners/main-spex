@@ -1,0 +1,17 @@
+id: in-progress-mixed
+title: Notify customers when their order ships
+description: >-
+  Notifies a customer by email when their order ships, with a retry for
+  transient delivery failures and a follow-up reminder later.
+acceptance_criteria:
+  - id: sends-email
+    must: "send a shipping notification email once an order ships"
+  - id: retries-on-failure
+    must: "retry sending the notification once if the first attempt fails"
+  - id: schedules-followup
+    must: "schedule a follow-up reminder email a week after shipping"
+    is_done: false
+scope:
+  - api
+  - frontend
+status: in-progress

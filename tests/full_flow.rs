@@ -1,9 +1,10 @@
 use std::fs;
-use std::io::Write;
 use std::path::Path;
-use std::process::{Command, Stdio};
 
 use tempfile::tempdir;
+
+mod common;
+use common::{copy_dir, dummy_project_fixture, report_text, run_spex};
 
 // Snapshot of `spex check` for a freshly initialized copy of the
 // `pepperoni-pizza-no-spex` example. The findings are intentional: the example
@@ -251,8 +252,7 @@ fn rules_output_flag_writes_file_matching_stdout() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza");
-    copy_dir(&example, &project);
+    copy_dir(&dummy_project_fixture(), &project);
 
     let stdout_run = run_spex(&project, &["rules"], "");
     assert!(
@@ -297,8 +297,7 @@ fn specs_output_flag_writes_file_matching_stdout() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza");
-    copy_dir(&example, &project);
+    copy_dir(&dummy_project_fixture(), &project);
 
     let stdout_run = run_spex(&project, &["specs"], "");
     assert!(
@@ -336,44 +335,6 @@ fn specs_output_flag_writes_file_matching_stdout() {
         file_yaml, stdout_yaml,
         "--output file contents should match stdout output"
     );
-}
-
-// `/bin/sh` echo interprets the literal `\b` in writing-style.sh into backspace
-// bytes; drop them so snapshots stay portable across shells.
-fn report_text(stdout: &[u8]) -> String {
-    String::from_utf8_lossy(stdout).replace('\u{8}', "")
-}
-
-fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
-    let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
-    let bin_dir = bin.parent().expect("binary directory");
-    let path = match std::env::var_os("PATH") {
-        Some(existing) => {
-            let mut dirs = vec![bin_dir.to_path_buf()];
-            dirs.extend(std::env::split_paths(&existing));
-            std::env::join_paths(dirs).expect("join PATH")
-        }
-        None => bin_dir.as_os_str().to_owned(),
-    };
-
-    let mut child = Command::new(bin)
-        .args(args)
-        .current_dir(dir)
-        .env("PATH", path)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("spawn spex");
-
-    child
-        .stdin
-        .take()
-        .expect("open spex stdin")
-        .write_all(stdin.as_bytes())
-        .expect("write spex stdin");
-
-    child.wait_with_output().expect("wait for spex")
 }
 
 // Copies the no-spex example into `project` and, mirroring tutorial Step 2.1,
@@ -418,31 +379,4 @@ fn add_rules(project: &Path) {
         "expected repositories not found in spex.yaml"
     );
     fs::write(&config_path, patched).expect("write spex.yaml");
-}
-
-fn copy_dir(src: &Path, dst: &Path) {
-    fs::create_dir_all(dst).expect("create destination dir");
-    for entry in fs::read_dir(src).expect("read source dir") {
-        let entry = entry.expect("read dir entry");
-        let from = entry.path();
-        let to = dst.join(entry.file_name());
-        let file_type = entry.file_type().expect("read file type");
-        if file_type.is_symlink() {
-            let target = fs::read_link(&from).expect("read symlink target");
-            std::os::unix::fs::symlink(target, &to).expect("create symlink");
-        } else if file_type.is_dir() {
-            // Skip build artifacts so copies stay deterministic regardless of
-            // whatever a developer has built locally inside an example.
-            let name = entry.file_name();
-            if matches!(
-                name.to_str(),
-                Some("node_modules") | Some("target") | Some("dist")
-            ) {
-                continue;
-            }
-            copy_dir(&from, &to);
-        } else {
-            fs::copy(&from, &to).expect("copy file");
-        }
-    }
 }

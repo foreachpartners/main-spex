@@ -1,0 +1,12 @@
+id: in-progress-pending
+title: Show a low-stock banner
+description: >-
+  Warns the customer when an item they're viewing is low in stock, so
+  they know to order soon.
+acceptance_criteria:
+  - id: shows-banner
+    must: "show a low-stock banner on an item with fewer than 5 remaining"
+  - id: shows-tooltip
+    must: "show a tooltip on the banner explaining what low stock means"
+    is_done: false
+status: in-progress

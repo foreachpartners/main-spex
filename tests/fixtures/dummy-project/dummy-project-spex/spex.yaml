@@ -1,0 +1,23 @@
+project_name: dummy-project
+cli_version: 0.8.8
+description: >-
+  Minimal dummy project used by spex's own test suite to exercise
+  `spex coverage` and `spex coverage --verbose` output across active,
+  in-progress, and planned specs.
+repositories:
+  - repository_name: dummy-project-api
+    repository_short_name: api
+    path: ../dummy-project-api
+    contracts:
+      - path: ./contracts.md
+        description: Interface contract notes for the api.
+    rules:
+      - no-todo-comments
+  - repository_name: dummy-project-frontend
+    repository_short_name: frontend
+    path: ../dummy-project-frontend
+    rules: []
+  - repository_name: dummy-project-spex
+    repository_short_name: spex
+    path: .
+    rules: []

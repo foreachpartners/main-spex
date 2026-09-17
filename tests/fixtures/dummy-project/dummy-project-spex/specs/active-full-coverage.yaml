@@ -1,0 +1,13 @@
+id: active-full-coverage
+title: Show the cart subtotal with tax
+description: >-
+  Shows the customer the cart subtotal, including tax, so they know the
+  total cost before checkout.
+acceptance_criteria:
+  - id: shows-subtotal
+    must: "show the subtotal of all items in the cart"
+  - id: shows-tax
+    must: "show the tax computed on the subtotal"
+scope:
+  - api
+status: active

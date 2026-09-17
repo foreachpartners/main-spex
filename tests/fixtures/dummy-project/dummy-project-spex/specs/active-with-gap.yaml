@@ -1,0 +1,17 @@
+id: active-with-gap
+title: Validate registration input
+description: >-
+  Validates a new account's registration input before it is created,
+  rejecting invalid or duplicate submissions.
+acceptance_criteria:
+  - id: validates-input
+    must: "reject a registration request missing a required field"
+  - id: normalizes-format
+    must: "normalize the submitted email to lowercase before storing it"
+  - id: rejects-duplicate
+    must: "reject a registration request for an email already registered"
+  - id: logs-attempt
+    must: "log every registration attempt, successful or not"
+scope:
+  - frontend
+status: active
