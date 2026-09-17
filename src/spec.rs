@@ -30,6 +30,8 @@ pub struct Spec {
     #[serde(skip, default)]
     pub path: String,
     #[serde(default)]
+    pub description: String,
+    #[serde(default)]
     pub acceptance_criteria: Vec<AcceptanceCriterion>,
     #[serde(default)]
     pub blocked_by: Vec<String>,
@@ -120,6 +122,16 @@ impl Commitment {
             Commitment::Should(_) => "SHOULD",
             Commitment::ShouldNot(_) => "SHOULD NOT",
             Commitment::May(_) => "MAY",
+        }
+    }
+
+    pub fn text(&self) -> &str {
+        match self {
+            Commitment::Must(text) => text,
+            Commitment::MustNot(text) => text,
+            Commitment::Should(text) => text,
+            Commitment::ShouldNot(text) => text,
+            Commitment::May(text) => text,
         }
     }
 }

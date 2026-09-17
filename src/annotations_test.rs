@@ -7,6 +7,7 @@ mod tests {
         Spec {
             id: id.to_string(),
             path: format!("{id}.yaml"),
+            description: String::new(),
             acceptance_criteria: ac_ids
                 .iter()
                 .map(|id| AcceptanceCriterion {

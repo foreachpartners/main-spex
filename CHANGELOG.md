@@ -2,6 +2,17 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.7] - 2026-09-17
+
+- `coverage`: long text — a gapped row's "missing: ..." detail, `--verbose` spec/acceptance-criterion descriptions — now wraps to the terminal width with continuation lines indented to align, instead of relying on the terminal's own wrap and losing alignment with the row.
+- `coverage --verbose`: each planned spec's and each gapped spec's detail is now followed by a blank line, separating it from the next entry.
+
+## [0.8.6] - 2026-09-17
+
+- `cli`: `--verbose` is no longer a global flag; it's now local to the subcommands that use it.
+- `coverage`: added `--verbose` — each listed `planned` spec additionally shows its `description`, and each gapped spec in the "Gaps" section additionally shows its `description` plus the text of each acceptance criterion still missing a required layer.
+- `check`: removed `--verbose` and the stderr progress logging it drove; `spex check` was the only user of the shared `Log` helper, which is also removed.
+
 ## [0.8.5] - 2026-09-16
 
 - `ac-id`/`spec-id`/`rule-id` schemas: update id naming guidance now emphasizes readability.

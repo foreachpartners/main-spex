@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::style::Log;
     use std::collections::{HashMap, HashSet};
     use std::path::PathBuf;
     use tempfile::tempdir;
@@ -43,7 +42,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut findings = Vec::new();
         validate_annotations(&ctx, false, &known(&["list-pizza-menu"]), &mut findings);
@@ -65,7 +63,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut known_ids = known(&["list-pizza-menu", "rate-limit"]);
         known_ids.insert(
@@ -91,7 +88,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut findings = Vec::new();
         validate_annotations(&ctx, true, &HashMap::new(), &mut findings);
@@ -111,7 +107,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut findings = Vec::new();
         validate_annotations(&ctx, false, &HashMap::new(), &mut findings);
@@ -131,7 +126,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut findings = Vec::new();
         validate_annotations(
@@ -159,7 +153,6 @@ mod tests {
             repo_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
-            log: &Log::new(false),
         };
         let mut findings = Vec::new();
         validate_annotations(

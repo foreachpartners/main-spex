@@ -28,13 +28,6 @@ use commands::specs::SpecsArgs;
     about = "AI-first specification-driven development framework"
 )]
 struct Cli {
-    #[arg(
-        long,
-        short,
-        global = true,
-        help = "Print progress to stderr as work executes"
-    )]
-    verbose: bool,
     #[command(subcommand)]
     command: Commands,
 }
@@ -63,16 +56,11 @@ enum Commands {
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    let verbose = cli.verbose;
-
-    if verbose && !matches!(cli.command, Commands::Check(_)) {
-        eprintln!("warning: --verbose has no effect outside of `spex check`");
-    }
 
     match cli.command {
         Commands::Init => finish(commands::init::run()),
         Commands::Update => finish(commands::update::run()),
-        Commands::Check(args) => finish(commands::check::run(args, verbose)),
+        Commands::Check(args) => finish(commands::check::run(args)),
         Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
         Commands::Coverage(args) => finish(commands::coverage::run(args)),
         Commands::Info(args) => finish(commands::info::run(args)),

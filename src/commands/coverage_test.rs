@@ -8,6 +8,7 @@ mod tests {
         Spec {
             id: id.to_string(),
             path: format!("{id}.yaml"),
+            description: String::new(),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
             scope: Vec::new(),
@@ -19,6 +20,7 @@ mod tests {
     fn ac(id: &str, impl_present: bool, test_present: bool) -> AcCoverage {
         AcCoverage {
             id: id.to_string(),
+            text: String::new(),
             impl_required: true,
             impl_present,
             test_required: true,
@@ -34,6 +36,7 @@ mod tests {
     ) -> SpecRow {
         SpecRow {
             id: id.to_string(),
+            description: String::new(),
             status: Status::Active,
             scope: Vec::new(),
             contract_required,
@@ -150,8 +153,12 @@ mod tests {
             spec("D", Status::Deprecated),
         ];
         let groups = status_groups(&specs);
+        let ids: Vec<(Status, Vec<&str>)> = groups
+            .iter()
+            .map(|(status, specs)| (*status, specs.iter().map(|s| s.id.as_str()).collect()))
+            .collect();
         assert_eq!(
-            groups,
+            ids,
             vec![
                 (Status::Active, vec!["A"]),
                 (Status::Planned, vec!["B", "C"]),
@@ -164,7 +171,11 @@ mod tests {
     fn status_groups_skips_empty_statuses() {
         let specs = vec![spec("A", Status::Planned)];
         let groups = status_groups(&specs);
-        assert_eq!(groups, vec![(Status::Planned, vec!["A"])]);
+        let ids: Vec<(Status, Vec<&str>)> = groups
+            .iter()
+            .map(|(status, specs)| (*status, specs.iter().map(|s| s.id.as_str()).collect()))
+            .collect();
+        assert_eq!(ids, vec![(Status::Planned, vec!["A"])]);
     }
 
     #[test]

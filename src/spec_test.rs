@@ -6,6 +6,7 @@ mod tests {
         Spec {
             id: "A".to_string(),
             path: "A.yaml".to_string(),
+            description: String::new(),
             acceptance_criteria: Vec::new(),
             blocked_by: Vec::new(),
             scope: Vec::new(),

@@ -33,10 +33,17 @@ pub struct CoverageArgs {
         help = "Repository short names to include by spec `scope` (default: all)"
     )]
     scope: Vec<String>,
+    #[arg(
+        long,
+        short,
+        help = "Also show spec descriptions for planned specs, and spec/acceptance-criterion descriptions for each gap"
+    )]
+    verbose: bool,
 }
 
 struct SpecRow {
     id: String,
+    description: String,
     status: Status,
     scope: Vec<String>,
     contract_required: bool,
@@ -91,7 +98,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
     let found = annotations::scan_workspace(&workspace.dir, &workspace.config)
         .change_context(CoverageError::Walk)?;
 
-    Ok(report(&specs, &found))
+    Ok(report(&specs, &found, args.verbose))
 }
 
 fn scope_selected(spec: &Spec, scopes: &[String]) -> bool {
@@ -109,6 +116,7 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
             let (contract_required, contract_present) = annotations::contract_coverage(spec, found);
             SpecRow {
                 id: spec.id.clone(),
+                description: spec.description.clone(),
                 status: spec.status,
                 scope: spec.scope.clone(),
                 contract_required,
@@ -155,13 +163,13 @@ fn missing_summary(row: &SpecRow) -> String {
     parts.join(", ")
 }
 
-fn report(specs: &[Spec], found: &Found) -> ExitCode {
+fn report(specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let style = Style::detect();
 
-    print_status_totals(&style, specs);
+    print_status_totals(&style, specs, verbose);
 
     let rows = tracked_rows(specs, found);
-    let gaps = print_coverage(&style, &rows);
+    let gaps = print_coverage(&style, &rows, verbose);
 
     println!("{}", summary_line(&style, specs, gaps));
 
@@ -196,22 +204,18 @@ fn summary_line(style: &Style, specs: &[Spec], gaps: usize) -> String {
     format!("in-progress ({in_progress}), planned ({planned}), active ({active}), {gaps_text}")
 }
 
-// Spec ids per status, in Status::ALL order, skipping empty statuses.
-fn status_groups(specs: &[Spec]) -> Vec<(Status, Vec<&str>)> {
+// Specs per status, in Status::ALL order, skipping empty statuses.
+fn status_groups(specs: &[Spec]) -> Vec<(Status, Vec<&Spec>)> {
     Status::ALL
         .into_iter()
         .filter_map(|status| {
-            let ids: Vec<&str> = specs
-                .iter()
-                .filter(|spec| spec.status == status)
-                .map(|spec| spec.id.as_str())
-                .collect();
-            (!ids.is_empty()).then_some((status, ids))
+            let specs: Vec<&Spec> = specs.iter().filter(|spec| spec.status == status).collect();
+            (!specs.is_empty()).then_some((status, specs))
         })
         .collect()
 }
 
-fn print_status_totals(style: &Style, specs: &[Spec]) {
+fn print_status_totals(style: &Style, specs: &[Spec], verbose: bool) {
     println!("{}", style.bold(&format!("Specs ({})", specs.len())));
     if specs.is_empty() {
         println!("  {}", style.dim("none found"));
@@ -219,17 +223,27 @@ fn print_status_totals(style: &Style, specs: &[Spec]) {
         return;
     }
 
-    for (status, ids) in status_groups(specs) {
-        println!("  {} ({})", style.bold(status.label()), ids.len());
+    let mut printed_blank = false;
+    for (status, group) in status_groups(specs) {
+        println!("  {} ({})", style.bold(status.label()), group.len());
+        printed_blank = false;
         // Active and in-progress specs are already listed below with their
         // coverage detail, so listing their ids here would just duplicate that.
         if !matches!(status, Status::Active | Status::InProgress) {
-            for id in ids {
-                println!("    {}", style.cyan(id));
+            for spec in group {
+                println!("    {}", style.cyan(&spec.id));
+                printed_blank = false;
+                if verbose && status == Status::Planned {
+                    print_wrapped(style, 6, &spec.description);
+                    println!();
+                    printed_blank = true;
+                }
             }
         }
     }
-    println!();
+    if !printed_blank {
+        println!();
+    }
 }
 
 // Groups gapped rows by scope, sorted alphabetically; a row with more than
@@ -267,7 +281,59 @@ fn scope_groups<'a>(gapped: &[&'a SpecRow]) -> Vec<(Option<&'a str>, Vec<&'a Spe
     groups
 }
 
-fn print_gap_row(style: &Style, row: &SpecRow, width: usize) {
+// The acceptance criteria still missing a required impl or test annotation.
+fn gapped_ac(row: &SpecRow) -> Vec<&AcCoverage> {
+    row.ac_rows.iter().filter(|ac| !ac.is_ok()).collect()
+}
+
+fn terminal_width() -> usize {
+    terminal_size::terminal_size().map_or(100, |(terminal_size::Width(w), _)| w as usize)
+}
+
+fn wrap_text(text: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    for word in text.split_whitespace() {
+        if current.is_empty() {
+            current.push_str(word);
+        } else if current.len() + 1 + word.len() <= width {
+            current.push(' ');
+            current.push_str(word);
+        } else {
+            lines.push(std::mem::take(&mut current));
+            current.push_str(word);
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    lines
+}
+
+// Prints `text` dimmed and word-wrapped to the terminal width, indented by
+// `indent` spaces on every line.
+fn print_wrapped(style: &Style, indent: usize, text: &str) {
+    let avail = terminal_width().saturating_sub(indent).max(20);
+    let pad = " ".repeat(indent);
+    for line in wrap_text(text, avail) {
+        println!("{pad}{}", style.dim(&line));
+    }
+}
+
+// Prints `prefix` followed by `text` dimmed and word-wrapped to the terminal
+// width; continuation lines are indented to align under `prefix`, whose
+// rendered (non-ANSI) width is `prefix_len`.
+fn print_wrapped_after(style: &Style, prefix: &str, prefix_len: usize, text: &str) {
+    let avail = terminal_width().saturating_sub(prefix_len).max(20);
+    let pad = " ".repeat(prefix_len);
+    let mut lines = wrap_text(text, avail).into_iter();
+    println!("{prefix}{}", style.dim(&lines.next().unwrap_or_default()));
+    for line in lines {
+        println!("{pad}{}", style.dim(&line));
+    }
+}
+
+fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     let id = style.cyan(&format!("{:<width$}", row.id, width = width));
     let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
     let ac = if row.ac_complete() {
@@ -280,15 +346,23 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize) {
     if layers.is_empty() {
         println!("    {}  {id}  {ac}", style.red("✗"));
     } else {
-        println!(
-            "    {}  {id}  {ac}  {}",
-            style.red("✗"),
-            style.dim(&format!("missing: {layers}"))
-        );
+        let prefix_len = 4 + 1 + 2 + width + 2 + ac_text.len() + 2;
+        let prefix = format!("    {}  {id}  {ac}  ", style.red("✗"));
+        print_wrapped_after(style, &prefix, prefix_len, &format!("missing: {layers}"));
+    }
+
+    if verbose {
+        print_wrapped(style, 8, &row.description);
+        for ac in gapped_ac(row) {
+            let prefix_len = 8 + ac.id.len() + 2;
+            let prefix = format!("        {}: ", style.cyan(&ac.id));
+            print_wrapped_after(style, &prefix, prefix_len, &ac.text);
+        }
+        println!();
     }
 }
 
-fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
+fn print_coverage(style: &Style, rows: &[SpecRow], verbose: bool) -> usize {
     let gapped: Vec<&SpecRow> = rows.iter().filter(|row| row.has_gap()).collect();
     let gaps = gapped.len();
 
@@ -299,18 +373,23 @@ fn print_coverage(style: &Style, rows: &[SpecRow]) -> usize {
         return 0;
     }
 
+    let mut printed_blank = false;
     if gapped.is_empty() {
         println!("  {}", style.dim("none"));
     } else {
         let width = gapped.iter().map(|row| row.id.len()).max().unwrap_or(0);
         for (scope, scope_rows) in scope_groups(&gapped) {
             println!("  {}", style.bold(scope.unwrap_or("unscoped")));
+            printed_blank = false;
             for row in scope_rows {
-                print_gap_row(style, row, width);
+                print_gap_row(style, row, width, verbose);
+                printed_blank = verbose;
             }
         }
     }
 
-    println!();
+    if !printed_blank {
+        println!();
+    }
     gaps
 }

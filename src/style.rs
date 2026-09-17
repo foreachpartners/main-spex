@@ -13,10 +13,6 @@ impl Style {
         Self::new(std::io::stdout().is_terminal())
     }
 
-    pub fn detect_stderr() -> Self {
-        Self::new(std::io::stderr().is_terminal())
-    }
-
     fn new(is_terminal: bool) -> Self {
         let enabled = is_terminal && std::env::var_os("NO_COLOR").is_none();
         Self { enabled }
@@ -59,28 +55,6 @@ impl Style {
             format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")
         } else {
             text.to_string()
-        }
-    }
-}
-
-// Emits progress to stderr while a command executes, leaving stdout for the
-// command's actual output. Silent unless `--verbose` is set.
-pub struct Log {
-    enabled: bool,
-    style: Style,
-}
-
-impl Log {
-    pub fn new(verbose: bool) -> Self {
-        Self {
-            enabled: verbose,
-            style: Style::detect_stderr(),
-        }
-    }
-
-    pub fn step(&self, message: &str) {
-        if self.enabled {
-            eprintln!("{} {message}", self.style.dim("·"));
         }
     }
 }

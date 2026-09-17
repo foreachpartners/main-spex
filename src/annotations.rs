@@ -57,6 +57,7 @@ impl Found {
 // doesn't waive.
 pub struct AcCoverage {
     pub id: String,
+    pub text: String,
     pub impl_required: bool,
     pub impl_present: bool,
     pub test_required: bool,
@@ -74,6 +75,7 @@ pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
         .iter()
         .map(|ac| AcCoverage {
             id: ac.id.clone(),
+            text: ac.commitment.text().to_string(),
             impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
             impl_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
             test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),

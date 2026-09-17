@@ -586,7 +586,6 @@ constraints:
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &[],
-                log: &Log::new(false),
             },
             &mut findings,
             &mut Vec::new(),
@@ -605,7 +604,6 @@ constraints:
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &["src/main.rs".to_string()],
-                log: &Log::new(false),
             },
             &mut findings,
             &mut Vec::new(),
@@ -651,7 +649,6 @@ constraints:
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &[],
-                log: &Log::new(false),
             },
             &mut findings,
             &mut collected,
@@ -664,7 +661,6 @@ constraints:
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &[],
-                log: &Log::new(false),
             },
             &mut findings,
             &mut collected,
@@ -676,7 +672,7 @@ constraints:
         assert!(findings.is_empty());
         assert_eq!(collected.len(), 1);
 
-        run_workspace_checks(&spex, &collected, &Log::new(false), &mut findings);
+        run_workspace_checks(&spex, &collected, &mut findings);
 
         // It ran exactly once, despite both repositories inheriting it.
         let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
@@ -836,6 +832,7 @@ constraints:
         Spec {
             id: id.to_string(),
             path: format!("{id}.yaml"),
+            description: String::new(),
             acceptance_criteria,
             blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
             scope: Vec::new(),

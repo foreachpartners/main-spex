@@ -91,13 +91,6 @@ Every behavioral change traces to a spec, and one Spec ID traces across the repo
 
 # CLI
 
-## Global flags
-
-Apply to every subcommand.
-
-- `--verbose` (`-v`) prints progress to stderr as work executes, leaving stdout for the command's actual output.
-- Currently only `check` emits progress: each repository and each check it runs, with the time each took.
-
 ## init
 
 Creates the spex repository (`<project-name>-spex`) in the workspace root and scaffolds the framework.
@@ -143,7 +136,6 @@ Runs each repository's rule checks and gates on errors.
 - Negated `regexp` and `glob` checks are skipped when `--files` is passed, because a negated check needs the full file set to prove a forbidden pattern is absent; running it on a subset would produce false positives.
 - Skips files ignored by `.gitignore`, plus well-known generated files (e.g. `Cargo.lock`, `package-lock.json`).
 - `--fill-preexisting-errors` baselines the current errors into `spex.yaml`, then exits without gating.
-- `--verbose` reports each repository and each check once it finishes, with timings, on stderr.
 - Every finding with a location renders it as a terminal hyperlink to the absolute file it actually points at, so it opens correctly no matter the shell's current working directory; the displayed text stays the short repository-relative path.
 
 ## coverage
@@ -160,6 +152,7 @@ Reports annotation coverage for specs, per acceptance criterion.
 - Gaps are grouped by `scope`, sorted alphabetically, with specs that have no scope grouped last under `unscoped`. A spec listed under more than one `scope` is duplicated under each of its scope groups; the "Gaps" header count still reflects each gapped spec once.
 - Ends with a one-line summary: the spec count per status (`in-progress`, `planned`, `active`) and the gap count.
 - Exits non-zero only when an **active** spec has a missing required layer or acceptance criterion; gaps on `in-progress` specs are reported but don't affect the exit code.
+- `--verbose` adds description detail: each listed `planned` spec also shows its `description`; each gapped spec also shows its `description` and, for each acceptance criterion missing a required layer, that criterion's text.
 
 ### coverage_ignore
 
