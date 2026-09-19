@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.8.9] - 2026-09-19
+
+- `coverage`: spec ids are now clickable terminal hyperlinks (OSC 8) to their spec file — in the status totals and in every "Gaps"/pending row; nothing changes when output is not a terminal.
+
 ## [0.8.8] - 2026-09-17
 
 - `coverage`: an acceptance criterion flagged `is_done: false` and still missing a required impl or test annotation is now reported as pending, not a gap — it no longer counts toward the exit code or the "Gaps" section, and is instead listed (●, blue, "in-progress: ...") under its spec's `in-progress` status group.

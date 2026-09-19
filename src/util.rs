@@ -10,6 +10,11 @@ use serde::de::DeserializeOwned;
 #[path = "util_test.rs"]
 mod util_test;
 
+pub fn file_url(path: &Path) -> String {
+    let path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    format!("file://{}", path.to_string_lossy().replace(' ', "%20"))
+}
+
 pub fn plural(count: usize, noun: &str) -> String {
     if count == 1 {
         format!("1 {noun}")

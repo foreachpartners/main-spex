@@ -3,6 +3,7 @@ mod tests {
     use super::super::*;
     use crate::annotations::AcCoverage;
     use crate::spec::{CoverageLayer, Spec, Status};
+    use std::path::{Path, PathBuf};
 
     fn spec(id: &str, status: Status) -> Spec {
         Spec {
@@ -41,6 +42,7 @@ mod tests {
     ) -> SpecRow {
         SpecRow {
             id: id.to_string(),
+            file: PathBuf::new(),
             description: String::new(),
             status: Status::Active,
             scope: Vec::new(),
@@ -59,9 +61,16 @@ mod tests {
             spec("D", Status::InProgress),
         ];
         let found = Found::new();
-        let rows = tracked_rows(&specs, &found);
+        let rows = tracked_rows(Path::new("/workspace"), &specs, &found);
         let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
         assert_eq!(ids, vec!["A", "D"]);
+    }
+
+    #[test]
+    fn tracked_rows_records_each_spec_file() {
+        let specs = vec![spec("A", Status::Active)];
+        let rows = tracked_rows(Path::new("/workspace"), &specs, &Found::new());
+        assert_eq!(rows[0].file, PathBuf::from("/workspace/specs/A.yaml"));
     }
 
     #[test]
@@ -69,7 +78,7 @@ mod tests {
         let spec: Spec = serde_yaml_ng::from_str("id: A\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
-        let rows = tracked_rows(&[spec], &Found::new());
+        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
         assert!(rows.is_empty());
     }
 
@@ -82,7 +91,7 @@ mod tests {
         assert!(spec.layer_ignored(CoverageLayer::Contract));
         assert!(spec.layer_ignored(CoverageLayer::Test));
         assert!(!spec.layer_ignored(CoverageLayer::Impl));
-        let rows = tracked_rows(&[spec], &Found::new());
+        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
         assert!(!rows[0].contract_required);
     }
 
@@ -92,7 +101,7 @@ mod tests {
             "id: A\nstatus: active\nacceptance_criteria:\n  - id: ac-1\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-1\n",
         )
         .expect("parse spec");
-        let rows = tracked_rows(&[spec], &Found::new());
+        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
         assert!(!rows[0].ac_rows[0].impl_required);
         assert!(rows[0].ac_rows[0].test_required);
     }

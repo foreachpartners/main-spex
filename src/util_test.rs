@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{load_yaml_dir, load_yaml_docs, repo_walker, yaml_files};
+    use super::super::{file_url, load_yaml_dir, load_yaml_docs, repo_walker, yaml_files};
     use serde::Deserialize;
     use std::collections::HashSet;
     use std::path::PathBuf;
@@ -28,6 +28,22 @@ mod tests {
                     .to_path_buf()
             })
             .collect()
+    }
+
+    #[test]
+    fn file_url_prefixes_an_absolute_path() {
+        assert_eq!(
+            file_url(PathBuf::from("/workspace/foo.yaml").as_path()),
+            "file:///workspace/foo.yaml"
+        );
+    }
+
+    #[test]
+    fn file_url_encodes_spaces() {
+        assert_eq!(
+            file_url(PathBuf::from("/workspace/my repo/foo.yaml").as_path()),
+            "file:///workspace/my%20repo/foo.yaml"
+        );
     }
 
     #[test]

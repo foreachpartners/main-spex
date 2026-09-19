@@ -2,7 +2,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use crate::style::Style;
-use crate::util::plural;
+use crate::util::{file_url, plural};
 
 use super::*;
 
@@ -95,13 +95,7 @@ fn location_link(style: &Style, base: &Path, location: &str) -> String {
 }
 
 fn location_url(base: &Path, location: &str) -> String {
-    let file = base.join(normalize_location(location));
-    let file = file.canonicalize().unwrap_or(file);
-    format!("file://{}", encode_path(&file))
-}
-
-fn encode_path(path: &Path) -> String {
-    path.to_string_lossy().replace(' ', "%20")
+    file_url(&base.join(normalize_location(location)))
 }
 
 fn count_summary(errors: usize, warnings: usize) -> String {

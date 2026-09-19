@@ -1,3 +1,4 @@
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Args;
@@ -7,6 +8,7 @@ use thiserror::Error;
 use crate::annotations::{self, AcCoverage, Found};
 use crate::spec::{Spec, Status};
 use crate::style::Style;
+use crate::util::file_url;
 use crate::workspace::Workspace;
 
 #[cfg(test)]
@@ -43,6 +45,7 @@ pub struct CoverageArgs {
 
 struct SpecRow {
     id: String,
+    file: PathBuf,
     description: String,
     status: Status,
     scope: Vec<String>,
@@ -117,7 +120,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
     let found = annotations::scan_workspace(&workspace.dir, &workspace.config)
         .change_context(CoverageError::Walk)?;
 
-    Ok(report(&specs, &found, args.verbose))
+    Ok(report(&workspace.dir, &specs, &found, args.verbose))
 }
 
 fn scope_selected(spec: &Spec, scopes: &[String]) -> bool {
@@ -127,7 +130,7 @@ fn scope_selected(spec: &Spec, scopes: &[String]) -> bool {
             .any(|short_name| spec.scope.contains(short_name))
 }
 
-fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
+fn tracked_rows(workspace: &Path, specs: &[Spec], found: &Found) -> Vec<SpecRow> {
     specs
         .iter()
         .filter(|spec| matches!(spec.status, Status::Active | Status::InProgress))
@@ -135,6 +138,7 @@ fn tracked_rows(specs: &[Spec], found: &Found) -> Vec<SpecRow> {
             let (contract_required, contract_present) = annotations::contract_coverage(spec, found);
             SpecRow {
                 id: spec.id.clone(),
+                file: workspace.join(spec.location()),
                 description: spec.description.clone(),
                 status: spec.status,
                 scope: spec.scope.clone(),
@@ -200,9 +204,9 @@ fn pending_summary(row: &SpecRow) -> String {
     ac_layer_summary(&pending)
 }
 
-fn report(specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
+fn report(workspace: &Path, specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let style = Style::detect();
-    let rows = tracked_rows(specs, found);
+    let rows = tracked_rows(workspace, specs, found);
     // Shared across the pending list (in the "Specs" totals) and the "Gaps"
     // list, so the `id`/`AC` columns line up between the two sections.
     let id_width = rows
@@ -212,7 +216,7 @@ fn report(specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
         .max()
         .unwrap_or(0);
 
-    print_status_totals(&style, specs, &rows, id_width, verbose);
+    print_status_totals(&style, workspace, specs, &rows, id_width, verbose);
 
     let gaps = print_coverage(&style, &rows, id_width, verbose);
 
@@ -262,6 +266,7 @@ fn status_groups(specs: &[Spec]) -> Vec<(Status, Vec<&Spec>)> {
 
 fn print_status_totals(
     style: &Style,
+    workspace: &Path,
     specs: &[Spec],
     rows: &[SpecRow],
     id_width: usize,
@@ -300,7 +305,7 @@ fn print_status_totals(
             Status::Active => {}
             _ => {
                 for spec in group {
-                    println!("    {}", style.cyan(&spec.id));
+                    println!("    {}", spec_link(style, workspace, spec));
                     printed_blank = false;
                     if verbose && status == Status::Planned {
                         print_wrapped(style, 6, &spec.description);
@@ -314,6 +319,13 @@ fn print_status_totals(
     if !printed_blank {
         println!();
     }
+}
+
+fn spec_link(style: &Style, workspace: &Path, spec: &Spec) -> String {
+    style.hyperlink(
+        &file_url(&workspace.join(spec.location())),
+        &style.cyan(&spec.id),
+    )
 }
 
 // Groups gapped rows by scope, sorted alphabetically; a row with more than
@@ -442,7 +454,10 @@ fn ac_gap_label(ac: &AcCoverage) -> String {
 }
 
 fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
-    let id = style.cyan(&format!("{:<width$}", row.id, width = width));
+    let id = style.hyperlink(
+        &file_url(&row.file),
+        &style.cyan(&format!("{:<width$}", row.id, width = width)),
+    );
     let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
     let ac = if row.ac_complete() {
         style.dim(&ac_text)
