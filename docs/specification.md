@@ -125,6 +125,7 @@ Refreshes the managed framework files from the installed binary.
 
 Runs each repository's rule checks and gates on errors.
 
+- Opens its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - Runs the rule checks each repository lists in its `rules`, reporting findings per repository.
 - When the spex repository is in scope, also validates the spec set itself and attributes the findings to it: a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is not `active` or `deprecated` warns; a spec whose `status` is `active` with any acceptance criterion still `is_done: false` errors, since `active` means fully implemented; a `blocked_by` entry that references a non-existing spec errors; a `blocked_by` entry that references an already-`active` spec (or any rule, since those always apply) warns, since a satisfied blocker should be removed; a `scope` entry that does not match any repository's `repository_short_name` in `spex.yaml` errors. This reads only `is_done`, never annotations — proving `is_done` is actually true is `spex coverage`'s job, not `spex check`'s.
 - Also errors when a spec file, rule file, or `spex.yaml` declares its properties out of order relative to their JSON Schema's declared property order, at every nesting level the schema describes (for example a rule's `checks[].*` items, or `spex.yaml`'s `repositories[].*` and `repositories[].contracts[].*`), and when an acceptance criterion id is duplicated within the same spec.
@@ -143,6 +144,7 @@ Runs each repository's rule checks and gates on errors.
 
 Reports annotation coverage for specs, per acceptance criterion.
 
+- Opens its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - Reports annotation coverage for every spec whose `status` is `active` or `in-progress`.
 - `--scope <name>...` limits the report to specs whose `scope` includes one of the given repository short names; the annotation search itself still spans every workspace repository. Defaults to all specs; errors on an unrecognized name.
 - Requires a contract annotation per the spec's `contract` field: `single` needs a single spec-level `@spec contract <spec-id>` anywhere in any repository, `for-each-ac` needs a `@spec contract <spec-id>#<ac-id>` annotation for every acceptance criterion, `none` requires none. Also requires an impl and a test annotation for every acceptance criterion, each qualified with that criterion's id (`@spec impl|test <spec-id>#<ac-id>`). A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement — only a `#<ac-id>`-qualified annotation does, since a single bare annotation would otherwise trivially satisfy every criterion.
@@ -202,7 +204,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 # Skills
 
-Skills are agent workflows that drive the spec -> execute -> check loop and other use cases.
+Skills are agent workflows that drive the spec -> contract -> implement -> test and other use cases.
 
 - A skill is triggered by name (for example `/spex-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.

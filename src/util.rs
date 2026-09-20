@@ -6,6 +6,8 @@ use error_stack::{Report, ResultExt};
 use ignore::{Walk, WalkBuilder};
 use serde::de::DeserializeOwned;
 
+use crate::style::Style;
+
 #[cfg(test)]
 #[path = "util_test.rs"]
 mod util_test;
@@ -21,6 +23,10 @@ pub fn plural(count: usize, noun: &str) -> String {
     } else {
         format!("{count} {noun}s")
     }
+}
+
+pub fn version_line(style: &Style) -> String {
+    style.dim(&format!("spex {}", env!("CARGO_PKG_VERSION")))
 }
 
 // Dependency lock files are generated artifacts: never spec-annotated and

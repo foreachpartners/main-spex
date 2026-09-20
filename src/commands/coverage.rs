@@ -8,7 +8,7 @@ use thiserror::Error;
 use crate::annotations::{self, AcCoverage, Found};
 use crate::spec::{Spec, Status};
 use crate::style::Style;
-use crate::util::file_url;
+use crate::util::{file_url, version_line};
 use crate::workspace::Workspace;
 
 #[cfg(test)]
@@ -217,6 +217,8 @@ fn pending_summary(row: &SpecRow) -> String {
 
 fn report(workspace: &Path, specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let style = Style::detect();
+    println!("{}", version_line(&style));
+    println!();
     let rows = tracked_rows(workspace, specs, found);
     // Shared across the pending list (in the "Specs" totals) and the "Gaps"
     // list, so the `id`/`AC` columns line up between the two sections.

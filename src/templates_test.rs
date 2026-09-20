@@ -46,7 +46,12 @@ mod tests_unit {
                 dest.display()
             );
         }
-        for name in ["conventions.md", "faq.md", "specification.md", "tutorial.md"] {
+        for name in [
+            "conventions.md",
+            "faq.md",
+            "specification.md",
+            "tutorial.md",
+        ] {
             assert!(
                 !spex_dir.path().join(DOCS_DIR).join(name).exists(),
                 "`{name}` is not a bundled doc and must not scaffold"

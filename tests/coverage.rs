@@ -7,6 +7,12 @@ const EXPECTED_COVERAGE: &str = include_str!("fixtures/dummy-project/expected_co
 const EXPECTED_COVERAGE_VERBOSE: &str =
     include_str!("fixtures/dummy-project/expected_coverage_verbose.txt");
 
+// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
+// followed by a blank line; the fixtures hold the report body only.
+fn with_version_header(body: &str) -> String {
+    format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
+}
+
 // `dummy-project` is a small, dedicated fixture (see
 // tests/fixtures/dummy-project) whose few specs are picked to exercise
 // every state `spex coverage` reports: for each `contract` level (`none`,
@@ -26,7 +32,7 @@ fn coverage_report_matches_expected() {
     let coverage = run_spex(&project, &["coverage"], "");
     assert_eq!(
         report_text(&coverage.stdout),
-        EXPECTED_COVERAGE,
+        with_version_header(EXPECTED_COVERAGE),
         "coverage report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );
@@ -46,7 +52,7 @@ fn coverage_verbose_report_matches_expected() {
     let coverage = run_spex(&project, &["coverage", "--verbose"], "");
     assert_eq!(
         report_text(&coverage.stdout),
-        EXPECTED_COVERAGE_VERBOSE,
+        with_version_header(EXPECTED_COVERAGE_VERBOSE),
         "coverage --verbose report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );

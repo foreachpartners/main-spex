@@ -2,7 +2,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use crate::style::Style;
-use crate::util::{file_url, plural};
+use crate::util::{file_url, plural, version_line};
 
 use super::*;
 
@@ -12,6 +12,8 @@ mod report_test;
 
 pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -> ExitCode {
     let style = Style::detect();
+    println!("{}", version_line(&style));
+    println!();
     let mut total_errors = 0usize;
     let mut total_warnings = 0usize;
 

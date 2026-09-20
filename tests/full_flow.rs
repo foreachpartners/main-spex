@@ -66,6 +66,12 @@ Gaps (0)
 planned (3), in-progress (0), active (1), gaps (0)
 "#;
 
+// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
+// followed by a blank line; the snapshots below hold the report body only.
+fn with_version_header(body: &str) -> String {
+    format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
+}
+
 #[test]
 fn init_then_check_pepperoni_pizza() {
     let workspace = tempdir().expect("create temp workspace");
@@ -95,7 +101,7 @@ fn init_then_check_pepperoni_pizza() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        EXPECTED_CHECK_REPORT,
+        with_version_header(EXPECTED_CHECK_REPORT),
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -108,7 +114,7 @@ fn init_then_check_pepperoni_pizza() {
     let coverage = run_spex(&project, &["coverage"], "");
     assert_eq!(
         report_text(&coverage.stdout),
-        EXPECTED_COVERAGE_REPORT,
+        with_version_header(EXPECTED_COVERAGE_REPORT),
         "coverage report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );
@@ -223,7 +229,7 @@ fn workflow() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        EXPECTED_WORKFLOW_CHECK_REPORT,
+        with_version_header(EXPECTED_WORKFLOW_CHECK_REPORT),
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -236,7 +242,7 @@ fn workflow() {
     let coverage = run_spex(&project, &["coverage"], "");
     assert_eq!(
         report_text(&coverage.stdout),
-        EXPECTED_WORKFLOW_COVERAGE_REPORT,
+        with_version_header(EXPECTED_WORKFLOW_COVERAGE_REPORT),
         "coverage report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );
