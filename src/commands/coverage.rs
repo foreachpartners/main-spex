@@ -454,9 +454,10 @@ fn ac_gap_label(ac: &AcCoverage) -> String {
 }
 
 fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
-    let id = style.hyperlink(
-        &file_url(&row.file),
-        &style.cyan(&format!("{:<width$}", row.id, width = width)),
+    let id = format!(
+        "{}{}",
+        style.hyperlink(&file_url(&row.file), &style.cyan(&row.id)),
+        " ".repeat(width.saturating_sub(row.id.len())),
     );
     let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
     let ac = if row.ac_complete() {
