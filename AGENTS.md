@@ -34,6 +34,8 @@ spex --help # CLI command
 
 On version change fill `CHANGELOG.md`
 
+When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md`
+
 ## Project structure
 
 ```
