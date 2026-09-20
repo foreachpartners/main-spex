@@ -6,29 +6,42 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
+## Command overview
+
+| Command             | Purpose                                                                |
+| ------------------- | ---------------------------------------------------------------------- |
+| `spex init`         | Create the spex workspace repository                                   |
+| `spex update`       | Refresh the bundled templates in the spex repository                   |
+| `spex check`        | Run the rule checks declared in `spex.yaml`; fails on `error` findings |
+| `spex check-schema` | Validate JSON or YAML files against a JSON Schema                      |
+| `spex coverage`     | Report `@spec` annotation coverage per acceptance criterion            |
+| `spex info`         | Print the resolved `spex.yaml` as JSON, for scripts                    |
+| `spex rules`        | Print the rules per repository, as YAML                                |
+| `spex specs`        | Print the workspace specs, as YAML                                     |
+
+Every command except `init` finds the spex repository by walking up from the current directory to the nearest `spex.yaml`, so any of them can run from anywhere inside the workspace.
+
 ## Install
 
-### Prerequisites
+Install the `spex` binary from source. **Prerequisites:** Rust (required to build the CLI) and Git.
 
-- **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
-- **Git**: [Install Git](https://git-scm.com/install/)
-
-### Installation
-
-- **spex CLI**: Clone spex repository (repo) and install spex cli tool:
-  ```sh
-  git clone https://github.com/foreachpartners/spex
-  cd spex
-  cargo install --path . --force
-  ```
+```sh
+git clone https://github.com/foreachpartners/spex
+cd spex
+cargo install --path . --force
+```
 
 ## Commands
 
 ### `spex init`
 
-Initializes the spex workspace repository. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
+Initializes the spex workspace. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
 
-It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, docs, skills, scripts, and default rules).
+It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory (`<project-name>-spex`) if missing, prompts to confirm the discovered workspace repositories, and writes:
+
+- `spex.yaml`, recording the installed CLI's version as `cli_version`
+- `<project-name>.code-workspace`
+- the bundled templates: schemas, docs, skills, scripts, and default rules
 
 ```sh
 spex init
@@ -38,9 +51,11 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, docs, or rules you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+- Managed files are overwritten with the latest versions; any skills, scripts, schemas, docs, or rules you added are left untouched.
+- Updates `cli_version` in `spex.yaml` to the installed binary's version.
+- Run it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
@@ -48,19 +63,21 @@ spex update
 
 ### `spex check`
 
-Runs the rule checks declared in `spex.yaml` against the workspace. Each workspace repository is checked against the rules listed in its `rules`, and every check's findings are reported per repository. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Runs the checks declared in `spex.yaml` against each workspace repository, reporting findings per repository. Exits non-zero when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 
-```sh
-spex check
-```
+#### Script checks
 
-The command exits with a non-zero status when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
+A `script` check runs the program named by its `script:` filename (e.g. `writing-style.sh`), resolved at `scripts/<rule-id-lowercase>/<script>` under the spex directory. The `run` mode controls the invocation:
 
-A `script` check runs the program named by its `script:` filename (for example `writing-style.sh`), always resolved at `scripts/<rule-id-lowercase>/<script>` under the spex directory. Set `run: per-file` (the default) to pass the matched files as arguments. Set `run: per-repo` to run the script once per repository, in that repository's directory, with no arguments. Set `run: workspace` to run the script exactly once, with no arguments.
+- `run: per-file` (default) — pass the matched files as arguments.
+- `run: per-repo` — run once per repository, in that repository's directory, with no arguments.
+- `run: workspace` — run exactly once, with no arguments.
 
-A failing `script` reports each violation on its own stdout line, following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. The exit code keeps its meaning: non-zero means the check failed.
+Violations are reported on stdout, one per line, as `<location><TAB><message>`: `<location>` is a repository-relative file, optionally `<file>:<line>`; `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. A non-zero exit code still means the check failed.
 
-A repository can also baseline pre-existing `error`-severity findings with `ignored_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
+#### Baselines
+
+A repository can baseline pre-existing `error`-severity findings with `ignored_errors`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files`, or always when `files` is omitted. New errors in other files still surface, and `warn`-severity findings are never affected:
 
 ```yaml
 repositories:
@@ -78,29 +95,38 @@ repositories:
 
 - `--repo <name>...` — limit the run to the named workspace repositories, matched by either full `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files; errors when a given file doesn't exist in any workspace repository.
-- `--fill-preexisting-errors` — record the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
+- `--fill-preexisting-errors` — record the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
+
+  It runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `ignored_errors` entry per check into that repository's block. A finding tied to a file is baselined for that file; a file-less error (e.g. a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. Each selected repository's baseline is regenerated from the current findings — dropping entries whose errors are gone — while the rest of `spex.yaml` and any unselected repository stay byte-stable. It always exits `0`. Repository-level errors that belong to no named check (e.g. a misconfigured override) are not baselined; fix those directly.
 
 ```sh
 spex check --repo api frontend
-```
-
-```sh
 spex check --repo api --files src/main.rs src/orders.rs
-```
-
-`--fill-preexisting-errors` runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `ignored_errors` entry per check into that repository's block in `spex.yaml`. A finding tied to a file is baselined for that file; a file-less error (for example a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. The command regenerates each selected repository's baseline from the current findings — dropping entries whose errors are gone — and leaves the rest of `spex.yaml`, and any unselected repository, byte-stable. It always exits `0`. Repository-level errors that belong to no named check (for example a misconfigured override) are not baselined; fix those directly.
-
-```sh
 spex check --repo frontend --fill-preexisting-errors
 ```
 
-When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule: `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy its JSON Schema; each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`; every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`; each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`); and each acceptance criterion's `id` must be unique within its spec. It also checks that a `blocked_by` reference names an existing spec and is dropped once satisfied, that a `scope` entry matches a repository's `repository_short_name` in `spex.yaml`, that a `coverage_ignore` entry matches the spec's `contract` setting (a contract-layer entry errors under both `contract: none` — there is no contract coverage to waive — and, when it carries an `ac`, under `contract: single` — contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`), that a spec whose acceptance criteria are all done (`is_done` `true` or absent) has its `status` set to `active` or `deprecated`, and that a spec whose `status` is `active` has every acceptance criterion done (use `in-progress` while any is still `is_done: false`). This reads only each criterion's `is_done` field — whether that's actually backed by impl/test annotations is `spex coverage`'s job.
+#### Self-validation
+
+When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule:
+
+- `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
+- Each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`.
+- Every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`.
+- Each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` must be unique within its spec.
+- A `blocked_by` reference must name an existing spec and be dropped once satisfied.
+- A `scope` entry must match a repository's `repository_short_name` in `spex.yaml`.
+- A `coverage_ignore` entry must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
+- A spec whose acceptance criteria are all done (`is_done` `true` or absent) must have its `status` set to `active` or `deprecated`; a spec whose `status` is `active` must have every acceptance criterion done (use `in-progress` while any is still `is_done: false`).
+
+This reads only each criterion's `is_done` field — whether that is actually backed by impl/test annotations is `spex coverage`'s job.
 
 ### `spex check-schema`
 
-Validates JSON or YAML files against a JSON Schema. It loads the schema, resolves any cross-file `$ref`s against sibling schema files in the schema's own directory (fully offline, no network access), and validates each file. Violations are printed to stderr as `<file>: <message>`, and the command exits non-zero when any file fails.
+Validates JSON or YAML files against a JSON Schema.
 
-This is a general-purpose validator. `spex check` uses the same validation, built in, to keep the spex repository's own spec files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
+- Cross-file `$ref`s resolve against sibling schema files in the schema's own directory — fully offline, no network access.
+- Violations are printed to stderr as `<file>: <message>`; the command exits non-zero when any file fails.
+- `spex check` uses the same validation, built in, to keep the spex repository's own files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -109,29 +135,28 @@ This is a general-purpose validator. `spex check` uses the same validation, buil
 
 ```sh
 spex check-schema --schema schemas/rule.schema.json --files rules/naming-convention.yaml
-```
-
-```sh
 spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-menu.yaml specs/place-pizza-order.yaml
 ```
 
 ### `spex coverage`
 
-Reports how well the active and in-progress specs are covered by spec-id annotations across the workspace, per acceptance criterion. For every spec whose `status` is `active` or `in-progress`, it requires a contract annotation per the spec's `contract` field — `single` needs a single spec-level `@spec contract <spec-id>` (anywhere in any workspace repository's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`); `for-each-ac` needs a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` requires none — and requires an implementation and a test annotation for every acceptance criterion, each qualified with that criterion's id: `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`. A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec. A spec with no `status` field defaults to `planned`, so it is ignored. Run it from anywhere inside the workspace; spex locates the config by walking up to the nearest `spex.yaml`.
+Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion. Exits non-zero when any active or in-progress spec has a gap.
 
-```sh
-spex coverage
-```
+For every spec whose `status` is `active` or `in-progress`, coverage requires:
 
-- `--scope <name>...` — limit the report to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
+- **Contract** — per the spec's `contract` field:
+  - `single` — one spec-level `@spec contract <spec-id>` anywhere in any workspace repository's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`.
+  - `for-each-ac` — a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion.
+  - `none` — none.
+- **Impl and test** — for every acceptance criterion: `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`.
 
-```sh
-spex coverage --scope api frontend
-```
+A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec. A spec with no `status` field defaults to `planned` and is ignored (its ID is still listed under its status).
 
-The annotation search itself is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
+The annotation search is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped.
 
-A spec can relax the requirement with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec; given (an acceptance criterion id), it waives just that one criterion's impl or test requirement, or its contract requirement under `contract: for-each-ac`. The entry must match the spec's `contract` setting — whole-spec contract waives work under `single` and `for-each-ac`, per-criterion contract waives only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless — `spex check` errors on a mismatch:
+#### Waivers
+
+A spec can relax the requirements with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec; given (an acceptance criterion id), it waives just that one criterion's impl or test requirement, or its contract requirement under `contract: for-each-ac`. The entry must match the spec's `contract` setting — whole-spec contract waives work under `single` and `for-each-ac`, per-criterion contract waives only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch:
 
 ```yaml
 id: place-pizza-order
@@ -142,47 +167,44 @@ coverage_ignore:
     ac: no-null-typed-string
 ```
 
-The report shows how many of each tracked spec's acceptance criteria are fully traced (a required impl and a required test annotation both present) as `done/total AC`. A tracked spec with any untraced required criterion has a gap.
+#### Report
 
-The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation), each with its acceptance-criteria progress and what's missing, naming the acceptance criterion ids involved (for example `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`). Specs with no gap — fully covered, or only ignored requirements missing — aren't listed individually; they're only reflected in the "Gaps" count. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
+- Lists specs grouped by status (omitting any status with no specs), each tracked spec showing its progress as `done/total AC` — a criterion counts when both a required impl and a required test annotation are present. A tracked spec with any untraced required criterion has a gap.
+- The "Gaps" section lists only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation), each with its progress and what's missing, naming the acceptance criterion ids involved (e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`).
+- Specs with no gap — fully covered, or only ignored requirements missing — aren't listed individually; they're only reflected in the "Gaps" count.
+- The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`.
 
-`--verbose` (`-v`) adds description detail to the report: each `planned` spec listed under its status also shows its `description`, and each gapped spec in the "Gaps" section also shows its `description` plus, for every acceptance criterion still missing a required layer, that criterion's own text next to its id.
+#### Flags
+
+- `--scope <name>...` — limit the report to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
+- `--verbose` (`-v`) — add description detail: each `planned` spec listed under its status also shows its `description`, and each gapped spec in the "Gaps" section also shows its `description` plus, for every acceptance criterion still missing a required layer, that criterion's own text next to its id.
 
 ```sh
+spex coverage --scope api frontend
 spex coverage --verbose
 ```
 
 ### `spex info`
 
-Prints the resolved `spex.yaml` configuration, for scripts to consume instead of parsing `spex.yaml` by hand. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
-
-`spex info` prints the fully-resolved configuration as pretty JSON, the general-purpose form scripts pipe into `jq` for whatever field they need:
+Prints the resolved `spex.yaml` configuration as pretty JSON — the general-purpose form scripts pipe into `jq` for whatever field they need:
 
 ```sh
 spex info | jq -r '.repositories[].path'
 ```
 
-`--print <field>` is a convenience for the common case of needing exactly one top-level scalar field, printing it bare with no quoting or JSON escaping:
+#### Flags
+
+- `--print <field>` — print one top-level scalar field bare, with no quoting or JSON escaping. Errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (e.g. `repositories`, which is a list — use plain `spex info` for that).
+- `--repo <name>...` — limit output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`. Errors when any given name matches no repository.
 
 ```sh
 spex info --print project_name
-```
-
-`--repo <name>...` limits output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`:
-
-```sh
 spex info --repo api frontend
 ```
 
-`--print` errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (for example `repositories`, which is a list — use plain `spex info` for that); `--repo` errors when any given name matches no repository.
-
 ### `spex rules`
 
-Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules` — as YAML. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
-
-```sh
-spex rules
-```
+Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules`, as YAML:
 
 ```yaml
 - repository_name: pepperoni-pizza-api
@@ -195,25 +217,18 @@ spex rules
 #### Flags
 
 - `--ai` — drop fields an agent doesn't need to follow a rule (`sync_with_upstream` and `checks`), and add a `path` field after `id` with the rule file's location relative to the workspace root (e.g. `rules/secret-handling.yaml`).
-- `--id <id>...` — limit output to the given Rule IDs. Defaults to all rules; errors on an unrecognized ID.
+- `--id <id>...` — limit output to the given rule IDs. Defaults to all rules; errors on an unrecognized ID.
 - `--repo <name>...` — limit output to the named repositories, matched by either `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`; errors on an unrecognized name.
 - `--output <path>` — write the rendered YAML to this file instead of stdout, since the full rules list is large and can get truncated when printed to a terminal or piped through a shell.
 
 ```sh
 spex rules --ai --repo api
-```
-
-```sh
 spex rules --id secret-handling naming-convention
 ```
 
 ### `spex specs`
 
-Prints the workspace specs as YAML. Run it from anywhere inside the workspace; spex locates the config the same way `spex check` and `spex coverage` do.
-
-```sh
-spex specs
-```
+Prints the workspace specs as YAML:
 
 ```yaml
 - id: place-pizza-order
@@ -224,15 +239,12 @@ spex specs
 #### Flags
 
 - `--ai` — add a `path` field after `id` with the spec file's location relative to the workspace root (e.g. `specs/place-pizza-order.yaml`).
-- `--id <id>...` — limit output to the given Spec IDs. Defaults to all specs; errors on an unrecognized ID.
+- `--id <id>...` — limit output to the given spec IDs. Defaults to all specs; errors on an unrecognized ID.
 - `--scope <name>...` — limit output to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
 - `--output <path>` — write the rendered YAML to this file instead of stdout, since the full specs list is large and can get truncated when printed to a terminal or piped through a shell.
 
 ```sh
 spex specs --ai --scope api
-```
-
-```sh
 spex specs --id place-pizza-order list-pizza-menu
 ```
 
@@ -240,28 +252,11 @@ spex specs --id place-pizza-order list-pizza-menu
 
 These commands operate on the `spex` source checkout itself.
 
-### Build
-
 ```sh
 cargo build            # Debug build
-```
-
-```sh
 cargo build --release  # Optimized build
-```
-
-### Test
-
-```sh
-cargo test
-```
-
-### Lint and format
-
-```sh
-cargo check  # Type-check and lint
-```
-
-```sh
-cargo fmt    # Format
+cargo test             # Test
+cargo check            # Type-check and lint
+cargo fmt              # Format
+dprint check           # Format check for md/yaml/json
 ```
