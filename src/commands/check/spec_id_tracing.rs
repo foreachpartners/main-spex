@@ -64,9 +64,7 @@ fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
 
 struct Checker {
     spec_line: Regex,
-    xspec_line: Regex,
     spec_extract: Regex,
-    xspec_extract: Regex,
     token: Regex,
 }
 
@@ -84,30 +82,22 @@ impl Checker {
                 r"@spec\s+(?:contract|impl|test)\s+{token}(?:\s*,\s*{token})*"
             ))
             .expect("valid spec-line regex"),
-            xspec_line: Regex::new(&format!(r#"x-spec:\s*"?{id}"?"#))
-                .expect("valid xspec-line regex"),
             spec_extract: Regex::new(&format!(
                 r"@spec\s+(?:contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
             ))
             .expect("valid spec-extract regex"),
-            xspec_extract: Regex::new(&format!(r#"x-spec:\s*"?({id})"?"#))
-                .expect("valid xspec-extract regex"),
             token: Regex::new(&token).expect("valid token regex"),
         }
     }
 
-    // Flags a line that opens an annotation (`@spec ` or `x-spec:`) but does
-    // not match its full grammar anywhere in the line.
+    // Flags a line that opens an annotation (`@spec `) but does not match its
+    // full grammar anywhere in the line.
     fn check_format(&self, file: &ScopedFile, content: &str, findings: &mut Vec<Finding>) {
         for (index, line) in content.lines().enumerate() {
-            let has_spec = line.contains("@spec ");
-            let has_xspec = line.contains("x-spec:");
-            if !has_spec && !has_xspec {
+            if !line.contains("@spec ") {
                 continue;
             }
-            let ok = (!has_spec || self.spec_line.is_match(line))
-                && (!has_xspec || self.xspec_line.is_match(line));
-            if !ok {
+            if !self.spec_line.is_match(line) {
                 findings.push(finding(
                     FORMAT_CHECK,
                     Some(format!("{}:{}", rel_str(file), index + 1)),
@@ -137,9 +127,6 @@ impl Checker {
                 };
                 refs.insert((spec_id, ac_id));
             }
-        }
-        for caps in self.xspec_extract.captures_iter(content) {
-            refs.insert((caps[1].to_string(), None));
         }
 
         let mut orphans: Vec<(String, Option<String>)> = refs

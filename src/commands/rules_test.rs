@@ -208,7 +208,7 @@ mod tests {
                     type: glob
                     pattern: "**/*.bak"
                 examples:
-                  contract: "x-spec: list-pizza-menu"
+                  contract: 'x-spec: "@spec contract list-pizza-menu"'
             "#},
         )
         .expect("write rule");
@@ -226,7 +226,7 @@ mod tests {
                   acceptance_criteria:
                   - MUST annotate the boundary
                   examples:
-                    contract: 'x-spec: list-pizza-menu'
+                    contract: 'x-spec: \"@spec contract list-pizza-menu\"'
             "}
         );
     }

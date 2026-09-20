@@ -47,7 +47,7 @@ If a task fails or an agent cannot complete it, stop, report what failed, and as
 
 This step implements the change only — it does not write tests. Use `spex-test` for that once implementation is done.
 
-As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or the OpenAPI `x-spec: <spec-id>` property for a contract), tagging the specific criterion id it satisfies. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap.
+As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or, for a contract, an OpenAPI `x-*` vendor extension whose value is `@spec contract <spec-id>`), tagging the specific criterion id it satisfies. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap.
 
 ## Step 3 — Finalize the specs
 

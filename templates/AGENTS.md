@@ -13,7 +13,7 @@ BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (in
 
 ## Traceability
 
-Every behavioral change traces to a spec AC via a trace comment (@spec impl|test <spec-id>#<ac-id>, or x-spec: <spec-id> in OpenAPI). Place the trace on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint contract). Target minimal tracing amount that make sense. Tag `impl` and `test` annotations traces with the specific acceptance criterion id are required for each, so `spex coverage` can verify each one individually.
+Every behavioral change traces to a spec AC via a trace comment (@spec impl|test|contract <spec-id>[#<ac-id>]). For contract spec-id is enough, for test and impl ac-id for each acceptance criterion is required. Place the trace on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint). Target minimal tracing amount that make sense. Tag `impl` and `test` annotations traces with the specific acceptance criterion id are required for each, so `spex coverage` can verify each one individually.
 
 ## Definition of done
 

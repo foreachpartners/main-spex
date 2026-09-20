@@ -98,7 +98,7 @@
     },
     "coverage_ignore": {
       "type": "array",
-      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one's impl or test annotation. `ac` is not valid with `layer: contract`, since `x-spec` has no per-criterion granularity. By default coverage requires contract at the spec level, and impl and test per acceptance criterion.",
+      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one's impl or test annotation. `ac` is not valid with `layer: contract`, since `@spec contract` has no per-criterion granularity. By default coverage requires contract at the spec level, and impl and test per acceptance criterion.",
       "items": {
         "type": "object",
         "properties": {

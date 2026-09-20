@@ -81,12 +81,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-      x-spec: delivery-time
+      x-spec: "@spec contract delivery-time"
   /register:
     post:
       operationId: register
       summary: Register a new customer account
-      x-spec: register-user-api
+      x-spec: "@spec contract register-user-api"
       requestBody:
         required: true
         content:
@@ -116,7 +116,7 @@ paths:
     post:
       operationId: login
       summary: Log in with email and password
-      x-spec: login-api
+      x-spec: "@spec contract login-api"
       requestBody:
         required: true
         content:

@@ -139,8 +139,8 @@ impl Commitment {
 // A `coverage_ignore` entry: `layer` is required, `ac` is optional. Without
 // `ac` it waives that layer for the whole spec (every acceptance criterion,
 // for impl/test); with `ac` it waives just that one criterion's impl or test
-// annotation. Contract has no per-criterion form, since `x-spec` has no
-// acceptance-criterion granularity.
+// annotation. Contract has no per-criterion form, since `@spec contract` has
+// no acceptance-criterion granularity.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CoverageIgnore {
     pub layer: CoverageLayer,

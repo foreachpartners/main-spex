@@ -59,7 +59,7 @@ The tool's language is irrelevant (Bash, Python, Rust); what matters is determin
 Every behavioral change traces to a spec, down to the acceptance criterion. Bidirectional: top-down (spec -> contract -> plan -> code -> test) and bottom-up (test -> code -> plan -> contract -> spec). No orphans, and no acceptance criterion left uncovered.
 
 - The Spec ID (`delivery-time`), optionally scoped to an acceptance criterion (`delivery-time#created-order-status`), is the traceability unit.
-- Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>[#<ac-id>]` in code, `x-spec: <spec-id>` in OpenAPI.
+- Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>[#<ac-id>]` in code, or as the value of an OpenAPI vendor extension such as `x-spec` for contracts.
 - `spex coverage` computes coverage from those annotations, per spec and per acceptance criterion.
 - Checking out a commit shows exactly which specs — and which acceptance criteria — the code was built against.
 - Spec traceability is required, rule traceability is optional.

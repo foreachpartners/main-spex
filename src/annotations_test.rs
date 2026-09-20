@@ -41,16 +41,10 @@ mod tests {
     }
 
     #[test]
-    fn scan_treats_xspec_as_contract() {
-        let found = scan("        x-spec: a\n");
+    fn scan_treats_vendor_extension_value_as_contract() {
+        let found = scan("      x-spec: \"@spec contract a\"\n");
         assert!(found.has_bare("a", CoverageLayer::Contract));
         assert!(!found.has_bare("a", CoverageLayer::Impl));
-    }
-
-    #[test]
-    fn scan_treats_quoted_xspec_as_contract() {
-        let found = scan("x-spec: \"a\"\n");
-        assert!(found.has_bare("a", CoverageLayer::Contract));
     }
 
     #[test]
@@ -88,7 +82,7 @@ mod tests {
         std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
         std::fs::write(
             spex_dir.join("contracts/api.openapi.yaml"),
-            "      x-spec: a\n",
+            "      x-spec: \"@spec contract a\"\n",
         )
         .expect("write contract");
 
@@ -153,7 +147,7 @@ mod tests {
     #[test]
     fn contract_coverage_reads_bare_annotation() {
         let spec = spec("a", &[], Vec::new());
-        let found = scan("x-spec: a\n");
+        let found = scan("// @spec contract a\n");
         assert_eq!(contract_coverage(&spec, &found), (true, true));
     }
 

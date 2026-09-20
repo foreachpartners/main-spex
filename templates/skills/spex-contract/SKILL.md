@@ -49,7 +49,7 @@ For a machine-readable interface:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec — the OpenAPI `x-spec: <spec-id>` property, or a `@spec contract <spec-id>` comment in formats without an extension mechanism. Annotate once at the boundary (the operation), never on the nested schemas it references.
+- Annotate each operation with its spec — an OpenAPI `x-*` vendor extension (e.g. `x-spec`) whose value is `@spec contract <spec-id>`, or that same comment form in formats without an extension mechanism. The extension's key name is not itself checked, only that its value matches the grammar. Annotate once at the boundary (the operation), never on the nested schemas it references.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 For a design reference:
@@ -82,7 +82,7 @@ paths:
     post:
       operationId: createOrder
       summary: Create an order
-      x-spec: order-create
+      x-spec: "@spec contract order-create"
       requestBody:
         content:
           application/json:

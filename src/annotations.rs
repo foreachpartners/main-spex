@@ -100,7 +100,7 @@ pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
         .collect()
 }
 
-// Contract coverage stays spec-level: `x-spec` has no per-criterion form.
+// Contract coverage stays spec-level: `@spec contract` has no per-criterion form.
 pub fn contract_coverage(spec: &Spec, found: &Found) -> (bool, bool) {
     let required = !spec.layer_ignored(CoverageLayer::Contract);
     let present = found.has_bare(&spec.id, CoverageLayer::Contract);
@@ -125,7 +125,7 @@ pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Found> {
     for repo in &config.repositories {
         // Interface contracts live inside the spex repository's `contracts/`
         // folder, so scan them explicitly even though the spex dir itself is
-        // skipped below; their `x-spec` annotations are the contract layer.
+        // skipped below; their `@spec contract` annotations are the contract layer.
         for contract in &repo.contracts {
             let contract_path = spex_dir.join(&contract.path);
             if let Ok(content) = fs::read_to_string(&contract_path) {
@@ -161,7 +161,6 @@ fn scan_repo(scanner: &Scanner, repo_path: &Path, found: &mut Found) -> Result<(
 
 struct Scanner {
     spec: Regex,
-    xspec: Regex,
     token: Regex,
 }
 
@@ -174,7 +173,6 @@ impl Scanner {
                 r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
             ))
             .expect("valid @spec regex"),
-            xspec: Regex::new(&format!(r#"x-spec:\s*"?({id})"?"#)).expect("valid x-spec regex"),
             token: Regex::new(&token).expect("valid token regex"),
         }
     }
@@ -208,14 +206,6 @@ impl Scanner {
                         .insert(layer),
                 };
             }
-        }
-
-        for caps in self.xspec.captures_iter(content) {
-            found
-                .bare
-                .entry(caps[1].to_string())
-                .or_default()
-                .insert(CoverageLayer::Contract);
         }
     }
 }
