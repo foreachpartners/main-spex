@@ -202,7 +202,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 # Skills
 
-Skills are agent workflows that drive the spec -> plan -> execute -> check loop and other use cases.
+Skills are agent workflows that drive the spec -> execute -> check loop and other use cases.
 
 - A skill is triggered by name (for example `/spex-spec`) or loaded on demand by the AI agent.
 - Skills live in the `spex` repository.
