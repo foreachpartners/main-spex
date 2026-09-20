@@ -4,12 +4,16 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof). Every behavioral change traces to a Spec ID, annotated at the layer boundary (`@spec contract|impl|test <spec-id>[#<ac-id>]`, or `x-spec: <spec-id>` in OpenAPI). Tag `impl` and `test` annotations with the specific acceptance criterion id are required for each so `spex coverage` can verify each one individually.
+BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof).
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
 - **Skill** — the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
 - **Traceability** — the `@spec`/`@rule` annotations stitching together spec, contract, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+
+## Traceability
+
+Every behavioral change traces to a spec AC via a trace comment (@spec impl|test <spec-id>#<ac-id>, or x-spec: <spec-id> in OpenAPI). Place the trace on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint contract). Target minimal tracing amount that make sense. Tag `impl` and `test` annotations traces with the specific acceptance criterion id are required for each, so `spex coverage` can verify each one individually.
 
 ## Definition of done
 
