@@ -2,6 +2,13 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.0] - 2026-09-20
+
+- **Breaking**: specs now have a required `contract` field (`none`, `single`, or `for-each-ac`) setting the contract coverage granularity. `single` requires a single `@spec contract <spec-id>` annotation for the whole spec (the previous behavior); `for-each-ac` requires a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` disables contract coverage. Existing specs must add `contract: single` (see the migration guide).
+- `coverage`: under `contract: for-each-ac`, contract coverage is now per acceptance criterion — a missing per-criterion contract annotation is reported as a gap (`contract(ac-one, ac-two)`), and a contract annotation anchored to one criterion no longer satisfies the others.
+- `coverage_ignore`: a contract-layer entry may now carry `ac` to waive one criterion's contract under `contract: for-each-ac`; previously any `ac` was invalid with `layer: contract`.
+- `check`: now verifies every `coverage_ignore` entry matches the spec's `contract` setting — a contract-layer entry errors under `contract: none` (nothing to waive), and a per-criterion contract entry errors under `contract: single` (contracts are spec-level there).
+
 ## [0.9.1] - 2026-09-20
 
 - Added the `spex-update` skill: to automatically update spex based on migration guide using AI.

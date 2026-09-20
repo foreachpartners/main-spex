@@ -7,7 +7,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::Config;
-use crate::spec::{CoverageLayer, Spec};
+use crate::spec::{ContractLevel, CoverageLayer, Spec};
 use crate::util;
 
 #[cfg(test)]
@@ -23,9 +23,11 @@ pub enum AnnotationsError {
 }
 
 // Spec-id annotations found across the workspace: `bare` holds layers found
-// without a `#ac-id` (a whole-spec annotation, or any contract annotation,
-// since contracts have no per-criterion granularity); `by_ac` holds layers
-// found qualified with a specific acceptance criterion.
+// without a `#ac-id` (a whole-spec annotation), `by_ac` holds layers found
+// qualified with a specific acceptance criterion. A contract annotation
+// anchored to one criterion lands in both: it satisfies that criterion's own
+// contract requirement under `contract: for-each-ac`, and still stands for
+// the whole spec under `contract: single`.
 #[derive(Debug, Default)]
 pub struct Found {
     bare: HashMap<String, HashSet<CoverageLayer>>,
@@ -53,12 +55,15 @@ impl Found {
     }
 }
 
-// Whether an acceptance criterion has the impl/test annotations `coverage_ignore`
-// doesn't waive.
+// Whether an acceptance criterion has the impl/test/contract annotations
+// `coverage_ignore` doesn't waive. Contract is per-criterion only under
+// `contract: for-each-ac`.
 pub struct AcCoverage {
     pub id: String,
     pub text: String,
     pub is_done: bool,
+    pub contract_required: bool,
+    pub contract_present: bool,
     pub impl_required: bool,
     pub impl_present: bool,
     pub test_required: bool,
@@ -74,7 +79,9 @@ impl AcCoverage {
     }
 
     pub fn is_ok(&self) -> bool {
-        self.impl_ok() && (!self.test_required || self.test_present)
+        self.impl_ok()
+            && (!self.test_required || self.test_present)
+            && (!self.contract_required || self.contract_present)
     }
 
     // Not yet traced, but not a gap either: the criterion is itself flagged
@@ -92,6 +99,8 @@ pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
             id: ac.id.clone(),
             text: ac.commitment.text().to_string(),
             is_done: ac.is_done(),
+            contract_required: spec.ac_contract_required(&ac.id),
+            contract_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Contract),
             impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
             impl_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
             test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),
@@ -100,11 +109,19 @@ pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
         .collect()
 }
 
-// Contract coverage stays spec-level: `@spec contract` has no per-criterion form.
+// Spec-level contract coverage. Under `contract: single` one `@spec
+// contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
+// disables contract coverage; `for-each-ac` has no spec-level requirement —
+// each acceptance criterion carries its own (see `ac_coverage`).
 pub fn contract_coverage(spec: &Spec, found: &Found) -> (bool, bool) {
-    let required = !spec.layer_ignored(CoverageLayer::Contract);
-    let present = found.has_bare(&spec.id, CoverageLayer::Contract);
-    (required, present)
+    match spec.contract {
+        ContractLevel::None => (false, false),
+        ContractLevel::Single => (
+            spec.contract_required(),
+            found.has_bare(&spec.id, CoverageLayer::Contract),
+        ),
+        ContractLevel::ForEachAc => (false, false),
+    }
 }
 
 // Scans one piece of content for spec-id annotations; a test-only helper for
@@ -186,24 +203,31 @@ impl Scanner {
                 _ => continue,
             };
             for token in self.token.find_iter(&caps[2]) {
-                // Contract has no per-criterion granularity, so any `#ac-id`
-                // on a contract annotation is ignored and it always counts bare.
                 match token.as_str().split_once('#') {
-                    Some((spec_id, ac_id)) if layer != CoverageLayer::Contract => found
-                        .by_ac
-                        .entry((spec_id.to_string(), ac_id.to_string()))
-                        .or_default()
-                        .insert(layer),
-                    Some((spec_id, _)) => found
-                        .bare
-                        .entry(spec_id.to_string())
-                        .or_default()
-                        .insert(layer),
-                    None => found
-                        .bare
-                        .entry(token.as_str().to_string())
-                        .or_default()
-                        .insert(layer),
+                    Some((spec_id, ac_id)) => {
+                        found
+                            .by_ac
+                            .entry((spec_id.to_string(), ac_id.to_string()))
+                            .or_default()
+                            .insert(layer);
+                        // A contract annotation anchored to one criterion
+                        // still counts for the whole spec, so
+                        // `contract: single` is satisfied by it too.
+                        if layer == CoverageLayer::Contract {
+                            found
+                                .bare
+                                .entry(spec_id.to_string())
+                                .or_default()
+                                .insert(layer);
+                        }
+                    }
+                    None => {
+                        found
+                            .bare
+                            .entry(token.as_str().to_string())
+                            .or_default()
+                            .insert(layer);
+                    }
                 };
             }
         }

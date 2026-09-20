@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::spec::{AcceptanceCriterion, Commitment, CoverageIgnore, Spec, Status};
+    use crate::spec::{
+        AcceptanceCriterion, Commitment, ContractLevel, CoverageIgnore, Spec, Status,
+    };
 
     fn spec(id: &str, ac_ids: &[&str], coverage_ignore: Vec<CoverageIgnore>) -> Spec {
         Spec {
@@ -20,6 +22,7 @@ mod tests {
             blocked_by: Vec::new(),
             scope: Vec::new(),
             status: Status::Active,
+            contract: ContractLevel::Single,
             coverage_ignore,
         }
     }
@@ -66,6 +69,14 @@ mod tests {
     fn scan_treats_ac_qualified_contract_annotation_as_bare() {
         let found = scan("// @spec contract a#empty-string\n");
         assert!(found.has_bare("a", CoverageLayer::Contract));
+    }
+
+    #[test]
+    fn scan_collects_ac_qualified_contract_annotation_per_ac() {
+        let found = scan("// @spec contract a#empty-string\n");
+        assert!(found.has_ac("a", "empty-string", CoverageLayer::Contract));
+        assert!(!found.has_ac("a", "other-ac", CoverageLayer::Contract));
+        assert!(!found.has_ac("a", "empty-string", CoverageLayer::Impl));
     }
 
     #[test]
@@ -162,5 +173,51 @@ mod tests {
             }],
         );
         assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+    }
+
+    #[test]
+    fn contract_coverage_never_requires_under_none() {
+        let mut spec = spec("a", &[], Vec::new());
+        spec.contract = ContractLevel::None;
+        assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+    }
+
+    #[test]
+    fn contract_coverage_is_spec_level_under_single() {
+        let mut spec = spec("a", &[], Vec::new());
+        spec.contract = ContractLevel::Single;
+        let found = scan("// @spec contract a#ac-1\n");
+        assert_eq!(contract_coverage(&spec, &found), (true, true));
+    }
+
+    #[test]
+    fn contract_coverage_is_per_ac_under_for_each_ac() {
+        let mut spec = spec("a", &["ac-one", "ac-two"], Vec::new());
+        spec.contract = ContractLevel::ForEachAc;
+        assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+
+        let found = scan("// @spec contract a#ac-one\n");
+        let rows = ac_coverage(&spec, &found);
+        assert!(rows[0].contract_required && rows[0].contract_present);
+        assert!(rows[1].contract_required && !rows[1].contract_present);
+        assert!(rows[0].impl_required && !rows[0].impl_present);
+        assert!(!rows[0].is_ok());
+        assert!(!rows[1].is_ok());
+    }
+
+    #[test]
+    fn ac_coverage_under_for_each_ac_respects_contract_ignore() {
+        let mut spec = spec(
+            "a",
+            &["ac-one"],
+            vec![CoverageIgnore {
+                layer: CoverageLayer::Contract,
+                ac: Some("ac-one".to_string()),
+            }],
+        );
+        spec.contract = ContractLevel::ForEachAc;
+        let rows = ac_coverage(&spec, &Found::new());
+        assert!(!rows[0].contract_required);
+        assert!(!rows[0].contract_present);
     }
 }

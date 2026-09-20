@@ -1,0 +1,14 @@
+id: foreach-not-covered
+title: Let customers reorder a past order
+description: >-
+  Lets a customer reorder every item of a past order, with a contract
+  annotation per acceptance criterion and no annotations tracing it at all.
+acceptance_criteria:
+  - id: reorders-past-order
+    must: "let a customer reorder every item of a past order"
+  - id: edits-reorder-before-submit
+    must: "let a customer edit a reorder before submitting it"
+scope:
+  - frontend
+status: active
+contract: for-each-ac

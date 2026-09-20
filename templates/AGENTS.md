@@ -4,23 +4,31 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface, if applicable) -> plan (how to implement, optional) -> implementation (code) -> test (proof).
+BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
 - **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
 - **Skill** — the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
-- **Traceability** — the `@spec`/`@rule` annotations stitching together spec, contract, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
 ## Traceability
 
-Every behavioral change traces to a spec AC via a trace comment (@spec impl|test|contract <spec-id>[#<ac-id>]). For contract spec-id is enough, for test and impl ac-id for each acceptance criterion is required. Place the trace on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint). Target minimal tracing amount that make sense. Tag `impl` and `test` annotations traces with the specific acceptance criterion id are required for each, so `spex coverage` can verify each one individually.
+Every behavioral change traces to a spec acceptance creterion via a trace comment `@spec impl|test|contract <spec-id>#<ac-id>` e.g `@spec impl place-pizza-order#auth-required` for implementation acceptance criterion.
+
+For `@spec test` and `@spec impl` ac-id for each acceptance criterion is required. Contract type is defined in spec, e.g `contract: for-each-ac`:
+
+- `for-each-ac` - contract for each ac is requred, same as for `@spec impl` and `@spec test`/
+- `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec impl place-pizza-order`.
+- `none` - no contract required.
+
+Trace comment should be placed on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint, contract). Target minimal tracing amount that make sense.
 
 ## Definition of done
 
 A change isn't finished until:
 
 - `spex check` passes (no error-severity findings) for every affected repository.
-- `spex coverage` shows no gap for any spec or acceptance criterion the change touches.
+- `spex coverage` shows no gap for any spec acceptance criterion the change touches.
 - Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
 
 ## Workspace layout

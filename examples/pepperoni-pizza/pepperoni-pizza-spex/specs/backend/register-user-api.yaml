@@ -37,3 +37,4 @@ acceptance_criteria:
 scope:
   - api
 status: planned
+contract: single

@@ -9,3 +9,4 @@ acceptance_criteria:
 scope:
   - frontend
 status: planned
+contract: single

@@ -36,3 +36,4 @@ scope:
 blocked_by:
   - register-user-api
 status: planned
+contract: single

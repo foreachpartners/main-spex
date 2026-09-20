@@ -58,6 +58,7 @@ Draft each spec following the field rules in `<workspace-root>/<project-name>-sp
 - Set `scope` to the repositories that implement the capability, each matching a `repository_short_name` in `spex.yaml`.
 - When `scope` lists more than one repository, make the division of responsibility explicit: every acceptance criterion must name the repository that owns it at the start of its text, so the boundary between repositories is unambiguous and no shared behavior is left unassigned. Split a behavior that crosses the boundary into separate per-repository criteria rather than one vague criterion. For example, the API owns producing a value and the frontend owns presenting it — write must: "compute the delivery-time estimate in the `api` from the order's pizza count, the in-progress orders, and the workers on shift" and must: "display the estimate in the `frontend` in the cart and on the order confirmation" as distinct criteria.
 - Set `blocked_by` only for specs that must be in place before this one can be implemented and their status is not `active`. Do not list a shared foundation that every capability rides on (e.g. the API surface), and never list an already-shipped or established spec. When nothing genuinely blocks the work, leave it absent.
+- Set `contract` to the contract coverage the spec needs: `single` (the migration default) — a single `@spec contract <spec-id>` annotation for the whole spec, usual for a normal API spec; `for-each-ac` — a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion, when each criterion exposes its own contract surface that must be individually traced; `none` — no contract coverage, when the spec has no interface contract at all. The field is required.
 - Keep `description` short, simple, and concrete: a general summary of the capability and who or what is affected. Do not restate specifics already covered by `acceptance_criteria`, and leave the step-by-step implementation to the plan.
 - Add `examples` only when a request/response, payload, or usage snippet clarifies the capability better than prose. Key each entry with a short label (e.g. `request`, `response`).
 
@@ -109,6 +110,7 @@ scope:
   - api
   - frontend
 status: planned
+contract: single
 ```
 
 ## Step 5 — Point to the next skill

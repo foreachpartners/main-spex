@@ -11,3 +11,4 @@ acceptance_criteria:
 scope:
   - api
 status: active
+contract: single

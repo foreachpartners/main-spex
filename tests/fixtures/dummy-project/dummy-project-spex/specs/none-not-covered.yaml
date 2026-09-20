@@ -1,0 +1,14 @@
+id: none-not-covered
+title: Let customers schedule a reorder
+description: >-
+  Lets a customer schedule a saved favorite order to be reordered on a chosen
+  day, with contract coverage disabled and no annotations tracing it at all.
+acceptance_criteria:
+  - id: schedules-reorder-day
+    must: "let a customer schedule a reorder on a chosen day"
+  - id: cancels-scheduled-reorder
+    must: "let a customer cancel a scheduled reorder"
+scope:
+  - api
+status: active
+contract: none

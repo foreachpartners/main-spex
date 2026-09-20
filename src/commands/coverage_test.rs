@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::annotations::AcCoverage;
-    use crate::spec::{CoverageLayer, Spec, Status};
+    use crate::spec::{ContractLevel, CoverageLayer, Spec, Status};
     use std::path::{Path, PathBuf};
 
     fn spec(id: &str, status: Status) -> Spec {
@@ -14,6 +14,7 @@ mod tests {
             blocked_by: Vec::new(),
             scope: Vec::new(),
             status,
+            contract: ContractLevel::Single,
             coverage_ignore: Vec::new(),
         }
     }
@@ -27,10 +28,26 @@ mod tests {
             id: id.to_string(),
             text: String::new(),
             is_done,
+            contract_required: false,
+            contract_present: false,
             impl_required: true,
             impl_present,
             test_required: true,
             test_present,
+        }
+    }
+
+    fn contract_ac(id: &str, contract_present: bool) -> AcCoverage {
+        AcCoverage {
+            id: id.to_string(),
+            text: String::new(),
+            is_done: true,
+            contract_required: true,
+            contract_present,
+            impl_required: false,
+            impl_present: true,
+            test_required: false,
+            test_present: true,
         }
     }
 
@@ -75,7 +92,7 @@ mod tests {
 
     #[test]
     fn omitting_status_defaults_to_planned_and_is_ignored() {
-        let spec: Spec = serde_yaml_ng::from_str("id: A\n").expect("parse spec");
+        let spec: Spec = serde_yaml_ng::from_str("id: A\ncontract: single\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
         let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
@@ -85,7 +102,7 @@ mod tests {
     #[test]
     fn tracked_rows_carries_coverage_ignore() {
         let spec: Spec = serde_yaml_ng::from_str(
-            "id: A\nstatus: active\ncoverage_ignore:\n  - layer: contract\n  - layer: test\n",
+            "id: A\ncontract: single\nstatus: active\ncoverage_ignore:\n  - layer: contract\n  - layer: test\n",
         )
         .expect("parse spec");
         assert!(spec.layer_ignored(CoverageLayer::Contract));
@@ -98,7 +115,7 @@ mod tests {
     #[test]
     fn tracked_rows_parses_per_ac_ignore() {
         let spec: Spec = serde_yaml_ng::from_str(
-            "id: A\nstatus: active\nacceptance_criteria:\n  - id: ac-1\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-1\n",
+            "id: A\ncontract: single\nstatus: active\nacceptance_criteria:\n  - id: ac-1\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-1\n",
         )
         .expect("parse spec");
         let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
@@ -200,6 +217,48 @@ mod tests {
         assert!(row.has_gap());
         assert!(!row.has_pending());
         assert_eq!(missing_summary(&row), "impl(ac-1), test(ac-1)");
+    }
+
+    #[test]
+    fn missing_per_ac_contract_is_a_gap_under_for_each_ac() {
+        let row = row(
+            "A",
+            false,
+            false,
+            vec![contract_ac("ac-1", true), contract_ac("ac-2", false)],
+        );
+        assert!(row.has_gap());
+        assert_eq!(missing_summary(&row), "contract(ac-2)");
+    }
+
+    #[test]
+    fn per_ac_contract_complete_has_no_gap_under_for_each_ac() {
+        let row = row(
+            "A",
+            false,
+            false,
+            vec![contract_ac("ac-1", true), contract_ac("ac-2", true)],
+        );
+        assert!(!row.has_gap());
+        assert_eq!(missing_summary(&row), "");
+    }
+
+    #[test]
+    fn missing_contract_is_pending_not_a_gap_when_not_done_under_for_each_ac() {
+        let mut ac = contract_ac("ac-1", false);
+        ac.is_done = false;
+        let row = row("A", false, false, vec![ac]);
+        assert!(!row.has_gap());
+        assert!(row.has_pending());
+        assert_eq!(pending_summary(&row), "contract(ac-1)");
+    }
+
+    #[test]
+    fn ac_gap_label_lists_contract_with_impl_and_test() {
+        let mut ac = contract_ac("ac-1", false);
+        ac.test_required = true;
+        ac.test_present = false;
+        assert_eq!(ac_gap_label(&ac), "missing contract & test".to_string());
     }
 
     #[test]

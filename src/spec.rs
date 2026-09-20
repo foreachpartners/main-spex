@@ -39,6 +39,7 @@ pub struct Spec {
     pub scope: Vec<String>,
     #[serde(default)]
     pub status: Status,
+    pub contract: ContractLevel,
     #[serde(default)]
     pub coverage_ignore: Vec<CoverageIgnore>,
 }
@@ -48,6 +49,28 @@ impl Spec {
     // `specs/admin/foo.yaml`).
     pub fn location(&self) -> String {
         format!("{SPECS_DIR}/{}", self.path)
+    }
+
+    // Whether contract coverage is required at all: `none` disables it,
+    // `single` requires one spec-level `@spec contract <spec-id>`,
+    // `for-each-ac` requires one per acceptance criterion (see
+    // `ac_contract_required`).
+    pub fn contract_required(&self) -> bool {
+        match self.contract {
+            ContractLevel::None => false,
+            ContractLevel::Single | ContractLevel::ForEachAc => {
+                !self.layer_ignored(CoverageLayer::Contract)
+            }
+        }
+    }
+
+    // Whether this one acceptance criterion needs its own contract
+    // annotation — only under `contract: for-each-ac`, and only when the
+    // contract layer (or this criterion's contract requirement specifically)
+    // isn't waived by `coverage_ignore`.
+    pub fn ac_contract_required(&self, ac_id: &str) -> bool {
+        self.contract == ContractLevel::ForEachAc
+            && !self.ac_ignored(ac_id, CoverageLayer::Contract)
     }
 
     // A layer waived for the whole spec, via a `coverage_ignore` entry with
@@ -137,10 +160,10 @@ impl Commitment {
 }
 
 // A `coverage_ignore` entry: `layer` is required, `ac` is optional. Without
-// `ac` it waives that layer for the whole spec (every acceptance criterion,
-// for impl/test); with `ac` it waives just that one criterion's impl or test
-// annotation. Contract has no per-criterion form, since `@spec contract` has
-// no acceptance-criterion granularity.
+// `ac` it waives that layer for the whole spec (every acceptance criterion);
+// with `ac` it waives just that one criterion's impl, test, or (under
+// `contract: for-each-ac`) contract annotation. `spex check` verifies the
+// entry matches the spec's `contract` setting.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CoverageIgnore {
     pub layer: CoverageLayer,
@@ -182,6 +205,18 @@ impl Status {
     pub fn is_implemented(self) -> bool {
         matches!(self, Status::Active | Status::Deprecated)
     }
+}
+
+// `contract` coverage granularity of a spec: `none` disables contract
+// coverage, `single` requires one spec-level annotation, `for-each-ac`
+// requires one annotation per acceptance criterion.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ContractLevel {
+    None,
+    Single,
+    #[serde(rename = "for-each-ac")]
+    ForEachAc,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]

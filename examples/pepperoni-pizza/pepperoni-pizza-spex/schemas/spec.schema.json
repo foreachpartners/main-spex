@@ -96,9 +96,14 @@
       "enum": ["active", "in-progress", "planned", "blocked", "deprecated"],
       "default": "planned"
     },
+    "contract": {
+      "type": "string",
+      "description": "Contract coverage granularity, required. `none` disables contract coverage entirely; `single` requires a single `@spec contract <spec-id>` annotation for the whole spec; `for-each-ac` requires a `@spec contract <spec-id>#<ac-id>` annotation for every acceptance criterion.",
+      "enum": ["none", "single", "for-each-ac"]
+    },
     "coverage_ignore": {
       "type": "array",
-      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one's impl or test annotation. `ac` is not valid with `layer: contract`, since `@spec contract` has no per-criterion granularity. By default coverage requires contract at the spec level, and impl and test per acceptance criterion.",
+      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `spex check` verifies each entry matches the spec's `contract` setting.",
       "items": {
         "type": "object",
         "properties": {
@@ -111,16 +116,7 @@
           }
         },
         "required": ["layer"],
-        "additionalProperties": false,
-        "if": {
-          "properties": {
-            "layer": { "const": "contract" }
-          },
-          "required": ["layer"]
-        },
-        "then": {
-          "not": { "required": ["ac"] }
-        }
+        "additionalProperties": false
       },
       "uniqueItems": true
     },
@@ -134,7 +130,7 @@
       "minProperties": 1
     }
   },
-  "required": ["id", "title", "description", "acceptance_criteria"],
+  "required": ["id", "title", "description", "acceptance_criteria", "contract"],
   "additionalProperties": false,
   "examples": [
     {
@@ -162,6 +158,7 @@
       "scope": ["api", "frontend"],
       "blocked_by": ["cart-add-item", "payment-gateway"],
       "status": "planned",
+      "contract": "single",
       "examples": {
         "request": "POST /orders { \"cart_id\": \"c_123\" }"
       }

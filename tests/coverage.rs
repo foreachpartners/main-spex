@@ -9,11 +9,14 @@ const EXPECTED_COVERAGE_VERBOSE: &str =
 
 // `dummy-project` is a small, dedicated fixture (see
 // tests/fixtures/dummy-project) whose few specs are picked to exercise
-// every state `spex coverage` reports: a fully covered active spec, an
-// active spec missing its contract and some impl/test annotations, an
-// in-progress spec with only a pending (not-yet-traced) criterion, an
+// every state `spex coverage` reports: for each `contract` level (`none`,
+// `single`, `for-each-ac`) one fully covered active spec, one active spec
+// with a partial gap, and one active spec with no annotations at all, plus
+// an in-progress spec with only a pending (not-yet-traced) criterion, an
 // in-progress spec mixing a real gap with a pending criterion (and spanning
-// two scopes), and two planned specs.
+// two scopes), and two planned specs. This exercises each contract gap
+// shape: no contract entry under `none`, a spec-level `contract` under
+// `single`, and a `contract(ac-id)` per criterion under `for-each-ac`.
 #[test]
 fn coverage_report_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");

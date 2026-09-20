@@ -22,6 +22,7 @@
   acceptance_criteria:
     - id: created-order-status
       must: "return 201 with the created order from POST /orders"
+  contract: single
   ```
 
 - **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.

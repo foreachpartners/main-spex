@@ -49,7 +49,11 @@ mod tests {
         let rules_dir = dir.path().join(rule::RULES_DIR);
         std::fs::create_dir_all(&specs_dir).expect("specs dir");
         std::fs::create_dir_all(&rules_dir).expect("rules dir");
-        std::fs::write(specs_dir.join("shared.yaml"), "id: SHARED\n").expect("spec");
+        std::fs::write(
+            specs_dir.join("shared.yaml"),
+            "id: SHARED\ncontract: single\n",
+        )
+        .expect("spec");
         std::fs::write(rules_dir.join("shared.yaml"), "id: SHARED\n").expect("rule");
 
         let specs = spec::load_all(&specs_dir).expect("specs");

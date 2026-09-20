@@ -1,0 +1,14 @@
+id: foreach-full-coverage
+title: Let customers retry a failed payment
+description: >-
+  Lets a customer retry a failed payment with a fresh payment method, with a
+  contract annotation per acceptance criterion.
+acceptance_criteria:
+  - id: retries-with-new-card
+    must: "let a customer retry a failed payment with a new card"
+  - id: retries-once-only
+    must: "let a customer retry a failed payment only once before support is involved"
+scope:
+  - api
+status: active
+contract: for-each-ac

@@ -150,10 +150,20 @@ fn tracked_rows(workspace: &Path, specs: &[Spec], found: &Found) -> Vec<SpecRow>
         .collect()
 }
 
-// Renders which of the given acceptance criteria still lack a required impl
-// or test annotation, as `impl(ac-1), test(ac-1, ac-2)`.
+// Renders which of the given acceptance criteria still lack a required
+// contract, impl, or test annotation, as `contract(ac-1), impl(ac-2),
+// test(ac-1, ac-2)`. Contract is per-criterion only under
+// `contract: for-each-ac`.
 fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
-    let by_layer: [(&str, Vec<&str>); 2] = [
+    let by_layer: [(&str, Vec<&str>); 3] = [
+        (
+            "contract",
+            ac_rows
+                .iter()
+                .filter(|ac| ac.contract_required && !ac.contract_present)
+                .map(|ac| ac.id.as_str())
+                .collect(),
+        ),
         (
             "impl",
             ac_rows
@@ -179,9 +189,10 @@ fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
         .join(", ")
 }
 
-// Lists what's missing on a gapped row: the contract annotation, then which
-// acceptance criteria still lack a required impl or test annotation, other
-// than ones flagged `is_done: false` (those are pending, not a gap).
+// Lists what's missing on a gapped row: a missing spec-level contract
+// (under `contract: single`), then which acceptance criteria still lack a
+// required contract, impl, or test annotation, other than ones flagged
+// `is_done: false` (those are pending, not a gap).
 fn missing_summary(row: &SpecRow) -> String {
     let mut parts = Vec::new();
 
@@ -441,15 +452,20 @@ fn print_wrapped_after_colored(
 }
 
 // Describes which layers a single gapped acceptance criterion is missing, as
-// `missing impl & test`, `missing impl`, or `missing test`.
+// `missing contract & impl`, `missing impl & test`, or `missing contract`.
 fn ac_gap_label(ac: &AcCoverage) -> String {
-    let missing_impl = ac.impl_required && !ac.impl_present;
-    let missing_test = ac.test_required && !ac.test_present;
-    match (missing_impl, missing_test) {
-        (true, true) => "missing impl & test".to_string(),
-        (true, false) => "missing impl".to_string(),
-        (false, true) => "missing test".to_string(),
-        (false, false) => String::new(),
+    let missing: Vec<&str> = [
+        ("contract", ac.contract_required && !ac.contract_present),
+        ("impl", ac.impl_required && !ac.impl_present),
+        ("test", ac.test_required && !ac.test_present),
+    ]
+    .into_iter()
+    .filter_map(|(name, missing)| missing.then_some(name))
+    .collect();
+    if missing.is_empty() {
+        String::new()
+    } else {
+        format!("missing {}", missing.join(" & "))
     }
 }
 
@@ -469,9 +485,10 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     };
     let prefix_len = 4 + 1 + 2 + width + 2 + ac_text.len() + 2;
 
-    // In verbose mode the per-criterion gap is already shown inline below, so
-    // the header only needs to call out a missing contract, which isn't
-    // per-AC.
+    // In verbose mode the per-criterion gap is already shown inline below,
+    // so the header only needs to call out a missing spec-level contract
+    // (only `contract: single` has one; under `for-each-ac` each criterion's
+    // contract gap shows in its own verbose line).
     let header_summary = if verbose {
         (!row.contract_ok()).then(|| "contract".to_string())
     } else {

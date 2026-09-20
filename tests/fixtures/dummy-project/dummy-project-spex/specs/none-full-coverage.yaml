@@ -1,0 +1,14 @@
+id: none-full-coverage
+title: Let customers track a favorite item's price
+description: >-
+  Lets a customer mark an item as tracked and receive an email when its price
+  drops, with contract coverage disabled.
+acceptance_criteria:
+  - id: marks-item-tracked
+    must: "let a customer mark an item to track its price"
+  - id: notifies-on-price-drop
+    must: "email the customer when a tracked item's price drops"
+scope:
+  - api
+status: active
+contract: none

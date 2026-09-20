@@ -1,0 +1,14 @@
+id: foreach-with-gap
+title: Let customers split a payment across cards
+description: >-
+  Lets a customer split an order's payment across two cards, with a contract
+  annotation per acceptance criterion and only the first criterion traced.
+acceptance_criteria:
+  - id: splits-across-cards
+    must: "let a customer split an order's payment across two cards"
+  - id: splits-across-accounts
+    must: "let a customer split an order's payment across two accounts"
+scope:
+  - api
+status: active
+contract: for-each-ac

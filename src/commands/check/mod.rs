@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
 use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
-use crate::spec::{Spec, Status};
+use crate::spec::{ContractLevel, CoverageLayer, Spec, Status};
 use crate::style::Style;
 use crate::util::{self, plural};
 use crate::workspace::Workspace;
@@ -626,6 +626,7 @@ fn validate_specs(
     for spec in &specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
         validate_scope(spec, &workspace.config.repositories, &mut report.findings);
+        validate_coverage_ignore(spec, &mut report.findings);
     }
 
     let rules_list = workspace
@@ -737,5 +738,36 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
                 "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
             ),
         });
+    }
+}
+
+// A `coverage_ignore` entry for the contract layer must match the spec's
+// `contract` setting: with `none` there is no contract coverage to waive at
+// all; with `single` the contract is spec-level, so a per-criterion entry
+// can't match anything; only `for-each-ac` has per-criterion contracts to
+// waive.
+fn validate_coverage_ignore(spec: &Spec, findings: &mut Vec<Finding>) {
+    for ignore in &spec.coverage_ignore {
+        if ignore.layer != CoverageLayer::Contract {
+            continue;
+        }
+        let message = match (spec.contract, ignore.ac.as_deref()) {
+            (ContractLevel::None, _) => Some(
+                "`coverage_ignore` waives the contract layer but `contract: none` already disables contract coverage — remove the entry or set `contract` to `single` or `for-each-ac`".to_string(),
+            ),
+            (ContractLevel::Single, Some(_)) => Some(
+                "`coverage_ignore` waives one acceptance criterion's contract but `contract: single` requires a single spec-level contract — use `contract: for-each-ac` for per-criterion contracts".to_string(),
+            ),
+            _ => None,
+        };
+        if let Some(message) = message {
+            findings.push(Finding {
+                severity: Severity::Error,
+                spec_id: spec.id.clone(),
+                check: "coverage-ignore".to_string(),
+                location: Some(spec.location()),
+                message,
+            });
+        }
     }
 }

@@ -1,0 +1,14 @@
+id: single-not-covered
+title: Let customers archive a completed order
+description: >-
+  Lets a customer archive a completed order so it is hidden from the default
+  order list, with no annotations tracing it at all.
+acceptance_criteria:
+  - id: archives-completed-order
+    must: "let a customer archive a completed order"
+  - id: hides-archived-default
+    must: "hide archived orders from the default order list"
+scope:
+  - api
+status: active
+contract: single
