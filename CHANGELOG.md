@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.9.1] - 2026-09-20
+
+- Added the `spex-update` skill: to automatically update spex based on migration guide using AI.
+
 ## [0.9.0] - 2026-09-20
 
 - **Breaking:** removed the separate `x-spec` annotation grammar; contract coverage now uses `@spec contract <spec-id>`, matched anywhere in file text including as any `x-*` vendor extension's string value — the extension key name is no longer significant. Existing `x-spec: <spec-id>` annotations must be rewritten as `x-spec: "@spec contract <spec-id>"` (or any other `x-*` key).

@@ -260,6 +260,10 @@ Grills the user with one question at a time to stress-test a plan, decision, or 
 
 Reference for writing and editing agent skills well, so the user can create a new skill or review an existing one for quality.
 
+## spex-update
+
+Updates a project's `cli_version` by running `spex update`, then applies `references/migration_guide.md`'s steps for every version between the old and new `cli_version`.
+
 ## spex-cavemen
 
 Switches the agent to terse, filler-free replies to save tokens.
