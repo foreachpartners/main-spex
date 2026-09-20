@@ -53,7 +53,7 @@ src/                CLI source
     check/          check command: orchestration (mod), report
       conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs)
       runners/      One runner per check type (ast_grep, glob, regexp, script)
-docs/
+docs/                          Framework reference docs, bundled into projects by init/update (single source of truth)
   glossary.md              Terms used across code, messages, schemas, and docs
   framework-principles.md  Non-negotiable foundation spex is built on
   conventions.md           Engineering values spex follows but didn't invent
@@ -63,7 +63,6 @@ docs/
   faq.md                   Frequently asked questions
 templates/          Assets scaffolded into projects
   schemas/          Spec schemas
-  docs/             Framework reference docs (glossary, principles, CLI)
   scripts/          Helper scripts
   skills/           Agent skills
   rules/            Reusable rule templates

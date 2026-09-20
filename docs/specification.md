@@ -12,7 +12,7 @@ field rules.
 Framework helps turn business goals into verified code through a chain of artifacts, each
 traceable by a shared Spec ID.
 
-Flow runs BRD (why) -> PRD (what) -> spec (what it provides) -> contract (interface, if applicable) -> plan (how to build it, optional) -> implementation (code) -> test (proof).
+Flow runs BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
 
 ### BRD
 
@@ -24,7 +24,7 @@ Features and user-facing behavior extracted from the BRD by product owner as act
 
 ### Spec
 
-Extracted from the PRD by product owner and/or developer. It describes a capability the system must provide, with its specifics captured as acceptance criteria. A spec serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
+Extracted from the PRD — or from the BRD or a feature idea directly when there is no PRD — by product owner and/or developer. It describes a capability the system must provide, with its specifics captured as acceptance criteria. A spec serves as single source of truth of product behavior. It's implemented and can be extended or changed over time.
 
 ### Contract
 
@@ -84,7 +84,7 @@ A project spans several workspace repositories under one workspace root folder.
 Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it.
 
 - The Spec ID is the unit of traceability; every behavioral change traces to one, with no orphans.
-- Traceability is bidirectional: top-down (spec -> contract -> plan -> code -> test) and bottom-up (test -> code -> plan -> contract -> spec).
+- Traceability is bidirectional: top-down (spec -> contract -> code -> test) and bottom-up (test -> code -> contract -> spec).
 - Separate repositories give per-repository access control (least privilege).
 - One Spec ID can trace across many repositories.
 - Checking out a commit shows exactly which specs the code was built against.
@@ -294,6 +294,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - Form is `@spec contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`, matched anywhere in a file's text — as a code comment, or as the string value of any OpenAPI vendor extension (`x-*`) property for contracts, whose key name is not itself checked. A contract annotation carries `#<ac-id>` only when the spec's `contract` is `for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` a single bare `@spec contract <spec-id>` suffices. A contract annotation anchored to one criterion still counts as the spec-level contract for `contract: single`.
 - An impl or test annotation should carry the `#<ac-id>` of the acceptance criterion it satisfies, since `spex coverage` only counts a bare, unqualified annotation toward a target with no acceptance-criteria ids (e.g. a rule); a bare annotation on a spec never satisfies any of its criteria.
 - Annotate once at the boundary, never nested; list every acceptance criterion id the boundary satisfies rather than adding a second nested annotation.
+- Place an annotation on the smallest unit that actually satisfies the acceptance criterion — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the criterion's scope genuinely spans that boundary (e.g. an endpoint, contract); keep the total number of annotations minimal.
 - Never reference a Spec ID with no spec file.
 - The grammar and the no-orphan rule are enforced by `spex check`, built in, in every repository regardless of which rules it opts into (see `check` above).
 

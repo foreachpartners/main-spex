@@ -185,8 +185,7 @@ mod tests_unit {
                   Spex workspace repository. Holds the specs and config that govern the
                   project: schemas/ (JSON Schemas for spex.yaml and the spec files),
                   rules/ (cross-cutting conventions and rules), specs/ (the
-                  functionality the system provides) and docs/ (framework reference:
-                  glossary, principles, CLI).
+                  functionality the system provides) and docs/ (framework reference).
                 path: .
                 rules: []
         "};

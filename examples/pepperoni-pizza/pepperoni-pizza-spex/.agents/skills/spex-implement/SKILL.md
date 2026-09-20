@@ -49,6 +49,8 @@ This step implements the change only — it does not write tests. Use `spex-test
 
 As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or, for a contract, an OpenAPI `x-*` vendor extension whose value is `@spec contract <spec-id>` — anchored per criterion as `@spec contract <spec-id>#<ac-id>` when the spec's `contract` is `for-each-ac`), tagging the specific criterion id it satisfies. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap.
 
+Place each annotation on the smallest unit that actually satisfies the criterion — a specific field, function, or handler — not on the file, the enclosing type, or a whole module. Widen the placement only when the criterion's scope genuinely spans that boundary (e.g. an endpoint, contract). Keep the total number of annotations minimal.
+
 ## Step 3 — Finalize the specs
 
 For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:

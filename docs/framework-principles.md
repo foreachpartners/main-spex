@@ -1,6 +1,6 @@
 # Framework principles
 
-These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, specs and rules, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms, [specification.md](specification.md) for how the framework behaves, and [conventions.md](conventions.md) for the engineering values spex follows but didn't invent.
+These principles form the foundation of spex. They are non-negotiable. Everything else — the artifact flow, specs and rules, the CLI, the skills — is a consequence of them. See [glossary.md](glossary.md) for terms.
 
 ## Goal: unleash AI's full speed without slop
 

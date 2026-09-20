@@ -6,10 +6,6 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
-## Global flags
-
-- `--verbose` (`-v`) — print progress to stderr while the command executes, so stdout still carries only the command's actual output. Currently the `check` command uses it, logging each repository and each check as it starts and finishes along with how long each took. Useful for spotting which check is slow on a large workspace.
-
 ## Install
 
 ### Prerequisites
@@ -32,7 +28,7 @@ spex --help
 
 Initializes the spex workspace repository. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`).
 
-It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, skills, scripts, and default rules).
+It prompts to confirm the project name (defaulting to the workspace root folder name), creates the spex repository directory `<project-name>-spex` (if missing), prompts to confirm the discovered workspace repositories, then writes `spex.yaml` (recording the installed CLI's version as `cli_version`), a `<project-name>.code-workspace` file, and the bundled templates (schemas, docs, skills, scripts, and default rules).
 
 ```sh
 spex init
@@ -42,9 +38,9 @@ Finish setup afterwards by running the `/spex-setup` skill.
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
+Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary. Run it from anywhere inside the workspace; spex locates the repository by walking up to the nearest `spex.yaml`.
 
-Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, or rules you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+Managed files are overwritten with the latest versions, while any additional skills, scripts, schemas, docs, or rules you have added are left untouched. It also updates `cli_version` in `spex.yaml` to the installed binary's version. Use it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
@@ -83,11 +79,6 @@ repositories:
 - `--repo <name>...` — limit the run to the named workspace repositories, matched by either full `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`.
 - `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files; errors when a given file doesn't exist in any workspace repository.
 - `--fill-preexisting-errors` — record the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: the existing errors are baselined so they stop failing the run, while any new error still does.
-- `--verbose` (`-v`) — stream progress to stderr as the run proceeds: each repository, then each check it runs (with the time each took), and the workspace checks at the end. The report on stdout is unchanged, so piping or redirecting it still works.
-
-```sh
-spex check --verbose
-```
 
 ```sh
 spex check --repo api frontend
@@ -132,7 +123,13 @@ Reports how well the active and in-progress specs are covered by spec-id annotat
 spex coverage
 ```
 
-The search is not scoped to the spec's `scope`. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
+- `--scope <name>...` — limit the report to specs whose `scope` includes the given repository short name (`repository_short_name`). Defaults to all specs; errors on an unrecognized name.
+
+```sh
+spex coverage --scope api frontend
+```
+
+The annotation search itself is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped. Specs that are neither `active` nor `in-progress` are listed by ID under their status and are otherwise ignored.
 
 A spec can relax the requirement with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec; given (an acceptance criterion id), it waives just that one criterion's impl or test requirement, or its contract requirement under `contract: for-each-ac`. The entry must match the spec's `contract` setting — whole-spec contract waives work under `single` and `for-each-ac`, per-criterion contract waives only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless — `spex check` errors on a mismatch:
 
@@ -148,6 +145,12 @@ coverage_ignore:
 The report shows how many of each tracked spec's acceptance criteria are fully traced (a required impl and a required test annotation both present) as `done/total AC`. A tracked spec with any untraced required criterion has a gap.
 
 The report lists specs grouped by status (omitting any status with no specs), each spec ID shown under its status, then a "Gaps" section listing only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation), each with its acceptance-criteria progress and what's missing, naming the acceptance criterion ids involved (for example `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`). Specs with no gap — fully covered, or only ignored requirements missing — aren't listed individually; they're only reflected in the "Gaps" count. The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`. The command exits with a non-zero status when any active or in-progress spec has a gap.
+
+`--verbose` (`-v`) adds description detail to the report: each `planned` spec listed under its status also shows its `description`, and each gapped spec in the "Gaps" section also shows its `description` plus, for every acceptance criterion still missing a required layer, that criterion's own text next to its id.
+
+```sh
+spex coverage --verbose
+```
 
 ### `spex info`
 

@@ -31,6 +31,30 @@ mod tests_unit {
     }
 
     #[test]
+    fn scaffold_writes_bundled_docs_only() {
+        let spex_dir = tempdir().expect("create spex dir");
+
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        for name in BUNDLED_DOCS {
+            let dest = spex_dir.path().join(DOCS_DIR).join(name);
+            assert!(dest.is_file(), "missing bundled doc `{}`", dest.display());
+            assert_eq!(
+                fs::read(&dest).expect("read doc"),
+                DOCS.get_file(name).expect("bundled doc").contents(),
+                "`{}` differs from the bundled doc",
+                dest.display()
+            );
+        }
+        for name in ["conventions.md", "faq.md", "specification.md", "tutorial.md"] {
+            assert!(
+                !spex_dir.path().join(DOCS_DIR).join(name).exists(),
+                "`{name}` is not a bundled doc and must not scaffold"
+            );
+        }
+    }
+
+    #[test]
     fn scaffold_overwrites_modified_managed_file() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
@@ -57,7 +81,10 @@ mod tests_unit {
 
         scaffold(spex_dir.path(), &[]).expect("re-scaffold");
 
-        let expected = TEMPLATES.get_file(DOC).expect("bundled doc").contents();
+        let expected = DOCS
+            .get_file("glossary.md")
+            .expect("bundled doc")
+            .contents();
         assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 

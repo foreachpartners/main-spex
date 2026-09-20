@@ -14,6 +14,10 @@ use serde::Deserialize;
 mod templates_test;
 
 static TEMPLATES: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
+// Framework reference docs are bundled from the repository's own `docs/`
+// folder — the single source of truth — not duplicated under `templates/`.
+// Only the files in `BUNDLED_DOCS` ship to projects.
+static DOCS: Dir = include_dir!("$CARGO_MANIFEST_DIR/docs");
 
 pub const SCHEMAS_DIR: &str = "schemas";
 pub const DOCS_DIR: &str = "docs";
@@ -24,12 +28,17 @@ pub const AGENTS_FILE: &str = "AGENTS.md";
 pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
-// and `update` so both manage the exact same set of bundled files.
+// and `update` so both manage the exact same set of bundled files. `docs/` is
+// bundled separately from the repository's own `docs/` folder (see `DOCS`),
+// so it is not listed here.
 // `rules/` and `scripts/` are handled separately: they are only overwritten
 // when the local spec opts in via `sync_with_upstream`. Skills are also
 // handled separately: a local skill is left untouched when its
 // `metadata.sync-with-upstream` is explicitly `false`.
-const MANAGED_FLAT_DIRS: [&str; 2] = [SCHEMAS_DIR, DOCS_DIR];
+const MANAGED_FLAT_DIRS: [&str; 1] = [SCHEMAS_DIR];
+
+// The framework reference docs scaffolded into a spex repo's `docs/` folder.
+const BUNDLED_DOCS: [&str; 3] = ["cli.md", "framework-principles.md", "glossary.md"];
 
 type Result<T> = core::result::Result<T, Report<TemplateError>>;
 
@@ -106,6 +115,7 @@ pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     for name in MANAGED_FLAT_DIRS {
         copy_flat_dir(name, spex_dir)?;
     }
+    copy_docs(spex_dir)?;
     copy_rules(spex_dir, removed_rules)?;
     copy_skills(spex_dir)?;
     sync_agents_md(spex_dir)?;
@@ -231,6 +241,22 @@ fn copy_flat_dir(name: &str, spex_dir: &Path) -> Result<()> {
         return Ok(());
     };
     copy_tree(dir, Path::new(""), spex_dir)
+}
+
+fn copy_docs(spex_dir: &Path) -> Result<()> {
+    let dest = spex_dir.join(DOCS_DIR);
+    fs::create_dir_all(&dest)
+        .change_context(TemplateError::Io)
+        .attach_with(|| format!("could not create `{}`", dest.display()))?;
+    for name in BUNDLED_DOCS {
+        let Some(file) = DOCS.get_file(name) else {
+            continue;
+        };
+        fs::write(dest.join(name), file.contents())
+            .change_context(TemplateError::Io)
+            .attach_with(|| format!("could not write `{}`", dest.display()))?;
+    }
+    Ok(())
 }
 
 fn copy_skills(spex_dir: &Path) -> Result<()> {

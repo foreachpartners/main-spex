@@ -14,7 +14,7 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria. Most are extracted from the PRD, which typically breaks down into many specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Most are extracted from the PRD, which typically breaks down into many specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
   id: place-pizza-order
@@ -22,9 +22,10 @@
   acceptance_criteria:
     - id: created-order-status
       must: "return 201 with the created order from POST /orders"
+  contract: single
   ```
 
-- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
+- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
 
   ```yaml
   id: secret-handling
@@ -52,7 +53,7 @@
   secret-handling
   ```
 
-- **Traceability** (tracing, trace) — is the thread that stitches together spec, contract, implementations, and tests — ensuring full coverage and tracing for spec and every acceptance criterion.
+- **Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
   ```text
   @spec impl place-pizza-order#created-order-status
@@ -121,4 +122,4 @@
 
 - **AI coding agent** (AI agent, agent) — the tool a person picks to do the work: an autonomous assistant that reads, runs, and edits code on their behalf. Hosted inside an editor (Zed, VS Code, Cursor) or run from the terminal (Claude Code, Codex).
 
-- **Agent Skill** (skill) — a modular, reusable capability that packages specialized instructions an AI agent loads on demand when a request matches the skill's description. Defined as a folder with a `SKILL.md` entry point, following the [Agent Skills](https://agentskills.io/) spec.
+- **Agent Skill** (skill) — a modular, reusable capability that packages specialized instructions an AI agent loads on demand when a request matches the skill's description. Defined as a folder with a `SKILL.md` entry point, following the [Agent Skills](https://agentskills.io/) spec. In spex, a skill is the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
