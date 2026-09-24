@@ -16,10 +16,10 @@ spex --help
 | `spex check-schema` | Validate JSON or YAML files against a JSON Schema                      |
 | `spex coverage`     | Report `@spec` annotation coverage per acceptance criterion            |
 | `spex info`         | Print the resolved `spex.yaml` as JSON, for scripts                    |
-| `spex rules`        | Print the rules per repository, as YAML                                |
+| `spex rules`        | Print the rules governing the selected repositories, as YAML           |
 | `spex specs`        | Print the workspace specs, as YAML                                     |
 
-Every command except `init` finds the spex repository by walking up from the current directory to the nearest `spex.yaml`, so any of them can run from anywhere inside the workspace.
+Every command except `init` finds the spex repository from the current directory — walking up and checking each directory it passes, plus its immediate subdirectories, for a `spex.yaml` — so any of them can run from anywhere inside the workspace.
 
 ## Install
 
@@ -55,7 +55,7 @@ Rewrites the bundled templates in the spex repository — skills, schemas, docs,
 
 - Managed files are overwritten with the latest versions; any skills, scripts, schemas, docs, or rules you added are left untouched.
 - Updates `cli_version` in `spex.yaml` to the installed binary's version.
-- Run it after upgrading the `spex` binary to pull in framework updates; spex warns on every command when `cli_version` does not match the installed CLI.
+- Run it after upgrading the `spex` binary to pull in framework updates; the commands that load the workspace (`check`, `coverage`, `info`, `rules`, `specs`) warn when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
@@ -67,7 +67,7 @@ Runs the checks declared in `spex.yaml` against each workspace repository, repor
 
 #### Script checks
 
-A `script` check runs the program named by its `script:` filename (e.g. `writing-style.sh`), resolved at `scripts/<rule-id-lowercase>/<script>` under the spex directory. The `run` mode controls the invocation:
+A `script` check runs the program named by its `script:` filename (e.g. `writing-style.sh`), resolved at `scripts/<rule-id>/<script>` under the spex directory. The `run` mode controls the invocation:
 
 - `run: per-file` (default) — pass the matched files as arguments.
 - `run: per-repo` — run once per repository, in that repository's directory, with no arguments.
@@ -110,9 +110,12 @@ spex check --repo frontend --fill-preexisting-errors
 When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule:
 
 - `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
-- Each spec file must be named `<spec-id-lowercase>.yaml` and each rule file `<rule-id-lowercase>.yaml`.
-- Every script a rule check references must exist at `scripts/<rule-id-lowercase>/<script>`.
-- Each spec's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` must be unique within its spec.
+- Each spec file must be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
+- Every script a rule check references must exist at `scripts/<rule-id>/<script>`.
+- Declared properties must follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).
+- Each spec's and rule's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` must be unique within its spec.
+- No id may repeat across `specs/` and `rules/`.
+- Every `@spec` annotation must match the annotation grammar and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
 - A `blocked_by` reference must name an existing spec and be dropped once satisfied.
 - A `scope` entry must match a repository's `repository_short_name` in `spex.yaml`.
 - A `coverage_ignore` entry must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
@@ -126,7 +129,7 @@ Validates JSON or YAML files against a JSON Schema.
 
 - Cross-file `$ref`s resolve against sibling schema files in the schema's own directory — fully offline, no network access.
 - Violations are printed to stderr as `<file>: <message>`; the command exits non-zero when any file fails.
-- `spex check` uses the same validation, built in, to keep the spex repository's own files (`spex.yaml`, `specs/<spec-id-lowercase>.yaml`, `rules/<rule-id-lowercase>.yaml`) valid against the bundled schemas.
+- `spex check` uses the same validation, built in, to keep the spex repository's own files (`spex.yaml`, `specs/<spec-id>.yaml`, `rules/<rule-id>.yaml`) valid against the bundled schemas.
 
 #### Flags
 
@@ -140,7 +143,7 @@ spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-men
 
 ### `spex coverage`
 
-Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion. Exits non-zero when any active or in-progress spec has a gap.
+Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion. Exits non-zero when an `active` spec has a gap; gaps on `in-progress` specs are reported but do not affect the exit code.
 
 For every spec whose `status` is `active` or `in-progress`, coverage requires:
 
@@ -152,7 +155,7 @@ For every spec whose `status` is `active` or `in-progress`, coverage requires:
 
 A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec. A spec with no `status` field defaults to `planned` and is ignored (its ID is still listed under its status).
 
-The annotation search is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The `spex` repository itself is excluded from the search, and files ignored by `.gitignore` are skipped.
+The annotation search is not scoped to the spec's `scope` — a spec kept in the report by `--scope` is still traced across every workspace repository. The spex repository's own files are skipped, except the contract files it declares, and files ignored by `.gitignore` are skipped.
 
 #### Waivers
 
@@ -169,10 +172,11 @@ coverage_ignore:
 
 #### Report
 
-- Lists specs grouped by status (omitting any status with no specs), each tracked spec showing its progress as `done/total AC` — a criterion counts when both a required impl and a required test annotation are present. A tracked spec with any untraced required criterion has a gap.
-- The "Gaps" section lists only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation), each with its progress and what's missing, naming the acceptance criterion ids involved (e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`).
-- Specs with no gap — fully covered, or only ignored requirements missing — aren't listed individually; they're only reflected in the "Gaps" count.
-- The report ends with a one-line summary of spec counts per status and the gap count, e.g. `in-progress (3), planned (5), active (2), gaps (1)`.
+- Lists specs grouped by status (omitting any status with no specs), each tracked spec showing its progress as `done/total AC` — a criterion counts once its required impl annotation is present, whether or not its required test annotation is; a missing test annotation is reported as a gap or as pending instead.
+- The "Gaps" section lists only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation while its `is_done` is `true` or absent), each with its progress and what's missing, naming the acceptance criterion ids involved (e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`). A gapped spec with pending criteria reports them on a separate line labeled `in-progress`.
+- An acceptance criterion missing a required annotation while flagged `is_done: false` is pending, not a gap — expected on an in-progress spec still being worked on. A pending-only `in-progress` spec (`●`) is listed under its `in-progress` status group instead of "Gaps".
+- The "Gaps" header counts the gapped specs only, each once however many `scope`s it belongs to; a spec with no gap is not listed at all.
+- The report ends with a one-line summary of spec counts per status and the gap count, e.g. `planned (5), in-progress (3), active (2), gaps (1)`.
 
 #### Flags
 
@@ -204,14 +208,12 @@ spex info --repo api frontend
 
 ### `spex rules`
 
-Prints, for every repository in `spex.yaml`, the full content of each rule listed in its `rules`, as YAML:
+Prints, for the selected repositories, the full content of each rule listed in their `rules`, as YAML — each rule once, however many repositories list it:
 
 ```yaml
-- repository_name: pepperoni-pizza-api
-  rules:
-    - id: secret-handling
-      title: Secret protection
-      # ...
+- id: secret-handling
+  title: Secret protection
+  # ...
 ```
 
 #### Flags

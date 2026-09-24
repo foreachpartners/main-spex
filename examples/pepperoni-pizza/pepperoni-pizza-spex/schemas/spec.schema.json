@@ -20,7 +20,7 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria, each with a stable id and its commitment level as a key (`must`, `must_not`, `should`, `should_not`, or `may`) holding the criterion text. Order by commitment level: must, then must_not, then should, then should_not, then may. `spex coverage` requires every criterion to have its own impl and test annotation (`@spec impl|test <spec-id>#<ac-id>`), and reports how many of an active spec's criteria are traced.",
+      "description": "Verifiable acceptance criteria, each with a stable id and its commitment level as a key (`must`, `must_not`, `should`, `should_not`, or `may`) holding the criterion text. Order by commitment level: must, then must_not, then should, then should_not, then may. `spex coverage` requires every criterion of an active or in-progress spec to have its own impl and test annotation (`@spec impl|test <spec-id>#<ac-id>`), and counts a criterion as done once its impl annotation is present — a missing test annotation is reported separately, as a gap or as pending.",
       "items": {
         "type": "object",
         "description": "A single verifiable acceptance criterion, exactly one of `must`/`must_not`/`should`/`should_not`/`may` present.",
@@ -92,7 +92,7 @@
     },
     "status": {
       "type": "string",
-      "description": "Lifecycle status. Omitting is equivalent to 'planned'. 'active' requires every acceptance criterion to have a required impl and test annotation (see `spex coverage`); a spec being implemented but not yet complete is 'in-progress'.",
+      "description": "Lifecycle status. Omitting is equivalent to 'planned'. 'active' means fully implemented and requires every acceptance criterion to be done (`is_done` absent or true), enforced by `spex check`; use 'in-progress' while any criterion is still `is_done: false`. Whether those criteria are actually traced by annotations is `spex coverage`'s job.",
       "enum": ["active", "in-progress", "planned", "blocked", "deprecated"],
       "default": "planned"
     },

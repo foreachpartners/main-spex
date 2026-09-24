@@ -2,13 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/check.schema.json",
   "title": "Check",
-  "description": "A single automated check that verifies a spec's acceptance criteria.",
+  "description": "A single automated check that verifies a rule's acceptance criteria.",
   "type": "object",
   "properties": {
-    "spec": {
-      "description": "Rule ID this check belongs to. Used only by per-repo checks in spex.yaml, where the check's identity is `<spec>/<name>`; omitted inside rule files, which supply the rule ID themselves.",
-      "$ref": "rule-id.schema.json"
-    },
     "name": {
       "type": "string",
       "description": "Unique name identifying the check.",

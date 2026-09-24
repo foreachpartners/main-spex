@@ -66,6 +66,7 @@ templates/          Assets scaffolded into projects
   scripts/          Helper scripts
   skills/           Agent skills
   rules/            Reusable rule templates
+  docs/             Framework docs shipped to projects (symlinks into docs/)
 examples/           Sample projects (pepperoni-pizza, pepperoni-pizza-no-spex)
 tests/              Integration tests that build and run the spex binary
 ```

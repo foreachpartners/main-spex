@@ -36,12 +36,14 @@ mod tests_unit {
 
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
-        for name in BUNDLED_DOCS {
+        let docs = TEMPLATES.get_dir(DOCS_DIR).expect("bundled docs dir");
+        for file in docs.files() {
+            let name = file.path().file_name().expect("doc file name");
             let dest = spex_dir.path().join(DOCS_DIR).join(name);
             assert!(dest.is_file(), "missing bundled doc `{}`", dest.display());
             assert_eq!(
                 fs::read(&dest).expect("read doc"),
-                DOCS.get_file(name).expect("bundled doc").contents(),
+                file.contents(),
                 "`{}` differs from the bundled doc",
                 dest.display()
             );
@@ -77,6 +79,29 @@ mod tests_unit {
     }
 
     #[test]
+    fn bundled_docs_match_the_single_source_of_truth() {
+        let root_docs = include_dir::include_dir!("$CARGO_MANIFEST_DIR/docs");
+        let bundled = TEMPLATES.get_dir(DOCS_DIR).expect("bundled docs dir");
+
+        for file in bundled.files() {
+            let name = file.path().file_name().expect("doc file name");
+            let source = root_docs.get_file(name).unwrap_or_else(|| {
+                panic!(
+                    "bundled `docs/{}` has no source in the `docs/` folder",
+                    name.to_string_lossy()
+                )
+            });
+            assert_eq!(
+                file.contents(),
+                source.contents(),
+                "bundled `docs/{}` differs from `docs/{}`",
+                name.to_string_lossy(),
+                name.to_string_lossy()
+            );
+        }
+    }
+
+    #[test]
     fn scaffold_overwrites_modified_managed_doc() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
@@ -86,10 +111,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path(), &[]).expect("re-scaffold");
 
-        let expected = DOCS
-            .get_file("glossary.md")
-            .expect("bundled doc")
-            .contents();
+        let expected = TEMPLATES.get_file(DOC).expect("bundled doc").contents();
         assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 

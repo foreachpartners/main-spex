@@ -19,6 +19,7 @@
   ```yaml
   id: place-pizza-order
   title: Customer can place an order
+  description: Lets a customer turn their cart into a confirmed order.
   acceptance_criteria:
     - id: created-order-status
       must: "return 201 with the created order from POST /orders"
@@ -30,8 +31,9 @@
   ```yaml
   id: secret-handling
   title: Secret protection
+  description: Keeps credentials out of the repository and out of build output.
   acceptance_criteria:
-    - "Secret scan check passes on every commit in CI."
+    - "MUST pass a secret scan on every commit in CI"
   ```
 
 - **Spec ID** — a unique identifier assigned to a spec, used for referencing and traceability. Should convey the spec's contents so it can be understood without opening the spec.

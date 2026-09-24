@@ -12,7 +12,7 @@
     },
     "cli_version": {
       "type": "string",
-      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns on a mismatch with the installed CLI; run `spex update` to sync.",
+      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the workspace finds a mismatch with the installed CLI; run `spex update` to sync.",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "description": {
@@ -62,21 +62,21 @@
         },
         "contracts": {
           "type": "array",
-          "description": "Machine-readable interface contracts this repository owns. Each entry points at a contract file wherever it lives (typically inside this repository's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across repositories) and summarizes it.",
+          "description": "Interface contracts this repository owns. Each entry points at a contract file wherever it lives (typically inside this repository's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across repositories) and summarizes it.",
           "items": {
             "$ref": "#/$defs/contract"
           }
         },
         "rules": {
           "type": "array",
-          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after its lowercased spec ID under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
+          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after it under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
           "items": {
             "$ref": "rule-id.schema.json"
           }
         },
         "ignored_errors": {
           "type": "array",
-          "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `spec` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
+          "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
           "items": {
             "$ref": "#/$defs/preexisting_error"
           }
@@ -87,7 +87,7 @@
     },
     "contract": {
       "type": "object",
-      "description": "A machine-readable interface contract (OpenAPI, proto, GraphQL SDL, AsyncAPI) owned by a repository.",
+      "description": "An interface contract owned by a repository: machine-readable (OpenAPI, proto, GraphQL SDL, AsyncAPI) or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
       "properties": {
         "path": {
           "type": "string",
