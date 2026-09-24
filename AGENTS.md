@@ -16,7 +16,7 @@ spex is built on three simple pieces:
 
 ## Specification
 
-[`docs/specification.md`](docs/specification.md) is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria). Consult it before changing behavior, and keep it in sync when behavior changes.
+[`docs/specification.md`](docs/specification.md) is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria), and [`docs/cli.md`](docs/cli.md) for the CLI's command behavior. Consult them before changing behavior, and keep them in sync when behavior changes.
 
 ## Quick commands
 
@@ -57,8 +57,8 @@ docs/                          Framework reference docs, bundled into projects b
   glossary.md              Terms used across code, messages, schemas, and docs
   framework-principles.md  Non-negotiable foundation spex is built on
   conventions.md           Engineering values spex follows but didn't invent
-  specification.md         Single source of truth for framework behavior
-  cli.md                   CLI command reference
+  specification.md         Framework behavior, minus the CLI
+  cli.md                   Single source of truth for CLI behavior
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
 templates/          Assets scaffolded into projects
@@ -90,4 +90,4 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
 - **Writing style**: Follow the authoring conventions in `templates/rules/writing-style.yaml` (e.g. path placeholders) across docs, skills, and schemas.
-- **Single source of truth**: `docs/specification.md` defines how the framework behaves. Treat it as authoritative, and update it whenever you change framework behavior.
+- **Single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli.md` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
