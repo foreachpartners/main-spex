@@ -1,9 +1,8 @@
 project_name: dummy-project
 cli_version: 0.8.8
 description: >-
-  Minimal dummy project used by spex's own test suite to exercise
-  `spex coverage` and `spex coverage --verbose` output across active,
-  in-progress, and planned specs.
+  Minimal dummy project used by spex's own test suite to exercise `spex check`
+  and `spex coverage` on a workspace whose specs cover every lifecycle state.
 repositories:
   - repository_name: dummy-project-api
     repository_short_name: api

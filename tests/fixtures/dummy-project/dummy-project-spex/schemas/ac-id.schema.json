@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/ac-id.schema.json",
+  "title": "Acceptance Criterion ID",
+  "description": "Acceptance criterion ID, unique within its spec. Only lowercase English letters and hyphens. The name should convey the spec's acceptance criterion contents so it can be understood without opening the spec. Referenced by tracing `@spec impl|test <spec-id>#<ac-id>` to ensure coverage and for lookup purposes, e.g. `@spec impl place-pizza-order#auth-required` or `@spec test place-pizza-order#auth-required`",
+  "type": "string",
+  "pattern": "^[a-z]+(-[a-z]+)*$",
+  "maxLength": 40,
+  "examples": ["auth-required"]
+}

@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/spex.schema.json",
+  "title": "Spex Workspace Config",
+  "description": "Workspace configuration (spex.yaml): the project and the workspace repositories that spex manages together.",
+  "type": "object",
+  "properties": {
+    "project_name": {
+      "type": "string",
+      "description": "Kebab-case name of the project.",
+      "minLength": 1
+    },
+    "cli_version": {
+      "type": "string",
+      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the workspace finds a mismatch with the installed CLI; run `spex update` to sync.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional summary of what the project is and does.",
+      "minLength": 1
+    },
+    "rules_unused": {
+      "type": "array",
+      "description": "Rule IDs deliberately removed from this workspace's `rules/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rule missing locally but not listed here is treated as newly available upstream and gets deployed.",
+      "items": {
+        "$ref": "rule-id.schema.json"
+      }
+    },
+    "repositories": {
+      "type": "array",
+      "description": "Workspace repositories that spex manages for this project.",
+      "items": {
+        "$ref": "#/$defs/repository"
+      }
+    }
+  },
+  "$defs": {
+    "repository": {
+      "type": "object",
+      "description": "A single workspace repository.",
+      "properties": {
+        "repository_name": {
+          "type": "string",
+          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per naming-convention.",
+          "minLength": 1
+        },
+        "repository_short_name": {
+          "type": "string",
+          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in naming-convention.",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional summary of what the repository is and does.",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "description": "Path to the repository, relative to the spex directory.",
+          "minLength": 1
+        },
+        "contracts": {
+          "type": "array",
+          "description": "Interface contracts this repository owns. Each entry points at a contract file wherever it lives (typically inside this repository's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across repositories) and summarizes it.",
+          "items": {
+            "$ref": "#/$defs/contract"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after it under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
+          "items": {
+            "$ref": "rule-id.schema.json"
+          }
+        },
+        "ignored_errors": {
+          "type": "array",
+          "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
+          "items": {
+            "$ref": "#/$defs/preexisting_error"
+          }
+        }
+      },
+      "required": ["repository_name", "repository_short_name", "path"],
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "description": "An interface contract owned by a repository: machine-readable (OpenAPI, proto, GraphQL SDL, AsyncAPI) or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the contract file, relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` when the contract lives in the owning repository, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "Short summary of what the contract covers (for example `admin rest openapi spec`).",
+          "minLength": 1
+        }
+      },
+      "required": ["path", "description"],
+      "additionalProperties": false
+    },
+    "preexisting_error": {
+      "type": "object",
+      "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
+      "properties": {
+        "rule_id": {
+          "description": "Rule ID of the check whose pre-existing errors are baselined. Must be one of the repository's rules.",
+          "$ref": "rule-id.schema.json"
+        },
+        "check": {
+          "type": "string",
+          "description": "Name of the check whose pre-existing errors are baselined.",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "description": "Repository-relative files whose pre-existing errors are suppressed. Omit or leave empty to suppress the whole check. A regexp finding's `file:line` location is matched on its file part.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": ["rule_id", "check"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["project_name", "cli_version"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "project_name": "pepperoni-pizza",
+      "cli_version": "0.3.1",
+      "description": "Online ordering for a pizzeria.",
+      "repositories": [
+        {
+          "repository_name": "pepperoni-pizza-api",
+          "repository_short_name": "api",
+          "description": "Backend service that handles orders.",
+          "path": "../pepperoni-pizza-api",
+          "contracts": [
+            {
+              "path": "contracts/api.openapi.yaml",
+              "description": "REST OpenAPI spec for the orders API."
+            }
+          ],
+          "rules": ["secret-handling", "naming-convention"]
+        },
+        {
+          "repository_name": "pepperoni-pizza-frontend",
+          "repository_short_name": "frontend",
+          "description": "React web client that lets customers place orders.",
+          "path": "../pepperoni-pizza-frontend",
+          "rules": ["writing-style", "naming-convention"]
+        }
+      ]
+    }
+  ]
+}

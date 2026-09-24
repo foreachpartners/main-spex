@@ -35,35 +35,18 @@ Gaps (0)
 planned (0), in-progress (0), active (0), gaps (0)
 "#;
 
-// Snapshot of `spex check` for the already-initialized `pepperoni-pizza`
-// example
-const EXPECTED_WORKFLOW_CHECK_REPORT: &str = r#"pepperoni-pizza-api
+// Snapshot of `spex check` for the dummy-project fixture, whose specs cover
+// every lifecycle state.
+const EXPECTED_DUMMY_CHECK_REPORT: &str = r#"dummy-project-api
   no issues
 
-pepperoni-pizza-frontend
+dummy-project-frontend
   no issues
 
-pepperoni-pizza-spex
+dummy-project-spex
   no issues
 
-pepperoni-pizza: 0 errors, 0 warnings
-"#;
-
-// Snapshot of `spex coverage` for the `pepperoni-pizza` example. Its one
-// active spec, `delivery-time`, has all of its acceptance criteria checked
-// off and is annotated across the contract, impl, and test layers, so it
-// reports as fully covered with no gaps; the other three specs are `planned`.
-const EXPECTED_WORKFLOW_COVERAGE_REPORT: &str = r#"Specs (4)
-  active (1)
-  planned (3)
-    login-api
-    register-page
-    register-user-api
-
-Gaps (0)
-  none
-
-planned (3), in-progress (0), active (1), gaps (0)
+dummy-project: 0 errors, 0 warnings
 "#;
 
 // Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
@@ -219,17 +202,16 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 }
 
 #[test]
-fn workflow() {
+fn check_dummy_project_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza");
-    copy_dir(&example, &project);
+    copy_dir(&dummy_project_fixture(), &project);
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header(EXPECTED_WORKFLOW_CHECK_REPORT),
+        with_version_header(EXPECTED_DUMMY_CHECK_REPORT),
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -237,19 +219,6 @@ fn workflow() {
         check.status.success(),
         "check should exit 0 when there are no errors (exit {:?})",
         check.status.code(),
-    );
-
-    let coverage = run_spex(&project, &["coverage"], "");
-    assert_eq!(
-        report_text(&coverage.stdout),
-        with_version_header(EXPECTED_WORKFLOW_COVERAGE_REPORT),
-        "coverage report did not match\nstderr:\n{}",
-        String::from_utf8_lossy(&coverage.stderr),
-    );
-    assert_eq!(
-        coverage.status.code(),
-        Some(0),
-        "coverage should exit 0 when every active spec is fully covered"
     );
 }
 

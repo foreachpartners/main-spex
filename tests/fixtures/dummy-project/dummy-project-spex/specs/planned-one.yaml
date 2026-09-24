@@ -6,6 +6,7 @@ description: >-
 acceptance_criteria:
   - id: save-as-favorite
     must: "let a customer save a completed order as a favorite"
+    is_done: false
 scope:
   - frontend
 status: planned

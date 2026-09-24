@@ -6,6 +6,7 @@ description: >-
 acceptance_criteria:
   - id: export-date-range
     must: "let an administrator export all orders in a chosen date range as CSV"
+    is_done: false
 scope:
   - api
 status: planned
