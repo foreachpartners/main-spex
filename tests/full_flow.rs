@@ -7,8 +7,8 @@ mod common;
 use common::{copy_dir, dummy_project_fixture, report_text, run_spex};
 
 // Snapshot of `spex check` for a freshly initialized copy of the
-// `pepperoni-pizza-no-spex` example. The findings are intentional: the example
-// ships demo violations.
+// `no-spex-project` fixture. The findings are intentional: the fixture ships
+// demo violations.
 const EXPECTED_CHECK_REPORT: &str = r#"proj-api
   warn  secret-handling/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
@@ -25,7 +25,7 @@ proj-spex
 proj: 1 error, 1 warning
 "#;
 
-// Snapshot of `spex coverage` for the freshly initialized no-spex example.
+// Snapshot of `spex coverage` for the freshly initialized no-spex-project fixture.
 const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
   none found
 
@@ -56,7 +56,7 @@ fn with_version_header(body: &str) -> String {
 }
 
 #[test]
-fn init_then_check_pepperoni_pizza() {
+fn init_then_check_no_spex_project() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
@@ -163,7 +163,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     add_rules(&project);
 
-    // The freshly initialized example has one error: the frontend README.
+    // The freshly initialized fixture has one error: the frontend README.
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
     assert!(
         fill.status.success(),
@@ -312,13 +312,13 @@ fn specs_output_flag_writes_file_matching_stdout() {
     );
 }
 
-// Copies the no-spex example into `project` and, mirroring tutorial Step 2.1,
-// renames its repositories to follow naming-convention
+// Copies the no-spex-project fixture into `project` and, mirroring tutorial
+// Step 2.1, renames its repositories to follow naming-convention
 // (`<project-name>-<repository-short-name>`). The project name defaults to the
 // workspace folder name, so the prefix is derived from it.
 fn copy_no_spex(project: &Path) {
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/pepperoni-pizza-no-spex");
-    copy_dir(&example, project);
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/no-spex-project");
+    copy_dir(&fixture, project);
 
     let project_name = project
         .file_name()
@@ -335,7 +335,7 @@ fn copy_no_spex(project: &Path) {
 }
 
 // `spex init` leaves every repository's `rules` empty (that's `spex-setup`'s
-// job). Mimic what the skill would do for the no-spex example, so `check`
+// job). Mimic what the skill would do for the no-spex-project fixture, so `check`
 // exercises the demo violations it ships.
 fn add_rules(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
