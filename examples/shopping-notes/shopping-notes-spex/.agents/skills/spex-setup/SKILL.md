@@ -93,7 +93,7 @@ Example `spex.yaml` repository entry after collecting a contract:
 
 `spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `openapi-conventions`, `graphql-conventions`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
-1. For each repository, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
+1. For each repository, including spex itself, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
 2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "openapi-conventions: this repository exposes a REST API").
 3. Only after the user confirms a given rule applies, add its ID to that repository's `rules` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
 4. Do not modify any rule's file under `rules/` while doing this; this only edits which repositories reference it in `spex.yaml`.
