@@ -1,8 +1,8 @@
 # spex tutorial
 
-A simple tutorial where you learn spex on simple project from scratchs.
+A simple tutorial where you learn spex on a simple project from scratch.
 
-You will create `shopping-notes` application that let's user note down shoping items to not forget to buy them when visiting a store. It will have simple frontend (react SPA) and api (node) repositories.
+You will create a `shopping-notes` application that lets a user note down shopping items so they don't forget to buy them when visiting a store. It will have a simple frontend (react SPA) and api (node) repositories.
 
 By the end you will have recreated a project similar to `examples/shopping-notes` from the simple empty api and frontend
 `examples/shopping-notes-no-spex` starting point.
@@ -91,7 +91,7 @@ Commit your fixes, run `spex check` again and ensure there is no more errors.
 
 ### Api healthcheck
 
-**Spec** (specification) are single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_.
+**Spec** (specification) is a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_.
 
 Specs are short, fast to generate and review, ironing out details and creating a single source of truth for how our application works. It's like a waterfall from spec down to implementation, we can always point agent to spec and say `follow it`, `check implementation against it` or do it ourselfs. Specs helps us to quicky reason about application behaviour, removes uncertainty of how things should be and help us to move fast.
 
@@ -121,7 +121,7 @@ Review generated contract, edit if needed and commit changes.
 
 Run `spex coverage`, you will see that our spec now `in-progress`, meaning we are working on it and it has all acceptance criteria (ac) not implemented.
 
-#### Trasability
+#### Traceability
 
 Try to remove `x-spec: "@spec contract api-healthcheck"` in `api.openapi.yaml` and run `spex coverage`, you will see `missing: contract` gap.
 
@@ -143,7 +143,7 @@ Review skill will spawn two subagents in parallel where first will review if imp
 
 #### Test
 
-Now it's time to add tests for our implementation, run `/spex-test api-healthcheck`. We run tests last to ensure AI is focused on implementation review and not distracted by tests code wich ofter larger than implementation itself. As you may know saving context is improtant because the larger the context - more often AI hallucinate and often produces worse results, at a time of writing keeping context under ~200_000 tokens is recommended.
+Now it's time to add tests for our implementation, run `/spex-test api-healthcheck`. We run tests last to ensure AI is focused on implementation review and not distracted by test code, which is often larger than the implementation itself. As you may know, saving context is important because the larger the context, the more often AI hallucinates and produces worse results — at the time of writing, keeping context under ~200_000 tokens is recommended.
 
 Now our first spec is completed, running `spex check` should pass and `spex coverage` should show our spec active with no gaps.
 
@@ -167,7 +167,7 @@ You learned all the basics of spex and now can proceed on your own. Here is docu
 
 ### Business Requirements
 
-Shopping notes application that let's user note down shoping items to not forget to buy them when visiting a store.
+Shopping notes application that lets a user note down shopping items so they don't forget to buy them when visiting a store.
 
 ### Product Requirements
 

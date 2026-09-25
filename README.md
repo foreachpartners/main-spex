@@ -137,10 +137,10 @@ flowchart TD
 
 Framework [specification](docs/specification.md).
 
-Example [project](examples/pepperoni-pizza/README.md) with spex implemented.
+Example [project](examples/shopping-notes/README.md) with spex implemented.
 
 ## Try tutorial
 
 Ready to try it yourself? Follow the [Tutorial](docs/tutorial.md) to take the
-`pepperoni-pizza` example from a plain multi-repo project to a fully spec-driven
+`shopping-notes` example from a plain multi-repo project to a fully spec-driven
 workspace, end to end.
