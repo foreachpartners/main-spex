@@ -35,21 +35,21 @@ spex is built on four simple pieces:
 We will create the following structure:
 
 ```
-pepperoni-pizza/                       # workspace root
-├── pepperoni-pizza-api/               # existing api repository
-├── pepperoni-pizza-frontend/          # existing frontend repository
+shopping-notes/                       # workspace root
+├── shopping-notes-api/                # existing api repository
+├── shopping-notes-frontend/           # existing frontend repository
 ├── ...                                # repeat for other repositories
-└── pepperoni-pizza-spex/              # new spex repository (created by spex cli)
+└── shopping-notes-spex/               # new spex repository (created by spex cli)
 ```
 
 Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `spex init`.
 
 1. Put all project git repos in one shared folder (workspace root folder)
-2. Run terminal command `spex init` in workspace root to create the `pepperoni-pizza-spex` repo
+2. Run terminal command `spex init` in workspace root to create the `shopping-notes-spex` repo
 3. Open workspace to work across all repositories at once and integrate with AI coding agent:
-   - Cursor/VSCode: open workspace from file `pepperoni-pizza-spex/pepperoni-pizza.code-workspace`
+   - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-   - Claude CLI: run `claude --add-dir ../pepperoni-pizza-api ../pepperoni-pizza-frontend ..` from `pepperoni-pizza-spex` repo
+   - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend ..` from `shopping-notes-spex` repo
    - Zed: add project, pick all workspace repos (folders)
 4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
 
@@ -61,19 +61,19 @@ For existing project you can generate all specs based on existing code or gradua
 
 ### Typical workflow
 
-Say you're want to add pizza ordering functionality to the backend. Here's what you will do:
+Say you're want to add shopping item creation functionality to the backend. Here's what you will do:
 
-1. **Create spec** `/spex-spec backend place pizza order endpoint`. Will create `pepperoni-pizza-spex/specs/place-pizza-order.yaml`
-2. **Derive the contract** for a spec `/spex-contract place-pizza-order`. Will add the endpoint to `pepperoni-pizza-spex/contracts/api.openapi.yaml`.
-3. **Implement it** `/spex-implement place-pizza-order`. Will implement a spec as writen following applicable rules and skill instructions.
-4. **Review** review implementation with `/spex-review place-pizza-order` to ensure conformance with spec and applicable rules.
-5. **Add tests** `/spex-test place-pizza-order`. Will add tests coverage for the implemented spec.
+1. **Create spec** `/spex-spec backend add shopping item endpoint`. Will create `shopping-notes-spex/specs/add-shopping-item.yaml`
+2. **Derive the contract** for a spec `/spex-contract add-shopping-item`. Will add the endpoint to `shopping-notes-spex/contracts/api.openapi.yaml`.
+3. **Implement it** `/spex-implement add-shopping-item`. Will implement a spec as writen following applicable rules and skill instructions.
+4. **Review** review implementation with `/spex-review add-shopping-item` to ensure conformance with spec and applicable rules.
+5. **Add tests** `/spex-test add-shopping-item`. Will add tests coverage for the implemented spec.
 
 Tip: you can combine skills `/spex-spec /spex-contract` or run `spex-assembly-line` to implement, review and fix in loop and test.
 
 Say you're want to add rule. Here's what you will do:
 
-**Create a rule**: `/spex-rule secret handling`. Will create `pepperoni-pizza-spex/rules/secret-handling.yaml` with scripts to verify it.
+**Create a rule**: `/spex-rule secret handling`. Will create `shopping-notes-spex/rules/secret-handling.yaml` with scripts to verify it.
 
 ## Framework Principles
 
@@ -90,19 +90,19 @@ See full principles in [framework-principles.md](docs/framework-principles.md).
 
 ### The flow from business goal to verified code:
 
-For example, a pizza ordering feature moves through the flow like this:
+For example, a shopping item feature moves through the flow like this:
 
-1. **BRD** — sell pizza online to increase sales
-2. **PRD** — customers can pick a pizza on the website and pay online
-3. **Spec** — `place-pizza-order`: Customer can place an order.
+1. **BRD** — help shoppers keep track of what to buy to increase engagement
+2. **PRD** — users can add shopping items on the website
+3. **Spec** — `add-shopping-item`: Customer can add a shopping item.
 
    Acceptance criteria:
-   - MUST return 201 from POST /orders with the created order
-   - MUST let the customer place the order from the order page
+   - MUST return 201 from POST /items with the created item
+   - MUST let the customer add the item from the shopping notes page
 
-4. **Contract** — OpenAPI definition of `placeOrder` returning `201`, plus a Figma reference for the order page
-5. **Implementation** — the `placeOrder()` handler in code
-6. **Test** — verifies that placing an order returns `201`
+4. **Contract** — OpenAPI definition of `addItem` returning `201`, plus a Figma reference for the shopping notes page
+5. **Implementation** — the `addItem()` handler in code
+6. **Test** — verifies that adding an item returns `201`
 
 ```mermaid
 flowchart TD

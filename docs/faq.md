@@ -5,10 +5,10 @@
 A workspace keeps every repository it manages as its own git repository under one shared folder, each named `<project-name>-<repository-short-name>`:
 
 ```text
-pepperoni-pizza/             <- workspace root folder
-  pepperoni-pizza-spex/      <- specs, config, and contracts/
-  pepperoni-pizza-api/
-  pepperoni-pizza-frontend/
+shopping-notes/             <- workspace root folder
+  shopping-notes-spex/      <- specs, config, and contracts/
+  shopping-notes-api/
+  shopping-notes-frontend/
 ```
 
 Each person — and each AI agent — gets access only to what they need. Because each repository is independent, access is granted per repository:

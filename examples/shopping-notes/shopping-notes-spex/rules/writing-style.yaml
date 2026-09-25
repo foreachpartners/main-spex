@@ -39,4 +39,4 @@ examples:
     MUST load configuration at startup.
   placeholder: |
     <workspace-root>/<project-name>-spex/specs/<spec-id>.yaml
-    e.g. pepperoni-pizza/pepperoni-pizza-spex/specs/place-pizza-order.yaml
+    e.g. shopping-notes/shopping-notes-spex/specs/add-shopping-item.yaml

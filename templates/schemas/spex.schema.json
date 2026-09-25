@@ -42,7 +42,7 @@
       "properties": {
         "repository_name": {
           "type": "string",
-          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `pepperoni-pizza-api`). Matches the repository directory name per naming-convention.",
+          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `shopping-notes-api`). Matches the repository directory name per naming-convention.",
           "minLength": 1
         },
         "repository_short_name": {
@@ -91,7 +91,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "description": "Path to the contract file, relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` when the contract lives in the owning repository, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
+          "description": "Path to the contract file, relative to the spex directory (for example `../shopping-notes-api/contracts/api.openapi.yaml` when the contract lives in the owning repository, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
           "minLength": 1
         },
         "description": {
@@ -133,28 +133,28 @@
   "additionalProperties": false,
   "examples": [
     {
-      "project_name": "pepperoni-pizza",
+      "project_name": "shopping-notes",
       "cli_version": "0.3.1",
-      "description": "Online ordering for a pizzeria.",
+      "description": "Shopping list app for keeping track of items to buy.",
       "repositories": [
         {
-          "repository_name": "pepperoni-pizza-api",
+          "repository_name": "shopping-notes-api",
           "repository_short_name": "api",
-          "description": "Backend service that handles orders.",
-          "path": "../pepperoni-pizza-api",
+          "description": "Backend service that handles shopping items.",
+          "path": "../shopping-notes-api",
           "contracts": [
             {
               "path": "contracts/api.openapi.yaml",
-              "description": "REST OpenAPI spec for the orders API."
+              "description": "REST OpenAPI spec for the shopping items API."
             }
           ],
           "rules": ["secret-handling", "naming-convention"]
         },
         {
-          "repository_name": "pepperoni-pizza-frontend",
+          "repository_name": "shopping-notes-frontend",
           "repository_short_name": "frontend",
-          "description": "React web client that lets customers place orders.",
-          "path": "../pepperoni-pizza-frontend",
+          "description": "React web client that lets users manage their shopping notes.",
+          "path": "../shopping-notes-frontend",
           "rules": ["writing-style", "naming-convention"]
         }
       ]

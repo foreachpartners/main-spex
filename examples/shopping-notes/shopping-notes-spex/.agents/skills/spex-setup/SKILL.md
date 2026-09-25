@@ -69,7 +69,7 @@ For each repository, using the contract files you noted in Step 2:
 1. Identify its interface contract files. Look for OpenAPI (`openapi.yaml`, `openapi.json`, `*.openapi.yaml`), proto (`*.proto`), GraphQL SDL (`schema.graphql`, `*.graphql`), and AsyncAPI (`asyncapi.yaml`). Skip repositories that ship no contract.
 2. Ask the user where each contract should live: in place inside its own repository (the default), or moved into the shared `<workspace-root>/<project-name>-spex/contracts/` folder because it's genuinely shared across repositories. Never decide this yourself.
 3. Only if the user chooses the shared folder, move the file there, renaming it with the repository's short name as a prefix: `<repository-short-name>.<original-filename>` (for example the `api` repository's `openapi.yaml` becomes `contracts/api.openapi.yaml`). Do not double-prefix a filename that already starts with the repository short name.
-4. Add an entry under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml` or `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the orders API.`).
+4. Add an entry under that repository's `contracts` list in `spex.yaml`. Each entry needs a `path` relative to the spex directory (for example `../shopping-notes-api/contracts/api.openapi.yaml` or `contracts/api.openapi.yaml`) and a one-line `description` of what it covers (for example `REST OpenAPI spec for the shopping items API.`).
 5. Leave the original contract file in its repository untouched unless the user chose to move it in step 2.
 6. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
@@ -78,13 +78,13 @@ Confirm each repository's contract location and description with the user, the s
 Example `spex.yaml` repository entry after collecting a contract:
 
 ```yaml
-- repository_name: pepperoni-pizza-api
+- repository_name: shopping-notes-api
   repository_short_name: api
-  description: Backend service that handles orders.
-  path: ../pepperoni-pizza-api
+  description: Backend service that handles shopping items.
+  path: ../shopping-notes-api
   contracts:
     - path: contracts/api.openapi.yaml
-      description: REST OpenAPI spec for the orders API.
+      description: REST OpenAPI spec for the shopping items API.
   rules:
     - secret-handling
 ```
@@ -156,16 +156,16 @@ Once `spex.yaml` is described and the workspace folders are iconified, the works
 Place `description` right after the name it describes, and the `contracts` list after `path`, mirroring the schema example:
 
 ```yaml
-project_name: pepperoni-pizza
-description: Online ordering for a pizzeria.
+project_name: shopping-notes
+description: Shopping list app for keeping track of items to buy.
 repositories:
-  - repository_name: pepperoni-pizza-api
+  - repository_name: shopping-notes-api
     repository_short_name: api
-    description: Backend service that handles orders.
-    path: ../pepperoni-pizza-api
+    description: Backend service that handles shopping items.
+    path: ../shopping-notes-api
     contracts:
       - path: contracts/api.openapi.yaml
-        description: REST OpenAPI spec for the orders API.
+        description: REST OpenAPI spec for the shopping items API.
     rules:
       - secret-handling
 ```

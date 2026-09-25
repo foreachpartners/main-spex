@@ -11,7 +11,7 @@ A contract is the _interface_ derived from a spec. For a machine-readable interf
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to the spex directory. The user owns where a contract file actually lives — most commonly inside the owning repository itself (for example `../pepperoni-pizza-api/contracts/api.openapi.yaml`). The spex repository's own `<workspace-root>/<project-name>-spex/contracts/` folder is only a convention for contracts genuinely shared across repositories, not the default location.
+Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to the spex directory. The user owns where a contract file actually lives — most commonly inside the owning repository itself (for example `../shopping-notes-api/contracts/api.openapi.yaml`). The spex repository's own `<workspace-root>/<project-name>-spex/contracts/` folder is only a convention for contracts genuinely shared across repositories, not the default location.
 
 ## Step 0 — Establish the target specs
 
@@ -123,9 +123,9 @@ Design reference example, for a spec with no machine-readable interface, in `con
 
 ## Delivery time
 
-https://figma.com/file/pepperoni-pizza/cart-and-delivery?node-id=42%3A100
+https://figma.com/file/shopping-notes/list-and-delivery?node-id=42%3A100
 
-Cart delivery estimate (live, updates as pizzas are added) and the
+List delivery estimate (live, updates as items are added) and the
 in-progress order countdown.
 ```
 

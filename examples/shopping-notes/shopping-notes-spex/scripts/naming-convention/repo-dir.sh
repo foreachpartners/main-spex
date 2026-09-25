@@ -3,7 +3,7 @@
 #
 # The repository directory name is a derived identifier and must equal
 # <project-name>-<repository-short-name>, e.g.
-#   pepperoni-pizza-api
+#   shopping-notes-api
 # where <project-name> comes from spex.yaml and <repository-short-name> is the
 # repository's short name (kebab-case).
 #

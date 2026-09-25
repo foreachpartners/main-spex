@@ -83,12 +83,12 @@
   Status: not-started
   ```
 
-- **Project** — the whole product being built, named after its workspace root folder (e.g. `pepperoni-pizza`). One project spans several workspace repositories that share a single set of specs.
+- **Project** — the whole product being built, named after its workspace root folder (e.g. `shopping-notes`). One project spans several workspace repositories that share a single set of specs.
 
 - **Project name** — the identifier of the project, taken from the name of its workspace root folder.
 
   ```text
-  pepperoni-pizza
+  shopping-notes
   ```
 
 - **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yaml`.
@@ -96,10 +96,10 @@
 - **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
 
   ```text
-  pepperoni-pizza/             <- workspace root
-    pepperoni-pizza-spex/      <- workspace repository
-    pepperoni-pizza-api/       <- workspace repository
-    pepperoni-pizza-frontend/  <- workspace repository
+  shopping-notes/             <- workspace root
+    shopping-notes-spex/      <- workspace repository
+    shopping-notes-api/       <- workspace repository
+    shopping-notes-frontend/  <- workspace repository
   ```
 
 - **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) or by more specific role (service, mobile).
@@ -107,9 +107,9 @@
 - **Workspace repository name** (repository name, repo full name) — the identifier of a workspace repository, taken from the name of its folder inside the workspace root/git.
 
   ```text
-  pepperoni-pizza-spex
-  pepperoni-pizza-api
-  pepperoni-pizza-frontend
+  shopping-notes-spex
+  shopping-notes-api
+  shopping-notes-frontend
   ```
 
 - **Workspace repository short name** (repository short name, repo short name) — workspace repository name excluding project name.

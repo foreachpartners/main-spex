@@ -99,9 +99,9 @@ A repository can baseline pre-existing `error`-severity findings with `ignored_e
 
 ```yaml
 repositories:
-  - repository_name: pepperoni-pizza-frontend
+  - repository_name: shopping-notes-frontend
     repository_short_name: frontend
-    path: ../pepperoni-pizza-frontend
+    path: ../shopping-notes-frontend
     rules: [writing-style]
     ignored_errors:
       - rule_id: writing-style

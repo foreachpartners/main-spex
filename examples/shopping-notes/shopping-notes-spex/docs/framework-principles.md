@@ -22,7 +22,7 @@ Clear, well-defined specs eliminate guesswork: they provide explicit acceptance 
 
 Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
-The same problem shows up at the repository level: without a skill, every session re-explains the same commands and conventions from scratch. A repository skill (for example `pepperoni-pizza-api`) writes that down once and autoloads before any read, write, test, or run, so the agent doesn't have to guess or ask.
+The same problem shows up at the repository level: without a skill, every session re-explains the same commands and conventions from scratch. A repository skill (for example `shopping-notes-api`) writes that down once and autoloads before any read, write, test, or run, so the agent doesn't have to guess or ask.
 
 **Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted. Likewise, a developer explains a repo's structure and commands by hand instead of relying on an autoloaded skill — the knowledge stays in the developer's head, not in the framework.
 
