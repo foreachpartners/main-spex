@@ -1,9 +1,9 @@
 ---
 name: spex-review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along both axes at once — governing rules (does the code follow cross-cutting conventions and coding standards?) and specs (does the code match what the spec asked for?). Runs spex-review-rule and spex-review-spec in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, or work-in-progress changes without specifying a single axis, or asks to "review since X".
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along both axes at once — governing rules (does the code follow cross-cutting conventions and coding standards?) and specs (does the code match what the spec asked for?). Uses spex-review-rule and spex-review-spec skills. Use when the user wants to review a branch, a PR, or work-in-progress changes.
 ---
 
-Runs the `spex-review-rule` and `spex-review-spec` skills as **parallel sub-agents** against the same diff, so they don't pollute each other's context, then aggregates their findings.
+Runs the `spex-review-rule` and `spex-review-spec` skills as **parallel sub-agents** against review target, so they don't pollute each other's context, then aggregates their findings.
 
 The spec should have been provided to you, ask user if not.
 
@@ -11,7 +11,7 @@ The spec should have been provided to you, ask user if not.
 
 ### 1. Pin the fixed point
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`.
+If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review repository spec is scoped to.
 
 **Committed diff** (user gave a fixed point):
 

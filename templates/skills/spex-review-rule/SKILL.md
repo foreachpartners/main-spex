@@ -9,7 +9,7 @@ Rule-axis review of a diff — committed changes since a fixed point, or uncommi
 
 ### 1. Pin the fixed point
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`.
+If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review repository spec is scoped to.
 
 **Committed diff** (user gave a fixed point):
 
