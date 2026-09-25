@@ -39,6 +39,8 @@ Split into tasks only when work spans independent repositories or clearly separa
 
 If a task fails or an agent cannot complete it, stop, report what failed, and ask the user how to proceed rather than pressing on with dependent work.
 
+It's improtant to implement tests against specification, if you see that test fails to meet spec acceptance criteria - fix the implementanation if change is small or report to user is problem is bigger, don't try to fit a test to implementation. Testing is layer that ensures spec acceptance criteria a strictly followed.
+
 ## Step 3 — Finalize the specs
 
 For every governing spec, run `spex coverage` and open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
