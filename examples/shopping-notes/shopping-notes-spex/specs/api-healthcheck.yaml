@@ -1,0 +1,16 @@
+id: api-healthcheck
+title: Expose a healthcheck endpoint on the API
+description: >-
+  Lets operators and infrastructure tooling verify the API process is up and
+  responding, independent of any downstream dependency.
+acceptance_criteria:
+  - id: health-endpoint-returns-ok
+    must: "return 200 with body `{ \"status\": \"ok\" }` from `GET /health` when the API process is running"
+  - id: health-endpoint-no-auth
+    must_not: "require authentication or authorization to access `GET /health`"
+  - id: health-endpoint-no-dependency-checks
+    must_not: "check the status of any downstream dependency (e.g. database) when responding to `GET /health`"
+scope:
+  - api
+status: active
+contract: single

@@ -1,0 +1,16 @@
+id: fe-clear-shopping-list
+title: Clear all items from the shopping list
+description: >-
+  Lets the user remove every item from the shopping list in one action,
+  e.g. after a shopping trip is done.
+acceptance_criteria:
+  - id: clear-list-action
+    must: let the user clear all items from the shopping list with a single action
+  - id: call-clear-list-endpoint
+    must: call the clear-list endpoint when the user clears the shopping list
+  - id: confirm-before-clearing
+    should: ask the user to confirm before clearing all items
+scope:
+  - frontend
+status: active
+contract: single

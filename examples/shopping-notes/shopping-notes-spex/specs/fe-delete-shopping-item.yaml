@@ -1,0 +1,16 @@
+id: fe-delete-shopping-item
+title: Delete an item from the shopping list
+description: >-
+  Lets the user remove a single item from the shopping list, e.g. when
+  they no longer need it.
+acceptance_criteria:
+  - id: delete-item-action
+    must: let the user delete an item from the shopping list with a single action
+  - id: call-delete-item-endpoint
+    must: call the delete-item endpoint when the user deletes an item
+  - id: remove-item-from-view
+    should: remove the item from the displayed list immediately after it is deleted
+scope:
+  - frontend
+status: active
+contract: single

@@ -1,0 +1,14 @@
+id: api-view-shopping-list
+title: List shopping items
+description: >-
+  Lets a client retrieve the current shopping list so the user can see what
+  they still need to buy.
+acceptance_criteria:
+  - id: list-items
+    must: 'return every item with its `id`, `name`, and `bought` status from `GET /items`'
+  - id: empty-list-when-no-items
+    must: 'return an empty list from `GET /items` when no items exist'
+scope:
+  - api
+status: active
+contract: single

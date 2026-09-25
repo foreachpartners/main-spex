@@ -1,0 +1,15 @@
+id: fe-not-found-page
+title: Show a not-found page for unmatched routes
+description: >-
+  Lets a user who navigates to a URL that doesn't match any route see a
+  clear not-found page instead of a blank screen, with a way back to the
+  main page.
+acceptance_criteria:
+  - id: unmatched-route-shows-not-found-page
+    must: "render the not-found page when the requested URL matches no defined route"
+  - id: not-found-page-links-to-main-page
+    must: "show a link back to the main page on the not-found page"
+scope:
+  - frontend
+status: active
+contract: single

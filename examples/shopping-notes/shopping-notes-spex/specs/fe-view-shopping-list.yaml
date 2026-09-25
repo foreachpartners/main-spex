@@ -1,0 +1,16 @@
+id: fe-view-shopping-list
+title: View the shopping list
+description: >-
+  Lets the user see every item they've noted down, so they know what's
+  still left to buy.
+acceptance_criteria:
+  - id: display-item-list
+    must: display each item's name and bought status in the shopping list view
+  - id: load-list-from-api
+    must: load the shopping list from the list-items endpoint when the view is opened
+  - id: empty-state
+    should: show an empty state when the shopping list has no items
+scope:
+  - frontend
+status: active
+contract: single

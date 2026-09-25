@@ -1,154 +1,198 @@
 # spex tutorial
 
-A hands-on walkthrough from a plain multi-repo project to a spec-driven one. You
-install the CLI, set up a spex workspace on the `pepperoni-pizza` example, fix
-check and coverage findings, and run the spec and rule workflows
-end to end.
+A simple tutorial where you learn spex on simple project from scratchs.
 
-By the end you will have recreated a project similar to `examples/pepperoni-pizza` from the
-`examples/pepperoni-pizza-no-spex` starting point.
+You will create `shopping-notes` application that let's user note down shoping items to not forget to buy them when visiting a store. It will have simple frontend (react SPA) and api (node) repositories.
 
-## Step 1 — Install spex
+By the end you will have recreated a project similar to `examples/shopping-notes` from the simple empty api and frontend
+`examples/shopping-notes-no-spex` starting point.
+
+## Install spex
 
 Follow the installation process in [cli.md](cli.md#install).
 
-## Step 2 — Copy the example project
+## Copy the example project
 
-Copy `examples/pepperoni-pizza-no-spex` somewhere on your machine and rename the
-copy to `pepperoni-pizza`. This folder is your **workspace root**, containing the
-`api` and `frontend` repositories side by side.
+Copy `examples/shopping-notes-no-spex` somewhere on your machine and rename the
+copy to `shopping-notes`. This folder becomes your **workspace root**, containing the
+`shopping-notes-api` and `shopping-notes-frontend` repositories side by side.
 
-## Step 2.1 — Rename folders to follow naming-convention
+### Get familiar with project
 
-Repository directory naming is <project-name>-<repository-short-name>
+Get familiar with our base project, run api and frontend, run tests.
 
-- `api` becomes `pepperoni-pizza-api`
-- `frontend` becomes `pepperoni-pizza-frontend`
+### Setup git repos
 
-## Step 3 — Set up spex and workspace
+Ask AI to init git repositories for api and frontend and commit existing files.
 
-Run `spex init` in terminal.
+## Set up spex and workspace
+
+Run `spex init` to generate `shopping-notes-spex` in terminal while in `shopping-notes` workspace root.
+
+### Get familiar with spex
+
+Get familiar with generated base `shopping-notes-spex` repository, we will cover each part in details later.
+
+### Setup spex git repo
+
+Ask AI to init git in `shopping-notes-spex` repository and commit existing files.
+
+### Setup workspace
 
 Open the workspace to work across all repositories at once and integrate with an AI coding agent:
 
-- Cursor/VSCode: open workspace from file `pepperoni-pizza-spex/pepperoni-pizza.code-workspace`
+- Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
 - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-- Claude CLI: run `claude --add-dir ../pepperoni-pizza-api ../pepperoni-pizza-frontend ..` from `pepperoni-pizza-spex` repo
+- Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend` from `shopping-notes-spex` repo
 - Zed: add project, pick all workspace repos (folders)
 
-Ask AI to init git in each repository and commit with `chore: initial commit`.
+### Skills
 
-Commit as you complete each step so your progress is easy to review and roll back.
+If you did everything correctly you should be able to run spex AI skills using you coding agent or cli.
 
-Run your first skill `/spex-setup` in AI chat window to complete setup.
+**Agent Skill** (skill) — a modular, reusable capability that packages specialized instructions an AI agent loads on demand when a request matches the skill's description. Defined as a folder with a `SKILL.md` entry point, following the [Agent Skills](https://agentskills.io/) spec. In spex, a skill is the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
 
-## Step 4 — Fix everything `spex check` reports
+Skill consists of metadata and body, metadata is always loaded in when you start new agent chat for all skills,
+body is loaded on demand, which helps to save tokens and not pollute context, therefore improving output results:
 
-Run `spex check` in terminal from anywhere in the workspace and work
-through the findings until it exits cleanly.
+Example `spex-setup/SKILL.md`:
 
-## Step 5 — Spec workflow
+```
+description: skill metadata description, always loaded, example: `completes spex setup, use it when user wants to finish spex setup`
+---
 
-Drive a real feature from PRD to verified code. Start with the PRD-level
-statement of what the product should do:
-
-> show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
-
-### 5.1 Create the spec
-
-There is no person who requested this feature with whom you can clarify details, so decide yourself how it should behave for the tutorial.
-
-Hand the PRD to the skill — it breaks the PRD into one or more specs:
-
-```text
-/spex-spec show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers
+skill body wih instructions, loaded only when user invokes skill `/spex-setup` or metadata matches user request,
+for example if user says `let's setup spex` - it will match skill metadata description and AI agent will read skill body
 ```
 
-The skill interviews you, proposes the split when the PRD covers more than one capability, then writes a schema-valid spec per capability. A spec captures one capability, not one repository. Review the spec and confirm its `status` is `planned`.
+The skill that we will run `shopping-notes-spex/.agents/skills/spex-setup/SKILL.md` is instruction for AI to
+update `spex.yaml` (which is main spex configuration file for your project) and:
 
-### 5.2 Derive the contract
+- add descriptions for your project and each repository
+- pick rules from bundled with spex that applicable to each project repository and remove unused
+- generate main skills for each repo with metadata that requires them to be loaded when AI works on any repository. Skills will describe each repository and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
+
+Run your first skill `/spex-setup` in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit.
+
+## Rules
+
+Run `spex check` in terminal from anywhere in the workspace, you will see `dependencies-rules/npm-floating-version` errors in api.
+
+**Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies repo-wide.
+
+Each repostirory has rules that it needs to follow, applicable rules for each repo are defined in `spex.yaml` and one of the rules for api is
+reported `dependencies-rules`. You can open `shopping-notes-spex/rules/dependencies-rules.yaml` and check it description and acceptance_criteria repo must follow with deterministic `checks`. Our error comes from `npm-floating-version` which requires `package.json dependencies must pin an exact version, not a range`. We can fix it by opening `/shopping-notes-api/package.json` and removing `^`.
+
+Rules are a way to ensure AI generates code in a way we want. Rules applicable to repository are loaded in AI context when it works on this repository and if possible they also have determenistic checks which we can validate by running `spex check`.
+
+Commit your fixes, run `spex check` again and ensure there is no more errors.
+
+## Specs
+
+### Api healthcheck
+
+**Spec** (specification) are single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_.
+
+Specs are short, fast to generate and review, ironing out details and creating a single source of truth for how our application works. It's like a waterfall from spec down to implementation, we can always point agent to spec and say `follow it`, `check implementation against it` or do it ourselfs. Specs helps us to quicky reason about application behaviour, removes uncertainty of how things should be and help us to move fast.
+
+Let's create a simple specs for api, our technical lead wants a helthcheck for api so that other tools, services and frontend could check if api is working fine.
+
+Let's invoke a skill for spec creation for this task, ask AI `/spex-spec healthcheck endpoint for api, id api-healthcheck`.
+
+Agent will ask you details, feel free to pick what you think right for example, for real project you may want to collaborate with project manager, technical lead, domain experts or other involved parties on things that you can't decide yourself.
+
+Review created spec and edit it if needed.
+
+Run `spex coverage` - a command that shows you a current state of project and ensures that each spec has contract if applicable, implementation adn tests for eac acceptance criterion. For now you will see only our spec `api-healthcheck` as planned.
+
+Commit the change.
+
+#### Contract
+
+Now let's implement `api-healthcheck` spec, we start with OpenAPI contract.
+
+**Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events, figma design reference. AI implements from spec and contract.
+
+We implement contract first because it's fast to generate and easy to review it, narrowing down how AI should implement our spec. Without contract we would need to review full implementation and do larger refactoring in case AI implements it not in a way we want it. With contracts we are saving time and tokens. Also it's easy to refactor implementation not changing it public surface, but requires a breaking change otherwise.
+
+Let's run a skill to create a contract for our spec `/spex-contract api-healthcheck in shopping-notes-spex/contracts/api.openapi.yaml and switch spec status to in-progress`
+
+Review generated contract, edit if needed and commit changes.
+
+Run `spex coverage`, you will see that our spec now `in-progress`, meaning we are working on it and it has all acceptance criteria (ac) not implemented.
+
+#### Trasability
+
+Try to remove `x-spec: "@spec contract api-healthcheck"` in `api.openapi.yaml` and run `spex coverage`, you will see `missing: contract` gap.
+
+**Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+
+Tracing is like a thread going through from spec to it's artifacts in format of comment `@spec <type> <spec-id>` like `@spec contract api-healthcheck`. Trace helps AI and us to quickly find code and test related to spec and the other way around, while determenistic `spex coverage` check ensures nothing is missing, spec has contract and **each** spec acceptance creation has implementation and test. You may know that AI sometimes forget to implement or test some small part of our request, one ac, with `spex coverage` this problem is no longer exists.
+
+Put back trace for contract and let's continue with implementation.
+
+#### Implement
+
+Like with everyting else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all nessesary context for the task - spec, applicable rules, repo skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
+
+#### Review
+
+While our change is small and we can manually review it, in case of bigger changes we would want agent to review implementation, let's try it out, run `/spex-review api-healthcheck api repo implementation`.
+
+Review skill will spawn two subagents in parallel where first will review if implementation follows rules, second will review if implementation follows spec. Review skill itself delegates to `spex-review-rule` and `spex-review-spec` skills for each subagent. It's like a constructor where you can combine pieces to achive desired process, we will see it later using `spex-assembly-line` skill.
+
+#### Test
+
+Now it's time to add tests for our implementation, run `/spex-test api-healthcheck`. We run tests last to ensure AI is focused on implementation review and not distracted by tests code wich ofter larger than implementation itself. As you may know saving context is improtant because the larger the context - more often AI hallucinate and often produces worse results, at a time of writing keeping context under ~200_000 tokens is recommended.
+
+Now our first spec is completed, running `spex check` should pass and `spex coverage` should show our spec active with no gaps.
+
+Commit changes in api and spex.
+
+### Frontend not found page
+
+Now our project manager want use to have not found page in frontend in case user navigates to non-existing page.
+
+Let's create a spec for it `/spex-spec frontend not found page with link back to main page, id fe-not-found-page, contract figma`. Commit changes.
+
+Now let's create design mockup contract for our page, as we have a bad taste let's ask our designer, here is what we got: `https://www.figma.com/design/MSDzHDhkLsANf0jvFbAUTR/Not-found-page---shopping-notes?node-id=1-2`
+
+Let's write it down `/spex-contract fe-not-found-page, change status to in-progress, place in shopping-notes-frontend/contracts/figma.md, figma https://www.figma.com/design/MSDzHDhkLsANf0jvFbAUTR/Not-found-page---shopping-notes?node-id=1-2`. As our contract is not shared and belongs to frontend we place it there. Commit changes.
+
+If you remember next we would need to do implementation, review and testing. There is a orchestrator skill that will do all of this for you `/spex-assembly-line fe-not-found-page` by spawning agent for each stage and running loop review and fix until clean or a 3-pass cap. The only thing that will be left for us is to review and commit changes.
+
+## Shopping notes application
+
+You learned all the basics of spex and now can proceed on your own. Here is documents for your task:
+
+### Business Requirements
+
+Shopping notes application that let's user note down shoping items to not forget to buy them when visiting a store.
+
+### Product Requirements
+
+- User can add an item to the shopping list.
+- User can view the list of items.
+- User can easily mark an item as bought.
+- User can delete an item from the list.
+- User can clear all items from the list.
+
+How do you split the work is up to you, but I suggest you to split frontend and api specs and also make each capability a separate spec, then create all specs, all contracts and implement each or all at once.
+
+## Generate a completion report
+
+Ask your AI agent summarize the result:
 
 ```text
-/spex-contract <spec-id>
-```
-
-The agent reads the spec, `api` OpenAPI contract and updates it to match changes.
-
-### 5.3 Plan
-
-```text
-/spex-plan <spec-id>
-```
-
-The agent reads the spec, contract, code and proposes an implementation plan.
-
-Tip: you can combine skills in the future `/spex-spec /spex-contract /spex-plan`
-
-### 5.4 Implement
-
-```text
-/spex-implement <spec-id>
-```
-
-The agent executes the plan tasks for each step in parallel, then deletes the plan file once every step is `completed`.
-
-### 5.5 Verify with check and coverage
-
-```sh
-spex check
-spex coverage
-```
-
-Coverage should now show your new spec as `✓`.
-
-### 5.6 Review
-
-```text
-/spex-review <spec-id>
-```
-
-### 5.7 Add tests
-
-```text
-/spex-test <spec-id>
-```
-
-The agent adds tests for each implemented acceptance criterion, following the repository's testing patterns.
-
-## Step 6 — Rule workflow
-
-Rules capture cross-cutting conventions that apply repo-wide. Create one
-for the API:
-
-```text
-/spex-rule the API must not hardcode network bind addresses or ports — they must be read from configuration/environment
-```
-
-The skill interviews you, proposes a `regexp` check that flags binding to a
-hardcoded address like `127.0.0.1:3000`, and writes a schema-valid
-`pepperoni-pizza-spex/rules/*.yaml`. Make sure the new spec is in the `api` repository's
-`rules` list in `spex.yaml` so the check runs against it.
-
-Then run `spex check` — it should flag the hardcoded bind address in `api`. You can fix it directly for
-small change or create a plan if compliance with the new rule requires many changes.
-
-## Step 7 — Generate a completion report
-
-Have your AI agent summarize the result:
-
-```text
-Create a new file `pepperoni-pizza-spex/tutorial-completion.md` that documents the result of this tutorial. In it:
+Create a new file `shopping-notes-spex/tutorial-completion.md` that documents the result of this tutorial. In it:
 
 1. Run `spex check` and paste its full output under a "spex check" heading.
 2. Run `spex coverage` and paste its full output under a "spex coverage" heading.
-3. Rate created spec and implementation for this requirement: "show customers pizza delivery time based on number of pizzas ordered, other ongoing orders and today workers". User was free to decide on details.
-4. Rate created rule for this requirement: "the API must not hardcode network bind addresses or ports — they must be read from configuration/environment"
+3. Rate created specs, rules, implementation, tests, tracability and overall project
 ```
 
-Review and commit it.
+Commit it, if needed publish repository as private and share results with your manager to confirm you completed tutorial.
 
 ## 🎉 Congratulations!
 
-You did it! You took a plain multi-repo project and turned it into a fully
-spec-driven workspace — installing the CLI, wiring up Git per repository, and
-driving real features from spec to verified code.
+You did it! Now you can use spex in real project. And don't forget to contrubite good rules and skills and other improvements back to spex for everyone to use.

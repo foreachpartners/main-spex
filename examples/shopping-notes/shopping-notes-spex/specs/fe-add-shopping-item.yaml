@@ -1,0 +1,18 @@
+id: fe-add-shopping-item
+title: Add an item to the shopping list
+description: >-
+  Lets the user note down a shopping item from the UI so they don't forget
+  to buy it at the store.
+acceptance_criteria:
+  - id: add-item-input
+    must: let the user enter an item name and submit it to add it to the shopping list
+  - id: call-create-item-endpoint
+    must: call the create-item endpoint when the user submits a new item name
+  - id: reject-empty-submit
+    must_not: submit an add when the input is empty
+  - id: clear-input-after-add
+    should: clear the input field after the item is added
+scope:
+  - frontend
+status: active
+contract: single

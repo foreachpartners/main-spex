@@ -23,7 +23,12 @@ Every command except `init` finds the spex repository from the current directory
 
 ## Install
 
-Install the `spex` binary from source. **Prerequisites:** Rust (required to build the CLI) and Git.
+### Prerequisites:
+
+- **Rust**: [Install Rust](https://rust-lang.org/tools/install/)
+- **Git**: [Install Git](https://git-scm.com/install/)
+
+### Install the `spex` binary from source.
 
 ```sh
 git clone https://github.com/foreachpartners/spex

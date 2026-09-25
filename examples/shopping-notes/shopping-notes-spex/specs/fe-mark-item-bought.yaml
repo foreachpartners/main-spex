@@ -1,0 +1,16 @@
+id: fe-mark-item-bought
+title: Mark an item as bought
+description: >-
+  Lets the user mark an item as bought once they've picked it up, without
+  removing it from the shopping list.
+acceptance_criteria:
+  - id: mark-bought-action
+    must: let the user mark an item as bought from the shopping list with a single action
+  - id: call-mark-bought-endpoint
+    must: call the mark-item-bought endpoint when the user marks an item as bought
+  - id: distinguish-bought-items
+    should: visually distinguish bought items from unbought items in the list
+scope:
+  - frontend
+status: active
+contract: single

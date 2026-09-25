@@ -1,7 +1,0 @@
-{
-  "folders": [
-    { "name": "🦀 api", "path": "../pepperoni-pizza-api" },
-    { "name": "⚛️ frontend", "path": "../pepperoni-pizza-frontend" },
-    { "name": "🧰 spex", "path": "." },
-  ]
-}

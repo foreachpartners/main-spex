@@ -1,0 +1,170 @@
+openapi: 3.1.1
+info:
+  title: Shopping Notes API
+  version: 1.0.0
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Report API process liveness
+      x-spec: "@spec contract api-healthcheck"
+      responses:
+        "200":
+          description: API process is running
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /items:
+    get:
+      operationId: listItems
+      summary: List shopping items
+      x-spec: "@spec contract api-view-shopping-list"
+      responses:
+        "200":
+          description: Shopping list returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemList"
+    post:
+      operationId: createItem
+      summary: Create a shopping item
+      x-spec: "@spec contract api-add-shopping-item"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateItemRequest"
+      responses:
+        "201":
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    delete:
+      operationId: clearItems
+      summary: Clear the shopping list
+      x-spec: "@spec contract api-clear-shopping-list"
+      responses:
+        "204":
+          description: Shopping list cleared
+  /items/{item_id}:
+    patch:
+      operationId: updateItem
+      summary: Update a shopping item's bought status
+      x-spec: "@spec contract api-mark-item-bought"
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateItemRequest"
+      responses:
+        "200":
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    delete:
+      operationId: deleteItem
+      summary: Delete a shopping item
+      x-spec: "@spec contract api-delete-shopping-item"
+      parameters:
+        - $ref: "#/components/parameters/ItemId"
+      responses:
+        "204":
+          description: Item deleted
+        "404":
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+components:
+  parameters:
+    ItemId:
+      name: item_id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    Item:
+      type: object
+      required:
+        - id
+        - name
+        - bought
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        bought:
+          type: boolean
+    ItemList:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+    CreateItemRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+    UpdateItemRequest:
+      type: object
+      required:
+        - bought
+      properties:
+        bought:
+          type: boolean
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    NotFoundError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
