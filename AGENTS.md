@@ -16,7 +16,7 @@ spex is built on three simple pieces:
 
 ## Specification
 
-[`docs/specification.md`](docs/specification.md) is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria), and [`docs/cli.md`](docs/cli.md) for the CLI's command behavior. Consult them before changing behavior, and keep them in sync when behavior changes.
+`docs/specification.md` is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria), and `docs/cli.md` for the CLI's command behavior. Consult them before changing behavior, and keep them in sync when behavior changes. Also on changes update if needed `docs/tutorial.md` and `examples/shopping-notes`.
 
 ## Quick commands
 
