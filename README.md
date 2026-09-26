@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal: unleash AI's full speed without slop
 
-AI operates fast and getting even faster — the framework's job is unleash it speed while ensuring slop-free results.
+AI operates fast — the framework's job is unleash it speed while ensuring slop-free verifiable results.
 
 ## Core Concepts
 
