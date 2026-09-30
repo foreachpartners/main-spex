@@ -9,7 +9,10 @@ use common::{copy_dir, dummy_project_fixture, report_text, run_spex};
 // Snapshot of `spex check` for a freshly initialized copy of the
 // `no-spex-project` fixture. The findings are intentional: the fixture ships
 // demo violations.
-const EXPECTED_CHECK_REPORT: &str = r#"proj-api
+const EXPECTED_CHECK_REPORT: &str = r#"proj-spex
+  no issues
+
+proj-api
   warn  secret-handling/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
   0 errors, 1 warning
@@ -18,9 +21,6 @@ proj-frontend
   error  writing-style/no-cyrillic  (README.md:1)
       Requirements and documentation must be in English
   1 error, 0 warnings
-
-proj-spex
-  no issues
 
 proj: 1 error, 1 warning
 "#;
@@ -62,7 +62,7 @@ fn init_then_check_no_spex_project() {
 
     copy_no_spex(&project);
 
-    let init = run_spex(&project, &["init"], "\n\n");
+    let init = run_spex(&project, &["init"], "\n");
     assert!(
         init.status.success(),
         "init failed (exit {:?})\nstdout:\n{}\nstderr:\n{}",
@@ -79,7 +79,7 @@ fn init_then_check_no_spex_project() {
         "init did not scaffold rules"
     );
 
-    add_rules(&project);
+    add_repositories(&project);
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
@@ -115,10 +115,10 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
 
     copy_no_spex(&project);
 
-    let init = run_spex(&project, &["init"], "\n\n");
+    let init = run_spex(&project, &["init"], "\n");
     assert!(init.status.success(), "init failed");
 
-    add_rules(&project);
+    add_repositories(&project);
 
     // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
     // error in any other file would still surface.
@@ -158,10 +158,10 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     copy_no_spex(&project);
 
-    let init = run_spex(&project, &["init"], "\n\n");
+    let init = run_spex(&project, &["init"], "\n");
     assert!(init.status.success(), "init failed");
 
-    add_rules(&project);
+    add_repositories(&project);
 
     // The freshly initialized fixture has one error: the frontend README.
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
@@ -334,24 +334,14 @@ fn copy_no_spex(project: &Path) {
     }
 }
 
-// `spex init` leaves every repository's `rules` empty (that's `spex-setup`'s
-// job). Mimic what the skill would do for the no-spex-project fixture, so `check`
-// exercises the demo violations it ships.
-fn add_rules(project: &Path) {
+// `spex init` lists only the spex repository (adding the other repositories is
+// `spex-setup`'s job). Mimic what the skill would do for the no-spex-project
+// fixture, so `check` exercises the demo violations it ships.
+fn add_repositories(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
-    let config = fs::read_to_string(&config_path).expect("read spex.yaml");
-    let patched = config
-        .replace(
-            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules: []\n",
-            "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules:\n      - secret-handling\n",
-        )
-        .replace(
-            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules: []\n",
-            "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
-        );
-    assert_ne!(
-        patched, config,
-        "expected repositories not found in spex.yaml"
+    let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");
+    config.push_str(
+        "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules:\n      - secret-handling\n  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
     );
-    fs::write(&config_path, patched).expect("write spex.yaml");
+    fs::write(&config_path, config).expect("write spex.yaml");
 }

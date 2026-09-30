@@ -1,13 +1,13 @@
 ---
 name: spex-setup
-description: Fill in the missing descriptions in the workspace config (spex.yaml), add each repository's applicable rules, and record each repository's existing interface contracts, if any, in spex.yaml. Use this skill to complete spex setup after running `spex init`.
+description: Add the workspace repositories to the workspace config (spex.yaml) and the editor workspace file, fill in the missing descriptions, add each repository's applicable rules, record each repository's existing interface contracts, if any, in spex.yaml, and create each repository's skill. Use this skill to complete spex setup after running `spex init`.
 ---
 
 # Describe the Workspace (spex.yaml)
 
-Add a short `description` for the project and for each workspace repository in `spex.yaml`. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
+Add every workspace repository to `spex.yaml`, then add a short `description` for the project and for each workspace repository. Inspect each repository to understand what it is, then write concise summaries. The result must stay valid against the workspace config schema.
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder but leaves `rules` empty in `spex.yaml` for every repository. While inspecting each repository, decide which of those bundled rules actually apply to it and add them (see Step 6). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 5). `spex init` also seeds a dummy `SKILL.md` (name and description only) for each repository; fill in its body with the repository's real commands (see Step 8). After describing the repositories, adding rules, recording contracts, and filling in each repository's skill, fill in the folder icons in the editor workspace file (see the last step).
+`spex init` writes `spex.yaml` and the editor workspace file with only the spex repository, and copies every bundled rule into the spex repository's `rules/` folder. It does not know about the other workspace repositories: add them first (see Step 1). While inspecting each repository, decide which of the bundled rules actually apply to it and add them (see Step 6). Also ask the user about any interface contract it ships and record its location in `spex.yaml` (see Step 5). Create a `SKILL.md` for each repository, including the spex repository, with the repository's real commands (see Step 8). After that, add a folder with an icon for each repository to the editor workspace file (see Step 7).
 
 ## Paths
 
@@ -23,9 +23,20 @@ All paths are relative to the workspace root (the folder that holds every worksp
 
 The schema at `<workspace-root>/<project-name>-spex/schemas/spex.schema.json` is authoritative for field rules and contains a worked example. Read it before editing.
 
-## Step 1 — Read the config
+## Step 1 — Read the config and add the workspace repositories
 
-Read `<workspace-root>/<project-name>-spex/spex.yaml`. Note the `project_name`, every repository's `repository_name` (full name), `repository_short_name`, and `path`, and which `description` fields are already present.
+Read `<workspace-root>/<project-name>-spex/spex.yaml`. It lists only the spex repository until this step adds the others.
+
+1. List the non-hidden directories directly under `<workspace-root>` that `repositories` does not list yet. Each is a candidate workspace repository.
+2. Show the candidates to the user and confirm them. Drop any directory the user says is not a workspace repository.
+3. Add an entry to `repositories` for each confirmed directory, sorted by `repository_name` and placed after the existing entries:
+   - `repository_name`: the directory name in kebab-case
+   - `repository_short_name`: the `repository_name` without its `<project-name>-` prefix, or the whole `repository_name` when it has no such prefix
+   - `path`: `../<directory-name>`
+   - `rules: []`
+4. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+
+Then note the `project_name`, every repository's `repository_name` (full name), `repository_short_name`, and `path`, and which `description` fields are already present. Treat a `description` of `unknown` as missing.
 
 Decide what to fill in:
 
@@ -57,7 +68,7 @@ Keep each description to one line, concrete, and free of filler. Match the imper
 ## Step 4 — Confirm, then write
 
 1. Show the proposed descriptions to the user and confirm them.
-2. Edit `<workspace-root>/<project-name>-spex/spex.yaml` in place: add `project_name`'s `description` directly below it, and each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
+2. Edit `<workspace-root>/<project-name>-spex/spex.yaml` in place: set the project `description` (replacing `unknown`), and add each repository's `description` directly below its `repository_name`. Preserve all existing fields, ordering, and formatting.
 3. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
 ## Step 5 — Record contracts
@@ -91,9 +102,9 @@ Example `spex.yaml` repository entry after collecting a contract:
 
 ## Step 6 — Add rules that apply
 
-`spex init` copies every bundled rule into the spex repository's `rules/` folder, but leaves `rules` empty in `spex.yaml` for every repository. Not every rule applies to every repository — a stack- or interface-specific one (for example `openapi-conventions`, `graphql-conventions`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
+`spex init` copies every bundled rule into the spex repository's `rules/` folder and lists only the spex repository's default rules in `spex.yaml`; every repository added in Step 1 starts with an empty `rules` list. Not every rule applies to every repository — a stack- or interface-specific one (for example `openapi-conventions`, `graphql-conventions`) only makes sense for a repository that actually has that interface, and some cross-cutting ones may not fit a given repository's role either.
 
-1. For each repository, including spex itself, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it.
+1. For each repository, including spex itself, using the judgment from Step 2, list the rule IDs whose file in `rules/` genuinely applies to it and that its `rules` does not list yet.
 2. Show the user, per repository, which rules you propose to add and a one-line reason each (for example "openapi-conventions: this repository exposes a REST API").
 3. Only after the user confirms a given rule applies, add its ID to that repository's `rules` list in `spex.yaml`. Leave out any rule the user is unsure about or doesn't want.
 4. Do not modify any rule's file under `rules/` while doing this; this only edits which repositories reference it in `spex.yaml`.
@@ -109,13 +120,13 @@ Once every repository's `rules` is settled, a rule in `rules/` that ended up ref
 4. Leave any rule the user wants to keep untouched, even if unused today.
 5. Validate the result against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
 
-## Step 7 — Fill in the workspace folder icons
+## Step 7 — Add the workspace folders
 
-`spex init` writes `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` with a `folders` list. The `spex` folder already has its icon (🧰); every other folder starts without one. Give each remaining folder a single emoji icon that fits its role.
+`spex init` writes `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` with a `folders` list holding only the `spex` folder, which already has its icon (🧰). Add a folder for every other repository, each with a single emoji icon that fits its role.
 
 1. Read the `.code-workspace` file.
-2. For each folder whose `name` has no leading emoji, prepend one emoji plus a space (for example `🦀 backend`, `🛍️ storefront`). Base the choice on the repository's stack and role, which you already learned in Step 2.
-3. Leave the `spex` folder's icon and every `path` untouched. Change only the `name` fields.
+2. For each repository in `spex.yaml` that has no folder with the same `path`, append a folder whose `name` is one emoji, a space, and the `repository_short_name` (for example `🦀 backend`, `🛍️ storefront`), and whose `path` is the repository's `path`. Base the emoji on the repository's stack and role, which you already learned in Step 2.
+3. Leave every existing folder untouched.
 4. Keep the file valid JSON-with-comments (it may keep its trailing comma after the last folder).
 
 Example result:
@@ -123,20 +134,20 @@ Example result:
 ```json
 {
   "folders": [
-    { "name": "📜 proto", "path": "../moodmart-proto" },
-    { "name": "🦀 backend", "path": "../moodmart-backend" },
-    { "name": "🛍️ storefront", "path": "../moodmart-storefront" },
+    { "name": "🧰 spex", "path": "." },
     { "name": "📋 analysis", "path": "../moodmart-analysis" },
-    { "name": "🧰 spex", "path": "." }
+    { "name": "🦀 backend", "path": "../moodmart-backend" },
+    { "name": "📜 proto", "path": "../moodmart-proto" },
+    { "name": "🛍️ storefront", "path": "../moodmart-storefront" }
   ]
 }
 ```
 
-## Step 8 — Fill in each repository's skill file
+## Step 8 — Create each repository's skill file
 
-`spex init` seeds `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository, including the spex repository itself, with only its frontmatter (`name` and `description`) filled in. Give each repository's skill an initial body from what you already learned inspecting it in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
+Create `<workspace-root>/<project-name>-spex/.agents/skills/<repository-name>/SKILL.md` for every repository, including the spex repository itself. Never overwrite a `SKILL.md` that already exists. Write each skill from what you already learned inspecting the repository in Step 2, so an agent that loads the skill knows how to work in that repository without re-discovering the basics.
 
-Use two different templates depending on which repository this is, and follow the chosen template's sections and order exactly — do not add, drop, reorder, or rename its sections, and do not blend in sections from the other template:
+Use two different templates depending on which repository this is, and follow the chosen template's frontmatter, sections and order exactly — do not add, drop, reorder, or rename its sections, and do not blend in sections from the other template. Replace `<repository-name>` in the frontmatter with the repository's `repository_name` and keep the rest of the frontmatter as is: its `description` makes an agent working across the workspace autoload the skill from context instead of waiting for an explicit `/<repository-name>` invocation.
 
 - **The spex repository** (`repository_short_name: spex`, the `<project-name>-spex` folder itself): copy the shape of [`references/SPEX-REPO-SKILL-TEMPLATE.md`](references/SPEX-REPO-SKILL-TEMPLATE.md) exactly, filling its paths (`spex.yaml`, `specs/`, `rules/`, `contracts/`, `plans/`, `scripts/`) with this workspace's real values (`spex` subcommands are documented in `AGENTS.md`).
 - **Every other repository**: copy the shape of [`references/GENERIC-REPO-SKILL-TEMPLATE.md`](references/GENERIC-REPO-SKILL-TEMPLATE.md) exactly, filling each section with this repository's real facts, pulled from what you learned in Step 2 — never invented. Fill the `# General` section's one-line description with the same repository description you wrote in Step 3. Omit a section if the repository has nothing genuine to put in it (for example `# Project structure` when the layout is too flat or generic to be worth documenting, or `# Rules` when no test/lint/format policy exists in CI config or contributor docs) rather than inventing content to keep the section.
@@ -153,10 +164,11 @@ Once `spex.yaml` is described and the workspace folders are iconified, the works
 
 ## Field placement
 
-Place `description` right after the name it describes, and the `contracts` list after `path`, mirroring the schema example:
+Place a repository's `description` right after its `repository_name`, and the `contracts` list after `path`, mirroring the schema example:
 
 ```yaml
 project_name: shopping-notes
+cli_version: 0.3.1
 description: Shopping list app for keeping track of items to buy.
 repositories:
   - repository_name: shopping-notes-api
@@ -172,13 +184,14 @@ repositories:
 
 ## Quality bar
 
+- Every workspace repository the user confirmed is listed in `spex.yaml` and has a folder in the editor workspace file.
 - Project has a one-line, business-level `description`.
 - Every repository has a one-line `description` describing its role.
 - Descriptions are grounded in the repositories' real contents, not guesses.
 - Every existing contract's location was confirmed with the user (in place by default, or moved into the shared `contracts/` folder only by their choice) and recorded under its repository's `contracts` in `spex.yaml`, each with a one-line `description`.
 - Each repository's `rules` lists exactly the rules that genuinely apply to it; every addition was confirmed by the user with a reason.
 - Any rule that applies to no repository was either removed (its file deleted from `rules/` and its ID added to `rules_unused`) or deliberately kept, per the user's confirmation.
-- Every repository's `SKILL.md` body follows its template's sections and order exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout (and, for other repositories, real commands), confirmed by the user.
+- Every repository has a `SKILL.md` whose frontmatter, sections and order follow its template exactly (`SPEX-REPO-SKILL-TEMPLATE.md` for the spex repository, `GENERIC-REPO-SKILL-TEMPLATE.md` for every other), grounded in that repository's real layout (and, for other repositories, real commands), confirmed by the user.
 - Detailed, repository-specific material lives in its own `references/`, `scripts/`, or `assets/` file, one topic per file, each listed with a one-line description under that repository's `# Index` section — never inlined into `SKILL.md` at length, and never invented to populate the section.
 - No existing field or path is changed, and no rule is added or removed without user confirmation.
 - `spex.yaml` stays valid against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.

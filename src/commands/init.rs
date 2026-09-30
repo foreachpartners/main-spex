@@ -6,11 +6,10 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::spec::SPECS_DIR;
 use crate::style::Style;
 use crate::templates;
-use crate::templates::{AGENTS_DIR_NAME, SKILLS_DIR};
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -27,28 +26,13 @@ pub enum InitError {
     AlreadyInitialized,
     #[error("the spex directory has no parent workspace root")]
     NoWorkspaceRoot,
-    #[error("initialization cancelled")]
-    Cancelled,
     #[error("an I/O operation failed")]
     Io,
 }
 
-const SPEX_REPO_PATH: &str = ".";
-const SPEX_WORKSPACE_ICON: &str = "🧰";
 const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
-
-const SPEX_REPO_DESCRIPTION: &str = "    description: >-
-      Spex workspace repository. Holds the specs and config that govern the
-      project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rules/ (cross-cutting conventions and rules), specs/ (the
-      functionality the system provides) and docs/ (framework reference).
-";
-
-struct DiscoveredRepo {
-    name: String,
-    short_name: String,
-    path: String,
-}
+const CONFIG_TEMPLATE: &str = include_str!("../../templates/spex.yaml");
+const CODE_WORKSPACE_TEMPLATE: &str = include_str!("../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
     let current_dir = std::env::current_dir()
@@ -69,20 +53,15 @@ pub fn run() -> Result<ExitCode> {
     let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
     verify_not_initialized(&spex_dir)?;
 
-    let spex_dir_name = dir_name(&spex_dir).unwrap_or_default().to_string();
-    let repositories = discover_repositories(&workspace_root, &spex_dir_name, &project_name)?;
-    let repositories = confirm_repositories(repositories)?;
-
-    write_config(&spex_dir, &project_name, &repositories)?;
-    write_code_workspace(&spex_dir, &project_name, &repositories)?;
+    write_config(&spex_dir, &project_name)?;
+    write_code_workspace(&spex_dir, &project_name)?;
     copy_templates(&spex_dir)?;
-    write_repo_skills(&spex_dir, &repositories)?;
 
     let style = Style::detect();
     println!(
         "{}",
         style.green(
-            "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to complete setup"
+            "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to add workspace repositories and complete setup"
         )
     );
     Ok(ExitCode::SUCCESS)
@@ -110,87 +89,34 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-// Seeds a dummy skill for each repository.
-// Each seeded skill starts with only its metadata.
-// `spex-setup` fills in the body with the repository's real commands and context.
-// A skill left by the user (or filled in by `spex-setup`) is never overwritten.
-fn write_repo_skills(spex_dir: &Path, repositories: &[DiscoveredRepo]) -> Result<()> {
-    for repo in repositories {
-        let skill_dir = spex_dir
-            .join(AGENTS_DIR_NAME)
-            .join(SKILLS_DIR)
-            .join(&repo.name);
-        let skill_md = skill_dir.join("SKILL.md");
-        if skill_md.exists() {
-            continue;
-        }
-
-        fs::create_dir_all(&skill_dir)
-            .change_context(InitError::Io)
-            .attach_with(|| format!("could not create `{}`", skill_dir.display()))?;
-        fs::write(&skill_md, repo_skill_md(&repo.name))
-            .change_context(InitError::Io)
-            .attach_with(|| format!("could not write `{}`", skill_md.display()))?;
-    }
-    Ok(())
-}
-
-fn repo_skill_md(repo_name: &str) -> String {
-    format!(
-        "---\nname: {repo_name}\ndescription: Information, rules, commands and other {repo_name} repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.\n---\n"
-    )
-}
-
-fn write_config(
-    spex_dir: &Path,
-    project_name: &str,
-    repositories: &[DiscoveredRepo],
-) -> Result<()> {
+fn write_config(spex_dir: &Path, project_name: &str) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
-    fs::write(&config_path, config_to_yaml(project_name, repositories))
+    fs::write(&config_path, config_from_template(project_name))
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
     Ok(())
 }
 
-fn write_code_workspace(
-    spex_dir: &Path,
-    project_name: &str,
-    repositories: &[DiscoveredRepo],
-) -> Result<()> {
+fn config_from_template(project_name: &str) -> String {
+    let named = CONFIG_TEMPLATE
+        .replace(
+            "project_name: unknown",
+            &format!("project_name: {project_name}"),
+        )
+        .replace(
+            "repository_name: unknown",
+            &format!("repository_name: {project_name}-{SPEX_DIR_NAME}"),
+        );
+    config::set_cli_version(&named, CLI_VERSION)
+}
+
+fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
-    fs::write(&path, code_workspace_json(repositories))
+    fs::write(&path, CODE_WORKSPACE_TEMPLATE)
         .change_context(InitError::Io)
         .attach_with(|| format!("could not write `{}`", path.display()))?;
     Ok(())
-}
-
-fn code_workspace_json(repositories: &[DiscoveredRepo]) -> String {
-    let mut json = String::from("{\n  \"folders\": [\n");
-    for repo in repositories {
-        let name = workspace_folder_name(repo);
-        json.push_str(&format!(
-            "    {{ \"name\": \"{}\", \"path\": \"{}\" }},\n",
-            escape_json(&name),
-            escape_json(&repo.path),
-        ));
-    }
-    json.push_str("  ]\n}\n");
-    json
-}
-
-// Folders display the repository short name; spex owns its icon, and spex-setup
-// fills the icons for the other folders.
-fn workspace_folder_name(repo: &DiscoveredRepo) -> String {
-    if repo.path == SPEX_REPO_PATH {
-        return format!("{SPEX_WORKSPACE_ICON} {}", repo.short_name);
-    }
-    repo.short_name.clone()
-}
-
-fn escape_json(value: &str) -> String {
-    value.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 // The workspace root is the current directory, unless `spex init` runs from
@@ -249,101 +175,6 @@ fn confirm_project_name(default_name: &str) -> Result<String> {
     })
 }
 
-fn discover_repositories(
-    workspace_root: &Path,
-    spex_dir_name: &str,
-    project_name: &str,
-) -> Result<Vec<DiscoveredRepo>> {
-    let entries = fs::read_dir(workspace_root)
-        .change_context(InitError::Io)
-        .attach_with(|| format!("could not read `{}`", workspace_root.display()))?;
-
-    let mut repositories = Vec::new();
-    for entry in entries {
-        let entry = entry.change_context(InitError::Io)?;
-        let file_type = entry.file_type().change_context(InitError::Io)?;
-        if !file_type.is_dir() {
-            continue;
-        }
-
-        let dir_name = entry.file_name().to_string_lossy().into_owned();
-        if dir_name.starts_with('.') {
-            continue;
-        }
-
-        let path = if dir_name == spex_dir_name {
-            SPEX_REPO_PATH.to_string()
-        } else {
-            format!("../{dir_name}")
-        };
-
-        let name = to_kebab_case(&dir_name);
-        let short_name = repository_short_name(&name, project_name);
-        repositories.push(DiscoveredRepo {
-            name,
-            short_name,
-            path,
-        });
-    }
-
-    repositories.sort_by(|a, b| a.name.cmp(&b.name));
-    Ok(repositories)
-}
-
-// The repository short name is the full repository name minus the
-// `<project-name>-` prefix, per naming-convention.
-fn repository_short_name(name: &str, project_name: &str) -> String {
-    name.strip_prefix(&format!("{project_name}-"))
-        .unwrap_or(name)
-        .to_string()
-}
-
-fn confirm_repositories(repositories: Vec<DiscoveredRepo>) -> Result<Vec<DiscoveredRepo>> {
-    if repositories.is_empty() {
-        let answer = prompt("No workspace repositories found. Continue anyway? [Y/n]: ")?;
-        if is_yes(&answer) {
-            return Ok(repositories);
-        }
-        bail!(InitError::Cancelled);
-    }
-
-    let names = repositories
-        .iter()
-        .map(|repo| repo.name.as_str())
-        .collect::<Vec<_>>()
-        .join(", ");
-
-    let answer = prompt(&format!(
-        "Workspace repositories: {names}\nUse these repositories? [Y/n]: "
-    ))?;
-    if is_yes(&answer) {
-        Ok(repositories)
-    } else {
-        bail!(InitError::Cancelled);
-    }
-}
-
-fn config_to_yaml(project_name: &str, repositories: &[DiscoveredRepo]) -> String {
-    let mut yaml = format!("project_name: {project_name}\ncli_version: {CLI_VERSION}\n");
-
-    if repositories.is_empty() {
-        yaml.push_str("repositories: []\n");
-    } else {
-        yaml.push_str("repositories:\n");
-        for repo in repositories {
-            yaml.push_str(&format!("  - repository_name: {}\n", repo.name));
-            yaml.push_str(&format!("    repository_short_name: {}\n", repo.short_name));
-            if repo.path == SPEX_REPO_PATH {
-                yaml.push_str(SPEX_REPO_DESCRIPTION);
-            }
-            yaml.push_str(&format!("    path: {}\n", repo.path));
-            yaml.push_str("    rules: []\n");
-        }
-    }
-
-    yaml
-}
-
 fn dir_name(path: &Path) -> Option<&str> {
     path.file_name().and_then(|name| name.to_str())
 }
@@ -378,11 +209,4 @@ fn prompt(message: &str) -> Result<String> {
         .change_context(InitError::Io)
         .attach("could not read from stdin")?;
     Ok(input)
-}
-
-fn is_yes(answer: &str) -> bool {
-    matches!(
-        answer.trim().to_ascii_lowercase().as_str(),
-        "" | "y" | "yes"
-    )
 }

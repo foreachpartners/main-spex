@@ -1,3 +1,8 @@
+---
+name: <repository-name>
+description: Information, rules, commands and other <repository-name> repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.
+---
+
 # General
 
 Run `spex info --repo spex` for general repository information. This repository holds the specs and config that govern the whole `<project-name>` workspace; it has no `rules` of its own.

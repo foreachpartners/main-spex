@@ -34,7 +34,7 @@ spex --help # CLI command
 
 On version change fill `CHANGELOG.md`
 
-When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md`
+When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
 
 ## Project structure
 
@@ -61,14 +61,16 @@ docs/                          Framework reference docs, bundled into projects b
   cli.md                   Single source of truth for CLI behavior
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
-templates/          Assets scaffolded into projects
-  schemas/          Spec schemas
-  scripts/          Helper scripts
-  skills/           Agent skills
-  rules/            Reusable rule templates
-  docs/             Framework docs shipped to projects (symlinks into docs/)
-examples/           Sample projects (shopping-notes, shopping-notes-no-spex)
-tests/              Integration tests that build and run the spex binary
+templates/                     Assets scaffolded into projects
+  schemas/                     Spec schemas
+  scripts/                     Helper scripts
+  skills/                      Agent skills
+  rules/                       Reusable rule templates
+  docs/                        Framework docs shipped to projects (symlinks into docs/)
+  spex.yaml                    Workspace config seeded by init (project name filled in)
+  project-name.code-workspace  Editor workspace file seeded by init
+examples/                      Sample example projects with/without spex(shopping-notes, shopping-notes-no-spex)
+tests/                         Integration tests that build and run the spex binary
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end

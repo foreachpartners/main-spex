@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.1] - 2026-09-30
+
+- `init`: now only creates the spex repository. It seeds `spex.yaml` and `<project-name>.code-workspace` from bundled templates with the project name filled in (both list only the spex repository), and no longer discovers, confirms, or configures other workspace repositories or seeds their stub skills.
+- `spex-setup` skill: now adds the other workspace repositories to `spex.yaml` and the workspace file, and creates every repository skill, including the spex repository's. This unlocks a flow where we start with spex only and add other repositories later.
+
 ## [0.10.0] - 2026-09-20
 
 - **Breaking**: specs now have a required `contract` field (`none`, `single`, or `for-each-ac`) setting the contract coverage granularity. `single` requires a single `@spec contract <spec-id>` annotation for the whole spec (the previous behavior); `for-each-ac` requires a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` disables contract coverage. Existing specs must add `contract: single` (see the migration guide).

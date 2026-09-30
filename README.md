@@ -42,16 +42,16 @@ shopping-notes/                       # workspace root
 └── shopping-notes-spex/               # new spex repository (created by spex cli)
 ```
 
-Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `spex init`.
+Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `/spex-setup`.
 
 1. Put all project git repos in one shared folder (workspace root folder)
 2. Run terminal command `spex init` in workspace root to create the `shopping-notes-spex` repo
-3. Open workspace to work across all repositories at once and integrate with AI coding agent:
+3. Open workspace to work across all repositories at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
    - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
    - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend ..` from `shopping-notes-spex` repo
    - Zed: add project, pick all workspace repos (folders)
-4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
+4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to add the workspace repositories and complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
 
 ### Adoption
 

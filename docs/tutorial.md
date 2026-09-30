@@ -46,6 +46,8 @@ Open the workspace to work across all repositories at once and integrate with an
 - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend` from `shopping-notes-spex` repo
 - Zed: add project, pick all workspace repos (folders)
 
+The workspace file lists only `shopping-notes-spex` for now, the `/spex-setup` skill below adds the other repositories to it.
+
 ### Skills
 
 If you did everything correctly you should be able to run spex AI skills using you coding agent or cli.
@@ -68,6 +70,7 @@ for example if user says `let's setup spex` - it will match skill metadata descr
 The skill that we will run `shopping-notes-spex/.agents/skills/spex-setup/SKILL.md` is instruction for AI to
 update `spex.yaml` (which is main spex configuration file for your project) and:
 
+- add the workspace repositories (`shopping-notes-api`, `shopping-notes-frontend`) to `spex.yaml` and the workspace file
 - add descriptions for your project and each repository
 - pick rules from bundled with spex that applicable to each project repository and remove unused
 - generate main skills for each repo with metadata that requires them to be loaded when AI works on any repository. Skills will describe each repository and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`

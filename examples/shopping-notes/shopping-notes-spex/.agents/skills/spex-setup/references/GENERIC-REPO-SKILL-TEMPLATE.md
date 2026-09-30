@@ -1,3 +1,8 @@
+---
+name: <repository-name>
+description: Information, rules, commands and other <repository-name> repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.
+---
+
 # General
 
 Run `spex info --repo <repository-short-name>` for general repository information and applicable rules. <One-line description of what this repository is and does>.

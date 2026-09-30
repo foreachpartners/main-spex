@@ -42,20 +42,21 @@ cargo install --path . --force
 
 Initializes the spex workspace. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`), which is reused instead of created.
 
-It prompts to confirm the project name (defaulting to the workspace root folder name) and the discovered workspace repositories (each `repository_short_name` derived from its directory name minus the `<project-name>-` prefix), then writes:
+It prompts to confirm the project name (defaulting to the workspace root folder name), then writes:
 
-- `spex.yaml`, recording the installed CLI's version as `cli_version`, with every repository's `rules` list left empty
-- `<project-name>.code-workspace`, with a folder per repository
+- `spex.yaml`, seeded from the bundled template with the project name filled in and the installed CLI's version as `cli_version`. It lists only the spex repository (`<project-name>-spex`) and the rules that apply to it
+- `<project-name>.code-workspace`, seeded from the bundled template with a folder for the spex repository only
 - the bundled templates: schemas, docs, scripts, skills, and every bundled rule, plus empty `specs/`, `plans/`, and `contracts/` folders
 - `.agents/skills/` with the bundled skills, and a `.claude` -> `.agents` symlink, so different agent tools detect the same skills
-- a stub `SKILL.md` for every workspace repository, named after the repository and holding only a frontmatter `description` and no body. The description states the skill must be loaded before reading, writing, testing, or running any code in that repository, so an agent working across the workspace autoloads it from context instead of waiting for an explicit `/name` invocation; the `/spex-setup` skill fills in the body
 - a root `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink, seeded only when absent. A `# Project` marker splits `AGENTS.md`: content above it is managed and kept in sync by `spex update`, content from the marker onward is the user's own and is never touched
+
+It does not look for, ask about, or configure the other workspace repositories.
 
 ```sh
 spex init
 ```
 
-Finish setup afterwards by running the `/spex-setup` skill.
+Finish setup afterwards by running the `/spex-setup` skill: it adds the other workspace repositories to `spex.yaml` and the workspace file, and creates a skill for every workspace repository, including the spex repository.
 
 ### `spex update`
 

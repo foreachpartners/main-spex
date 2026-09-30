@@ -1,0 +1,16 @@
+project_name: unknown
+cli_version: 0.10.0
+description: >-
+  unknown
+repositories:
+  - repository_name: unknown
+    repository_short_name: spex
+    description: >-
+      Spex workspace repository. Holds the specs, rules, skills
+      and config that govern the project.
+    path: .
+    rules:
+      - commit-message-format
+      - naming-convention
+      - secret-handling
+      - writing-style
