@@ -34,13 +34,14 @@ pub enum SpecsError {
 
 #[derive(Args)]
 pub struct SpecsArgs {
-    #[arg(long, help = "Add a path field with the spec file's location")]
+    #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
     ai: bool,
     #[arg(long, num_args = 1.., help = "Spec IDs to include (default: all)")]
     id: Vec<String>,
     #[arg(
         long,
         num_args = 1..,
+        value_name = "REPOSITORY_SHORT_NAME",
         help = "Repository short names to include by spec `scope` (default: all)"
     )]
     scope: Vec<String>,

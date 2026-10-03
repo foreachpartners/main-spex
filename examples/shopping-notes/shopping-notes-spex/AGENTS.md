@@ -37,11 +37,22 @@ The workspace root holds this repo (the single source of truth for specs, rules,
 
 Skills live under `.agents/skills`; `.claude` is a symlink to `.agents`, so `.claude/skills` is the same directory — edit skill files under `.agents/skills` only.
 
+## CLI commands
+
+Run from anywhere inside the workspace; `spex <command> --help` lists every option.
+
+- `spex check [--repo <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
+- `spex coverage [--scope <repository-short-name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
+- `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs as YAML.
+- `spex rules [--id <rule-id>...] [--repo <name>...] [--ai] [--output <file>]` — print the active rules per repository as YAML.
+- `spex info [--print <field>]` — print `spex.yaml`: project and per-repository configuration.
+- `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
+
+Pass `--ai` to `specs` and `rules`: it drops fields AI doesn't need and adds ones it does. Prefer `--output <file>` for them too: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.
+
 ## Docs
 
 - [docs/glossary.md](docs/glossary.md) — terms used across specs, rules, schemas, and skills.
-- [docs/framework-principles.md](docs/framework-principles.md) — the non-negotiable principles spex is built on.
-- [docs/cli.md](docs/cli.md) — full `spex` command reference.
 
 ## Core discipline
 

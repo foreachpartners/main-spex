@@ -34,6 +34,8 @@ spex --help # CLI command
 
 On version change fill `CHANGELOG.md`
 
+On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
+
 When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
 
 ## Project structure

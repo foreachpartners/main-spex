@@ -35,10 +35,7 @@ pub enum RulesError {
 
 #[derive(Args)]
 pub struct RulesArgs {
-    #[arg(
-        long,
-        help = "Drop fields an agent doesn't need to follow a rule: sync_with_upstream and checks"
-    )]
+    #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
     ai: bool,
     #[arg(long, num_args = 1.., help = "Rule IDs to include (default: all)")]
     id: Vec<String>,

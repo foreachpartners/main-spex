@@ -2,6 +2,10 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.10.3
+
+`docs/cli.md` and `docs/framework-principles.md` are no longer bundled into projects (only `docs/glossary.md` still is), and `spex update` doesn't delete files, so the old copies linger. Delete `<workspace-root>/<project-name>-spex/docs/cli.md` and `<workspace-root>/<project-name>-spex/docs/framework-principles.md`.
+
 ## 0.10.2
 
 The spex repository folder icon in the editor workspace file changed from 🧰 to 🦉. In `<workspace-root>/<project-name>-spex/<project-name>.code-workspace`, rename the folder `🧰 spex` (with `path` `.`) to `🦉 spex`.

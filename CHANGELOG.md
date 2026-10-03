@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.3] - 2026-10-03
+
+- `init`/`update`: no longer bundle `docs/cli.md` and `docs/framework-principles.md` into projects; only `docs/glossary.md` ships. `framework-principles` docs are not usefull for project AI agent.
+- `AGENTS.md` template: added a short list of the CLI commands for AI agents, since `docs/cli.md` no longer ships.
+
 ## [0.10.2] - 2026-10-03
 
 - owl icon 🦉 is now spex main icon

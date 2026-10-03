@@ -46,7 +46,7 @@ enum Commands {
     CheckSchema(CheckSchemaArgs),
     #[command(about = "Report annotation coverage of active specs")]
     Coverage(CoverageArgs),
-    #[command(about = "Print the resolved spex configuration, for scripting")]
+    #[command(about = "Print `spex.yaml`: project and per-repository configuration")]
     Info(InfoArgs),
     #[command(about = "Print the active rules per repository, as YAML")]
     Rules(RulesArgs),
