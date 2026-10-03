@@ -6,6 +6,8 @@ use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::util::dir_name;
+
 #[cfg(test)]
 #[path = "config_test.rs"]
 mod config_test;
@@ -95,11 +97,16 @@ pub fn find_dir(start: &Path) -> Result<PathBuf> {
     Err(Report::new(ConfigError::NotFound))
 }
 
+pub fn is_spex_dir_name(name: &str) -> bool {
+    name == SPEX_DIR_NAME || name.ends_with(&format!("-{SPEX_DIR_NAME}"))
+}
+
 fn spex_child_dir(dir: &Path) -> Option<PathBuf> {
     let mut children: Vec<PathBuf> = fs::read_dir(dir)
         .ok()?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
+        .filter(|path| dir_name(path).is_some_and(is_spex_dir_name))
         .filter(|path| path.join(SPEX_CONFIG_FILE).is_file())
         .collect();
     children.sort();

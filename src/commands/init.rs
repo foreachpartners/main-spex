@@ -6,10 +6,11 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, is_spex_dir_name};
 use crate::spec::SPECS_DIR;
 use crate::style::Style;
 use crate::templates;
+use crate::util::dir_name;
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -153,10 +154,6 @@ fn ensure_spex_dir(
     Ok(spex_dir)
 }
 
-fn is_spex_dir_name(name: &str) -> bool {
-    name == SPEX_DIR_NAME || name.ends_with(&format!("-{SPEX_DIR_NAME}"))
-}
-
 fn verify_not_initialized(current_dir: &Path) -> Result<()> {
     if current_dir.join(SPEX_CONFIG_FILE).exists() {
         bail!(InitError::AlreadyInitialized);
@@ -173,10 +170,6 @@ fn confirm_project_name(default_name: &str) -> Result<String> {
     } else {
         to_kebab_case(name)
     })
-}
-
-fn dir_name(path: &Path) -> Option<&str> {
-    path.file_name().and_then(|name| name.to_str())
 }
 
 fn to_kebab_case(name: &str) -> String {

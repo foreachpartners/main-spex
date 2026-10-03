@@ -6,7 +6,7 @@ mod tests {
     use tempfile::tempdir;
 
     // The spex repository directory is named `<project-name>-spex`, so discovery
-    // must find it by the `spex.yaml` it holds, not by a fixed directory name.
+    // must match the `-spex` suffix and the `spex.yaml` it holds, not a fixed name.
     const SPEX_REPO_DIR: &str = "demo-spex";
 
     fn workspace() -> tempfile::TempDir {
@@ -44,6 +44,25 @@ mod tests {
     fn errors_when_not_in_a_workspace() {
         let dir = tempdir().expect("dir");
         assert!(find_dir(dir.path()).is_err());
+    }
+
+    #[test]
+    fn ignores_child_directory_not_named_like_a_spex_repository() {
+        let dir = tempdir().expect("dir");
+        let templates = dir.path().join("templates");
+        std::fs::create_dir_all(&templates).expect("templates dir");
+        std::fs::write(templates.join(SPEX_CONFIG_FILE), "project_name: unknown\n")
+            .expect("config");
+        assert!(find_dir(dir.path()).is_err());
+    }
+
+    #[test]
+    fn finds_child_directory_named_spex() {
+        let dir = tempdir().expect("dir");
+        let spex = dir.path().join(SPEX_DIR_NAME);
+        std::fs::create_dir_all(&spex).expect("spex dir");
+        std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
+        assert_eq!(find_dir(dir.path()).expect("found"), spex);
     }
 
     fn config_with_version(version: &str) -> Config {

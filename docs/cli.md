@@ -19,7 +19,7 @@ spex --help
 | `spex rules`        | Print the rules governing the selected repositories, as YAML           |
 | `spex specs`        | Print the workspace specs, as YAML                                     |
 
-Every command except `init` finds the spex repository from the current directory — walking up and checking each directory it passes, plus its immediate subdirectories, for a `spex.yaml` — so any of them can run from anywhere inside the workspace.
+Every command except `init` finds the spex repository from the current directory — walking up and checking each directory it passes, plus its immediate subdirectories named `spex` or ending in `-spex`, for a `spex.yaml` — so any of them can run from anywhere inside the workspace.
 
 ## Install
 

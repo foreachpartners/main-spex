@@ -17,6 +17,10 @@ pub fn file_url(path: &Path) -> String {
     format!("file://{}", path.to_string_lossy().replace(' ', "%20"))
 }
 
+pub fn dir_name(path: &Path) -> Option<&str> {
+    path.file_name().and_then(|name| name.to_str())
+}
+
 pub fn plural(count: usize, noun: &str) -> String {
     if count == 1 {
         format!("1 {noun}")
