@@ -2,6 +2,10 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.10.2
+
+The spex repository folder icon in the editor workspace file changed from 🧰 to 🦉. In `<workspace-root>/<project-name>-spex/<project-name>.code-workspace`, rename the folder `🧰 spex` (with `path` `.`) to `🦉 spex`.
+
 ## 0.10.0
 
 The spec format gained a required `contract` field (`none`, `single`, or `for-each-ac`) that sets the contract coverage granularity. Add `contract: single` to every spec in `<workspace-root>/<project-name>-spex/specs/**/*.yaml` (its current default behavior — one contract annotation per spec), or choose `none` (no contract coverage) or `for-each-ac` (one contract annotation per acceptance criterion) where they fit better.

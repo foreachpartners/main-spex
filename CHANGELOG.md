@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.2] - 2026-10-03
+
+- owl icon 🦉 is now spex main icon
+- `spex-setup` skill: the workspace folder example now shows an icon for each common repository role (frontend, API, mobile, and more).
+- `init`: the spex repository folder in the seeded `<project-name>.code-workspace` now uses the 🦉 icon instead of 🧰; the `spex-setup` skill refers to the new icon. Existing projects rename the folder per the migration guide.
+
 ## [0.10.1] - 2026-09-30
 
 - `init`: now only creates the spex repository. It seeds `spex.yaml` and `<project-name>.code-workspace` from bundled templates with the project name filled in (both list only the spex repository), and no longer discovers, confirms, or configures other workspace repositories or seeds their stub skills.
