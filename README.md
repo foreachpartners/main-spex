@@ -1,4 +1,4 @@
-# spex
+# spex 🦉
 
 The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
 
