@@ -125,7 +125,7 @@ Once every repository's `rules` is settled, a rule in `rules/` that ended up ref
 `spex init` writes `<workspace-root>/<project-name>-spex/<project_name>.code-workspace` with a `folders` list holding only the `spex` folder, which already has its icon (🦉). Add a folder for every other repository, each with a single emoji icon that fits its role.
 
 1. Read the `.code-workspace` file.
-2. For each repository in `spex.yaml` that has no folder with the same `path`, append a folder whose `name` is one emoji, a space, and the `repository_short_name` (for example `🦀 backend`, `🛍️ storefront`), and whose `path` is the repository's `path`. Base the emoji on the repository's stack and role, which you already learned in Step 2, and follow the icons in the example and icon list below.
+2. For each repository in `spex.yaml` that has no folder with the same `path`, append a folder whose `name` is one emoji, a space, and the `repository_short_name` (for example `🔌 api`, `🖥️ frontend`), and whose `path` is the repository's `path`. Base the emoji on the repository's stack and role, which you already learned in Step 2, and follow the icons in the example and icon list below.
 3. Leave every existing folder untouched.
 4. Keep the file valid JSON-with-comments (it may keep its trailing comma after the last folder).
 
