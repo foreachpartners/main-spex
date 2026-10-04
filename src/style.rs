@@ -26,6 +26,10 @@ impl Style {
         }
     }
 
+    pub fn version_line(&self) -> String {
+        self.dim(&format!("spex {}", env!("CARGO_PKG_VERSION")))
+    }
+
     pub fn bold(&self, text: &str) -> String {
         self.paint("1", text)
     }

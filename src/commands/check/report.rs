@@ -2,7 +2,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use crate::style::Style;
-use crate::util::{file_url, plural, version_line};
+use crate::util::{file_url, plural};
 
 use super::*;
 
@@ -12,7 +12,7 @@ mod report_test;
 
 pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -> ExitCode {
     let style = Style::detect();
-    println!("{}", version_line(&style));
+    println!("{}", style.version_line());
     println!();
     let mut total_errors = 0usize;
     let mut total_warnings = 0usize;
@@ -27,7 +27,7 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
         total_errors += errors;
         total_warnings += warnings;
 
-        let base = repo_base_dir(config, spex_dir, &repo.name);
+        let base = config.repo_base_dir(spex_dir, &repo.name);
 
         println!("{}", style.bold(&repo.name));
         if repo.findings.is_empty() {
@@ -53,18 +53,6 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
     } else {
         ExitCode::SUCCESS
     }
-}
-
-// The directory a repository's findings' `location` strings are relative to:
-// the repository's own path for its report, or the spex directory for the
-// synthetic `workspace` report, whose locations are already spex-relative.
-fn repo_base_dir(config: &Config, spex_dir: &Path, repo_name: &str) -> std::path::PathBuf {
-    config
-        .repositories
-        .iter()
-        .find(|repo| repo.name == repo_name)
-        .map(|repo| spex_dir.join(&repo.path))
-        .unwrap_or_else(|| spex_dir.to_path_buf())
 }
 
 fn print_finding(style: &Style, base: &Path, finding: &Finding) {
@@ -97,7 +85,7 @@ fn location_link(style: &Style, base: &Path, location: &str) -> String {
 }
 
 fn location_url(base: &Path, location: &str) -> String {
-    file_url(&base.join(normalize_location(location)))
+    file_url(&base.join(Finding::normalize_location(location)))
 }
 
 fn count_summary(errors: usize, warnings: usize) -> String {

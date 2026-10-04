@@ -30,7 +30,7 @@ mod repo_base_dir_tests {
         let spex_dir = Path::new("/workspace");
 
         assert_eq!(
-            repo_base_dir(&config, spex_dir, "api"),
+            config.repo_base_dir(spex_dir, "api"),
             spex_dir.join("services/api")
         );
     }
@@ -40,7 +40,7 @@ mod repo_base_dir_tests {
         let config = config(vec![repository("api", "services/api")]);
         let spex_dir = Path::new("/workspace");
 
-        assert_eq!(repo_base_dir(&config, spex_dir, "workspace"), spex_dir);
+        assert_eq!(config.repo_base_dir(spex_dir, "workspace"), spex_dir);
     }
 
     #[test]
@@ -48,7 +48,7 @@ mod repo_base_dir_tests {
         let config = config(vec![repository("api", "services/api")]);
         let spex_dir = Path::new("/workspace");
 
-        assert_eq!(repo_base_dir(&config, spex_dir, "unknown"), spex_dir);
+        assert_eq!(config.repo_base_dir(spex_dir, "unknown"), spex_dir);
     }
 }
 

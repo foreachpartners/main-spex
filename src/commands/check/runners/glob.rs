@@ -14,7 +14,7 @@ pub(in crate::commands::check) fn run_glob(
     let matcher = match Glob::new(pattern) {
         Ok(glob) => glob.compile_matcher(),
         Err(err) => {
-            findings.push(config_error(
+            findings.push(Finding::config_error(
                 spec_id,
                 &check.name,
                 format!("invalid glob: {err}"),
@@ -30,20 +30,20 @@ pub(in crate::commands::check) fn run_glob(
 
     if *negate {
         if matched.is_empty() {
-            findings.push(violation(
+            findings.push(Finding::violation(
                 check,
                 spec_id,
                 None,
-                message(check, &format!("required path not found: {pattern}")),
+                check.message(&format!("required path not found: {pattern}")),
             ));
         }
     } else {
         for file in matched {
-            findings.push(violation(
+            findings.push(Finding::violation(
                 check,
                 spec_id,
-                Some(rel_str(file)),
-                message(check, "forbidden path"),
+                Some(file.rel_str()),
+                check.message("forbidden path"),
             ));
         }
     }

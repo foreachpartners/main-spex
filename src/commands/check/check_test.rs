@@ -104,8 +104,8 @@ mod tests {
             "./README.md".to_string(),
             "missing.rs".to_string(),
         ];
-        let resolved = provided_files(dir.path(), &files);
-        let names: Vec<String> = resolved.iter().map(rel_str).collect();
+        let resolved = ScopedFile::provided(dir.path(), &files);
+        let names: Vec<String> = resolved.iter().map(ScopedFile::rel_str).collect();
 
         assert_eq!(
             names,
@@ -526,7 +526,7 @@ constraints:
         check.exclude = vec!["**/*_test.rs".to_string()];
 
         let scoped = scope_files(&check, &files).expect("scoped");
-        let names: Vec<String> = scoped.iter().map(|file| rel_str(file)).collect();
+        let names: Vec<String> = scoped.iter().map(|file| file.rel_str()).collect();
         assert_eq!(names, vec!["src/main.rs".to_string()]);
     }
 
@@ -756,53 +756,47 @@ constraints:
 
     #[test]
     fn normalize_location_drops_trailing_line_number() {
-        assert_eq!(normalize_location("src/main.rs:42"), "src/main.rs");
-        assert_eq!(normalize_location("src/main.rs"), "src/main.rs");
+        assert_eq!(Finding::normalize_location("src/main.rs:42"), "src/main.rs");
+        assert_eq!(Finding::normalize_location("src/main.rs"), "src/main.rs");
         // A non-numeric suffix is part of the path, not a line number.
-        assert_eq!(normalize_location("a:b/c.rs"), "a:b/c.rs");
+        assert_eq!(Finding::normalize_location("a:b/c.rs"), "a:b/c.rs");
     }
 
     #[test]
     fn preexisting_empty_files_suppresses_whole_check() {
         let baseline = vec![preexisting("no-cyrillic", vec![])];
-        assert!(is_preexisting(
-            &finding(Severity::Error, "no-cyrillic", Some("README.md:1")),
-            &baseline,
-        ));
-        assert!(is_preexisting(
-            &finding(Severity::Error, "no-cyrillic", None),
-            &baseline,
-        ));
+        assert!(
+            finding(Severity::Error, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
+        );
+        assert!(finding(Severity::Error, "no-cyrillic", None).is_preexisting(&baseline));
     }
 
     #[test]
     fn preexisting_matches_listed_file_only() {
         let baseline = vec![preexisting("no-cyrillic", vec!["docs/old.md"])];
         // Listed file, normalized from `file:line`, is suppressed.
-        assert!(is_preexisting(
-            &finding(Severity::Error, "no-cyrillic", Some("docs/old.md:3")),
-            &baseline,
-        ));
+        assert!(
+            finding(Severity::Error, "no-cyrillic", Some("docs/old.md:3"))
+                .is_preexisting(&baseline)
+        );
         // A new error in another file still surfaces.
-        assert!(!is_preexisting(
-            &finding(Severity::Error, "no-cyrillic", Some("docs/new.md:3")),
-            &baseline,
-        ));
+        assert!(
+            !finding(Severity::Error, "no-cyrillic", Some("docs/new.md:3"))
+                .is_preexisting(&baseline)
+        );
     }
 
     #[test]
     fn preexisting_never_suppresses_warnings_or_other_checks() {
         let baseline = vec![preexisting("no-cyrillic", vec![])];
         // Warnings are never a baseline concern.
-        assert!(!is_preexisting(
-            &finding(Severity::Warn, "no-cyrillic", Some("README.md:1")),
-            &baseline,
-        ));
+        assert!(
+            !finding(Severity::Warn, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
+        );
         // A different check name does not match.
-        assert!(!is_preexisting(
-            &finding(Severity::Error, "writing", Some("README.md:1")),
-            &baseline,
-        ));
+        assert!(
+            !finding(Severity::Error, "writing", Some("README.md:1")).is_preexisting(&baseline)
+        );
     }
 
     fn ac(ids: &[&str]) -> Vec<AcceptanceCriterion> {

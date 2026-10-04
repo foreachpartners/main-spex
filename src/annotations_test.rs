@@ -29,7 +29,7 @@ mod tests {
 
     #[test]
     fn scan_collects_bare_layers() {
-        let found = scan("// @spec contract a\n// @spec impl a\n// @spec test a\n");
+        let found = Found::scan("// @spec contract a\n// @spec impl a\n// @spec test a\n");
         assert!(found.has_bare("a", CoverageLayer::Contract));
         assert!(found.has_bare("a", CoverageLayer::Impl));
         assert!(found.has_bare("a", CoverageLayer::Test));
@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
-        let found = scan("// @spec test a, b, rate-limit\n");
+        let found = Found::scan("// @spec test a, b, rate-limit\n");
         assert!(found.has_bare("a", CoverageLayer::Test));
         assert!(found.has_bare("b", CoverageLayer::Test));
         assert!(found.has_bare("rate-limit", CoverageLayer::Test));
@@ -45,14 +45,14 @@ mod tests {
 
     #[test]
     fn scan_treats_vendor_extension_value_as_contract() {
-        let found = scan("      x-spec: \"@spec contract a\"\n");
+        let found = Found::scan("      x-spec: \"@spec contract a\"\n");
         assert!(found.has_bare("a", CoverageLayer::Contract));
         assert!(!found.has_bare("a", CoverageLayer::Impl));
     }
 
     #[test]
     fn scan_collects_ac_qualified_annotations() {
-        let found = scan("// @spec impl a#empty-string\n// @spec test a#empty-string\n");
+        let found = Found::scan("// @spec impl a#empty-string\n// @spec test a#empty-string\n");
         assert!(found.has_ac("a", "empty-string", CoverageLayer::Impl));
         assert!(found.has_ac("a", "empty-string", CoverageLayer::Test));
         assert!(!found.has_ac("a", "other-ac", CoverageLayer::Impl));
@@ -60,20 +60,20 @@ mod tests {
 
     #[test]
     fn scan_supports_ac_qualified_ids_in_a_list() {
-        let found = scan("// @spec impl a#ac-one, b#ac-two\n");
+        let found = Found::scan("// @spec impl a#ac-one, b#ac-two\n");
         assert!(found.has_ac("a", "ac-one", CoverageLayer::Impl));
         assert!(found.has_ac("b", "ac-two", CoverageLayer::Impl));
     }
 
     #[test]
     fn scan_treats_ac_qualified_contract_annotation_as_bare() {
-        let found = scan("// @spec contract a#empty-string\n");
+        let found = Found::scan("// @spec contract a#empty-string\n");
         assert!(found.has_bare("a", CoverageLayer::Contract));
     }
 
     #[test]
     fn scan_collects_ac_qualified_contract_annotation_per_ac() {
-        let found = scan("// @spec contract a#empty-string\n");
+        let found = Found::scan("// @spec contract a#empty-string\n");
         assert!(found.has_ac("a", "empty-string", CoverageLayer::Contract));
         assert!(!found.has_ac("a", "other-ac", CoverageLayer::Contract));
         assert!(!found.has_ac("a", "empty-string", CoverageLayer::Impl));
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn bare_annotation_does_not_satisfy_ac_level_coverage() {
-        let found = scan("// @spec impl a\n// @spec test a\n");
+        let found = Found::scan("// @spec impl a\n// @spec test a\n");
         assert!(!found.has_ac("a", "any-ac", CoverageLayer::Impl));
         assert!(!found.has_ac("a", "any-ac", CoverageLayer::Test));
     }
@@ -102,7 +102,7 @@ mod tests {
         )
         .expect("parse config");
 
-        let found = scan_workspace(spex_dir, &config).expect("scan");
+        let found = Found::scan_workspace(spex_dir, &config).expect("scan");
         assert!(found.has_bare("a", CoverageLayer::Contract));
     }
 
@@ -117,7 +117,7 @@ mod tests {
             set
         });
 
-        let rows = ac_coverage(&spec, &found);
+        let rows = found.ac_coverage(&spec);
         assert!(rows[0].is_ok());
         assert!(!rows[1].is_ok());
         assert!(rows[1].impl_required && !rows[1].impl_present);
@@ -134,7 +134,7 @@ mod tests {
                 ac: Some("ac-1".to_string()),
             }],
         );
-        let rows = ac_coverage(&spec, &Found::new());
+        let rows = Found::new().ac_coverage(&spec);
         assert!(!rows[0].impl_required);
         assert!(rows[0].test_required);
         assert!(!rows[0].is_ok());
@@ -150,7 +150,7 @@ mod tests {
                 ac: None,
             }],
         );
-        let rows = ac_coverage(&spec, &Found::new());
+        let rows = Found::new().ac_coverage(&spec);
         assert!(rows[0].impl_required);
         assert!(!rows[0].test_required);
     }
@@ -158,8 +158,8 @@ mod tests {
     #[test]
     fn contract_coverage_reads_bare_annotation() {
         let spec = spec("a", &[], Vec::new());
-        let found = scan("// @spec contract a\n");
-        assert_eq!(contract_coverage(&spec, &found), (true, true));
+        let found = Found::scan("// @spec contract a\n");
+        assert_eq!(found.contract_coverage(&spec), (true, true));
     }
 
     #[test]
@@ -172,32 +172,32 @@ mod tests {
                 ac: None,
             }],
         );
-        assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+        assert_eq!(Found::new().contract_coverage(&spec), (false, false));
     }
 
     #[test]
     fn contract_coverage_never_requires_under_none() {
         let mut spec = spec("a", &[], Vec::new());
         spec.contract = ContractLevel::None;
-        assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+        assert_eq!(Found::new().contract_coverage(&spec), (false, false));
     }
 
     #[test]
     fn contract_coverage_is_spec_level_under_single() {
         let mut spec = spec("a", &[], Vec::new());
         spec.contract = ContractLevel::Single;
-        let found = scan("// @spec contract a#ac-1\n");
-        assert_eq!(contract_coverage(&spec, &found), (true, true));
+        let found = Found::scan("// @spec contract a#ac-1\n");
+        assert_eq!(found.contract_coverage(&spec), (true, true));
     }
 
     #[test]
     fn contract_coverage_is_per_ac_under_for_each_ac() {
         let mut spec = spec("a", &["ac-one", "ac-two"], Vec::new());
         spec.contract = ContractLevel::ForEachAc;
-        assert_eq!(contract_coverage(&spec, &Found::new()), (false, false));
+        assert_eq!(Found::new().contract_coverage(&spec), (false, false));
 
-        let found = scan("// @spec contract a#ac-one\n");
-        let rows = ac_coverage(&spec, &found);
+        let found = Found::scan("// @spec contract a#ac-one\n");
+        let rows = found.ac_coverage(&spec);
         assert!(rows[0].contract_required && rows[0].contract_present);
         assert!(rows[1].contract_required && !rows[1].contract_present);
         assert!(rows[0].impl_required && !rows[0].impl_present);
@@ -216,7 +216,7 @@ mod tests {
             }],
         );
         spec.contract = ContractLevel::ForEachAc;
-        let rows = ac_coverage(&spec, &Found::new());
+        let rows = Found::new().ac_coverage(&spec);
         assert!(!rows[0].contract_required);
         assert!(!rows[0].contract_present);
     }

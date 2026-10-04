@@ -3,7 +3,7 @@ use std::fs;
 
 use regex::Regex;
 
-use super::{Finding, RepoCtx, ScopedFile, Severity, rel_str};
+use super::{Finding, RepoCtx, ScopedFile, Severity};
 
 #[cfg(test)]
 #[path = "spec_id_tracing_test.rs"]
@@ -100,7 +100,7 @@ impl Checker {
             if !self.spec_line.is_match(line) {
                 findings.push(finding(
                     FORMAT_CHECK,
-                    Some(format!("{}:{}", rel_str(file), index + 1)),
+                    Some(format!("{}:{}", file.rel_str(), index + 1)),
                     "malformed spec-id annotation".to_string(),
                 ));
             }
@@ -144,7 +144,7 @@ impl Checker {
                 ),
                 _ => format!("orphan annotation references unknown spec `{spec_id}`"),
             };
-            findings.push(finding(ORPHAN_CHECK, Some(rel_str(file)), message));
+            findings.push(finding(ORPHAN_CHECK, Some(file.rel_str()), message));
         }
     }
 }

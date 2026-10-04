@@ -25,7 +25,7 @@ pub(in crate::commands::check) fn run_ast_grep(
     let rule_core = match ast_grep_rule_core_value(pattern, rule) {
         Ok(value) => value,
         Err(message) => {
-            findings.push(config_error(spec_id, &check.name, message));
+            findings.push(Finding::config_error(spec_id, &check.name, message));
             return;
         }
     };
@@ -34,7 +34,7 @@ pub(in crate::commands::check) fn run_ast_grep(
         Some(name) => match name.parse::<SupportLang>() {
             Ok(lang) => Some(lang),
             Err(err) => {
-                findings.push(config_error(
+                findings.push(Finding::config_error(
                     spec_id,
                     &check.name,
                     format!("unknown ast-grep language `{name}`: {err}"),
@@ -57,7 +57,7 @@ pub(in crate::commands::check) fn run_ast_grep(
         let matcher = match build_ast_grep_matcher(&rule_core, lang) {
             Ok(matcher) => matcher,
             Err(err) => {
-                findings.push(config_error(
+                findings.push(Finding::config_error(
                     spec_id,
                     &check.name,
                     format!("invalid ast-grep rule: {err}"),
@@ -76,21 +76,21 @@ pub(in crate::commands::check) fn run_ast_grep(
 
             if *negate {
                 if matches.peek().is_none() {
-                    findings.push(violation(
+                    findings.push(Finding::violation(
                         check,
                         spec_id,
-                        Some(rel_str(file)),
-                        message(check, "required pattern not found"),
+                        Some(file.rel_str()),
+                        check.message("required pattern not found"),
                     ));
                 }
             } else {
                 for found in matches {
                     let line = found.start_pos().line() + 1;
-                    findings.push(violation(
+                    findings.push(Finding::violation(
                         check,
                         spec_id,
-                        Some(format!("{}:{}", rel_str(file), line)),
-                        message(check, "matches forbidden pattern"),
+                        Some(format!("{}:{}", file.rel_str(), line)),
+                        check.message("matches forbidden pattern"),
                     ));
                 }
             }

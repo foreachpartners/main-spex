@@ -92,10 +92,15 @@ fn push_script_findings(
             continue;
         }
         let (location, message) = parse_script_line(line);
-        findings.push(violation(check, spec_id, location, message));
+        findings.push(Finding::violation(check, spec_id, location, message));
     }
     if findings.len() == before {
-        findings.push(violation(check, spec_id, None, script_fallback(output)));
+        findings.push(Finding::violation(
+            check,
+            spec_id,
+            None,
+            script_fallback(output),
+        ));
     }
 }
 
@@ -127,7 +132,7 @@ fn locate_script(
 
     let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
         let dir = spex_dir.join(rule::SCRIPTS_DIR).join(spec_id);
-        findings.push(config_error(
+        findings.push(Finding::config_error(
             spec_id,
             &check.name,
             format!("script `{reference}` not found in {}", dir.display()),
@@ -193,7 +198,7 @@ pub(in crate::commands::check) fn resolve_script(
 }
 
 fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -> Finding {
-    config_error(
+    Finding::config_error(
         spec_id,
         &check.name,
         format!("could not run script `{}`: {err}", script.display()),

@@ -39,6 +39,40 @@ impl Rule {
     pub fn location(&self) -> String {
         format!("{RULES_DIR}/{}", self.path)
     }
+
+    // Every rule file, parsed once, in file order — unlike `load_all`, this
+    // keeps files with colliding ids separate so conformance checks that must
+    // see every file (e.g. duplicate-id and ac-order checks) can.
+    pub fn load_all_list(rules_dir: &Path) -> Result<Vec<Self>> {
+        let rules = util::load_yaml_dir(
+            rules_dir,
+            || RuleError::ReadDir,
+            RuleError::ReadFile,
+            RuleError::Parse,
+        )?;
+
+        Ok(rules
+            .into_iter()
+            .map(|(mut rule, path, raw): (Self, String, String)| {
+                rule.path = path;
+                let lines = util::acceptance_criteria_lines(&raw);
+                for (ac, line) in rule.acceptance_criteria.iter_mut().zip(lines) {
+                    ac.line = line;
+                }
+                rule
+            })
+            .collect())
+    }
+
+    // Every rule keyed by id, for lookup by the rules a repository assigns
+    // itself. A colliding id keeps only its last-loaded file; `load_all_list`
+    // preserves every file when that distinction matters.
+    pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Self>> {
+        Ok(Self::load_all_list(rules_dir)?
+            .into_iter()
+            .map(|rule| (rule.id.clone(), rule))
+            .collect())
+    }
 }
 
 // A rule's acceptance criteria are plain `"MUST ..."` strings (unlike a
@@ -46,7 +80,7 @@ impl Rule {
 #[derive(Debug, Clone)]
 pub struct AcceptanceCriterion {
     pub text: String,
-    // The 1-indexed source line of this criterion, filled in by `load_all`
+    // The 1-indexed source line of this criterion, filled in by `Rule::load_all`
     // from the raw file text (serde tracks no spans).
     pub line: usize,
 }
@@ -96,6 +130,14 @@ pub struct Check {
     pub exclude: Vec<String>,
     #[serde(default)]
     pub severity: Severity,
+}
+
+impl Check {
+    pub fn message(&self, default: &str) -> String {
+        self.description
+            .clone()
+            .unwrap_or_else(|| default.to_string())
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -154,38 +196,4 @@ pub enum Severity {
     Warn,
     #[default]
     Error,
-}
-
-// Every rule file, parsed once, in file order — unlike `load_all`, this
-// keeps files with colliding ids separate so conformance checks that must
-// see every file (e.g. duplicate-id and ac-order checks) can.
-pub fn load_all_list(rules_dir: &Path) -> Result<Vec<Rule>> {
-    let rules = util::load_yaml_dir(
-        rules_dir,
-        || RuleError::ReadDir,
-        RuleError::ReadFile,
-        RuleError::Parse,
-    )?;
-
-    Ok(rules
-        .into_iter()
-        .map(|(mut rule, path, raw): (Rule, String, String)| {
-            rule.path = path;
-            let lines = util::acceptance_criteria_lines(&raw);
-            for (ac, line) in rule.acceptance_criteria.iter_mut().zip(lines) {
-                ac.line = line;
-            }
-            rule
-        })
-        .collect())
-}
-
-// Every rule keyed by id, for lookup by the rules a repository assigns
-// itself. A colliding id keeps only its last-loaded file; `load_all_list`
-// preserves every file when that distinction matters.
-pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Rule>> {
-    Ok(load_all_list(rules_dir)?
-        .into_iter()
-        .map(|rule| (rule.id.clone(), rule))
-        .collect())
 }

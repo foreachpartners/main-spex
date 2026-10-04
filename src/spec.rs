@@ -51,6 +51,22 @@ impl Spec {
         format!("{SPECS_DIR}/{}", self.path)
     }
 
+    pub fn ac_done_total(&self) -> (usize, usize) {
+        let done = self
+            .acceptance_criteria
+            .iter()
+            .filter(|ac| ac.is_done())
+            .count();
+        (done, self.acceptance_criteria.len())
+    }
+
+    pub fn scope_selected(&self, scopes: &[String]) -> bool {
+        scopes.is_empty()
+            || scopes
+                .iter()
+                .any(|short_name| self.scope.contains(short_name))
+    }
+
     // Whether contract coverage is required at all: `none` disables it,
     // `single` requires one spec-level `@spec contract <spec-id>`,
     // `for-each-ac` requires one per acceptance criterion (see
@@ -89,6 +105,29 @@ impl Spec {
                 .coverage_ignore
                 .iter()
                 .any(|ignore| ignore.layer == layer && ignore.ac.as_deref() == Some(ac_id))
+    }
+
+    pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
+        let loaded = util::load_yaml_dir(
+            specs_dir,
+            || SpecError::ReadDir,
+            SpecError::ReadFile,
+            SpecError::Parse,
+        )?;
+
+        let mut specs: Vec<Self> = loaded
+            .into_iter()
+            .map(|(mut spec, path, raw): (Self, String, String)| {
+                spec.path = path;
+                let lines = util::acceptance_criteria_lines(&raw);
+                for (ac, line) in spec.acceptance_criteria.iter_mut().zip(lines) {
+                    ac.line = line;
+                }
+                spec
+            })
+            .collect();
+        specs.sort_by(|a, b| a.id.cmp(&b.id));
+        Ok(specs)
     }
 }
 
@@ -225,27 +264,4 @@ pub enum CoverageLayer {
     Contract,
     Impl,
     Test,
-}
-
-pub fn load_all(specs_dir: &Path) -> Result<Vec<Spec>> {
-    let loaded = util::load_yaml_dir(
-        specs_dir,
-        || SpecError::ReadDir,
-        SpecError::ReadFile,
-        SpecError::Parse,
-    )?;
-
-    let mut specs: Vec<Spec> = loaded
-        .into_iter()
-        .map(|(mut spec, path, raw): (Spec, String, String)| {
-            spec.path = path;
-            let lines = util::acceptance_criteria_lines(&raw);
-            for (ac, line) in spec.acceptance_criteria.iter_mut().zip(lines) {
-                ac.line = line;
-            }
-            spec
-        })
-        .collect();
-    specs.sort_by(|a, b| a.id.cmp(&b.id));
-    Ok(specs)
 }

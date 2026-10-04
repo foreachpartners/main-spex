@@ -3,10 +3,10 @@ mod commands;
 mod config;
 mod rule;
 mod spec;
+mod spex;
 mod style;
 mod templates;
 mod util;
-mod spex;
 
 use std::fmt::Debug;
 use std::process::ExitCode;

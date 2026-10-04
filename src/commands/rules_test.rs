@@ -112,7 +112,7 @@ mod tests {
     fn workspace(dir: &std::path::Path) -> Spex {
         Spex {
             dir: dir.to_path_buf(),
-            config: crate::config::load(dir).expect("load config"),
+            config: crate::config::Config::load(dir).expect("load config"),
         }
     }
 

@@ -53,6 +53,74 @@ impl Found {
             .get(&(spec_id.to_string(), ac_id.to_string()))
             .is_some_and(|layers| layers.contains(&layer))
     }
+
+    pub fn ac_coverage(&self, spec: &Spec) -> Vec<AcCoverage> {
+        spec.acceptance_criteria
+            .iter()
+            .map(|ac| AcCoverage {
+                id: ac.id.clone(),
+                text: ac.commitment.text().to_string(),
+                is_done: ac.is_done(),
+                contract_required: spec.ac_contract_required(&ac.id),
+                contract_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Contract),
+                impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
+                impl_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
+                test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),
+                test_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Test),
+            })
+            .collect()
+    }
+
+    // Spec-level contract coverage. Under `contract: single` one `@spec
+    // contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
+    // disables contract coverage; `for-each-ac` has no spec-level requirement —
+    // each acceptance criterion carries its own (see `ac_coverage`).
+    pub fn contract_coverage(&self, spec: &Spec) -> (bool, bool) {
+        match spec.contract {
+            ContractLevel::None => (false, false),
+            ContractLevel::Single => (
+                spec.contract_required(),
+                self.has_bare(&spec.id, CoverageLayer::Contract),
+            ),
+            ContractLevel::ForEachAc => (false, false),
+        }
+    }
+
+    // Scans one piece of content for spec-id annotations; a test-only helper for
+    // building a `Found` from a fixture string instead of real files on disk.
+    #[cfg(test)]
+    pub fn scan(content: &str) -> Self {
+        let mut found = Self::new();
+        Scanner::new().scan(content, &mut found);
+        found
+    }
+
+    // Scans every workspace repository except spex itself for spec-id annotations.
+    pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Self> {
+        let scanner = Scanner::new();
+        let spex_canon = util::canonical(spex_dir);
+        let mut found = Self::new();
+
+        for repo in &config.repositories {
+            // Interface contracts live inside the spex repository's `contracts/`
+            // folder, so scan them explicitly even though the spex dir itself is
+            // skipped below; their `@spec contract` annotations are the contract layer.
+            for contract in &repo.contracts {
+                let contract_path = spex_dir.join(&contract.path);
+                if let Ok(content) = fs::read_to_string(&contract_path) {
+                    scanner.scan(&content, &mut found);
+                }
+            }
+
+            let repo_path = spex_dir.join(&repo.path);
+            if !repo_path.is_dir() || util::canonical(&repo_path) == spex_canon {
+                continue;
+            }
+            scanner.scan_repo(&repo_path, &mut found)?;
+        }
+
+        Ok(found)
+    }
 }
 
 // Whether an acceptance criterion has the impl/test/contract annotations
@@ -92,90 +160,6 @@ impl AcCoverage {
     }
 }
 
-pub fn ac_coverage(spec: &Spec, found: &Found) -> Vec<AcCoverage> {
-    spec.acceptance_criteria
-        .iter()
-        .map(|ac| AcCoverage {
-            id: ac.id.clone(),
-            text: ac.commitment.text().to_string(),
-            is_done: ac.is_done(),
-            contract_required: spec.ac_contract_required(&ac.id),
-            contract_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Contract),
-            impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
-            impl_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
-            test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),
-            test_present: found.has_ac(&spec.id, &ac.id, CoverageLayer::Test),
-        })
-        .collect()
-}
-
-// Spec-level contract coverage. Under `contract: single` one `@spec
-// contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
-// disables contract coverage; `for-each-ac` has no spec-level requirement —
-// each acceptance criterion carries its own (see `ac_coverage`).
-pub fn contract_coverage(spec: &Spec, found: &Found) -> (bool, bool) {
-    match spec.contract {
-        ContractLevel::None => (false, false),
-        ContractLevel::Single => (
-            spec.contract_required(),
-            found.has_bare(&spec.id, CoverageLayer::Contract),
-        ),
-        ContractLevel::ForEachAc => (false, false),
-    }
-}
-
-// Scans one piece of content for spec-id annotations; a test-only helper for
-// building a `Found` from a fixture string instead of real files on disk.
-#[cfg(test)]
-pub fn scan(content: &str) -> Found {
-    let mut found = Found::new();
-    Scanner::new().scan(content, &mut found);
-    found
-}
-
-// Scans every workspace repository except spex itself for spec-id annotations.
-pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Found> {
-    let scanner = Scanner::new();
-    let spex_canon = canonical(spex_dir);
-    let mut found = Found::new();
-
-    for repo in &config.repositories {
-        // Interface contracts live inside the spex repository's `contracts/`
-        // folder, so scan them explicitly even though the spex dir itself is
-        // skipped below; their `@spec contract` annotations are the contract layer.
-        for contract in &repo.contracts {
-            let contract_path = spex_dir.join(&contract.path);
-            if let Ok(content) = fs::read_to_string(&contract_path) {
-                scanner.scan(&content, &mut found);
-            }
-        }
-
-        let repo_path = spex_dir.join(&repo.path);
-        if !repo_path.is_dir() || canonical(&repo_path) == spex_canon {
-            continue;
-        }
-        scan_repo(&scanner, &repo_path, &mut found)?;
-    }
-
-    Ok(found)
-}
-
-fn scan_repo(scanner: &Scanner, repo_path: &Path, found: &mut Found) -> Result<()> {
-    for result in util::repo_walker(repo_path) {
-        let entry = result.change_context(AnnotationsError::Walk)?;
-        if !entry.file_type().is_some_and(|kind| kind.is_file()) {
-            continue;
-        }
-        // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
-        let Ok(content) = fs::read_to_string(entry.path()) else {
-            continue;
-        };
-        scanner.scan(&content, found);
-    }
-
-    Ok(())
-}
-
 struct Scanner {
     spec: Regex,
     token: Regex,
@@ -192,6 +176,22 @@ impl Scanner {
             .expect("valid @spec regex"),
             token: Regex::new(&token).expect("valid token regex"),
         }
+    }
+
+    fn scan_repo(&self, repo_path: &Path, found: &mut Found) -> Result<()> {
+        for result in util::repo_walker(repo_path) {
+            let entry = result.change_context(AnnotationsError::Walk)?;
+            if !entry.file_type().is_some_and(|kind| kind.is_file()) {
+                continue;
+            }
+            // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
+            let Ok(content) = fs::read_to_string(entry.path()) else {
+                continue;
+            };
+            self.scan(&content, found);
+        }
+
+        Ok(())
     }
 
     fn scan(&self, content: &str, found: &mut Found) {
@@ -232,8 +232,4 @@ impl Scanner {
             }
         }
     }
-}
-
-fn canonical(path: &Path) -> std::path::PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }

@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::config::{self, Config};
+use crate::config::Config;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
 use crate::style::Style;
@@ -31,33 +31,33 @@ pub struct Spex {
 impl Spex {
     pub fn locate_spex_config() -> Result<PathBuf> {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
-        config::find_dir(&current_dir).change_context(WorkspaceError::Config)
+        Config::find_dir(&current_dir).change_context(WorkspaceError::Config)
     }
 
     pub fn discover() -> Result<Self> {
         let dir = Self::locate_spex_config()?;
-        let config = config::load(&dir).change_context(WorkspaceError::Config)?;
+        let config = Config::load(&dir).change_context(WorkspaceError::Config)?;
         Ok(Self { dir, config })
     }
 
     pub fn warn_if_cli_outdated(&self) {
-        if let Some(warning) = config::version_warning(&self.config) {
+        if let Some(warning) = self.config.version_warning() {
             let style = Style::detect();
             eprintln!("{} {warning}", style.yellow("warning:"));
         }
     }
 
     pub fn rules(&self) -> Result<HashMap<String, Rule>> {
-        rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
+        Rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
     }
 
     // Every rule file, keeping files with colliding ids separate — see
-    // `rule::load_all_list`.
+    // `Rule::load_all_list`.
     pub fn rules_list(&self) -> Result<Vec<Rule>> {
-        rule::load_all_list(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
+        Rule::load_all_list(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
-        spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(WorkspaceError::Specs)
+        Spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(WorkspaceError::Specs)
     }
 }

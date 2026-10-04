@@ -6,7 +6,7 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt, bail};
 use thiserror::Error;
 
-use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, is_spex_dir_name};
+use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::spec::SPECS_DIR;
 use crate::style::Style;
 use crate::templates;
@@ -108,7 +108,7 @@ fn config_from_template(project_name: &str) -> String {
             "repository_name: unknown",
             &format!("repository_name: {project_name}-{SPEX_DIR_NAME}"),
         );
-    config::set_cli_version(&named, CLI_VERSION)
+    Config::set_cli_version(&named, CLI_VERSION)
 }
 
 fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
@@ -123,7 +123,7 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
 // The workspace root is the current directory, unless `spex init` runs from
 // inside the spex repository directory, in which case it is the parent.
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
-    if dir_name(current_dir).is_some_and(is_spex_dir_name) {
+    if dir_name(current_dir).is_some_and(Config::is_spex_dir_name) {
         let parent = current_dir.parent().ok_or_else(|| {
             Report::new(InitError::NoWorkspaceRoot)
                 .attach("expected the spex directory to live inside a workspace root")
@@ -141,7 +141,7 @@ fn ensure_spex_dir(
     workspace_root: &Path,
     project_name: &str,
 ) -> Result<PathBuf> {
-    if dir_name(current_dir).is_some_and(is_spex_dir_name) {
+    if dir_name(current_dir).is_some_and(Config::is_spex_dir_name) {
         return Ok(current_dir.to_path_buf());
     }
 

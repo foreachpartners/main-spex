@@ -78,7 +78,7 @@ mod tests {
             spec("D", Status::InProgress),
         ];
         let found = Found::new();
-        let rows = tracked_rows(Path::new("/workspace"), &specs, &found);
+        let rows = SpecRow::tracked(Path::new("/workspace"), &specs, &found);
         let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
         assert_eq!(ids, vec!["A", "D"]);
     }
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn tracked_rows_records_each_spec_file() {
         let specs = vec![spec("A", Status::Active)];
-        let rows = tracked_rows(Path::new("/workspace"), &specs, &Found::new());
+        let rows = SpecRow::tracked(Path::new("/workspace"), &specs, &Found::new());
         assert_eq!(rows[0].file, PathBuf::from("/workspace/specs/A.yaml"));
     }
 
@@ -95,7 +95,7 @@ mod tests {
         let spec: Spec = serde_yaml_ng::from_str("id: A\ncontract: single\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
-        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
+        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
         assert!(rows.is_empty());
     }
 
@@ -108,7 +108,7 @@ mod tests {
         assert!(spec.layer_ignored(CoverageLayer::Contract));
         assert!(spec.layer_ignored(CoverageLayer::Test));
         assert!(!spec.layer_ignored(CoverageLayer::Impl));
-        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
+        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
         assert!(!rows[0].contract_required);
     }
 
@@ -118,7 +118,7 @@ mod tests {
             "id: A\ncontract: single\nstatus: active\nacceptance_criteria:\n  - id: ac-1\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-1\n",
         )
         .expect("parse spec");
-        let rows = tracked_rows(Path::new("/workspace"), &[spec], &Found::new());
+        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
         assert!(!rows[0].ac_rows[0].impl_required);
         assert!(rows[0].ac_rows[0].test_required);
     }
@@ -132,7 +132,7 @@ mod tests {
             vec![ac("ac-1", false, false), ac("ac-2", true, false)],
         );
         assert_eq!(
-            missing_summary(&row),
+            row.missing_summary(),
             "contract, impl(ac-1), test(ac-1, ac-2)"
         );
     }
@@ -141,14 +141,14 @@ mod tests {
     fn missing_contract_is_a_gap_by_default() {
         let row = row("A", true, false, vec![ac("ac-1", true, true)]);
         assert!(row.has_gap());
-        assert_eq!(missing_summary(&row), "contract");
+        assert_eq!(row.missing_summary(), "contract");
     }
 
     #[test]
     fn ignored_contract_is_not_a_gap() {
         let row = row("A", false, false, vec![ac("ac-1", true, true)]);
         assert!(!row.has_gap());
-        assert_eq!(missing_summary(&row), "");
+        assert_eq!(row.missing_summary(), "");
     }
 
     #[test]
@@ -175,7 +175,7 @@ mod tests {
         assert_eq!(row.ac_done(), 1);
         assert_eq!(row.ac_total(), 2);
         assert!(row.has_gap());
-        assert_eq!(missing_summary(&row), "impl(ac-2), test(ac-1, ac-2)");
+        assert_eq!(row.missing_summary(), "impl(ac-2), test(ac-1, ac-2)");
     }
 
     #[test]
@@ -202,8 +202,8 @@ mod tests {
         );
         assert!(!row.has_gap());
         assert!(row.has_pending());
-        assert_eq!(missing_summary(&row), "");
-        assert_eq!(pending_summary(&row), "impl(ac-2), test(ac-2)");
+        assert_eq!(row.missing_summary(), "");
+        assert_eq!(row.pending_summary(), "impl(ac-2), test(ac-2)");
     }
 
     #[test]
@@ -216,7 +216,7 @@ mod tests {
         );
         assert!(row.has_gap());
         assert!(!row.has_pending());
-        assert_eq!(missing_summary(&row), "impl(ac-1), test(ac-1)");
+        assert_eq!(row.missing_summary(), "impl(ac-1), test(ac-1)");
     }
 
     #[test]
@@ -228,7 +228,7 @@ mod tests {
             vec![contract_ac("ac-1", true), contract_ac("ac-2", false)],
         );
         assert!(row.has_gap());
-        assert_eq!(missing_summary(&row), "contract(ac-2)");
+        assert_eq!(row.missing_summary(), "contract(ac-2)");
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod tests {
             vec![contract_ac("ac-1", true), contract_ac("ac-2", true)],
         );
         assert!(!row.has_gap());
-        assert_eq!(missing_summary(&row), "");
+        assert_eq!(row.missing_summary(), "");
     }
 
     #[test]
@@ -250,7 +250,7 @@ mod tests {
         let row = row("A", false, false, vec![ac]);
         assert!(!row.has_gap());
         assert!(row.has_pending());
-        assert_eq!(pending_summary(&row), "contract(ac-1)");
+        assert_eq!(row.pending_summary(), "contract(ac-1)");
     }
 
     #[test]
@@ -324,9 +324,9 @@ mod tests {
         b.scope = vec!["web".to_string()];
         let c = spec("C", Status::Active);
 
-        assert!(scope_selected(&a, &["api".to_string()]));
-        assert!(!scope_selected(&b, &["api".to_string()]));
-        assert!(scope_selected(&c, &[]));
+        assert!(a.scope_selected(&["api".to_string()]));
+        assert!(!b.scope_selected(&["api".to_string()]));
+        assert!(c.scope_selected(&[]));
     }
 
     #[test]

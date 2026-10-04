@@ -5,11 +5,11 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::annotations::{self, AcCoverage, Found};
+use crate::annotations::{AcCoverage, Found};
 use crate::spec::{Spec, Status};
-use crate::style::Style;
-use crate::util::{file_url, version_line};
 use crate::spex::Spex;
+use crate::style::Style;
+use crate::util::file_url;
 
 #[cfg(test)]
 #[path = "coverage_test.rs"]
@@ -96,6 +96,66 @@ impl SpecRow {
     fn has_gap(&self) -> bool {
         !self.contract_ok() || self.has_real_ac_gap()
     }
+
+    fn tracked(workspace: &Path, specs: &[Spec], found: &Found) -> Vec<Self> {
+        specs
+            .iter()
+            .filter(|spec| matches!(spec.status, Status::Active | Status::InProgress))
+            .map(|spec| {
+                let (contract_required, contract_present) = found.contract_coverage(spec);
+                Self {
+                    id: spec.id.clone(),
+                    file: workspace.join(spec.location()),
+                    description: spec.description.clone(),
+                    status: spec.status,
+                    scope: spec.scope.clone(),
+                    contract_required,
+                    contract_present,
+                    ac_rows: found.ac_coverage(spec),
+                }
+            })
+            .collect()
+    }
+
+    // Lists what's missing on a gapped row: a missing spec-level contract
+    // (under `contract: single`), then which acceptance criteria still lack a
+    // required contract, impl, or test annotation, other than ones flagged
+    // `is_done: false` (those are pending, not a gap).
+    fn missing_summary(&self) -> String {
+        let mut parts = Vec::new();
+
+        if !self.contract_ok() {
+            parts.push("contract".to_string());
+        }
+
+        let layers = ac_layer_summary(&self.gapped_ac());
+        if !layers.is_empty() {
+            parts.push(layers);
+        }
+
+        parts.join(", ")
+    }
+
+    // Lists which acceptance criteria are flagged `is_done: false` and not yet
+    // traced — expected on an in-progress spec, reported but not a gap.
+    fn pending_summary(&self) -> String {
+        let pending: Vec<&AcCoverage> = self.ac_rows.iter().filter(|ac| ac.is_pending()).collect();
+        ac_layer_summary(&pending)
+    }
+
+    // The acceptance criteria still missing a required impl or test annotation,
+    // other than ones flagged `is_done: false` (those are pending, not a gap).
+    fn gapped_ac(&self) -> Vec<&AcCoverage> {
+        self.ac_rows
+            .iter()
+            .filter(|ac| !ac.is_ok() && !ac.is_pending())
+            .collect()
+    }
+
+    // The acceptance criteria flagged `is_done: false` and not yet traced.
+    fn pending_ac(&self) -> Vec<&AcCoverage> {
+        self.ac_rows.iter().filter(|ac| ac.is_pending()).collect()
+    }
 }
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
@@ -116,40 +176,13 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
 
     let specs: Vec<Spec> = specs
         .into_iter()
-        .filter(|spec| scope_selected(spec, &args.scope))
+        .filter(|spec| spec.scope_selected(&args.scope))
         .collect();
 
-    let found = annotations::scan_workspace(&workspace.dir, &workspace.config)
+    let found = Found::scan_workspace(&workspace.dir, &workspace.config)
         .change_context(CoverageError::Walk)?;
 
     Ok(report(&workspace.dir, &specs, &found, args.verbose))
-}
-
-fn scope_selected(spec: &Spec, scopes: &[String]) -> bool {
-    scopes.is_empty()
-        || scopes
-            .iter()
-            .any(|short_name| spec.scope.contains(short_name))
-}
-
-fn tracked_rows(workspace: &Path, specs: &[Spec], found: &Found) -> Vec<SpecRow> {
-    specs
-        .iter()
-        .filter(|spec| matches!(spec.status, Status::Active | Status::InProgress))
-        .map(|spec| {
-            let (contract_required, contract_present) = annotations::contract_coverage(spec, found);
-            SpecRow {
-                id: spec.id.clone(),
-                file: workspace.join(spec.location()),
-                description: spec.description.clone(),
-                status: spec.status,
-                scope: spec.scope.clone(),
-                contract_required,
-                contract_present,
-                ac_rows: annotations::ac_coverage(spec, found),
-            }
-        })
-        .collect()
 }
 
 // Renders which of the given acceptance criteria still lack a required
@@ -191,37 +224,11 @@ fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
         .join(", ")
 }
 
-// Lists what's missing on a gapped row: a missing spec-level contract
-// (under `contract: single`), then which acceptance criteria still lack a
-// required contract, impl, or test annotation, other than ones flagged
-// `is_done: false` (those are pending, not a gap).
-fn missing_summary(row: &SpecRow) -> String {
-    let mut parts = Vec::new();
-
-    if !row.contract_ok() {
-        parts.push("contract".to_string());
-    }
-
-    let layers = ac_layer_summary(&gapped_ac(row));
-    if !layers.is_empty() {
-        parts.push(layers);
-    }
-
-    parts.join(", ")
-}
-
-// Lists which acceptance criteria are flagged `is_done: false` and not yet
-// traced — expected on an in-progress spec, reported but not a gap.
-fn pending_summary(row: &SpecRow) -> String {
-    let pending: Vec<&AcCoverage> = row.ac_rows.iter().filter(|ac| ac.is_pending()).collect();
-    ac_layer_summary(&pending)
-}
-
 fn report(workspace: &Path, specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let style = Style::detect();
-    println!("{}", version_line(&style));
+    println!("{}", style.version_line());
     println!();
-    let rows = tracked_rows(workspace, specs, found);
+    let rows = SpecRow::tracked(workspace, specs, found);
     // Shared across the pending list (in the "Specs" totals) and the "Gaps"
     // list, so the `id`/`AC` columns line up between the two sections.
     let id_width = rows
@@ -378,20 +385,6 @@ fn scope_groups<'a>(gapped: &[&'a SpecRow]) -> Vec<(Option<&'a str>, Vec<&'a Spe
     groups
 }
 
-// The acceptance criteria still missing a required impl or test annotation,
-// other than ones flagged `is_done: false` (those are pending, not a gap).
-fn gapped_ac(row: &SpecRow) -> Vec<&AcCoverage> {
-    row.ac_rows
-        .iter()
-        .filter(|ac| !ac.is_ok() && !ac.is_pending())
-        .collect()
-}
-
-// The acceptance criteria flagged `is_done: false` and not yet traced.
-fn pending_ac(row: &SpecRow) -> Vec<&AcCoverage> {
-    row.ac_rows.iter().filter(|ac| ac.is_pending()).collect()
-}
-
 fn terminal_width() -> usize {
     terminal_size::terminal_size().map_or(100, |(terminal_size::Width(w), _)| w as usize)
 }
@@ -496,7 +489,7 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
     let header_summary = if verbose {
         (!row.contract_ok()).then(|| "contract".to_string())
     } else {
-        let layers = missing_summary(row);
+        let layers = row.missing_summary();
         (!layers.is_empty()).then_some(layers)
     };
 
@@ -522,7 +515,7 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
             style,
             &prefix,
             prefix_len,
-            &format!("in-progress: {}", pending_summary(row)),
+            &format!("in-progress: {}", row.pending_summary()),
         );
     }
 
@@ -532,13 +525,13 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
             style,
             &pad,
             prefix_len,
-            &format!("in-progress: {}", pending_summary(row)),
+            &format!("in-progress: {}", row.pending_summary()),
         );
     }
 
     if verbose {
         print_wrapped(style, 8, &row.description);
-        for ac in gapped_ac(row) {
+        for ac in row.gapped_ac() {
             let label = ac_gap_label(ac);
             let prefix = format!("        {} ({}): ", style.cyan(&ac.id), style.red(&label));
             let prefix_len = 8 + ac.id.len() + 3 + label.len() + 3;
@@ -549,7 +542,7 @@ fn print_gap_row(style: &Style, row: &SpecRow, width: usize, verbose: bool) {
         // because of a real gap must not have its pending criteria mistaken
         // for gaps.
         if !row.has_gap() {
-            for ac in pending_ac(row) {
+            for ac in row.pending_ac() {
                 let prefix = format!("        {}: ", style.cyan(&ac.id));
                 let prefix_len = 8 + ac.id.len() + 2;
                 print_wrapped_after(style, &prefix, prefix_len, &ac.text);

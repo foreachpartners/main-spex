@@ -14,45 +14,47 @@ pub(super) use script::{
     resolve_script, run_per_file_script, run_per_repo_script, run_workspace_checks,
 };
 
-// Runs a non-workspace check against one repository, dispatching on the check's
-// kind and (for scripts) its run scope. Workspace scripts are deferred by
-// `dispatch_check` and run later in `run_workspace_checks`, so they no-op here.
-pub(super) fn run_check(ctx: &RepoCtx, spec_id: &str, check: &Check, findings: &mut Vec<Finding>) {
-    let scoped = match scope_files(check, ctx.candidates) {
-        Ok(scoped) => scoped,
-        Err(message) => {
-            findings.push(config_error(spec_id, &check.name, message));
-            return;
-        }
-    };
+impl RepoCtx<'_> {
+    // Runs a non-workspace check against one repository, dispatching on the check's
+    // kind and (for scripts) its run scope. Workspace scripts are deferred by
+    // `dispatch_check` and run later in `run_workspace_checks`, so they no-op here.
+    pub(super) fn run_check(&self, spec_id: &str, check: &Check, findings: &mut Vec<Finding>) {
+        let scoped = match scope_files(check, self.candidates) {
+            Ok(scoped) => scoped,
+            Err(message) => {
+                findings.push(Finding::config_error(spec_id, &check.name, message));
+                return;
+            }
+        };
 
-    match &check.kind {
-        CheckKind::Regexp { .. } => run_regexp(spec_id, check, &scoped, findings),
-        CheckKind::Glob { .. } => run_glob(spec_id, check, &scoped, findings),
-        CheckKind::AstGrep { .. } => run_ast_grep(spec_id, check, &scoped, findings),
-        CheckKind::Script {
-            run: RunScope::PerFile,
-            ..
-        } => {
-            run_per_file_script(
-                spec_id,
-                check,
-                ctx.repo_path,
-                ctx.spex_dir,
-                &scoped,
-                findings,
-            );
+        match &check.kind {
+            CheckKind::Regexp { .. } => run_regexp(spec_id, check, &scoped, findings),
+            CheckKind::Glob { .. } => run_glob(spec_id, check, &scoped, findings),
+            CheckKind::AstGrep { .. } => run_ast_grep(spec_id, check, &scoped, findings),
+            CheckKind::Script {
+                run: RunScope::PerFile,
+                ..
+            } => {
+                run_per_file_script(
+                    spec_id,
+                    check,
+                    self.repo_path,
+                    self.spex_dir,
+                    &scoped,
+                    findings,
+                );
+            }
+            CheckKind::Script {
+                run: RunScope::PerRepo,
+                ..
+            } => {
+                run_per_repo_script(spec_id, check, self.repo_path, self.spex_dir, findings);
+            }
+            CheckKind::Script {
+                run: RunScope::Workspace,
+                ..
+            } => {}
         }
-        CheckKind::Script {
-            run: RunScope::PerRepo,
-            ..
-        } => {
-            run_per_repo_script(spec_id, check, ctx.repo_path, ctx.spex_dir, findings);
-        }
-        CheckKind::Script {
-            run: RunScope::Workspace,
-            ..
-        } => {}
     }
 }
 

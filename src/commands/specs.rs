@@ -5,8 +5,8 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::spec::SPECS_DIR;
-use crate::util;
 use crate::spex::Spex;
+use crate::util;
 
 #[cfg(test)]
 #[path = "specs_test.rs"]

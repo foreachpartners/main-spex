@@ -39,7 +39,7 @@ mod tests_unit {
     fn config_from_template_names_project_and_spex_repository() {
         let yaml = config_from_template("pizza-shop");
 
-        let config: config::Config = serde_yaml_ng::from_str(&yaml).expect("parse config");
+        let config: Config = serde_yaml_ng::from_str(&yaml).expect("parse config");
         assert_eq!(config.project_name, "pizza-shop");
         assert_eq!(config.repositories.len(), 1);
         let spex = &config.repositories[0];
@@ -52,7 +52,7 @@ mod tests_unit {
     fn config_from_template_records_installed_cli_version() {
         let yaml = config_from_template("pizza-shop");
 
-        let config: config::Config = serde_yaml_ng::from_str(&yaml).expect("parse config");
+        let config: Config = serde_yaml_ng::from_str(&yaml).expect("parse config");
         assert_eq!(config.cli_version, CLI_VERSION);
     }
 

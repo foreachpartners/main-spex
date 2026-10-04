@@ -6,8 +6,6 @@ use error_stack::{Report, ResultExt};
 use ignore::{Walk, WalkBuilder};
 use serde::de::DeserializeOwned;
 
-use crate::style::Style;
-
 #[cfg(test)]
 #[path = "util_test.rs"]
 mod util_test;
@@ -21,16 +19,16 @@ pub fn dir_name(path: &Path) -> Option<&str> {
     path.file_name().and_then(|name| name.to_str())
 }
 
+pub fn canonical(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
+
 pub fn plural(count: usize, noun: &str) -> String {
     if count == 1 {
         format!("1 {noun}")
     } else {
         format!("{count} {noun}s")
     }
-}
-
-pub fn version_line(style: &Style) -> String {
-    style.dim(&format!("spex {}", env!("CARGO_PKG_VERSION")))
 }
 
 // Dependency lock files are generated artifacts: never spec-annotated and

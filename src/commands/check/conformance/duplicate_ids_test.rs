@@ -13,8 +13,8 @@ mod tests {
         std::fs::write(rules_dir.join("frontend/one.yaml"), "id: ONE\n").expect("one");
         std::fs::write(rules_dir.join("two.yaml"), "id: TWO\n").expect("two");
 
-        let specs = spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
-        let rules = rule::load_all_list(&rules_dir).expect("rules");
+        let specs = Spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
+        let rules = Rule::load_all_list(&rules_dir).expect("rules");
         let mut findings = Vec::new();
         validate_no_duplicate_ids(&specs, &rules, &mut findings);
 
@@ -32,8 +32,8 @@ mod tests {
         std::fs::write(rules_dir.join("backend/shared.yaml"), "id: SHARED\n")
             .expect("backend rule");
 
-        let specs = spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
-        let rules = rule::load_all_list(&rules_dir).expect("rules");
+        let specs = Spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
+        let rules = Rule::load_all_list(&rules_dir).expect("rules");
         let mut findings = Vec::new();
         validate_no_duplicate_ids(&specs, &rules, &mut findings);
 
@@ -56,8 +56,8 @@ mod tests {
         .expect("spec");
         std::fs::write(rules_dir.join("shared.yaml"), "id: SHARED\n").expect("rule");
 
-        let specs = spec::load_all(&specs_dir).expect("specs");
-        let rules = rule::load_all_list(&rules_dir).expect("rules");
+        let specs = Spec::load_all(&specs_dir).expect("specs");
+        let rules = Rule::load_all_list(&rules_dir).expect("rules");
         let mut findings = Vec::new();
         validate_no_duplicate_ids(&specs, &rules, &mut findings);
 

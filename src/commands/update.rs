@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE};
+use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE};
 use crate::spex::Spex;
 use crate::style::Style;
 use crate::templates;
@@ -51,7 +51,7 @@ pub fn run() -> Result<ExitCode> {
     templates::scaffold(&spex_dir, &previous.rules_unused)
         .change_context(UpdateError::Templates)?;
 
-    fs::write(&config_path, config::set_cli_version(&raw, CLI_VERSION))
+    fs::write(&config_path, Config::set_cli_version(&raw, CLI_VERSION))
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
 

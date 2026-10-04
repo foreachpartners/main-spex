@@ -6,8 +6,8 @@ use thiserror::Error;
 
 use crate::config::Repository;
 use crate::rule::RULES_DIR;
-use crate::util;
 use crate::spex::Spex;
+use crate::util;
 
 #[cfg(test)]
 #[path = "rules_test.rs"]
