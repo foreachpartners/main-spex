@@ -114,7 +114,13 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
         .config
         .repositories
         .iter()
-        .filter(|repo| args.repo.is_empty() || args.repo.iter().any(|name| repo.matches_any_repo_name(name)))
+        .filter(|repo| {
+            args.repo.is_empty()
+                || args
+                    .repo
+                    .iter()
+                    .any(|name| repo.matches_any_repo_name(name))
+        })
         .collect();
 
     let output: Vec<&serde_json::Value> = rules

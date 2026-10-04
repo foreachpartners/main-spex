@@ -1,6 +1,7 @@
 mod annotations;
 mod commands;
 mod config;
+mod repo_files;
 mod rule;
 mod spec;
 mod spex;

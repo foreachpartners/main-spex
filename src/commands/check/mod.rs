@@ -7,11 +7,12 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
+use crate::repo_files::RepoFiles;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
 use crate::spec::{ContractLevel, CoverageLayer, Spec, Status};
 use crate::spex::Spex;
 use crate::style::Style;
-use crate::util::{self, plural};
+use crate::util::plural;
 
 mod conformance;
 mod report;
@@ -64,12 +65,8 @@ struct ScopedFile {
 impl ScopedFile {
     fn collect(repo_path: &Path) -> Result<Vec<Self>> {
         let mut files = Vec::new();
-        for result in util::repo_walker(repo_path) {
-            let entry = result.change_context(CheckError::Walk)?;
-            if !entry.file_type().is_some_and(|kind| kind.is_file()) {
-                continue;
-            }
-            let abs = entry.into_path();
+        for result in RepoFiles::new(repo_path) {
+            let abs = result.change_context(CheckError::Walk)?;
             let rel = abs.strip_prefix(repo_path).unwrap_or(&abs).to_path_buf();
             files.push(Self { abs, rel });
         }
@@ -457,7 +454,11 @@ fn select_repos<'a>(
     files: &[String],
 ) -> Result<Vec<&'a Repository>> {
     for name in names {
-        if !config.repositories.iter().any(|repo| repo.matches_any_repo_name(name)) {
+        if !config
+            .repositories
+            .iter()
+            .any(|repo| repo.matches_any_repo_name(name))
+        {
             return Err(Report::new(CheckError::UnknownRepo(name.clone())));
         }
     }
@@ -475,7 +476,9 @@ fn select_repos<'a>(
         return Ok(config
             .repositories
             .iter()
-            .filter(|repo| names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name)))
+            .filter(|repo| {
+                names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name))
+            })
             .collect());
     }
 

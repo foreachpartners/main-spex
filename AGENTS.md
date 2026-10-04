@@ -49,8 +49,9 @@ src/                CLI source
   rule.rs           Rule model
   spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
   annotations.rs    @spec impl|test annotation parsing (source for coverage)
+  repo_files.rs     Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
   style.rs          Terminal color styling (shared by commands)
-  util.rs           Shared helpers (file walking, yaml-dir loading, pluralize)
+  util.rs           Shared helpers (yaml-dir loading, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
     check/          check command: orchestration (mod), report

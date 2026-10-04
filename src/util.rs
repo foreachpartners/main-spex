@@ -1,9 +1,7 @@
-use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use error_stack::{Report, ResultExt};
-use ignore::{Walk, WalkBuilder};
 use serde::de::DeserializeOwned;
 
 #[cfg(test)]
@@ -29,44 +27,6 @@ pub fn plural(count: usize, noun: &str) -> String {
     } else {
         format!("{count} {noun}s")
     }
-}
-
-const REPO_WALKER_SKIPPED_NAMES: &[&str] = &[
-    ".git",
-    "Cargo.lock",
-    "Gemfile.lock",
-    "Pipfile.lock",
-    "bun.lock",
-    "bun.lockb",
-    "composer.lock",
-    "flake.lock",
-    "go.sum",
-    "package-lock.json",
-    "pnpm-lock.yaml",
-    "poetry.lock",
-    "uv.lock",
-    "yarn.lock",
-];
-
-// Walks a workspace repository's files, honoring gitignore rules while still
-// surfacing dotfiles (e.g. `.env`) and always skipping the `.git` directory and
-// well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
-// `require_git(false)` keeps gitignore rules in effect even when the repository
-// has no `.git` directory; otherwise the `ignore` crate silently ignores them.
-pub fn repo_walker(root: &Path) -> Walk {
-    WalkBuilder::new(root)
-        .hidden(false)
-        .git_ignore(true)
-        .git_global(true)
-        .require_git(false)
-        .filter_entry(|entry| !is_skipped(entry.file_name()))
-        .build()
-}
-
-fn is_skipped(name: &OsStr) -> bool {
-    REPO_WALKER_SKIPPED_NAMES
-        .iter()
-        .any(|skipped| name == *skipped)
 }
 
 fn collect_yaml_paths<E>(

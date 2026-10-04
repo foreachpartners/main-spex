@@ -7,6 +7,7 @@ use regex::Regex;
 use thiserror::Error;
 
 use crate::config::Config;
+use crate::repo_files::RepoFiles;
 use crate::spec::{ContractLevel, CoverageLayer, Spec};
 use crate::util;
 
@@ -179,13 +180,10 @@ impl Scanner {
     }
 
     fn scan_repo(&self, repo_path: &Path, found: &mut Found) -> Result<()> {
-        for result in util::repo_walker(repo_path) {
-            let entry = result.change_context(AnnotationsError::Walk)?;
-            if !entry.file_type().is_some_and(|kind| kind.is_file()) {
-                continue;
-            }
+        for result in RepoFiles::new(repo_path) {
+            let path = result.change_context(AnnotationsError::Walk)?;
             // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
-            let Ok(content) = fs::read_to_string(entry.path()) else {
+            let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };
             self.scan(&content, found);
