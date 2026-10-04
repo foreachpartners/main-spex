@@ -5,7 +5,7 @@ description: >-
   after a shopping trip is done.
 acceptance_criteria:
   - id: delete-all-items
-    must: 'delete every item from the JSON file store when `DELETE /items` is called'
+    must: "delete every item from the JSON file store when `DELETE /items` is called"
   - id: persist-cleared-list
     must: persist the empty list so cleared items do not reappear after an API restart
 scope:

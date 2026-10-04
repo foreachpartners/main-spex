@@ -5,7 +5,7 @@ description: >-
   to buy it.
 acceptance_criteria:
   - id: create-item-with-name
-    must: 'create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`'
+    must: "create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`"
   - id: assign-unique-id
     must: assign each created item a unique `id`
   - id: persist-created-item

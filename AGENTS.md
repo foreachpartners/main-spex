@@ -21,13 +21,13 @@ spex is built on three simple pieces:
 ## Quick commands
 
 ```sh
-cargo check # Lint
-cargo fmt   # Format
-cargo test  # Test
-dprint fmt   # Format md/yaml/json
-dprint check # Check md/yaml/json formatting
-cargo install --path . --force  # Reinstall cli
-spex --help # CLI command
+just lint       # cargo check
+just fmt        # Format everything (fmt-docs + cargo fmt)
+just test       # cargo test
+just fmt-docs   # dprint fmt (md/yaml/json)
+just check-docs # dprint check (md/yaml/json)
+just install    # Reinstall cli
+just help       # spex --help
 ```
 
 ## Rules

@@ -5,11 +5,11 @@ description: >-
   user no longer needs it.
 acceptance_criteria:
   - id: delete-item-by-id
-    must: 'remove the item from the JSON file store when `DELETE /items/{id}` is called with an existing item id'
+    must: "remove the item from the JSON file store when `DELETE /items/{id}` is called with an existing item id"
   - id: persist-deletion
     must: persist the deletion so the item does not reappear after an API restart
   - id: unknown-item-not-found
-    must: 'return a 404 response from `DELETE /items/{id}` when no item matches `id`'
+    must: "return a 404 response from `DELETE /items/{id}` when no item matches `id`"
 scope:
   - api
 status: active
