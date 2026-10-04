@@ -452,7 +452,9 @@ fn select_repos<'a>(
             !ScopedFile::provided(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
         });
         if !found {
-            return Err(Report::new(CliError::UnknownFile(file.clone())));
+            return Err(Report::new(CliError::Custom(format!(
+                "unknown file `{file}` — not found in any workspace repository"
+            ))));
         }
     }
 

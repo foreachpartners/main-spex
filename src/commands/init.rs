@@ -144,7 +144,9 @@ fn ensure_spex_dir(
 
 fn verify_not_initialized(current_dir: &Path) -> Result<()> {
     if current_dir.join(SPEX_CONFIG_FILE).exists() {
-        bail!(CliError::AlreadyInitialized);
+        bail!(CliError::Custom(format!(
+            "`{SPEX_CONFIG_FILE}` already exists in this directory"
+        )));
     }
     Ok(())
 }

@@ -62,14 +62,20 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
 
 fn print_field(value: &serde_json::Value, field: &str) -> Result<ExitCode> {
     let Some(found) = value.get(field) else {
-        return Err(Report::new(CliError::UnknownField(field.to_string())));
+        return Err(Report::new(CliError::Custom(format!(
+            "no field `{field}` in the spex configuration"
+        ))));
     };
 
     match found {
         serde_json::Value::String(s) => println!("{s}"),
         serde_json::Value::Number(n) => println!("{n}"),
         serde_json::Value::Bool(b) => println!("{b}"),
-        _ => return Err(Report::new(CliError::NotScalar(field.to_string()))),
+        _ => {
+            return Err(Report::new(CliError::Custom(format!(
+                "field `{field}` is not a single value"
+            ))));
+        }
     }
 
     Ok(ExitCode::SUCCESS)

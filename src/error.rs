@@ -21,8 +21,6 @@ pub enum CliError {
         "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
     )]
     NotInitialized,
-    #[error("`{SPEX_CONFIG_FILE}` already exists in this directory")]
-    AlreadyInitialized,
     #[error("the spex directory has no parent workspace root")]
     NoWorkspaceRoot,
     #[error("could not read `{SPEX_CONFIG_FILE}`")]
@@ -57,10 +55,6 @@ pub enum CliError {
     InvalidSchema(PathBuf),
     #[error("could not serialize output")]
     Serialize,
-    #[error("no field `{0}` in the spex configuration")]
-    UnknownField(String),
-    #[error("field `{0}` is not a single value")]
-    NotScalar(String),
     #[error("unknown workspace repository `{0}` — not listed in {SPEX_CONFIG_FILE}")]
     UnknownRepo(String),
     #[error("unknown repository short name `{0}` — not listed in {SPEX_CONFIG_FILE}")]
@@ -69,6 +63,6 @@ pub enum CliError {
     UnknownSpecId(String),
     #[error("unknown rule id `{0}` — not found in {RULES_DIR}")]
     UnknownRuleId(String),
-    #[error("unknown file `{0}` — not found in any workspace repository")]
-    UnknownFile(String),
+    #[error("{0}")]
+    Custom(String),
 }
