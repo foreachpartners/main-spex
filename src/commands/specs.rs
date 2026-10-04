@@ -71,7 +71,7 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
             .config
             .repositories
             .iter()
-            .any(|repo| &repo.short_name == short_name)
+            .any(|repo| &repo.repository_short_name == short_name)
         {
             return Err(Report::new(SpecsError::UnknownScope(short_name.clone())));
         }

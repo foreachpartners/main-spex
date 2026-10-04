@@ -40,10 +40,8 @@ pub struct Config {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Repository {
-    #[serde(rename = "repository_name")]
-    pub name: String,
-    #[serde(rename = "repository_short_name")]
-    pub short_name: String,
+    pub repository_name: String,
+    pub repository_short_name: String,
     pub path: String,
     #[serde(default)]
     pub contracts: Vec<Contract>,
@@ -57,7 +55,7 @@ impl Repository {
     // `--repo` (and similar repository-name flags) accept either the full
     // repository name or its short name.
     pub fn matches(&self, name: &str) -> bool {
-        self.name == name || self.short_name == name
+        self.repository_name == name || self.repository_short_name == name
     }
 
     pub fn is_spex_repo(&self, spex_dir: &Path) -> bool {
@@ -121,7 +119,7 @@ impl Config {
     pub fn repo_base_dir(&self, spex_dir: &Path, repo_name: &str) -> PathBuf {
         self.repositories
             .iter()
-            .find(|repo| repo.name == repo_name)
+            .find(|repo| repo.repository_name == repo_name)
             .map(|repo| spex_dir.join(&repo.path))
             .unwrap_or_else(|| spex_dir.to_path_buf())
     }

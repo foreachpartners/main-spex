@@ -541,8 +541,8 @@ constraints:
 
     fn repository(path: &str, rules: Vec<&str>) -> Repository {
         Repository {
-            name: "api".to_string(),
-            short_name: "api".to_string(),
+            repository_name: "api".to_string(),
+            repository_short_name: "api".to_string(),
             path: path.to_string(),
             contracts: Vec::new(),
             rules: rules.into_iter().map(str::to_string).collect(),
@@ -705,11 +705,11 @@ constraints:
         }
 
         let mut api = repository("api", vec![]);
-        api.name = "api".to_string();
+        api.repository_name = "api".to_string();
         let mut web = repository("web", vec![]);
-        web.name = "web".to_string();
+        web.repository_name = "web".to_string();
         let mut cli = repository("cli", vec![]);
-        cli.name = "cli".to_string();
+        cli.repository_name = "cli".to_string();
         let config = Config {
             project_name: String::new(),
             cli_version: String::new(),
@@ -720,12 +720,18 @@ constraints:
 
         // Files in api and web select exactly their owning repositories.
         let selected = select_repos(&config, spex, &[], &files).expect("select");
-        let names: Vec<&str> = selected.iter().map(|repo| repo.name.as_str()).collect();
+        let names: Vec<&str> = selected
+            .iter()
+            .map(|repo| repo.repository_name.as_str())
+            .collect();
         assert_eq!(names, vec!["api", "web"]);
 
         // --repo cli unions in even though no provided file lives there.
         let selected = select_repos(&config, spex, &["cli".to_string()], &files).expect("select");
-        let names: Vec<&str> = selected.iter().map(|repo| repo.name.as_str()).collect();
+        let names: Vec<&str> = selected
+            .iter()
+            .map(|repo| repo.repository_name.as_str())
+            .collect();
         assert_eq!(names, vec!["api", "web", "cli"]);
 
         // An unknown --repo name still errors.

@@ -228,9 +228,12 @@ impl Finding {
         let location = self.location.as_deref()?;
         repos.iter().find_map(|repo| {
             let prefix = format!("{}/", repo.path);
-            location
-                .strip_prefix(&prefix)
-                .map(|rel| (repo.name.clone(), Some(Self::normalize_location(rel))))
+            location.strip_prefix(&prefix).map(|rel| {
+                (
+                    repo.repository_name.clone(),
+                    Some(Self::normalize_location(rel)),
+                )
+            })
         })
     }
 
@@ -304,7 +307,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             findings.retain(|finding| !finding.is_preexisting(&repo.ignored_errors));
         }
         reports.push(RepoReport {
-            name: repo.name.clone(),
+            name: repo.repository_name.clone(),
             findings,
         });
     }
@@ -361,7 +364,7 @@ fn fill_preexisting_errors(
     // repository name -> (spec, check) -> baselined files
     let mut grouped: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
         .iter()
-        .map(|repo| (repo.name.clone(), BTreeMap::new()))
+        .map(|repo| (repo.repository_name.clone(), BTreeMap::new()))
         .collect();
 
     for report in reports {
@@ -426,13 +429,13 @@ fn report_fill(
     println!("{}", style.bold("spex check --fill-preexisting-errors"));
     println!();
     for repo in selected {
-        let count = by_repo.get(&repo.name).map_or(0, Vec::len);
+        let count = by_repo.get(&repo.repository_name).map_or(0, Vec::len);
         let summary = if count == 0 {
             style.green("no pre-existing errors")
         } else {
             style.dim(&format!("baselined {}", plural(count, "check")))
         };
-        println!("  {}  {summary}", style.bold(&repo.name));
+        println!("  {}  {summary}", style.bold(&repo.repository_name));
     }
     println!();
     if changed {
@@ -502,7 +505,7 @@ fn check_repo(
     let repo_path = spex_dir.join(&repo.path);
     if !repo_path.is_dir() {
         findings.push(Finding::repo_error(
-            &repo.name,
+            &repo.repository_name,
             format!(
                 "workspace repository path not found: {}",
                 repo_path.display()
@@ -568,7 +571,7 @@ fn validate_specs(
     };
     let Some(report) = reports
         .iter_mut()
-        .find(|report| report.name == spex_repo.name)
+        .find(|report| report.name == spex_repo.repository_name)
     else {
         return Ok(());
     };
@@ -687,7 +690,7 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
     for short_name in &spec.scope {
         if repositories
             .iter()
-            .any(|repo| &repo.short_name == short_name)
+            .any(|repo| &repo.repository_short_name == short_name)
         {
             continue;
         }

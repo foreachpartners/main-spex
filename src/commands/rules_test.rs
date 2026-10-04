@@ -7,8 +7,8 @@ mod tests {
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
         Repository {
-            name: name.to_string(),
-            short_name: name.to_string(),
+            repository_name: name.to_string(),
+            repository_short_name: name.to_string(),
             path: format!("../{name}"),
             contracts: Vec::new(),
             rules: rules.iter().map(|r| r.to_string()).collect(),

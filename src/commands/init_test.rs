@@ -43,8 +43,8 @@ mod tests_unit {
         assert_eq!(config.project_name, "pizza-shop");
         assert_eq!(config.repositories.len(), 1);
         let spex = &config.repositories[0];
-        assert_eq!(spex.name, "pizza-shop-spex");
-        assert_eq!(spex.short_name, "spex");
+        assert_eq!(spex.repository_name, "pizza-shop-spex");
+        assert_eq!(spex.repository_short_name, "spex");
         assert_eq!(spex.path, ".");
     }
 

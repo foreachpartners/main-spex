@@ -168,7 +168,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
             .config
             .repositories
             .iter()
-            .any(|repo| &repo.short_name == short_name)
+            .any(|repo| &repo.repository_short_name == short_name)
         {
             return Err(Report::new(CoverageError::UnknownScope(short_name.clone())));
         }
