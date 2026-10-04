@@ -29,13 +29,13 @@ pub struct Spex {
 }
 
 impl Spex {
-    pub fn locate_spex_repository() -> Result<PathBuf> {
+    pub fn locate_spex_config() -> Result<PathBuf> {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
         config::find_dir(&current_dir).change_context(WorkspaceError::Config)
     }
 
     pub fn discover() -> Result<Self> {
-        let dir = Self::locate_spex_repository()?;
+        let dir = Self::locate_spex_config()?;
         let config = config::load(&dir).change_context(WorkspaceError::Config)?;
         if let Some(warning) = config::version_warning(&config) {
             let style = Style::detect();

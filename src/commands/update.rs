@@ -5,9 +5,9 @@ use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
 use crate::config::{self, CLI_VERSION, SPEX_CONFIG_FILE};
+use crate::spex::Spex;
 use crate::style::Style;
 use crate::templates;
-use crate::spex::Spex;
 use serde::Deserialize;
 
 #[cfg(test)]
@@ -39,7 +39,7 @@ pub enum UpdateError {
 }
 
 pub fn run() -> Result<ExitCode> {
-    let spex_dir = Spex::locate_spex_repository().change_context(UpdateError::NotInitialized)?;
+    let spex_dir = Spex::locate_spex_config().change_context(UpdateError::NotInitialized)?;
 
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     let raw = fs::read_to_string(&config_path)
