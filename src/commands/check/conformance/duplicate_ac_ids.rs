@@ -9,7 +9,8 @@ const DUPLICATE_AC_ID_CHECK: &str = "no-duplicate-ac-ids";
 // An acceptance criterion id must be unique within its own spec: annotations
 // reference `<spec-id>#<ac-id>`, so a duplicate id within one spec would make
 // that reference ambiguous.
-pub(super) fn validate_no_duplicate_ac_ids(specs: &[Spec], findings: &mut Vec<Finding>) {
+pub(super) fn validate_no_duplicate_ac_ids(specs: &[Spec]) -> Vec<Finding> {
+    let mut findings = Vec::new();
     for spec in specs {
         let mut seen: HashSet<&str> = HashSet::new();
         for ac in &spec.acceptance_criteria {
@@ -26,4 +27,5 @@ pub(super) fn validate_no_duplicate_ac_ids(specs: &[Spec], findings: &mut Vec<Fi
             }
         }
     }
+    findings
 }

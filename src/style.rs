@@ -4,6 +4,32 @@ use std::io::IsTerminal;
 #[path = "style_test.rs"]
 mod style_test;
 
+pub fn visible_width(text: &str) -> usize {
+    let mut width = 0;
+    let mut chars = text.chars();
+    while let Some(ch) = chars.next() {
+        if ch != '\u{1b}' {
+            width += 1;
+            continue;
+        }
+        match chars.next() {
+            Some('[') => {
+                chars.by_ref().find(char::is_ascii_alphabetic);
+            }
+            Some(']') => {
+                while let Some(next) = chars.next() {
+                    if next == '\u{1b}' {
+                        chars.next();
+                        break;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    width
+}
+
 pub struct Style {
     enabled: bool,
 }
@@ -16,6 +42,11 @@ impl Style {
     #[cfg(test)]
     pub fn plain() -> Self {
         Self { enabled: false }
+    }
+
+    #[cfg(test)]
+    pub fn colored() -> Self {
+        Self { enabled: true }
     }
 
     fn new(is_terminal: bool) -> Self {

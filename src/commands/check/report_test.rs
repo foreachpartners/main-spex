@@ -1,28 +1,6 @@
-use crate::config::{Config, Repository};
+use crate::testing::{config, repository};
 
 use super::*;
-
-fn repository(name: &str, path: &str) -> Repository {
-    Repository {
-        description: None,
-        repository_name: name.to_string(),
-        repository_short_name: name.to_string(),
-        path: path.to_string(),
-        contracts: Vec::new(),
-        rules: Vec::new(),
-        ignored_errors: Vec::new(),
-    }
-}
-
-fn config(repositories: Vec<Repository>) -> Config {
-    Config {
-        description: None,
-        rules_unused: Vec::new(),
-        project_name: "acme".to_string(),
-        cli_version: "0.0.0".to_string(),
-        repositories,
-    }
-}
 
 mod repo_base_dir_tests {
     use super::*;

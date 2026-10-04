@@ -5,20 +5,22 @@ use std::process::{Command, Output};
 use crate::rule;
 
 use super::super::{Finding, ScopedFile, WorkspaceCheck};
-use super::{Hit, Outcome, push_outcome};
+use super::{Hit, Outcome, outcome_findings};
 
 const SCRIPT_BATCH_SIZE: usize = 1000;
 
 pub(in crate::commands::check) fn run_workspace_checks(
     spex_dir: &Path,
     workspace_checks: &[WorkspaceCheck],
-    findings: &mut Vec<Finding>,
-) {
-    for pending in workspace_checks {
-        let outcome = locate_script(&pending.rule_id, &pending.script, spex_dir)
-            .and_then(|program| run_script_once(&program, spex_dir));
-        push_outcome(&pending.rule_id, &pending.check, outcome, findings);
-    }
+) -> Vec<Finding> {
+    workspace_checks
+        .iter()
+        .flat_map(|pending| {
+            let outcome = locate_script(&pending.rule_id, &pending.script, spex_dir)
+                .and_then(|program| run_script_once(&program, spex_dir));
+            outcome_findings(&pending.rule_id, &pending.check, outcome)
+        })
+        .collect()
 }
 
 pub(in crate::commands::check) fn run_per_file_script(

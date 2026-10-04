@@ -55,19 +55,6 @@ impl Spec {
                 .any(|short_name| self.scope.contains(short_name))
     }
 
-    // Whether contract coverage is required at all: `none` disables it,
-    // `single` requires one spec-level `@spec contract <spec-id>`,
-    // `for-each-ac` requires one per acceptance criterion (see
-    // `ac_contract_required`).
-    pub fn contract_required(&self) -> bool {
-        match self.contract {
-            ContractLevel::None => false,
-            ContractLevel::Single | ContractLevel::ForEachAc => {
-                !self.layer_ignored(CoverageLayer::Contract)
-            }
-        }
-    }
-
     // Whether this one acceptance criterion needs its own contract
     // annotation — only under `contract: for-each-ac`, and only when the
     // contract layer (or this criterion's contract requirement specifically)
@@ -213,6 +200,10 @@ impl Status {
 
     pub fn is_implemented(self) -> bool {
         matches!(self, Status::Active | Status::Deprecated)
+    }
+
+    pub fn is_tracked(self) -> bool {
+        matches!(self, Status::Active | Status::InProgress)
     }
 }
 

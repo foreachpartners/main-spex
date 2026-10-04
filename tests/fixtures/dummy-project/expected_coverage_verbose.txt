@@ -18,22 +18,21 @@ Gaps (7)
     ✗  foreach-with-gap     1/2 AC
         Lets a customer split an order's payment across two cards, with a contract annotation per
         acceptance criterion and only the first criterion traced.
-        splits-across-cards (missing test): let a customer split an order's payment across two
-                                             cards
+        splits-across-cards (missing test): let a customer split an order's payment across two cards
         splits-across-accounts (missing contract & impl & test): let a customer split an order's
-                                                                  payment across two accounts
+                                                                 payment across two accounts
 
     ✗  in-progress-mixed    1/3 AC
         Notifies a customer by email when their order ships, with a retry for transient delivery
         failures and a follow-up reminder later.
         retries-on-failure (missing impl & test): retry sending the notification once if the first
-                                                   attempt fails
+                                                  attempt fails
 
     ✗  none-not-covered     0/2 AC
         Lets a customer schedule a saved favorite order to be reordered on a chosen day, with
         contract coverage disabled and no annotations tracing it at all.
         schedules-reorder-day (missing impl & test): let a customer schedule a reorder on a chosen
-                                                      day
+                                                     day
         cancels-scheduled-reorder (missing impl & test): let a customer cancel a scheduled reorder
 
     ✗  none-with-gap        1/2 AC
@@ -46,30 +45,30 @@ Gaps (7)
         no annotations tracing it at all.
         archives-completed-order (missing impl & test): let a customer archive a completed order
         hides-archived-default (missing impl & test): hide archived orders from the default order
-                                                       list
+                                                      list
 
   frontend
     ✗  active-with-gap      2/4 AC  missing: contract
         Validates a new account's registration input before it is created, rejecting invalid or
         duplicate submissions.
         normalizes-format (missing test): normalize the submitted email to lowercase before storing
-                                           it
+                                          it
         rejects-duplicate (missing impl): reject a registration request for an email already
-                                           registered
+                                          registered
         logs-attempt (missing impl & test): log every registration attempt, successful or not
 
     ✗  foreach-not-covered  0/2 AC
         Lets a customer reorder every item of a past order, with a contract annotation per
         acceptance criterion and no annotations tracing it at all.
-        reorders-past-order (missing contract & impl & test): let a customer reorder every item of
-                                                               a past order
+        reorders-past-order (missing contract & impl & test): let a customer reorder every item of a
+                                                              past order
         edits-reorder-before-submit (missing contract & impl & test): let a customer edit a reorder
-                                                                       before submitting it
+                                                                      before submitting it
 
     ✗  in-progress-mixed    1/3 AC
         Notifies a customer by email when their order ships, with a retry for transient delivery
         failures and a follow-up reminder later.
         retries-on-failure (missing impl & test): retry sending the notification once if the first
-                                                   attempt fails
+                                                  attempt fails
 
 planned (2), in-progress (2), active (9), gaps (7)

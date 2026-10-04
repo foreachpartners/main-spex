@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
-use crate::annotations::Parser;
+use crate::annotations;
 
 use super::{Finding, RepoCtx, ScopedFile};
 
@@ -20,9 +20,8 @@ pub(super) fn validate_annotations(
     ctx: &RepoCtx,
     is_spex_repo: bool,
     known_ids: &HashMap<String, HashSet<String>>,
-    findings: &mut Vec<Finding>,
-) {
-    let parser = Parser::new();
+) -> Vec<Finding> {
+    let mut findings = Vec::new();
     for file in ctx.candidates {
         if is_excluded(ctx, file, is_spex_repo) {
             continue;
@@ -30,9 +29,10 @@ pub(super) fn validate_annotations(
         let Ok(content) = fs::read_to_string(&file.abs) else {
             continue;
         };
-        check_format(&parser, file, &content, findings);
-        check_orphans(&parser, file, &content, known_ids, findings);
+        findings.extend(check_format(file, &content));
+        findings.extend(check_orphans(file, &content, known_ids));
     }
+    findings
 }
 
 // Markdown files carry illustrative example annotations in prose, not real
@@ -58,25 +58,25 @@ fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
         })
 }
 
-fn check_format(parser: &Parser, file: &ScopedFile, content: &str, findings: &mut Vec<Finding>) {
-    for line in parser.malformed_lines(content) {
-        findings.push(finding(
-            FORMAT_CHECK,
-            Some(format!("{}:{line}", file.rel_str())),
-            "malformed spec-id annotation".to_string(),
-        ));
-    }
+fn check_format(file: &ScopedFile, content: &str) -> Vec<Finding> {
+    annotations::malformed_lines(content)
+        .into_iter()
+        .map(|line| {
+            finding(
+                FORMAT_CHECK,
+                Some(format!("{}:{line}", file.rel_str())),
+                "malformed spec-id annotation".to_string(),
+            )
+        })
+        .collect()
 }
 
 fn check_orphans(
-    parser: &Parser,
     file: &ScopedFile,
     content: &str,
     known: &HashMap<String, HashSet<String>>,
-    findings: &mut Vec<Finding>,
-) {
-    let refs: HashSet<(String, Option<String>)> = parser
-        .annotations(content)
+) -> Vec<Finding> {
+    let refs: HashSet<(String, Option<String>)> = annotations::parse(content)
         .into_iter()
         .map(|annotation| (annotation.spec_id, annotation.ac_id))
         .collect();
@@ -89,15 +89,18 @@ fn check_orphans(
         })
         .collect();
     orphans.sort();
-    for (spec_id, ac_id) in orphans {
-        let message = match ac_id {
-            Some(ac_id) if known.contains_key(&spec_id) => format!(
-                "orphan annotation references unknown acceptance criterion `{ac_id}` of spec `{spec_id}`"
-            ),
-            _ => format!("orphan annotation references unknown spec `{spec_id}`"),
-        };
-        findings.push(finding(ORPHAN_CHECK, Some(file.rel_str()), message));
-    }
+    orphans
+        .into_iter()
+        .map(|(spec_id, ac_id)| {
+            let message = match ac_id {
+                Some(ac_id) if known.contains_key(&spec_id) => format!(
+                    "orphan annotation references unknown acceptance criterion `{ac_id}` of spec `{spec_id}`"
+                ),
+                _ => format!("orphan annotation references unknown spec `{spec_id}`"),
+            };
+            finding(ORPHAN_CHECK, Some(file.rel_str()), message)
+        })
+        .collect()
 }
 
 fn finding(check: &str, location: Option<String>, message: String) -> Finding {

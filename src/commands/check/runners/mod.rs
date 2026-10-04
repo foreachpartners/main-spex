@@ -32,18 +32,13 @@ impl Hit {
     }
 }
 
-pub(super) fn push_outcome(
-    rule_id: &str,
-    check: &Check,
-    outcome: Outcome,
-    findings: &mut Vec<Finding>,
-) {
+pub(super) fn outcome_findings(rule_id: &str, check: &Check, outcome: Outcome) -> Vec<Finding> {
     match outcome {
-        Ok(hits) => findings.extend(
-            hits.into_iter()
-                .map(|hit| Finding::violation(check, rule_id, hit.location, hit.message)),
-        ),
-        Err(message) => findings.push(Finding::config_error(rule_id, &check.name, message)),
+        Ok(hits) => hits
+            .into_iter()
+            .map(|hit| Finding::violation(check, rule_id, hit.location, hit.message))
+            .collect(),
+        Err(message) => vec![Finding::config_error(rule_id, &check.name, message)],
     }
 }
 

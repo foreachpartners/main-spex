@@ -1,35 +1,21 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::spec::{
-        AcceptanceCriterion, ContractLevel, CoverageIgnore, Spec, Statement, Status,
-    };
+    use crate::spec::{ContractLevel, CoverageIgnore, Spec, Status};
+    use crate::testing;
 
     fn spec(id: &str, ac_ids: &[&str], coverage_ignore: Vec<CoverageIgnore>) -> Spec {
         Spec {
-            id: id.to_string(),
-            path: format!("{id}.yaml"),
-            description: String::new(),
-            acceptance_criteria: ac_ids
-                .iter()
-                .map(|id| AcceptanceCriterion {
-                    id: id.to_string(),
-                    statement: Statement::Must(id.to_string()),
-                    is_done: None,
-                    line: 0,
-                })
-                .collect(),
-            blocked_by: Vec::new(),
-            scope: Vec::new(),
+            acceptance_criteria: ac_ids.iter().map(|id| testing::criterion(id)).collect(),
             status: Status::Active,
-            contract: ContractLevel::Single,
             coverage_ignore,
+            ..testing::spec(id)
         }
     }
 
     #[test]
-    fn parser_keeps_ids_with_digits_whole() {
-        let annotations = Parser::new().annotations("// @spec impl delivery-time2#step-1\n");
+    fn parse_keeps_ids_with_digits_whole() {
+        let annotations = parse("// @spec impl delivery-time2#step-1\n");
 
         assert_eq!(annotations.len(), 1);
         assert_eq!(annotations[0].spec_id, "delivery-time2");
@@ -37,10 +23,10 @@ mod tests {
     }
 
     #[test]
-    fn parser_reports_lines_with_an_unparseable_annotation() {
+    fn malformed_lines_reports_lines_with_an_unparseable_annotation() {
         let content = "// @spec impl a\n// @spec bogus a\nlet spec = 1;\n// @spec test\n";
 
-        assert_eq!(Parser::new().malformed_lines(content), vec![2, 4]);
+        assert_eq!(malformed_lines(content), vec![2, 4]);
     }
 
     #[test]

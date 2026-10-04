@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::testing;
     use indoc::indoc;
     use std::collections::HashMap;
     use tempfile::tempdir;
@@ -76,11 +77,8 @@ mod tests {
 
     fn config_with_version(version: &str) -> Config {
         Config {
-            project_name: "demo".to_string(),
             cli_version: version.to_string(),
-            description: None,
-            rules_unused: Vec::new(),
-            repositories: Vec::new(),
+            ..testing::config(Vec::new())
         }
     }
 

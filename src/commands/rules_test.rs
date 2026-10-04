@@ -2,18 +2,14 @@
 mod tests {
     use super::super::*;
     use crate::config::Repository;
+    use crate::testing;
     use indoc::indoc;
     use tempfile::tempdir;
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
         Repository {
-            description: None,
-            repository_name: name.to_string(),
-            repository_short_name: name.to_string(),
-            path: format!("../{name}"),
-            contracts: Vec::new(),
             rules: rules.iter().map(|r| r.to_string()).collect(),
-            ignored_errors: Vec::new(),
+            ..testing::repository(name, &format!("../{name}"))
         }
     }
 

@@ -9,6 +9,8 @@ mod spec;
 mod spex;
 mod style;
 mod templates;
+#[cfg(test)]
+mod testing;
 mod util;
 
 use std::process::ExitCode;

@@ -52,12 +52,13 @@ src/                CLI source
   commitment.rs     RFC 2119 commitments in order (shared by spec and rule)
   annotations.rs    @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
   repo_files.rs     Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
-  style.rs          Terminal color styling (shared by commands)
+  style.rs          Terminal color styling and visible-width measuring (shared by commands)
   util.rs           Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
+  testing.rs        Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
-    check/          check command: orchestration (mod), report, spec-id annotation tracing
-      conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs)
+    check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs, status, blocked_by, scope, coverage_ignore)
       runners/      One runner per check type (ast_grep, glob, regexp, script)
 docs/                          Framework reference docs, bundled into projects by init/update (single source of truth)
   glossary.md              Terms used across code, messages, schemas, and docs

@@ -43,8 +43,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let mut findings = Vec::new();
-        validate_annotations(&ctx, false, &known(&["list-pizza-menu"]), &mut findings);
+        let findings = validate_annotations(&ctx, false, &known(&["list-pizza-menu"]));
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, FORMAT_CHECK);
@@ -69,8 +68,7 @@ mod tests {
             "list-pizza-menu".to_string(),
             HashSet::from(["in-stock-only".to_string()]),
         );
-        let mut findings = Vec::new();
-        validate_annotations(&ctx, false, &known_ids, &mut findings);
+        let findings = validate_annotations(&ctx, false, &known_ids);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, ORPHAN_CHECK);
@@ -89,8 +87,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let mut findings = Vec::new();
-        validate_annotations(&ctx, true, &HashMap::new(), &mut findings);
+        let findings = validate_annotations(&ctx, true, &HashMap::new());
 
         assert!(findings.is_empty());
     }
@@ -108,8 +105,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let mut findings = Vec::new();
-        validate_annotations(&ctx, false, &HashMap::new(), &mut findings);
+        let findings = validate_annotations(&ctx, false, &HashMap::new());
 
         assert!(findings.is_empty());
     }
@@ -127,12 +123,10 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let mut findings = Vec::new();
-        validate_annotations(
+        let findings = validate_annotations(
             &ctx,
             false,
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
-            &mut findings,
         );
 
         assert_eq!(findings.len(), 1);
@@ -154,12 +148,10 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let mut findings = Vec::new();
-        validate_annotations(
+        let findings = validate_annotations(
             &ctx,
             false,
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
-            &mut findings,
         );
 
         assert_eq!(findings.len(), 1);

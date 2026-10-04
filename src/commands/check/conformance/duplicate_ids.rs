@@ -14,11 +14,8 @@ pub(super) const DUPLICATE_ID_CHECK: &str = "no-duplicate-ids";
 // Every id must be unique across both `rules/`
 // and `specs/`, since rule ids and spec ids share the same naming
 // convention and could otherwise collide.
-pub(super) fn validate_no_duplicate_ids(
-    specs: &[Spec],
-    rules: &[Rule],
-    findings: &mut Vec<Finding>,
-) {
+pub(super) fn validate_no_duplicate_ids(specs: &[Spec], rules: &[Rule]) -> Vec<Finding> {
+    let mut findings = Vec::new();
     let mut seen: HashMap<&str, String> = HashMap::new();
     let locations: Vec<(&str, String)> = specs
         .iter()
@@ -38,4 +35,5 @@ pub(super) fn validate_no_duplicate_ids(
             seen.insert(id, location.clone());
         }
     }
+    findings
 }

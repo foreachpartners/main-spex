@@ -1,18 +1,13 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::testing;
 
     fn spec(coverage_ignore: Vec<CoverageIgnore>) -> Spec {
         Spec {
-            id: "A".to_string(),
-            path: "A.yaml".to_string(),
-            description: String::new(),
-            acceptance_criteria: Vec::new(),
-            blocked_by: Vec::new(),
-            scope: Vec::new(),
             status: Status::Active,
-            contract: ContractLevel::Single,
             coverage_ignore,
+            ..testing::spec("A")
         }
     }
 
@@ -78,26 +73,9 @@ mod tests {
     }
 
     #[test]
-    fn contract_required_is_false_for_none() {
-        let mut spec = spec(Vec::new());
-        spec.contract = ContractLevel::None;
-        assert!(!spec.contract_required());
-    }
-
-    #[test]
-    fn contract_required_holds_at_spec_level_for_single_and_for_each_ac() {
-        for level in [ContractLevel::Single, ContractLevel::ForEachAc] {
-            let mut spec = spec(Vec::new());
-            spec.contract = level;
-            assert!(spec.contract_required());
-        }
-    }
-
-    #[test]
-    fn contract_required_respects_whole_layer_ignore() {
+    fn ac_contract_required_respects_whole_layer_ignore() {
         let mut spec = spec(vec![ignore(CoverageLayer::Contract, None)]);
         spec.contract = ContractLevel::ForEachAc;
-        assert!(!spec.contract_required());
         assert!(!spec.ac_contract_required("any-ac"));
     }
 
@@ -120,22 +98,15 @@ mod tests {
 
     #[test]
     fn is_done_defaults_true_when_absent() {
-        let ac = AcceptanceCriterion {
-            id: "a".to_string(),
-            statement: Statement::Must("a".to_string()),
-            is_done: None,
-            line: 0,
-        };
+        let ac = testing::criterion("a");
         assert!(ac.is_done());
     }
 
     #[test]
     fn is_done_reads_explicit_false() {
         let ac = AcceptanceCriterion {
-            id: "a".to_string(),
-            statement: Statement::Must("a".to_string()),
             is_done: Some(false),
-            line: 0,
+            ..testing::criterion("a")
         };
         assert!(!ac.is_done());
     }

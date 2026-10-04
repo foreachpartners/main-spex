@@ -15,8 +15,7 @@ mod tests {
 
         let specs = Spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
         let rules = Rule::load_all(&rules_dir).expect("rules");
-        let mut findings = Vec::new();
-        validate_no_duplicate_ids(&specs, &rules, &mut findings);
+        let findings = validate_no_duplicate_ids(&specs, &rules);
 
         assert!(findings.is_empty());
     }
@@ -34,8 +33,7 @@ mod tests {
 
         let specs = Spec::load_all(&dir.path().join(spec::SPECS_DIR)).expect("specs");
         let rules = Rule::load_all(&rules_dir).expect("rules");
-        let mut findings = Vec::new();
-        validate_no_duplicate_ids(&specs, &rules, &mut findings);
+        let findings = validate_no_duplicate_ids(&specs, &rules);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, DUPLICATE_ID_CHECK);
@@ -58,8 +56,7 @@ mod tests {
 
         let specs = Spec::load_all(&specs_dir).expect("specs");
         let rules = Rule::load_all(&rules_dir).expect("rules");
-        let mut findings = Vec::new();
-        validate_no_duplicate_ids(&specs, &rules, &mut findings);
+        let findings = validate_no_duplicate_ids(&specs, &rules);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, DUPLICATE_ID_CHECK);

@@ -1,10 +1,12 @@
 use std::path::Path;
 use std::process::ExitCode;
 
+use crate::config::Config;
+use crate::rule::Severity;
 use crate::style::Style;
 use crate::util::{file_url, plural};
 
-use super::*;
+use super::{Finding, RepoReport};
 
 #[cfg(test)]
 #[path = "report_test.rs"]

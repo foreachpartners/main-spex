@@ -3,11 +3,11 @@ use std::path::Path;
 
 use error_stack::ResultExt;
 use include_dir::{Dir, DirEntry, include_dir};
+use serde_yaml_ng::Value;
 
 use crate::error::{CliError, Result};
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use crate::util;
-use serde::Deserialize;
 
 #[cfg(test)]
 #[path = "templates_test.rs"]
@@ -105,12 +105,6 @@ pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
 }
 
-#[derive(Deserialize, Default)]
-struct SyncWithUpstreamFlag {
-    #[serde(default)]
-    sync_with_upstream: bool,
-}
-
 // A spec opts into `spex update` overwriting it (and its scripts) by setting
 // `sync_with_upstream: true`. If the local file is missing or fails to parse,
 // it is treated as not synced, so a brand-new local spec never gets silently
@@ -118,32 +112,9 @@ struct SyncWithUpstreamFlag {
 fn is_synced_with_upstream(spec_path: &Path) -> bool {
     fs::read_to_string(spec_path)
         .ok()
-        .and_then(|raw| serde_yaml_ng::from_str::<SyncWithUpstreamFlag>(&raw).ok())
-        .is_some_and(|flag| flag.sync_with_upstream)
-}
-
-fn default_true() -> bool {
-    true
-}
-
-#[derive(Deserialize)]
-struct SkillMetadata {
-    #[serde(rename = "sync-with-upstream", default = "default_true")]
-    sync_with_upstream: bool,
-}
-
-impl Default for SkillMetadata {
-    fn default() -> Self {
-        Self {
-            sync_with_upstream: true,
-        }
-    }
-}
-
-#[derive(Deserialize, Default)]
-struct SkillFrontmatter {
-    #[serde(default)]
-    metadata: SkillMetadata,
+        .and_then(|raw| serde_yaml_ng::from_str::<Value>(&raw).ok())
+        .and_then(|spec| spec.get("sync_with_upstream")?.as_bool())
+        .unwrap_or(false)
 }
 
 // Extracts the YAML frontmatter (the block between the leading `---` lines)
@@ -157,11 +128,14 @@ fn frontmatter(contents: &str) -> Option<&str> {
 fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
     fs::read_to_string(skill_md_path)
         .ok()
-        .and_then(|raw| {
-            let frontmatter = frontmatter(&raw)?;
-            serde_yaml_ng::from_str::<SkillFrontmatter>(frontmatter).ok()
+        .and_then(|raw| serde_yaml_ng::from_str::<Value>(frontmatter(&raw)?).ok())
+        .and_then(|frontmatter| {
+            frontmatter
+                .get("metadata")?
+                .get("sync-with-upstream")?
+                .as_bool()
         })
-        .is_none_or(|parsed| parsed.metadata.sync_with_upstream)
+        .unwrap_or(true)
 }
 
 fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {

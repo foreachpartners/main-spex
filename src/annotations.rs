@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
+use std::sync::LazyLock;
 
 use error_stack::ResultExt;
 use regex::Regex;
@@ -74,7 +75,7 @@ impl Found {
     // each acceptance criterion carries its own (see `ac_coverage`).
     pub fn contract_missing(&self, spec: &Spec) -> bool {
         spec.contract == ContractLevel::Single
-            && spec.contract_required()
+            && !spec.layer_ignored(CoverageLayer::Contract)
             && !self.has_bare(&spec.id, CoverageLayer::Contract)
     }
 
@@ -83,13 +84,12 @@ impl Found {
     #[cfg(test)]
     pub fn scan(content: &str) -> Self {
         let mut found = Self::new();
-        found.record_all(Parser::new().annotations(content));
+        found.record_all(parse(content));
         found
     }
 
     // Scans every workspace repository except spex itself for spec-id annotations.
     pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Self> {
-        let parser = Parser::new();
         let spex_canon = util::canonical(spex_dir);
         let mut found = Self::new();
 
@@ -100,7 +100,7 @@ impl Found {
             for contract in &repo.contracts {
                 let contract_path = spex_dir.join(&contract.path);
                 if let Ok(content) = fs::read_to_string(&contract_path) {
-                    found.record_all(parser.annotations(&content));
+                    found.record_all(parse(&content));
                 }
             }
 
@@ -108,19 +108,19 @@ impl Found {
             if !repo_path.is_dir() || util::canonical(&repo_path) == spex_canon {
                 continue;
             }
-            found.scan_repo(&parser, &repo_path)?;
+            found.scan_repo(&repo_path)?;
         }
 
         Ok(found)
     }
 
-    fn scan_repo(&mut self, parser: &Parser, repo_path: &Path) -> Result<()> {
+    fn scan_repo(&mut self, repo_path: &Path) -> Result<()> {
         for result in RepoFiles::new(repo_path) {
             let path = result.change_context(CliError::Walk)?;
             let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };
-            self.record_all(parser.annotations(&content));
+            self.record_all(parse(&content));
         }
 
         Ok(())
@@ -187,54 +187,51 @@ pub struct Annotation {
     pub ac_id: Option<String>,
 }
 
-pub struct Parser {
-    annotation: Regex,
-    token: Regex,
+fn token_pattern() -> String {
+    let id = r"[a-z0-9]+(?:-[a-z0-9]+)*";
+    format!(r"{id}(?:#{id})?")
 }
 
-impl Parser {
-    pub fn new() -> Self {
-        let id = r"[a-z0-9]+(?:-[a-z0-9]+)*";
-        let token = format!(r"{id}(?:#{id})?");
-        Self {
-            annotation: Regex::new(&format!(
-                r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
-            ))
-            .expect("valid @spec regex"),
-            token: Regex::new(&token).expect("valid token regex"),
-        }
-    }
+static ANNOTATION: LazyLock<Regex> = LazyLock::new(|| {
+    let token = token_pattern();
+    Regex::new(&format!(
+        r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
+    ))
+    .expect("valid @spec regex")
+});
 
-    pub fn annotations(&self, content: &str) -> Vec<Annotation> {
-        let mut annotations = Vec::new();
-        for caps in self.annotation.captures_iter(content) {
-            let layer = match &caps[1] {
-                "contract" => CoverageLayer::Contract,
-                "impl" => CoverageLayer::Impl,
-                "test" => CoverageLayer::Test,
-                _ => continue,
+static TOKEN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(&token_pattern()).expect("valid token regex"));
+
+pub fn parse(content: &str) -> Vec<Annotation> {
+    let mut annotations = Vec::new();
+    for caps in ANNOTATION.captures_iter(content) {
+        let layer = match &caps[1] {
+            "contract" => CoverageLayer::Contract,
+            "impl" => CoverageLayer::Impl,
+            "test" => CoverageLayer::Test,
+            _ => continue,
+        };
+        for token in TOKEN.find_iter(&caps[2]) {
+            let (spec_id, ac_id) = match token.as_str().split_once('#') {
+                Some((spec_id, ac_id)) => (spec_id, Some(ac_id)),
+                None => (token.as_str(), None),
             };
-            for token in self.token.find_iter(&caps[2]) {
-                let (spec_id, ac_id) = match token.as_str().split_once('#') {
-                    Some((spec_id, ac_id)) => (spec_id, Some(ac_id)),
-                    None => (token.as_str(), None),
-                };
-                annotations.push(Annotation {
-                    layer,
-                    spec_id: spec_id.to_string(),
-                    ac_id: ac_id.map(str::to_string),
-                });
-            }
+            annotations.push(Annotation {
+                layer,
+                spec_id: spec_id.to_string(),
+                ac_id: ac_id.map(str::to_string),
+            });
         }
-        annotations
     }
+    annotations
+}
 
-    pub fn malformed_lines(&self, content: &str) -> Vec<usize> {
-        content
-            .lines()
-            .enumerate()
-            .filter(|(_, line)| line.contains("@spec ") && !self.annotation.is_match(line))
-            .map(|(index, _)| index + 1)
-            .collect()
-    }
+pub fn malformed_lines(content: &str) -> Vec<usize> {
+    content
+        .lines()
+        .enumerate()
+        .filter(|(_, line)| line.contains("@spec ") && !ANNOTATION.is_match(line))
+        .map(|(index, _)| index + 1)
+        .collect()
 }

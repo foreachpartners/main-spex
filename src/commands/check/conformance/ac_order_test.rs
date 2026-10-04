@@ -14,9 +14,7 @@ mod tests {
         std::fs::write(specs_dir.join("sample.yaml"), yaml).expect("spec");
 
         let specs = Spec::load_all(&specs_dir).expect("specs");
-        let mut findings = Vec::new();
-        validate_ac_order(&specs, &[], &mut findings);
-        findings
+        validate_ac_order(&specs, &[])
     }
 
     fn rule_findings(yaml: &str) -> Vec<Finding> {
@@ -26,9 +24,7 @@ mod tests {
         std::fs::write(rules_dir.join("sample.yaml"), yaml).expect("rule");
 
         let rules = Rule::load_all(&rules_dir).expect("rules");
-        let mut findings = Vec::new();
-        validate_ac_order(&[], &rules, &mut findings);
-        findings
+        validate_ac_order(&[], &rules)
     }
 
     fn assert_out_of_order(finding: &Finding, location: &str, label: &str, prev_label: &str) {

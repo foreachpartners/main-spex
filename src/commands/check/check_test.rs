@@ -2,13 +2,9 @@
 mod tests {
     use super::super::runners::{build_globset, resolve_script};
     use super::super::*;
-    use crate::config::{Config, PreexistingError, Repository};
-    use crate::rule::{Check, CheckKind, Rule, RunScope, Severity};
-    use crate::spec::{
-        AcceptanceCriterion, ContractLevel, CoverageIgnore, CoverageLayer, Statement,
-    };
+    use crate::rule::Severity;
+    use crate::testing;
     use serial_test::serial;
-    use std::collections::HashMap;
     use tempfile::{TempDir, tempdir};
 
     fn check(kind: CheckKind) -> Check {
@@ -106,9 +102,7 @@ mod tests {
             spex_dir,
             candidates: files,
         };
-        let mut findings = Vec::new();
-        ctx.run_check(rule_id, check, &mut findings);
-        findings
+        ctx.run_check(rule_id, check)
     }
 
     fn run_scoped(
@@ -536,22 +530,15 @@ constraints:
 
     fn rule(id: &str, checks: Vec<Check>) -> Rule {
         Rule {
-            id: id.to_string(),
-            path: format!("{id}.yaml"),
-            acceptance_criteria: Vec::new(),
             checks,
+            ..testing::rule(id)
         }
     }
 
     fn repository(path: &str, rules: Vec<&str>) -> Repository {
         Repository {
-            description: None,
-            repository_name: "api".to_string(),
-            repository_short_name: "api".to_string(),
-            path: path.to_string(),
-            contracts: Vec::new(),
             rules: rules.into_iter().map(str::to_string).collect(),
-            ignored_errors: Vec::new(),
+            ..testing::repository("api", path)
         }
     }
 
@@ -582,8 +569,7 @@ constraints:
         let repository = repository("../api", vec!["X"]);
 
         // Without --files: negated check fires because dprint.json is absent.
-        let mut findings = Vec::new();
-        check_repo(
+        let findings = check_repo(
             CheckRepoArgs {
                 repo: &repository,
                 spex_dir: &spex,
@@ -591,7 +577,6 @@ constraints:
                 known_ids: &HashMap::new(),
                 files: &[],
             },
-            &mut findings,
             &mut Vec::new(),
         )
         .expect("check");
@@ -600,8 +585,7 @@ constraints:
         assert!(findings.iter().any(|f| f.check == "no-rs-files"));
 
         // With --files: negated check is skipped, non-negated still fires.
-        let mut findings = Vec::new();
-        check_repo(
+        let findings = check_repo(
             CheckRepoArgs {
                 repo: &repository,
                 spex_dir: &spex,
@@ -609,7 +593,6 @@ constraints:
                 known_ids: &HashMap::new(),
                 files: &["src/main.rs".to_string()],
             },
-            &mut findings,
             &mut Vec::new(),
         )
         .expect("check");
@@ -645,8 +628,7 @@ constraints:
         let rules = [rule("x", vec![listing])];
 
         let mut collected = Vec::new();
-        let mut findings = Vec::new();
-        check_repo(
+        let mut repo_findings = check_repo(
             CheckRepoArgs {
                 repo: &repository("../api", vec!["x"]),
                 spex_dir: &spex,
@@ -654,29 +636,29 @@ constraints:
                 known_ids: &HashMap::new(),
                 files: &[],
             },
-            &mut findings,
             &mut collected,
         )
         .expect("api");
-        check_repo(
-            CheckRepoArgs {
-                repo: &repository("../web", vec!["x"]),
-                spex_dir: &spex,
-                rules: &rules,
-                known_ids: &HashMap::new(),
-                files: &[],
-            },
-            &mut findings,
-            &mut collected,
-        )
-        .expect("web");
+        repo_findings.extend(
+            check_repo(
+                CheckRepoArgs {
+                    repo: &repository("../web", vec!["x"]),
+                    spex_dir: &spex,
+                    rules: &rules,
+                    known_ids: &HashMap::new(),
+                    files: &[],
+                },
+                &mut collected,
+            )
+            .expect("web"),
+        );
 
         // The workspace check is deferred, so neither repository reports it, and
         // the two repositories collapse into a single pending check.
-        assert!(findings.is_empty());
+        assert!(repo_findings.is_empty());
         assert_eq!(collected.len(), 1);
 
-        run_workspace_checks(&spex, &collected, &mut findings);
+        let findings = run_workspace_checks(&spex, &collected);
 
         // It ran exactly once, despite both repositories inheriting it.
         let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
@@ -695,337 +677,5 @@ constraints:
             .collect();
         assert!(locations.contains(&"api/a.txt"), "got: {locations:?}");
         assert!(locations.contains(&"web/b.txt"), "got: {locations:?}");
-    }
-
-    #[test]
-    fn select_repos_with_files_picks_owning_and_named_repos() {
-        let dir = tempdir().expect("dir");
-        let spex = dir.path();
-        for (repo, file) in [("api", "a.txt"), ("web", "b.txt"), ("cli", "c.txt")] {
-            std::fs::create_dir_all(spex.join(repo)).expect("repo dir");
-            std::fs::write(spex.join(repo).join(file), "").expect("file");
-        }
-
-        let mut api = repository("api", vec![]);
-        api.repository_name = "api".to_string();
-        let mut web = repository("web", vec![]);
-        web.repository_name = "web".to_string();
-        let mut cli = repository("cli", vec![]);
-        cli.repository_name = "cli".to_string();
-        let config = Config {
-            project_name: String::new(),
-            cli_version: String::new(),
-            description: None,
-            rules_unused: Vec::new(),
-            repositories: vec![api, web, cli],
-        };
-
-        let files = vec!["a.txt".to_string(), "b.txt".to_string()];
-
-        // Files in api and web select exactly their owning repositories.
-        let selected = select_repos(&config, spex, &[], &files).expect("select");
-        let names: Vec<&str> = selected
-            .iter()
-            .map(|repo| repo.repository_name.as_str())
-            .collect();
-        assert_eq!(names, vec!["api", "web"]);
-
-        // --repo cli unions in even though no provided file lives there.
-        let selected = select_repos(&config, spex, &["cli".to_string()], &files).expect("select");
-        let names: Vec<&str> = selected
-            .iter()
-            .map(|repo| repo.repository_name.as_str())
-            .collect();
-        assert_eq!(names, vec!["api", "web", "cli"]);
-
-        // An unknown --repo name still errors.
-        assert!(select_repos(&config, spex, &["ghost".to_string()], &files).is_err());
-
-        // A --files entry that doesn't exist in any repository errors.
-        let missing = vec!["missing.txt".to_string()];
-        assert!(select_repos(&config, spex, &[], &missing).is_err());
-    }
-
-    fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {
-        Finding {
-            severity,
-            rule_id: "X".to_string(),
-            check: check.to_string(),
-            location: location.map(str::to_string),
-            message: "boom".to_string(),
-        }
-    }
-
-    fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
-        PreexistingError {
-            rule_id: "X".to_string(),
-            check: check.to_string(),
-            files: files.into_iter().map(str::to_string).collect(),
-        }
-    }
-
-    #[test]
-    fn normalize_location_drops_trailing_line_number() {
-        assert_eq!(Finding::normalize_location("src/main.rs:42"), "src/main.rs");
-        assert_eq!(Finding::normalize_location("src/main.rs"), "src/main.rs");
-        // A non-numeric suffix is part of the path, not a line number.
-        assert_eq!(Finding::normalize_location("a:b/c.rs"), "a:b/c.rs");
-    }
-
-    #[test]
-    fn preexisting_empty_files_suppresses_whole_check() {
-        let baseline = vec![preexisting("no-cyrillic", vec![])];
-        assert!(
-            finding(Severity::Error, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
-        );
-        assert!(finding(Severity::Error, "no-cyrillic", None).is_preexisting(&baseline));
-    }
-
-    #[test]
-    fn preexisting_matches_listed_file_only() {
-        let baseline = vec![preexisting("no-cyrillic", vec!["docs/old.md"])];
-        // Listed file, normalized from `file:line`, is suppressed.
-        assert!(
-            finding(Severity::Error, "no-cyrillic", Some("docs/old.md:3"))
-                .is_preexisting(&baseline)
-        );
-        // A new error in another file still surfaces.
-        assert!(
-            !finding(Severity::Error, "no-cyrillic", Some("docs/new.md:3"))
-                .is_preexisting(&baseline)
-        );
-    }
-
-    #[test]
-    fn preexisting_never_suppresses_warnings_or_other_checks() {
-        let baseline = vec![preexisting("no-cyrillic", vec![])];
-        // Warnings are never a baseline concern.
-        assert!(
-            !finding(Severity::Warn, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
-        );
-        // A different check name does not match.
-        assert!(
-            !finding(Severity::Error, "writing", Some("README.md:1")).is_preexisting(&baseline)
-        );
-    }
-
-    fn ac(ids: &[&str]) -> Vec<AcceptanceCriterion> {
-        ac_with_done(ids, &[])
-    }
-
-    // Builds acceptance criteria for the given ids, marking `not_done` ones
-    // with `is_done: false` and leaving the rest at the (done) default.
-    fn ac_with_done(ids: &[&str], not_done: &[&str]) -> Vec<AcceptanceCriterion> {
-        ids.iter()
-            .map(|id| AcceptanceCriterion {
-                id: id.to_string(),
-                statement: Statement::Must(id.to_string()),
-                is_done: not_done.contains(id).then_some(false),
-                line: 0,
-            })
-            .collect()
-    }
-
-    fn spec(id: &str, blocked_by: Vec<&str>) -> Spec {
-        spec_with_criteria(id, Vec::new(), blocked_by)
-    }
-
-    fn spec_with_criteria(
-        id: &str,
-        acceptance_criteria: Vec<AcceptanceCriterion>,
-        blocked_by: Vec<&str>,
-    ) -> Spec {
-        Spec {
-            id: id.to_string(),
-            path: format!("{id}.yaml"),
-            description: String::new(),
-            acceptance_criteria,
-            blocked_by: blocked_by.into_iter().map(str::to_string).collect(),
-            scope: Vec::new(),
-            status: Status::Planned,
-            contract: ContractLevel::Single,
-            coverage_ignore: Vec::new(),
-        }
-    }
-
-    #[test]
-    fn status_finding_flags_fully_done_unimplemented_spec() {
-        let criteria = ac(&["a", "b"]);
-        let spec = spec_with_criteria("a", criteria, Vec::new());
-        let result = status_finding(&spec);
-        let finding = result.expect("expected a status finding");
-        assert_eq!(finding.severity, Severity::Warn);
-        assert_eq!(finding.check, "status");
-        assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
-    }
-
-    #[test]
-    fn status_finding_is_silent_when_consistent_or_incomplete() {
-        let full = ac(&["a", "b"]);
-        // Fully done and already implemented: nothing to flag.
-        let mut active = spec_with_criteria("A", full.clone(), Vec::new());
-        active.status = Status::Active;
-        assert!(status_finding(&active).is_none());
-        let mut deprecated = spec_with_criteria("A", full, Vec::new());
-        deprecated.status = Status::Deprecated;
-        assert!(status_finding(&deprecated).is_none());
-        // A not-done criterion means the spec isn't done, so any status is allowed.
-        let partial = ac_with_done(&["a", "b"], &["b"]);
-        assert!(status_finding(&spec_with_criteria("A", partial, Vec::new())).is_none());
-        // No criteria at all: nothing to infer.
-        assert!(status_finding(&spec_with_criteria("A", Vec::new(), Vec::new())).is_none());
-    }
-
-    #[test]
-    fn active_incomplete_finding_flags_active_with_not_done_criteria() {
-        let partial = ac_with_done(&["a", "b"], &["b"]);
-        let mut spec = spec_with_criteria("a", partial, Vec::new());
-        spec.status = Status::Active;
-        let finding = active_incomplete_finding(&spec).expect("expected a finding");
-        assert_eq!(finding.severity, Severity::Error);
-        assert_eq!(finding.check, "status");
-        assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
-        assert!(finding.message.contains("1/2"));
-    }
-
-    #[test]
-    fn active_incomplete_finding_is_silent_when_complete_or_not_active() {
-        let full = ac(&["a", "b"]);
-        let mut active = spec_with_criteria("a", full, Vec::new());
-        active.status = Status::Active;
-        assert!(active_incomplete_finding(&active).is_none());
-
-        let partial = ac_with_done(&["a", "b"], &["b"]);
-        let mut in_progress = spec_with_criteria("a", partial, Vec::new());
-        in_progress.status = Status::InProgress;
-        assert!(active_incomplete_finding(&in_progress).is_none());
-    }
-
-    #[test]
-    fn validate_blocked_by_flags_missing_and_active_references() {
-        let status_by_id = HashMap::from([
-            ("DONE", Status::Active),
-            ("PENDING", Status::Planned),
-            ("STILL-PENDING", Status::Blocked),
-        ]);
-        let spec = spec("A", vec!["MISSING", "DONE", "PENDING", "STILL-PENDING"]);
-
-        let mut findings = Vec::new();
-        validate_blocked_by(&spec, &status_by_id, &mut findings);
-
-        assert_eq!(findings.len(), 2);
-
-        let missing = &findings[0];
-        assert_eq!(missing.severity, Severity::Error);
-        assert_eq!(missing.check, "blocked-by");
-        assert!(missing.message.contains("MISSING"));
-        assert!(missing.message.contains("non-existing spec"));
-
-        let active = &findings[1];
-        assert_eq!(active.severity, Severity::Warn);
-        assert!(active.message.contains("DONE"));
-        assert!(active.message.contains("already active"));
-    }
-
-    #[test]
-    fn validate_scope_flags_unknown_repository_short_name() {
-        let mut spec = spec("A", Vec::new());
-        spec.scope = vec!["api".to_string(), "unknown".to_string()];
-        let repositories = vec![repository("../api", Vec::new())];
-
-        let mut findings = Vec::new();
-        validate_scope(&spec, &repositories, &mut findings);
-
-        assert_eq!(findings.len(), 1);
-        let finding = &findings[0];
-        assert_eq!(finding.severity, Severity::Error);
-        assert_eq!(finding.check, "scope");
-        assert!(finding.message.contains("unknown"));
-        assert!(finding.message.contains("repository_short_name"));
-    }
-
-    fn contract_ignore(ac: Option<&str>) -> CoverageIgnore {
-        CoverageIgnore {
-            layer: CoverageLayer::Contract,
-            ac: ac.map(str::to_string),
-        }
-    }
-
-    fn coverage_ignore_findings(spec: &Spec) -> Vec<Finding> {
-        let mut findings = Vec::new();
-        validate_coverage_ignore(spec, &mut findings);
-        findings
-    }
-
-    #[test]
-    fn coverage_ignore_whole_layer_contract_is_silent_with_contract_single() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::Single;
-        spec.coverage_ignore = vec![contract_ignore(None)];
-        assert!(coverage_ignore_findings(&spec).is_empty());
-    }
-
-    #[test]
-    fn coverage_ignore_whole_layer_contract_is_silent_with_for_each_ac() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::ForEachAc;
-        spec.coverage_ignore = vec![contract_ignore(None)];
-        assert!(coverage_ignore_findings(&spec).is_empty());
-    }
-
-    #[test]
-    fn coverage_ignore_per_ac_contract_is_silent_with_for_each_ac() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::ForEachAc;
-        spec.coverage_ignore = vec![contract_ignore(Some("ac-1"))];
-        assert!(coverage_ignore_findings(&spec).is_empty());
-    }
-
-    #[test]
-    fn coverage_ignore_contract_errors_with_contract_none() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::None;
-        spec.coverage_ignore = vec![contract_ignore(None), contract_ignore(Some("ac-1"))];
-
-        let findings = coverage_ignore_findings(&spec);
-        assert_eq!(findings.len(), 2);
-        for finding in &findings {
-            assert_eq!(finding.severity, Severity::Error);
-            assert_eq!(finding.check, "coverage-ignore");
-            assert_eq!(finding.location.as_deref(), Some("specs/A.yaml"));
-            assert!(finding.message.contains("contract: none"));
-        }
-    }
-
-    #[test]
-    fn coverage_ignore_per_ac_contract_errors_with_contract_single() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::Single;
-        spec.coverage_ignore = vec![contract_ignore(Some("ac-1"))];
-
-        let findings = coverage_ignore_findings(&spec);
-        assert_eq!(findings.len(), 1);
-        let finding = &findings[0];
-        assert_eq!(finding.severity, Severity::Error);
-        assert_eq!(finding.check, "coverage-ignore");
-        assert!(finding.message.contains("contract: single"));
-        assert!(finding.message.contains("contract: for-each-ac"));
-    }
-
-    #[test]
-    fn coverage_ignore_other_layers_are_always_silent() {
-        let mut spec = spec("A", Vec::new());
-        spec.contract = ContractLevel::None;
-        spec.coverage_ignore = vec![
-            CoverageIgnore {
-                layer: CoverageLayer::Impl,
-                ac: Some("ac-1".to_string()),
-            },
-            CoverageIgnore {
-                layer: CoverageLayer::Test,
-                ac: None,
-            },
-        ];
-        assert!(coverage_ignore_findings(&spec).is_empty());
     }
 }

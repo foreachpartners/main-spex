@@ -2,21 +2,15 @@
 mod tests {
     use super::super::*;
     use crate::annotations::AcCoverage;
-    use crate::spec::{AcceptanceCriterion, ContractLevel, CoverageLayer, Spec, Statement, Status};
+    use crate::spec::{AcceptanceCriterion, CoverageLayer, Spec, Statement, Status};
     use crate::style::Style;
-    use std::path::{Path, PathBuf};
+    use crate::testing;
+    use std::path::Path;
 
     fn spec(id: &str, status: Status) -> Spec {
         Spec {
-            id: id.to_string(),
-            path: format!("{id}.yaml"),
-            description: String::new(),
-            acceptance_criteria: Vec::new(),
-            blocked_by: Vec::new(),
-            scope: Vec::new(),
             status,
-            contract: ContractLevel::Single,
-            coverage_ignore: Vec::new(),
+            ..testing::spec(id)
         }
     }
 
@@ -53,37 +47,45 @@ mod tests {
         }
     }
 
-    fn row(id: &str, contract_missing: bool, ac_rows: Vec<AcCoverage>) -> SpecRow {
+    fn row(spec: &Spec, contract_missing: bool, ac_rows: Vec<AcCoverage>) -> SpecRow<'_> {
         SpecRow {
-            id: id.to_string(),
-            file: PathBuf::new(),
-            description: String::new(),
-            status: Status::Active,
-            scope: Vec::new(),
+            spec,
             contract_missing,
             ac_rows,
         }
     }
 
     #[test]
-    fn tracked_rows_includes_active_and_in_progress_and_ignores_the_rest() {
+    fn rows_track_coverage_only_for_active_and_in_progress() {
         let specs = vec![
             spec("A", Status::Active),
             spec("B", Status::Planned),
             spec("C", Status::Deprecated),
             spec("D", Status::InProgress),
         ];
-        let found = Found::new();
-        let rows = SpecRow::tracked(Path::new("/workspace"), &specs, &found);
-        let ids: Vec<&str> = rows.iter().map(|row| row.id.as_str()).collect();
-        assert_eq!(ids, vec!["A", "D"]);
+        let rows = SpecRow::all(&specs, &Found::new());
+        assert_eq!(rows.len(), 4);
+        let tracked: Vec<&str> = rows
+            .iter()
+            .filter(|row| row.is_tracked())
+            .map(|row| row.spec.id.as_str())
+            .collect();
+        assert_eq!(tracked, vec!["A", "D"]);
+        assert!(
+            rows.iter()
+                .filter(|row| !row.is_tracked())
+                .all(|row| { !row.has_gap() && !row.has_pending() && row.ac_rows.is_empty() })
+        );
     }
 
     #[test]
-    fn tracked_rows_records_each_spec_file() {
-        let specs = vec![spec("A", Status::Active)];
-        let rows = SpecRow::tracked(Path::new("/workspace"), &specs, &Found::new());
-        assert_eq!(rows[0].file, PathBuf::from("/workspace/specs/A.yaml"));
+    fn spec_link_targets_the_spec_file() {
+        let spec = spec("A", Status::Active);
+        let link = spec_link(&Style::colored(), Path::new("/workspace"), &spec);
+        assert!(
+            link.contains("file:///workspace/specs/A.yaml"),
+            "got: {link}"
+        );
     }
 
     #[test]
@@ -91,8 +93,9 @@ mod tests {
         let spec: Spec = serde_yaml_ng::from_str("id: A\ncontract: single\n").expect("parse spec");
         assert_eq!(spec.status, Status::Planned);
         assert!(spec.coverage_ignore.is_empty());
-        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
-        assert!(rows.is_empty());
+        let specs = [spec];
+        let rows = SpecRow::all(&specs, &Found::new());
+        assert!(!rows[0].is_tracked());
     }
 
     #[test]
@@ -104,7 +107,8 @@ mod tests {
         assert!(spec.layer_ignored(CoverageLayer::Contract));
         assert!(spec.layer_ignored(CoverageLayer::Test));
         assert!(!spec.layer_ignored(CoverageLayer::Impl));
-        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
+        let specs = [spec];
+        let rows = SpecRow::all(&specs, &Found::new());
         assert!(!rows[0].contract_missing);
     }
 
@@ -114,14 +118,16 @@ mod tests {
             "id: A\ncontract: single\nstatus: active\nacceptance_criteria:\n  - id: ac-1\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-1\n",
         )
         .expect("parse spec");
-        let rows = SpecRow::tracked(Path::new("/workspace"), &[spec], &Found::new());
+        let specs = [spec];
+        let rows = SpecRow::all(&specs, &Found::new());
         assert_eq!(rows[0].ac_rows[0].missing, vec![CoverageLayer::Test]);
     }
 
     #[test]
     fn missing_summary_lists_contract_then_impl_then_test() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             true,
             vec![ac("ac-1", false, false), ac("ac-2", true, false)],
         );
@@ -133,22 +139,25 @@ mod tests {
 
     #[test]
     fn missing_contract_is_a_gap_by_default() {
-        let row = row("A", true, vec![ac("ac-1", true, true)]);
+        let spec = spec("A", Status::Active);
+        let row = row(&spec, true, vec![ac("ac-1", true, true)]);
         assert!(row.has_gap());
         assert_eq!(row.missing_summary(), "contract");
     }
 
     #[test]
     fn ignored_contract_is_not_a_gap() {
-        let row = row("A", false, vec![ac("ac-1", true, true)]);
+        let spec = spec("A", Status::Active);
+        let row = row(&spec, false, vec![ac("ac-1", true, true)]);
         assert!(!row.has_gap());
         assert_eq!(row.missing_summary(), "");
     }
 
     #[test]
     fn unimplemented_ac_is_a_gap() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![ac("ac-1", true, true), ac("ac-2", false, true)],
         );
@@ -159,8 +168,9 @@ mod tests {
 
     #[test]
     fn ac_done_counts_impl_only_ignoring_missing_test() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![ac("ac-1", true, false), ac("ac-2", false, false)],
         );
@@ -172,8 +182,9 @@ mod tests {
 
     #[test]
     fn all_layers_and_ac_complete_has_no_gap() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![ac("ac-1", true, true), ac("ac-2", true, true)],
         );
@@ -182,8 +193,9 @@ mod tests {
 
     #[test]
     fn unimplemented_ac_flagged_not_done_is_pending_not_a_gap() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![
                 ac("ac-1", true, true),
@@ -198,7 +210,8 @@ mod tests {
 
     #[test]
     fn unimplemented_ac_not_flagged_is_still_a_gap() {
-        let row = row("A", false, vec![pending_ac("ac-1", false, false, true)]);
+        let spec = spec("A", Status::Active);
+        let row = row(&spec, false, vec![pending_ac("ac-1", false, false, true)]);
         assert!(row.has_gap());
         assert!(!row.has_pending());
         assert_eq!(row.missing_summary(), "impl(ac-1), test(ac-1)");
@@ -206,8 +219,9 @@ mod tests {
 
     #[test]
     fn missing_per_ac_contract_is_a_gap_under_for_each_ac() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![contract_ac("ac-1", true), contract_ac("ac-2", false)],
         );
@@ -217,8 +231,9 @@ mod tests {
 
     #[test]
     fn per_ac_contract_complete_has_no_gap_under_for_each_ac() {
+        let spec = spec("A", Status::Active);
         let row = row(
-            "A",
+            &spec,
             false,
             vec![contract_ac("ac-1", true), contract_ac("ac-2", true)],
         );
@@ -230,7 +245,8 @@ mod tests {
     fn missing_contract_is_pending_not_a_gap_when_not_done_under_for_each_ac() {
         let mut ac = contract_ac("ac-1", false);
         ac.is_done = false;
-        let row = row("A", false, vec![ac]);
+        let spec = spec("A", Status::Active);
+        let row = row(&spec, false, vec![ac]);
         assert!(!row.has_gap());
         assert!(row.has_pending());
         assert_eq!(row.pending_summary(), "contract(ac-1)");
@@ -251,10 +267,11 @@ mod tests {
             spec("C", Status::Planned),
             spec("D", Status::Deprecated),
         ];
-        let groups = status_groups(&specs);
+        let rows = SpecRow::all(&specs, &Found::new());
+        let groups = status_groups(&rows);
         let ids: Vec<(Status, Vec<&str>)> = groups
             .iter()
-            .map(|(status, specs)| (*status, specs.iter().map(|s| s.id.as_str()).collect()))
+            .map(|(status, rows)| (*status, rows.iter().map(|r| r.spec.id.as_str()).collect()))
             .collect();
         assert_eq!(
             ids,
@@ -269,21 +286,25 @@ mod tests {
     #[test]
     fn status_groups_skips_empty_statuses() {
         let specs = vec![spec("A", Status::Planned)];
-        let groups = status_groups(&specs);
+        let rows = SpecRow::all(&specs, &Found::new());
+        let groups = status_groups(&rows);
         let ids: Vec<(Status, Vec<&str>)> = groups
             .iter()
-            .map(|(status, specs)| (*status, specs.iter().map(|s| s.id.as_str()).collect()))
+            .map(|(status, rows)| (*status, rows.iter().map(|r| r.spec.id.as_str()).collect()))
             .collect();
         assert_eq!(ids, vec![(Status::Planned, vec!["A"])]);
     }
 
     #[test]
     fn scope_groups_duplicates_multi_scope_rows_and_lists_unscoped_last() {
-        let mut a = row("A", false, Vec::new());
-        a.scope = vec!["web".to_string(), "api".to_string()];
-        let mut b = row("B", false, Vec::new());
-        b.scope = vec!["web".to_string()];
-        let c = row("C", false, Vec::new());
+        let mut spec_a = spec("A", Status::Active);
+        spec_a.scope = vec!["web".to_string(), "api".to_string()];
+        let mut spec_b = spec("B", Status::Active);
+        spec_b.scope = vec!["web".to_string()];
+        let spec_c = spec("C", Status::Active);
+        let a = row(&spec_a, false, Vec::new());
+        let b = row(&spec_b, false, Vec::new());
+        let c = row(&spec_c, false, Vec::new());
 
         let rows = [&a, &b, &c];
         let groups = scope_groups(&rows);
@@ -293,7 +314,7 @@ mod tests {
 
         let ids: Vec<Vec<&str>> = groups
             .iter()
-            .map(|(_, rows)| rows.iter().map(|row| row.id.as_str()).collect())
+            .map(|(_, rows)| rows.iter().map(|row| row.spec.id.as_str()).collect())
             .collect();
         assert_eq!(ids, vec![vec!["A"], vec!["A", "B"], vec!["C"]]);
     }
@@ -313,23 +334,21 @@ mod tests {
 
     #[test]
     fn active_gaps_ignores_in_progress_gaps() {
-        let mut active = row("A", true, Vec::new());
-        active.status = Status::Active;
-
-        let mut in_progress = row("B", true, Vec::new());
-        in_progress.status = Status::InProgress;
+        let active_spec = spec("A", Status::Active);
+        let in_progress_spec = spec("B", Status::InProgress);
+        let active = row(&active_spec, true, Vec::new());
+        let in_progress = row(&in_progress_spec, true, Vec::new());
 
         assert_eq!(active_gaps(&[active, in_progress]), 1);
     }
 
     fn rendered(width: usize, verbose: bool, specs: &[Spec]) -> String {
-        let rows = SpecRow::tracked(Path::new("/workspace"), specs, &Found::new());
+        let rows = SpecRow::all(specs, &Found::new());
         render(
             &Style::plain(),
             width,
             verbose,
             Path::new("/workspace"),
-            specs,
             &rows,
         )
     }
@@ -339,12 +358,10 @@ mod tests {
         spec.description = "Does the thing.".to_string();
         spec.scope = vec!["api".to_string()];
         spec.acceptance_criteria = vec![AcceptanceCriterion {
-            id: "ac-1".to_string(),
             statement: Statement::Must(
                 "do the first thing in a sentence long enough to wrap".to_string(),
             ),
-            is_done: None,
-            line: 0,
+            ..testing::criterion("ac-1")
         }];
         spec
     }
@@ -366,7 +383,7 @@ mod tests {
     fn render_wraps_verbose_detail_to_the_given_width() {
         let text = rendered(40, true, &[gapped_spec()]);
 
-        let pad = " ".repeat(37);
+        let pad = " ".repeat(36);
         assert!(text.contains("        Does the thing.\n"));
         assert!(
             text.contains(&format!(

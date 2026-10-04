@@ -95,10 +95,14 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     Ok(())
 }
 
+fn is_inside_spex_dir(current_dir: &Path) -> bool {
+    dir_name(current_dir).is_some_and(Config::is_spex_dir_name)
+}
+
 // The workspace root is the current directory, unless `spex init` runs from
 // inside the spex repository directory, in which case it is the parent.
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
-    if dir_name(current_dir).is_some_and(Config::is_spex_dir_name) {
+    if is_inside_spex_dir(current_dir) {
         let parent = current_dir.parent().ok_or_else(|| {
             Report::new(CliError::NoWorkspaceRoot)
                 .attach("expected the spex directory to live inside a workspace root")
@@ -116,7 +120,7 @@ fn ensure_spex_dir(
     workspace_root: &Path,
     project_name: &str,
 ) -> Result<PathBuf> {
-    if dir_name(current_dir).is_some_and(Config::is_spex_dir_name) {
+    if is_inside_spex_dir(current_dir) {
         return Ok(current_dir.to_path_buf());
     }
 

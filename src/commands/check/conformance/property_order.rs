@@ -164,9 +164,10 @@ fn property_order_message(
 // Verifies every spec file, rule file, and `spex.yaml` declares its
 // properties — at every nesting level their JSON Schema describes — in the
 // order the schema declares them.
-pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Finding>) -> Result<()> {
+pub(super) fn validate_property_order(spex_dir: &Path) -> Result<Vec<Finding>> {
     let schemas_dir = spex_dir.join(SCHEMAS_DIR);
     let mut cache: HashMap<String, Value> = HashMap::new();
+    let mut findings = Vec::new();
 
     let spec_schema = load_schema_file(&mut cache, &schemas_dir, "spec.schema.json");
     for file in yaml_files(&spex_dir.join(SPECS_DIR))? {
@@ -176,7 +177,7 @@ pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Findin
             &spec_schema,
             &mut cache,
             &schemas_dir,
-            findings,
+            &mut findings,
         );
     }
 
@@ -188,7 +189,7 @@ pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Findin
             &rule_schema,
             &mut cache,
             &schemas_dir,
-            findings,
+            &mut findings,
         );
     }
 
@@ -201,10 +202,10 @@ pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Findin
             &spex_schema,
             &mut cache,
             &schemas_dir,
-            findings,
+            &mut findings,
         );
     }
-    Ok(())
+    Ok(findings)
 }
 
 fn check_file_property_order(

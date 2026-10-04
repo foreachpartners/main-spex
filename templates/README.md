@@ -7,7 +7,7 @@ Assets scaffolded into client projects by `spex init` and `spex update`. Everyth
 - `schemas/` — JSON Schemas for `spex.yaml`, specs, rules, and plans. Overwritten on every run.
 - `docs/` — framework reference docs. Overwritten on every run. Each file is a symlink into the repository's own `docs/` folder, which stays their single source of truth; this folder lists exactly which docs ship.
 - `AGENTS.md` — seeds the client's root `AGENTS.md` and its `CLAUDE.md` symlink on `init`. `update` rewrites only the managed section above the `# Project` marker, keeping the client's own content.
-- `spex.yaml` — seeds the client's `spex.yaml` on `init`, replacing the `unknown` project and spex repository names with the project name. It lists only the spex repository; `spex-setup` adds the others. `update` only refreshes its `cli_version`.
+- `spex.yaml` — seeds the client's `spex.yaml` on `init`, replacing the `unknown` project and spex repository names with the project name. It lists only the spex repository; `spex-setup` adds the others. `init` adds the installed CLI's `cli_version` (the template carries none), and `update` only refreshes it.
 - `project-name.code-workspace` — seeds the client's `<project-name>.code-workspace` on `init`, with a folder for the spex repository only; `spex-setup` adds the others. `update` never touches it.
 - `rules/` and `scripts/` — written when the rule is missing locally or carries `sync_with_upstream: true`.
 - `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`. `update` rewrites each `SKILL.md` only above its `# Project` marker, keeping the client's own content, so every bundled `SKILL.md` MUST end with that marker.

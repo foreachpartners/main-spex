@@ -16,3 +16,24 @@ fn hyperlink_returns_plain_text_when_disabled() {
 
     assert_eq!(style.hyperlink("file:///tmp/a.md", "a.md"), "a.md");
 }
+
+#[test]
+fn visible_width_counts_plain_text_by_characters() {
+    assert_eq!(visible_width("✗  api-thing"), 12);
+}
+
+#[test]
+fn visible_width_ignores_color_codes() {
+    let style = Style { enabled: true };
+
+    assert_eq!(visible_width(&style.red("missing")), 7);
+    assert_eq!(visible_width(&style.bold(&style.cyan("id"))), 2);
+}
+
+#[test]
+fn visible_width_ignores_hyperlink_wrapping() {
+    let style = Style { enabled: true };
+    let link = style.hyperlink("file:///tmp/a.md", &style.cyan("a.md"));
+
+    assert_eq!(visible_width(&link), 4);
+}

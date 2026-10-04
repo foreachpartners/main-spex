@@ -7,11 +7,8 @@ use super::{Finding, conform_finding};
 
 // Every script a rule check references must exist at
 // `scripts/<spec-id-lowercase>/<script>`.
-pub(super) fn validate_script_references(
-    spex_dir: &Path,
-    rules: &[Rule],
-    findings: &mut Vec<Finding>,
-) {
+pub(super) fn validate_script_references(spex_dir: &Path, rules: &[Rule]) -> Vec<Finding> {
+    let mut findings = Vec::new();
     let mut rules: Vec<&Rule> = rules.iter().collect();
     rules.sort_by(|a, b| a.id.cmp(&b.id));
 
@@ -29,4 +26,5 @@ pub(super) fn validate_script_references(
             }
         }
     }
+    findings
 }
