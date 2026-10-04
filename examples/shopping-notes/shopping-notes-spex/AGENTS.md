@@ -73,13 +73,12 @@ Code should be simple enough that any teammate or AI — not just its author —
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/commit-message-format.yaml`.
 
-Tag every spec- or rule-related commit with its ID(s) using @spec or @rule: `@spec <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]` or `@rule <Rule ID>[, <Rule ID>]`.
+Tag every spec-related commit with its ID(s) using @spec: `@spec <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]`.
 
 Examples:
 
 ```
 style: format md files
-feat(deps): pin dependencies @rule dependencies-rules
 feat(ui): list available pizzas @spec list-pizza-menu
 fix(cart): reject negative quantities @spec cart-add-item, cart-validate
 feat(orders): set status on order creation @spec place-pizza-order#created-order-status

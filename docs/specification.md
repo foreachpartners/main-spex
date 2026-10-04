@@ -26,7 +26,7 @@ A project spans several workspace repositories under one workspace root folder; 
 
 ## Traceability
 
-Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it — required for specs, optional for rules. The principle, including the bidirectional trace and commit-level provenance, is [framework-principles.md](framework-principles.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
+Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it. The principle, including the bidirectional trace and commit-level provenance, is [framework-principles.md](framework-principles.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
 
 # CLI
 
@@ -76,7 +76,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 
 - Form is `@spec contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`, matched anywhere in a file's text — as a code comment, or as the string value of any OpenAPI vendor extension (`x-*`) property for contracts, whose key name is not itself checked.
 - Place one annotation on the smallest unit that actually satisfies the acceptance criterion — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type; widen the placement only when the criterion's scope genuinely spans that boundary (e.g. an endpoint, contract). Annotate once at the boundary, never nested: list every acceptance criterion id the boundary satisfies rather than adding a second annotation.
-- An impl or test annotation carries the `#<ac-id>` of the acceptance criterion it satisfies: `spex coverage` counts a bare, unqualified annotation only toward a target with no acceptance criteria, such as a rule, never toward a criterion of a spec.
+- An impl or test annotation carries the `#<ac-id>` of the acceptance criterion it satisfies: `spex coverage` never counts a bare, unqualified annotation toward a criterion of a spec.
 - A contract annotation carries `#<ac-id>` only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` one bare `@spec contract <spec-id>` suffices, and a criterion-anchored annotation also counts as the spec-level contract.
 - Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli.md](cli.md#self-validation)).
 

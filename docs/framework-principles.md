@@ -62,6 +62,5 @@ Every behavioral change traces to a spec and down to the acceptance criterion. B
 - Annotations link artifacts to a spec at the layer boundary: `@spec contract|impl|test <spec-id>#<ac-id>` in code.
 - `spex coverage` computes coverage from those annotations, per spec and per acceptance criterion.
 - Checking out a commit shows exactly which specs — and which acceptance criteria — the code was built against.
-- Spec traceability is required, rule traceability is optional.
 
 **Violation test**: a code change affects behavior and carries no Spec ID, or an acceptance criterion has no annotation tracing to it — either is a violation.

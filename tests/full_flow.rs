@@ -223,6 +223,30 @@ fn check_dummy_project_matches_expected() {
 }
 
 #[test]
+fn check_flags_annotation_referencing_rule_id_as_orphan() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    copy_dir(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/src/rule_reference.rs"),
+        "// @spec impl no-todo-comments\n",
+    )
+    .expect("write rule reference");
+
+    let check = run_spex(&project, &["check"], "");
+    let report = report_text(&check.stdout);
+    assert!(
+        report.contains("orphan annotation references unknown spec `no-todo-comments`"),
+        "annotation referencing a rule id was not flagged\n{report}",
+    );
+    assert!(
+        !check.status.success(),
+        "check should exit non-zero on an orphan annotation",
+    );
+}
+
+#[test]
 fn rules_output_flag_writes_file_matching_stdout() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");

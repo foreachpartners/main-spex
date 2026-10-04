@@ -104,7 +104,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
     let rules = workspace.rules().change_context(CheckError::Workspace)?;
     let specs = workspace.specs().change_context(CheckError::Workspace)?;
-    let mut known_ids: HashMap<String, HashSet<String>> = specs
+    let known_ids: HashMap<String, HashSet<String>> = specs
         .iter()
         .map(|spec| {
             let ac_ids = spec
@@ -115,9 +115,6 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             (spec.id.clone(), ac_ids)
         })
         .collect();
-    for rule_id in rules.keys() {
-        known_ids.entry(rule_id.clone()).or_default();
-    }
 
     let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
 

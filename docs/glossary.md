@@ -49,7 +49,7 @@
   auth-required
   ```
 
-- **Rule ID** — a unique identifier assigned to a rule, used for referencing and traceability. Should convey the rule's contents so it can be understood without opening the rule.
+- **Rule ID** — a unique identifier assigned to a rule, used for referencing. Should convey the rule's contents so it can be understood without opening the rule.
 
   ```text
   secret-handling

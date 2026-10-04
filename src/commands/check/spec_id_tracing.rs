@@ -107,8 +107,8 @@ impl Checker {
         }
     }
 
-    // Flags a Spec ID referenced by an annotation that matches no known spec
-    // or rule, and an `#<ac-id>` suffix that matches no acceptance criterion
+    // Flags a Spec ID referenced by an annotation that matches no known spec,
+    // and an `#<ac-id>` suffix that matches no acceptance criterion
     // of its spec; deduplicated per file since a repeated reference in the
     // same file isn't a separate problem.
     fn check_orphans(
