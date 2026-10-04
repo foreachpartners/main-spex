@@ -3,12 +3,13 @@ use std::path::Path;
 
 use serde_json::Value;
 
+use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::spec::SPECS_DIR;
 use crate::templates::SCHEMAS_DIR;
 use crate::util::yaml_files;
 
-use super::{Finding, SPEC_ID, Severity, rel};
+use super::{Finding, RULE_ID, rel};
 
 #[cfg(test)]
 #[path = "property_order_test.rs"]
@@ -163,12 +164,12 @@ fn property_order_message(
 // Verifies every spec file, rule file, and `spex.yaml` declares its
 // properties — at every nesting level their JSON Schema describes — in the
 // order the schema declares them.
-pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Finding>) {
+pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Finding>) -> Result<()> {
     let schemas_dir = spex_dir.join(SCHEMAS_DIR);
     let mut cache: HashMap<String, Value> = HashMap::new();
 
     let spec_schema = load_schema_file(&mut cache, &schemas_dir, "spec.schema.json");
-    for file in yaml_files(&spex_dir.join(SPECS_DIR)) {
+    for file in yaml_files(&spex_dir.join(SPECS_DIR))? {
         check_file_property_order(
             spex_dir,
             &file,
@@ -180,7 +181,7 @@ pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Findin
     }
 
     let rule_schema = load_schema_file(&mut cache, &schemas_dir, "rule.schema.json");
-    for file in yaml_files(&spex_dir.join(RULES_DIR)) {
+    for file in yaml_files(&spex_dir.join(RULES_DIR))? {
         check_file_property_order(
             spex_dir,
             &file,
@@ -203,6 +204,7 @@ pub(super) fn validate_property_order(spex_dir: &Path, findings: &mut Vec<Findin
             findings,
         );
     }
+    Ok(())
 }
 
 fn check_file_property_order(
@@ -262,13 +264,12 @@ fn check_node_order(
                 .filter_map(|k| k.as_str().map(str::to_string))
                 .collect();
             if let Some((found, expected)) = find_order_violation(&canonical, &actual_keys) {
-                findings.push(Finding {
-                    severity: Severity::Error,
-                    spec_id: SPEC_ID.to_string(),
-                    check: PROPERTY_ORDER_CHECK.to_string(),
-                    location: Some(rel(spex_dir, file)),
-                    message: property_order_message(&found, &expected, &canonical, label),
-                });
+                findings.push(Finding::error(
+                    RULE_ID,
+                    PROPERTY_ORDER_CHECK,
+                    Some(rel(spex_dir, file)),
+                    property_order_message(&found, &expected, &canonical, label),
+                ));
             }
 
             for (key, value) in mapping {

@@ -1,7 +1,7 @@
 use crate::rule::Rule;
 use crate::spec::Spec;
 
-use super::{Finding, SPEC_ID, Severity};
+use super::{Finding, RULE_ID};
 
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
@@ -44,14 +44,13 @@ fn check_order(
         return;
     };
     if rank < prev_rank {
-        findings.push(Finding {
-            severity: Severity::Error,
-            spec_id: SPEC_ID.to_string(),
-            check: AC_ORDER_CHECK.to_string(),
-            location: Some(format!("{location}:{line}")),
-            message: format!(
+        findings.push(Finding::error(
+            RULE_ID,
+            AC_ORDER_CHECK,
+            Some(format!("{location}:{line}")),
+            format!(
                 "acceptance criteria out of order: {label} must not follow {prev_label} (order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY)"
             ),
-        });
+        ));
     }
 }

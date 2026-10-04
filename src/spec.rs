@@ -95,16 +95,14 @@ impl Spec {
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
-        let loaded = util::load_yaml_dir(specs_dir)?;
-
-        let mut specs: Vec<Self> = loaded
+        let mut specs: Vec<Self> = util::load_yaml_dir::<Self>(specs_dir)?
             .into_iter()
-            .map(|(mut spec, path, raw): (Self, String, String)| {
-                spec.path = path;
-                let lines = util::acceptance_criteria_lines(&raw);
-                for (ac, line) in spec.acceptance_criteria.iter_mut().zip(lines) {
-                    ac.line = line;
-                }
+            .map(|file| {
+                let mut spec = file.item;
+                spec.path = file.rel_path;
+                util::number_criteria(&mut spec.acceptance_criteria, &file.raw, |ac, line| {
+                    ac.line = line
+                });
                 spec
             })
             .collect();
@@ -246,4 +244,20 @@ pub enum CoverageLayer {
     Contract,
     Impl,
     Test,
+}
+
+impl CoverageLayer {
+    pub const ALL: [CoverageLayer; 3] = [
+        CoverageLayer::Contract,
+        CoverageLayer::Impl,
+        CoverageLayer::Test,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            CoverageLayer::Contract => "contract",
+            CoverageLayer::Impl => "impl",
+            CoverageLayer::Test => "test",
+        }
+    }
 }

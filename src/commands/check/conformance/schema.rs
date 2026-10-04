@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::commands::check_schema;
+use crate::error::Result;
 use crate::rule::{RULES_DIR, Rule};
 use crate::spec::{SPECS_DIR, Spec};
 use crate::templates::SCHEMAS_DIR;
@@ -13,7 +14,7 @@ pub(super) fn validate_schema(
     specs: &[Spec],
     rules: &[Rule],
     findings: &mut Vec<Finding>,
-) {
+) -> Result<()> {
     let spex_yaml = spex_dir.join(crate::config::SPEX_CONFIG_FILE);
     if spex_yaml.is_file() {
         validate_schema_group(spex_dir, &[spex_yaml], "spex.schema.json", findings);
@@ -26,13 +27,13 @@ pub(super) fn validate_schema(
 
     validate_schema_group(
         spex_dir,
-        &yaml_files(&spex_dir.join(SPECS_DIR)),
+        &yaml_files(&spex_dir.join(SPECS_DIR))?,
         "spec.schema.json",
         findings,
     );
     validate_schema_group(
         spex_dir,
-        &yaml_files(&spex_dir.join(RULES_DIR)),
+        &yaml_files(&spex_dir.join(RULES_DIR))?,
         "rule.schema.json",
         findings,
     );
@@ -43,6 +44,7 @@ pub(super) fn validate_schema(
     for rule in rules {
         check_filename_matches_id(rule.location(), &rule.path, &rule.id, findings);
     }
+    Ok(())
 }
 
 fn validate_schema_group(

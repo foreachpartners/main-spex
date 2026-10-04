@@ -1,8 +1,9 @@
 use std::path::Path;
 
+use crate::error::Result;
 use crate::spec::Spec;
 
-use super::{Finding, Severity};
+use super::Finding;
 
 mod ac_order;
 mod duplicate_ac_ids;
@@ -22,7 +23,7 @@ use script_references::validate_script_references;
 // a real rule, since spex's own conformance checks are built into `spex
 // check` itself rather than declared in a rule (they must run even before
 // any rules can be trusted to parse).
-const SPEC_ID: &str = "spex-internal-conformance";
+const RULE_ID: &str = "spex-internal-conformance";
 const CONFORM_CHECK: &str = "spec-files-conform";
 
 // Validates the spex repository's own spec files: `spex.yaml` and every file
@@ -36,13 +37,13 @@ pub(super) fn validate_conformance(
     specs: &[Spec],
     rules: &[crate::rule::Rule],
     findings: &mut Vec<Finding>,
-) {
-    validate_schema(spex_dir, specs, rules, findings);
+) -> Result<()> {
+    validate_schema(spex_dir, specs, rules, findings)?;
     validate_script_references(spex_dir, rules, findings);
     validate_ac_order(specs, rules, findings);
     validate_no_duplicate_ids(specs, rules, findings);
     validate_no_duplicate_ac_ids(specs, findings);
-    validate_property_order(spex_dir, findings);
+    validate_property_order(spex_dir, findings)
 }
 
 fn rel(spex_dir: &Path, file: &Path) -> String {
@@ -53,11 +54,5 @@ fn rel(spex_dir: &Path, file: &Path) -> String {
 }
 
 fn conform_finding(location: Option<String>, message: String) -> Finding {
-    Finding {
-        severity: Severity::Error,
-        spec_id: SPEC_ID.to_string(),
-        check: CONFORM_CHECK.to_string(),
-        location,
-        message,
-    }
+    Finding::error(RULE_ID, CONFORM_CHECK, location, message)
 }

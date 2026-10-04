@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::rule::Rule;
 use crate::spec::Spec;
 
-use super::{Finding, SPEC_ID, Severity};
+use super::{Finding, RULE_ID};
 
 #[cfg(test)]
 #[path = "duplicate_ids_test.rs"]
@@ -28,13 +28,12 @@ pub(super) fn validate_no_duplicate_ids(
 
     for (id, location) in &locations {
         if let Some(first_seen) = seen.get(id) {
-            findings.push(Finding {
-                severity: Severity::Error,
-                spec_id: SPEC_ID.to_string(),
-                check: DUPLICATE_ID_CHECK.to_string(),
-                location: Some(location.clone()),
-                message: format!("duplicate id `{id}`: already defined in `{first_seen}`"),
-            });
+            findings.push(Finding::error(
+                RULE_ID,
+                DUPLICATE_ID_CHECK,
+                Some(location.clone()),
+                format!("duplicate id `{id}`: already defined in `{first_seen}`"),
+            ));
         } else {
             seen.insert(id, location.clone());
         }

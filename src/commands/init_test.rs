@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use std::fs;
     use tempfile::{TempDir, tempdir};
 
     fn workspace_with(dirs: &[&str], files: &[&str]) -> TempDir {

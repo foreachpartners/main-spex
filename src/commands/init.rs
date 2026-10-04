@@ -1,4 +1,3 @@
-use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -10,7 +9,7 @@ use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::style::Style;
 use crate::templates;
-use crate::util::dir_name;
+use crate::util::{self, dir_name};
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -24,9 +23,7 @@ const CONFIG_TEMPLATE: &str = include_str!("../../templates/spex.yaml");
 const CODE_WORKSPACE_TEMPLATE: &str = include_str!("../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
-    let current_dir = std::env::current_dir()
-        .change_context(CliError::Io)
-        .attach("could not determine the current directory")?;
+    let current_dir = std::env::current_dir().change_context(CliError::CurrentDir)?;
 
     let workspace_root = workspace_root(&current_dir)?;
 
@@ -61,28 +58,20 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::ensure_agents_md(spex_dir).change_context(CliError::Io)?;
 
     let specs = spex_dir.join(SPECS_DIR);
-    fs::create_dir_all(&specs)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not create `{}`", specs.display()))?;
+    util::create_dir_all(&specs)?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
-    fs::create_dir_all(&plans)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not create `{}`", plans.display()))?;
+    util::create_dir_all(&plans)?;
 
     let contracts = spex_dir.join(CONTRACTS_DIR_NAME);
-    fs::create_dir_all(&contracts)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not create `{}`", contracts.display()))?;
+    util::create_dir_all(&contracts)?;
 
     Ok(())
 }
 
 fn write_config(spex_dir: &Path, project_name: &str) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
-    fs::write(&config_path, config_from_template(project_name))
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not write `{}`", config_path.display()))?;
+    util::write_file(&config_path, config_from_template(project_name))?;
     Ok(())
 }
 
@@ -102,9 +91,7 @@ fn config_from_template(project_name: &str) -> String {
 fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
-    fs::write(&path, CODE_WORKSPACE_TEMPLATE)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not write `{}`", path.display()))?;
+    util::write_file(&path, CODE_WORKSPACE_TEMPLATE)?;
     Ok(())
 }
 
@@ -135,9 +122,7 @@ fn ensure_spex_dir(
 
     let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
     if !spex_dir.is_dir() {
-        fs::create_dir(&spex_dir)
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not create `{}` directory", spex_dir.display()))?;
+        util::create_dir_all(&spex_dir)?;
     }
     Ok(spex_dir)
 }

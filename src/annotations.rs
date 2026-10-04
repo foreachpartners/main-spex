@@ -50,16 +50,20 @@ impl Found {
     pub fn ac_coverage(&self, spec: &Spec) -> Vec<AcCoverage> {
         spec.acceptance_criteria
             .iter()
-            .map(|ac| AcCoverage {
-                id: ac.id.clone(),
-                text: ac.commitment.text().to_string(),
-                is_done: ac.is_done(),
-                contract_required: spec.ac_contract_required(&ac.id),
-                contract_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Contract),
-                impl_required: !spec.ac_ignored(&ac.id, CoverageLayer::Impl),
-                impl_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Impl),
-                test_required: !spec.ac_ignored(&ac.id, CoverageLayer::Test),
-                test_present: self.has_ac(&spec.id, &ac.id, CoverageLayer::Test),
+            .map(|ac| {
+                let required = |layer| match layer {
+                    CoverageLayer::Contract => spec.ac_contract_required(&ac.id),
+                    _ => !spec.ac_ignored(&ac.id, layer),
+                };
+                AcCoverage {
+                    id: ac.id.clone(),
+                    text: ac.commitment.text().to_string(),
+                    is_done: ac.is_done(),
+                    missing: CoverageLayer::ALL
+                        .into_iter()
+                        .filter(|&layer| required(layer) && !self.has_ac(&spec.id, &ac.id, layer))
+                        .collect(),
+                }
             })
             .collect()
     }
@@ -68,15 +72,10 @@ impl Found {
     // contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
     // disables contract coverage; `for-each-ac` has no spec-level requirement —
     // each acceptance criterion carries its own (see `ac_coverage`).
-    pub fn contract_coverage(&self, spec: &Spec) -> (bool, bool) {
-        match spec.contract {
-            ContractLevel::None => (false, false),
-            ContractLevel::Single => (
-                spec.contract_required(),
-                self.has_bare(&spec.id, CoverageLayer::Contract),
-            ),
-            ContractLevel::ForEachAc => (false, false),
-        }
+    pub fn contract_missing(&self, spec: &Spec) -> bool {
+        spec.contract == ContractLevel::Single
+            && spec.contract_required()
+            && !self.has_bare(&spec.id, CoverageLayer::Contract)
     }
 
     // Scans one piece of content for spec-id annotations; a test-only helper for
@@ -84,13 +83,13 @@ impl Found {
     #[cfg(test)]
     pub fn scan(content: &str) -> Self {
         let mut found = Self::new();
-        Scanner::new().scan(content, &mut found);
+        found.record_all(Parser::new().annotations(content));
         found
     }
 
     // Scans every workspace repository except spex itself for spec-id annotations.
     pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Self> {
-        let scanner = Scanner::new();
+        let parser = Parser::new();
         let spex_canon = util::canonical(spex_dir);
         let mut found = Self::new();
 
@@ -101,7 +100,7 @@ impl Found {
             for contract in &repo.contracts {
                 let contract_path = spex_dir.join(&contract.path);
                 if let Ok(content) = fs::read_to_string(&contract_path) {
-                    scanner.scan(&content, &mut found);
+                    found.record_all(parser.annotations(&content));
                 }
             }
 
@@ -109,61 +108,96 @@ impl Found {
             if !repo_path.is_dir() || util::canonical(&repo_path) == spex_canon {
                 continue;
             }
-            scanner.scan_repo(&repo_path, &mut found)?;
+            found.scan_repo(&parser, &repo_path)?;
         }
 
         Ok(found)
     }
+
+    fn scan_repo(&mut self, parser: &Parser, repo_path: &Path) -> Result<()> {
+        for result in RepoFiles::new(repo_path) {
+            let path = result.change_context(CliError::Walk)?;
+            let Ok(content) = fs::read_to_string(path) else {
+                continue;
+            };
+            self.record_all(parser.annotations(&content));
+        }
+
+        Ok(())
+    }
+
+    fn record_all(&mut self, annotations: Vec<Annotation>) {
+        for annotation in annotations {
+            self.record(annotation);
+        }
+    }
+
+    fn record(&mut self, annotation: Annotation) {
+        let Annotation {
+            layer,
+            spec_id,
+            ac_id,
+        } = annotation;
+        let Some(ac_id) = ac_id else {
+            self.bare.entry(spec_id).or_default().insert(layer);
+            return;
+        };
+        if layer == CoverageLayer::Contract {
+            self.bare.entry(spec_id.clone()).or_default().insert(layer);
+        }
+        self.by_ac
+            .entry((spec_id, ac_id))
+            .or_default()
+            .insert(layer);
+    }
 }
 
-// Whether an acceptance criterion has the impl/test/contract annotations
-// `coverage_ignore` doesn't waive. Contract is per-criterion only under
-// `contract: for-each-ac`.
 pub struct AcCoverage {
     pub id: String,
     pub text: String,
     pub is_done: bool,
-    pub contract_required: bool,
-    pub contract_present: bool,
-    pub impl_required: bool,
-    pub impl_present: bool,
-    pub test_required: bool,
-    pub test_present: bool,
+    pub missing: Vec<CoverageLayer>,
 }
 
 impl AcCoverage {
-    // Implemented, regardless of whether it's tested yet — what the
-    // `X/Y AC` counter tracks, since implementation is the milestone that
-    // marks a criterion as built.
+    pub fn is_missing(&self, layer: CoverageLayer) -> bool {
+        self.missing.contains(&layer)
+    }
+
     pub fn impl_ok(&self) -> bool {
-        !self.impl_required || self.impl_present
+        !self.is_missing(CoverageLayer::Impl)
     }
 
     pub fn is_ok(&self) -> bool {
-        self.impl_ok()
-            && (!self.test_required || self.test_present)
-            && (!self.contract_required || self.contract_present)
+        self.missing.is_empty()
     }
 
-    // Not yet traced, but not a gap either: the criterion is itself flagged
-    // `is_done: false`, so missing impl/test annotations are expected, not a
-    // slip — that's what makes an in-progress spec in-progress.
+    pub fn is_gap(&self) -> bool {
+        self.is_done && !self.is_ok()
+    }
+
     pub fn is_pending(&self) -> bool {
         !self.is_done && !self.is_ok()
     }
 }
 
-struct Scanner {
-    spec: Regex,
+pub struct Annotation {
+    pub layer: CoverageLayer,
+    pub spec_id: String,
+    pub ac_id: Option<String>,
+}
+
+pub struct Parser {
+    annotation: Regex,
     token: Regex,
 }
 
-impl Scanner {
-    fn new() -> Self {
-        let id = r"[a-z]+(?:-[a-z]+)*";
+impl Parser {
+    pub fn new() -> Self {
+        let id = r"[a-z0-9]+(?:-[a-z0-9]+)*";
         let token = format!(r"{id}(?:#{id})?");
         Self {
-            spec: Regex::new(&format!(
+            annotation: Regex::new(&format!(
                 r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
             ))
             .expect("valid @spec regex"),
@@ -171,21 +205,9 @@ impl Scanner {
         }
     }
 
-    fn scan_repo(&self, repo_path: &Path, found: &mut Found) -> Result<()> {
-        for result in RepoFiles::new(repo_path) {
-            let path = result.change_context(CliError::Walk)?;
-            // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
-            let Ok(content) = fs::read_to_string(path) else {
-                continue;
-            };
-            self.scan(&content, found);
-        }
-
-        Ok(())
-    }
-
-    fn scan(&self, content: &str, found: &mut Found) {
-        for caps in self.spec.captures_iter(content) {
+    pub fn annotations(&self, content: &str) -> Vec<Annotation> {
+        let mut annotations = Vec::new();
+        for caps in self.annotation.captures_iter(content) {
             let layer = match &caps[1] {
                 "contract" => CoverageLayer::Contract,
                 "impl" => CoverageLayer::Impl,
@@ -193,33 +215,26 @@ impl Scanner {
                 _ => continue,
             };
             for token in self.token.find_iter(&caps[2]) {
-                match token.as_str().split_once('#') {
-                    Some((spec_id, ac_id)) => {
-                        found
-                            .by_ac
-                            .entry((spec_id.to_string(), ac_id.to_string()))
-                            .or_default()
-                            .insert(layer);
-                        // A contract annotation anchored to one criterion
-                        // still counts for the whole spec, so
-                        // `contract: single` is satisfied by it too.
-                        if layer == CoverageLayer::Contract {
-                            found
-                                .bare
-                                .entry(spec_id.to_string())
-                                .or_default()
-                                .insert(layer);
-                        }
-                    }
-                    None => {
-                        found
-                            .bare
-                            .entry(token.as_str().to_string())
-                            .or_default()
-                            .insert(layer);
-                    }
+                let (spec_id, ac_id) = match token.as_str().split_once('#') {
+                    Some((spec_id, ac_id)) => (spec_id, Some(ac_id)),
+                    None => (token.as_str(), None),
                 };
+                annotations.push(Annotation {
+                    layer,
+                    spec_id: spec_id.to_string(),
+                    ac_id: ac_id.map(str::to_string),
+                });
             }
         }
+        annotations
+    }
+
+    pub fn malformed_lines(&self, content: &str) -> Vec<usize> {
+        content
+            .lines()
+            .enumerate()
+            .filter(|(_, line)| line.contains("@spec ") && !self.annotation.is_match(line))
+            .map(|(index, _)| index + 1)
+            .collect()
     }
 }

@@ -46,16 +46,16 @@ src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
   error.rs          CliError, the single error enum for every command, and the shared Result alias
-  workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
+  spex.rs           Resolved spex dir + config, with spec and rule loaders (shared by commands)
   rule.rs           Rule model
   spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
-  annotations.rs    @spec impl|test annotation parsing (source for coverage)
+  annotations.rs    @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
   repo_files.rs     Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
   style.rs          Terminal color styling (shared by commands)
-  util.rs           Shared helpers (yaml-dir loading, pluralize)
+  util.rs           Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
-    check/          check command: orchestration (mod), report
+    check/          check command: orchestration (mod), report, spec-id annotation tracing
       conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs)
       runners/      One runner per check type (ast_grep, glob, regexp, script)
 docs/                          Framework reference docs, bundled into projects by init/update (single source of truth)

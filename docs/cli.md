@@ -210,7 +210,7 @@ spex coverage --verbose
 
 ### `spex info`
 
-Prints the resolved `spex.yaml` configuration as pretty JSON — the general-purpose form scripts pipe into `jq` for whatever field they need:
+Prints the resolved `spex.yaml` configuration as pretty JSON — every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list. It is the general-purpose form scripts pipe into `jq` for whatever field they need:
 
 ```sh
 spex info | jq -r '.repositories[].path'

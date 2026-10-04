@@ -51,6 +51,8 @@ pub enum CliError {
     ParseFile(PathBuf),
     #[error("could not write `{}`", .0.display())]
     WriteFile(PathBuf),
+    #[error("could not create directory `{}`", .0.display())]
+    CreateDir(PathBuf),
     #[error("invalid schema `{}`", .0.display())]
     InvalidSchema(PathBuf),
     #[error("could not serialize output")]

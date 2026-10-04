@@ -29,16 +29,14 @@ impl Rule {
     }
 
     pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
-        let rules = util::load_yaml_dir(rules_dir)?;
-
-        Ok(rules
+        Ok(util::load_yaml_dir::<Self>(rules_dir)?
             .into_iter()
-            .map(|(mut rule, path, raw): (Self, String, String)| {
-                rule.path = path;
-                let lines = util::acceptance_criteria_lines(&raw);
-                for (ac, line) in rule.acceptance_criteria.iter_mut().zip(lines) {
-                    ac.line = line;
-                }
+            .map(|file| {
+                let mut rule = file.item;
+                rule.path = file.rel_path;
+                util::number_criteria(&mut rule.acceptance_criteria, &file.raw, |ac, line| {
+                    ac.line = line
+                });
                 rule
             })
             .collect())

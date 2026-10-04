@@ -7,6 +7,7 @@ mod tests {
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
         Repository {
+            description: None,
             repository_name: name.to_string(),
             repository_short_name: name.to_string(),
             path: format!("../{name}"),

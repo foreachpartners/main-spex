@@ -21,6 +21,10 @@ pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct Config {
     pub project_name: String,
     pub cli_version: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub rules_unused: Vec<RuleId>,
     #[serde(default)]
     pub repositories: Vec<Repository>,
 }
@@ -29,6 +33,8 @@ pub struct Config {
 pub struct Repository {
     pub repository_name: String,
     pub repository_short_name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     pub path: String,
     #[serde(default)]
     pub contracts: Vec<Contract>,
@@ -53,6 +59,8 @@ impl Repository {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Contract {
     pub path: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
 }
 
 // A baseline entry that suppresses pre-existing `error`-severity findings for an

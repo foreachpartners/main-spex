@@ -43,7 +43,7 @@ mod tests {
         .expect("ordered rule");
 
         let mut findings = Vec::new();
-        validate_property_order(dir.path(), &mut findings);
+        validate_property_order(dir.path(), &mut findings).expect("validate");
 
         assert!(findings.is_empty());
     }
@@ -68,7 +68,7 @@ mod tests {
         .expect("misordered rule");
 
         let mut findings = Vec::new();
-        validate_property_order(dir.path(), &mut findings);
+        validate_property_order(dir.path(), &mut findings).expect("validate");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);
@@ -103,7 +103,7 @@ mod tests {
         .expect("ordered check");
 
         let mut findings = Vec::new();
-        validate_property_order(dir.path(), &mut findings);
+        validate_property_order(dir.path(), &mut findings).expect("validate");
 
         assert!(findings.is_empty());
     }
@@ -134,7 +134,7 @@ mod tests {
         .expect("misordered check");
 
         let mut findings = Vec::new();
-        validate_property_order(dir.path(), &mut findings);
+        validate_property_order(dir.path(), &mut findings).expect("validate");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);
@@ -160,7 +160,7 @@ mod tests {
         .expect("spex.yaml");
 
         let mut findings = Vec::new();
-        validate_property_order(dir.path(), &mut findings);
+        validate_property_order(dir.path(), &mut findings).expect("validate");
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);

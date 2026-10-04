@@ -43,11 +43,9 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     if !agents.exists()
         && let Some(file) = TEMPLATES.get_file(AGENTS_FILE)
     {
-        fs::write(&agents, file.contents())
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not write `{}`", agents.display()))?;
+        util::write_file(&agents, file.contents())?;
     }
-    ensure_claude_md_link(spex_dir)
+    ensure_symlink(spex_dir, CLAUDE_FILE, AGENTS_FILE)
 }
 
 // Marks where the user-owned section of `AGENTS.md` and of every bundled
@@ -91,9 +89,7 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
 
     let updated = merge_project_section(template.contents(), &local_contents);
     if updated != local_contents.as_bytes() {
-        fs::write(&agents, updated)
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not write `{}`", agents.display()))?;
+        util::write_file(&agents, updated)?;
     }
     Ok(())
 }
@@ -105,7 +101,7 @@ pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     copy_rules(spex_dir, removed_rules)?;
     copy_skills(spex_dir)?;
     sync_agents_md(spex_dir)?;
-    ensure_claude_link(spex_dir)?;
+    ensure_symlink(spex_dir, CLAUDE_DIR_NAME, AGENTS_DIR_NAME)?;
     mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
 }
 
@@ -174,9 +170,7 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     };
 
     let rules_dest = spex_dir.join(RULES_DIR);
-    fs::create_dir_all(&rules_dest)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not create `{}`", rules_dest.display()))?;
+    util::create_dir_all(&rules_dest)?;
 
     let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
     let scripts_dest = spex_dir.join(SCRIPTS_DIR);
@@ -184,7 +178,7 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     // Rules may be grouped into nested folders, so a bundled rule already
     // present under a nested folder must be matched there rather than
     // re-created flat at `rules_dest/<name>`.
-    let existing_rules = util::yaml_files(&rules_dest);
+    let existing_rules = util::yaml_files(&rules_dest)?;
 
     for file in dir.files() {
         let Some(name) = file.path().file_name() else {
@@ -208,9 +202,7 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
             continue;
         }
 
-        fs::write(&dest, file.contents())
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not write `{}`", dest.display()))?;
+        util::write_file(&dest, file.contents())?;
 
         if let Some(scripts) = scripts_dir
             && let Some(rule_scripts) = scripts.get_dir(format!("{SCRIPTS_DIR}/{rule_id}"))
@@ -235,9 +227,7 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
     };
 
     let dest_root = spex_dir.join(AGENTS_DIR_NAME).join(SKILLS_DIR);
-    fs::create_dir_all(&dest_root)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not create `{}`", dest_root.display()))?;
+    util::create_dir_all(&dest_root)?;
 
     for skill in skills.dirs() {
         let name = skill.path().file_name().unwrap_or_default();
@@ -254,12 +244,10 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
         if let Some(local) = local_skill_md
             && let Some(template) = skill.get_file(skill.path().join(SKILL_FILE))
         {
-            fs::write(
+            util::write_file(
                 &skill_md,
                 merge_project_section(template.contents(), &local),
-            )
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not write `{}`", skill_md.display()))?;
+            )?;
         }
     }
 
@@ -274,13 +262,9 @@ fn copy_tree(dir: &Dir, strip: &Path, dest_root: &Path) -> Result<()> {
                 let rel = file.path().strip_prefix(strip).unwrap_or(file.path());
                 let dest = dest_root.join(rel);
                 if let Some(parent) = dest.parent() {
-                    fs::create_dir_all(parent)
-                        .change_context(CliError::Io)
-                        .attach_with(|| format!("could not create `{}`", parent.display()))?;
+                    util::create_dir_all(parent)?;
                 }
-                fs::write(&dest, file.contents())
-                    .change_context(CliError::Io)
-                    .attach_with(|| format!("could not write `{}`", dest.display()))?;
+                util::write_file(&dest, file.contents())?;
             }
         }
     }
@@ -288,46 +272,21 @@ fn copy_tree(dir: &Dir, strip: &Path, dest_root: &Path) -> Result<()> {
 }
 
 #[cfg(unix)]
-fn ensure_claude_link(spex_dir: &Path) -> Result<()> {
+fn ensure_symlink(spex_dir: &Path, link_name: &str, target: &str) -> Result<()> {
     use std::os::unix::fs::symlink;
 
-    let link = spex_dir.join(CLAUDE_DIR_NAME);
+    let link = spex_dir.join(link_name);
     if link.symlink_metadata().is_ok() {
         return Ok(());
     }
 
-    symlink(AGENTS_DIR_NAME, &link)
+    symlink(target, &link)
         .change_context(CliError::Io)
-        .attach_with(|| {
-            format!(
-                "could not link `{}` to `{}`",
-                link.display(),
-                AGENTS_DIR_NAME
-            )
-        })
+        .attach_with(|| format!("could not link `{}` to `{target}`", link.display()))
 }
 
 #[cfg(not(unix))]
-fn ensure_claude_link(_spex_dir: &Path) -> Result<()> {
-    Ok(())
-}
-
-#[cfg(unix)]
-fn ensure_claude_md_link(spex_dir: &Path) -> Result<()> {
-    use std::os::unix::fs::symlink;
-
-    let link = spex_dir.join(CLAUDE_FILE);
-    if link.symlink_metadata().is_ok() {
-        return Ok(());
-    }
-
-    symlink(AGENTS_FILE, &link)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not link `{}` to `{}`", link.display(), AGENTS_FILE))
-}
-
-#[cfg(not(unix))]
-fn ensure_claude_md_link(_spex_dir: &Path) -> Result<()> {
+fn ensure_symlink(_spex_dir: &Path, _link_name: &str, _target: &str) -> Result<()> {
     Ok(())
 }
 

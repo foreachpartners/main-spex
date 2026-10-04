@@ -61,9 +61,9 @@ fn print_finding(style: &Style, base: &Path, finding: &Finding) {
         Severity::Warn => style.yellow("warn"),
     };
     let check = if finding.check.is_empty() {
-        finding.spec_id.clone()
+        finding.rule_id.clone()
     } else {
-        format!("{}/{}", finding.spec_id, finding.check)
+        format!("{}/{}", finding.rule_id, finding.check)
     };
     let location = finding
         .location

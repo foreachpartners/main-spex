@@ -21,7 +21,10 @@ mod spec_id_tracing;
 
 use conformance::validate_conformance;
 use report::report;
-use runners::*;
+use runners::{
+    Outcome, locate_script, push_outcome, run_ast_grep, run_glob, run_per_file_script, run_regexp,
+    run_script_once, run_workspace_checks, scope_files,
+};
 use spec_id_tracing::validate_annotations;
 
 #[cfg(test)]
@@ -84,22 +87,51 @@ struct RepoCtx<'a> {
 impl RepoCtx<'_> {
     fn dispatch_check(
         &self,
-        spec_id: &str,
+        rule_id: &str,
         check: &Check,
         findings: &mut Vec<Finding>,
         workspace_checks: &mut Vec<WorkspaceCheck>,
     ) {
-        if matches!(
-            check.kind,
+        match &check.kind {
             CheckKind::Script {
+                script,
                 run: RunScope::Workspace,
-                ..
+            } => WorkspaceCheck::collect(rule_id, check, script, workspace_checks),
+            _ => self.run_check(rule_id, check, findings),
+        }
+    }
+
+    fn run_check(&self, rule_id: &str, check: &Check, findings: &mut Vec<Finding>) {
+        push_outcome(rule_id, check, self.check_hits(rule_id, check), findings);
+    }
+
+    fn check_hits(&self, rule_id: &str, check: &Check) -> Outcome {
+        let files = scope_files(check, self.candidates)?;
+
+        match &check.kind {
+            CheckKind::Regexp { pattern, negate } => run_regexp(check, pattern, *negate, &files),
+            CheckKind::Glob { pattern, negate } => run_glob(check, pattern, *negate, &files),
+            CheckKind::AstGrep {
+                pattern,
+                rule,
+                language,
+                negate,
+            } => run_ast_grep(
+                check,
+                pattern.as_deref(),
+                rule.as_ref(),
+                language.as_deref(),
+                *negate,
+                &files,
+            ),
+            CheckKind::Script { script, run } => {
+                let program = locate_script(rule_id, script, self.spex_dir)?;
+                match run {
+                    RunScope::PerFile => run_per_file_script(&program, self.repo_path, &files),
+                    RunScope::PerRepo => run_script_once(&program, self.repo_path),
+                    RunScope::Workspace => Ok(Vec::new()),
+                }
             }
-        ) {
-            // Workspace checks only collect here; they run once in `run_workspace_checks`.
-            WorkspaceCheck::collect(spec_id, check, workspace_checks);
-        } else {
-            self.run_check(spec_id, check, findings);
         }
     }
 }
@@ -118,20 +150,22 @@ struct CheckRepoArgs<'a> {
 // scanned so it runs exactly once across the whole workspace. It receives no
 // files; the script discovers its own from the spex directory.
 struct WorkspaceCheck {
-    spec_id: String,
+    rule_id: String,
+    script: String,
     check: Check,
 }
 
 impl WorkspaceCheck {
-    // Defers a `workspace`-scoped check, deduplicating by `(spec_id, name)` so a
+    // Defers a `workspace`-scoped check, deduplicating by `(rule_id, name)` so a
     // check inherited by several repositories still runs exactly once.
-    fn collect(spec_id: &str, check: &Check, workspace_checks: &mut Vec<Self>) {
+    fn collect(rule_id: &str, check: &Check, script: &str, workspace_checks: &mut Vec<Self>) {
         let already_pending = workspace_checks
             .iter()
-            .any(|pending| pending.spec_id == spec_id && pending.check.name == check.name);
+            .any(|pending| pending.rule_id == rule_id && pending.check.name == check.name);
         if !already_pending {
             workspace_checks.push(Self {
-                spec_id: spec_id.to_string(),
+                rule_id: rule_id.to_string(),
+                script: script.to_string(),
                 check: check.clone(),
             });
         }
@@ -140,37 +174,49 @@ impl WorkspaceCheck {
 
 struct Finding {
     severity: Severity,
-    spec_id: String,
+    rule_id: String,
     check: String,
     location: Option<String>,
     message: String,
 }
 
 impl Finding {
-    fn violation(check: &Check, spec_id: &str, location: Option<String>, message: String) -> Self {
+    fn new(
+        severity: Severity,
+        rule_id: &str,
+        check: &str,
+        location: Option<String>,
+        message: String,
+    ) -> Self {
         Self {
-            severity: check.severity,
-            spec_id: spec_id.to_string(),
-            check: check.name.clone(),
+            severity,
+            rule_id: rule_id.to_string(),
+            check: check.to_string(),
             location,
             message,
         }
     }
 
-    fn config_error(spec_id: &str, check: &str, message: String) -> Self {
-        Self {
-            severity: Severity::Error,
-            spec_id: spec_id.to_string(),
-            check: check.to_string(),
-            location: None,
-            message,
-        }
+    fn error(rule_id: &str, check: &str, location: Option<String>, message: String) -> Self {
+        Self::new(Severity::Error, rule_id, check, location, message)
+    }
+
+    fn warn(rule_id: &str, check: &str, location: Option<String>, message: String) -> Self {
+        Self::new(Severity::Warn, rule_id, check, location, message)
+    }
+
+    fn violation(check: &Check, rule_id: &str, location: Option<String>, message: String) -> Self {
+        Self::new(check.severity, rule_id, &check.name, location, message)
+    }
+
+    fn config_error(rule_id: &str, check: &str, message: String) -> Self {
+        Self::error(rule_id, check, None, message)
     }
 
     // A repository-level error not tied to a specific named check (e.g. a missing
     // spec or a misconfigured override).
-    fn repo_error(spec_id: &str, message: String) -> Self {
-        Self::config_error(spec_id, "", message)
+    fn repo_error(rule_id: &str, message: String) -> Self {
+        Self::config_error(rule_id, "", message)
     }
 
     fn file(&self) -> Option<String> {
@@ -220,7 +266,7 @@ impl Finding {
 
     fn matches_baseline(&self, baseline: &[PreexistingError], file: Option<&str>) -> bool {
         baseline.iter().any(|entry| {
-            entry.rule_id == self.spec_id
+            entry.rule_id == self.rule_id
                 && entry.check == self.check
                 && (entry.files.is_empty()
                     || file.is_some_and(|file| entry.files.iter().any(|listed| listed == file)))
@@ -246,10 +292,9 @@ struct RepoReport {
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(CliError::Workspace)?;
-    workspace.warn_if_cli_outdated();
-    let rules = workspace.rules().change_context(CliError::Workspace)?;
-    let specs = workspace.specs().change_context(CliError::Workspace)?;
+    let spex = Spex::discover_and_warn()?;
+    let rules = spex.rules()?;
+    let specs = spex.specs()?;
     let known_ids: HashMap<String, HashSet<String>> = specs
         .iter()
         .map(|spec| {
@@ -262,7 +307,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         })
         .collect();
 
-    let selected = select_repos(&workspace.config, &workspace.dir, &args.repo, &args.files)?;
+    let selected = select_repos(&spex.config, &spex.dir, &args.repo, &args.files)?;
 
     // The generator must see every current error, including ones an existing
     // baseline would otherwise suppress, so it can rewrite the full baseline.
@@ -276,7 +321,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         check_repo(
             CheckRepoArgs {
                 repo,
-                spex_dir: &workspace.dir,
+                spex_dir: &spex.dir,
                 rules: &rules,
                 known_ids: &known_ids,
                 files: &args.files,
@@ -295,7 +340,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     if !workspace_checks.is_empty() {
         let mut findings = Vec::new();
-        run_workspace_checks(&workspace.dir, &workspace_checks, &mut findings);
+        run_workspace_checks(&spex.dir, &workspace_checks, &mut findings);
         if suppress {
             findings.retain(|finding| !finding.is_preexisting_workspace(&selected));
         }
@@ -305,13 +350,13 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         });
     }
 
-    validate_specs(&workspace, &rules, &selected, &mut reports)?;
+    validate_specs(&spex, &specs, &rules, &selected, &mut reports)?;
 
     if args.fill_preexisting_errors {
-        return fill_preexisting_errors(&workspace.dir, &selected, &reports);
+        return fill_preexisting_errors(&spex.dir, &selected, &reports);
     }
 
-    Ok(report(&workspace.config, &workspace.dir, &reports))
+    Ok(report(&spex.config, &spex.dir, &reports))
 }
 
 // Either the whole check is baselined (a file-less error) or a specific set of
@@ -365,7 +410,7 @@ fn fill_preexisting_errors(
                 continue;
             };
             checks
-                .entry((finding.spec_id.clone(), finding.check.clone()))
+                .entry((finding.rule_id.clone(), finding.check.clone()))
                 .or_insert_with(|| Baseline::Files(BTreeSet::new()))
                 .add_file(file);
         }
@@ -523,11 +568,11 @@ fn check_repo(
     // meaningfully evaluated, so we skip them to avoid false positives.
     let has_files = !files.is_empty();
 
-    for spec_id in &repo.rules {
-        let Some(rule) = rules.iter().find(|rule| rule.id == *spec_id) else {
+    for rule_id in &repo.rules {
+        let Some(rule) = rules.iter().find(|rule| rule.id == *rule_id) else {
             findings.push(Finding::repo_error(
-                spec_id,
-                format!("rule `{spec_id}` not found in {}/", rule::RULES_DIR),
+                rule_id,
+                format!("rule `{rule_id}` not found in {}/", rule::RULES_DIR),
             ));
             continue;
         };
@@ -547,15 +592,13 @@ fn check_repo(
 // attributes any findings to the spex repository, which owns the spec files.
 // Runs only when the spex repository is in scope.
 fn validate_specs(
-    workspace: &Spex,
+    spex: &Spex,
+    specs: &[Spec],
     rules: &[Rule],
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
-    let Some(spex_repo) = selected
-        .iter()
-        .find(|repo| repo.is_spex_repo(&workspace.dir))
-    else {
+    let Some(spex_repo) = selected.iter().find(|repo| repo.is_spex_repo(&spex.dir)) else {
         return Ok(());
     };
     let Some(report) = reports
@@ -565,10 +608,8 @@ fn validate_specs(
         return Ok(());
     };
 
-    let specs = workspace.specs().change_context(CliError::Workspace)?;
-
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
-    for spec in &specs {
+    for spec in specs {
         status_by_id.insert(spec.id.as_str(), spec.status);
     }
     // Rules are global and always apply, so they count as satisfied for
@@ -577,7 +618,7 @@ fn validate_specs(
         status_by_id.insert(rule.id.as_str(), Status::Active);
     }
 
-    for spec in &specs {
+    for spec in specs {
         if let Some(finding) = status_finding(spec) {
             report.findings.push(finding);
         }
@@ -586,15 +627,13 @@ fn validate_specs(
         }
     }
 
-    for spec in &specs {
+    for spec in specs {
         validate_blocked_by(spec, &status_by_id, &mut report.findings);
-        validate_scope(spec, &workspace.config.repositories, &mut report.findings);
+        validate_scope(spec, &spex.config.repositories, &mut report.findings);
         validate_coverage_ignore(spec, &mut report.findings);
     }
 
-    validate_conformance(&workspace.dir, &specs, rules, &mut report.findings);
-
-    Ok(())
+    validate_conformance(&spex.dir, specs, rules, &mut report.findings)
 }
 
 // A spec with every acceptance criterion marked done is implemented, so its
@@ -606,16 +645,15 @@ fn status_finding(spec: &Spec) -> Option<Finding> {
     if total == 0 || done != total || spec.status.is_implemented() {
         return None;
     }
-    Some(Finding {
-        severity: Severity::Warn,
-        spec_id: spec.id.clone(),
-        check: "status".to_string(),
-        location: Some(spec.location()),
-        message: format!(
+    Some(Finding::warn(
+        &spec.id,
+        "status",
+        Some(spec.location()),
+        format!(
             "every acceptance criterion is done but status is `{}` — set status to active or deprecated",
             spec.status.label()
         ),
-    })
+    ))
 }
 
 // `active` means fully implemented, so it requires every acceptance
@@ -626,15 +664,14 @@ fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
     if spec.status != Status::Active || done == total {
         return None;
     }
-    Some(Finding {
-        severity: Severity::Error,
-        spec_id: spec.id.clone(),
-        check: "status".to_string(),
-        location: Some(spec.location()),
-        message: format!(
+    Some(Finding::error(
+        &spec.id,
+        "status",
+        Some(spec.location()),
+        format!(
             "status is `active` but only {done}/{total} acceptance criteria are done — use `in-progress` until every `is_done: false` is cleared"
         ),
-    })
+    ))
 }
 
 fn validate_blocked_by(
@@ -645,22 +682,20 @@ fn validate_blocked_by(
     for blocker in &spec.blocked_by {
         let location = Some(spec.location());
         match status_by_id.get(blocker.as_str()) {
-            None => findings.push(Finding {
-                severity: Severity::Error,
-                spec_id: spec.id.clone(),
-                check: "blocked-by".to_string(),
+            None => findings.push(Finding::error(
+                &spec.id,
+                "blocked-by",
                 location,
-                message: format!("`blocked_by` references `{blocker}`, a non-existing spec"),
-            }),
-            Some(Status::Active) => findings.push(Finding {
-                severity: Severity::Warn,
-                spec_id: spec.id.clone(),
-                check: "blocked-by".to_string(),
+                format!("`blocked_by` references `{blocker}`, a non-existing spec"),
+            )),
+            Some(Status::Active) => findings.push(Finding::warn(
+                &spec.id,
+                "blocked-by",
                 location,
-                message: format!(
+                format!(
                     "`blocked_by` references `{blocker}`, which is already active — remove satisfied blockers"
                 ),
-            }),
+            )),
             Some(_) => {}
         }
     }
@@ -674,15 +709,14 @@ fn validate_scope(spec: &Spec, repositories: &[Repository], findings: &mut Vec<F
         {
             continue;
         }
-        findings.push(Finding {
-            severity: Severity::Error,
-            spec_id: spec.id.clone(),
-            check: "scope".to_string(),
-            location: Some(spec.location()),
-            message: format!(
+        findings.push(Finding::error(
+            &spec.id,
+            "scope",
+            Some(spec.location()),
+            format!(
                 "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
             ),
-        });
+        ));
     }
 }
 
@@ -706,13 +740,12 @@ fn validate_coverage_ignore(spec: &Spec, findings: &mut Vec<Finding>) {
             _ => None,
         };
         if let Some(message) = message {
-            findings.push(Finding {
-                severity: Severity::Error,
-                spec_id: spec.id.clone(),
-                check: "coverage-ignore".to_string(),
-                location: Some(spec.location()),
+            findings.push(Finding::error(
+                &spec.id,
+                "coverage-ignore",
+                Some(spec.location()),
                 message,
-            });
+            ));
         }
     }
 }

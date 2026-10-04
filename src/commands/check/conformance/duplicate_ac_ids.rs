@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::spec::Spec;
 
-use super::{Finding, SPEC_ID, Severity};
+use super::{Finding, RULE_ID};
 
 const DUPLICATE_AC_ID_CHECK: &str = "no-duplicate-ac-ids";
 
@@ -14,16 +14,15 @@ pub(super) fn validate_no_duplicate_ac_ids(specs: &[Spec], findings: &mut Vec<Fi
         let mut seen: HashSet<&str> = HashSet::new();
         for ac in &spec.acceptance_criteria {
             if !seen.insert(&ac.id) {
-                findings.push(Finding {
-                    severity: Severity::Error,
-                    spec_id: SPEC_ID.to_string(),
-                    check: DUPLICATE_AC_ID_CHECK.to_string(),
-                    location: Some(format!("{}:{}", spec.location(), ac.line)),
-                    message: format!(
+                findings.push(Finding::error(
+                    RULE_ID,
+                    DUPLICATE_AC_ID_CHECK,
+                    Some(format!("{}:{}", spec.location(), ac.line)),
+                    format!(
                         "duplicate acceptance criterion id `{}` within this spec",
                         ac.id
                     ),
-                });
+                ));
             }
         }
     }

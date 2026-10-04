@@ -15,6 +15,14 @@ pub fn file_url(path: &Path) -> String {
     format!("file://{}", path.to_string_lossy().replace(' ', "%20"))
 }
 
+pub fn write_file(path: &Path, contents: impl AsRef<[u8]>) -> Result<()> {
+    fs::write(path, contents).change_context_lazy(|| CliError::WriteFile(path.to_path_buf()))
+}
+
+pub fn create_dir_all(path: &Path) -> Result<()> {
+    fs::create_dir_all(path).change_context_lazy(|| CliError::CreateDir(path.to_path_buf()))
+}
+
 pub fn dir_name(path: &Path) -> Option<&str> {
     path.file_name().and_then(|name| name.to_str())
 }
@@ -31,79 +39,77 @@ pub fn plural(count: usize, noun: &str) -> String {
     }
 }
 
-fn collect_yaml_paths(dir: &Path, paths: &mut Vec<PathBuf>) -> Result<()> {
+pub fn wrap_text(text: &str, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut current = String::new();
+    for word in text.split_whitespace() {
+        if current.is_empty() {
+            current.push_str(word);
+        } else if current.len() + 1 + word.len() <= width {
+            current.push(' ');
+            current.push_str(word);
+        } else {
+            lines.push(std::mem::take(&mut current));
+            current.push_str(word);
+        }
+    }
+    if !current.is_empty() {
+        lines.push(current);
+    }
+    lines
+}
+
+pub struct YamlFile<T> {
+    pub item: T,
+    pub rel_path: String,
+    pub raw: String,
+}
+
+pub fn yaml_files(dir: &Path) -> Result<Vec<PathBuf>> {
+    let mut files = Vec::new();
+    if dir.is_dir() {
+        collect_yaml_files(dir, &mut files)?;
+    }
+    files.sort();
+    Ok(files)
+}
+
+fn collect_yaml_files(dir: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
     let entries = fs::read_dir(dir).change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
 
     for entry in entries {
         let entry = entry.change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
         let path = entry.path();
         if path.is_dir() {
-            collect_yaml_paths(&path, paths)?;
-            continue;
-        }
-        if path.extension().and_then(|ext| ext.to_str()) == Some("yaml") {
-            paths.push(path);
+            collect_yaml_files(&path, files)?;
+        } else if path.extension().and_then(|ext| ext.to_str()) == Some("yaml") {
+            files.push(path);
         }
     }
 
     Ok(())
 }
 
-// Lists every `*.yaml` file under `dir`, at any nesting depth, sorted for
-// stable output. A missing or unreadable directory (or subdirectory) yields
-// an empty list.
-pub fn yaml_files(dir: &Path) -> Vec<PathBuf> {
-    fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-        let Ok(entries) = fs::read_dir(dir) else {
-            return;
-        };
-        for entry in entries.filter_map(|entry| entry.ok()) {
-            let path = entry.path();
-            if path.is_dir() {
-                walk(&path, out);
-                continue;
-            }
-            if path.extension().and_then(|ext| ext.to_str()) == Some("yaml") {
-                out.push(path);
-            }
-        }
-    }
-
-    let mut files = Vec::new();
-    walk(dir, &mut files);
-    files.sort();
-    files
-}
-
-// Parses every `*.yaml` file under `dir`, at any nesting depth, into `T`,
-// paired with its path relative to `dir` (e.g. `admin/foo.yaml`) and its raw
-// source text (so a caller can derive line numbers for parts of `T` that
-// serde doesn't track spans for), so callers can locate the file that
-// produced each item. Missing directories yield an empty list.
-pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<(T, String, String)>> {
-    let mut items = Vec::new();
-    if !dir.is_dir() {
-        return Ok(items);
-    }
-
-    let mut paths = Vec::new();
-    collect_yaml_paths(dir, &mut paths)?;
-    paths.sort();
-
-    for path in paths {
-        let rel_name = path
-            .strip_prefix(dir)
-            .unwrap_or(&path)
-            .to_string_lossy()
-            .into_owned();
-        let raw =
-            fs::read_to_string(&path).change_context_lazy(|| CliError::ReadFile(path.clone()))?;
-        let item: T = serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
-        items.push((item, rel_name, raw));
-    }
-
-    Ok(items)
+pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<YamlFile<T>>> {
+    yaml_files(dir)?
+        .into_iter()
+        .map(|path| {
+            let raw = fs::read_to_string(&path)
+                .change_context_lazy(|| CliError::ReadFile(path.clone()))?;
+            let item = serde_yaml_ng::from_str(&raw)
+                .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
+            let rel_path = path
+                .strip_prefix(dir)
+                .unwrap_or(&path)
+                .to_string_lossy()
+                .into_owned();
+            Ok(YamlFile {
+                item,
+                rel_path,
+                raw,
+            })
+        })
+        .collect()
 }
 
 // The 1-indexed source line of each `acceptance_criteria` list item (`- ...`),
@@ -132,25 +138,8 @@ pub fn acceptance_criteria_lines(text: &str) -> Vec<usize> {
     lines
 }
 
-// Loads every `*.yaml` file under `dir`, at any nesting depth, as generic
-// JSON, paired with its path relative to `dir` — so the full document, every
-// field the schema allows rather than just the subset a typed struct
-// deserializes, is available to a command that filters and prints it.
-pub fn load_yaml_docs(dir: &Path) -> Result<Vec<(serde_json::Value, String)>> {
-    let mut docs = Vec::new();
-    for path in yaml_files(dir) {
-        let rel_name = path
-            .strip_prefix(dir)
-            .unwrap_or(&path)
-            .to_string_lossy()
-            .into_owned();
-        let raw =
-            fs::read_to_string(&path).change_context_lazy(|| CliError::ReadFile(path.clone()))?;
-        let yaml: serde_yaml_ng::Value = serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
-        let json =
-            serde_json::to_value(yaml).change_context_lazy(|| CliError::ParseFile(path.clone()))?;
-        docs.push((json, rel_name));
+pub fn number_criteria<A>(criteria: &mut [A], raw: &str, set_line: impl Fn(&mut A, usize)) {
+    for (criterion, line) in criteria.iter_mut().zip(acceptance_criteria_lines(raw)) {
+        set_line(criterion, line);
     }
-    Ok(docs)
 }

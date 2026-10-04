@@ -13,6 +13,11 @@ impl Style {
         Self::new(std::io::stdout().is_terminal())
     }
 
+    #[cfg(test)]
+    pub fn plain() -> Self {
+        Self { enabled: false }
+    }
+
     fn new(is_terminal: bool) -> Self {
         let enabled = is_terminal && std::env::var_os("NO_COLOR").is_none();
         Self { enabled }

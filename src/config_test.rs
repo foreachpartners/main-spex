@@ -78,6 +78,8 @@ mod tests {
         Config {
             project_name: "demo".to_string(),
             cli_version: version.to_string(),
+            description: None,
+            rules_unused: Vec::new(),
             repositories: Vec::new(),
         }
     }
@@ -281,5 +283,55 @@ mod tests {
                     path: ../api
             "}
         );
+    }
+
+    #[test]
+    fn serialization_keeps_descriptions_and_rules_unused() {
+        let config: Config = serde_yaml_ng::from_str(indoc! {"
+            project_name: demo
+            cli_version: 0.0.0
+            description: A demo project.
+            rules_unused:
+              - graphql-conventions
+            repositories:
+              - repository_name: demo-api
+                repository_short_name: api
+                description: REST API.
+                path: ../demo-api
+                contracts:
+                  - path: contracts/api.yaml
+                    description: OpenAPI contract.
+        "})
+        .expect("parse config");
+
+        let json = serde_json::to_value(&config).expect("serialize");
+
+        assert_eq!(json["description"], "A demo project.");
+        assert_eq!(json["rules_unused"][0], "graphql-conventions");
+        assert_eq!(json["repositories"][0]["description"], "REST API.");
+        assert_eq!(
+            json["repositories"][0]["contracts"][0]["description"],
+            "OpenAPI contract."
+        );
+    }
+
+    #[test]
+    fn serialization_omits_absent_descriptions_but_keeps_empty_lists() {
+        let config: Config = serde_yaml_ng::from_str(indoc! {"
+            project_name: demo
+            cli_version: 0.0.0
+            repositories:
+              - repository_name: demo-api
+                repository_short_name: api
+                path: ../demo-api
+        "})
+        .expect("parse config");
+
+        let json = serde_json::to_value(&config).expect("serialize");
+
+        assert!(json.get("description").is_none());
+        assert_eq!(json["rules_unused"], serde_json::json!([]));
+        assert!(json["repositories"][0].get("description").is_none());
+        assert_eq!(json["repositories"][0]["contracts"], serde_json::json!([]));
     }
 }

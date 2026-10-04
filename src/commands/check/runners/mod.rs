@@ -1,6 +1,8 @@
 use globset::{Glob, GlobSet, GlobSetBuilder};
 
-use super::*;
+use crate::rule::Check;
+
+use super::{Finding, ScopedFile};
 
 mod ast_grep;
 mod glob;
@@ -11,50 +13,37 @@ pub(super) use ast_grep::run_ast_grep;
 pub(super) use glob::run_glob;
 pub(super) use regexp::run_regexp;
 pub(super) use script::{
-    resolve_script, run_per_file_script, run_per_repo_script, run_workspace_checks,
+    locate_script, resolve_script, run_per_file_script, run_script_once, run_workspace_checks,
 };
 
-impl RepoCtx<'_> {
-    // Runs a non-workspace check against one repository, dispatching on the check's
-    // kind and (for scripts) its run scope. Workspace scripts are deferred by
-    // `dispatch_check` and run later in `run_workspace_checks`, so they no-op here.
-    pub(super) fn run_check(&self, spec_id: &str, check: &Check, findings: &mut Vec<Finding>) {
-        let scoped = match scope_files(check, self.candidates) {
-            Ok(scoped) => scoped,
-            Err(message) => {
-                findings.push(Finding::config_error(spec_id, &check.name, message));
-                return;
-            }
-        };
+pub(super) type Outcome = core::result::Result<Vec<Hit>, String>;
 
-        match &check.kind {
-            CheckKind::Regexp { .. } => run_regexp(spec_id, check, &scoped, findings),
-            CheckKind::Glob { .. } => run_glob(spec_id, check, &scoped, findings),
-            CheckKind::AstGrep { .. } => run_ast_grep(spec_id, check, &scoped, findings),
-            CheckKind::Script {
-                run: RunScope::PerFile,
-                ..
-            } => {
-                run_per_file_script(
-                    spec_id,
-                    check,
-                    self.repo_path,
-                    self.spex_dir,
-                    &scoped,
-                    findings,
-                );
-            }
-            CheckKind::Script {
-                run: RunScope::PerRepo,
-                ..
-            } => {
-                run_per_repo_script(spec_id, check, self.repo_path, self.spex_dir, findings);
-            }
-            CheckKind::Script {
-                run: RunScope::Workspace,
-                ..
-            } => {}
+pub(super) struct Hit {
+    location: Option<String>,
+    message: String,
+}
+
+impl Hit {
+    fn new(location: Option<String>, message: impl Into<String>) -> Self {
+        Self {
+            location,
+            message: message.into(),
         }
+    }
+}
+
+pub(super) fn push_outcome(
+    rule_id: &str,
+    check: &Check,
+    outcome: Outcome,
+    findings: &mut Vec<Finding>,
+) {
+    match outcome {
+        Ok(hits) => findings.extend(
+            hits.into_iter()
+                .map(|hit| Finding::violation(check, rule_id, hit.location, hit.message)),
+        ),
+        Err(message) => findings.push(Finding::config_error(rule_id, &check.name, message)),
     }
 }
 

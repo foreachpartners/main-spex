@@ -1,10 +1,12 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Output};
 
-use super::super::*;
+use crate::rule;
 
-// Cap files per script invocation so large repos don't blow past the OS arg limit.
+use super::super::{Finding, ScopedFile, WorkspaceCheck};
+use super::{Hit, Outcome, push_outcome};
+
 const SCRIPT_BATCH_SIZE: usize = 1000;
 
 pub(in crate::commands::check) fn run_workspace_checks(
@@ -13,199 +15,98 @@ pub(in crate::commands::check) fn run_workspace_checks(
     findings: &mut Vec<Finding>,
 ) {
     for pending in workspace_checks {
-        let Some(script) = locate_script(&pending.spec_id, &pending.check, spex_dir, findings)
-        else {
-            continue;
-        };
-        run_workspace_script(
-            &pending.spec_id,
-            &pending.check,
-            &script,
-            spex_dir,
-            findings,
-        );
+        let outcome = locate_script(&pending.rule_id, &pending.script, spex_dir)
+            .and_then(|program| run_script_once(&program, spex_dir));
+        push_outcome(&pending.rule_id, &pending.check, outcome, findings);
     }
 }
 
-// Runs a `workspace`-scoped script exactly once in the spex directory, passing
-// no files; the script discovers whatever it needs from that directory.
-fn run_workspace_script(
-    spec_id: &str,
-    check: &Check,
-    script: &Path,
-    spex_dir: &Path,
-    findings: &mut Vec<Finding>,
-) {
-    run_script_command(
-        spec_id,
-        check,
-        script,
-        spex_dir,
-        std::iter::empty::<&OsStr>(),
-        findings,
-    );
+pub(in crate::commands::check) fn run_per_file_script(
+    program: &Path,
+    repo_path: &Path,
+    files: &[&ScopedFile],
+) -> Outcome {
+    let mut hits = Vec::new();
+    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
+        hits.extend(run_script(
+            program,
+            repo_path,
+            batch.iter().map(|file| file.rel.as_os_str()),
+        )?);
+    }
+    Ok(hits)
 }
 
-// Spawns the script in `cwd` and records any failure. Returns `false` when the
-// script could not be spawned so batched callers stop issuing further batches.
-fn run_script_command<I, S>(
-    spec_id: &str,
-    check: &Check,
-    script: &Path,
-    cwd: &Path,
-    args: I,
-    findings: &mut Vec<Finding>,
-) -> bool
+pub(in crate::commands::check) fn run_script_once(program: &Path, cwd: &Path) -> Outcome {
+    run_script(program, cwd, std::iter::empty::<&OsStr>())
+}
+
+fn run_script<I, S>(program: &Path, cwd: &Path, args: I) -> Outcome
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = match Command::new(script).args(args).current_dir(cwd).output() {
-        Ok(output) => output,
-        Err(err) => {
-            findings.push(run_error(spec_id, check, script, err));
-            return false;
-        }
-    };
+    let output = Command::new(program)
+        .args(args)
+        .current_dir(cwd)
+        .output()
+        .map_err(|err| format!("could not run script `{}`: {err}", program.display()))?;
 
-    if !output.status.success() {
-        push_script_findings(spec_id, check, &output, findings);
-    }
-    true
+    Ok(if output.status.success() {
+        Vec::new()
+    } else {
+        script_hits(&output)
+    })
 }
 
-// Parses a failed script's stdout into one finding per line, following the
-// script location contract: each line is `LOCATION<TAB>MESSAGE`, where a
-// missing `LOCATION` (empty, or no tab at all) yields a file-less finding. When
-// the script printed nothing on stdout, falls back to a single file-less finding
-// built from stderr or the exit status.
-fn push_script_findings(
-    spec_id: &str,
-    check: &Check,
-    output: &std::process::Output,
-    findings: &mut Vec<Finding>,
-) {
+fn script_hits(output: &Output) -> Vec<Hit> {
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let before = findings.len();
-    for line in stdout.lines() {
-        if line.trim().is_empty() {
-            continue;
-        }
-        let (location, message) = parse_script_line(line);
-        findings.push(Finding::violation(check, spec_id, location, message));
-    }
-    if findings.len() == before {
-        findings.push(Finding::violation(
-            check,
-            spec_id,
-            None,
-            script_fallback(output),
-        ));
+    let hits: Vec<Hit> = stdout
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(parse_script_line)
+        .collect();
+    if hits.is_empty() {
+        vec![Hit::new(None, script_fallback(output))]
+    } else {
+        hits
     }
 }
 
-fn parse_script_line(line: &str) -> (Option<String>, String) {
+fn parse_script_line(line: &str) -> Hit {
     match line.split_once('\t') {
         Some((location, message)) => {
             let location = location.trim();
-            let location = (!location.is_empty()).then(|| location.to_string());
-            (location, message.trim().to_string())
+            Hit::new(
+                (!location.is_empty()).then(|| location.to_string()),
+                message.trim(),
+            )
         }
-        None => (None, line.trim().to_string()),
+        None => Hit::new(None, line.trim()),
     }
 }
 
-// Resolves a script check's program path, pushing a config error when the check
-// declares no script or the file is missing.
-fn locate_script(
-    spec_id: &str,
-    check: &Check,
+pub(in crate::commands::check) fn locate_script(
+    rule_id: &str,
+    reference: &str,
     spex_dir: &Path,
-    findings: &mut Vec<Finding>,
-) -> Option<PathBuf> {
-    let CheckKind::Script {
-        script: reference, ..
-    } = &check.kind
-    else {
-        unreachable!("locate_script called with non-script check")
-    };
-
-    let Some(script) = resolve_script(reference, spex_dir, spec_id) else {
-        let dir = spex_dir.join(rule::SCRIPTS_DIR).join(spec_id);
-        findings.push(Finding::config_error(
-            spec_id,
-            &check.name,
-            format!("script `{reference}` not found in {}", dir.display()),
-        ));
-        return None;
-    };
-
-    Some(script)
+) -> core::result::Result<PathBuf, String> {
+    resolve_script(reference, spex_dir, rule_id).ok_or_else(|| {
+        let dir = spex_dir.join(rule::SCRIPTS_DIR).join(rule_id);
+        format!("script `{reference}` not found in {}", dir.display())
+    })
 }
 
-// Runs a `per-file` script once per batch of in-scope files, passing each
-// file's repository-relative path as an argument.
-pub(in crate::commands::check) fn run_per_file_script(
-    spec_id: &str,
-    check: &Check,
-    repo_path: &Path,
-    spex_dir: &Path,
-    files: &[&ScopedFile],
-    findings: &mut Vec<Finding>,
-) {
-    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
-        return;
-    };
-    for batch in files.chunks(SCRIPT_BATCH_SIZE) {
-        let args = batch.iter().map(|file| file.rel.as_os_str());
-        if !run_script_command(spec_id, check, &script, repo_path, args, findings) {
-            return;
-        }
-    }
-}
-
-// Runs a `per-repo` script exactly once in the repository directory, passing no
-// files; the script discovers whatever it needs from that directory.
-pub(in crate::commands::check) fn run_per_repo_script(
-    spec_id: &str,
-    check: &Check,
-    repo_path: &Path,
-    spex_dir: &Path,
-    findings: &mut Vec<Finding>,
-) {
-    let Some(script) = locate_script(spec_id, check, spex_dir, findings) else {
-        return;
-    };
-    run_script_command(
-        spec_id,
-        check,
-        &script,
-        repo_path,
-        std::iter::empty::<&OsStr>(),
-        findings,
-    );
-}
-
-// Scripts are stored at `<base>/scripts/<spec-id>/<reference>`, so the
-// `script` field only carries the bare filename.
 pub(in crate::commands::check) fn resolve_script(
     reference: &str,
     base: &Path,
-    spec_id: &str,
+    rule_id: &str,
 ) -> Option<PathBuf> {
-    let script = base.join(rule::SCRIPTS_DIR).join(spec_id).join(reference);
+    let script = base.join(rule::SCRIPTS_DIR).join(rule_id).join(reference);
     script.is_file().then_some(script)
 }
 
-fn run_error(spec_id: &str, check: &Check, script: &Path, err: std::io::Error) -> Finding {
-    Finding::config_error(
-        spec_id,
-        &check.name,
-        format!("could not run script `{}`: {err}", script.display()),
-    )
-}
-
-fn script_fallback(output: &std::process::Output) -> String {
+fn script_fallback(output: &Output) -> String {
     let stderr = String::from_utf8_lossy(&output.stderr);
     if !stderr.trim().is_empty() {
         return stderr.trim().to_string();

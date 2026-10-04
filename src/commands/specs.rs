@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -34,21 +34,20 @@ pub struct SpecsArgs {
 }
 
 pub fn run(args: SpecsArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(CliError::Workspace)?;
-    let yaml = render(&workspace, &args)?;
+    let spex = Spex::discover()?;
+    let yaml = render(&spex, &args)?;
     match &args.output {
         Some(path) => {
-            std::fs::write(path, &yaml)
-                .change_context_lazy(|| CliError::WriteFile(PathBuf::from(path)))?;
+            util::write_file(Path::new(path), &yaml)?;
         }
         None => print!("{yaml}"),
     }
     Ok(ExitCode::SUCCESS)
 }
 
-fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
+fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
     for short_name in &args.scope {
-        if !workspace
+        if !spex
             .config
             .repositories
             .iter()
@@ -58,10 +57,10 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
         }
     }
 
-    let mut specs = util::load_yaml_docs(&workspace.dir.join(SPECS_DIR))?;
+    let mut specs = util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?;
     if args.ai {
-        for (spec, path) in &mut specs {
-            if let Some(obj) = spec.as_object_mut() {
+        for file in &mut specs {
+            if let Some(obj) = file.item.as_object_mut() {
                 let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
                 for (key, value) in std::mem::take(obj) {
                     let is_id = key == "id";
@@ -69,7 +68,7 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
                     if is_id {
                         with_path.insert(
                             "path".to_string(),
-                            serde_json::Value::String(format!("{SPECS_DIR}/{path}")),
+                            serde_json::Value::String(format!("{SPECS_DIR}/{}", file.rel_path)),
                         );
                     }
                 }
@@ -77,7 +76,7 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
             }
         }
     }
-    let specs: Vec<serde_json::Value> = specs.into_iter().map(|(spec, _)| spec).collect();
+    let specs: Vec<serde_json::Value> = specs.into_iter().map(|file| file.item).collect();
 
     for id in &args.id {
         if !specs

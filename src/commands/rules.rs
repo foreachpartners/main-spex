@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -30,21 +30,20 @@ pub struct RulesArgs {
 }
 
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(CliError::Workspace)?;
-    let yaml = render(&workspace, &args)?;
+    let spex = Spex::discover()?;
+    let yaml = render(&spex, &args)?;
     match &args.output {
         Some(path) => {
-            std::fs::write(path, &yaml)
-                .change_context_lazy(|| CliError::WriteFile(PathBuf::from(path)))?;
+            util::write_file(Path::new(path), &yaml)?;
         }
         None => print!("{yaml}"),
     }
     Ok(ExitCode::SUCCESS)
 }
 
-fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
+fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
     for name in &args.repo {
-        if !workspace
+        if !spex
             .config
             .repositories
             .iter()
@@ -54,10 +53,10 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
         }
     }
 
-    let mut rules = util::load_yaml_docs(&workspace.dir.join(RULES_DIR))?;
+    let mut rules = util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?;
     if args.ai {
-        for (rule, path) in &mut rules {
-            if let Some(obj) = rule.as_object_mut() {
+        for file in &mut rules {
+            if let Some(obj) = file.item.as_object_mut() {
                 let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
                 for (key, value) in std::mem::take(obj) {
                     if key == "sync_with_upstream" || key == "checks" {
@@ -68,7 +67,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
                     if is_id {
                         with_path.insert(
                             "path".to_string(),
-                            serde_json::Value::String(format!("{RULES_DIR}/{path}")),
+                            serde_json::Value::String(format!("{RULES_DIR}/{}", file.rel_path)),
                         );
                     }
                 }
@@ -76,7 +75,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
             }
         }
     }
-    let rules: Vec<serde_json::Value> = rules.into_iter().map(|(rule, _)| rule).collect();
+    let rules: Vec<serde_json::Value> = rules.into_iter().map(|file| file.item).collect();
 
     for id in &args.id {
         if !rules
@@ -87,7 +86,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
         }
     }
 
-    let repositories: Vec<&Repository> = workspace
+    let repositories: Vec<&Repository> = spex
         .config
         .repositories
         .iter()

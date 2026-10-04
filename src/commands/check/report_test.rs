@@ -4,6 +4,7 @@ use super::*;
 
 fn repository(name: &str, path: &str) -> Repository {
     Repository {
+        description: None,
         repository_name: name.to_string(),
         repository_short_name: name.to_string(),
         path: path.to_string(),
@@ -15,6 +16,8 @@ fn repository(name: &str, path: &str) -> Repository {
 
 fn config(repositories: Vec<Repository>) -> Config {
     Config {
+        description: None,
+        rules_unused: Vec::new(),
         project_name: "acme".to_string(),
         cli_version: "0.0.0".to_string(),
         repositories,
