@@ -31,9 +31,8 @@ pub fn plural(count: usize, noun: &str) -> String {
     }
 }
 
-// Dependency lock files are generated artifacts: never spec-annotated and
-// irrelevant to checks, so the walker skips them in every repository.
-const LOCK_FILES: &[&str] = &[
+const REPO_WALKER_SKIPPED_NAMES: &[&str] = &[
+    ".git",
     "Cargo.lock",
     "Gemfile.lock",
     "Pipfile.lock",
@@ -65,7 +64,9 @@ pub fn repo_walker(root: &Path) -> Walk {
 }
 
 fn is_skipped(name: &OsStr) -> bool {
-    name == OsStr::new(".git") || LOCK_FILES.iter().any(|lock| name == OsStr::new(lock))
+    REPO_WALKER_SKIPPED_NAMES
+        .iter()
+        .any(|skipped| name == *skipped)
 }
 
 fn collect_yaml_paths<E>(
