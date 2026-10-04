@@ -118,3 +118,9 @@ contract: single
 After the specs are written, offer to draft each one's contract: run `spex-contract <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the `writing-style` rule read in Step 1.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

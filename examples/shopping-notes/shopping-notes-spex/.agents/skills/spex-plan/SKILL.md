@@ -72,3 +72,9 @@ Tell the user the path you wrote (or the change you applied), walk through the s
 Mention that the plan is a working document, not a permanent artifact: `spex-implement` deletes it once every step is `completed`, since the spec and code then record the outcome more accurately.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

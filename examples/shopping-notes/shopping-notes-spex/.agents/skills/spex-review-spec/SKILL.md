@@ -42,3 +42,9 @@ Against the diff and spec contents, report:
 Quote the spec line for each finding.
 
 End with a one-line summary: total findings, and the worst issue (if any).
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

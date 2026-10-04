@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.5] - 2026-10-04
+
+- Bundled skills now end with a `# Project` section, like `AGENTS.md`. `update` rewrites everything above it and the skill's other bundled files, and keeps the section's content, so project-specific additions survive updates without opting the skill out via `sync-with-upstream: false`.
+- `update`: no longer deletes a managed skill's folder before rewriting it, so files you added to it are kept.
+
 ## [0.10.4] - 2026-10-04
 
 - Added the `spex` skill, bundled for every project, which replaces the per-project `<project-name>-spex` repository skill. Existing projects delete the old skill folder per the migration guide.

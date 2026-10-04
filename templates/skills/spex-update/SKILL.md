@@ -28,3 +28,9 @@ Re-read `references/migration_guide.md` — Step 3 just refreshed it. Apply, in 
 ## Step 5 — Verify
 
 Run `spex check` and `spex coverage` again. Fix any issues they report before finishing.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

@@ -38,6 +38,7 @@ Agent skills drive the artifact chain: each packages the instructions an AI codi
 
 - Skills live in the spex repository, installed under `.agents/skills/`; the bundled ones ship from `templates/skills/`, each `SKILL.md` describing what it does and when to load it.
 - A skill is triggered by name (e.g. `/spex-spec`) or loaded on demand by the agent from its description.
+- Every bundled `SKILL.md` ends with a `# Project` section for project-specific additions; `spex update` rewrites everything above it and never touches it.
 - A skill's `SKILL.md` frontmatter follows the [Agent Skills specification](https://agentskills.io/specification); whether `spex update` overwrites it is in [cli.md](cli.md#spex-update).
 
 # Specs

@@ -68,3 +68,9 @@ Summarize the run:
 - Which specs and acceptance criteria you added coverage for.
 - The format, lints, tests, and `spex check` run outcome.
 - Which specs you set to `active`, and which acceptance criteria still show `is_done: false` because `spex coverage` doesn't yet show them traced.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

@@ -15,3 +15,9 @@ Run `spex info --repo spex` for general repository information. This repository 
 - `contracts/` - contract: interface definitions (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI) shared across repositories. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.
 - `plans/` - plan: temporary implementation plan derived from approved spec and contract to plan and track huge task split in multiple steps. Deleted after completion.
 - `scripts/` - helper scripts a rule's `script` check references, one folder per rule
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

@@ -108,3 +108,9 @@ Summarize the run:
 ## Step 8 — Point to the next skill
 
 Ask the user to do an optional review with `spex-review`, then to add test coverage for the change with `spex-test`.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

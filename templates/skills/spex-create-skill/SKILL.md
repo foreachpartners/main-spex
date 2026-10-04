@@ -84,3 +84,9 @@ Use these to diagnose issues the user may be having with the skill.
 ## Where spex skills live
 
 New spex-authored skills live under `templates/skills/<skill-name>/SKILL.md` in this repository, and are scaffolded into `.agents/skills/<skill-name>/SKILL.md` of every spex project by `spex init`/`spex update`. Follow the naming rule shared by every skill system: `name` in the frontmatter must be lowercase, hyphen-separated, and match the containing directory exactly.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

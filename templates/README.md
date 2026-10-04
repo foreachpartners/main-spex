@@ -10,7 +10,7 @@ Assets scaffolded into client projects by `spex init` and `spex update`. Everyth
 - `spex.yaml` — seeds the client's `spex.yaml` on `init`, replacing the `unknown` project and spex repository names with the project name. It lists only the spex repository; `spex-setup` adds the others. `update` only refreshes its `cli_version`.
 - `project-name.code-workspace` — seeds the client's `<project-name>.code-workspace` on `init`, with a folder for the spex repository only; `spex-setup` adds the others. `update` never touches it.
 - `rules/` and `scripts/` — written when the rule is missing locally or carries `sync_with_upstream: true`.
-- `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`.
+- `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`. `update` rewrites each `SKILL.md` only above its `# Project` marker, keeping the client's own content, so every bundled `SKILL.md` MUST end with that marker.
 
 ## Editing docs
 

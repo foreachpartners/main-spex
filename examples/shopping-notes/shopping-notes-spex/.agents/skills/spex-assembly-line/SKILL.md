@@ -54,3 +54,9 @@ Summarize the run:
 - Each loop's passes, the Rule or Spec agent's findings per pass, and what the matching Fix agent fixed.
 - Whether each axis finished clean, or hit the 3-pass cap with findings still open.
 - Whether the Test agent finished cleanly or reported an unresolved failure.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

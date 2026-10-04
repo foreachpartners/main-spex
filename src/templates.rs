@@ -21,6 +21,7 @@ pub const SKILLS_DIR: &str = "skills";
 pub const AGENTS_DIR_NAME: &str = ".agents";
 pub const CLAUDE_DIR_NAME: &str = ".claude";
 pub const AGENTS_FILE: &str = "AGENTS.md";
+const SKILL_FILE: &str = "SKILL.md";
 pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
 // Top-level template categories scaffolded into a spex repo. Shared by `init`
@@ -57,22 +58,35 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
     ensure_claude_md_link(spex_dir)
 }
 
-// Marks where the user-owned section of `AGENTS.md` begins. Content before
-// this marker is bundled and kept in sync by `update`; content from the
-// marker onward (the "Project" section and anything the user adds under it)
-// is preserved untouched.
-const AGENTS_MD_SPLIT_MARKER: &str = "\n---\n\n# Project";
+// Marks where the user-owned section of `AGENTS.md` and of every bundled
+// `SKILL.md` begins. Content before this marker is bundled and kept in sync by
+// `update`; content from the marker onward (the "Project" section and anything
+// the user adds under it) is preserved untouched.
+const PROJECT_SECTION_MARKER: &str = "\n---\n\n# Project";
 
-fn split_agents_md(contents: &str) -> Option<(&str, &str)> {
-    let idx = contents.find(AGENTS_MD_SPLIT_MARKER)?;
+fn split_project_section(contents: &str) -> Option<(&str, &str)> {
+    let idx = contents.find(PROJECT_SECTION_MARKER)?;
     Some(contents.split_at(idx))
 }
 
-// Keeps `AGENTS.md` in sync with the bundled template. If the local file has
-// `AGENTS_MD_SPLIT_MARKER`, only the managed section above it is replaced,
+// Merges a bundled file with its local copy. If the local file has
+// `PROJECT_SECTION_MARKER`, only the managed section above it is replaced,
 // preserving the user's "Project" section untouched; a file that lacks the
 // marker (e.g. one written before this split existed) is fully overwritten,
 // since there is no safe way to tell managed from user content in it.
+fn merge_project_section(template: &[u8], local: &str) -> Vec<u8> {
+    let Some((_, preserved)) = split_project_section(local) else {
+        return template.to_vec();
+    };
+    let Some((managed, _)) = std::str::from_utf8(template)
+        .ok()
+        .and_then(split_project_section)
+    else {
+        return local.as_bytes().to_vec();
+    };
+    format!("{managed}{preserved}").into_bytes()
+}
+
 fn sync_agents_md(spex_dir: &Path) -> Result<()> {
     let Some(template) = TEMPLATES.get_file(AGENTS_FILE) else {
         return Ok(());
@@ -83,20 +97,7 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
         return Ok(());
     };
 
-    let updated = match split_agents_md(&local_contents) {
-        Some((_, preserved)) => {
-            let Some(managed) = std::str::from_utf8(template.contents())
-                .ok()
-                .and_then(split_agents_md)
-                .map(|(managed, _)| managed)
-            else {
-                return Ok(());
-            };
-            format!("{managed}{preserved}").into_bytes()
-        }
-        None => template.contents().to_vec(),
-    };
-
+    let updated = merge_project_section(template.contents(), &local_contents);
     if updated != local_contents.as_bytes() {
         fs::write(&agents, updated)
             .change_context(TemplateError::Io)
@@ -249,17 +250,25 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
     for skill in skills.dirs() {
         let name = skill.path().file_name().unwrap_or_default();
         let dest = dest_root.join(name);
+        let skill_md = dest.join(SKILL_FILE);
 
-        if dest.exists() {
-            if !skill_synced_with_upstream(&dest.join("SKILL.md")) {
-                continue;
-            }
-            // Replace each managed skill wholesale so renamed or removed files don't linger.
-            fs::remove_dir_all(&dest)
-                .change_context(TemplateError::Io)
-                .attach_with(|| format!("could not remove `{}`", dest.display()))?;
+        if dest.exists() && !skill_synced_with_upstream(&skill_md) {
+            continue;
         }
+
+        let local_skill_md = fs::read_to_string(&skill_md).ok();
         copy_tree(skill, Path::new(SKILLS_DIR), &dest_root)?;
+
+        if let Some(local) = local_skill_md
+            && let Some(template) = skill.get_file(skill.path().join(SKILL_FILE))
+        {
+            fs::write(
+                &skill_md,
+                merge_project_section(template.contents(), &local),
+            )
+            .change_context(TemplateError::Io)
+            .attach_with(|| format!("could not write `{}`", skill_md.display()))?;
+        }
     }
 
     Ok(())

@@ -62,3 +62,9 @@ A change can pass one axis and fail the other:
 - Code that does exactly what the issue asked but breaks the project's conventions -> **Spec pass, Rule fail.**
 
 Reporting them separately stops one axis from masking the other.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

@@ -66,3 +66,9 @@ Against the diff captured in step 1, report — per file/hunk where relevant:
 Distinguish hard violations from judgement calls — `spex check` violations and documented-standard breaches are hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces beyond what `spex check` already reported.
 
 End with a one-line summary: total findings, and the worst issue (if any).
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

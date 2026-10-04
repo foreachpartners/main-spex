@@ -63,6 +63,7 @@ Finish setup afterwards by running the `/spex-setup` skill: it adds the other wo
 Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary.
 
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a skill that opts out keeps its local changes, so consumers can override a global skill.
+- Rewrites a synced skill's `SKILL.md` above its `# Project` marker and the skill's other bundled files, preserving everything from that marker onward and any files you added to the skill folder; a local `SKILL.md` predating the marker is fully overwritten, since managed and user content cannot be told apart in it.
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local rule without it is left untouched, so consumers can override a global rule.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there records a deliberate deletion, so it stays deleted on future updates.
 - Rewrites the managed section of the root `AGENTS.md` (everything above the `# Project` marker), preserving everything from that marker onward; a local `AGENTS.md` predating the marker is fully overwritten, since managed and user content cannot be told apart in it.

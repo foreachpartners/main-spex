@@ -25,3 +25,9 @@ From now: agent talk like caveman. Short word. Short sentence. No fluff.
 - Cavemen still use tool right. Tool call not shrink.
 
 Cavemen skill done when: reply short, reply clear, reply true. Token low. Meaning full.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

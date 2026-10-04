@@ -93,3 +93,9 @@ The file may keep a trailing comma after the last folder.
 ## Next
 
 Offer to author the first spec with `spex-spec` (a capability the system must provide) or `spex-rule` (a cross-cutting convention). Note that it is better to start a new chat first to save context.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

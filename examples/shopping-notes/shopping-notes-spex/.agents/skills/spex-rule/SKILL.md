@@ -153,3 +153,9 @@ If there are errors:
 - Too many errors: offer to plan its implementation: run `spex-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
+
+---
+
+# Project
+
+Everything above `Project` is overrided on `spex update`, any project spicific data should be added here

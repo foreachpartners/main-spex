@@ -372,26 +372,76 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_replaces_managed_skill_removing_stale_files() {
+    fn scaffold_restores_bundled_skill_files_and_keeps_extra_ones() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), &[]).expect("scaffold");
 
-        let stale = spex_dir
+        let skill_dir = spex_dir
             .path()
             .join(AGENTS_DIR_NAME)
             .join(SKILLS_DIR)
-            .join("spex-setup/STALE.md");
-        fs::write(&stale, "stale").expect("write stale file");
+            .join("spex-setup");
+        let bundled_reference = skill_dir.join("references/GENERIC-REPO-SKILL-TEMPLATE.md");
+        let extra = skill_dir.join("notes.md");
+        fs::write(&bundled_reference, "tampered").expect("tamper bundled reference");
+        fs::write(&extra, "my notes").expect("write extra file");
 
         scaffold(spex_dir.path(), &[]).expect("re-scaffold");
 
+        let expected = TEMPLATES
+            .get_file("skills/spex-setup/references/GENERIC-REPO-SKILL-TEMPLATE.md")
+            .expect("bundled reference")
+            .contents();
+        assert_eq!(fs::read(&bundled_reference).unwrap(), expected);
+        assert_eq!(fs::read_to_string(&extra).unwrap(), "my notes");
+    }
+
+    #[test]
+    fn bundled_skills_have_a_project_section() {
+        let skills = TEMPLATES.get_dir(SKILLS_DIR).expect("bundled skills dir");
+
+        for skill in skills.dirs() {
+            let skill_md = skill
+                .get_file(skill.path().join(SKILL_FILE))
+                .expect("bundled SKILL.md")
+                .contents_utf8()
+                .expect("utf8 SKILL.md");
+            assert!(
+                skill_md.contains(PROJECT_SECTION_MARKER),
+                "{} lacks the project section marker",
+                skill.path().display()
+            );
+        }
+    }
+
+    #[test]
+    fn scaffold_syncs_managed_section_of_skill_preserving_project_data() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), &[]).expect("scaffold");
+
+        let skill = spex_dir.path().join(SKILL);
+        fs::write(
+            &skill,
+            "stale managed content\n\n---\n\n# Project\n\nmy custom notes\n",
+        )
+        .expect("seed SKILL.md");
+
+        scaffold(spex_dir.path(), &[]).expect("re-scaffold");
+
+        let updated = fs::read_to_string(&skill).expect("read SKILL.md");
+        let template = TEMPLATES
+            .get_file("skills/spex-setup/SKILL.md")
+            .expect("bundled skill")
+            .contents_utf8()
+            .expect("utf8 SKILL.md");
+        let (managed, _) = template
+            .split_once(PROJECT_SECTION_MARKER)
+            .expect("bundled SKILL.md has the project marker");
+
+        assert!(updated.starts_with(managed), "managed section not synced");
         assert!(
-            !stale.exists(),
-            "stale managed skill file should be removed"
-        );
-        assert!(
-            spex_dir.path().join(SKILL).is_file(),
-            "managed skill should be restored"
+            updated.ends_with("# Project\n\nmy custom notes\n"),
+            "project-specific section not preserved"
         );
     }
 

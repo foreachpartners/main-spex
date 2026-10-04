@@ -34,7 +34,7 @@ Improving existing skills helps all developers using them, so if you find a way 
 
 Create a separate version of the skill. Make your changes and test them by comparing the output results of the old and new skill versions for the same prompt.
 
-You can also disable upstream synchronization in the skill metadata if the changes are specific to your project and you just want to use a custom version.
+If the changes are specific to your project, add them under the `# Project` section at the end of the skill's `SKILL.md`; `spex update` never touches it. You can also disable upstream synchronization in the skill metadata if you just want to use a fully custom version.
 
 ```yaml
 metadata:
