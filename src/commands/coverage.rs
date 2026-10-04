@@ -3,9 +3,9 @@ use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
-use thiserror::Error;
 
 use crate::annotations::{AcCoverage, Found};
+use crate::error::{CliError, Result};
 use crate::spec::{Spec, Status};
 use crate::spex::Spex;
 use crate::style::Style;
@@ -14,18 +14,6 @@ use crate::util::file_url;
 #[cfg(test)]
 #[path = "coverage_test.rs"]
 mod coverage_test;
-
-type Result<T> = core::result::Result<T, Report<CoverageError>>;
-
-#[derive(Debug, Error)]
-pub enum CoverageError {
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("could not walk workspace repository files")]
-    Walk,
-    #[error("unknown repository short name `{0}` — not listed in spex.yaml")]
-    UnknownScope(String),
-}
 
 #[derive(Args)]
 pub struct CoverageArgs {
@@ -159,9 +147,9 @@ impl SpecRow {
 }
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(CoverageError::Workspace)?;
+    let workspace = Spex::discover().change_context(CliError::Workspace)?;
     workspace.warn_if_cli_outdated();
-    let specs = workspace.specs().change_context(CoverageError::Workspace)?;
+    let specs = workspace.specs().change_context(CliError::Workspace)?;
 
     for short_name in &args.scope {
         if !workspace
@@ -170,7 +158,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
             .iter()
             .any(|repo| &repo.repository_short_name == short_name)
         {
-            return Err(Report::new(CoverageError::UnknownScope(short_name.clone())));
+            return Err(Report::new(CliError::UnknownScope(short_name.clone())));
         }
     }
 
@@ -179,8 +167,8 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
         .filter(|spec| spec.scope_selected(&args.scope))
         .collect();
 
-    let found = Found::scan_workspace(&workspace.dir, &workspace.config)
-        .change_context(CoverageError::Walk)?;
+    let found =
+        Found::scan_workspace(&workspace.dir, &workspace.config).change_context(CliError::Walk)?;
 
     Ok(report(&workspace.dir, &specs, &found, args.verbose))
 }

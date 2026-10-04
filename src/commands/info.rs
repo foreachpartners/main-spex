@@ -2,25 +2,9 @@ use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
-use thiserror::Error;
 
+use crate::error::{CliError, Result};
 use crate::spex::Spex;
-
-type Result<T> = core::result::Result<T, Report<InfoError>>;
-
-#[derive(Debug, Error)]
-pub enum InfoError {
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("could not serialize the spex configuration")]
-    Serialize,
-    #[error("no field `{0}` in the spex configuration")]
-    UnknownField(String),
-    #[error("field `{0}` is not a single value")]
-    NotScalar(String),
-    #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
-    UnknownRepo(String),
-}
 
 #[derive(Args)]
 pub struct InfoArgs {
@@ -38,16 +22,16 @@ pub struct InfoArgs {
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(InfoError::Workspace)?;
+    let workspace = Spex::discover().change_context(CliError::Workspace)?;
     workspace.warn_if_cli_outdated();
-    let value = serde_json::to_value(&workspace.config).change_context(InfoError::Serialize)?;
+    let value = serde_json::to_value(&workspace.config).change_context(CliError::Serialize)?;
 
     if let Some(field) = &args.print {
         return print_field(&value, field);
     }
 
     if args.repo.is_empty() {
-        let json = serde_json::to_string_pretty(&value).change_context(InfoError::Serialize)?;
+        let json = serde_json::to_string_pretty(&value).change_context(CliError::Serialize)?;
         println!("{json}");
         return Ok(ExitCode::SUCCESS);
     }
@@ -61,7 +45,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
                 .repositories
                 .iter()
                 .find(|r| r.matches_any_repo_name(repo_filter))
-                .ok_or_else(|| Report::new(InfoError::UnknownRepo(repo_filter.clone())))
+                .ok_or_else(|| Report::new(CliError::UnknownRepo(repo_filter.clone())))
         })
         .collect::<Result<Vec<_>>>()?;
 
@@ -70,7 +54,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         "cli_version": workspace.config.cli_version,
         "repositories": repos,
     });
-    let json = serde_json::to_string_pretty(&filtered).change_context(InfoError::Serialize)?;
+    let json = serde_json::to_string_pretty(&filtered).change_context(CliError::Serialize)?;
     println!("{json}");
 
     Ok(ExitCode::SUCCESS)
@@ -78,14 +62,14 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
 
 fn print_field(value: &serde_json::Value, field: &str) -> Result<ExitCode> {
     let Some(found) = value.get(field) else {
-        return Err(Report::new(InfoError::UnknownField(field.to_string())));
+        return Err(Report::new(CliError::UnknownField(field.to_string())));
     };
 
     match found {
         serde_json::Value::String(s) => println!("{s}"),
         serde_json::Value::Number(n) => println!("{n}"),
         serde_json::Value::Bool(b) => println!("{b}"),
-        _ => return Err(Report::new(InfoError::NotScalar(field.to_string()))),
+        _ => return Err(Report::new(CliError::NotScalar(field.to_string()))),
     }
 
     Ok(ExitCode::SUCCESS)

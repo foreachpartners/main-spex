@@ -2,11 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
-use error_stack::{Report, ResultExt};
+use error_stack::ResultExt;
 use regex::Regex;
-use thiserror::Error;
 
 use crate::config::Config;
+use crate::error::{CliError, Result};
 use crate::repo_files::RepoFiles;
 use crate::spec::{ContractLevel, CoverageLayer, Spec};
 use crate::util;
@@ -14,14 +14,6 @@ use crate::util;
 #[cfg(test)]
 #[path = "annotations_test.rs"]
 mod annotations_test;
-
-type Result<T> = core::result::Result<T, Report<AnnotationsError>>;
-
-#[derive(Debug, Error)]
-pub enum AnnotationsError {
-    #[error("could not walk workspace repository files")]
-    Walk,
-}
 
 // Spec-id annotations found across the workspace: `bare` holds layers found
 // without a `#ac-id` (a whole-spec annotation), `by_ac` holds layers found
@@ -181,7 +173,7 @@ impl Scanner {
 
     fn scan_repo(&self, repo_path: &Path, found: &mut Found) -> Result<()> {
         for result in RepoFiles::new(repo_path) {
-            let path = result.change_context(AnnotationsError::Walk)?;
+            let path = result.change_context(CliError::Walk)?;
             // Skip files that aren't valid UTF-8 (binaries); they carry no annotations.
             let Ok(content) = fs::read_to_string(path) else {
                 continue;

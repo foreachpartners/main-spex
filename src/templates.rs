@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::Path;
 
-use error_stack::{Report, ResultExt};
+use error_stack::ResultExt;
 use include_dir::{Dir, DirEntry, include_dir};
-use thiserror::Error;
 
+use crate::error::{CliError, Result};
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use crate::util;
 use serde::Deserialize;
@@ -35,14 +35,6 @@ pub const CLAUDE_FILE: &str = "CLAUDE.md";
 // `metadata.sync-with-upstream` is explicitly `false`.
 const MANAGED_FLAT_DIRS: [&str; 2] = [DOCS_DIR, SCHEMAS_DIR];
 
-type Result<T> = core::result::Result<T, Report<TemplateError>>;
-
-#[derive(Debug, Error)]
-pub enum TemplateError {
-    #[error("an I/O operation failed")]
-    Io,
-}
-
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
 // `init`. `update` never seeds it, but does keep the managed section of an
 // existing one in sync; see `sync_agents_md`.
@@ -52,7 +44,7 @@ pub fn ensure_agents_md(spex_dir: &Path) -> Result<()> {
         && let Some(file) = TEMPLATES.get_file(AGENTS_FILE)
     {
         fs::write(&agents, file.contents())
-            .change_context(TemplateError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not write `{}`", agents.display()))?;
     }
     ensure_claude_md_link(spex_dir)
@@ -100,7 +92,7 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
     let updated = merge_project_section(template.contents(), &local_contents);
     if updated != local_contents.as_bytes() {
         fs::write(&agents, updated)
-            .change_context(TemplateError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not write `{}`", agents.display()))?;
     }
     Ok(())
@@ -183,7 +175,7 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
 
     let rules_dest = spex_dir.join(RULES_DIR);
     fs::create_dir_all(&rules_dest)
-        .change_context(TemplateError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not create `{}`", rules_dest.display()))?;
 
     let scripts_dir = TEMPLATES.get_dir(SCRIPTS_DIR);
@@ -217,7 +209,7 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
         }
 
         fs::write(&dest, file.contents())
-            .change_context(TemplateError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not write `{}`", dest.display()))?;
 
         if let Some(scripts) = scripts_dir
@@ -244,7 +236,7 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
 
     let dest_root = spex_dir.join(AGENTS_DIR_NAME).join(SKILLS_DIR);
     fs::create_dir_all(&dest_root)
-        .change_context(TemplateError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not create `{}`", dest_root.display()))?;
 
     for skill in skills.dirs() {
@@ -266,7 +258,7 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
                 &skill_md,
                 merge_project_section(template.contents(), &local),
             )
-            .change_context(TemplateError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not write `{}`", skill_md.display()))?;
         }
     }
@@ -283,11 +275,11 @@ fn copy_tree(dir: &Dir, strip: &Path, dest_root: &Path) -> Result<()> {
                 let dest = dest_root.join(rel);
                 if let Some(parent) = dest.parent() {
                     fs::create_dir_all(parent)
-                        .change_context(TemplateError::Io)
+                        .change_context(CliError::Io)
                         .attach_with(|| format!("could not create `{}`", parent.display()))?;
                 }
                 fs::write(&dest, file.contents())
-                    .change_context(TemplateError::Io)
+                    .change_context(CliError::Io)
                     .attach_with(|| format!("could not write `{}`", dest.display()))?;
             }
         }
@@ -305,7 +297,7 @@ fn ensure_claude_link(spex_dir: &Path) -> Result<()> {
     }
 
     symlink(AGENTS_DIR_NAME, &link)
-        .change_context(TemplateError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| {
             format!(
                 "could not link `{}` to `{}`",
@@ -330,7 +322,7 @@ fn ensure_claude_md_link(spex_dir: &Path) -> Result<()> {
     }
 
     symlink(AGENTS_FILE, &link)
-        .change_context(TemplateError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not link `{}` to `{}`", link.display(), AGENTS_FILE))
 }
 
@@ -348,22 +340,22 @@ fn mark_scripts_executable(scripts_dir: &Path) -> Result<()> {
     }
 
     let entries = fs::read_dir(scripts_dir)
-        .change_context(TemplateError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not read `{}`", scripts_dir.display()))?;
 
     for entry in entries {
-        let path = entry.change_context(TemplateError::Io)?.path();
+        let path = entry.change_context(CliError::Io)?.path();
         // Scripts are namespaced under `scripts/<spec-id>/`, so recurse into subdirectories.
         if path.is_dir() {
             mark_scripts_executable(&path)?;
             continue;
         }
         let mut permissions = fs::metadata(&path)
-            .change_context(TemplateError::Io)?
+            .change_context(CliError::Io)?
             .permissions();
         permissions.set_mode(permissions.mode() | 0o111);
         fs::set_permissions(&path, permissions)
-            .change_context(TemplateError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not set permissions on `{}`", path.display()))?;
     }
     Ok(())

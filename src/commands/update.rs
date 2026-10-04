@@ -1,10 +1,10 @@
 use std::fs;
 use std::process::ExitCode;
 
-use error_stack::{Report, ResultExt};
-use thiserror::Error;
+use error_stack::ResultExt;
 
-use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE};
+use crate::config::{CLI_VERSION, Config};
+use crate::error::{CliError, Result};
 use crate::spex::Spex;
 use crate::style::Style;
 use crate::templates;
@@ -24,34 +24,20 @@ struct UpdateConfig {
     rules_unused: Vec<String>,
 }
 
-type Result<T> = core::result::Result<T, Report<UpdateError>>;
-
-#[derive(Debug, Error)]
-pub enum UpdateError {
-    #[error(
-        "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
-    )]
-    NotInitialized,
-    #[error("could not rewrite bundled templates")]
-    Templates,
-    #[error("could not update `{SPEX_CONFIG_FILE}`")]
-    Config,
-}
-
 pub fn run() -> Result<ExitCode> {
-    let config_path = Spex::locate_spex_config().change_context(UpdateError::NotInitialized)?;
+    let config_path = Spex::locate_spex_config().change_context(CliError::NotInitialized)?;
 
     let raw = fs::read_to_string(&config_path)
-        .change_context(UpdateError::Config)
+        .change_context(CliError::UpdateConfig)
         .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
     templates::scaffold(Config::dir_of(&config_path), &previous.rules_unused)
-        .change_context(UpdateError::Templates)?;
+        .change_context(CliError::Templates)?;
 
     fs::write(&config_path, Config::set_cli_version(&raw, CLI_VERSION))
-        .change_context(UpdateError::Config)
+        .change_context(CliError::UpdateConfig)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
 
     let style = Style::detect();

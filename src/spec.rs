@@ -1,9 +1,8 @@
 use std::path::Path;
 
-use error_stack::Report;
 use serde::Deserialize;
-use thiserror::Error;
 
+use crate::error::Result;
 use crate::util;
 
 #[cfg(test)]
@@ -11,18 +10,6 @@ use crate::util;
 mod spec_test;
 
 pub const SPECS_DIR: &str = "specs";
-
-type Result<T> = core::result::Result<T, Report<SpecError>>;
-
-#[derive(Debug, Error)]
-pub enum SpecError {
-    #[error("could not read the `{SPECS_DIR}` directory")]
-    ReadDir,
-    #[error("could not read spec `{0}`")]
-    ReadFile(String),
-    #[error("could not parse spec `{0}`")]
-    Parse(String),
-}
 
 #[derive(Debug, Deserialize)]
 pub struct Spec {
@@ -108,12 +95,7 @@ impl Spec {
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
-        let loaded = util::load_yaml_dir(
-            specs_dir,
-            || SpecError::ReadDir,
-            SpecError::ReadFile,
-            SpecError::Parse,
-        )?;
+        let loaded = util::load_yaml_dir(specs_dir)?;
 
         let mut specs: Vec<Self> = loaded
             .into_iter()

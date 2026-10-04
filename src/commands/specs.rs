@@ -1,9 +1,10 @@
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
-use thiserror::Error;
 
+use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::spex::Spex;
 use crate::util;
@@ -11,26 +12,6 @@ use crate::util;
 #[cfg(test)]
 #[path = "specs_test.rs"]
 mod specs_test;
-
-type Result<T> = core::result::Result<T, Report<SpecsError>>;
-
-#[derive(Debug, Error)]
-pub enum SpecsError {
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("could not read `{0}`")]
-    ReadFile(String),
-    #[error("could not parse `{0}`")]
-    Parse(String),
-    #[error("could not serialize output")]
-    Serialize,
-    #[error("unknown repository short name `{0}` — not listed in spex.yaml")]
-    UnknownScope(String),
-    #[error("unknown spec id `{0}` — not found in {SPECS_DIR}")]
-    UnknownId(String),
-    #[error("could not write `{0}`")]
-    WriteFile(String),
-}
 
 #[derive(Args)]
 pub struct SpecsArgs {
@@ -53,12 +34,12 @@ pub struct SpecsArgs {
 }
 
 pub fn run(args: SpecsArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(SpecsError::Workspace)?;
+    let workspace = Spex::discover().change_context(CliError::Workspace)?;
     let yaml = render(&workspace, &args)?;
     match &args.output {
         Some(path) => {
             std::fs::write(path, &yaml)
-                .change_context_lazy(|| SpecsError::WriteFile(path.clone()))?;
+                .change_context_lazy(|| CliError::WriteFile(PathBuf::from(path)))?;
         }
         None => print!("{yaml}"),
     }
@@ -73,15 +54,11 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
             .iter()
             .any(|repo| &repo.repository_short_name == short_name)
         {
-            return Err(Report::new(SpecsError::UnknownScope(short_name.clone())));
+            return Err(Report::new(CliError::UnknownScope(short_name.clone())));
         }
     }
 
-    let mut specs = util::load_yaml_docs(
-        &workspace.dir.join(SPECS_DIR),
-        SpecsError::ReadFile,
-        SpecsError::Parse,
-    )?;
+    let mut specs = util::load_yaml_docs(&workspace.dir.join(SPECS_DIR))?;
     if args.ai {
         for (spec, path) in &mut specs {
             if let Some(obj) = spec.as_object_mut() {
@@ -107,7 +84,7 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
             .iter()
             .any(|spec| spec.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
-            return Err(Report::new(SpecsError::UnknownId(id.clone())));
+            return Err(Report::new(CliError::UnknownSpecId(id.clone())));
         }
     }
 
@@ -118,12 +95,12 @@ fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
         .collect();
 
     if output.is_empty() {
-        return serde_yaml_ng::to_string(&output).change_context(SpecsError::Serialize);
+        return serde_yaml_ng::to_string(&output).change_context(CliError::Serialize);
     }
 
     output
         .iter()
-        .map(|spec| serde_yaml_ng::to_string(&[spec]).change_context(SpecsError::Serialize))
+        .map(|spec| serde_yaml_ng::to_string(&[spec]).change_context(CliError::Serialize))
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))
 }

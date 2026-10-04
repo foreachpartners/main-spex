@@ -45,6 +45,7 @@ When a change requires migration steps in a spex project, fill `templates/skills
 src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
+  error.rs          CliError, the single error enum for every command, and the shared Result alias
   workspace.rs      Resolved spex dir + config, with spec loaders (shared by commands)
   rule.rs           Rule model
   spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)

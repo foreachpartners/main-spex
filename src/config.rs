@@ -4,8 +4,8 @@ use std::path::{Path, PathBuf};
 
 use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 
+use crate::error::{CliError, Result};
 use crate::rule::RuleId;
 use crate::util::{canonical, dir_name};
 
@@ -16,20 +16,6 @@ mod config_test;
 pub const SPEX_CONFIG_FILE: &str = "spex.yaml";
 pub const SPEX_DIR_NAME: &str = "spex";
 pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
-
-type Result<T> = core::result::Result<T, Report<ConfigError>>;
-
-#[derive(Debug, Error)]
-pub enum ConfigError {
-    #[error(
-        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any workspace repository"
-    )]
-    NotFound,
-    #[error("could not read `{SPEX_CONFIG_FILE}`")]
-    Read,
-    #[error("could not parse `{SPEX_CONFIG_FILE}`")]
-    Parse,
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
@@ -105,7 +91,7 @@ impl Config {
                 return Ok(child_config_path);
             }
         }
-        Err(Report::new(ConfigError::NotFound))
+        Err(Report::new(CliError::ConfigNotFound))
     }
 
     pub fn dir_of(config_path: &Path) -> &Path {
@@ -142,14 +128,14 @@ impl Config {
 
     pub fn load(config_path: &Path) -> Result<Self> {
         if !config_path.exists() {
-            return Err(Report::new(ConfigError::NotFound));
+            return Err(Report::new(CliError::ConfigNotFound));
         }
 
         let raw = fs::read_to_string(config_path)
-            .change_context(ConfigError::Read)
+            .change_context(CliError::ReadConfig)
             .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
-        serde_yaml_ng::from_str(&raw).change_context(ConfigError::Parse)
+        serde_yaml_ng::from_str(&raw).change_context(CliError::ParseConfig)
     }
 
     // Warns when the version that wrote `spex.yaml` differs from the running CLI so

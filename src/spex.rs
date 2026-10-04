@@ -1,26 +1,12 @@
 use std::path::PathBuf;
 
-use error_stack::{Report, ResultExt};
-use thiserror::Error;
+use error_stack::ResultExt;
 
 use crate::config::Config;
+use crate::error::{CliError, Result};
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
 use crate::style::Style;
-
-type Result<T> = core::result::Result<T, Report<WorkspaceError>>;
-
-#[derive(Debug, Error)]
-pub enum WorkspaceError {
-    #[error("could not determine the current directory")]
-    CurrentDir,
-    #[error("could not load spex configuration")]
-    Config,
-    #[error("could not load rules")]
-    Rules,
-    #[error("could not load specs")]
-    Specs,
-}
 
 pub struct Spex {
     pub dir: PathBuf,
@@ -29,13 +15,13 @@ pub struct Spex {
 
 impl Spex {
     pub fn locate_spex_config() -> Result<PathBuf> {
-        let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
-        Config::find_file(&current_dir).change_context(WorkspaceError::Config)
+        let current_dir = std::env::current_dir().change_context(CliError::CurrentDir)?;
+        Config::find_file(&current_dir).change_context(CliError::LoadConfig)
     }
 
     pub fn discover() -> Result<Self> {
         let config_path = Self::locate_spex_config()?;
-        let config = Config::load(&config_path).change_context(WorkspaceError::Config)?;
+        let config = Config::load(&config_path).change_context(CliError::LoadConfig)?;
         let dir = Config::dir_of(&config_path).to_path_buf();
         Ok(Self { dir, config })
     }
@@ -48,10 +34,10 @@ impl Spex {
     }
 
     pub fn rules(&self) -> Result<Vec<Rule>> {
-        Rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
+        Rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(CliError::LoadRules)
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
-        Spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(WorkspaceError::Specs)
+        Spec::load_all(&self.dir.join(spec::SPECS_DIR)).change_context(CliError::LoadSpecs)
     }
 }

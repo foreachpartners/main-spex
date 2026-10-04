@@ -4,16 +4,11 @@ mod tests {
     use serde::Deserialize;
     use std::path::PathBuf;
     use tempfile::tempdir;
-    use thiserror::Error;
 
     #[derive(Debug, Deserialize)]
     struct Item {
         id: String,
     }
-
-    #[derive(Debug, Error)]
-    #[error("test error")]
-    struct TestError;
 
     #[test]
     fn file_url_prefixes_an_absolute_path() {
@@ -38,8 +33,7 @@ mod tests {
         std::fs::create_dir_all(dir.path().join("frontend")).expect("frontend dir");
         std::fs::write(dir.path().join("frontend/nested.yaml"), "id: NESTED\n").expect("nested");
 
-        let items: Vec<(Item, String, String)> =
-            load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
+        let items: Vec<(Item, String, String)> = load_yaml_dir(dir.path()).expect("load");
         let mut ids: Vec<&str> = items.iter().map(|(item, _, _)| item.id.as_str()).collect();
         ids.sort();
 
@@ -58,8 +52,7 @@ mod tests {
         std::fs::write(dir.path().join("frontend/deep/nested.yaml"), "id: NESTED\n")
             .expect("nested");
 
-        let items: Vec<(Item, String, String)> =
-            load_yaml_dir(dir.path(), || TestError, |_| TestError, |_| TestError).expect("load");
+        let items: Vec<(Item, String, String)> = load_yaml_dir(dir.path()).expect("load");
 
         assert_eq!(items.len(), 1);
         assert_eq!(items[0].0.id, "NESTED");
@@ -73,7 +66,7 @@ mod tests {
         std::fs::create_dir_all(dir.path().join("nested")).expect("nested dir");
         std::fs::write(dir.path().join("nested/b.yaml"), "id: B\n").expect("write b.yaml");
 
-        let docs = load_yaml_docs(dir.path(), |_| TestError, |_| TestError).expect("load docs");
+        let docs = load_yaml_docs(dir.path()).expect("load docs");
         let ids: Vec<&str> = docs
             .iter()
             .map(|(d, _)| d["id"].as_str().unwrap())
@@ -87,8 +80,7 @@ mod tests {
     #[test]
     fn load_yaml_docs_on_missing_dir_is_empty() {
         let dir = tempdir().expect("temp dir");
-        let docs = load_yaml_docs(&dir.path().join("missing"), |_| TestError, |_| TestError)
-            .expect("load docs");
+        let docs = load_yaml_docs(&dir.path().join("missing")).expect("load docs");
         assert!(docs.is_empty());
     }
 

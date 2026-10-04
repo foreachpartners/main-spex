@@ -1,6 +1,7 @@
 mod annotations;
 mod commands;
 mod config;
+mod error;
 mod repo_files;
 mod rule;
 mod spec;
@@ -9,11 +10,9 @@ mod style;
 mod templates;
 mod util;
 
-use std::fmt::Debug;
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use error_stack::Report;
 
 use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
@@ -21,6 +20,7 @@ use commands::coverage::CoverageArgs;
 use commands::info::InfoArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
+use error::Result;
 
 #[derive(Parser)]
 #[command(
@@ -70,7 +70,7 @@ fn main() -> ExitCode {
     }
 }
 
-fn finish<E: Debug>(result: Result<ExitCode, Report<E>>) -> ExitCode {
+fn finish(result: Result<ExitCode>) -> ExitCode {
     match result {
         Ok(code) => code,
         Err(report) => {

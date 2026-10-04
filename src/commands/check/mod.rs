@@ -4,9 +4,9 @@ use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
-use thiserror::Error;
 
 use crate::config::{self, Config, PreexistingEntry, PreexistingError, Repository};
+use crate::error::{CliError, Result};
 use crate::repo_files::RepoFiles;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
 use crate::spec::{ContractLevel, CoverageLayer, Spec, Status};
@@ -27,22 +27,6 @@ use spec_id_tracing::validate_annotations;
 #[cfg(test)]
 #[path = "check_test.rs"]
 mod check_test;
-
-type Result<T> = core::result::Result<T, Report<CheckError>>;
-
-#[derive(Debug, Error)]
-pub enum CheckError {
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
-    UnknownRepo(String),
-    #[error("unknown file `{0}` — not found in any workspace repository")]
-    UnknownFile(String),
-    #[error("could not walk workspace repository files")]
-    Walk,
-    #[error("could not update `{}`", config::SPEX_CONFIG_FILE)]
-    Rewrite,
-}
 
 #[derive(Args)]
 pub struct CheckArgs {
@@ -66,7 +50,7 @@ impl ScopedFile {
     fn collect(repo_path: &Path) -> Result<Vec<Self>> {
         let mut files = Vec::new();
         for result in RepoFiles::new(repo_path) {
-            let abs = result.change_context(CheckError::Walk)?;
+            let abs = result.change_context(CliError::Walk)?;
             let rel = abs.strip_prefix(repo_path).unwrap_or(&abs).to_path_buf();
             files.push(Self { abs, rel });
         }
@@ -262,10 +246,10 @@ struct RepoReport {
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(CheckError::Workspace)?;
+    let workspace = Spex::discover().change_context(CliError::Workspace)?;
     workspace.warn_if_cli_outdated();
-    let rules = workspace.rules().change_context(CheckError::Workspace)?;
-    let specs = workspace.specs().change_context(CheckError::Workspace)?;
+    let rules = workspace.rules().change_context(CliError::Workspace)?;
+    let specs = workspace.specs().change_context(CliError::Workspace)?;
     let known_ids: HashMap<String, HashSet<String>> = specs
         .iter()
         .map(|spec| {
@@ -406,11 +390,11 @@ fn fill_preexisting_errors(
         .collect();
 
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
-    let raw = std::fs::read_to_string(&config_path).change_context(CheckError::Rewrite)?;
+    let raw = std::fs::read_to_string(&config_path).change_context(CliError::UpdateConfig)?;
     let updated = Config::set_preexisting_errors(&raw, &by_repo);
     let changed = updated != raw;
     if changed {
-        std::fs::write(&config_path, &updated).change_context(CheckError::Rewrite)?;
+        std::fs::write(&config_path, &updated).change_context(CliError::UpdateConfig)?;
     }
 
     report_fill(selected, &by_repo, changed);
@@ -459,7 +443,7 @@ fn select_repos<'a>(
             .iter()
             .any(|repo| repo.matches_any_repo_name(name))
         {
-            return Err(Report::new(CheckError::UnknownRepo(name.clone())));
+            return Err(Report::new(CliError::UnknownRepo(name.clone())));
         }
     }
 
@@ -468,7 +452,7 @@ fn select_repos<'a>(
             !ScopedFile::provided(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
         });
         if !found {
-            return Err(Report::new(CheckError::UnknownFile(file.clone())));
+            return Err(Report::new(CliError::UnknownFile(file.clone())));
         }
     }
 
@@ -579,7 +563,7 @@ fn validate_specs(
         return Ok(());
     };
 
-    let specs = workspace.specs().change_context(CheckError::Workspace)?;
+    let specs = workspace.specs().change_context(CliError::Workspace)?;
 
     let mut status_by_id: HashMap<&str, Status> = HashMap::new();
     for spec in &specs {

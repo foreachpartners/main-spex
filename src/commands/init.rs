@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use error_stack::{Report, ResultExt, bail};
-use thiserror::Error;
 
 use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::style::Style;
 use crate::templates;
@@ -19,31 +19,19 @@ mod init_test;
 const PLANS_DIR_NAME: &str = "plans";
 const CONTRACTS_DIR_NAME: &str = "contracts";
 
-type Result<T> = core::result::Result<T, Report<InitError>>;
-
-#[derive(Debug, Error)]
-pub enum InitError {
-    #[error("`{SPEX_CONFIG_FILE}` already exists in this directory")]
-    AlreadyInitialized,
-    #[error("the spex directory has no parent workspace root")]
-    NoWorkspaceRoot,
-    #[error("an I/O operation failed")]
-    Io,
-}
-
 const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
 const CONFIG_TEMPLATE: &str = include_str!("../../templates/spex.yaml");
 const CODE_WORKSPACE_TEMPLATE: &str = include_str!("../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
     let current_dir = std::env::current_dir()
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach("could not determine the current directory")?;
 
     let workspace_root = workspace_root(&current_dir)?;
 
     let default_name = dir_name(&workspace_root).ok_or_else(|| {
-        Report::new(InitError::NoWorkspaceRoot).attach("could not read the workspace root name")
+        Report::new(CliError::NoWorkspaceRoot).attach("could not read the workspace root name")
     })?;
 
     let project_name = confirm_project_name(default_name)?;
@@ -69,22 +57,22 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    templates::scaffold(spex_dir, &[]).change_context(InitError::Io)?;
-    templates::ensure_agents_md(spex_dir).change_context(InitError::Io)?;
+    templates::scaffold(spex_dir, &[]).change_context(CliError::Io)?;
+    templates::ensure_agents_md(spex_dir).change_context(CliError::Io)?;
 
     let specs = spex_dir.join(SPECS_DIR);
     fs::create_dir_all(&specs)
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not create `{}`", specs.display()))?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
     fs::create_dir_all(&plans)
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not create `{}`", plans.display()))?;
 
     let contracts = spex_dir.join(CONTRACTS_DIR_NAME);
     fs::create_dir_all(&contracts)
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not create `{}`", contracts.display()))?;
 
     Ok(())
@@ -93,7 +81,7 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
 fn write_config(spex_dir: &Path, project_name: &str) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     fs::write(&config_path, config_from_template(project_name))
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not write `{}`", config_path.display()))?;
     Ok(())
 }
@@ -115,7 +103,7 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
     fs::write(&path, CODE_WORKSPACE_TEMPLATE)
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach_with(|| format!("could not write `{}`", path.display()))?;
     Ok(())
 }
@@ -125,7 +113,7 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     if dir_name(current_dir).is_some_and(Config::is_spex_dir_name) {
         let parent = current_dir.parent().ok_or_else(|| {
-            Report::new(InitError::NoWorkspaceRoot)
+            Report::new(CliError::NoWorkspaceRoot)
                 .attach("expected the spex directory to live inside a workspace root")
         })?;
         return Ok(parent.to_path_buf());
@@ -148,7 +136,7 @@ fn ensure_spex_dir(
     let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
     if !spex_dir.is_dir() {
         fs::create_dir(&spex_dir)
-            .change_context(InitError::Io)
+            .change_context(CliError::Io)
             .attach_with(|| format!("could not create `{}` directory", spex_dir.display()))?;
     }
     Ok(spex_dir)
@@ -156,7 +144,7 @@ fn ensure_spex_dir(
 
 fn verify_not_initialized(current_dir: &Path) -> Result<()> {
     if current_dir.join(SPEX_CONFIG_FILE).exists() {
-        bail!(InitError::AlreadyInitialized);
+        bail!(CliError::AlreadyInitialized);
     }
     Ok(())
 }
@@ -193,13 +181,13 @@ fn prompt(message: &str) -> Result<String> {
     print!("{message}");
     io::stdout()
         .flush()
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach("could not flush stdout")?;
 
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
-        .change_context(InitError::Io)
+        .change_context(CliError::Io)
         .attach("could not read from stdin")?;
     Ok(input)
 }

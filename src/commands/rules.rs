@@ -1,10 +1,11 @@
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
-use thiserror::Error;
 
 use crate::config::Repository;
+use crate::error::{CliError, Result};
 use crate::rule::RULES_DIR;
 use crate::spex::Spex;
 use crate::util;
@@ -12,26 +13,6 @@ use crate::util;
 #[cfg(test)]
 #[path = "rules_test.rs"]
 mod rules_test;
-
-type Result<T> = core::result::Result<T, Report<RulesError>>;
-
-#[derive(Debug, Error)]
-pub enum RulesError {
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("could not read `{0}`")]
-    ReadFile(String),
-    #[error("could not parse `{0}`")]
-    Parse(String),
-    #[error("could not serialize output")]
-    Serialize,
-    #[error("unknown workspace repository `{0}` — not listed in spex.yaml")]
-    UnknownRepo(String),
-    #[error("unknown rule id `{0}` — not found in {RULES_DIR}")]
-    UnknownId(String),
-    #[error("could not write `{0}`")]
-    WriteFile(String),
-}
 
 #[derive(Args)]
 pub struct RulesArgs {
@@ -49,12 +30,12 @@ pub struct RulesArgs {
 }
 
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
-    let workspace = Spex::discover().change_context(RulesError::Workspace)?;
+    let workspace = Spex::discover().change_context(CliError::Workspace)?;
     let yaml = render(&workspace, &args)?;
     match &args.output {
         Some(path) => {
             std::fs::write(path, &yaml)
-                .change_context_lazy(|| RulesError::WriteFile(path.clone()))?;
+                .change_context_lazy(|| CliError::WriteFile(PathBuf::from(path)))?;
         }
         None => print!("{yaml}"),
     }
@@ -69,15 +50,11 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
             .iter()
             .any(|repo| repo.matches_any_repo_name(name))
         {
-            return Err(Report::new(RulesError::UnknownRepo(name.clone())));
+            return Err(Report::new(CliError::UnknownRepo(name.clone())));
         }
     }
 
-    let mut rules = util::load_yaml_docs(
-        &workspace.dir.join(RULES_DIR),
-        RulesError::ReadFile,
-        RulesError::Parse,
-    )?;
+    let mut rules = util::load_yaml_docs(&workspace.dir.join(RULES_DIR))?;
     if args.ai {
         for (rule, path) in &mut rules {
             if let Some(obj) = rule.as_object_mut() {
@@ -106,7 +83,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
             .iter()
             .any(|rule| rule.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
-            return Err(Report::new(RulesError::UnknownId(id.clone())));
+            return Err(Report::new(CliError::UnknownRuleId(id.clone())));
         }
     }
 
@@ -130,12 +107,12 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
         .collect();
 
     if output.is_empty() {
-        return serde_yaml_ng::to_string(&output).change_context(RulesError::Serialize);
+        return serde_yaml_ng::to_string(&output).change_context(CliError::Serialize);
     }
 
     output
         .iter()
-        .map(|rule| serde_yaml_ng::to_string(&[rule]).change_context(RulesError::Serialize))
+        .map(|rule| serde_yaml_ng::to_string(&[rule]).change_context(CliError::Serialize))
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))
 }

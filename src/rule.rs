@@ -1,27 +1,14 @@
 use std::path::Path;
 
-use error_stack::Report;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 
+use crate::error::Result;
 use crate::util;
 
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
 
 pub type RuleId = String;
-
-type Result<T> = core::result::Result<T, Report<RuleError>>;
-
-#[derive(Debug, Error)]
-pub enum RuleError {
-    #[error("could not read the `{RULES_DIR}` directory")]
-    ReadDir,
-    #[error("could not read rule `{0}`")]
-    ReadFile(String),
-    #[error("could not parse rule `{0}`")]
-    Parse(String),
-}
 
 #[derive(Debug, Deserialize)]
 pub struct Rule {
@@ -42,12 +29,7 @@ impl Rule {
     }
 
     pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
-        let rules = util::load_yaml_dir(
-            rules_dir,
-            || RuleError::ReadDir,
-            RuleError::ReadFile,
-            RuleError::Parse,
-        )?;
+        let rules = util::load_yaml_dir(rules_dir)?;
 
         Ok(rules
             .into_iter()

@@ -1,8 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use error_stack::{Report, ResultExt};
+use error_stack::ResultExt;
 use serde::de::DeserializeOwned;
+
+use crate::error::{CliError, Result};
 
 #[cfg(test)]
 #[path = "util_test.rs"]
@@ -29,23 +31,14 @@ pub fn plural(count: usize, noun: &str) -> String {
     }
 }
 
-fn collect_yaml_paths<E>(
-    dir: &Path,
-    read_dir_err: &impl Fn() -> E,
-    paths: &mut Vec<PathBuf>,
-) -> Result<(), Report<E>>
-where
-    E: std::error::Error + Send + Sync + 'static,
-{
-    let entries = fs::read_dir(dir)
-        .change_context_lazy(read_dir_err)
-        .attach_with(|| format!("could not read `{}`", dir.display()))?;
+fn collect_yaml_paths(dir: &Path, paths: &mut Vec<PathBuf>) -> Result<()> {
+    let entries = fs::read_dir(dir).change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
 
     for entry in entries {
-        let entry = entry.change_context_lazy(read_dir_err)?;
+        let entry = entry.change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
         let path = entry.path();
         if path.is_dir() {
-            collect_yaml_paths(&path, read_dir_err, paths)?;
+            collect_yaml_paths(&path, paths)?;
             continue;
         }
         if path.extension().and_then(|ext| ext.to_str()) == Some("yaml") {
@@ -86,26 +79,15 @@ pub fn yaml_files(dir: &Path) -> Vec<PathBuf> {
 // paired with its path relative to `dir` (e.g. `admin/foo.yaml`) and its raw
 // source text (so a caller can derive line numbers for parts of `T` that
 // serde doesn't track spans for), so callers can locate the file that
-// produced each item. Missing directories yield an empty list; the closures
-// let each caller surface its own error context while the directory walk and
-// per-file read/parse logic stays in one place.
-pub fn load_yaml_dir<T, E>(
-    dir: &Path,
-    read_dir_err: impl Fn() -> E,
-    read_file_err: impl Fn(String) -> E,
-    parse_err: impl Fn(String) -> E,
-) -> Result<Vec<(T, String, String)>, Report<E>>
-where
-    T: DeserializeOwned,
-    E: std::error::Error + Send + Sync + 'static,
-{
+// produced each item. Missing directories yield an empty list.
+pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<(T, String, String)>> {
     let mut items = Vec::new();
     if !dir.is_dir() {
         return Ok(items);
     }
 
     let mut paths = Vec::new();
-    collect_yaml_paths(dir, &read_dir_err, &mut paths)?;
+    collect_yaml_paths(dir, &mut paths)?;
     paths.sort();
 
     for path in paths {
@@ -115,9 +97,9 @@ where
             .to_string_lossy()
             .into_owned();
         let raw =
-            fs::read_to_string(&path).change_context_lazy(|| read_file_err(rel_name.clone()))?;
-        let item: T =
-            serde_yaml_ng::from_str(&raw).change_context_lazy(|| parse_err(rel_name.clone()))?;
+            fs::read_to_string(&path).change_context_lazy(|| CliError::ReadFile(path.clone()))?;
+        let item: T = serde_yaml_ng::from_str(&raw)
+            .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
         items.push((item, rel_name, raw));
     }
 
@@ -154,14 +136,7 @@ pub fn acceptance_criteria_lines(text: &str) -> Vec<usize> {
 // JSON, paired with its path relative to `dir` — so the full document, every
 // field the schema allows rather than just the subset a typed struct
 // deserializes, is available to a command that filters and prints it.
-pub fn load_yaml_docs<E>(
-    dir: &Path,
-    read_file_err: impl Fn(String) -> E,
-    parse_err: impl Fn(String) -> E,
-) -> Result<Vec<(serde_json::Value, String)>, Report<E>>
-where
-    E: std::error::Error + Send + Sync + 'static,
-{
+pub fn load_yaml_docs(dir: &Path) -> Result<Vec<(serde_json::Value, String)>> {
     let mut docs = Vec::new();
     for path in yaml_files(dir) {
         let rel_name = path
@@ -170,11 +145,11 @@ where
             .to_string_lossy()
             .into_owned();
         let raw =
-            fs::read_to_string(&path).change_context_lazy(|| read_file_err(rel_name.clone()))?;
-        let yaml: serde_yaml_ng::Value =
-            serde_yaml_ng::from_str(&raw).change_context_lazy(|| parse_err(rel_name.clone()))?;
+            fs::read_to_string(&path).change_context_lazy(|| CliError::ReadFile(path.clone()))?;
+        let yaml: serde_yaml_ng::Value = serde_yaml_ng::from_str(&raw)
+            .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
         let json =
-            serde_json::to_value(yaml).change_context_lazy(|| parse_err(rel_name.clone()))?;
+            serde_json::to_value(yaml).change_context_lazy(|| CliError::ParseFile(path.clone()))?;
         docs.push((json, rel_name));
     }
     Ok(docs)

@@ -6,23 +6,12 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use jsonschema::{Retrieve, Uri, Validator};
 use serde_json::Value;
-use thiserror::Error;
+
+use crate::error::{CliError, Result};
 
 #[cfg(test)]
 #[path = "check_schema_test.rs"]
 mod check_schema_test;
-
-type Result<T> = core::result::Result<T, Report<CheckSchemaError>>;
-
-#[derive(Debug, Error)]
-pub enum CheckSchemaError {
-    #[error("could not read `{0}`")]
-    Read(String),
-    #[error("could not parse `{0}`")]
-    Parse(String),
-    #[error("invalid schema `{0}`")]
-    Schema(String),
-}
 
 #[derive(Args)]
 pub struct CheckSchemaArgs {
@@ -65,9 +54,9 @@ pub fn run(args: CheckSchemaArgs) -> Result<ExitCode> {
 
 pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
     let text = fs::read_to_string(schema_path)
-        .change_context_lazy(|| CheckSchemaError::Read(display(schema_path)))?;
+        .change_context_lazy(|| CliError::ReadFile(schema_path.to_path_buf()))?;
     let schema: Value = serde_json::from_str(&text)
-        .change_context_lazy(|| CheckSchemaError::Parse(display(schema_path)))?;
+        .change_context_lazy(|| CliError::ParseFile(schema_path.to_path_buf()))?;
 
     let dir = schema_path
         .parent()
@@ -79,15 +68,15 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
         .build(&schema)
         // The error borrows `schema`, so render it before `schema` is dropped.
         .map_err(|err| {
-            Report::new(CheckSchemaError::Schema(display(schema_path))).attach(err.to_string())
+            Report::new(CliError::InvalidSchema(schema_path.to_path_buf())).attach(err.to_string())
         })
 }
 
 pub(crate) fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
     let text =
-        fs::read_to_string(path).change_context_lazy(|| CheckSchemaError::Read(display(path)))?;
+        fs::read_to_string(path).change_context_lazy(|| CliError::ReadFile(path.to_path_buf()))?;
     let instance: Value = serde_yaml_ng::from_str(&text)
-        .change_context_lazy(|| CheckSchemaError::Parse(display(path)))?;
+        .change_context_lazy(|| CliError::ParseFile(path.to_path_buf()))?;
 
     Ok(validate_instance(validator, &instance))
 }
@@ -109,10 +98,6 @@ pub(crate) fn validate_instance(validator: &Validator, instance: &Value) -> Vec<
     messages.sort();
     messages.dedup();
     messages
-}
-
-fn display(path: &Path) -> String {
-    path.display().to_string()
 }
 
 // Resolves cross-file `$ref`s against sibling schema files in the schema's own
