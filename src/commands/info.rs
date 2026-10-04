@@ -39,6 +39,7 @@ pub struct InfoArgs {
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
     let workspace = Spex::discover().change_context(InfoError::Workspace)?;
+    workspace.warn_if_cli_outdated();
     let value = serde_json::to_value(&workspace.config).change_context(InfoError::Serialize)?;
 
     if let Some(field) = &args.print {

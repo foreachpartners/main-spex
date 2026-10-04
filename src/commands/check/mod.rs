@@ -102,6 +102,7 @@ struct RepoReport {
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let workspace = Spex::discover().change_context(CheckError::Workspace)?;
+    workspace.warn_if_cli_outdated();
     let rules = workspace.rules().change_context(CheckError::Workspace)?;
     let specs = workspace.specs().change_context(CheckError::Workspace)?;
     let known_ids: HashMap<String, HashSet<String>> = specs

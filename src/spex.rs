@@ -37,11 +37,14 @@ impl Spex {
     pub fn discover() -> Result<Self> {
         let dir = Self::locate_spex_config()?;
         let config = config::load(&dir).change_context(WorkspaceError::Config)?;
-        if let Some(warning) = config::version_warning(&config) {
+        Ok(Self { dir, config })
+    }
+
+    pub fn warn_if_cli_outdated(&self) {
+        if let Some(warning) = config::version_warning(&self.config) {
             let style = Style::detect();
             eprintln!("{} {warning}", style.yellow("warning:"));
         }
-        Ok(Self { dir, config })
     }
 
     pub fn rules(&self) -> Result<HashMap<String, Rule>> {

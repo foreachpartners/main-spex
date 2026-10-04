@@ -100,6 +100,7 @@ impl SpecRow {
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
     let workspace = Spex::discover().change_context(CoverageError::Workspace)?;
+    workspace.warn_if_cli_outdated();
     let specs = workspace.specs().change_context(CoverageError::Workspace)?;
 
     for short_name in &args.scope {
