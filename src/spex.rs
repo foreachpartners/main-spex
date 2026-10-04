@@ -31,12 +31,13 @@ pub struct Spex {
 impl Spex {
     pub fn locate_spex_config() -> Result<PathBuf> {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
-        Config::find_dir(&current_dir).change_context(WorkspaceError::Config)
+        Config::find_file(&current_dir).change_context(WorkspaceError::Config)
     }
 
     pub fn discover() -> Result<Self> {
-        let dir = Self::locate_spex_config()?;
-        let config = Config::load(&dir).change_context(WorkspaceError::Config)?;
+        let config_path = Self::locate_spex_config()?;
+        let config = Config::load(&config_path).change_context(WorkspaceError::Config)?;
+        let dir = Config::dir_of(&config_path).to_path_buf();
         Ok(Self { dir, config })
     }
 

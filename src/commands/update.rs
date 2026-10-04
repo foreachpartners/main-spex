@@ -39,16 +39,15 @@ pub enum UpdateError {
 }
 
 pub fn run() -> Result<ExitCode> {
-    let spex_dir = Spex::locate_spex_config().change_context(UpdateError::NotInitialized)?;
+    let config_path = Spex::locate_spex_config().change_context(UpdateError::NotInitialized)?;
 
-    let config_path = spex_dir.join(SPEX_CONFIG_FILE);
     let raw = fs::read_to_string(&config_path)
         .change_context(UpdateError::Config)
         .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
-    templates::scaffold(&spex_dir, &previous.rules_unused)
+    templates::scaffold(Config::dir_of(&config_path), &previous.rules_unused)
         .change_context(UpdateError::Templates)?;
 
     fs::write(&config_path, Config::set_cli_version(&raw, CLI_VERSION))

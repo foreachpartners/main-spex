@@ -21,29 +21,35 @@ mod tests {
     #[test]
     fn finds_from_workspace_root() {
         let workspace = workspace();
-        let found = Config::find_dir(workspace.path()).expect("found");
-        assert_eq!(found, workspace.path().join(SPEX_REPO_DIR));
+        let found = Config::find_file(workspace.path()).expect("found");
+        assert_eq!(
+            found,
+            workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
+        );
     }
 
     #[test]
     fn finds_from_spex_dir() {
         let workspace = workspace();
         let spex = workspace.path().join(SPEX_REPO_DIR);
-        let found = Config::find_dir(&spex).expect("found");
-        assert_eq!(found, spex);
+        let found = Config::find_file(&spex).expect("found");
+        assert_eq!(found, spex.join(SPEX_CONFIG_FILE));
     }
 
     #[test]
     fn finds_from_nested_repo_subdirectory() {
         let workspace = workspace();
-        let found = Config::find_dir(&workspace.path().join("demo-api/src")).expect("found");
-        assert_eq!(found, workspace.path().join(SPEX_REPO_DIR));
+        let found = Config::find_file(&workspace.path().join("demo-api/src")).expect("found");
+        assert_eq!(
+            found,
+            workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
+        );
     }
 
     #[test]
     fn errors_when_not_in_a_workspace() {
         let dir = tempdir().expect("dir");
-        assert!(Config::find_dir(dir.path()).is_err());
+        assert!(Config::find_file(dir.path()).is_err());
     }
 
     #[test]
@@ -53,7 +59,7 @@ mod tests {
         std::fs::create_dir_all(&templates).expect("templates dir");
         std::fs::write(templates.join(SPEX_CONFIG_FILE), "project_name: unknown\n")
             .expect("config");
-        assert!(Config::find_dir(dir.path()).is_err());
+        assert!(Config::find_file(dir.path()).is_err());
     }
 
     #[test]
@@ -62,7 +68,10 @@ mod tests {
         let spex = dir.path().join(SPEX_DIR_NAME);
         std::fs::create_dir_all(&spex).expect("spex dir");
         std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
-        assert_eq!(Config::find_dir(dir.path()).expect("found"), spex);
+        assert_eq!(
+            Config::find_file(dir.path()).expect("found"),
+            spex.join(SPEX_CONFIG_FILE)
+        );
     }
 
     fn config_with_version(version: &str) -> Config {
@@ -77,7 +86,10 @@ mod tests {
     fn finds_spex_dir_directly_when_run_inside_it() {
         let dir = tempdir().expect("dir");
         std::fs::write(dir.path().join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
-        assert_eq!(Config::find_dir(dir.path()).expect("found"), dir.path());
+        assert_eq!(
+            Config::find_file(dir.path()).expect("found"),
+            dir.path().join(SPEX_CONFIG_FILE)
+        );
     }
 
     #[test]

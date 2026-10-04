@@ -93,21 +93,26 @@ pub struct PreexistingEntry {
 }
 
 impl Config {
-    // Locates the spex directory by finding the `spex.yaml` it contains. Walks up
-    // from `start`; at each ancestor it uses a directly present `spex.yaml`, then
-    // falls back to scanning that ancestor's immediate child directories. The child
-    // scan lets discovery work from the workspace root or a sibling repository even
-    // though the spex repository directory is named `<project-name>-spex`.
-    pub fn find_dir(start: &Path) -> Result<PathBuf> {
+    // Locates `spex.yaml`. Walks up from `start`; at each ancestor it uses a
+    // directly present `spex.yaml`, then falls back to scanning that ancestor's
+    // immediate child directories. The child scan lets discovery work from the
+    // workspace root or a sibling repository even though the spex repository
+    // directory is named `<project-name>-spex`.
+    pub fn find_file(start: &Path) -> Result<PathBuf> {
         for dir in start.ancestors() {
-            if dir.join(SPEX_CONFIG_FILE).is_file() {
-                return Ok(dir.to_path_buf());
+            let config_path = dir.join(SPEX_CONFIG_FILE);
+            if config_path.is_file() {
+                return Ok(config_path);
             }
-            if let Some(child) = Self::spex_child_dir(dir) {
-                return Ok(child);
+            if let Some(child_config_path) = Self::spex_child_config_path(dir) {
+                return Ok(child_config_path);
             }
         }
         Err(Report::new(ConfigError::NotFound))
+    }
+
+    pub fn dir_of(config_path: &Path) -> &Path {
+        config_path.parent().unwrap_or(Path::new(""))
     }
 
     // The directory a repository's findings' `location` strings are relative to:
@@ -125,25 +130,25 @@ impl Config {
         name == SPEX_DIR_NAME || name.ends_with(&format!("-{SPEX_DIR_NAME}"))
     }
 
-    fn spex_child_dir(dir: &Path) -> Option<PathBuf> {
-        let mut children: Vec<PathBuf> = fs::read_dir(dir)
+    fn spex_child_config_path(dir: &Path) -> Option<PathBuf> {
+        let mut config_paths: Vec<PathBuf> = fs::read_dir(dir)
             .ok()?
             .filter_map(|entry| entry.ok())
             .map(|entry| entry.path())
             .filter(|path| dir_name(path).is_some_and(Self::is_spex_dir_name))
-            .filter(|path| path.join(SPEX_CONFIG_FILE).is_file())
+            .map(|path| path.join(SPEX_CONFIG_FILE))
+            .filter(|config_path| config_path.is_file())
             .collect();
-        children.sort();
-        children.into_iter().next()
+        config_paths.sort();
+        config_paths.into_iter().next()
     }
 
-    pub fn load(spex_dir: &Path) -> Result<Self> {
-        let config_path = spex_dir.join(SPEX_CONFIG_FILE);
+    pub fn load(config_path: &Path) -> Result<Self> {
         if !config_path.exists() {
             return Err(Report::new(ConfigError::NotFound));
         }
 
-        let raw = fs::read_to_string(&config_path)
+        let raw = fs::read_to_string(config_path)
             .change_context(ConfigError::Read)
             .attach_with(|| format!("could not read `{}`", config_path.display()))?;
 
