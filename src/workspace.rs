@@ -32,9 +32,13 @@ pub struct Workspace {
 }
 
 impl Workspace {
-    pub fn discover() -> Result<Self> {
+    pub fn locate() -> Result<PathBuf> {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
-        let dir = config::find_dir(&current_dir).change_context(WorkspaceError::Config)?;
+        config::find_dir(&current_dir).change_context(WorkspaceError::Config)
+    }
+
+    pub fn discover() -> Result<Self> {
+        let dir = Self::locate()?;
         let config = config::load(&dir).change_context(WorkspaceError::Config)?;
         if let Some(warning) = config::version_warning(&config) {
             let style = Style::detect();
