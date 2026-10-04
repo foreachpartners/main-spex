@@ -12,9 +12,9 @@ AI operates fast — the framework's job is unleash it speed while ensuring slop
 
 spex is built on four simple pieces:
 
-- **Specs** define _what_ a feature does — a capability with acceptance criteria.
-- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing that apply repo-wide.
-- **Skills** are the instructions an AI agent follows to do the job — taking all applicable rules and implementing a spec.
+- **Specs** define _what_ a feature does — a capability with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
+- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each repository must adhere to a list of rules applicable to it.
+- **Skills** are the instructions an AI agent follows to do the job consistently and correctly.
 - **Traceability** is the thread that stitches together spec, contract, implementations, and tests — ensuring full coverage and tracing for spec and every acceptance criterion.
 
 ## Quickstart

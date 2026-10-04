@@ -5,7 +5,7 @@ description: Derive or update the interface contract from one or more specs. Use
 
 # Create an Interface Contract
 
-A contract is the _interface_ derived from a spec. For a machine-readable interface: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec that exposes no machine-readable interface, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the _interface_ derived from a spec. For an API: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 ## Paths
 
@@ -35,9 +35,9 @@ From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbi
 
 ## Step 3 — Decide what the contract needs
 
-Map each acceptance criterion that crosses a boundary to the interface element that exposes it: an endpoint, a message, a schema field, an error, an auth requirement — or, for a UI-facing spec with no machine-readable interface, the visual design it must match.
+Map each acceptance criterion that crosses a boundary to the interface element that exposes it: an endpoint, a message, a schema field, an error, an auth requirement — or, for a UI-facing spec, the visual design it must match.
 
-- If an affected repository exposes no machine-readable interface and no UI needing a design reference (for example a backend job with no consumer-facing surface), it needs no new contract. State that and move on.
+- If an affected repository exposes no API and no UI needing a design reference (for example a backend job with no consumer-facing surface), it needs no new contract. State that and move on.
 - If no targeted spec changes any contract, say so plainly and skip to Step 6 — there is nothing to write.
 - Reuse existing operations and schemas where the spec extends them; add new ones only where the behavior is genuinely new.
 
@@ -45,7 +45,7 @@ Map each acceptance criterion that crosses a boundary to the interface element t
 
 Draft each contract following the format of the existing document and the governing conventions. For OpenAPI, apply `openapi-conventions`; for GraphQL SDL, apply `graphql-conventions`.
 
-For a machine-readable interface:
+For an API:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
@@ -116,7 +116,7 @@ components:
 
 The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `OrderItem`.
 
-Design reference example, for a spec with no machine-readable interface, in `contracts/figma.md`:
+Design reference example, for a UI-facing spec, in `contracts/figma.md`:
 
 ```md
 <!-- @spec contract delivery-time -->

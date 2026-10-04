@@ -114,7 +114,7 @@ Commit the change.
 
 Now let's implement `api-healthcheck` spec, we start with OpenAPI contract.
 
-**Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events, figma design reference. AI implements from spec and contract.
+**Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or a Figma mockup for UI. AI implements from spec and contract.
 
 We implement contract first because it's fast to generate and easy to review it, narrowing down how AI should implement our spec. Without contract we would need to review full implementation and do larger refactoring in case AI implements it not in a way we want it. With contracts we are saving time and tokens. Also it's easy to refactor implementation not changing it public surface, but requires a breaking change otherwise.
 

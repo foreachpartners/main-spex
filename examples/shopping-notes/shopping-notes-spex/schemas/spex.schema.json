@@ -87,7 +87,7 @@
     },
     "contract": {
       "type": "object",
-      "description": "An interface contract owned by a repository: machine-readable (OpenAPI, proto, GraphQL SDL, AsyncAPI) or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
+      "description": "An interface contract owned by a repository: OpenAPI, proto, GraphQL SDL, AsyncAPI, or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
       "properties": {
         "path": {
           "type": "string",

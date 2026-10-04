@@ -6,10 +6,10 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
 
-- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`.
-- **Rule** — one coherent cross-cutting convention (style, structure, security) enforced repo-wide, with acceptance criteria proven by `spex check`.
-- **Skill** — the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.
-- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
+- **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each repository must adhere to a list of rules applicable to it defined in `spex.yaml`
+- **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
+- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
 
 ## Traceability
 

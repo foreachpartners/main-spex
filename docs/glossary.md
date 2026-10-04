@@ -61,7 +61,7 @@
   @spec impl place-pizza-order#created-order-status
   ```
 
-- **Contract** — derived from a spec, if applicable. The machine-readable _interface_ definition: endpoints, methods, status codes, errors, auth. OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. Contract is not limited to api, for frontend contract can be a figma design reference — a contract variant for UI-facing specs: a markdown document linking each spec to its visual design (e.g. a Figma frame), annotated like any other contract. Used when the interface a spec exposes is visual rather than machine-readable. AI implements from spec and contract. A contract file's location is user-owned — most commonly inside the owning repository itself — and recorded in `spex.yaml`; the `spex` repository's `contracts/` folder is only a convention for contracts genuinely shared across repositories.
+- **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or a Figma mockup for UI. AI implements from spec and contract.
 
   ```yaml
   paths:

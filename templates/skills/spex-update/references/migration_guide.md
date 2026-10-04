@@ -2,6 +2,10 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.10.4
+
+The spex repository skill is now the bundled `spex` skill, which replaces the per-project `<project-name>-spex` skill, and `spex update` doesn't delete files, so the old skill lingers. Delete the folder `<workspace-root>/<project-name>-spex/.agents/skills/<project-name>-spex/`.
+
 ## 0.10.3
 
 `docs/cli.md` and `docs/framework-principles.md` are no longer bundled into projects (only `docs/glossary.md` still is), and `spex update` doesn't delete files, so the old copies linger. Delete `<workspace-root>/<project-name>-spex/docs/cli.md` and `<workspace-root>/<project-name>-spex/docs/framework-principles.md`.

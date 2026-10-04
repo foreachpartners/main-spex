@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.10.4] - 2026-10-04
+
+- Added the `spex` skill, bundled for every project, which replaces the per-project `<project-name>-spex` repository skill. Existing projects delete the old skill folder per the migration guide.
+- `spex-setup` skill: skill now can be used to add setup new repositories at any time. Simplified to three steps — define the new repositories in `spex.yaml` (description, contracts, applicable rules), create each repository skill from the generic template, and add them to the editor workspace file. It no longer creates the spex repository's skill and no longer removes rules that apply to no repository.
+- `AGENTS.md` template: improved the spec, rule, and skill descriptions.
+
 ## [0.10.3] - 2026-10-03
 
 - `init`/`update`: no longer bundle `docs/cli.md` and `docs/framework-principles.md` into projects; only `docs/glossary.md` ships. `framework-principles` docs are not usefull for project AI agent.
