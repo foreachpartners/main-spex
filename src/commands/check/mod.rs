@@ -11,7 +11,7 @@ use crate::rule::{self, Check, CheckKind, Rule, RunScope, Severity};
 use crate::spec::{ContractLevel, CoverageLayer, Spec, Status};
 use crate::style::Style;
 use crate::util::{self, plural};
-use crate::workspace::Workspace;
+use crate::spex::Spex;
 
 mod conformance;
 mod report;
@@ -101,7 +101,7 @@ struct RepoReport {
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(CheckError::Workspace)?;
+    let workspace = Spex::discover().change_context(CheckError::Workspace)?;
     let rules = workspace.rules().change_context(CheckError::Workspace)?;
     let specs = workspace.specs().change_context(CheckError::Workspace)?;
     let known_ids: HashMap<String, HashSet<String>> = specs
@@ -581,7 +581,7 @@ fn is_spex_repo(repo: &Repository, spex_dir: &Path) -> bool {
 // attributes any findings to the spex repository, which owns the spec files.
 // Runs only when the spex repository is in scope.
 fn validate_specs(
-    workspace: &Workspace,
+    workspace: &Spex,
     rules: &HashMap<String, Rule>,
     selected: &[&Repository],
     reports: &mut [RepoReport],

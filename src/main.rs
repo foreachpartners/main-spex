@@ -6,7 +6,7 @@ mod spec;
 mod style;
 mod templates;
 mod util;
-mod workspace;
+mod spex;
 
 use std::fmt::Debug;
 use std::process::ExitCode;

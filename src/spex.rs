@@ -23,22 +23,19 @@ pub enum WorkspaceError {
     Specs,
 }
 
-// A resolved spex workspace: the spex directory plus its parsed configuration.
-// Commands start from here so directory discovery and config loading live in
-// one place.
-pub struct Workspace {
+pub struct Spex {
     pub dir: PathBuf,
     pub config: Config,
 }
 
-impl Workspace {
-    pub fn locate() -> Result<PathBuf> {
+impl Spex {
+    pub fn locate_spex_repository() -> Result<PathBuf> {
         let current_dir = std::env::current_dir().change_context(WorkspaceError::CurrentDir)?;
         config::find_dir(&current_dir).change_context(WorkspaceError::Config)
     }
 
     pub fn discover() -> Result<Self> {
-        let dir = Self::locate()?;
+        let dir = Self::locate_spex_repository()?;
         let config = config::load(&dir).change_context(WorkspaceError::Config)?;
         if let Some(warning) = config::version_warning(&config) {
             let style = Style::detect();

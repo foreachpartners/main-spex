@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::config::Repository;
 use crate::rule::RULES_DIR;
 use crate::util;
-use crate::workspace::Workspace;
+use crate::spex::Spex;
 
 #[cfg(test)]
 #[path = "rules_test.rs"]
@@ -49,7 +49,7 @@ pub struct RulesArgs {
 }
 
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(RulesError::Workspace)?;
+    let workspace = Spex::discover().change_context(RulesError::Workspace)?;
     let yaml = render(&workspace, &args)?;
     match &args.output {
         Some(path) => {
@@ -61,7 +61,7 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn render(workspace: &Workspace, args: &RulesArgs) -> Result<String> {
+fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
     for name in &args.repo {
         if !workspace
             .config

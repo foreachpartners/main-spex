@@ -4,7 +4,7 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use thiserror::Error;
 
-use crate::workspace::Workspace;
+use crate::spex::Spex;
 
 type Result<T> = core::result::Result<T, Report<InfoError>>;
 
@@ -38,7 +38,7 @@ pub struct InfoArgs {
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(InfoError::Workspace)?;
+    let workspace = Spex::discover().change_context(InfoError::Workspace)?;
     let value = serde_json::to_value(&workspace.config).change_context(InfoError::Serialize)?;
 
     if let Some(field) = &args.print {

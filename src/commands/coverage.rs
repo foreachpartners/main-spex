@@ -9,7 +9,7 @@ use crate::annotations::{self, AcCoverage, Found};
 use crate::spec::{Spec, Status};
 use crate::style::Style;
 use crate::util::{file_url, version_line};
-use crate::workspace::Workspace;
+use crate::spex::Spex;
 
 #[cfg(test)]
 #[path = "coverage_test.rs"]
@@ -99,7 +99,7 @@ impl SpecRow {
 }
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(CoverageError::Workspace)?;
+    let workspace = Spex::discover().change_context(CoverageError::Workspace)?;
     let specs = workspace.specs().change_context(CoverageError::Workspace)?;
 
     for short_name in &args.scope {

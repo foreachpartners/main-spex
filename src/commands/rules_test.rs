@@ -109,8 +109,8 @@ mod tests {
         .expect("write rule");
     }
 
-    fn workspace(dir: &std::path::Path) -> Workspace {
-        Workspace {
+    fn workspace(dir: &std::path::Path) -> Spex {
+        Spex {
             dir: dir.to_path_buf(),
             config: crate::config::load(dir).expect("load config"),
         }

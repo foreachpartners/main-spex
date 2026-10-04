@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::spec::SPECS_DIR;
 use crate::util;
-use crate::workspace::Workspace;
+use crate::spex::Spex;
 
 #[cfg(test)]
 #[path = "specs_test.rs"]
@@ -53,7 +53,7 @@ pub struct SpecsArgs {
 }
 
 pub fn run(args: SpecsArgs) -> Result<ExitCode> {
-    let workspace = Workspace::discover().change_context(SpecsError::Workspace)?;
+    let workspace = Spex::discover().change_context(SpecsError::Workspace)?;
     let yaml = render(&workspace, &args)?;
     match &args.output {
         Some(path) => {
@@ -65,7 +65,7 @@ pub fn run(args: SpecsArgs) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn render(workspace: &Workspace, args: &SpecsArgs) -> Result<String> {
+fn render(workspace: &Spex, args: &SpecsArgs) -> Result<String> {
     for short_name in &args.scope {
         if !workspace
             .config
