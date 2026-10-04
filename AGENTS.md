@@ -10,9 +10,10 @@ AI operates fast — the framework's job is unleash it speed while ensuring slop
 
 spex is built on three simple pieces:
 
-- **Specs** define _what_ a feature does — a capability with acceptance criteria.
-- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing that apply repo-wide.
-- **Skills** are the instructions an AI agent follows to do the job — taking all applicable rules and implementing a spec.
+- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
+- **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each repository must adhere to a list of rules applicable to it defined in `spex.yaml`
+- **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
+- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
 
 ## Specification
 
@@ -80,10 +81,10 @@ tests that drive the compiled binary live in `tests/`.
 
 Keep this section in sync when the structure changes.
 
-# Rules
+# Core discipline
 
-Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.
-
+- **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
+- **Single source of truth**: every piece of data, logic, or business rule must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it.
 - **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works. Avoid unnecessary abstraction, comments, indirection, and premature generalization.
 - **DRY** (Don't Repeat Yourself): Extract shared logic into a single source of truth instead of duplicating it. Reuse existing code, types, and systems before adding new ones.
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables instead of comments. Never add a comment — not for WHAT the code does, not for WHY it exists, not to note an extraction, refactor, or design rationale. Write no comments at all unless the user explicitly asks for one in that exact request.
@@ -93,5 +94,4 @@ Code should be simple enough that any teammate or AI — not just its author —
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Writing style**: Follow the authoring conventions in `templates/rules/writing-style.yaml` (e.g. path placeholders) across docs, skills, and schemas.
 - **Single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli.md` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.

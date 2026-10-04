@@ -56,11 +56,8 @@ Pass `--ai` to `specs` and `rules`: it drops fields AI doesn't need and adds one
 
 ## Core discipline
 
-Code should be simple enough that any teammate or AI — not just its author — can read, run, and safely change it.
-
-- **Human in control**: no artifact ships unapproved — spec before contract, contract before plan, plan before code and tests.
-- **Single source of truth**: reference a spec, contract, or convention — never copy it into code comments, docs, or agent rules.
-- **Traceability**: a behavioral change with no Spec ID annotation is a violation.
+- **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
+- **Single source of truth**: every piece of data, logic, or business rule must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it.
 - **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works. Avoid unnecessary abstraction, comments, indirection, and premature generalization.
 - **DRY** (Don't Repeat Yourself): Extract shared logic into a single source of truth instead of duplicating it. Reuse existing code, types, and systems before adding new ones.
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables instead of comments. Never add a comment — not for WHAT the code does, not for WHY it exists, not to note an extraction, refactor, or design rationale. Write no comments at all unless the user explicitly asks for one in that exact request.
