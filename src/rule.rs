@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::path::Path;
 
 use error_stack::Report;
@@ -9,6 +8,8 @@ use crate::util;
 
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
+
+pub type RuleId = String;
 
 type Result<T> = core::result::Result<T, Report<RuleError>>;
 
@@ -24,7 +25,7 @@ pub enum RuleError {
 
 #[derive(Debug, Deserialize)]
 pub struct Rule {
-    pub id: String,
+    pub id: RuleId,
     #[serde(skip, default)]
     pub path: String,
     #[serde(default)]
@@ -40,10 +41,7 @@ impl Rule {
         format!("{RULES_DIR}/{}", self.path)
     }
 
-    // Every rule file, parsed once, in file order — unlike `load_all`, this
-    // keeps files with colliding ids separate so conformance checks that must
-    // see every file (e.g. duplicate-id and ac-order checks) can.
-    pub fn load_all_list(rules_dir: &Path) -> Result<Vec<Self>> {
+    pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
         let rules = util::load_yaml_dir(
             rules_dir,
             || RuleError::ReadDir,
@@ -61,16 +59,6 @@ impl Rule {
                 }
                 rule
             })
-            .collect())
-    }
-
-    // Every rule keyed by id, for lookup by the rules a repository assigns
-    // itself. A colliding id keeps only its last-loaded file; `load_all_list`
-    // preserves every file when that distinction matters.
-    pub fn load_all(rules_dir: &Path) -> Result<HashMap<String, Self>> {
-        Ok(Self::load_all_list(rules_dir)?
-            .into_iter()
-            .map(|rule| (rule.id.clone(), rule))
             .collect())
     }
 }

@@ -6,6 +6,7 @@ use error_stack::{Report, ResultExt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::rule::RuleId;
 use crate::util::{canonical, dir_name};
 
 #[cfg(test)]
@@ -42,11 +43,11 @@ pub struct Config {
 pub struct Repository {
     pub repository_name: String,
     pub repository_short_name: String,
-    pub dir: String,
+    pub path: String,
     #[serde(default)]
     pub contracts: Vec<Contract>,
     #[serde(default)]
-    pub rules: Vec<String>,
+    pub rules: Vec<RuleId>,
     #[serde(default)]
     pub ignored_errors: Vec<PreexistingError>,
 }
@@ -59,7 +60,7 @@ impl Repository {
     }
 
     pub fn is_spex_repo(&self, spex_dir: &Path) -> bool {
-        canonical(&spex_dir.join(&self.dir)) == canonical(spex_dir)
+        canonical(&spex_dir.join(&self.path)) == canonical(spex_dir)
     }
 }
 
@@ -76,7 +77,7 @@ pub struct Contract {
 // listed are suppressed, so new errors in other files still surface.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
-    pub rule_id: String,
+    pub rule_id: RuleId,
     pub check: String,
     #[serde(default)]
     pub files: Vec<String>,
@@ -85,7 +86,7 @@ pub struct PreexistingError {
 // A fully-resolved baseline entry to write into `spex.yaml`. An empty `files`
 // renders a bare `rule_id`/`check` entry that suppresses the whole check.
 pub struct PreexistingEntry {
-    pub rule_id: String,
+    pub rule_id: RuleId,
     pub check: String,
     pub files: Vec<String>,
 }
@@ -120,7 +121,7 @@ impl Config {
         self.repositories
             .iter()
             .find(|repo| repo.repository_name == repo_name)
-            .map(|repo| spex_dir.join(&repo.dir))
+            .map(|repo| spex_dir.join(&repo.path))
             .unwrap_or_else(|| spex_dir.to_path_buf())
     }
 

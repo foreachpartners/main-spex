@@ -9,7 +9,7 @@ mod tests {
         Repository {
             repository_name: name.to_string(),
             repository_short_name: name.to_string(),
-            dir: format!("../{name}"),
+            path: format!("../{name}"),
             contracts: Vec::new(),
             rules: rules.iter().map(|r| r.to_string()).collect(),
             ignored_errors: Vec::new(),

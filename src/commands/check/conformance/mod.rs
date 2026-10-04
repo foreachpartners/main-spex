@@ -34,14 +34,13 @@ const CONFORM_CHECK: &str = "spec-files-conform";
 pub(super) fn validate_conformance(
     spex_dir: &Path,
     specs: &[Spec],
-    rules: &std::collections::HashMap<String, crate::rule::Rule>,
-    rules_list: &[crate::rule::Rule],
+    rules: &[crate::rule::Rule],
     findings: &mut Vec<Finding>,
 ) {
-    validate_schema(spex_dir, specs, rules_list, findings);
+    validate_schema(spex_dir, specs, rules, findings);
     validate_script_references(spex_dir, rules, findings);
-    validate_ac_order(specs, rules_list, findings);
-    validate_no_duplicate_ids(specs, rules_list, findings);
+    validate_ac_order(specs, rules, findings);
+    validate_no_duplicate_ids(specs, rules, findings);
     validate_no_duplicate_ac_ids(specs, findings);
     validate_property_order(spex_dir, findings);
 }

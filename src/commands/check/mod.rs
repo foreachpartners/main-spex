@@ -128,7 +128,7 @@ impl RepoCtx<'_> {
 struct CheckRepoArgs<'a> {
     repo: &'a Repository,
     spex_dir: &'a Path,
-    rules: &'a HashMap<String, Rule>,
+    rules: &'a [Rule],
     known_ids: &'a HashMap<String, HashSet<String>>,
     files: &'a [String],
 }
@@ -215,7 +215,7 @@ impl Finding {
             return false;
         };
         repos.iter().any(|repo| {
-            let prefix = format!("{}/", repo.dir);
+            let prefix = format!("{}/", repo.path);
             location.strip_prefix(&prefix).is_some_and(|rel| {
                 self.matches_baseline(&repo.ignored_errors, Some(&Self::normalize_location(rel)))
             })
@@ -227,7 +227,7 @@ impl Finding {
     fn owning_repo(&self, repos: &[&Repository]) -> Option<(String, Option<String>)> {
         let location = self.location.as_deref()?;
         repos.iter().find_map(|repo| {
-            let prefix = format!("{}/", repo.dir);
+            let prefix = format!("{}/", repo.path);
             location.strip_prefix(&prefix).map(|rel| {
                 (
                     repo.repository_name.clone(),
@@ -464,7 +464,7 @@ fn select_repos<'a>(
 
     for file in files {
         let found = config.repositories.iter().any(|repo| {
-            !ScopedFile::provided(&spex_dir.join(&repo.dir), std::slice::from_ref(file)).is_empty()
+            !ScopedFile::provided(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
         });
         if !found {
             return Err(Report::new(CheckError::UnknownFile(file.clone())));
@@ -484,7 +484,7 @@ fn select_repos<'a>(
         .iter()
         .filter(|repo| {
             names.iter().any(|name| repo.matches(name))
-                || !ScopedFile::provided(&spex_dir.join(&repo.dir), files).is_empty()
+                || !ScopedFile::provided(&spex_dir.join(&repo.path), files).is_empty()
         })
         .collect())
 }
@@ -502,7 +502,7 @@ fn check_repo(
         files,
     } = args;
 
-    let repo_path = spex_dir.join(&repo.dir);
+    let repo_path = spex_dir.join(&repo.path);
     if !repo_path.is_dir() {
         findings.push(Finding::repo_error(
             &repo.repository_name,
@@ -535,7 +535,7 @@ fn check_repo(
     let has_files = !files.is_empty();
 
     for spec_id in &repo.rules {
-        let Some(rule) = rules.get(spec_id) else {
+        let Some(rule) = rules.iter().find(|rule| rule.id == *spec_id) else {
             findings.push(Finding::repo_error(
                 spec_id,
                 format!("rule `{spec_id}` not found in {}/", rule::RULES_DIR),
@@ -559,7 +559,7 @@ fn check_repo(
 // Runs only when the spex repository is in scope.
 fn validate_specs(
     workspace: &Spex,
-    rules: &HashMap<String, Rule>,
+    rules: &[Rule],
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
@@ -584,7 +584,7 @@ fn validate_specs(
     }
     // Rules are global and always apply, so they count as satisfied for
     // `blocked_by` purposes.
-    for rule in rules.values() {
+    for rule in rules {
         status_by_id.insert(rule.id.as_str(), Status::Active);
     }
 
@@ -603,16 +603,7 @@ fn validate_specs(
         validate_coverage_ignore(spec, &mut report.findings);
     }
 
-    let rules_list = workspace
-        .rules_list()
-        .change_context(CheckError::Workspace)?;
-    validate_conformance(
-        &workspace.dir,
-        &specs,
-        rules,
-        &rules_list,
-        &mut report.findings,
-    );
+    validate_conformance(&workspace.dir, &specs, rules, &mut report.findings);
 
     Ok(())
 }

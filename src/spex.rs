@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 use error_stack::{Report, ResultExt};
@@ -48,14 +47,8 @@ impl Spex {
         }
     }
 
-    pub fn rules(&self) -> Result<HashMap<String, Rule>> {
+    pub fn rules(&self) -> Result<Vec<Rule>> {
         Rule::load_all(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
-    }
-
-    // Every rule file, keeping files with colliding ids separate — see
-    // `Rule::load_all_list`.
-    pub fn rules_list(&self) -> Result<Vec<Rule>> {
-        Rule::load_all_list(&self.dir.join(rule::RULES_DIR)).change_context(WorkspaceError::Rules)
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {

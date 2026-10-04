@@ -45,7 +45,7 @@ mod tests_unit {
         let spex = &config.repositories[0];
         assert_eq!(spex.repository_name, "pizza-shop-spex");
         assert_eq!(spex.repository_short_name, "spex");
-        assert_eq!(spex.dir, ".");
+        assert_eq!(spex.path, ".");
     }
 
     #[test]

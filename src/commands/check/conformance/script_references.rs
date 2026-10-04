@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::path::Path;
 
 use crate::rule::{CheckKind, RULES_DIR, Rule, SCRIPTS_DIR};
@@ -10,10 +9,10 @@ use super::{Finding, conform_finding};
 // `scripts/<spec-id-lowercase>/<script>`.
 pub(super) fn validate_script_references(
     spex_dir: &Path,
-    rules: &HashMap<String, Rule>,
+    rules: &[Rule],
     findings: &mut Vec<Finding>,
 ) {
-    let mut rules: Vec<&Rule> = rules.values().collect();
+    let mut rules: Vec<&Rule> = rules.iter().collect();
     rules.sort_by(|a, b| a.id.cmp(&b.id));
 
     for rule in rules {

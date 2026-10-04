@@ -112,7 +112,7 @@ impl Found {
                 }
             }
 
-            let repo_path = spex_dir.join(&repo.dir);
+            let repo_path = spex_dir.join(&repo.path);
             if !repo_path.is_dir() || util::canonical(&repo_path) == spex_canon {
                 continue;
             }

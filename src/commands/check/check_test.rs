@@ -543,7 +543,7 @@ constraints:
         Repository {
             repository_name: "api".to_string(),
             repository_short_name: "api".to_string(),
-            dir: path.to_string(),
+            path: path.to_string(),
             contracts: Vec::new(),
             rules: rules.into_iter().map(str::to_string).collect(),
             ignored_errors: Vec::new(),
@@ -572,10 +572,7 @@ constraints:
         // A non-negated glob check: "*.rs files are forbidden"
         let non_negated = named_glob_check("no-rs-files", "**/*.rs");
 
-        let rules = HashMap::from([(
-            "X".to_string(),
-            rule("X", vec![negated_glob.clone(), non_negated]),
-        )]);
+        let rules = [rule("X", vec![negated_glob.clone(), non_negated])];
 
         let repository = repository("../api", vec!["X"]);
 
@@ -640,7 +637,7 @@ constraints:
 
         let mut listing = script_check("list.sh", RunScope::Workspace);
         listing.name = "list".to_string();
-        let rules = HashMap::from([("x".to_string(), rule("x", vec![listing]))]);
+        let rules = [rule("x", vec![listing])];
 
         let mut collected = Vec::new();
         let mut findings = Vec::new();
