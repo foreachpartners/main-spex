@@ -215,7 +215,7 @@ impl Finding {
             return false;
         };
         repos.iter().any(|repo| {
-            let prefix = format!("{}/", repo.path);
+            let prefix = format!("{}/", repo.dir);
             location.strip_prefix(&prefix).is_some_and(|rel| {
                 self.matches_baseline(&repo.ignored_errors, Some(&Self::normalize_location(rel)))
             })
@@ -227,7 +227,7 @@ impl Finding {
     fn owning_repo(&self, repos: &[&Repository]) -> Option<(String, Option<String>)> {
         let location = self.location.as_deref()?;
         repos.iter().find_map(|repo| {
-            let prefix = format!("{}/", repo.path);
+            let prefix = format!("{}/", repo.dir);
             location.strip_prefix(&prefix).map(|rel| {
                 (
                     repo.repository_name.clone(),
@@ -464,7 +464,7 @@ fn select_repos<'a>(
 
     for file in files {
         let found = config.repositories.iter().any(|repo| {
-            !ScopedFile::provided(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
+            !ScopedFile::provided(&spex_dir.join(&repo.dir), std::slice::from_ref(file)).is_empty()
         });
         if !found {
             return Err(Report::new(CheckError::UnknownFile(file.clone())));
@@ -484,7 +484,7 @@ fn select_repos<'a>(
         .iter()
         .filter(|repo| {
             names.iter().any(|name| repo.matches(name))
-                || !ScopedFile::provided(&spex_dir.join(&repo.path), files).is_empty()
+                || !ScopedFile::provided(&spex_dir.join(&repo.dir), files).is_empty()
         })
         .collect())
 }
@@ -502,7 +502,7 @@ fn check_repo(
         files,
     } = args;
 
-    let repo_path = spex_dir.join(&repo.path);
+    let repo_path = spex_dir.join(&repo.dir);
     if !repo_path.is_dir() {
         findings.push(Finding::repo_error(
             &repo.repository_name,

@@ -42,7 +42,7 @@ pub struct Config {
 pub struct Repository {
     pub repository_name: String,
     pub repository_short_name: String,
-    pub path: String,
+    pub dir: String,
     #[serde(default)]
     pub contracts: Vec<Contract>,
     #[serde(default)]
@@ -59,7 +59,7 @@ impl Repository {
     }
 
     pub fn is_spex_repo(&self, spex_dir: &Path) -> bool {
-        canonical(&spex_dir.join(&self.path)) == canonical(spex_dir)
+        canonical(&spex_dir.join(&self.dir)) == canonical(spex_dir)
     }
 }
 
@@ -120,7 +120,7 @@ impl Config {
         self.repositories
             .iter()
             .find(|repo| repo.repository_name == repo_name)
-            .map(|repo| spex_dir.join(&repo.path))
+            .map(|repo| spex_dir.join(&repo.dir))
             .unwrap_or_else(|| spex_dir.to_path_buf())
     }
 

@@ -543,7 +543,7 @@ constraints:
         Repository {
             repository_name: "api".to_string(),
             repository_short_name: "api".to_string(),
-            path: path.to_string(),
+            dir: path.to_string(),
             contracts: Vec::new(),
             rules: rules.into_iter().map(str::to_string).collect(),
             ignored_errors: Vec::new(),

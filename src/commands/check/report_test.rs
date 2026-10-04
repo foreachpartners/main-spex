@@ -6,7 +6,7 @@ fn repository(name: &str, path: &str) -> Repository {
     Repository {
         repository_name: name.to_string(),
         repository_short_name: name.to_string(),
-        path: path.to_string(),
+        dir: path.to_string(),
         contracts: Vec::new(),
         rules: Vec::new(),
         ignored_errors: Vec::new(),
