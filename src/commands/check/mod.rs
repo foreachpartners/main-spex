@@ -457,7 +457,7 @@ fn select_repos<'a>(
     files: &[String],
 ) -> Result<Vec<&'a Repository>> {
     for name in names {
-        if !config.repositories.iter().any(|repo| repo.matches(name)) {
+        if !config.repositories.iter().any(|repo| repo.matches_any_repo_name(name)) {
             return Err(Report::new(CheckError::UnknownRepo(name.clone())));
         }
     }
@@ -475,7 +475,7 @@ fn select_repos<'a>(
         return Ok(config
             .repositories
             .iter()
-            .filter(|repo| names.is_empty() || names.iter().any(|name| repo.matches(name)))
+            .filter(|repo| names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name)))
             .collect());
     }
 
@@ -483,7 +483,7 @@ fn select_repos<'a>(
         .repositories
         .iter()
         .filter(|repo| {
-            names.iter().any(|name| repo.matches(name))
+            names.iter().any(|name| repo.matches_any_repo_name(name))
                 || !ScopedFile::provided(&spex_dir.join(&repo.path), files).is_empty()
         })
         .collect())

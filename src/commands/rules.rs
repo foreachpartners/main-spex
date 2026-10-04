@@ -67,7 +67,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
             .config
             .repositories
             .iter()
-            .any(|repo| repo.matches(name))
+            .any(|repo| repo.matches_any_repo_name(name))
         {
             return Err(Report::new(RulesError::UnknownRepo(name.clone())));
         }
@@ -114,7 +114,7 @@ fn render(workspace: &Spex, args: &RulesArgs) -> Result<String> {
         .config
         .repositories
         .iter()
-        .filter(|repo| args.repo.is_empty() || args.repo.iter().any(|name| repo.matches(name)))
+        .filter(|repo| args.repo.is_empty() || args.repo.iter().any(|name| repo.matches_any_repo_name(name)))
         .collect();
 
     let output: Vec<&serde_json::Value> = rules

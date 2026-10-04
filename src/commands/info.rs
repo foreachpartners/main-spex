@@ -60,7 +60,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
                 .config
                 .repositories
                 .iter()
-                .find(|r| r.matches(repo_filter))
+                .find(|r| r.matches_any_repo_name(repo_filter))
                 .ok_or_else(|| Report::new(InfoError::UnknownRepo(repo_filter.clone())))
         })
         .collect::<Result<Vec<_>>>()?;

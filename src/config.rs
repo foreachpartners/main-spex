@@ -53,9 +53,7 @@ pub struct Repository {
 }
 
 impl Repository {
-    // `--repo` (and similar repository-name flags) accept either the full
-    // repository name or its short name.
-    pub fn matches(&self, name: &str) -> bool {
+    pub fn matches_any_repo_name(&self, name: &str) -> bool {
         self.repository_name == name || self.repository_short_name == name
     }
 
