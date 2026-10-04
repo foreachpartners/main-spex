@@ -2,9 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::annotations::AcCoverage;
-    use crate::spec::{
-        AcceptanceCriterion, Commitment, ContractLevel, CoverageLayer, Spec, Status,
-    };
+    use crate::spec::{AcceptanceCriterion, ContractLevel, CoverageLayer, Spec, Statement, Status};
     use crate::style::Style;
     use std::path::{Path, PathBuf};
 
@@ -342,7 +340,7 @@ mod tests {
         spec.scope = vec!["api".to_string()];
         spec.acceptance_criteria = vec![AcceptanceCriterion {
             id: "ac-1".to_string(),
-            commitment: Commitment::Must(
+            statement: Statement::Must(
                 "do the first thing in a sentence long enough to wrap".to_string(),
             ),
             is_done: None,

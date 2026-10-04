@@ -2,6 +2,7 @@ use std::path::Path;
 
 use serde::Deserialize;
 
+use crate::commitment::Commitment;
 use crate::error::Result;
 use crate::util;
 
@@ -115,7 +116,7 @@ impl Spec {
 pub struct AcceptanceCriterion {
     pub id: String,
     #[serde(flatten)]
-    pub commitment: Commitment,
+    pub statement: Statement,
     #[serde(default)]
     pub is_done: Option<bool>,
     // The 1-indexed source line of this criterion's `- id: ...` entry, filled
@@ -132,48 +133,37 @@ impl AcceptanceCriterion {
     }
 }
 
-// The commitment level of an acceptance criterion, RFC 2119-style: the key
-// itself (`must`, `must_not`, ...) names the level, its value the criterion
-// text.
+// The statement of an acceptance criterion as written in a spec file: the key
+// itself (`must`, `must_not`, ...) names the commitment, its value the
+// criterion text.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Commitment {
-    Must(#[allow(dead_code)] String),
-    MustNot(#[allow(dead_code)] String),
-    Should(#[allow(dead_code)] String),
-    ShouldNot(#[allow(dead_code)] String),
-    May(#[allow(dead_code)] String),
+pub enum Statement {
+    Must(String),
+    MustNot(String),
+    Should(String),
+    ShouldNot(String),
+    May(String),
 }
 
-impl Commitment {
-    // RFC 2119 order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY.
-    pub fn rank(&self) -> u8 {
+impl Statement {
+    pub fn commitment(&self) -> Commitment {
         match self {
-            Commitment::Must(_) => 1,
-            Commitment::MustNot(_) => 2,
-            Commitment::Should(_) => 3,
-            Commitment::ShouldNot(_) => 4,
-            Commitment::May(_) => 5,
-        }
-    }
-
-    pub fn label(&self) -> &'static str {
-        match self {
-            Commitment::Must(_) => "MUST",
-            Commitment::MustNot(_) => "MUST NOT",
-            Commitment::Should(_) => "SHOULD",
-            Commitment::ShouldNot(_) => "SHOULD NOT",
-            Commitment::May(_) => "MAY",
+            Statement::Must(_) => Commitment::Must,
+            Statement::MustNot(_) => Commitment::MustNot,
+            Statement::Should(_) => Commitment::Should,
+            Statement::ShouldNot(_) => Commitment::ShouldNot,
+            Statement::May(_) => Commitment::May,
         }
     }
 
     pub fn text(&self) -> &str {
         match self {
-            Commitment::Must(text) => text,
-            Commitment::MustNot(text) => text,
-            Commitment::Should(text) => text,
-            Commitment::ShouldNot(text) => text,
-            Commitment::May(text) => text,
+            Statement::Must(text)
+            | Statement::MustNot(text)
+            | Statement::Should(text)
+            | Statement::ShouldNot(text)
+            | Statement::May(text) => text,
         }
     }
 }

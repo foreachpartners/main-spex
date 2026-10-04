@@ -1,5 +1,6 @@
 mod annotations;
 mod commands;
+mod commitment;
 mod config;
 mod error;
 mod repo_files;

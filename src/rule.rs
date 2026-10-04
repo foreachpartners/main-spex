@@ -2,6 +2,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+use crate::commitment::Commitment;
 use crate::error::Result;
 use crate::util;
 
@@ -66,22 +67,9 @@ impl<'de> serde::Deserialize<'de> for AcceptanceCriterion {
 }
 
 impl AcceptanceCriterion {
-    // RFC 2119 order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. `None` when the
-    // text doesn't start with a commitment keyword.
-    pub fn rank(&self) -> Option<(u8, &'static str)> {
-        if self.text.starts_with("MUST NOT") {
-            Some((2, "MUST NOT"))
-        } else if self.text.starts_with("MUST") {
-            Some((1, "MUST"))
-        } else if self.text.starts_with("SHOULD NOT") {
-            Some((4, "SHOULD NOT"))
-        } else if self.text.starts_with("SHOULD") {
-            Some((3, "SHOULD"))
-        } else if self.text.starts_with("MAY") {
-            Some((5, "MAY"))
-        } else {
-            None
-        }
+    // `None` when the text doesn't start with a commitment keyword.
+    pub fn commitment(&self) -> Option<Commitment> {
+        Commitment::from_text(&self.text)
     }
 }
 

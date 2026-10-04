@@ -49,6 +49,7 @@ src/                CLI source
   spex.rs           Resolved spex dir + config, with spec and rule loaders (shared by commands)
   rule.rs           Rule model
   spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
+  commitment.rs     RFC 2119 commitments in order (shared by spec and rule)
   annotations.rs    @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
   repo_files.rs     Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
   style.rs          Terminal color styling (shared by commands)

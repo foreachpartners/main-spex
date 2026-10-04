@@ -122,7 +122,7 @@ mod tests {
     fn is_done_defaults_true_when_absent() {
         let ac = AcceptanceCriterion {
             id: "a".to_string(),
-            commitment: Commitment::Must("a".to_string()),
+            statement: Statement::Must("a".to_string()),
             is_done: None,
             line: 0,
         };
@@ -133,7 +133,7 @@ mod tests {
     fn is_done_reads_explicit_false() {
         let ac = AcceptanceCriterion {
             id: "a".to_string(),
-            commitment: Commitment::Must("a".to_string()),
+            statement: Statement::Must("a".to_string()),
             is_done: Some(false),
             line: 0,
         };

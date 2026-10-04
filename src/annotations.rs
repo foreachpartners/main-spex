@@ -57,7 +57,7 @@ impl Found {
                 };
                 AcCoverage {
                     id: ac.id.clone(),
-                    text: ac.commitment.text().to_string(),
+                    text: ac.statement.text().to_string(),
                     is_done: ac.is_done(),
                     missing: CoverageLayer::ALL
                         .into_iter()

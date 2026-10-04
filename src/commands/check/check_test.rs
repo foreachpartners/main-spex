@@ -5,7 +5,7 @@ mod tests {
     use crate::config::{Config, PreexistingError, Repository};
     use crate::rule::{Check, CheckKind, Rule, RunScope, Severity};
     use crate::spec::{
-        AcceptanceCriterion, Commitment, ContractLevel, CoverageIgnore, CoverageLayer,
+        AcceptanceCriterion, ContractLevel, CoverageIgnore, CoverageLayer, Statement,
     };
     use serial_test::serial;
     use std::collections::HashMap;
@@ -819,7 +819,7 @@ constraints:
         ids.iter()
             .map(|id| AcceptanceCriterion {
                 id: id.to_string(),
-                commitment: Commitment::Must(id.to_string()),
+                statement: Statement::Must(id.to_string()),
                 is_done: not_done.contains(id).then_some(false),
                 line: 0,
             })

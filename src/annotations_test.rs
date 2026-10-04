@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::spec::{
-        AcceptanceCriterion, Commitment, ContractLevel, CoverageIgnore, Spec, Status,
+        AcceptanceCriterion, ContractLevel, CoverageIgnore, Spec, Statement, Status,
     };
 
     fn spec(id: &str, ac_ids: &[&str], coverage_ignore: Vec<CoverageIgnore>) -> Spec {
@@ -14,7 +14,7 @@ mod tests {
                 .iter()
                 .map(|id| AcceptanceCriterion {
                     id: id.to_string(),
-                    commitment: Commitment::Must(id.to_string()),
+                    statement: Statement::Must(id.to_string()),
                     is_done: None,
                     line: 0,
                 })
