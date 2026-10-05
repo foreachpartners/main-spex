@@ -58,9 +58,10 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
 }
 
 fn print_finding(style: &Style, base: &Path, finding: &Finding) {
+    let label = finding.severity.into();
     let severity = match finding.severity {
-        Severity::Error => style.red("error"),
-        Severity::Warn => style.yellow("warn"),
+        Severity::Error => style.red(label),
+        Severity::Warn => style.yellow(label),
     };
     let check = if finding.check.is_empty() {
         finding.rule_id.clone()

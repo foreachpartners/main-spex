@@ -206,12 +206,10 @@ static TOKEN: LazyLock<Regex> =
 pub fn parse(content: &str) -> Vec<Annotation> {
     let mut annotations = Vec::new();
     for caps in ANNOTATION.captures_iter(content) {
-        let layer = match &caps[1] {
-            "contract" => CoverageLayer::Contract,
-            "impl" => CoverageLayer::Impl,
-            "test" => CoverageLayer::Test,
-            _ => continue,
+        let Ok(layer) = caps[1].parse::<CoverageLayer>() else {
+            continue;
         };
+
         for token in TOKEN.find_iter(&caps[2]) {
             let (spec_id, ac_id) = match token.as_str().split_once('#') {
                 Some((spec_id, ac_id)) => (spec_id, Some(ac_id)),

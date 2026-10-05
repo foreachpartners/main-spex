@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use serde::Deserialize;
-use strum::{EnumIter, IntoStaticStr};
+use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::commitment::Commitment;
 use crate::error::Result;
@@ -206,7 +206,9 @@ pub enum ContractLevel {
     ForEachAc,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, EnumIter, IntoStaticStr)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, EnumIter, EnumString, IntoStaticStr,
+)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum CoverageLayer {
