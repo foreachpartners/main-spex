@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use strum::IntoEnumIterator;
 
     #[test]
     fn order_runs_from_must_to_may() {
@@ -12,12 +13,12 @@ mod tests {
 
     #[test]
     fn commitments_compare_in_that_order() {
-        assert!(Commitment::ALL.windows(2).all(|pair| pair[0] < pair[1]));
+        assert!(Commitment::iter().is_sorted());
     }
 
     #[test]
     fn from_text_reads_the_leading_commitment() {
-        for commitment in Commitment::ALL {
+        for commitment in Commitment::iter() {
             let text = format!("{} do something", commitment.label());
             assert_eq!(Commitment::from_text(&text), Some(commitment));
         }

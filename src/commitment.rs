@@ -1,42 +1,32 @@
+use strum::{EnumIter, IntoEnumIterator, IntoStaticStr};
+
 #[cfg(test)]
 #[path = "commitment_test.rs"]
 mod commitment_test;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, EnumIter, IntoStaticStr)]
+#[strum(serialize_all = "UPPERCASE")]
 pub enum Commitment {
     Must,
+    #[strum(serialize = "MUST NOT")]
     MustNot,
     Should,
+    #[strum(serialize = "SHOULD NOT")]
     ShouldNot,
     May,
 }
 
 impl Commitment {
-    pub const ALL: [Commitment; 5] = [
-        Commitment::Must,
-        Commitment::MustNot,
-        Commitment::Should,
-        Commitment::ShouldNot,
-        Commitment::May,
-    ];
-
     pub fn label(self) -> &'static str {
-        match self {
-            Commitment::Must => "MUST",
-            Commitment::MustNot => "MUST NOT",
-            Commitment::Should => "SHOULD",
-            Commitment::ShouldNot => "SHOULD NOT",
-            Commitment::May => "MAY",
-        }
+        self.into()
     }
 
     pub fn order() -> String {
-        Self::ALL.map(Self::label).join(", ")
+        Self::iter().map(Self::label).collect::<Vec<_>>().join(", ")
     }
 
     pub fn from_text(text: &str) -> Option<Self> {
-        Self::ALL
-            .into_iter()
+        Self::iter()
             .filter(|commitment| text.starts_with(commitment.label()))
             .max_by_key(|commitment| commitment.label().len())
     }
