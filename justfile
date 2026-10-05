@@ -16,6 +16,9 @@ fmt-docs:
 check-docs:
     dprint check
 
+check-fmt: check-docs
+    cargo fmt --check
+
 install:
     cargo install --path . --force
 

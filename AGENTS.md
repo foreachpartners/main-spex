@@ -27,6 +27,7 @@ just fmt        # Format everything (fmt-docs + cargo fmt)
 just test       # cargo test
 just fmt-docs   # dprint fmt (md/yaml/json)
 just check-docs # dprint check (md/yaml/json)
+just check-fmt  # Check formatting of everything (check-docs + cargo fmt --check)
 just install    # Reinstall cli
 just help       # spex --help
 ```
@@ -42,6 +43,7 @@ When a change requires migration steps in a spex project, fill `templates/skills
 ## Project structure
 
 ```
+.github/workflows/  CI: tests and format checks on pull requests
 src/                CLI source
   main.rs           Entry point, arg parsing
   config.rs         Config loading
