@@ -55,7 +55,7 @@ impl Style {
     }
 
     fn paint(&self, code: &str, text: &str) -> String {
-        if self.enabled {
+        if self.enabled && !cfg!(target_vendor = "win7") {
             format!("\u{1b}[{code}m{text}\u{1b}[0m")
         } else {
             text.to_string()
@@ -95,7 +95,7 @@ impl Style {
     }
 
     pub fn hyperlink(&self, url: &str, text: &str) -> String {
-        if self.enabled {
+        if self.enabled && !cfg!(target_vendor = "win7") {
             format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")
         } else {
             text.to_string()
