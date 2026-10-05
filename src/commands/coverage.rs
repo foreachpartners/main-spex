@@ -3,6 +3,7 @@ use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
+use strum::IntoEnumIterator;
 
 use crate::annotations::{AcCoverage, Found};
 use crate::error::{CliError, Result};
@@ -134,8 +135,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
 }
 
 fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
-    CoverageLayer::ALL
-        .into_iter()
+    CoverageLayer::iter()
         .filter_map(|layer| {
             let ids: Vec<&str> = ac_rows
                 .iter()
@@ -210,8 +210,7 @@ fn summary_line(style: &Style, rows: &[SpecRow], gaps: usize) -> String {
 }
 
 fn status_groups<'a>(rows: &'a [SpecRow]) -> Vec<(Status, Vec<&'a SpecRow<'a>>)> {
-    Status::ALL
-        .into_iter()
+    Status::iter()
         .filter_map(|status| {
             let group: Vec<&SpecRow> = rows
                 .iter()

@@ -5,6 +5,7 @@ use std::sync::LazyLock;
 
 use error_stack::ResultExt;
 use regex::Regex;
+use strum::IntoEnumIterator;
 
 use crate::config::Config;
 use crate::error::{CliError, Result};
@@ -60,8 +61,7 @@ impl Found {
                     id: ac.id.clone(),
                     text: ac.statement.text().to_string(),
                     is_done: ac.is_done(),
-                    missing: CoverageLayer::ALL
-                        .into_iter()
+                    missing: CoverageLayer::iter()
                         .filter(|&layer| required(layer) && !self.has_ac(&spec.id, &ac.id, layer))
                         .collect(),
                 }
