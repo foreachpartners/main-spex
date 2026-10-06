@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::fs;
 use std::io::Write;
 use std::path::Path;
@@ -7,6 +9,12 @@ use std::process::{Command, Stdio};
 // bytes; drop them so snapshots stay portable across shells.
 pub fn report_text(stdout: &[u8]) -> String {
     String::from_utf8_lossy(stdout).replace('\u{8}', "")
+}
+
+// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
+// followed by a blank line; the snapshots hold the report body only.
+pub fn with_version_header(body: &str) -> String {
+    format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
 }
 
 pub fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {

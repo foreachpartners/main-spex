@@ -1,0 +1,17 @@
+id: glob-runner
+title: Glob runner
+description: >-
+  Exercises the glob runner with a forbidden path and a required path.
+acceptance_criteria:
+  - "MUST provide a README.md in the repository root"
+  - "MUST NOT keep backup files in a repository"
+checks:
+  - name: no-backup-files
+    type: glob
+    pattern: "**/*.bak"
+    severity: warn
+  - name: require-readme
+    type: glob
+    pattern: "README.md"
+    negate: true
+    severity: error

@@ -1,0 +1,21 @@
+id: script-failures
+title: Script failures
+description: >-
+  Exercises how the script runner reports a script that fails without
+  reporting a violation line.
+acceptance_criteria:
+  - "MUST report a failing script that prints only to stderr"
+  - "MUST report a failing script that prints nothing"
+checks:
+  - name: stderr-only
+    description: A script that fails with a message on stderr
+    type: script
+    run: per-repo
+    script: fail-with-stderr.sh
+    severity: error
+  - name: exit-status-only
+    description: A script that fails without any output
+    type: script
+    run: per-repo
+    script: fail-silently.sh
+    severity: warn

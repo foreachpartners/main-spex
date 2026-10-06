@@ -1,17 +1,11 @@
 use tempfile::tempdir;
 
 mod common;
-use common::{dummy_project_fixture, report_text, run_spex};
+use common::{dummy_project_fixture, report_text, run_spex, with_version_header};
 
 const EXPECTED_COVERAGE: &str = include_str!("fixtures/dummy-project/expected_coverage.txt");
 const EXPECTED_COVERAGE_VERBOSE: &str =
     include_str!("fixtures/dummy-project/expected_coverage_verbose.txt");
-
-// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
-// followed by a blank line; the fixtures hold the report body only.
-fn with_version_header(body: &str) -> String {
-    format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
-}
 
 // `dummy-project` is a small, dedicated fixture (see
 // tests/fixtures/dummy-project) whose few specs are picked to exercise

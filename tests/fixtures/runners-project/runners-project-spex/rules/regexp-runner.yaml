@@ -1,0 +1,26 @@
+id: regexp-runner
+title: Regexp runner
+description: >-
+  Exercises the regexp runner with a forbidden pattern, a required pattern, and
+  include and exclude scoping.
+acceptance_criteria:
+  - "MUST start every source file with an SPDX license header"
+  - "MUST NOT leave a FIXME marker in source code"
+checks:
+  - name: no-fixme
+    type: regexp
+    pattern: "FIXME"
+    include:
+      - "src/**"
+    exclude:
+      - "src/generated/**"
+    severity: error
+  - name: require-license-header
+    type: regexp
+    pattern: "^// SPDX-License-Identifier: MIT$"
+    negate: true
+    include:
+      - "src/**"
+    exclude:
+      - "src/generated/**"
+    severity: warn

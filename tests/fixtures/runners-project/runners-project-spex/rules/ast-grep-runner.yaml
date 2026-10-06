@@ -1,0 +1,42 @@
+id: ast-grep-runner
+title: Ast-grep runner
+description: >-
+  Exercises the ast-grep runner with a forbidden pattern, a full rule object, a
+  required pattern, and include and exclude scoping.
+acceptance_criteria:
+  - "MUST provide a default export in every TypeScript source file"
+  - "MUST NOT call unwrap on a Rust value"
+  - "MUST NOT call console.log in TypeScript"
+  - "MUST NOT leave a debugger statement or alert call in TypeScript"
+checks:
+  - name: no-unwrap
+    type: ast-grep
+    pattern: "$RECEIVER.unwrap()"
+    include:
+      - "src/**/*.rs"
+    exclude:
+      - "src/generated/**"
+    severity: error
+  - name: no-console-log
+    type: ast-grep
+    pattern: "console.log($$$ARGS)"
+    include:
+      - "src/**/*.ts"
+    severity: error
+  - name: no-debugger-or-alert
+    type: ast-grep
+    rule:
+      rule:
+        any:
+          - kind: debugger_statement
+          - pattern: "alert($$$ARGS)"
+    include:
+      - "src/**/*.ts"
+    severity: error
+  - name: require-default-export
+    type: ast-grep
+    pattern: "export default $$$VALUE"
+    negate: true
+    include:
+      - "src/**/*.ts"
+    severity: warn

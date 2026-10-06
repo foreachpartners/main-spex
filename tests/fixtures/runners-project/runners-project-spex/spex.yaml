@@ -1,0 +1,27 @@
+project_name: runners-project
+cli_version: 0.10.5
+description: >-
+  Fixture for the check runners (regexp, glob, ast-grep, script) and the script
+  run scopes (per-file, per-repo, workspace), with intentional violations.
+repositories:
+  - repository_name: runners-project-api
+    repository_short_name: api
+    path: ../runners-project-api
+    rules:
+      - regexp-runner
+      - glob-runner
+      - ast-grep-runner
+      - script-runner
+      - script-failures
+  - repository_name: runners-project-frontend
+    repository_short_name: frontend
+    path: ../runners-project-frontend
+    rules:
+      - regexp-runner
+      - glob-runner
+      - ast-grep-runner
+      - script-runner
+  - repository_name: runners-project-spex
+    repository_short_name: spex
+    path: .
+    rules: []

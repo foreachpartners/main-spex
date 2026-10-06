@@ -4,7 +4,7 @@ use std::path::Path;
 use tempfile::tempdir;
 
 mod common;
-use common::{copy_dir, dummy_project_fixture, report_text, run_spex};
+use common::{copy_dir, dummy_project_fixture, report_text, run_spex, with_version_header};
 
 // Snapshot of `spex check` for a freshly initialized copy of the
 // `no-spex-project` fixture. The findings are intentional: the fixture ships
@@ -48,12 +48,6 @@ dummy-project-spex
 
 dummy-project: 0 errors, 0 warnings
 "#;
-
-// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
-// followed by a blank line; the snapshots below hold the report body only.
-fn with_version_header(body: &str) -> String {
-    format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
-}
 
 #[test]
 fn init_then_check_no_spex_project() {
