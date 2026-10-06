@@ -28,7 +28,7 @@ pub struct SpecsArgs {
     scope: Vec<String>,
     #[arg(
         long,
-        help = "Write the rendered YAML to this file instead of stdout — the full specs list is large and can get truncated when printed to a terminal or piped through a shell"
+        help = "Write the output to this file instead of stdout — the full specs list is large and can get truncated when printed to a terminal or piped through a shell"
     )]
     output: Option<String>,
 }

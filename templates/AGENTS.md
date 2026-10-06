@@ -43,8 +43,8 @@ Run from anywhere inside the workspace; `spex <command> --help` lists every opti
 
 - `spex check [--repo <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
 - `spex coverage [--scope <repository-short-name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
-- `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs as YAML.
-- `spex rules [--id <rule-id>...] [--repo <name>...] [--ai] [--output <file>]` — print the active rules per repository as YAML.
+- `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs.
+- `spex rules [--id <rule-id>...] [--repo <name>...] [--ai] [--output <file>]` — print the active rules per repository.
 - `spex info [--print <field>]` — print `spex.yaml`: project and per-repository configuration.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
 

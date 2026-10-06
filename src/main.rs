@@ -52,9 +52,9 @@ enum Commands {
     Coverage(CoverageArgs),
     #[command(about = "Print `spex.yaml`: project and per-repository configuration")]
     Info(InfoArgs),
-    #[command(about = "Print the active rules per repository, as YAML")]
+    #[command(about = "Print the active rules per repository")]
     Rules(RulesArgs),
-    #[command(about = "Print the workspace specs, as YAML")]
+    #[command(about = "Print the workspace specs")]
     Specs(SpecsArgs),
 }
 
