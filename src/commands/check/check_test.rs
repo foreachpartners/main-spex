@@ -234,6 +234,36 @@ mod tests {
     }
 
     #[test]
+    fn ast_grep_reports_hits_in_file_order_across_languages() {
+        let dir = tempdir().expect("temp dir");
+        let files = vec![
+            scoped(&dir, "src/a.ts", "trace(1);\n"),
+            scoped(&dir, "src/b.js", "trace(1);\n"),
+            scoped(&dir, "src/c.tsx", "trace(1);\n"),
+            scoped(&dir, "src/d.rs", "fn run() { trace(1); }\n"),
+            scoped(&dir, "src/e.py", "trace(1)\n"),
+        ];
+        let check = ast_grep_check(Some("trace($$$ARGS)"));
+
+        let findings = run_scoped(&dir, "tracing", &check, files);
+
+        let locations: Vec<_> = findings
+            .iter()
+            .map(|finding| finding.location.as_deref())
+            .collect();
+        assert_eq!(
+            locations,
+            [
+                Some("src/a.ts:1"),
+                Some("src/b.js:1"),
+                Some("src/c.tsx:1"),
+                Some("src/d.rs:1"),
+                Some("src/e.py:1"),
+            ]
+        );
+    }
+
+    #[test]
     fn ast_grep_negate_reports_when_absent() {
         let dir = tempdir().expect("temp dir");
         let file = scoped(&dir, "src/main.ts", "console.error(1);\n");

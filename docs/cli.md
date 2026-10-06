@@ -82,6 +82,7 @@ Runs the checks declared in `spex.yaml` against each workspace repository, repor
 
 - Opens its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - Skips files ignored by `.gitignore`, even in a repository without a `.git` directory, plus well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
+- Visits each repository's files sorted by name within each directory, so a check's findings, and the files a `per-file` script receives, come out in the same order on every run and machine.
 - Renders every finding with a location as a terminal hyperlink to the absolute file it points at, so it opens correctly whatever the shell's current working directory is; the displayed text stays the short repository-relative path.
 - Exits non-zero when any `error`-severity finding is reported; `warn`-severity findings do not affect the exit status.
 

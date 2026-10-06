@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ast_grep_config::{DeserializeEnv, RuleCoreError, SerializableRuleCore};
+use ast_grep_config::{DeserializeEnv, RuleCore, RuleCoreError, SerializableRuleCore};
 use ast_grep_language::{Language, LanguageExt, SupportLang};
 use serde_yaml_ng::{Mapping, Value};
 
@@ -26,42 +26,40 @@ pub(in crate::commands::check) fn run_ast_grep(
         })
         .transpose()?;
 
-    let mut by_lang: HashMap<SupportLang, Vec<&&ScopedFile>> = HashMap::new();
+    let mut matchers: HashMap<SupportLang, RuleCore> = HashMap::new();
+    let mut hits = Vec::new();
     for file in files {
         let Some(lang) = explicit_lang.or_else(|| SupportLang::from_path(&file.rel)) else {
             continue;
         };
-        by_lang.entry(lang).or_default().push(file);
-    }
+        if !matchers.contains_key(&lang) {
+            let matcher = build_ast_grep_matcher(&rule_core, lang)
+                .map_err(|err| format!("invalid ast-grep rule: {err}"))?;
+            matchers.insert(lang, matcher);
+        }
+        let matcher = &matchers[&lang];
 
-    let mut hits = Vec::new();
-    for (lang, files) in by_lang {
-        let matcher = build_ast_grep_matcher(&rule_core, lang)
-            .map_err(|err| format!("invalid ast-grep rule: {err}"))?;
+        let Ok(content) = std::fs::read_to_string(&file.abs) else {
+            continue;
+        };
+        let tree = lang.ast_grep(&content);
+        let root = tree.root();
+        let mut matches = root.find_all(matcher).peekable();
 
-        for file in files {
-            let Ok(content) = std::fs::read_to_string(&file.abs) else {
-                continue;
-            };
-            let tree = lang.ast_grep(&content);
-            let root = tree.root();
-            let mut matches = root.find_all(&matcher).peekable();
-
-            if negate {
-                if matches.peek().is_none() {
-                    hits.push(Hit::new(
-                        Some(file.rel_str()),
-                        check.message("required pattern not found"),
-                    ));
-                }
-            } else {
-                for found in matches {
-                    let line = found.start_pos().line() + 1;
-                    hits.push(Hit::new(
-                        Some(format!("{}:{}", file.rel_str(), line)),
-                        check.message("matches forbidden pattern"),
-                    ));
-                }
+        if negate {
+            if matches.peek().is_none() {
+                hits.push(Hit::new(
+                    Some(file.rel_str()),
+                    check.message("required pattern not found"),
+                ));
+            }
+        } else {
+            for found in matches {
+                let line = found.start_pos().line() + 1;
+                hits.push(Hit::new(
+                    Some(format!("{}:{}", file.rel_str(), line)),
+                    check.message("matches forbidden pattern"),
+                ));
             }
         }
     }

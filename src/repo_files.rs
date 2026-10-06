@@ -34,6 +34,7 @@ impl RepoFiles {
                 .git_ignore(true)
                 .git_global(true)
                 .require_git(false)
+                .sort_by_file_name(|left, right| left.cmp(right))
                 .filter_entry(|entry| !is_skipped(entry.file_name()))
                 .build(),
         )

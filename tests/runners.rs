@@ -8,19 +8,37 @@ use common::{copy_dir, report_text, run_spex, with_version_header};
 const EXPECTED_CHECK_REPORT: &str = r#"runners-project-api
   error  regexp-runner/no-fixme  (src/lib.rs:2)
       matches forbidden pattern
+  error  regexp-runner/no-fixme  (src/nested/mid.rs:2)
+      matches forbidden pattern
+  error  regexp-runner/no-fixme  (src/zeta.rs:1)
+      matches forbidden pattern
   warn  regexp-runner/require-license-header  (src/util.rs)
       required pattern not found
+  warn  regexp-runner/require-license-header  (src/zeta.rs)
+      required pattern not found
+  warn  glob-runner/no-backup-files  (archive.bak)
+      forbidden path
+  warn  glob-runner/no-backup-files  (docs/draft.bak)
+      forbidden path
   warn  glob-runner/no-backup-files  (old.bak)
       forbidden path
   error  ast-grep-runner/no-unwrap  (src/lib.rs:5)
       matches forbidden pattern
+  error  ast-grep-runner/no-unwrap  (src/nested/mid.rs:5)
+      matches forbidden pattern
+  error  ast-grep-runner/no-unwrap  (src/zeta.rs:4)
+      matches forbidden pattern
   warn  script-runner/per-file-hack  (src/lib.rs:3)
+      HACK marker left in code
+  warn  script-runner/per-file-hack  (src/nested/mid.rs:3)
+      HACK marker left in code
+  warn  script-runner/per-file-hack  (src/zeta.rs:2)
       HACK marker left in code
   error  script-failures/stderr-only
       tooling unavailable
   warn  script-failures/exit-status-only
       script exited with status 3
-  3 errors, 4 warnings
+  7 errors, 9 warnings
 
 runners-project-frontend
   error  regexp-runner/no-fixme  (src/index.ts:2)
@@ -35,13 +53,21 @@ runners-project-frontend
       matches forbidden pattern
   error  ast-grep-runner/no-debugger-or-alert  (src/debug.ts:4)
       matches forbidden pattern
+  error  ast-grep-runner/no-trace-call  (src/app.ts:2)
+      matches forbidden pattern
+  error  ast-grep-runner/no-trace-call  (src/legacy.js:2)
+      matches forbidden pattern
+  error  ast-grep-runner/no-trace-call  (src/view.tsx:2)
+      matches forbidden pattern
+  warn  ast-grep-runner/require-default-export  (src/app.ts)
+      required pattern not found
   warn  ast-grep-runner/require-default-export  (src/util.ts)
       required pattern not found
   warn  script-runner/per-file-hack  (src/index.ts:3)
       HACK marker left in code
   error  script-runner/per-repo-changelog
       CHANGELOG.md is missing from runners-project-frontend
-  6 errors, 3 warnings
+  9 errors, 4 warnings
 
 runners-project-spex
   no issues
@@ -51,7 +77,7 @@ workspace
       frontend version 1.3.0 differs from api version 1.2.0
   1 error, 0 warnings
 
-runners-project: 10 errors, 7 warnings
+runners-project: 17 errors, 13 warnings
 "#;
 
 const EXPECTED_CHECK_FILES_REPORT: &str = r#"runners-project-frontend

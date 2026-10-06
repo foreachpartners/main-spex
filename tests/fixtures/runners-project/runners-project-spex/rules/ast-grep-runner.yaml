@@ -2,11 +2,13 @@ id: ast-grep-runner
 title: Ast-grep runner
 description: >-
   Exercises the ast-grep runner with a forbidden pattern, a full rule object, a
-  required pattern, and include and exclude scoping.
+  required pattern, include and exclude scoping, and a check spanning several
+  languages.
 acceptance_criteria:
   - "MUST provide a default export in every TypeScript source file"
   - "MUST NOT call unwrap on a Rust value"
   - "MUST NOT call console.log in TypeScript"
+  - "MUST NOT call trace in any source language"
   - "MUST NOT leave a debugger statement or alert call in TypeScript"
 checks:
   - name: no-unwrap
@@ -32,6 +34,12 @@ checks:
           - pattern: "alert($$$ARGS)"
     include:
       - "src/**/*.ts"
+    severity: error
+  - name: no-trace-call
+    type: ast-grep
+    pattern: "trace($$$ARGS)"
+    include:
+      - "src/**"
     severity: error
   - name: require-default-export
     type: ast-grep

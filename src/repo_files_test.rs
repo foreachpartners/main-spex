@@ -12,6 +12,43 @@ mod tests {
             .collect()
     }
 
+    fn walked_in_order(root: &Path) -> Vec<PathBuf> {
+        RepoFiles::new(root)
+            .filter_map(Result::ok)
+            .map(|path| path.strip_prefix(root).unwrap_or(&path).to_path_buf())
+            .collect()
+    }
+
+    #[test]
+    fn yields_files_sorted_by_name_within_each_directory() {
+        let dir = tempdir().expect("temp dir");
+        for file in [
+            "zeta.txt",
+            "nested/beta.txt",
+            "nested/alpha.txt",
+            "a.rs",
+            "a/x.rs",
+        ] {
+            let path = dir.path().join(file);
+            std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
+            std::fs::write(path, "").expect("file");
+        }
+
+        let files = walked_in_order(dir.path());
+
+        assert_eq!(
+            files,
+            [
+                "a/x.rs",
+                "a.rs",
+                "nested/alpha.txt",
+                "nested/beta.txt",
+                "zeta.txt"
+            ]
+            .map(PathBuf::from)
+        );
+    }
+
     #[test]
     fn honors_gitignore_without_a_git_directory() {
         let dir = tempdir().expect("temp dir");
