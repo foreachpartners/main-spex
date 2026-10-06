@@ -173,9 +173,9 @@ pub struct CoverageIgnore {
 #[strum(serialize_all = "kebab-case")]
 pub enum Status {
     Active,
-    InProgress,
     #[default]
     Planned,
+    InProgress,
     Blocked,
     Deprecated,
 }
