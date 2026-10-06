@@ -1,4 +1,4 @@
-# 🦉 main-spex
+# 🦉 Main spex
 
 The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
 
@@ -10,7 +10,7 @@ AI operates fast — the framework's job is unleash it speed while ensuring slop
 
 ## Core Concepts
 
-spex is built on four simple pieces:
+Main spex, or spex for short, is built on four simple pieces:
 
 - **Specs** define _what_ a feature does — a capability with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each repository must adhere to a list of rules applicable to it.
@@ -23,7 +23,7 @@ spex is built on four simple pieces:
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
-- **spex CLI**: Clone the main-spex repository and install the `spex` CLI tool:
+- **spex CLI**: Clone the Main spex repository and install the `spex` CLI tool:
   ```sh
   git clone https://github.com/foreachpartners/main-spex
   cd main-spex

@@ -4,7 +4,7 @@ Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com
 
 ## [0.11.0] - 2026-10-06
 
-- **Breaking**: the project and crate are renamed from `spex` to `main-spex`; the CLI binary and command stay `spex`, and the repository moved to `https://github.com/foreachpartners/main-spex`. Existing installs must reinstall from the renamed repository with `cargo install --path . --force`.
+- **Breaking**: the project is renamed from spex to Main spex (spex for short) and the crate from `spex` to `main-spex`; the CLI binary and command stay `spex`, and the repository moved to `https://github.com/foreachpartners/main-spex`. Existing installs must reinstall from the renamed repository with `cargo install --path . --force`.
 
 ## [0.10.5] - 2026-10-04
 
