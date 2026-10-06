@@ -59,26 +59,21 @@ enum Commands {
 }
 
 fn main() -> ExitCode {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Init => finish(commands::init::run()),
-        Commands::Update => finish(commands::update::run()),
-        Commands::Check(args) => finish(commands::check::run(args)),
-        Commands::CheckSchema(args) => finish(commands::check_schema::run(args)),
-        Commands::Coverage(args) => finish(commands::coverage::run(args)),
-        Commands::Info(args) => finish(commands::info::run(args)),
-        Commands::Rules(args) => finish(commands::rules::run(args)),
-        Commands::Specs(args) => finish(commands::specs::run(args)),
-    }
+    run(Cli::parse().command).unwrap_or_else(|report| {
+        eprintln!("error: {report:?}");
+        ExitCode::FAILURE
+    })
 }
 
-fn finish(result: Result<ExitCode>) -> ExitCode {
-    match result {
-        Ok(code) => code,
-        Err(report) => {
-            eprintln!("error: {report:?}");
-            ExitCode::FAILURE
-        }
+fn run(command: Commands) -> Result<ExitCode> {
+    match command {
+        Commands::Init => commands::init::run(),
+        Commands::Update => commands::update::run(),
+        Commands::Check(args) => commands::check::run(args),
+        Commands::CheckSchema(args) => commands::check_schema::run(args),
+        Commands::Coverage(args) => commands::coverage::run(args),
+        Commands::Info(args) => commands::info::run(args),
+        Commands::Rules(args) => commands::rules::run(args),
+        Commands::Specs(args) => commands::specs::run(args),
     }
 }
