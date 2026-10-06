@@ -7,9 +7,9 @@ use error_stack::{Report, ResultExt, bail};
 use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
-use crate::style::Style;
+use crate::support::style::Style;
+use crate::support::util::{self, dir_name};
 use crate::templates;
-use crate::util::{self, dir_name};
 
 #[cfg(test)]
 #[path = "init_test.rs"]

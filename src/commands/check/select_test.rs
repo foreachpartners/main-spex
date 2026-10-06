@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::testing;
+    use crate::support::testing;
     use tempfile::tempdir;
 
     #[test]

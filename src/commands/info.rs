@@ -3,8 +3,8 @@ use std::process::ExitCode;
 use clap::Args;
 use error_stack::{Report, ResultExt};
 
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
-use crate::spex::Spex;
 
 #[derive(Args)]
 pub struct InfoArgs {

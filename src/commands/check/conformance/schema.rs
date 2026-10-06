@@ -4,8 +4,8 @@ use crate::commands::check_schema;
 use crate::error::Result;
 use crate::rule::{RULES_DIR, Rule};
 use crate::spec::{SPECS_DIR, Spec};
+use crate::support::util::yaml_files;
 use crate::templates::SCHEMAS_DIR;
-use crate::util::yaml_files;
 
 use super::{Finding, conform_finding, rel};
 

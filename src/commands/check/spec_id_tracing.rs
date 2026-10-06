@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
-use crate::annotations;
+use crate::tracing::annotations;
 
 use super::{Finding, RepoCtx, ScopedFile};
 

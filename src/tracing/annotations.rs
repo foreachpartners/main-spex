@@ -9,9 +9,9 @@ use strum::IntoEnumIterator;
 
 use crate::config::Config;
 use crate::error::{CliError, Result};
-use crate::repo_files::RepoFiles;
 use crate::spec::{ContractLevel, CoverageLayer, Spec};
-use crate::util;
+use crate::support::repo_files::RepoFiles;
+use crate::support::util;
 
 #[cfg(test)]
 #[path = "annotations_test.rs"]

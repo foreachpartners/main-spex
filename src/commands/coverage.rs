@@ -5,12 +5,12 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 use strum::IntoEnumIterator;
 
-use crate::annotations::{AcCoverage, Found};
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::spec::{CoverageLayer, Spec, Status};
-use crate::spex::Spex;
-use crate::style::{Style, visible_width};
-use crate::util::{file_url, wrap_text};
+use crate::support::style::{Style, visible_width};
+use crate::support::util::{file_url, wrap_text};
+use crate::tracing::annotations::{AcCoverage, Found};
 
 #[cfg(test)]
 #[path = "coverage_test.rs"]

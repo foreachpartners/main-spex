@@ -3,7 +3,7 @@ mod tests {
     use super::super::*;
     use crate::rule::Severity;
     use crate::spec::AcceptanceCriterion;
-    use crate::testing;
+    use crate::support::testing;
 
     fn criteria(ids: &[&str], not_done: &[&str]) -> Vec<AcceptanceCriterion> {
         ids.iter()

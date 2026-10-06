@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::spec::{ContractLevel, CoverageIgnore, Spec, Status};
-    use crate::testing;
+    use crate::support::testing;
 
     fn spec(id: &str, ac_ids: &[&str], coverage_ignore: Vec<CoverageIgnore>) -> Spec {
         Spec {

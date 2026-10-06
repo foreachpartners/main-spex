@@ -1,6 +1,6 @@
-use crate::commitment::Commitment;
 use crate::rule::Rule;
 use crate::spec::Spec;
+use crate::support::commitment::Commitment;
 
 use super::{Finding, RULE_ID};
 

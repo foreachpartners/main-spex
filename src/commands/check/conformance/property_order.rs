@@ -6,8 +6,8 @@ use serde_json::Value;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::spec::SPECS_DIR;
+use crate::support::util::yaml_files;
 use crate::templates::SCHEMAS_DIR;
-use crate::util::yaml_files;
 
 use super::{Finding, RULE_ID, rel};
 

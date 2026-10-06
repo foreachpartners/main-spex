@@ -3,9 +3,9 @@ use std::path::Path;
 use serde::Deserialize;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
-use crate::commitment::Commitment;
 use crate::error::Result;
-use crate::util;
+use crate::support::commitment::Commitment;
+use crate::support::util;
 
 #[cfg(test)]
 #[path = "spec_test.rs"]

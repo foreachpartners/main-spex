@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::annotations::AcCoverage;
     use crate::spec::{AcceptanceCriterion, CoverageLayer, Spec, Statement, Status};
-    use crate::style::Style;
-    use crate::testing;
+    use crate::support::style::Style;
+    use crate::support::testing;
+    use crate::tracing::annotations::AcCoverage;
     use std::path::Path;
 
     fn spec(id: &str, status: Status) -> Spec {

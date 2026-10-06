@@ -7,8 +7,8 @@ use error_stack::ResultExt;
 use crate::config::{self, Config, PreexistingEntry, Repository};
 use crate::error::{CliError, Result};
 use crate::rule::Severity;
-use crate::style::Style;
-use crate::util::plural;
+use crate::support::style::Style;
+use crate::support::util::plural;
 
 use super::RepoReport;
 

@@ -7,7 +7,7 @@ use serde_yaml_ng::Value;
 
 use crate::error::{CliError, Result};
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
-use crate::util;
+use crate::support::util;
 
 #[cfg(test)]
 #[path = "templates_test.rs"]

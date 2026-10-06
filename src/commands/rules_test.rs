@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::config::Repository;
-    use crate::testing;
+    use crate::support::testing;
     use indoc::indoc;
     use tempfile::tempdir;
 

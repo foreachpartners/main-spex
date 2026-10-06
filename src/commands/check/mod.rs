@@ -6,11 +6,11 @@ use clap::Args;
 use error_stack::ResultExt;
 
 use crate::config::Repository;
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
-use crate::repo_files::RepoFiles;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope};
 use crate::spec::Spec;
-use crate::spex::Spex;
+use crate::support::repo_files::RepoFiles;
 
 mod baseline;
 mod conformance;

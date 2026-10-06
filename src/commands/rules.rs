@@ -5,10 +5,10 @@ use clap::Args;
 use error_stack::{Report, ResultExt};
 
 use crate::config::Repository;
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::rule::RULES_DIR;
-use crate::spex::Spex;
-use crate::util;
+use crate::support::util;
 
 #[cfg(test)]
 #[path = "rules_test.rs"]

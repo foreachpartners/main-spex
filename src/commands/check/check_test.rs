@@ -3,7 +3,7 @@ mod tests {
     use super::super::runners::{build_globset, resolve_script};
     use super::super::*;
     use crate::rule::Severity;
-    use crate::testing;
+    use crate::support::testing;
     use serial_test::serial;
     use tempfile::{TempDir, tempdir};
 

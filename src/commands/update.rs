@@ -3,10 +3,10 @@ use std::process::ExitCode;
 
 use error_stack::ResultExt;
 
+use crate::config::spex::Spex;
 use crate::config::{CLI_VERSION, Config};
 use crate::error::{CliError, Result};
-use crate::spex::Spex;
-use crate::style::Style;
+use crate::support::style::Style;
 use crate::templates;
 use serde::Deserialize;
 

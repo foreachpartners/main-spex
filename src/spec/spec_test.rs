@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::testing;
+    use crate::support::testing;
 
     fn spec(coverage_ignore: Vec<CoverageIgnore>) -> Spec {
         Spec {

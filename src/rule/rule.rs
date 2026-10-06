@@ -3,9 +3,9 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 
-use crate::commitment::Commitment;
 use crate::error::Result;
-use crate::util;
+use crate::support::commitment::Commitment;
+use crate::support::util;
 
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";

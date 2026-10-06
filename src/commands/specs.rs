@@ -4,10 +4,10 @@ use std::process::ExitCode;
 use clap::Args;
 use error_stack::{Report, ResultExt};
 
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
-use crate::spex::Spex;
-use crate::util;
+use crate::support::util;
 
 #[cfg(test)]
 #[path = "specs_test.rs"]

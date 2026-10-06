@@ -1,17 +1,11 @@
-mod annotations;
 mod commands;
-mod commitment;
 mod config;
 mod error;
-mod repo_files;
 mod rule;
 mod spec;
-mod spex;
-mod style;
+mod support;
 mod templates;
-#[cfg(test)]
-mod testing;
-mod util;
+mod tracing;
 
 use std::process::ExitCode;
 

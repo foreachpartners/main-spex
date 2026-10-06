@@ -6,7 +6,7 @@ use crate::config::Config;
 use crate::error::{CliError, Result};
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
-use crate::style::Style;
+use crate::support::style::Style;
 
 pub struct Spex {
     pub dir: PathBuf,

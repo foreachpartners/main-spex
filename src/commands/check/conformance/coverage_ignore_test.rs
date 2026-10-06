@@ -3,7 +3,7 @@ mod tests {
     use super::super::*;
     use crate::rule::Severity;
     use crate::spec::CoverageIgnore;
-    use crate::testing;
+    use crate::support::testing;
 
     fn contract_ignore(ac: Option<&str>) -> CoverageIgnore {
         CoverageIgnore {

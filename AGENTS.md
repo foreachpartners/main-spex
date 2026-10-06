@@ -46,18 +46,23 @@ When a change requires migration steps in a spex project, fill `templates/skills
 .github/workflows/  CI: tests and format checks on pull requests
 src/                CLI source
   main.rs           Entry point, arg parsing
-  config.rs         Config loading
   error.rs          CliError, the single error enum for every command, and the shared Result alias
-  spex.rs           Resolved spex dir + config, with spec and rule loaders (shared by commands)
-  rule.rs           Rule model
-  spec.rs           Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
-  commitment.rs     RFC 2119 commitments in order (shared by spec and rule)
-  annotations.rs    @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
-  repo_files.rs     Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
-  style.rs          Terminal color styling and visible-width measuring (shared by commands)
-  util.rs           Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
   templates.rs      Bundled template scaffolding (shared by init/update)
-  testing.rs        Shared unit-test builders for specs, rules, repositories and config (test builds only)
+  spec/             Spec topic (mod.rs is an index only)
+    spec.rs         Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
+  rule/             Rule topic (mod.rs is an index only)
+    rule.rs         Rule model
+  tracing/          Traceability topic
+    annotations.rs  @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
+  config/           Configuration topic (mod.rs is an index only)
+    config.rs       Config loading
+    spex.rs         Resolved spex dir + config, with spec and rule loaders (shared by commands)
+  support/          Cross-topic helpers
+    commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
+    repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
+    style.rs        Terminal color styling and visible-width measuring (shared by commands)
+    util.rs         Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
+    testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
     check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
       conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs, status, blocked_by, scope, coverage_ignore)

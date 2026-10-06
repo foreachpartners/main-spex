@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::rule::Severity;
-    use crate::testing;
+    use crate::support::testing;
 
     #[test]
     fn validate_blocked_by_flags_missing_and_active_references() {

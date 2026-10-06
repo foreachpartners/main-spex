@@ -1,4 +1,4 @@
-use crate::testing::{config, repository};
+use crate::support::testing::{config, repository};
 
 use super::*;
 
