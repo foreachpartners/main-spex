@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
+use strum::IntoStaticStr;
 
 use crate::commitment::Commitment;
 use crate::error::Result;
@@ -146,8 +147,9 @@ pub enum RunScope {
     Workspace,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize, IntoStaticStr)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum Severity {
     Warn,
     #[default]

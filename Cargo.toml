@@ -20,6 +20,7 @@ ast-grep-core = "0.45.3"
 ast-grep-config = "0.45.3"
 ast-grep-language = "0.45.3"
 terminal_size = "0.4.4"
+strum = { version = "0.28.0", features = ["derive"] }
 
 [dev-dependencies]
 tempfile = "3.27.0"

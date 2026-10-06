@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use serde::Deserialize;
+use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::commitment::Commitment;
 use crate::error::Result;
@@ -167,35 +168,21 @@ pub struct CoverageIgnore {
     pub ac: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, EnumIter, IntoStaticStr)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum Status {
     Active,
-    #[serde(rename = "in-progress")]
-    InProgress,
     #[default]
     Planned,
+    InProgress,
     Blocked,
     Deprecated,
 }
 
 impl Status {
-    pub const ALL: [Status; 5] = [
-        Status::Active,
-        Status::Planned,
-        Status::InProgress,
-        Status::Blocked,
-        Status::Deprecated,
-    ];
-
     pub fn label(self) -> &'static str {
-        match self {
-            Status::Active => "active",
-            Status::InProgress => "in-progress",
-            Status::Planned => "planned",
-            Status::Blocked => "blocked",
-            Status::Deprecated => "deprecated",
-        }
+        self.into()
     }
 
     pub fn is_implemented(self) -> bool {
@@ -210,17 +197,20 @@ impl Status {
 // `contract` coverage granularity of a spec: `none` disables contract
 // coverage, `single` requires one spec-level annotation, `for-each-ac`
 // requires one annotation per acceptance criterion.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, EnumIter, IntoStaticStr)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum ContractLevel {
     None,
     Single,
-    #[serde(rename = "for-each-ac")]
     ForEachAc,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, EnumIter, EnumString, IntoStaticStr,
+)]
+#[serde(rename_all = "kebab-case")]
+#[strum(serialize_all = "kebab-case")]
 pub enum CoverageLayer {
     Contract,
     Impl,
@@ -228,17 +218,7 @@ pub enum CoverageLayer {
 }
 
 impl CoverageLayer {
-    pub const ALL: [CoverageLayer; 3] = [
-        CoverageLayer::Contract,
-        CoverageLayer::Impl,
-        CoverageLayer::Test,
-    ];
-
     pub fn label(self) -> &'static str {
-        match self {
-            CoverageLayer::Contract => "contract",
-            CoverageLayer::Impl => "impl",
-            CoverageLayer::Test => "test",
-        }
+        self.into()
     }
 }

@@ -1185,6 +1185,7 @@ dependencies = [
  "serde_json",
  "serde_yaml_ng",
  "serial_test",
+ "strum",
  "tempfile",
  "terminal_size",
  "thiserror",
