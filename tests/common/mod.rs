@@ -57,6 +57,40 @@ pub fn dummy_project_fixture() -> std::path::PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/dummy-project")
 }
 
+pub fn runners_project_fixture() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/runners-project")
+}
+
+pub fn temp_project(fixture: &Path) -> (tempfile::TempDir, std::path::PathBuf) {
+    let workspace = tempfile::tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    copy_dir(fixture, &project);
+    (workspace, project)
+}
+
+pub fn listed_ids(stdout: &[u8]) -> Vec<String> {
+    let mut ids: Vec<String> = String::from_utf8_lossy(stdout)
+        .lines()
+        .filter_map(|line| line.strip_prefix("- id: "))
+        .map(str::to_string)
+        .collect();
+    ids.sort();
+    ids
+}
+
+pub fn assert_fails_mentioning(output: &std::process::Output, needle: &str) {
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        !output.status.success(),
+        "expected a non-zero exit\nstdout:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+    );
+    assert!(
+        stderr.contains(needle),
+        "stderr did not mention `{needle}`\nstderr:\n{stderr}",
+    );
+}
+
 pub fn copy_dir(src: &Path, dst: &Path) {
     fs::create_dir_all(dst).expect("create destination dir");
     for entry in fs::read_dir(src).expect("read source dir") {

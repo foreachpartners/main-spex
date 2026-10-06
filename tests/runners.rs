@@ -3,9 +3,12 @@ use std::path::Path;
 use tempfile::tempdir;
 
 mod common;
-use common::{copy_dir, report_text, run_spex, with_version_header};
+use common::{
+    assert_fails_mentioning, copy_dir, report_text, run_spex, runners_project_fixture,
+    with_version_header,
+};
 
-const EXPECTED_CHECK_REPORT: &str = r#"runners-project-api
+const API_REPORT: &str = r#"runners-project-api
   error  regexp-runner/no-fixme  (src/lib.rs:2)
       matches forbidden pattern
   error  regexp-runner/no-fixme  (src/nested/mid.rs:2)
@@ -40,7 +43,9 @@ const EXPECTED_CHECK_REPORT: &str = r#"runners-project-api
       script exited with status 3
   7 errors, 9 warnings
 
-runners-project-frontend
+"#;
+
+const FRONTEND_REPORT: &str = r#"runners-project-frontend
   error  regexp-runner/no-fixme  (src/index.ts:2)
       matches forbidden pattern
   warn  regexp-runner/require-license-header  (src/util.ts)
@@ -69,15 +74,18 @@ runners-project-frontend
       CHANGELOG.md is missing from runners-project-frontend
   9 errors, 4 warnings
 
-runners-project-spex
+"#;
+
+const SPEX_REPORT: &str = r#"runners-project-spex
   no issues
 
-workspace
+"#;
+
+const WORKSPACE_REPORT: &str = r#"workspace
   error  script-runner/workspace-versions  (../runners-project-frontend/VERSION)
       frontend version 1.3.0 differs from api version 1.2.0
   1 error, 0 warnings
 
-runners-project: 17 errors, 13 warnings
 "#;
 
 const EXPECTED_CHECK_FILES_REPORT: &str = r#"runners-project-frontend
@@ -99,11 +107,14 @@ workspace
 runners-project: 4 errors, 1 warning
 "#;
 
+fn expected_report(sections: &[&str], summary: &str) -> String {
+    with_version_header(&format!("{}{summary}\n", sections.concat()))
+}
+
 fn copy_runners_project(project: &Path) {
-    let manifest = Path::new(env!("CARGO_MANIFEST_DIR"));
-    copy_dir(&manifest.join("tests/fixtures/runners-project"), project);
+    copy_dir(&runners_project_fixture(), project);
     copy_dir(
-        &manifest.join("templates/schemas"),
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas"),
         &project.join("runners-project-spex/schemas"),
     );
 }
@@ -117,7 +128,10 @@ fn check_reports_every_runner_and_script_scope() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header(EXPECTED_CHECK_REPORT),
+        expected_report(
+            &[API_REPORT, FRONTEND_REPORT, SPEX_REPORT, WORKSPACE_REPORT],
+            "runners-project: 17 errors, 13 warnings",
+        ),
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -145,5 +159,70 @@ fn check_files_narrows_each_runner_and_script_scope() {
         check.status.code(),
         Some(1),
         "check should exit 1 when errors are present"
+    );
+}
+
+#[test]
+fn check_repo_limits_the_report_to_the_named_repository() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    copy_runners_project(&project);
+
+    let by_short_name = run_spex(&project, &["check", "--repo", "frontend"], "");
+    assert_eq!(
+        report_text(&by_short_name.stdout),
+        expected_report(
+            &[FRONTEND_REPORT, WORKSPACE_REPORT],
+            "runners-project: 10 errors, 4 warnings",
+        ),
+        "check --repo report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&by_short_name.stderr),
+    );
+    assert_eq!(by_short_name.status.code(), Some(1));
+
+    let by_full_name = run_spex(
+        &project,
+        &["check", "--repo", "runners-project-frontend"],
+        "",
+    );
+    assert_eq!(
+        report_text(&by_full_name.stdout),
+        report_text(&by_short_name.stdout),
+        "--repo should match a repository by full name as well as short name",
+    );
+}
+
+#[test]
+fn check_repo_runs_a_workspace_script_only_when_a_repository_using_it_is_selected() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    copy_runners_project(&project);
+
+    let check = run_spex(&project, &["check", "--repo", "spex"], "");
+
+    assert_eq!(
+        report_text(&check.stdout),
+        expected_report(&[SPEX_REPORT], "runners-project: 0 errors, 0 warnings"),
+        "check --repo spex report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&check.stderr),
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 when the selected repository has no findings"
+    );
+}
+
+#[test]
+fn check_repo_rejects_an_unknown_repository() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    copy_runners_project(&project);
+
+    let check = run_spex(&project, &["check", "--repo", "bogus"], "");
+
+    assert_fails_mentioning(&check, "unknown workspace repository `bogus`");
+    assert!(
+        check.stdout.is_empty(),
+        "no report should print when the repository is unknown"
     );
 }

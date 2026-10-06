@@ -1,5 +1,6 @@
 id: glob-runner
 title: Glob runner
+sync_with_upstream: true
 description: >-
   Exercises the glob runner with a forbidden path and a required path.
 acceptance_criteria:
