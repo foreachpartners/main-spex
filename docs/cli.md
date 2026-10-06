@@ -33,8 +33,8 @@ Every command except `init` finds the spex repository from the current directory
 ### Install the `spex` binary from source.
 
 ```sh
-git clone https://github.com/foreachpartners/spex
-cd spex
+git clone https://github.com/foreachpartners/main-spex
+cd main-spex
 cargo install --path . --force
 ```
 

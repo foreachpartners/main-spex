@@ -696,6 +696,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 
 [[package]]
+name = "main-spex"
+version = "0.11.0"
+dependencies = [
+ "ast-grep-config",
+ "ast-grep-core",
+ "ast-grep-language",
+ "clap",
+ "error-stack",
+ "globset",
+ "ignore",
+ "include_dir",
+ "indoc",
+ "jsonschema",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_yaml_ng",
+ "serial_test",
+ "strum",
+ "tempfile",
+ "terminal_size",
+ "thiserror",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1165,31 +1190,6 @@ name = "smallvec"
 version = "1.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
-
-[[package]]
-name = "spex"
-version = "0.10.5"
-dependencies = [
- "ast-grep-config",
- "ast-grep-core",
- "ast-grep-language",
- "clap",
- "error-stack",
- "globset",
- "ignore",
- "include_dir",
- "indoc",
- "jsonschema",
- "regex",
- "serde",
- "serde_json",
- "serde_yaml_ng",
- "serial_test",
- "strum",
- "tempfile",
- "terminal_size",
- "thiserror",
-]
 
 [[package]]
 name = "streaming-iterator"

@@ -1,4 +1,4 @@
-# 🦉 spex
+# 🦉 main-spex
 
 The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
 
@@ -23,10 +23,10 @@ spex is built on four simple pieces:
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
-- **spex CLI**: Clone spex repository (repo) and install spex cli tool:
+- **spex CLI**: Clone the main-spex repository and install the `spex` CLI tool:
   ```sh
-  git clone https://github.com/foreachpartners/spex
-  cd spex
+  git clone https://github.com/foreachpartners/main-spex
+  cd main-spex
   cargo install --path . --force
   ```
 

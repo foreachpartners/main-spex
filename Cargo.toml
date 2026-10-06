@@ -1,8 +1,12 @@
 [package]
-name = "spex"
-version = "0.10.5"
+name = "main-spex"
+version = "0.11.0"
 edition = "2024"
 rust-version = "1.90"
+
+[[bin]]
+name = "spex"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }

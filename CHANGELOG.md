@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.11.0] - 2026-10-06
+
+- **Breaking**: the project and crate are renamed from `spex` to `main-spex`; the CLI binary and command stay `spex`, and the repository moved to `https://github.com/foreachpartners/main-spex`. Existing installs must reinstall from the renamed repository with `cargo install --path . --force`.
+
 ## [0.10.5] - 2026-10-04
 
 - Bundled skills now end with a `# Project` section, like `AGENTS.md`. `update` rewrites everything above it and the skill's other bundled files, and keeps the section's content, so project-specific additions survive updates without opting the skill out via `sync-with-upstream: false`.

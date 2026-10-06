@@ -1,4 +1,4 @@
-# spex
+# Main spex
 
 The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
 
@@ -8,7 +8,7 @@ AI operates fast — the framework's job is unleash it speed while ensuring slop
 
 ## Core Concepts
 
-spex is built on three simple pieces:
+Main spex, or spex for short, is built on four simple pieces:
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each repository must adhere to a list of rules applicable to it defined in `spex.yaml`
