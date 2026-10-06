@@ -66,9 +66,9 @@ src/                CLI source
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)
     init/ update/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests
     check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
-      conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs, status, blocked_by, scope, coverage_ignore)
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore)
       runners/      One runner per check type (ast_grep, glob, regexp, script)
-docs/                          Framework reference docs, bundled into projects by init/update (single source of truth)
+docs/                          Framework reference docs (single source of truth); only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
   framework-principles.md  Non-negotiable foundation spex is built on
   conventions.md           Engineering values spex follows but didn't invent
@@ -77,11 +77,13 @@ docs/                          Framework reference docs, bundled into projects b
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
 templates/                     Assets scaffolded into projects
-  schemas/                     Spec schemas
+  schemas/                     JSON Schemas for spex.yaml, specs, rules, and plans
   scripts/                     Helper scripts
   skills/                      Agent skills
   rules/                       Reusable rule templates
   docs/                        Framework docs shipped to projects (symlinks into docs/)
+  AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
+  README.md                    Contributor notes on scaffolding rules; never scaffolded
   spex.yaml                    Workspace config seeded by init (project name filled in)
   project-name.code-workspace  Editor workspace file seeded by init
 examples/                      Sample example projects with/without spex(shopping-notes, shopping-notes-no-spex)
