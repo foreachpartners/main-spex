@@ -14,7 +14,7 @@ use serde::Deserialize;
 #[path = "update_test.rs"]
 mod update_test;
 
-const CHANGELOG: &str = include_str!("../../CHANGELOG.md");
+const CHANGELOG: &str = include_str!("../../../CHANGELOG.md");
 
 #[derive(Deserialize, Default)]
 struct UpdateConfig {

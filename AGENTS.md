@@ -63,7 +63,8 @@ src/                CLI source
     style.rs        Terminal color styling and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
-  commands/         Subcommands (init, update, check, check_schema, coverage, rules, info, specs)
+  commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)
+    init/ update/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests
     check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
       conformance/  Structural checks on specs/rules themselves (ids, ac order, schema, script refs, status, blocked_by, scope, coverage_ignore)
       runners/      One runner per check type (ast_grep, glob, regexp, script)

@@ -19,8 +19,9 @@ const PLANS_DIR_NAME: &str = "plans";
 const CONTRACTS_DIR_NAME: &str = "contracts";
 
 const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
-const CONFIG_TEMPLATE: &str = include_str!("../../templates/spex.yaml");
-const CODE_WORKSPACE_TEMPLATE: &str = include_str!("../../templates/project-name.code-workspace");
+const CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.yaml");
+const CODE_WORKSPACE_TEMPLATE: &str =
+    include_str!("../../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
     let current_dir = std::env::current_dir().change_context(CliError::CurrentDir)?;
