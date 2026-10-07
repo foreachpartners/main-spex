@@ -23,7 +23,7 @@ use error::Result;
 #[command(
     name = "spex",
     version,
-    about = "AI-first specification-driven development framework"
+    about = "AI-first specification-driven development framework cli"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -34,21 +34,19 @@ struct Cli {
 enum Commands {
     #[command(about = "Initialize the spex workspace repository")]
     Init,
-    #[command(
-        about = "Rewrite bundled skills, schemas, scripts and rules with the latest versions"
-    )]
+    #[command(about = "Update spex to the latest version (skills, rules, docs, etc.)")]
     Update,
-    #[command(about = "Run rule checks against the workspace")]
+    #[command(about = "Run spex and rule checks")]
     Check(CheckArgs),
+    #[command(about = "Report coverage")]
+    Coverage(CoverageArgs),
     #[command(about = "Validate JSON or YAML files against a JSON Schema")]
     CheckSchema(CheckSchemaArgs),
-    #[command(about = "Report annotation coverage of active specs")]
-    Coverage(CoverageArgs),
-    #[command(about = "Print `spex.yaml`: project and per-repository configuration")]
+    #[command(about = "Print project configuration")]
     Info(InfoArgs),
-    #[command(about = "Print the active rules per repository")]
+    #[command(about = "Print the project rules")]
     Rules(RulesArgs),
-    #[command(about = "Print the workspace specs")]
+    #[command(about = "Print the project specs")]
     Specs(SpecsArgs),
 }
 
