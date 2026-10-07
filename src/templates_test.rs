@@ -33,7 +33,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        let rules = TEMPLATES.get_dir(RULES_DIR).expect("bundled rules dir");
+        let rules = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
         for file in rules.files() {
             let dest = spex_dir.path().join(file.path());
             assert_eq!(
@@ -44,7 +44,7 @@ mod tests_unit {
             );
         }
 
-        let skills = TEMPLATES.get_dir(SKILLS_DIR).expect("bundled skills dir");
+        let skills = TEMPLATES_DIR.get_dir(SKILLS_DIRNAME).expect("bundled skills dir");
         for skill in skills.dirs() {
             let name = skill.path().file_name().expect("skill dir name");
             let bundled = skill
@@ -68,10 +68,10 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        let docs = TEMPLATES.get_dir(DOCS_DIR).expect("bundled docs dir");
+        let docs = TEMPLATES_DIR.get_dir(DOCS_DIRNAME).expect("bundled docs dir");
         for file in docs.files() {
             let name = file.path().file_name().expect("doc file name");
-            let dest = spex_dir.path().join(DOCS_DIR).join(name);
+            let dest = spex_dir.path().join(DOCS_DIRNAME).join(name);
             assert!(dest.is_file(), "missing bundled doc `{}`", dest.display());
             assert_eq!(
                 fs::read(&dest).expect("read doc"),
@@ -87,7 +87,7 @@ mod tests_unit {
             "tutorial.md",
         ] {
             assert!(
-                !spex_dir.path().join(DOCS_DIR).join(name).exists(),
+                !spex_dir.path().join(DOCS_DIRNAME).join(name).exists(),
                 "`{name}` is not a bundled doc and must not scaffold"
             );
         }
@@ -96,7 +96,7 @@ mod tests_unit {
     #[test]
     fn bundled_docs_match_the_single_source_of_truth() {
         let root_docs = include_dir::include_dir!("$CARGO_MANIFEST_DIR/docs");
-        let bundled = TEMPLATES.get_dir(DOCS_DIR).expect("bundled docs dir");
+        let bundled = TEMPLATES_DIR.get_dir(DOCS_DIRNAME).expect("bundled docs dir");
 
         for file in bundled.files() {
             let name = file.path().file_name().expect("doc file name");
@@ -122,24 +122,24 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        let agents = spex_dir.path().join(AGENTS_FILE);
-        let expected = TEMPLATES
-            .get_file(AGENTS_FILE)
+        let agents = spex_dir.path().join(AGENTS_FILENAME);
+        let expected = TEMPLATES_DIR
+            .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents();
         assert_eq!(fs::read(&agents).expect("read AGENTS.md"), expected);
 
         #[cfg(unix)]
         {
-            let claude = spex_dir.path().join(CLAUDE_FILE);
+            let claude = spex_dir.path().join(CLAUDE_FILENAME);
             let target = fs::read_link(&claude).expect("read CLAUDE.md symlink");
-            assert_eq!(target, Path::new(AGENTS_FILE));
+            assert_eq!(target, Path::new(AGENTS_FILENAME));
         }
     }
 
     #[test]
     fn rule_templates_have_no_leftover_template_only_fields() {
-        let dir = TEMPLATES.get_dir(RULES_DIR).expect("bundled rules dir");
+        let dir = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
 
         for file in dir.files() {
             let text = file.contents_utf8().expect("utf8 rule");
@@ -158,7 +158,7 @@ mod tests_unit {
         let validator = crate::commands::check_schema::build_validator(&schema_path)
             .expect("build rule validator");
 
-        let dir = TEMPLATES.get_dir(RULES_DIR).expect("bundled rules dir");
+        let dir = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
 
         for file in dir.files() {
             let text = file.contents_utf8().expect("utf8 rule");

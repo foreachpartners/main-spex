@@ -24,7 +24,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES
+        let expected = TEMPLATES_DIR
             .get_file(SCHEMA)
             .expect("bundled schema")
             .contents();
@@ -41,7 +41,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES.get_file(DOC).expect("bundled doc").contents();
+        let expected = TEMPLATES_DIR.get_file(DOC).expect("bundled doc").contents();
         assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 
@@ -61,12 +61,12 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected_spec = TEMPLATES
+        let expected_spec = TEMPLATES_DIR
             .get_file(MANAGED_SPEC)
             .expect("bundled spec")
             .contents();
         assert_eq!(fs::read(&spec).expect("read spec"), expected_spec);
-        let expected_script = TEMPLATES
+        let expected_script = TEMPLATES_DIR
             .get_file(SCRIPT)
             .expect("bundled script")
             .contents();
@@ -178,7 +178,7 @@ mod tests_unit {
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         assert!(
-            !spex_dir.path().join(AGENTS_FILE).exists(),
+            !spex_dir.path().join(AGENTS_FILENAME).exists(),
             "sync (update) must not create AGENTS.md"
         );
     }
@@ -186,7 +186,7 @@ mod tests_unit {
     #[test]
     fn sync_syncs_managed_section_of_agents_md_preserving_project_data() {
         let spex_dir = tempdir().expect("create spex dir");
-        let agents = spex_dir.path().join(AGENTS_FILE);
+        let agents = spex_dir.path().join(AGENTS_FILENAME);
         fs::write(
             &agents,
             "stale managed content\n\n---\n\n# Project\n\nmy custom notes\n",
@@ -196,8 +196,8 @@ mod tests_unit {
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         let updated = fs::read_to_string(&agents).expect("read AGENTS.md");
-        let template = TEMPLATES
-            .get_file(AGENTS_FILE)
+        let template = TEMPLATES_DIR
+            .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents_utf8()
             .expect("utf8 AGENTS.md");
@@ -215,13 +215,13 @@ mod tests_unit {
     #[test]
     fn sync_overwrites_agents_md_without_marker() {
         let spex_dir = tempdir().expect("create spex dir");
-        let agents = spex_dir.path().join(AGENTS_FILE);
+        let agents = spex_dir.path().join(AGENTS_FILENAME);
         fs::write(&agents, "a pre-split AGENTS.md with no marker\n").expect("seed AGENTS.md");
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES
-            .get_file(AGENTS_FILE)
+        let expected = TEMPLATES_DIR
+            .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents();
         assert_eq!(
@@ -244,7 +244,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES
+        let expected = TEMPLATES_DIR
             .get_file("skills/spex-setup/references/GENERIC-REPO-SKILL-TEMPLATE.md")
             .expect("bundled reference")
             .contents();
@@ -254,7 +254,7 @@ mod tests_unit {
 
     #[test]
     fn bundled_skills_have_a_project_section() {
-        let skills = TEMPLATES.get_dir(SKILLS_DIR).expect("bundled skills dir");
+        let skills = TEMPLATES_DIR.get_dir(SKILLS_DIRNAME).expect("bundled skills dir");
 
         for skill in skills.dirs() {
             let skill_md = skill
@@ -285,7 +285,7 @@ mod tests_unit {
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         let updated = fs::read_to_string(&skill).expect("read SKILL.md");
-        let template = TEMPLATES
+        let template = TEMPLATES_DIR
             .get_file("skills/spex-setup/SKILL.md")
             .expect("bundled skill")
             .contents_utf8()
@@ -335,7 +335,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES
+        let expected = TEMPLATES_DIR
             .get_file("skills/spex-setup/SKILL.md")
             .expect("bundled skill")
             .contents();

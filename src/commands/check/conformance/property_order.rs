@@ -7,7 +7,7 @@ use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::spec::SPECS_DIR;
 use crate::support::util::yaml_files;
-use crate::templates::SCHEMAS_DIR;
+use crate::templates::SCHEMAS_DIRNAME;
 
 use super::{Finding, RULE_ID, rel};
 
@@ -165,7 +165,7 @@ fn property_order_message(
 // properties — at every nesting level their JSON Schema describes — in the
 // order the schema declares them.
 pub(super) fn validate_property_order(spex_dir: &Path) -> Result<Vec<Finding>> {
-    let schemas_dir = spex_dir.join(SCHEMAS_DIR);
+    let schemas_dir = spex_dir.join(SCHEMAS_DIRNAME);
     let mut cache: HashMap<String, Value> = HashMap::new();
     let mut findings = Vec::new();
 

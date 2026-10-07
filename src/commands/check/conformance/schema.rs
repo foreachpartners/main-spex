@@ -5,7 +5,7 @@ use crate::error::Result;
 use crate::rule::{RULES_DIR, Rule};
 use crate::spec::{SPECS_DIR, Spec};
 use crate::support::util::yaml_files;
-use crate::templates::SCHEMAS_DIR;
+use crate::templates::SCHEMAS_DIRNAME;
 
 use super::{Finding, conform_finding, rel};
 
@@ -62,7 +62,7 @@ fn validate_schema_group(spex_dir: &Path, files: &[PathBuf], schema_name: &str) 
     if files.is_empty() {
         return Vec::new();
     }
-    let schema_path = spex_dir.join(SCHEMAS_DIR).join(schema_name);
+    let schema_path = spex_dir.join(SCHEMAS_DIRNAME).join(schema_name);
     let validator = match check_schema::build_validator(&schema_path) {
         Ok(validator) => validator,
         Err(err) => {

@@ -47,7 +47,7 @@ fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
     }
     if file
         .abs
-        .starts_with(ctx.spex_dir.join(crate::templates::SCHEMAS_DIR))
+        .starts_with(ctx.spex_dir.join(crate::templates::SCHEMAS_DIRNAME))
     {
         return true;
     }

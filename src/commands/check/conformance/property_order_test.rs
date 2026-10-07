@@ -4,7 +4,7 @@ mod tests {
     use tempfile::tempdir;
 
     fn write_schemas(dir: &std::path::Path) {
-        let schemas = dir.join(crate::templates::SCHEMAS_DIR);
+        let schemas = dir.join(crate::templates::SCHEMAS_DIRNAME);
         std::fs::create_dir_all(&schemas).expect("schemas dir");
         let src_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas");
         for entry in std::fs::read_dir(&src_dir).expect("read templates/schemas") {
