@@ -3,9 +3,9 @@ use std::path::Path;
 use serde::Deserialize;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
+use super::id::{AcId, SpecId};
 use crate::error::Result;
 use crate::support::commitment::Commitment;
-use crate::support::id::id_type;
 use crate::support::util;
 
 #[cfg(test)]
@@ -13,9 +13,6 @@ use crate::support::util;
 mod spec_test;
 
 pub const SPECS_DIR: &str = "specs";
-
-id_type!(SpecId, "spec id");
-id_type!(AcId, "acceptance criterion id");
 
 #[derive(Debug, Deserialize)]
 pub struct Spec {

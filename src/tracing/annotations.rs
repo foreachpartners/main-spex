@@ -22,8 +22,11 @@ impl Annotation {
         };
         Some(Self {
             layer,
-            spec_id: spec_id.parse().ok()?,
-            ac_id: ac_id.map(str::parse::<AcId>).transpose().ok()?,
+            spec_id: SpecId::try_from(spec_id.to_string()).ok()?,
+            ac_id: ac_id
+                .map(|ac_id| AcId::try_from(ac_id.to_string()))
+                .transpose()
+                .ok()?,
         })
     }
 }

@@ -3,15 +3,17 @@ use crate::rule::{Rule, RuleId};
 use crate::spec::{AcId, AcceptanceCriterion, ContractLevel, Spec, SpecId, Statement, Status};
 
 pub fn spec_id(id: &str) -> SpecId {
-    id.parse().expect("valid spec id")
+    id.to_string().try_into().expect("valid spec id")
 }
 
 pub fn ac_id(id: &str) -> AcId {
-    id.parse().expect("valid acceptance criterion id")
+    id.to_string()
+        .try_into()
+        .expect("valid acceptance criterion id")
 }
 
 pub fn rule_id(id: &str) -> RuleId {
-    id.parse().expect("valid rule id")
+    id.to_string().try_into().expect("valid rule id")
 }
 
 pub fn spec(id: &str) -> Spec {

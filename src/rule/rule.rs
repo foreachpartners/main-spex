@@ -3,15 +3,13 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 
+use super::id::RuleId;
 use crate::error::Result;
 use crate::support::commitment::Commitment;
-use crate::support::id::id_type;
 use crate::support::util;
 
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
-
-id_type!(RuleId, "rule id");
 
 #[derive(Debug, Deserialize)]
 pub struct Rule {
