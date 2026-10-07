@@ -8,8 +8,8 @@ use error_stack::{Report, ResultExt, bail};
 use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
+use crate::support::fs::{create_dir_all, dir_name, write_file};
 use crate::support::style::Style;
-use crate::support::util::{self, dir_name};
 use crate::templates;
 
 #[cfg(test)]
@@ -59,20 +59,20 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     templates::scaffold(spex_dir).change_context(CliError::Io)?;
 
     let specs = spex_dir.join(SPECS_DIR);
-    util::create_dir_all(&specs)?;
+    create_dir_all(&specs)?;
 
     let plans = spex_dir.join(PLANS_DIR_NAME);
-    util::create_dir_all(&plans)?;
+    create_dir_all(&plans)?;
 
     let contracts = spex_dir.join(CONTRACTS_DIR_NAME);
-    util::create_dir_all(&contracts)?;
+    create_dir_all(&contracts)?;
 
     Ok(())
 }
 
 fn write_config(spex_dir: &Path, project_name: &str) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
-    util::write_file(&config_path, config_from_template(project_name))?;
+    write_file(&config_path, config_from_template(project_name))?;
     Ok(())
 }
 
@@ -92,7 +92,7 @@ fn config_from_template(project_name: &str) -> String {
 fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     let file_name = format!("{project_name}.{CODE_WORKSPACE_EXTENSION}");
     let path = spex_dir.join(&file_name);
-    util::write_file(&path, CODE_WORKSPACE_TEMPLATE)?;
+    write_file(&path, CODE_WORKSPACE_TEMPLATE)?;
     Ok(())
 }
 
@@ -126,7 +126,7 @@ fn ensure_spex_dir(
     }
 
     let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
-    util::create_dir_all(&spex_dir)?;
+    create_dir_all(&spex_dir)?;
     Ok(spex_dir)
 }
 

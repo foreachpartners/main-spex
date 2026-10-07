@@ -1,11 +1,28 @@
 #[cfg(test)]
 mod tests {
-    use super::super::write_embedded_dir;
+    use super::super::{file_url, write_embedded_dir};
     use include_dir::{Dir, include_dir};
     use std::fs;
+    use std::path::PathBuf;
     use tempfile::tempdir;
 
     static EMBEDDED: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates/schemas");
+
+    #[test]
+    fn file_url_prefixes_an_absolute_path() {
+        assert_eq!(
+            file_url(PathBuf::from("/workspace/foo.yaml").as_path()),
+            "file:///workspace/foo.yaml"
+        );
+    }
+
+    #[test]
+    fn file_url_encodes_spaces() {
+        assert_eq!(
+            file_url(PathBuf::from("/workspace/my repo/foo.yaml").as_path()),
+            "file:///workspace/my%20repo/foo.yaml"
+        );
+    }
 
     #[test]
     fn write_embedded_dir_mirrors_bundled_paths_under_the_destination() {

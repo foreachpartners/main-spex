@@ -3,8 +3,9 @@ use std::process::ExitCode;
 
 use crate::config::Config;
 use crate::rule::Severity;
+use crate::support::fs::file_url;
 use crate::support::style::Style;
-use crate::support::util::{file_url, plural};
+use crate::support::util::plural;
 
 use super::{Finding, RepoReport};
 

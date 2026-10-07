@@ -1,15 +1,37 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
 use include_dir::{Dir, DirEntry};
 
-use super::util;
 use crate::error::{CliError, Result};
 
 #[cfg(test)]
 #[path = "fs_test.rs"]
 mod fs_test;
+
+pub fn file_url(path: &Path) -> String {
+    format!(
+        "file://{}",
+        canonical(path).to_string_lossy().replace(' ', "%20")
+    )
+}
+
+pub fn write_file(path: &Path, contents: impl AsRef<[u8]>) -> Result<()> {
+    fs::write(path, contents).change_context_lazy(|| CliError::WriteFile(path.to_path_buf()))
+}
+
+pub fn create_dir_all(path: &Path) -> Result<()> {
+    fs::create_dir_all(path).change_context_lazy(|| CliError::CreateDir(path.to_path_buf()))
+}
+
+pub fn dir_name(path: &Path) -> Option<&str> {
+    path.file_name().and_then(|name| name.to_str())
+}
+
+pub fn canonical(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
 
 pub fn write_embedded_dir(dir: &Dir, dest_root: &Path) -> Result<()> {
     for entry in dir.entries() {
@@ -18,9 +40,9 @@ pub fn write_embedded_dir(dir: &Dir, dest_root: &Path) -> Result<()> {
             DirEntry::File(file) => {
                 let dest = dest_root.join(file.path());
                 if let Some(parent) = dest.parent() {
-                    util::create_dir_all(parent)?;
+                    create_dir_all(parent)?;
                 }
-                util::write_file(&dest, file.contents())?;
+                write_file(&dest, file.contents())?;
             }
         }
     }

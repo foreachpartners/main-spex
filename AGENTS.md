@@ -59,10 +59,10 @@ src/                CLI source
     spex.rs         Resolved spex dir + config, with spec and rule loaders (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
-    fs.rs           Filesystem operations: write an embedded dir to disk, symlink if absent, mark files executable
+    fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
     style.rs        Terminal color styling and visible-width measuring (shared by commands)
-    util.rs         Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
+    util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests

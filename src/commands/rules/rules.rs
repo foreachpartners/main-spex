@@ -8,6 +8,7 @@ use crate::config::Repository;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::rule::RULES_DIR;
+use crate::support::fs::write_file;
 use crate::support::util;
 
 #[cfg(test)]
@@ -34,7 +35,7 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
     let yaml = render(&spex, &args)?;
     match &args.output {
         Some(path) => {
-            util::write_file(Path::new(path), &yaml)?;
+            write_file(Path::new(path), &yaml)?;
         }
         None => print!("{yaml}"),
     }

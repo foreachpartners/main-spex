@@ -5,7 +5,7 @@ use serde_yaml_ng::Value;
 
 use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
-use crate::support::fs::{make_files_executable, write_embedded_dir};
+use crate::support::fs::{create_dir_all, make_files_executable, write_embedded_dir, write_file};
 use crate::support::util;
 use crate::templates::{self, AGENTS_FILE, SKILLS_DIR, TEMPLATES};
 
@@ -65,7 +65,7 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
 
     let updated = merge_project_section(template.contents(), &local_contents);
     if updated != local_contents.as_bytes() {
-        util::write_file(&agents, updated)?;
+        write_file(&agents, updated)?;
     }
     Ok(())
 }
@@ -109,7 +109,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     };
 
     let rules_dest = spex_dir.join(RULES_DIR);
-    util::create_dir_all(&rules_dest)?;
+    create_dir_all(&rules_dest)?;
 
     // Rules may be grouped into nested folders, so a bundled rule already
     // present under a nested folder must be matched there rather than
@@ -138,7 +138,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
             continue;
         }
 
-        util::write_file(&dest, file.contents())?;
+        write_file(&dest, file.contents())?;
         templates::copy_rule_scripts(&rule_id, spex_dir)?;
     }
 
@@ -151,7 +151,7 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
     };
 
     let dest_root = templates::installed_skills_dir(spex_dir);
-    util::create_dir_all(&dest_root)?;
+    create_dir_all(&dest_root)?;
 
     for skill in skills.dirs() {
         let name = skill.path().file_name().unwrap_or_default();
@@ -168,7 +168,7 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
         if let Some(local) = local_skill_md
             && let Some(template) = skill.get_file(skill.path().join(SKILL_FILE))
         {
-            util::write_file(
+            write_file(
                 &skill_md,
                 merge_project_section(template.contents(), &local),
             )?;

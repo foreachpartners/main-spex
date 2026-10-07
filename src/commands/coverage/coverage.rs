@@ -8,8 +8,9 @@ use strum::IntoEnumIterator;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::spec::{CoverageLayer, Spec, Status};
+use crate::support::fs::file_url;
 use crate::support::style::{Style, visible_width};
-use crate::support::util::{file_url, wrap_text};
+use crate::support::util::wrap_text;
 use crate::tracing::annotations::{AcCoverage, Found};
 
 #[cfg(test)]

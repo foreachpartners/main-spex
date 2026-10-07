@@ -4,8 +4,9 @@ use include_dir::{Dir, include_dir};
 
 use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
-use crate::support::fs::{make_files_executable, symlink_if_absent, write_embedded_dir};
-use crate::support::util;
+use crate::support::fs::{
+    make_files_executable, symlink_if_absent, write_embedded_dir, write_file,
+};
 
 #[cfg(test)]
 #[path = "templates_test.rs"]
@@ -88,7 +89,7 @@ fn copy_agents_md(spex_dir: &Path) -> Result<()> {
     let agents = TEMPLATES
         .get_file(AGENTS_FILE)
         .expect("bundled AGENTS.md is missing");
-    util::write_file(&spex_dir.join(AGENTS_FILE), agents.contents())?;
+    write_file(&spex_dir.join(AGENTS_FILE), agents.contents())?;
     symlink_if_absent(&spex_dir.join(CLAUDE_FILE), AGENTS_FILE)
 }
 

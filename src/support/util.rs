@@ -10,27 +10,6 @@ use crate::error::{CliError, Result};
 #[path = "util_test.rs"]
 mod util_test;
 
-pub fn file_url(path: &Path) -> String {
-    let path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
-    format!("file://{}", path.to_string_lossy().replace(' ', "%20"))
-}
-
-pub fn write_file(path: &Path, contents: impl AsRef<[u8]>) -> Result<()> {
-    fs::write(path, contents).change_context_lazy(|| CliError::WriteFile(path.to_path_buf()))
-}
-
-pub fn create_dir_all(path: &Path) -> Result<()> {
-    fs::create_dir_all(path).change_context_lazy(|| CliError::CreateDir(path.to_path_buf()))
-}
-
-pub fn dir_name(path: &Path) -> Option<&str> {
-    path.file_name().and_then(|name| name.to_str())
-}
-
-pub fn canonical(path: &Path) -> PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
-}
-
 pub fn plural(count: usize, noun: &str) -> String {
     if count == 1 {
         format!("1 {noun}")

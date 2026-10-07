@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::{CliError, Result};
 use crate::rule::RuleId;
-use crate::support::util::{canonical, dir_name};
+use crate::support::fs::{canonical, dir_name};
 
 #[cfg(test)]
 #[path = "config_test.rs"]

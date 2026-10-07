@@ -10,8 +10,8 @@ use strum::IntoEnumIterator;
 use crate::config::Config;
 use crate::error::{CliError, Result};
 use crate::spec::{ContractLevel, CoverageLayer, Spec};
+use crate::support::fs::canonical;
 use crate::support::repo_files::RepoFiles;
-use crate::support::util;
 
 #[cfg(test)]
 #[path = "annotations_test.rs"]
@@ -90,7 +90,7 @@ impl Found {
 
     // Scans every workspace repository except spex itself for spec-id annotations.
     pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Self> {
-        let spex_canon = util::canonical(spex_dir);
+        let spex_canon = canonical(spex_dir);
         let mut found = Self::new();
 
         for repo in &config.repositories {
@@ -105,7 +105,7 @@ impl Found {
             }
 
             let repo_path = spex_dir.join(&repo.path);
-            if !repo_path.is_dir() || util::canonical(&repo_path) == spex_canon {
+            if !repo_path.is_dir() || canonical(&repo_path) == spex_canon {
                 continue;
             }
             found.scan_repo(&repo_path)?;

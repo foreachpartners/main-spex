@@ -1,29 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{file_url, load_yaml_dir, number_criteria, wrap_text, yaml_files};
+    use super::super::{load_yaml_dir, number_criteria, wrap_text, yaml_files};
     use serde::Deserialize;
-    use std::path::PathBuf;
     use tempfile::tempdir;
 
     #[derive(Debug, Deserialize)]
     struct Item {
         id: String,
-    }
-
-    #[test]
-    fn file_url_prefixes_an_absolute_path() {
-        assert_eq!(
-            file_url(PathBuf::from("/workspace/foo.yaml").as_path()),
-            "file:///workspace/foo.yaml"
-        );
-    }
-
-    #[test]
-    fn file_url_encodes_spaces() {
-        assert_eq!(
-            file_url(PathBuf::from("/workspace/my repo/foo.yaml").as_path()),
-            "file:///workspace/my%20repo/foo.yaml"
-        );
     }
 
     #[test]
