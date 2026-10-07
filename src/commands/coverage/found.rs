@@ -10,7 +10,7 @@ use crate::error::{CliError, Result};
 use crate::spec::{AcId, ContractLevel, CoverageLayer, Spec, SpecId};
 use crate::support::fs::canonical;
 use crate::support::repo_files::RepoFiles;
-use crate::tracing::annotations::{Annotation, parse};
+use crate::tracing::annotations::{self, Annotation};
 
 #[cfg(test)]
 #[path = "found_test.rs"]
@@ -83,7 +83,7 @@ impl Found {
     #[cfg(test)]
     pub fn scan(content: &str) -> Self {
         let mut found = Self::new();
-        found.record_all(parse(content));
+        found.record_all(annotations::parse(content));
         found
     }
 
@@ -99,7 +99,7 @@ impl Found {
             for contract in &repo.contracts {
                 let contract_path = spex_dir.join(&contract.path);
                 if let Ok(content) = fs::read_to_string(&contract_path) {
-                    found.record_all(parse(&content));
+                    found.record_all(annotations::parse(&content));
                 }
             }
 
@@ -121,7 +121,7 @@ impl Found {
             let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };
-            self.record_all(parse(&content));
+            self.record_all(annotations::parse(&content));
         }
 
         Ok(())
