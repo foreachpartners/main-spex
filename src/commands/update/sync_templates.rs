@@ -5,6 +5,7 @@ use serde_yaml_ng::Value;
 
 use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
+use crate::support::fs::{make_files_executable, write_embedded_dir};
 use crate::support::util;
 use crate::templates::{self, AGENTS_FILE, SKILLS_DIR, TEMPLATES};
 
@@ -26,7 +27,7 @@ pub fn sync_templates(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     sync_skills(spex_dir)?;
     sync_agents_md(spex_dir)?;
     templates::link_claude_dir(spex_dir)?;
-    templates::mark_scripts_executable(&spex_dir.join(SCRIPTS_DIR))
+    make_files_executable(&spex_dir.join(SCRIPTS_DIR))
 }
 
 fn split_project_section(contents: &str) -> Option<(&str, &str)> {
@@ -162,7 +163,7 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
         }
 
         let local_skill_md = fs::read_to_string(&skill_md).ok();
-        templates::copy_tree(skill, Path::new(SKILLS_DIR), &dest_root)?;
+        write_embedded_dir(skill, &templates::agents_dir(spex_dir))?;
 
         if let Some(local) = local_skill_md
             && let Some(template) = skill.get_file(skill.path().join(SKILL_FILE))

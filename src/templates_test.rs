@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use std::fs;
     use std::path::Path;
 
     use serde_json::Value;

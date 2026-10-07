@@ -1,0 +1,90 @@
+#[cfg(test)]
+mod tests {
+    use super::super::write_embedded_dir;
+    use include_dir::{Dir, include_dir};
+    use std::fs;
+    use tempfile::tempdir;
+
+    static EMBEDDED: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates/schemas");
+
+    #[test]
+    fn write_embedded_dir_mirrors_bundled_paths_under_the_destination() {
+        let dest = tempdir().expect("temp dir");
+
+        write_embedded_dir(&EMBEDDED, dest.path()).expect("write embedded dir");
+
+        for file in EMBEDDED.files() {
+            assert_eq!(
+                fs::read(dest.path().join(file.path())).expect("read written file"),
+                file.contents(),
+                "`{}` differs from the embedded file",
+                file.path().display()
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    mod unix {
+        use super::super::super::{make_files_executable, symlink_if_absent};
+        use std::fs;
+        use std::os::unix::fs::PermissionsExt;
+        use std::path::Path;
+        use tempfile::tempdir;
+
+        #[test]
+        fn symlink_if_absent_creates_the_link() {
+            let dir = tempdir().expect("temp dir");
+            let link = dir.path().join("CLAUDE.md");
+
+            symlink_if_absent(&link, "AGENTS.md").expect("link");
+
+            assert_eq!(
+                fs::read_link(&link).expect("read link"),
+                Path::new("AGENTS.md")
+            );
+        }
+
+        #[test]
+        fn symlink_if_absent_keeps_an_existing_file() {
+            let dir = tempdir().expect("temp dir");
+            let link = dir.path().join("CLAUDE.md");
+            fs::write(&link, "own content").expect("existing file");
+
+            symlink_if_absent(&link, "AGENTS.md").expect("link");
+
+            assert_eq!(fs::read_to_string(&link).expect("read file"), "own content");
+        }
+
+        #[test]
+        fn make_files_executable_covers_nested_files() {
+            let dir = tempdir().expect("temp dir");
+            fs::create_dir_all(dir.path().join("nested")).expect("nested dir");
+            let top = dir.path().join("top.sh");
+            let nested = dir.path().join("nested/inner.sh");
+            fs::write(&top, "#!/bin/sh\n").expect("top");
+            fs::write(&nested, "#!/bin/sh\n").expect("nested");
+
+            make_files_executable(dir.path()).expect("make executable");
+
+            for script in [top, nested] {
+                let mode = fs::metadata(&script)
+                    .expect("metadata")
+                    .permissions()
+                    .mode();
+                assert_eq!(
+                    mode & 0o111,
+                    0o111,
+                    "`{}` is not executable",
+                    script.display()
+                );
+            }
+        }
+
+        #[test]
+        fn make_files_executable_ignores_a_missing_directory() {
+            let dir = tempdir().expect("temp dir");
+
+            make_files_executable(&dir.path().join("missing")).expect("no-op");
+        }
+    }
+}

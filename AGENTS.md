@@ -59,6 +59,7 @@ src/                CLI source
     spex.rs         Resolved spex dir + config, with spec and rule loaders (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
+    fs.rs           Filesystem operations: write an embedded dir to disk, symlink if absent, mark files executable
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
     style.rs        Terminal color styling and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, file writes, text wrapping, pluralize)
