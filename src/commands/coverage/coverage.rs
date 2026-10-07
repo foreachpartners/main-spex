@@ -11,7 +11,8 @@ use crate::spec::{CoverageLayer, Spec, Status};
 use crate::support::fs::file_url;
 use crate::support::style::{Style, visible_width};
 use crate::support::util::wrap_text;
-use crate::tracing::annotations::{AcCoverage, Found};
+
+use super::found::{AcCoverage, Found};
 
 #[cfg(test)]
 #[path = "coverage_test.rs"]

@@ -53,7 +53,7 @@ src/                CLI source
   rule/             Rule topic (mod.rs is an index only)
     rule.rs         Rule model
   tracing/          Traceability topic
-    annotations.rs  @spec annotation grammar, parsing and coverage lookups (shared by check and coverage)
+    annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
     config.rs       Config loading
     spex.rs         Resolved spex dir + config, with spec and rule loaders (shared by commands)
@@ -65,7 +65,7 @@ src/                CLI source
     util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)
-    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses)
+    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds found, the workspace scan of annotations and per-criterion coverage lookups)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
       conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore)

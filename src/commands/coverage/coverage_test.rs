@@ -4,7 +4,6 @@ mod tests {
     use crate::spec::{AcceptanceCriterion, CoverageLayer, Spec, Statement, Status};
     use crate::support::style::Style;
     use crate::support::testing;
-    use crate::tracing::annotations::AcCoverage;
     use std::path::Path;
 
     fn spec(id: &str, status: Status) -> Spec {
