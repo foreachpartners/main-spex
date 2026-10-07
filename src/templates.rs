@@ -24,16 +24,9 @@ pub const AGENTS_FILE: &str = "AGENTS.md";
 const SKILL_FILE: &str = "SKILL.md";
 pub const CLAUDE_FILE: &str = "CLAUDE.md";
 
-// Top-level template categories scaffolded into a spex repo. Shared by `init`
-// and `update` so both manage the exact same set of bundled files. Framework
-// docs ship from `templates/docs/`, whose files are symlinks into the
-// repository's own `docs/` folder — the single source of truth — so the docs
-// scaffolded are exactly the ones linked there.
-// `rules/` and `scripts/` are handled separately: they are only overwritten
-// when the local spec opts in via `sync_with_upstream`. Skills are also
-// handled separately: a local skill is left untouched when its
-// `metadata.sync-with-upstream` is explicitly `false`.
-const MANAGED_FLAT_DIRS: [&str; 2] = [DOCS_DIR, SCHEMAS_DIR];
+// Copied as-is, overriding existing files, unlike rules and skills whose
+// overwrite is conditional.
+const PLAIN_DIRS: [&str; 2] = [DOCS_DIR, SCHEMAS_DIR];
 
 // Seeds the project's root `AGENTS.md` (and its `CLAUDE.md` symlink) once, during
 // `init`. `update` never seeds it, but does keep the managed section of an
@@ -95,8 +88,8 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
 }
 
 pub fn scaffold(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
-    for name in MANAGED_FLAT_DIRS {
-        copy_flat_dir(name, spex_dir)?;
+    for name in PLAIN_DIRS {
+        copy_plain_dir(name, spex_dir)?;
     }
     copy_rules(spex_dir, removed_rules)?;
     copy_skills(spex_dir)?;
@@ -188,10 +181,10 @@ fn copy_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     Ok(())
 }
 
-fn copy_flat_dir(name: &str, spex_dir: &Path) -> Result<()> {
-    let Some(dir) = TEMPLATES.get_dir(name) else {
-        return Ok(());
-    };
+fn copy_plain_dir(name: &str, spex_dir: &Path) -> Result<()> {
+    let dir = TEMPLATES
+        .get_dir(name)
+        .expect("bundled template directory is missing");
     copy_tree(dir, Path::new(""), spex_dir)
 }
 
