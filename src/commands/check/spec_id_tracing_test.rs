@@ -160,4 +160,76 @@ mod tests {
         assert_eq!(findings[0].check, FORMAT_CHECK);
         assert_eq!(findings[0].location.as_deref(), Some("src/lib.rs:1"));
     }
+
+    fn validate_content(content: &str, known_ids: &HashMap<SpecId, HashSet<AcId>>) -> Vec<Finding> {
+        let dir = tempdir().expect("temp dir");
+        let candidates = vec![write_candidate(dir.path(), "src/lib.rs", content)];
+        let ctx = RepoCtx {
+            repo_path: dir.path(),
+            spex_dir: dir.path(),
+            candidates: &candidates,
+        };
+        validate_annotations(&ctx, false, known_ids)
+    }
+
+    fn locations(findings: &[Finding]) -> Vec<&str> {
+        findings
+            .iter()
+            .map(|finding| finding.location.as_deref().expect("finding location"))
+            .collect()
+    }
+
+    #[test]
+    fn flags_an_annotation_without_a_known_layer_or_ids() {
+        let findings = validate_content(
+            "// @spec xx\n// @spec ggg valid_id\n// @spec test\n",
+            &known(&["a"]),
+        );
+
+        assert!(findings.iter().all(|finding| finding.check == FORMAT_CHECK));
+        assert_eq!(
+            locations(&findings),
+            vec!["src/lib.rs:1", "src/lib.rs:2", "src/lib.rs:3"]
+        );
+    }
+
+    #[test]
+    fn flags_an_id_that_continues_past_its_valid_part_without_an_orphan_finding() {
+        let findings = validate_content(
+            "// @spec impl a_b\n\
+             // @spec impl a, B\n\
+             // @spec impl a#b#c\n\
+             // @spec impl aB\n\
+             // @spec impl a2\n\
+             // @spec impl a\u{430}\n",
+            &known(&["a"]),
+        );
+
+        assert!(findings.iter().all(|finding| finding.check == FORMAT_CHECK));
+        assert_eq!(
+            locations(&findings),
+            vec![
+                "src/lib.rs:1",
+                "src/lib.rs:2",
+                "src/lib.rs:3",
+                "src/lib.rs:4",
+                "src/lib.rs:5",
+                "src/lib.rs:6",
+            ]
+        );
+    }
+
+    #[test]
+    fn accepts_annotations_followed_by_a_comment_or_string_closer() {
+        let findings = validate_content(
+            "/* @spec impl a */\n\
+             x-spec: \"@spec contract a\"\n\
+             <!-- @spec impl a -->\n\
+             // @spec impl a.\n\
+             // @spec test a, b\n",
+            &known(&["a", "b"]),
+        );
+
+        assert!(findings.is_empty());
+    }
 }

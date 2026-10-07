@@ -29,14 +29,14 @@ impl Annotation {
 }
 
 fn token_pattern() -> String {
-    let id = r"[a-z0-9]+(?:-[a-z0-9]+)*";
+    let id = r"[a-z]+(?:-[a-z]+)*";
     format!(r"{id}(?:#{id})?")
 }
 
 static ANNOTATION: LazyLock<Regex> = LazyLock::new(|| {
     let token = token_pattern();
     Regex::new(&format!(
-        r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)"
+        r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)(?:[^\w#,-]|$)"
     ))
     .expect("valid @spec regex")
 });

@@ -27,14 +27,19 @@ mod tests {
     }
 
     #[test]
-    fn parse_keeps_the_valid_ids_beside_an_invalid_one() {
-        let annotations = parse("// @spec impl alpha, delivery-time2, beta#step-one\n");
+    fn parse_skips_the_whole_annotation_when_a_listed_id_is_invalid() {
+        let content = "// @spec impl alpha, delivery-time2, beta#step-one\n";
 
-        let spec_ids: Vec<&str> = annotations
-            .iter()
-            .map(|annotation| annotation.spec_id.as_str())
-            .collect();
-        assert_eq!(spec_ids, vec!["alpha", "beta"]);
+        assert!(parse(content).is_empty());
+        assert_eq!(malformed_lines(content), vec![1]);
+    }
+
+    #[test]
+    fn malformed_lines_reports_an_id_that_continues_past_its_valid_part() {
+        let content =
+            "// @spec impl a_b\n// @spec impl a, B\n// @spec impl a#b#c\n// @spec impl aB\n";
+
+        assert_eq!(malformed_lines(content), vec![1, 2, 3, 4]);
     }
 
     #[test]
