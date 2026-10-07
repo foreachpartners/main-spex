@@ -43,7 +43,10 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = BUNDLED_TEMPLATES_DIR.get_file(DOC).expect("bundled doc").contents();
+        let expected = BUNDLED_TEMPLATES_DIR
+            .get_file(DOC)
+            .expect("bundled doc")
+            .contents();
         assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 

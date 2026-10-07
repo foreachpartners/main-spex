@@ -8,7 +8,7 @@ use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use crate::support::fs::{create_dir_all, make_files_executable, write_embedded_dir, write_file};
 use crate::support::util;
-use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, SKILLS_DIRNAME, BUNDLED_TEMPLATES_DIR};
+use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
 
 #[cfg(test)]
 #[path = "sync_templates_test.rs"]

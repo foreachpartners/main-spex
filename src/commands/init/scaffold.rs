@@ -6,8 +6,8 @@ use crate::support::fs::{
     make_files_executable, symlink_if_absent, write_embedded_dir, write_file,
 };
 use crate::templates::{
-    AGENTS_DIRNAME, AGENTS_FILENAME, CLAUDE_DIRNAME, CLAUDE_FILENAME, DOCS_DIRNAME,
-    SCHEMAS_DIRNAME, SKILLS_DIRNAME, BUNDLED_TEMPLATES_DIR,
+    AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, CLAUDE_DIRNAME, CLAUDE_FILENAME,
+    DOCS_DIRNAME, SCHEMAS_DIRNAME, SKILLS_DIRNAME,
 };
 
 #[cfg(test)]
