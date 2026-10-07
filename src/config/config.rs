@@ -140,10 +140,10 @@ impl Config {
         }
 
         let raw = fs::read_to_string(config_path)
-            .change_context(CliError::ReadConfig)
-            .attach_with(|| format!("could not read `{}`", config_path.display()))?;
+            .change_context_lazy(|| CliError::ReadFile(config_path.to_path_buf()))?;
 
-        serde_yaml_ng::from_str(&raw).change_context(CliError::ParseConfig)
+        serde_yaml_ng::from_str(&raw)
+            .change_context_lazy(|| CliError::ParseFile(config_path.to_path_buf()))
     }
 
     // Warns when the version that wrote `spex.yaml` differs from the running CLI so

@@ -6,6 +6,7 @@ use error_stack::ResultExt;
 use crate::config::spex::Spex;
 use crate::config::{CLI_VERSION, Config};
 use crate::error::{CliError, Result};
+use crate::support::fs::write_file;
 use crate::support::style::Style;
 use serde::Deserialize;
 
@@ -29,17 +30,14 @@ pub fn run() -> Result<ExitCode> {
     let config_path = Spex::locate_spex_config().change_context(CliError::NotInitialized)?;
 
     let raw = fs::read_to_string(&config_path)
-        .change_context(CliError::UpdateConfig)
-        .attach_with(|| format!("could not read `{}`", config_path.display()))?;
+        .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
     sync_templates(Config::dir_of(&config_path), &previous.rules_unused)
-        .change_context(CliError::Templates)?;
+        .change_context_lazy(|| CliError::Internal("could not rewrite bundled templates".into()))?;
 
-    fs::write(&config_path, Config::set_cli_version(&raw, CLI_VERSION))
-        .change_context(CliError::UpdateConfig)
-        .attach_with(|| format!("could not write `{}`", config_path.display()))?;
+    write_file(&config_path, Config::set_cli_version(&raw, CLI_VERSION))?;
 
     let style = Style::detect();
     println!(

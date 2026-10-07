@@ -68,7 +68,11 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
         .build(&schema)
         // The error borrows `schema`, so render it before `schema` is dropped.
         .map_err(|err| {
-            Report::new(CliError::InvalidSchema(schema_path.to_path_buf())).attach(err.to_string())
+            Report::new(CliError::Internal(format!(
+                "invalid schema `{}`",
+                schema_path.display()
+            )))
+            .attach(err.to_string())
         })
 }
 

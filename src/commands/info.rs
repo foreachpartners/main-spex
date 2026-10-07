@@ -23,14 +23,14 @@ pub struct InfoArgs {
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
     let spex = Spex::discover_and_warn()?;
-    let value = serde_json::to_value(&spex.config).change_context(CliError::Serialize)?;
+    let value = serde_json::to_value(&spex.config).change_context_lazy(serialize_error)?;
 
     if let Some(field) = &args.print {
         return print_field(&value, field);
     }
 
     if args.repo.is_empty() {
-        let json = serde_json::to_string_pretty(&value).change_context(CliError::Serialize)?;
+        let json = serde_json::to_string_pretty(&value).change_context_lazy(serialize_error)?;
         println!("{json}");
         return Ok(ExitCode::SUCCESS);
     }
@@ -52,10 +52,14 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         "cli_version": spex.config.cli_version,
         "repositories": repos,
     });
-    let json = serde_json::to_string_pretty(&filtered).change_context(CliError::Serialize)?;
+    let json = serde_json::to_string_pretty(&filtered).change_context_lazy(serialize_error)?;
     println!("{json}");
 
     Ok(ExitCode::SUCCESS)
+}
+
+fn serialize_error() -> CliError {
+    CliError::Internal("could not serialize the spex configuration".into())
 }
 
 fn print_field(value: &serde_json::Value, field: &str) -> Result<ExitCode> {

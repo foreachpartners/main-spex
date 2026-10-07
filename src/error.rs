@@ -11,8 +11,6 @@ pub type Result<T> = core::result::Result<T, Report<CliError>>;
 
 #[derive(Debug, Error)]
 pub enum CliError {
-    #[error("could not determine the current directory")]
-    CurrentDir,
     #[error(
         "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any workspace repository"
     )]
@@ -21,28 +19,6 @@ pub enum CliError {
         "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
     )]
     NotInitialized,
-    #[error("the spex directory has no parent workspace root")]
-    NoWorkspaceRoot,
-    #[error("could not read `{SPEX_CONFIG_FILE}`")]
-    ReadConfig,
-    #[error("could not parse `{SPEX_CONFIG_FILE}`")]
-    ParseConfig,
-    #[error("could not update `{SPEX_CONFIG_FILE}`")]
-    UpdateConfig,
-    #[error("could not load spex configuration")]
-    LoadConfig,
-    #[error("could not load rules")]
-    LoadRules,
-    #[error("could not load specs")]
-    LoadSpecs,
-    #[error("could not load the spex workspace")]
-    Workspace,
-    #[error("could not rewrite bundled templates")]
-    Templates,
-    #[error("could not walk workspace repository files")]
-    Walk,
-    #[error("an I/O operation failed")]
-    Io,
     #[error("could not read directory `{}`", .0.display())]
     ReadDir(PathBuf),
     #[error("could not read `{}`", .0.display())]
@@ -53,10 +29,6 @@ pub enum CliError {
     WriteFile(PathBuf),
     #[error("could not create directory `{}`", .0.display())]
     CreateDir(PathBuf),
-    #[error("invalid schema `{}`", .0.display())]
-    InvalidSchema(PathBuf),
-    #[error("could not serialize output")]
-    Serialize,
     #[error("unknown workspace repository `{0}` — not listed in {SPEX_CONFIG_FILE}")]
     UnknownRepo(String),
     #[error("unknown repository short name `{0}` — not listed in {SPEX_CONFIG_FILE}")]
@@ -67,4 +39,6 @@ pub enum CliError {
     UnknownRuleId(String),
     #[error("{0}")]
     Custom(String),
+    #[error("{0}")]
+    Internal(String),
 }

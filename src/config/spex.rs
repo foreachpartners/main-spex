@@ -1,11 +1,10 @@
 use std::path::PathBuf;
 
-use error_stack::ResultExt;
-
 use crate::config::Config;
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
+use crate::support::fs::current_dir;
 use crate::support::style::Style;
 
 pub struct Spex {
@@ -15,25 +14,20 @@ pub struct Spex {
 
 impl Spex {
     pub fn locate_spex_config() -> Result<PathBuf> {
-        let current_dir = std::env::current_dir().change_context(CliError::CurrentDir)?;
-        Config::find_file(&current_dir).change_context(CliError::LoadConfig)
+        Config::find_file(&current_dir()?)
     }
 
     pub fn discover() -> Result<Self> {
-        Self::load().change_context(CliError::Workspace)
+        let config_path = Self::locate_spex_config()?;
+        let config = Config::load(&config_path)?;
+        let dir = Config::dir_of(&config_path).to_path_buf();
+        Ok(Self { dir, config })
     }
 
     pub fn discover_and_warn() -> Result<Self> {
         let spex = Self::discover()?;
         spex.warn_if_cli_outdated();
         Ok(spex)
-    }
-
-    fn load() -> Result<Self> {
-        let config_path = Self::locate_spex_config()?;
-        let config = Config::load(&config_path).change_context(CliError::LoadConfig)?;
-        let dir = Config::dir_of(&config_path).to_path_buf();
-        Ok(Self { dir, config })
     }
 
     fn warn_if_cli_outdated(&self) {
@@ -45,13 +39,9 @@ impl Spex {
 
     pub fn rules(&self) -> Result<Vec<Rule>> {
         Rule::load_all(&self.dir.join(rule::RULES_DIR))
-            .change_context(CliError::LoadRules)
-            .change_context(CliError::Workspace)
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
         Spec::load_all(&self.dir.join(spec::SPECS_DIR))
-            .change_context(CliError::LoadSpecs)
-            .change_context(CliError::Workspace)
     }
 }

@@ -95,12 +95,16 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
         .collect();
 
     if output.is_empty() {
-        return serde_yaml_ng::to_string(&output).change_context(CliError::Serialize);
+        return serde_yaml_ng::to_string(&output)
+            .change_context_lazy(|| CliError::Internal("could not serialize specs".into()));
     }
 
     output
         .iter()
-        .map(|spec| serde_yaml_ng::to_string(&[spec]).change_context(CliError::Serialize))
+        .map(|spec| {
+            serde_yaml_ng::to_string(&[spec])
+                .change_context_lazy(|| CliError::Internal("could not serialize specs".into()))
+        })
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))
 }

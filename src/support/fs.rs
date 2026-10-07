@@ -17,6 +17,12 @@ pub fn file_url(path: &Path) -> String {
     )
 }
 
+pub fn current_dir() -> Result<PathBuf> {
+    std::env::current_dir().change_context_lazy(|| {
+        CliError::Internal("could not determine the current directory".into())
+    })
+}
+
 pub fn write_file(path: &Path, contents: impl AsRef<[u8]>) -> Result<()> {
     fs::write(path, contents).change_context_lazy(|| CliError::WriteFile(path.to_path_buf()))
 }
@@ -57,9 +63,9 @@ pub fn symlink_if_absent(link: &Path, target: &str) -> Result<()> {
         return Ok(());
     }
 
-    symlink(target, link)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not link `{}` to `{target}`", link.display()))
+    symlink(target, link).change_context_lazy(|| {
+        CliError::Internal(format!("could not link `{}` to `{target}`", link.display()))
+    })
 }
 
 #[cfg(not(unix))]
@@ -75,23 +81,25 @@ pub fn make_files_executable(dir: &Path) -> Result<()> {
         return Ok(());
     }
 
-    let entries = fs::read_dir(dir)
-        .change_context(CliError::Io)
-        .attach_with(|| format!("could not read `{}`", dir.display()))?;
+    let entries = fs::read_dir(dir).change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
 
     for entry in entries {
-        let path = entry.change_context(CliError::Io)?.path();
+        let path = entry
+            .change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?
+            .path();
         if path.is_dir() {
             make_files_executable(&path)?;
             continue;
         }
         let mut permissions = fs::metadata(&path)
-            .change_context(CliError::Io)?
+            .change_context_lazy(|| {
+                CliError::Internal(format!("could not read metadata of `{}`", path.display()))
+            })?
             .permissions();
         permissions.set_mode(permissions.mode() | 0o111);
-        fs::set_permissions(&path, permissions)
-            .change_context(CliError::Io)
-            .attach_with(|| format!("could not set permissions on `{}`", path.display()))?;
+        fs::set_permissions(&path, permissions).change_context_lazy(|| {
+            CliError::Internal(format!("could not set permissions on `{}`", path.display()))
+        })?;
     }
     Ok(())
 }

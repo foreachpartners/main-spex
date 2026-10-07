@@ -2,7 +2,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use error_stack::Report;
 use strum::IntoEnumIterator;
 
 use crate::config::spex::Spex;
@@ -130,7 +130,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
         .filter(|spec| spec.scope_selected(&args.scope))
         .collect();
 
-    let found = Found::scan_workspace(&spex.dir, &spex.config).change_context(CliError::Walk)?;
+    let found = Found::scan_workspace(&spex.dir, &spex.config)?;
 
     Ok(report(&spex.dir, &specs, &found, args.verbose))
 }

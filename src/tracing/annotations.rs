@@ -116,7 +116,9 @@ impl Found {
 
     fn scan_repo(&mut self, repo_path: &Path) -> Result<()> {
         for result in RepoFiles::new(repo_path) {
-            let path = result.change_context(CliError::Walk)?;
+            let path = result.change_context_lazy(|| {
+                CliError::Internal("could not walk workspace repository files".into())
+            })?;
             let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };

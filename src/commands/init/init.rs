@@ -8,7 +8,7 @@ use error_stack::{Report, ResultExt, bail};
 use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
-use crate::support::fs::{create_dir_all, dir_name, write_file};
+use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
 use crate::support::style::Style;
 
 use super::scaffold::scaffold;
@@ -26,12 +26,14 @@ const CODE_WORKSPACE_TEMPLATE: &str =
     include_str!("../../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
-    let current_dir = std::env::current_dir().change_context(CliError::CurrentDir)?;
+    let current_dir = current_dir()?;
 
     let workspace_root = workspace_root(&current_dir)?;
 
     let default_name = dir_name(&workspace_root).ok_or_else(|| {
-        Report::new(CliError::NoWorkspaceRoot).attach("could not read the workspace root name")
+        Report::new(CliError::Internal(
+            "could not read the workspace root name".into(),
+        ))
     })?;
 
     let project_name = confirm_project_name(default_name)?;
@@ -57,7 +59,7 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    scaffold(spex_dir).change_context(CliError::Io)?;
+    scaffold(spex_dir)?;
 
     let specs = spex_dir.join(SPECS_DIR);
     create_dir_all(&specs)?;
@@ -106,8 +108,9 @@ fn is_inside_spex_dir(current_dir: &Path) -> bool {
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     if is_inside_spex_dir(current_dir) {
         let parent = current_dir.parent().ok_or_else(|| {
-            Report::new(CliError::NoWorkspaceRoot)
-                .attach("expected the spex directory to live inside a workspace root")
+            Report::new(CliError::Internal(
+                "expected the spex directory to live inside a workspace root".into(),
+            ))
         })?;
         return Ok(parent.to_path_buf());
     }
@@ -175,13 +178,11 @@ fn prompt(message: &str) -> Result<String> {
     print!("{message}");
     io::stdout()
         .flush()
-        .change_context(CliError::Io)
-        .attach("could not flush stdout")?;
+        .change_context_lazy(|| CliError::Internal("could not flush stdout".into()))?;
 
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
-        .change_context(CliError::Io)
-        .attach("could not read from stdin")?;
+        .change_context_lazy(|| CliError::Internal("could not read from stdin".into()))?;
     Ok(input)
 }

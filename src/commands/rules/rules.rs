@@ -107,12 +107,16 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
         .collect();
 
     if output.is_empty() {
-        return serde_yaml_ng::to_string(&output).change_context(CliError::Serialize);
+        return serde_yaml_ng::to_string(&output)
+            .change_context_lazy(|| CliError::Internal("could not serialize rules".into()));
     }
 
     output
         .iter()
-        .map(|rule| serde_yaml_ng::to_string(&[rule]).change_context(CliError::Serialize))
+        .map(|rule| {
+            serde_yaml_ng::to_string(&[rule])
+                .change_context_lazy(|| CliError::Internal("could not serialize rules".into()))
+        })
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))
 }

@@ -7,6 +7,7 @@ use error_stack::ResultExt;
 use crate::config::{self, Config, PreexistingEntry, Repository};
 use crate::error::{CliError, Result};
 use crate::rule::Severity;
+use crate::support::fs::write_file;
 use crate::support::style::Style;
 use crate::support::util::plural;
 
@@ -88,11 +89,12 @@ pub(super) fn fill_preexisting_errors(
         .collect();
 
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
-    let raw = std::fs::read_to_string(&config_path).change_context(CliError::UpdateConfig)?;
+    let raw = std::fs::read_to_string(&config_path)
+        .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
     let updated = Config::set_preexisting_errors(&raw, &by_repo);
     let changed = updated != raw;
     if changed {
-        std::fs::write(&config_path, &updated).change_context(CliError::UpdateConfig)?;
+        write_file(&config_path, &updated)?;
     }
 
     report_fill(selected, &by_repo, changed);

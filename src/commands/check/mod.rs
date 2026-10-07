@@ -57,7 +57,9 @@ impl ScopedFile {
     fn collect(repo_path: &Path) -> Result<Vec<Self>> {
         let mut files = Vec::new();
         for result in RepoFiles::new(repo_path) {
-            let abs = result.change_context(CliError::Walk)?;
+            let abs = result.change_context_lazy(|| {
+                CliError::Internal("could not walk workspace repository files".into())
+            })?;
             let rel = abs.strip_prefix(repo_path).unwrap_or(&abs).to_path_buf();
             files.push(Self { abs, rel });
         }
