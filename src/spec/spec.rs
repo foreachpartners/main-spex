@@ -27,7 +27,7 @@ pub struct Spec {
     #[serde(default)]
     pub acceptance_criteria: Vec<AcceptanceCriterion>,
     #[serde(default)]
-    pub blocked_by: Vec<String>,
+    pub blocked_by: Vec<SpecId>,
     #[serde(default)]
     pub scope: Vec<String>,
     #[serde(default)]

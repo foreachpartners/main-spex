@@ -48,7 +48,7 @@ pub(super) fn validate_conformance(
     specs: &[Spec],
     rules: &[Rule],
 ) -> Result<Vec<Finding>> {
-    let status_by_id = status_by_id(specs, rules);
+    let status_by_id = status_by_id(specs);
     let mut findings = Vec::new();
 
     for spec in specs {

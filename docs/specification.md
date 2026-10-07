@@ -57,7 +57,7 @@ A spec, defined in [glossary.md](glossary.md), lives at `specs/<spec-id>.yaml`, 
   - `id` follows `schemas/ac-id.schema.json`: lowercase letters and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
   - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads `#<ac-id>`-qualified annotations separately; a criterion missing its annotations while flagged `is_done: false` is reported as pending, not a gap.
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
-- `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
+- `blocked_by` lists specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
 - `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion's `is_done` to be `true` or absent, `in-progress` is for a spec being implemented but not yet complete.
 - `coverage_ignore` waives a coverage requirement, one `{layer, ac}` entry per waiver:
   - `layer` (`contract`, `impl`, or `test`) is required; without `ac`, it waives that layer for the whole spec.
