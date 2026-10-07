@@ -3,11 +3,12 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
+use crate::commands::init::scaffold::{copy_docs_and_schemas, copy_rule_scripts, link_claude_dir};
 use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use crate::support::fs::{create_dir_all, make_files_executable, write_embedded_dir, write_file};
 use crate::support::util;
-use crate::templates::{self, AGENTS_FILENAME, SKILLS_DIRNAME, TEMPLATES_DIR};
+use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, SKILLS_DIRNAME, TEMPLATES_DIR};
 
 #[cfg(test)]
 #[path = "sync_templates_test.rs"]
@@ -22,11 +23,11 @@ const SKILL_FILE: &str = "SKILL.md";
 const PROJECT_SECTION_MARKER: &str = "\n---\n\n# Project";
 
 pub fn sync_templates(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
-    templates::copy_plain_dirs(spex_dir)?;
+    copy_docs_and_schemas(spex_dir)?;
     sync_rules(spex_dir, removed_rules)?;
     sync_skills(spex_dir)?;
     sync_agents_md(spex_dir)?;
-    templates::link_claude_dir(spex_dir)?;
+    link_claude_dir(spex_dir)?;
     make_files_executable(&spex_dir.join(SCRIPTS_DIR))
 }
 
@@ -139,7 +140,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
         }
 
         write_file(&dest, file.contents())?;
-        templates::copy_rule_scripts(&rule_id, spex_dir)?;
+        copy_rule_scripts(&rule_id, spex_dir)?;
     }
 
     Ok(())
@@ -150,7 +151,8 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
         return Ok(());
     };
 
-    let dest_root = templates::installed_skills_dir(spex_dir);
+    let agents_dir = spex_dir.join(AGENTS_DIRNAME);
+    let dest_root = agents_dir.join(SKILLS_DIRNAME);
     create_dir_all(&dest_root)?;
 
     for skill in skills.dirs() {
@@ -163,7 +165,7 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
         }
 
         let local_skill_md = fs::read_to_string(&skill_md).ok();
-        write_embedded_dir(skill, &templates::agents_dir(spex_dir))?;
+        write_embedded_dir(skill, &agents_dir)?;
 
         if let Some(local) = local_skill_md
             && let Some(template) = skill.get_file(skill.path().join(SKILL_FILE))

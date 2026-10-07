@@ -10,7 +10,8 @@ use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, dir_name, write_file};
 use crate::support::style::Style;
-use crate::templates;
+
+use super::scaffold::scaffold;
 
 #[cfg(test)]
 #[path = "init_test.rs"]
@@ -56,7 +57,7 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    templates::scaffold(spex_dir).change_context(CliError::Io)?;
+    scaffold(spex_dir).change_context(CliError::Io)?;
 
     let specs = spex_dir.join(SPECS_DIR);
     create_dir_all(&specs)?;
