@@ -42,7 +42,9 @@ cargo install --path . --force
 
 ### `spex init`
 
-Initializes the spex workspace. Run it from the workspace root or from an existing spex repository directory (`<project-name>-spex`), which is reused instead of created.
+Initializes the spex workspace. Run it from the workspace root or from inside an empty spex repository directory (`<project-name>-spex`), which is reused instead of created.
+
+It sets up a fresh project only: it fails when the spex repository directory is not empty, so it never overwrites anything. Use `spex update` for an initialized project.
 
 It prompts to confirm the project name (defaulting to the workspace root folder name), then writes:
 
@@ -50,7 +52,7 @@ It prompts to confirm the project name (defaulting to the workspace root folder 
 - `<project-name>.code-workspace`, seeded from the bundled template with a folder for the spex repository only
 - the bundled templates: schemas, docs, scripts, skills, and every bundled rule, plus empty `specs/`, `plans/`, and `contracts/` folders
 - `.agents/skills/` with the bundled skills, and a `.claude` -> `.agents` symlink, so different agent tools detect the same skills
-- a root `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink, seeded only when absent. A `# Project` marker splits `AGENTS.md`: content above it is managed and kept in sync by `spex update`, content from the marker onward is the user's own and is never touched
+- a root `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink. A `# Project` marker splits `AGENTS.md`: content above it is managed and kept in sync by `spex update`, content from the marker onward is the user's own and is never touched
 
 It does not look for, ask about, or configure the other workspace repositories.
 
@@ -63,6 +65,8 @@ Finish setup afterwards by running the `/spex-setup` skill: it adds the other wo
 ### `spex update`
 
 Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary.
+
+It updates an initialized project only: it fails when no `spex.yaml` is found, so run `spex init` first.
 
 - Rewrites a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a skill that opts out keeps its local changes, so consumers can override a global skill.
 - Rewrites a synced skill's `SKILL.md` above its `# Project` marker and the skill's other bundled files, preserving everything from that marker onward and any files you added to the skill folder; a local `SKILL.md` predating the marker is fully overwritten, since managed and user content cannot be told apart in it.

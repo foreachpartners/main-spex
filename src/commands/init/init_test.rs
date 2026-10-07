@@ -141,18 +141,26 @@ mod tests_unit {
     }
 
     #[test]
-    fn verify_not_initialized_fails_when_config_exists() {
+    fn verify_empty_fails_when_directory_has_a_file() {
         let spex_dir = tempdir().expect("create spex dir");
         fs::write(spex_dir.path().join(SPEX_CONFIG_FILE), "").expect("create config");
 
-        assert!(verify_not_initialized(spex_dir.path()).is_err());
+        assert!(verify_empty(spex_dir.path()).is_err());
     }
 
     #[test]
-    fn verify_not_initialized_passes_on_empty_directory() {
+    fn verify_empty_fails_when_directory_has_a_subdirectory() {
+        let spex_dir = tempdir().expect("create spex dir");
+        fs::create_dir(spex_dir.path().join(".git")).expect("create subdirectory");
+
+        assert!(verify_empty(spex_dir.path()).is_err());
+    }
+
+    #[test]
+    fn verify_empty_passes_on_empty_directory() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        assert!(verify_not_initialized(spex_dir.path()).is_ok());
+        assert!(verify_empty(spex_dir.path()).is_ok());
     }
 
     #[test]

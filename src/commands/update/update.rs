@@ -7,8 +7,9 @@ use crate::config::spex::Spex;
 use crate::config::{CLI_VERSION, Config};
 use crate::error::{CliError, Result};
 use crate::support::style::Style;
-use crate::templates;
 use serde::Deserialize;
+
+use super::sync_templates::sync_templates;
 
 #[cfg(test)]
 #[path = "update_test.rs"]
@@ -33,7 +34,7 @@ pub fn run() -> Result<ExitCode> {
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
-    templates::scaffold(Config::dir_of(&config_path), &previous.rules_unused)
+    sync_templates(Config::dir_of(&config_path), &previous.rules_unused)
         .change_context(CliError::Templates)?;
 
     fs::write(&config_path, Config::set_cli_version(&raw, CLI_VERSION))

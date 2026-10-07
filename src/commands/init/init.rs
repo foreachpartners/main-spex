@@ -1,3 +1,4 @@
+use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -38,7 +39,7 @@ pub fn run() -> Result<ExitCode> {
     // (`<project-name>-spex`), so it can only be resolved once the project name
     // is known.
     let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
-    verify_not_initialized(&spex_dir)?;
+    verify_empty(&spex_dir)?;
 
     write_config(&spex_dir, &project_name)?;
     write_code_workspace(&spex_dir, &project_name)?;
@@ -55,8 +56,7 @@ pub fn run() -> Result<ExitCode> {
 }
 
 fn copy_templates(spex_dir: &Path) -> Result<()> {
-    templates::scaffold(spex_dir, &[]).change_context(CliError::Io)?;
-    templates::ensure_agents_md(spex_dir).change_context(CliError::Io)?;
+    templates::scaffold(spex_dir).change_context(CliError::Io)?;
 
     let specs = spex_dir.join(SPECS_DIR);
     util::create_dir_all(&specs)?;
@@ -126,16 +126,17 @@ fn ensure_spex_dir(
     }
 
     let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
-    if !spex_dir.is_dir() {
-        util::create_dir_all(&spex_dir)?;
-    }
+    util::create_dir_all(&spex_dir)?;
     Ok(spex_dir)
 }
 
-fn verify_not_initialized(current_dir: &Path) -> Result<()> {
-    if current_dir.join(SPEX_CONFIG_FILE).exists() {
+fn verify_empty(spex_dir: &Path) -> Result<()> {
+    let mut entries =
+        fs::read_dir(spex_dir).change_context_lazy(|| CliError::ReadDir(spex_dir.to_path_buf()))?;
+    if entries.next().is_some() {
         bail!(CliError::Custom(format!(
-            "`{SPEX_CONFIG_FILE}` already exists in this directory"
+            "`{}` is not empty — `spex init` sets up a fresh project in an empty directory, use `spex update` for an initialized one",
+            spex_dir.display()
         )));
     }
     Ok(())
