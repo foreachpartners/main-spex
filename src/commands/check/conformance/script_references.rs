@@ -17,8 +17,8 @@ pub(super) fn validate_script_references(spex_dir: &Path, rules: &[Rule]) -> Vec
             let CheckKind::Script { script, .. } = &check.kind else {
                 continue;
             };
-            if resolve_script(script, spex_dir, &rule.id).is_none() {
-                let dir = spex_dir.join(SCRIPTS_DIR).join(&rule.id);
+            if resolve_script(script, spex_dir, rule.id.as_str()).is_none() {
+                let dir = spex_dir.join(SCRIPTS_DIR).join(rule.id.as_str());
                 findings.push(conform_finding(
                     Some(format!("{RULES_DIR}/{}", rule.path)),
                     format!("missing script {}/{script}", dir.display()),

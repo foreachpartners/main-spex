@@ -16,7 +16,7 @@ pub(super) fn status_finding(spec: &Spec) -> Option<Finding> {
         return None;
     }
     Some(Finding::warn(
-        &spec.id,
+        spec.id.as_str(),
         "status",
         Some(spec.location()),
         format!(
@@ -35,7 +35,7 @@ pub(super) fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
         return None;
     }
     Some(Finding::error(
-        &spec.id,
+        spec.id.as_str(),
         "status",
         Some(spec.location()),
         format!(

@@ -5,6 +5,7 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use crate::error::Result;
 use crate::support::commitment::Commitment;
+use crate::support::id::id_type;
 use crate::support::util;
 
 #[cfg(test)]
@@ -13,9 +14,12 @@ mod spec_test;
 
 pub const SPECS_DIR: &str = "specs";
 
+id_type!(SpecId, "spec id");
+id_type!(AcId, "acceptance criterion id");
+
 #[derive(Debug, Deserialize)]
 pub struct Spec {
-    pub id: String,
+    pub id: SpecId,
     #[serde(skip, default)]
     pub path: String,
     #[serde(default)]
@@ -60,7 +64,7 @@ impl Spec {
     // annotation — only under `contract: for-each-ac`, and only when the
     // contract layer (or this criterion's contract requirement specifically)
     // isn't waived by `coverage_ignore`.
-    pub fn ac_contract_required(&self, ac_id: &str) -> bool {
+    pub fn ac_contract_required(&self, ac_id: &AcId) -> bool {
         self.contract == ContractLevel::ForEachAc
             && !self.ac_ignored(ac_id, CoverageLayer::Contract)
     }
@@ -75,12 +79,12 @@ impl Spec {
 
     // A layer waived for one acceptance criterion, either because the whole
     // layer is ignored or because this criterion specifically is.
-    pub fn ac_ignored(&self, ac_id: &str, layer: CoverageLayer) -> bool {
+    pub fn ac_ignored(&self, ac_id: &AcId, layer: CoverageLayer) -> bool {
         self.layer_ignored(layer)
             || self
                 .coverage_ignore
                 .iter()
-                .any(|ignore| ignore.layer == layer && ignore.ac.as_deref() == Some(ac_id))
+                .any(|ignore| ignore.layer == layer && ignore.ac.as_ref() == Some(ac_id))
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
@@ -102,7 +106,7 @@ impl Spec {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AcceptanceCriterion {
-    pub id: String,
+    pub id: AcId,
     #[serde(flatten)]
     pub statement: Statement,
     #[serde(default)]
@@ -165,7 +169,7 @@ impl Statement {
 pub struct CoverageIgnore {
     pub layer: CoverageLayer,
     #[serde(default)]
-    pub ac: Option<String>,
+    pub ac: Option<AcId>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, EnumIter, IntoStaticStr)]

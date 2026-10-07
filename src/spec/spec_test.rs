@@ -7,14 +7,14 @@ mod tests {
         Spec {
             status: Status::Active,
             coverage_ignore,
-            ..testing::spec("A")
+            ..testing::spec("a")
         }
     }
 
     fn ignore(layer: CoverageLayer, ac: Option<&str>) -> CoverageIgnore {
         CoverageIgnore {
             layer,
-            ac: ac.map(str::to_string),
+            ac: ac.map(testing::ac_id),
         }
     }
 
@@ -28,7 +28,7 @@ mod tests {
     #[test]
     fn ac_ignored_true_when_layer_is_ignored_for_whole_spec() {
         let spec = spec(vec![ignore(CoverageLayer::Test, None)]);
-        assert!(spec.ac_ignored("any-ac", CoverageLayer::Test));
+        assert!(spec.ac_ignored(&testing::ac_id("any-ac"), CoverageLayer::Test));
     }
 
     #[test]
@@ -37,26 +37,26 @@ mod tests {
             CoverageLayer::Impl,
             Some("no-null-typed-string"),
         )]);
-        assert!(spec.ac_ignored("no-null-typed-string", CoverageLayer::Impl));
-        assert!(!spec.ac_ignored("other-ac", CoverageLayer::Impl));
-        assert!(!spec.ac_ignored("no-null-typed-string", CoverageLayer::Test));
+        assert!(spec.ac_ignored(&testing::ac_id("no-null-typed-string"), CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("other-ac"), CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("no-null-typed-string"), CoverageLayer::Test));
     }
 
     #[test]
     fn ac_ignored_false_with_no_coverage_ignore() {
         let spec = spec(Vec::new());
-        assert!(!spec.ac_ignored("any-ac", CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("any-ac"), CoverageLayer::Impl));
     }
 
     #[test]
     fn coverage_ignore_parses_whole_layer_and_per_ac_entries() {
         let spec: Spec = serde_yaml_ng::from_str(
-            "id: A\ncontract: single\ncoverage_ignore:\n  - layer: contract\n  - layer: impl\n    ac: no-null-typed-string\n",
+            "id: a\ncontract: single\ncoverage_ignore:\n  - layer: contract\n  - layer: impl\n    ac: no-null-typed-string\n",
         )
         .expect("parse spec");
         assert!(spec.layer_ignored(CoverageLayer::Contract));
-        assert!(spec.ac_ignored("no-null-typed-string", CoverageLayer::Impl));
-        assert!(!spec.ac_ignored("other-ac", CoverageLayer::Impl));
+        assert!(spec.ac_ignored(&testing::ac_id("no-null-typed-string"), CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("other-ac"), CoverageLayer::Impl));
     }
 
     #[test]
@@ -67,7 +67,7 @@ mod tests {
             ("for-each-ac", ContractLevel::ForEachAc),
         ] {
             let spec: Spec =
-                serde_yaml_ng::from_str(&format!("id: A\ncontract: {yaml}\n")).expect("parse spec");
+                serde_yaml_ng::from_str(&format!("id: a\ncontract: {yaml}\n")).expect("parse spec");
             assert_eq!(spec.contract, level);
         }
     }
@@ -76,24 +76,24 @@ mod tests {
     fn ac_contract_required_respects_whole_layer_ignore() {
         let mut spec = spec(vec![ignore(CoverageLayer::Contract, None)]);
         spec.contract = ContractLevel::ForEachAc;
-        assert!(!spec.ac_contract_required("any-ac"));
+        assert!(!spec.ac_contract_required(&testing::ac_id("any-ac")));
     }
 
     #[test]
     fn ac_contract_required_only_under_for_each_ac() {
         let mut spec = spec(Vec::new());
         spec.contract = ContractLevel::Single;
-        assert!(!spec.ac_contract_required("any-ac"));
+        assert!(!spec.ac_contract_required(&testing::ac_id("any-ac")));
         spec.contract = ContractLevel::ForEachAc;
-        assert!(spec.ac_contract_required("any-ac"));
+        assert!(spec.ac_contract_required(&testing::ac_id("any-ac")));
     }
 
     #[test]
     fn ac_contract_required_respects_per_ac_ignore() {
         let mut spec = spec(vec![ignore(CoverageLayer::Contract, Some("waived-ac"))]);
         spec.contract = ContractLevel::ForEachAc;
-        assert!(!spec.ac_contract_required("waived-ac"));
-        assert!(spec.ac_contract_required("other-ac"));
+        assert!(!spec.ac_contract_required(&testing::ac_id("waived-ac")));
+        assert!(spec.ac_contract_required(&testing::ac_id("other-ac")));
     }
 
     #[test]

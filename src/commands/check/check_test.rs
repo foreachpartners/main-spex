@@ -438,7 +438,7 @@ constraints:
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        assert!(resolve_script("lint.sh", &spex, "X").is_none());
+        assert!(resolve_script("lint.sh", &spex, "x").is_none());
     }
 
     // Tests that create a script and then execute it run serially: `Command`
@@ -567,7 +567,7 @@ constraints:
 
     fn repository(path: &str, rules: Vec<&str>) -> Repository {
         Repository {
-            rules: rules.into_iter().map(str::to_string).collect(),
+            rules: rules.into_iter().map(testing::rule_id).collect(),
             ..testing::repository("api", path)
         }
     }
@@ -594,9 +594,9 @@ constraints:
         // A non-negated glob check: "*.rs files are forbidden"
         let non_negated = named_glob_check("no-rs-files", "**/*.rs");
 
-        let rules = [rule("X", vec![negated_glob.clone(), non_negated])];
+        let rules = [rule("x", vec![negated_glob.clone(), non_negated])];
 
-        let repository = repository("../api", vec!["X"]);
+        let repository = repository("../api", vec!["x"]);
 
         // Without --files: negated check fires because dprint.json is absent.
         let findings = check_repo(

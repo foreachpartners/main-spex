@@ -16,7 +16,7 @@ pub(super) fn validate_coverage_ignore(spec: &Spec) -> Vec<Finding> {
         .iter()
         .filter(|ignore| ignore.layer == CoverageLayer::Contract)
         .filter_map(|ignore| {
-            let message = match (spec.contract, ignore.ac.as_deref()) {
+            let message = match (spec.contract, ignore.ac.as_ref()) {
                 (ContractLevel::None, _) => Some(
                     "`coverage_ignore` waives the contract layer but `contract: none` already disables contract coverage — remove the entry or set `contract` to `single` or `for-each-ac`".to_string(),
                 ),
@@ -27,7 +27,7 @@ pub(super) fn validate_coverage_ignore(spec: &Spec) -> Vec<Finding> {
             };
             message.map(|message| {
                 Finding::error(
-                    &spec.id,
+                    spec.id.as_str(),
                     "coverage-ignore",
                     Some(spec.location()),
                     message,

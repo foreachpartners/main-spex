@@ -36,13 +36,13 @@ mod tests {
     fn status_finding_is_silent_when_consistent_or_incomplete() {
         let full = || criteria(&["a", "b"], &[]);
         // Fully done and already implemented: nothing to flag.
-        assert!(status_finding(&spec("A", Status::Active, full())).is_none());
-        assert!(status_finding(&spec("A", Status::Deprecated, full())).is_none());
+        assert!(status_finding(&spec("a", Status::Active, full())).is_none());
+        assert!(status_finding(&spec("a", Status::Deprecated, full())).is_none());
         // A not-done criterion means the spec isn't done, so any status is allowed.
         let partial = criteria(&["a", "b"], &["b"]);
-        assert!(status_finding(&spec("A", Status::Planned, partial)).is_none());
+        assert!(status_finding(&spec("a", Status::Planned, partial)).is_none());
         // No criteria at all: nothing to infer.
-        assert!(status_finding(&spec("A", Status::Planned, Vec::new())).is_none());
+        assert!(status_finding(&spec("a", Status::Planned, Vec::new())).is_none());
     }
 
     #[test]

@@ -17,7 +17,7 @@ pub(super) fn validate_scope(spec: &Spec, repositories: &[Repository]) -> Vec<Fi
         })
         .map(|short_name| {
             Finding::error(
-                &spec.id,
+                spec.id.as_str(),
                 "scope",
                 Some(spec.location()),
                 format!(

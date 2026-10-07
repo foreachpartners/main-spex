@@ -124,7 +124,7 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
 fn repo_has_rule(repo: &Repository, rule: &serde_json::Value) -> bool {
     rule.get("id")
         .and_then(|v| v.as_str())
-        .is_some_and(|rule_id| repo.rules.iter().any(|id| id == rule_id))
+        .is_some_and(|rule_id| repo.rules.iter().any(|id| id.as_str() == rule_id))
 }
 
 fn id_selected(value: &serde_json::Value, ids: &[String]) -> bool {

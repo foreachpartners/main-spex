@@ -7,7 +7,7 @@ use strum::IntoEnumIterator;
 
 use crate::config::Config;
 use crate::error::{CliError, Result};
-use crate::spec::{ContractLevel, CoverageLayer, Spec};
+use crate::spec::{AcId, ContractLevel, CoverageLayer, Spec, SpecId};
 use crate::support::fs::canonical;
 use crate::support::repo_files::RepoFiles;
 use crate::tracing::annotations::{Annotation, parse};
@@ -24,8 +24,8 @@ mod found_test;
 // the whole spec under `contract: single`.
 #[derive(Debug, Default)]
 pub struct Found {
-    bare: HashMap<String, HashSet<CoverageLayer>>,
-    by_ac: HashMap<(String, String), HashSet<CoverageLayer>>,
+    bare: HashMap<SpecId, HashSet<CoverageLayer>>,
+    by_ac: HashMap<(SpecId, AcId), HashSet<CoverageLayer>>,
 }
 
 impl Found {
@@ -33,7 +33,7 @@ impl Found {
         Self::default()
     }
 
-    pub fn has_bare(&self, spec_id: &str, layer: CoverageLayer) -> bool {
+    pub fn has_bare(&self, spec_id: &SpecId, layer: CoverageLayer) -> bool {
         self.bare
             .get(spec_id)
             .is_some_and(|layers| layers.contains(&layer))
@@ -42,9 +42,9 @@ impl Found {
     // A whole-spec annotation never satisfies per-criterion coverage — only a
     // `#ac-id`-qualified one does, otherwise a single bare annotation would
     // trivially satisfy every criterion and defeat the point of tracking them.
-    fn has_ac(&self, spec_id: &str, ac_id: &str, layer: CoverageLayer) -> bool {
+    fn has_ac(&self, spec_id: &SpecId, ac_id: &AcId, layer: CoverageLayer) -> bool {
         self.by_ac
-            .get(&(spec_id.to_string(), ac_id.to_string()))
+            .get(&(spec_id.clone(), ac_id.clone()))
             .is_some_and(|layers| layers.contains(&layer))
     }
 
@@ -154,7 +154,7 @@ impl Found {
 }
 
 pub struct AcCoverage {
-    pub id: String,
+    pub id: AcId,
     pub text: String,
     pub is_done: bool,
     pub missing: Vec<CoverageLayer>,

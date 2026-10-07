@@ -8,7 +8,7 @@ mod tests {
     fn contract_ignore(ac: Option<&str>) -> CoverageIgnore {
         CoverageIgnore {
             layer: CoverageLayer::Contract,
-            ac: ac.map(str::to_string),
+            ac: ac.map(testing::ac_id),
         }
     }
 
@@ -16,7 +16,7 @@ mod tests {
         Spec {
             contract,
             coverage_ignore,
-            ..testing::spec("A")
+            ..testing::spec("a")
         }
     }
 
@@ -36,7 +36,7 @@ mod tests {
     fn coverage_ignore_per_ac_contract_is_silent_with_for_each_ac() {
         let spec = spec(
             ContractLevel::ForEachAc,
-            vec![contract_ignore(Some("ac-1"))],
+            vec![contract_ignore(Some("ac-a"))],
         );
         assert!(validate_coverage_ignore(&spec).is_empty());
     }
@@ -45,7 +45,7 @@ mod tests {
     fn coverage_ignore_contract_errors_with_contract_none() {
         let spec = spec(
             ContractLevel::None,
-            vec![contract_ignore(None), contract_ignore(Some("ac-1"))],
+            vec![contract_ignore(None), contract_ignore(Some("ac-a"))],
         );
 
         let findings = validate_coverage_ignore(&spec);
@@ -53,14 +53,14 @@ mod tests {
         for finding in &findings {
             assert_eq!(finding.severity, Severity::Error);
             assert_eq!(finding.check, "coverage-ignore");
-            assert_eq!(finding.location.as_deref(), Some("specs/A.yaml"));
+            assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
             assert!(finding.message.contains("contract: none"));
         }
     }
 
     #[test]
     fn coverage_ignore_per_ac_contract_errors_with_contract_single() {
-        let spec = spec(ContractLevel::Single, vec![contract_ignore(Some("ac-1"))]);
+        let spec = spec(ContractLevel::Single, vec![contract_ignore(Some("ac-a"))]);
 
         let findings = validate_coverage_ignore(&spec);
         assert_eq!(findings.len(), 1);
@@ -78,7 +78,7 @@ mod tests {
             vec![
                 CoverageIgnore {
                     layer: CoverageLayer::Impl,
-                    ac: Some("ac-1".to_string()),
+                    ac: Some(testing::ac_id("ac-one")),
                 },
                 CoverageIgnore {
                     layer: CoverageLayer::Test,

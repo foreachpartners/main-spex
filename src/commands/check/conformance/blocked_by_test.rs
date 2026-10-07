@@ -15,7 +15,7 @@ mod tests {
             blocked_by: ["MISSING", "DONE", "PENDING", "STILL-PENDING"]
                 .map(str::to_string)
                 .to_vec(),
-            ..testing::spec("A")
+            ..testing::spec("a")
         };
 
         let findings = validate_blocked_by(&spec, &status_by_id);

@@ -45,14 +45,14 @@ pub(super) fn validate_schema(
         findings.extend(check_filename_matches_id(
             spec.location(),
             &spec.path,
-            &spec.id,
+            spec.id.as_str(),
         ));
     }
     for rule in rules {
         findings.extend(check_filename_matches_id(
             rule.location(),
             &rule.path,
-            &rule.id,
+            rule.id.as_str(),
         ));
     }
     Ok(findings)

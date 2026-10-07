@@ -54,7 +54,7 @@ A spec, defined in [glossary.md](glossary.md), lives at `specs/<spec-id>.yaml`, 
 - Holds its specifics in the acceptance criteria, ordered by RFC 2119 commitment level: `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`.
 - Each acceptance criterion is `{id, must|must_not|should|should_not|may, is_done}`:
   - Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the verifiable statement.
-  - `id` is a kebab-case slug, unique within the spec, naming the criterion's behavior rather than its position.
+  - `id` follows `schemas/ac-id.schema.json`: lowercase letters and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
   - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads `#<ac-id>`-qualified annotations separately; a criterion missing its annotations while flagged `is_done: false` is reported as pending, not a gap.
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs or rules that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
@@ -79,6 +79,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - Place one annotation on the smallest unit that actually satisfies the acceptance criterion — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type; widen the placement only when the criterion's scope genuinely spans that boundary (e.g. an endpoint, contract). Annotate once at the boundary, never nested: list every acceptance criterion id the boundary satisfies rather than adding a second annotation.
 - An impl or test annotation carries the `#<ac-id>` of the acceptance criterion it satisfies: `spex coverage` never counts a bare, unqualified annotation toward a criterion of a spec.
 - A contract annotation carries `#<ac-id>` only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` one bare `@spec contract <spec-id>` suffices, and a criterion-anchored annotation also counts as the spec-level contract.
+- `<spec-id>` and `<ac-id>` follow the same id grammar as the ids they reference; an annotation naming an id outside it is malformed.
 - Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli.md](cli.md#self-validation)).
 
 # Rules

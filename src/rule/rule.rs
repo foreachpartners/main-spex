@@ -5,12 +5,13 @@ use strum::IntoStaticStr;
 
 use crate::error::Result;
 use crate::support::commitment::Commitment;
+use crate::support::id::id_type;
 use crate::support::util;
 
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
 
-pub type RuleId = String;
+id_type!(RuleId, "rule id");
 
 #[derive(Debug, Deserialize)]
 pub struct Rule {

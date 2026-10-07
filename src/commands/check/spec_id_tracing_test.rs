@@ -5,6 +5,8 @@ mod tests {
     use std::path::PathBuf;
     use tempfile::tempdir;
 
+    use crate::support::testing;
+
     fn write_candidate(repo_path: &std::path::Path, rel: &str, content: &str) -> ScopedFile {
         let abs = repo_path.join(rel);
         if let Some(parent) = abs.parent() {
@@ -17,16 +19,16 @@ mod tests {
         }
     }
 
-    fn known(ids: &[&str]) -> HashMap<String, HashSet<String>> {
+    fn known(ids: &[&str]) -> HashMap<SpecId, HashSet<AcId>> {
         ids.iter()
-            .map(|id| (id.to_string(), HashSet::new()))
+            .map(|id| (testing::spec_id(id), HashSet::new()))
             .collect()
     }
 
-    fn known_with_acs(id: &str, ac_ids: &[&str]) -> HashMap<String, HashSet<String>> {
+    fn known_with_acs(id: &str, ac_ids: &[&str]) -> HashMap<SpecId, HashSet<AcId>> {
         HashMap::from([(
-            id.to_string(),
-            ac_ids.iter().map(|ac| ac.to_string()).collect(),
+            testing::spec_id(id),
+            ac_ids.iter().map(|ac| testing::ac_id(ac)).collect(),
         )])
     }
 
@@ -65,8 +67,8 @@ mod tests {
         };
         let mut known_ids = known(&["list-pizza-menu", "rate-limit"]);
         known_ids.insert(
-            "list-pizza-menu".to_string(),
-            HashSet::from(["in-stock-only".to_string()]),
+            testing::spec_id("list-pizza-menu"),
+            HashSet::from([testing::ac_id("in-stock-only")]),
         );
         let findings = validate_annotations(&ctx, false, &known_ids);
 
@@ -155,7 +157,7 @@ mod tests {
         );
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, ORPHAN_CHECK);
-        assert!(findings[0].message.contains("delivery-time2"));
+        assert_eq!(findings[0].check, FORMAT_CHECK);
+        assert_eq!(findings[0].location.as_deref(), Some("src/lib.rs:1"));
     }
 }

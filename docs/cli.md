@@ -137,12 +137,13 @@ spex check --repo frontend --fill-preexisting-errors
 When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule:
 
 - `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
+- A spec id, acceptance criterion id, or rule id outside the id grammar (lowercase letters and hyphens only, at most 40 characters) cannot be loaded: the command stops with a parse error naming the file instead of reporting a finding.
 - Each spec file must be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - Every script a rule check references must exist at `scripts/<rule-id>/<script>`.
 - Declared properties must follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).
 - Each spec's and rule's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` must be unique within its spec.
 - No id may repeat across `specs/` and `rules/`.
-- Every `@spec` annotation must match the annotation grammar and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec. Markdown files are skipped, as are the spex directory's `schemas/` and the spex repository's `specs/`, `rules/`, and `scripts/`, which hold illustrative example annotations rather than real references.
+- Every `@spec` annotation must match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec. Markdown files are skipped, as are the spex directory's `schemas/` and the spex repository's `specs/`, `rules/`, and `scripts/`, which hold illustrative example annotations rather than real references.
 - A `blocked_by` reference must name an existing spec and be dropped once satisfied — referencing an already-`active` spec, or any rule, warns, since rules always apply.
 - A `scope` entry must match a repository's `repository_short_name` in `spex.yaml`.
 - A `coverage_ignore` entry must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).

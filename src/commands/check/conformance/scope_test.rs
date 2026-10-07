@@ -8,7 +8,7 @@ mod tests {
     fn validate_scope_flags_unknown_repository_short_name() {
         let spec = Spec {
             scope: vec!["api".to_string(), "unknown".to_string()],
-            ..testing::spec("A")
+            ..testing::spec("a")
         };
         let repositories = vec![testing::repository("api", "../api")];
 

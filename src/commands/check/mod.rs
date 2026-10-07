@@ -9,7 +9,7 @@ use crate::config::Repository;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::rule::{self, Check, CheckKind, Rule, RunScope};
-use crate::spec::Spec;
+use crate::spec::{AcId, Spec, SpecId};
 use crate::support::repo_files::RepoFiles;
 
 mod baseline;
@@ -150,7 +150,7 @@ struct CheckRepoArgs<'a> {
     repo: &'a Repository,
     spex_dir: &'a Path,
     rules: &'a [Rule],
-    known_ids: &'a HashMap<String, HashSet<String>>,
+    known_ids: &'a HashMap<SpecId, HashSet<AcId>>,
     files: &'a [String],
 }
 
@@ -184,7 +184,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let spex = Spex::discover_and_warn()?;
     let rules = spex.rules()?;
     let specs = spex.specs()?;
-    let known_ids: HashMap<String, HashSet<String>> = specs
+    let known_ids: HashMap<SpecId, HashSet<AcId>> = specs
         .iter()
         .map(|spec| {
             let ac_ids = spec
@@ -291,7 +291,7 @@ fn check_repo(
     for rule_id in &repo.rules {
         let Some(rule) = rules.iter().find(|rule| rule.id == *rule_id) else {
             findings.push(Finding::repo_error(
-                rule_id,
+                rule_id.as_str(),
                 format!("rule `{rule_id}` not found in {}/", rule::RULES_DIR),
             ));
             continue;
@@ -301,7 +301,7 @@ fn check_repo(
             if has_files && check.kind.negate() {
                 continue;
             }
-            findings.extend(ctx.dispatch_check(&rule.id, check, workspace_checks));
+            findings.extend(ctx.dispatch_check(rule.id.as_str(), check, workspace_checks));
         }
     }
 

@@ -1,10 +1,22 @@
 use crate::config::{Config, Repository};
-use crate::rule::Rule;
-use crate::spec::{AcceptanceCriterion, ContractLevel, Spec, Statement, Status};
+use crate::rule::{Rule, RuleId};
+use crate::spec::{AcId, AcceptanceCriterion, ContractLevel, Spec, SpecId, Statement, Status};
+
+pub fn spec_id(id: &str) -> SpecId {
+    id.parse().expect("valid spec id")
+}
+
+pub fn ac_id(id: &str) -> AcId {
+    id.parse().expect("valid acceptance criterion id")
+}
+
+pub fn rule_id(id: &str) -> RuleId {
+    id.parse().expect("valid rule id")
+}
 
 pub fn spec(id: &str) -> Spec {
     Spec {
-        id: id.to_string(),
+        id: spec_id(id),
         path: format!("{id}.yaml"),
         description: String::new(),
         acceptance_criteria: Vec::new(),
@@ -18,7 +30,7 @@ pub fn spec(id: &str) -> Spec {
 
 pub fn rule(id: &str) -> Rule {
     Rule {
-        id: id.to_string(),
+        id: rule_id(id),
         path: format!("{id}.yaml"),
         acceptance_criteria: Vec::new(),
         checks: Vec::new(),
@@ -27,7 +39,7 @@ pub fn rule(id: &str) -> Rule {
 
 pub fn criterion(id: &str) -> AcceptanceCriterion {
     AcceptanceCriterion {
-        id: id.to_string(),
+        id: ac_id(id),
         statement: Statement::Must(id.to_string()),
         is_done: None,
         line: 0,

@@ -49,9 +49,9 @@ src/                CLI source
   error.rs          CliError, the single error enum for every command, and the shared Result alias
   templates.rs      Bundled templates directory and the names of its folders and files (constants only)
   spec/             Spec topic (mod.rs is an index only)
-    spec.rs         Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
+    spec.rs         Spec model (status, acceptance criteria as {id, must|..., is_done} objects) and the SpecId and AcId value objects
   rule/             Rule topic (mod.rs is an index only)
-    rule.rs         Rule model
+    rule.rs         Rule model and the RuleId value object
   tracing/          Traceability topic
     annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
@@ -60,6 +60,7 @@ src/                CLI source
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)
+    id.rs           Id grammar and the macro behind the SpecId, AcId and RuleId value objects
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
     style.rs        Terminal color styling and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)

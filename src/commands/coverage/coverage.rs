@@ -169,7 +169,7 @@ fn render(style: &Style, width: usize, verbose: bool, spex_dir: &Path, rows: &[S
     let id_width = rows
         .iter()
         .filter(|row| row.has_gap() || row.has_pending())
-        .map(|row| row.spec.id.len())
+        .map(|row| row.spec.id.as_str().len())
         .max()
         .unwrap_or(0);
     let mut printer = Printer {
@@ -226,7 +226,7 @@ fn status_groups<'a>(rows: &'a [SpecRow]) -> Vec<(Status, Vec<&'a SpecRow<'a>>)>
 fn spec_link(style: &Style, spex_dir: &Path, spec: &Spec) -> String {
     style.hyperlink(
         &file_url(&spex_dir.join(spec.location())),
-        &style.cyan(&spec.id),
+        &style.cyan(spec.id.as_str()),
     )
 }
 
@@ -366,7 +366,7 @@ impl Printer<'_> {
         let id = format!(
             "{}{}",
             spec_link(style, self.spex_dir, row.spec),
-            " ".repeat(self.id_width.saturating_sub(row.spec.id.len())),
+            " ".repeat(self.id_width.saturating_sub(row.spec.id.as_str().len())),
         );
         let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());
         let ac = if row.ac_complete() {
@@ -416,12 +416,16 @@ impl Printer<'_> {
             self.wrapped(8, &row.spec.description);
             for ac in row.gapped_ac() {
                 let label = ac_gap_label(ac);
-                let prefix = format!("        {} ({}): ", style.cyan(&ac.id), style.red(&label));
+                let prefix = format!(
+                    "        {} ({}): ",
+                    style.cyan(ac.id.as_str()),
+                    style.red(&label)
+                );
                 self.wrapped_after(&prefix, &ac.text, Style::dim);
             }
             if !row.has_gap() {
                 for ac in row.pending_ac() {
-                    let prefix = format!("        {}: ", style.cyan(&ac.id));
+                    let prefix = format!("        {}: ", style.cyan(ac.id.as_str()));
                     self.wrapped_after(&prefix, &ac.text, Style::dim);
                 }
             }

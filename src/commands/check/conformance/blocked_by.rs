@@ -32,13 +32,13 @@ pub(super) fn validate_blocked_by(
             let location = Some(spec.location());
             match status_by_id.get(blocker.as_str()) {
                 None => Some(Finding::error(
-                    &spec.id,
+                    spec.id.as_str(),
                     "blocked-by",
                     location,
                     format!("`blocked_by` references `{blocker}`, a non-existing spec"),
                 )),
                 Some(Status::Active) => Some(Finding::warn(
-                    &spec.id,
+                    spec.id.as_str(),
                     "blocked-by",
                     location,
                     format!(

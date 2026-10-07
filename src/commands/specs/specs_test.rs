@@ -10,30 +10,30 @@ mod tests {
 
     #[test]
     fn scope_selected_defaults_to_true_when_empty() {
-        assert!(scope_selected(&spec("A", r#", "scope": ["api"]"#), &[]));
+        assert!(scope_selected(&spec("a", r#", "scope": ["api"]"#), &[]));
     }
 
     #[test]
     fn scope_selected_matches_short_name_in_spec_scope() {
         let api = ["api".to_string()];
-        assert!(scope_selected(&spec("A", r#", "scope": ["api"]"#), &api));
+        assert!(scope_selected(&spec("a", r#", "scope": ["api"]"#), &api));
         assert!(!scope_selected(
-            &spec("A", r#", "scope": ["frontend"]"#),
+            &spec("a", r#", "scope": ["frontend"]"#),
             &api
         ));
-        assert!(!scope_selected(&spec("A", ""), &api));
+        assert!(!scope_selected(&spec("a", ""), &api));
     }
 
     #[test]
     fn id_selected_defaults_to_true_when_empty() {
-        assert!(id_selected(&spec("A", ""), &[]));
+        assert!(id_selected(&spec("a", ""), &[]));
     }
 
     #[test]
     fn id_selected_filters_to_given_ids() {
-        let ids = vec!["A".to_string(), "B".to_string()];
-        assert!(id_selected(&spec("A", ""), &ids));
-        assert!(!id_selected(&spec("C", ""), &ids));
+        let ids = vec!["a".to_string(), "b".to_string()];
+        assert!(id_selected(&spec("a", ""), &ids));
+        assert!(!id_selected(&spec("c", ""), &ids));
     }
 
     fn write_workspace(dir: &std::path::Path) {

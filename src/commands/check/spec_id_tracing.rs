@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
+use crate::spec::{AcId, SpecId};
 use crate::tracing::annotations;
 
 use super::{Finding, RepoCtx, ScopedFile};
@@ -19,7 +20,7 @@ const ORPHAN_CHECK: &str = "no-orphan-annotations";
 pub(super) fn validate_annotations(
     ctx: &RepoCtx,
     is_spex_repo: bool,
-    known_ids: &HashMap<String, HashSet<String>>,
+    known_ids: &HashMap<SpecId, HashSet<AcId>>,
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
     for file in ctx.candidates {
@@ -74,14 +75,14 @@ fn check_format(file: &ScopedFile, content: &str) -> Vec<Finding> {
 fn check_orphans(
     file: &ScopedFile,
     content: &str,
-    known: &HashMap<String, HashSet<String>>,
+    known: &HashMap<SpecId, HashSet<AcId>>,
 ) -> Vec<Finding> {
-    let refs: HashSet<(String, Option<String>)> = annotations::parse(content)
+    let refs: HashSet<(SpecId, Option<AcId>)> = annotations::parse(content)
         .into_iter()
         .map(|annotation| (annotation.spec_id, annotation.ac_id))
         .collect();
 
-    let mut orphans: Vec<(String, Option<String>)> = refs
+    let mut orphans: Vec<(SpecId, Option<AcId>)> = refs
         .into_iter()
         .filter(|(spec_id, ac_id)| match known.get(spec_id) {
             None => true,

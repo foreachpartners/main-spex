@@ -69,7 +69,7 @@ pub struct Contract {
 // listed are suppressed, so new errors in other files still surface.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
-    pub rule_id: RuleId,
+    pub rule_id: String,
     pub check: String,
     #[serde(default)]
     pub files: Vec<String>,
@@ -78,7 +78,7 @@ pub struct PreexistingError {
 // A fully-resolved baseline entry to write into `spex.yaml`. An empty `files`
 // renders a bare `rule_id`/`check` entry that suppresses the whole check.
 pub struct PreexistingEntry {
-    pub rule_id: RuleId,
+    pub rule_id: String,
     pub check: String,
     pub files: Vec<String>,
 }

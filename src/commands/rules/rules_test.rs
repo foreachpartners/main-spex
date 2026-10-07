@@ -8,7 +8,7 @@ mod tests {
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
         Repository {
-            rules: rules.iter().map(|r| r.to_string()).collect(),
+            rules: rules.iter().map(|r| testing::rule_id(r)).collect(),
             ..testing::repository(name, &format!("../{name}"))
         }
     }
@@ -26,20 +26,20 @@ mod tests {
 
     #[test]
     fn id_selected_defaults_to_true_when_empty() {
-        assert!(id_selected(&rule("A", ""), &[]));
+        assert!(id_selected(&rule("a", ""), &[]));
     }
 
     #[test]
     fn id_selected_filters_to_given_ids() {
-        let ids = vec!["A".to_string(), "B".to_string()];
-        assert!(id_selected(&rule("A", ""), &ids));
-        assert!(!id_selected(&rule("C", ""), &ids));
+        let ids = vec!["a".to_string(), "b".to_string()];
+        assert!(id_selected(&rule("a", ""), &ids));
+        assert!(!id_selected(&rule("c", ""), &ids));
     }
 
     #[test]
     fn repo_has_rule_and_id_selected_together_filter_assigned_and_selected_rules() {
-        let api = repo("demo-api", &["A", "B"]);
-        let rules = [rule("A", ""), rule("B", ""), rule("C", "")];
+        let api = repo("demo-api", &["a", "b"]);
+        let rules = [rule("a", ""), rule("b", ""), rule("c", "")];
 
         let ids: Vec<&str> = rules
             .iter()
@@ -47,15 +47,15 @@ mod tests {
             .filter(|rule| id_selected(rule, &[]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
-        assert_eq!(ids, vec!["A", "B"]);
+        assert_eq!(ids, vec!["a", "b"]);
 
         let filtered_ids: Vec<&str> = rules
             .iter()
             .filter(|rule| repo_has_rule(&api, rule))
-            .filter(|rule| id_selected(rule, &["A".to_string()]))
+            .filter(|rule| id_selected(rule, &["a".to_string()]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
-        assert_eq!(filtered_ids, vec!["A"]);
+        assert_eq!(filtered_ids, vec!["a"]);
     }
 
     fn write_workspace(dir: &std::path::Path) {
