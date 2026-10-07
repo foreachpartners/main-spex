@@ -31,7 +31,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        let rules = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
+        let rules = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
         for file in rules.files() {
             let dest = spex_dir.path().join(file.path());
             assert_eq!(
@@ -42,7 +42,7 @@ mod tests_unit {
             );
         }
 
-        let skills = TEMPLATES_DIR
+        let skills = BUNDLED_TEMPLATES_DIR
             .get_dir(SKILLS_DIRNAME)
             .expect("bundled skills dir");
         for skill in skills.dirs() {
@@ -71,7 +71,7 @@ mod tests_unit {
 
         scaffold(spex_dir.path()).expect("scaffold");
 
-        let docs = TEMPLATES_DIR
+        let docs = BUNDLED_TEMPLATES_DIR
             .get_dir(DOCS_DIRNAME)
             .expect("bundled docs dir");
         for file in docs.files() {
@@ -105,7 +105,7 @@ mod tests_unit {
         scaffold(spex_dir.path()).expect("scaffold");
 
         let agents = spex_dir.path().join(AGENTS_FILENAME);
-        let expected = TEMPLATES_DIR
+        let expected = BUNDLED_TEMPLATES_DIR
             .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents();

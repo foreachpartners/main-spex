@@ -8,7 +8,7 @@ use crate::error::Result;
 use crate::rule::{RULES_DIR, SCRIPTS_DIR};
 use crate::support::fs::{create_dir_all, make_files_executable, write_embedded_dir, write_file};
 use crate::support::util;
-use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, SKILLS_DIRNAME, TEMPLATES_DIR};
+use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, SKILLS_DIRNAME, BUNDLED_TEMPLATES_DIR};
 
 #[cfg(test)]
 #[path = "sync_templates_test.rs"]
@@ -55,7 +55,7 @@ fn merge_project_section(template: &[u8], local: &str) -> Vec<u8> {
 }
 
 fn sync_agents_md(spex_dir: &Path) -> Result<()> {
-    let Some(template) = TEMPLATES_DIR.get_file(AGENTS_FILENAME) else {
+    let Some(template) = BUNDLED_TEMPLATES_DIR.get_file(AGENTS_FILENAME) else {
         return Ok(());
     };
 
@@ -105,7 +105,7 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
 }
 
 fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
-    let Some(dir) = TEMPLATES_DIR.get_dir(RULES_DIR) else {
+    let Some(dir) = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR) else {
         return Ok(());
     };
 
@@ -147,7 +147,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
 }
 
 fn sync_skills(spex_dir: &Path) -> Result<()> {
-    let Some(skills) = TEMPLATES_DIR.get_dir(SKILLS_DIRNAME) else {
+    let Some(skills) = BUNDLED_TEMPLATES_DIR.get_dir(SKILLS_DIRNAME) else {
         return Ok(());
     };
 

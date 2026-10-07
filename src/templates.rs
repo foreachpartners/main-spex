@@ -4,7 +4,7 @@ use include_dir::{Dir, include_dir};
 #[path = "templates_test.rs"]
 mod templates_test;
 
-pub static TEMPLATES_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
+pub static BUNDLED_TEMPLATES_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 pub const SCHEMAS_DIRNAME: &str = "schemas";
 pub const DOCS_DIRNAME: &str = "docs";

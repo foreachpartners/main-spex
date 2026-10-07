@@ -7,7 +7,7 @@ use crate::support::fs::{
 };
 use crate::templates::{
     AGENTS_DIRNAME, AGENTS_FILENAME, CLAUDE_DIRNAME, CLAUDE_FILENAME, DOCS_DIRNAME,
-    SCHEMAS_DIRNAME, SKILLS_DIRNAME, TEMPLATES_DIR,
+    SCHEMAS_DIRNAME, SKILLS_DIRNAME, BUNDLED_TEMPLATES_DIR,
 };
 
 #[cfg(test)]
@@ -25,7 +25,7 @@ pub fn scaffold(spex_dir: &Path) -> Result<()> {
 
 pub fn copy_docs_and_schemas(spex_dir: &Path) -> Result<()> {
     for name in [DOCS_DIRNAME, SCHEMAS_DIRNAME] {
-        let dir = TEMPLATES_DIR
+        let dir = BUNDLED_TEMPLATES_DIR
             .get_dir(name)
             .expect("bundled template directory is missing");
         write_embedded_dir(dir, spex_dir)?;
@@ -34,7 +34,7 @@ pub fn copy_docs_and_schemas(spex_dir: &Path) -> Result<()> {
 }
 
 pub fn copy_rule_scripts(rule_id: &str, spex_dir: &Path) -> Result<()> {
-    let Some(scripts) = TEMPLATES_DIR.get_dir(format!("{SCRIPTS_DIR}/{rule_id}")) else {
+    let Some(scripts) = BUNDLED_TEMPLATES_DIR.get_dir(format!("{SCRIPTS_DIR}/{rule_id}")) else {
         return Ok(());
     };
     write_embedded_dir(scripts, spex_dir)
@@ -45,7 +45,7 @@ pub fn link_claude_dir(spex_dir: &Path) -> Result<()> {
 }
 
 fn copy_rules(spex_dir: &Path) -> Result<()> {
-    let Some(rules) = TEMPLATES_DIR.get_dir(RULES_DIR) else {
+    let Some(rules) = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR) else {
         return Ok(());
     };
 
@@ -62,7 +62,7 @@ fn copy_rules(spex_dir: &Path) -> Result<()> {
 }
 
 fn copy_skills(spex_dir: &Path) -> Result<()> {
-    let Some(skills) = TEMPLATES_DIR.get_dir(SKILLS_DIRNAME) else {
+    let Some(skills) = BUNDLED_TEMPLATES_DIR.get_dir(SKILLS_DIRNAME) else {
         return Ok(());
     };
 
@@ -70,7 +70,7 @@ fn copy_skills(spex_dir: &Path) -> Result<()> {
 }
 
 fn copy_agents_md(spex_dir: &Path) -> Result<()> {
-    let agents = TEMPLATES_DIR
+    let agents = BUNDLED_TEMPLATES_DIR
         .get_file(AGENTS_FILENAME)
         .expect("bundled AGENTS.md is missing");
     write_file(&spex_dir.join(AGENTS_FILENAME), agents.contents())?;

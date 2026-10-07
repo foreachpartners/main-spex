@@ -26,7 +26,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES_DIR
+        let expected = BUNDLED_TEMPLATES_DIR
             .get_file(SCHEMA)
             .expect("bundled schema")
             .contents();
@@ -43,7 +43,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES_DIR.get_file(DOC).expect("bundled doc").contents();
+        let expected = BUNDLED_TEMPLATES_DIR.get_file(DOC).expect("bundled doc").contents();
         assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 
@@ -63,12 +63,12 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected_spec = TEMPLATES_DIR
+        let expected_spec = BUNDLED_TEMPLATES_DIR
             .get_file(MANAGED_SPEC)
             .expect("bundled spec")
             .contents();
         assert_eq!(fs::read(&spec).expect("read spec"), expected_spec);
-        let expected_script = TEMPLATES_DIR
+        let expected_script = BUNDLED_TEMPLATES_DIR
             .get_file(SCRIPT)
             .expect("bundled script")
             .contents();
@@ -201,7 +201,7 @@ mod tests_unit {
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         let updated = fs::read_to_string(&agents).expect("read AGENTS.md");
-        let template = TEMPLATES_DIR
+        let template = BUNDLED_TEMPLATES_DIR
             .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents_utf8()
@@ -225,7 +225,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES_DIR
+        let expected = BUNDLED_TEMPLATES_DIR
             .get_file(AGENTS_FILENAME)
             .expect("bundled AGENTS.md")
             .contents();
@@ -253,7 +253,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES_DIR
+        let expected = BUNDLED_TEMPLATES_DIR
             .get_file("skills/spex-setup/references/GENERIC-REPO-SKILL-TEMPLATE.md")
             .expect("bundled reference")
             .contents();
@@ -263,7 +263,7 @@ mod tests_unit {
 
     #[test]
     fn bundled_skills_have_a_project_section() {
-        let skills = TEMPLATES_DIR
+        let skills = BUNDLED_TEMPLATES_DIR
             .get_dir(SKILLS_DIRNAME)
             .expect("bundled skills dir");
 
@@ -296,7 +296,7 @@ mod tests_unit {
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         let updated = fs::read_to_string(&skill).expect("read SKILL.md");
-        let template = TEMPLATES_DIR
+        let template = BUNDLED_TEMPLATES_DIR
             .get_file("skills/spex-setup/SKILL.md")
             .expect("bundled skill")
             .contents_utf8()
@@ -346,7 +346,7 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
-        let expected = TEMPLATES_DIR
+        let expected = BUNDLED_TEMPLATES_DIR
             .get_file("skills/spex-setup/SKILL.md")
             .expect("bundled skill")
             .contents();

@@ -10,7 +10,7 @@ mod tests_unit {
     #[test]
     fn bundled_docs_match_the_single_source_of_truth() {
         let root_docs = include_dir::include_dir!("$CARGO_MANIFEST_DIR/docs");
-        let bundled = TEMPLATES_DIR
+        let bundled = BUNDLED_TEMPLATES_DIR
             .get_dir(DOCS_DIRNAME)
             .expect("bundled docs dir");
 
@@ -34,7 +34,7 @@ mod tests_unit {
 
     #[test]
     fn rule_templates_have_no_leftover_template_only_fields() {
-        let dir = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
+        let dir = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
 
         for file in dir.files() {
             let text = file.contents_utf8().expect("utf8 rule");
@@ -53,7 +53,7 @@ mod tests_unit {
         let validator = crate::commands::check_schema::build_validator(&schema_path)
             .expect("build rule validator");
 
-        let dir = TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
+        let dir = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR).expect("bundled rules dir");
 
         for file in dir.files() {
             let text = file.contents_utf8().expect("utf8 rule");
