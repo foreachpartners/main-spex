@@ -1,10 +1,13 @@
 use std::path::Path;
 use std::process::ExitCode;
 
+use anstream::println;
+use owo_colors::OwoColorize;
+
 use crate::config::Config;
 use crate::rule::Severity;
 use crate::support::fs::file_url;
-use crate::support::style::Style;
+use crate::support::style::{hyperlink, version_line};
 use crate::support::util::plural;
 
 use super::{Finding, RepoReport};
@@ -14,8 +17,7 @@ use super::{Finding, RepoReport};
 mod report_test;
 
 pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -> ExitCode {
-    let style = Style::detect();
-    println!("{}", style.version_line());
+    println!("{}", version_line());
     println!();
     let mut total_errors = 0usize;
     let mut total_warnings = 0usize;
@@ -32,24 +34,20 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
 
         let base = config.repo_base_dir(spex_dir, &repo.name);
 
-        println!("{}", style.bold(&repo.name));
+        println!("{}", repo.name.bold());
         if repo.findings.is_empty() {
-            println!("  {}", style.green("no issues"));
+            println!("  {}", "no issues".green());
         } else {
             for finding in &repo.findings {
-                print_finding(&style, &base, finding);
+                print_finding(&base, finding);
             }
-            println!("  {}", style.dim(&count_summary(errors, warnings)));
+            println!("  {}", count_summary(errors, warnings).dimmed());
         }
         println!();
     }
 
     let total = count_summary(total_errors, total_warnings);
-    println!(
-        "{}: {}",
-        style.bold(&config.project_name),
-        style.bold(&total)
-    );
+    println!("{}: {}", config.project_name.bold(), total.bold());
 
     if total_errors > 0 {
         ExitCode::FAILURE
@@ -58,11 +56,11 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
     }
 }
 
-fn print_finding(style: &Style, base: &Path, finding: &Finding) {
-    let label = finding.severity.into();
+fn print_finding(base: &Path, finding: &Finding) {
+    let label: &str = finding.severity.into();
     let severity = match finding.severity {
-        Severity::Error => style.red(label),
-        Severity::Warn => style.yellow(label),
+        Severity::Error => label.red().to_string(),
+        Severity::Warn => label.yellow().to_string(),
     };
     let check = if finding.check.is_empty() {
         finding.rule_id.clone()
@@ -72,9 +70,9 @@ fn print_finding(style: &Style, base: &Path, finding: &Finding) {
     let location = finding
         .location
         .as_deref()
-        .map(|location| format!("  {}", location_link(style, base, location)))
+        .map(|location| format!("  {}", location_link(base, location)))
         .unwrap_or_default();
-    println!("  {severity}  {}{location}", style.cyan(&check));
+    println!("  {severity}  {}{location}", check.cyan());
     for line in finding.message.lines() {
         println!("      {line}");
     }
@@ -83,9 +81,9 @@ fn print_finding(style: &Style, base: &Path, finding: &Finding) {
 // Renders a finding's location as a terminal hyperlink to the absolute file
 // (display text stays the short repository-relative form), so it opens
 // correctly regardless of the shell's current directory.
-fn location_link(style: &Style, base: &Path, location: &str) -> String {
-    let text = style.dim(&format!("({location})"));
-    style.hyperlink(&location_url(base, location), &text)
+fn location_link(base: &Path, location: &str) -> String {
+    let text = format!("({location})").dimmed().to_string();
+    hyperlink(&location_url(base, location), &text)
 }
 
 fn location_url(base: &Path, location: &str) -> String {

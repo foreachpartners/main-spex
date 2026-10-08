@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 use error_stack::ResultExt;
 use serde::de::DeserializeOwned;
+use walkdir::WalkDir;
 
 use crate::error::{CliError, Result};
 
@@ -45,28 +46,19 @@ pub struct YamlFile<T> {
 }
 
 pub fn yaml_files(dir: &Path) -> Result<Vec<PathBuf>> {
-    let mut files = Vec::new();
-    if dir.is_dir() {
-        collect_yaml_files(dir, &mut files)?;
+    if !dir.is_dir() {
+        return Ok(Vec::new());
     }
-    files.sort();
-    Ok(files)
-}
 
-fn collect_yaml_files(dir: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
-    let entries = fs::read_dir(dir).change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
-
-    for entry in entries {
+    let mut files = Vec::new();
+    for entry in WalkDir::new(dir).sort_by_file_name() {
         let entry = entry.change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
-        let path = entry.path();
-        if path.is_dir() {
-            collect_yaml_files(&path, files)?;
-        } else if path.extension().and_then(|ext| ext.to_str()) == Some("yaml") {
-            files.push(path);
+        let is_yaml = entry.path().extension().and_then(|ext| ext.to_str()) == Some("yaml");
+        if is_yaml && entry.file_type().is_file() {
+            files.push(entry.into_path());
         }
     }
-
-    Ok(())
+    Ok(files)
 }
 
 pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<YamlFile<T>>> {

@@ -63,7 +63,7 @@ src/                CLI source
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
-    style.rs        Terminal color styling and visible-width measuring (shared by commands)
+    style.rs        Terminal hyperlinks, version line and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)

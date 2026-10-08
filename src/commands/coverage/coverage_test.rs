@@ -2,7 +2,6 @@
 mod tests {
     use super::super::*;
     use crate::spec::{AcceptanceCriterion, CoverageLayer, Spec, Statement, Status};
-    use crate::support::style::Style;
     use crate::support::testing;
     use std::path::Path;
 
@@ -78,12 +77,11 @@ mod tests {
     }
 
     #[test]
-    fn spec_link_targets_the_spec_file() {
+    fn spec_url_targets_the_spec_file() {
         let spec = spec("a", Status::Active);
-        let link = spec_link(&Style::colored(), Path::new("/workspace"), &spec);
-        assert!(
-            link.contains("file:///workspace/specs/a.yaml"),
-            "got: {link}"
+        assert_eq!(
+            spec_url(Path::new("/workspace"), &spec),
+            "file:///workspace/specs/a.yaml"
         );
     }
 
@@ -343,13 +341,8 @@ mod tests {
 
     fn rendered(width: usize, verbose: bool, specs: &[Spec]) -> String {
         let rows = SpecRow::all(specs, &Found::new());
-        render(
-            &Style::plain(),
-            width,
-            verbose,
-            Path::new("/workspace"),
-            &rows,
-        )
+        let text = render(width, verbose, Path::new("/workspace"), &rows);
+        anstream::adapter::strip_str(&text).to_string()
     }
 
     fn gapped_spec() -> Spec {

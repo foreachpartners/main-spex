@@ -2,13 +2,14 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::Path;
 use std::process::ExitCode;
 
+use anstream::println;
 use error_stack::ResultExt;
+use owo_colors::OwoColorize;
 
 use crate::config::{self, Config, PreexistingEntry, Repository};
 use crate::error::{CliError, Result};
 use crate::rule::Severity;
 use crate::support::fs::write_file;
-use crate::support::style::Style;
 use crate::support::util::plural;
 
 use super::RepoReport;
@@ -106,17 +107,18 @@ fn report_fill(
     by_repo: &HashMap<String, Vec<PreexistingEntry>>,
     changed: bool,
 ) {
-    let style = Style::detect();
-    println!("{}", style.bold("spex check --fill-preexisting-errors"));
+    println!("{}", "spex check --fill-preexisting-errors".bold());
     println!();
     for repo in selected {
         let count = by_repo.get(&repo.repository_name).map_or(0, Vec::len);
         let summary = if count == 0 {
-            style.green("no pre-existing errors")
+            "no pre-existing errors".green().to_string()
         } else {
-            style.dim(&format!("baselined {}", plural(count, "check")))
+            format!("baselined {}", plural(count, "check"))
+                .dimmed()
+                .to_string()
         };
-        println!("  {}  {summary}", style.bold(&repo.repository_name));
+        println!("  {}  {summary}", repo.repository_name.bold());
     }
     println!();
     if changed {

@@ -3,13 +3,14 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use anstream::println;
 use error_stack::{Report, ResultExt, bail};
+use owo_colors::OwoColorize;
 
 use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
-use crate::support::style::Style;
 
 use super::scaffold::scaffold;
 
@@ -48,12 +49,10 @@ pub fn run() -> Result<ExitCode> {
     write_code_workspace(&spex_dir, &project_name)?;
     copy_templates(&spex_dir)?;
 
-    let style = Style::detect();
     println!(
         "{}",
-        style.green(
-            "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to add workspace repositories and complete setup"
-        )
+        "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to add workspace repositories and complete setup"
+            .green()
     );
     Ok(ExitCode::SUCCESS)
 }

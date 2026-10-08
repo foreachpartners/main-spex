@@ -77,27 +77,26 @@ pub fn symlink_if_absent(_link: &Path, _target: &str) -> Result<()> {
 pub fn make_files_executable(dir: &Path) -> Result<()> {
     use std::os::unix::fs::PermissionsExt;
 
+    use walkdir::WalkDir;
+
     if !dir.is_dir() {
         return Ok(());
     }
 
-    let entries = fs::read_dir(dir).change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
-
-    for entry in entries {
-        let path = entry
-            .change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?
-            .path();
-        if path.is_dir() {
-            make_files_executable(&path)?;
+    for entry in WalkDir::new(dir) {
+        let entry = entry.change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
+        if !entry.file_type().is_file() {
             continue;
         }
-        let mut permissions = fs::metadata(&path)
+        let path = entry.path();
+        let mut permissions = entry
+            .metadata()
             .change_context_lazy(|| {
                 CliError::Internal(format!("could not read metadata of `{}`", path.display()))
             })?
             .permissions();
         permissions.set_mode(permissions.mode() | 0o111);
-        fs::set_permissions(&path, permissions).change_context_lazy(|| {
+        fs::set_permissions(path, permissions).change_context_lazy(|| {
             CliError::Internal(format!("could not set permissions on `{}`", path.display()))
         })?;
     }

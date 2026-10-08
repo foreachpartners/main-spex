@@ -1,11 +1,13 @@
 use std::path::PathBuf;
 
+use anstream::eprintln;
+use owo_colors::OwoColorize;
+
 use crate::config::Config;
 use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
 use crate::support::fs::current_dir;
-use crate::support::style::Style;
 
 pub struct Spex {
     pub dir: PathBuf,
@@ -28,8 +30,7 @@ impl Spex {
 
     fn warn_if_cli_outdated(&self) {
         if let Some(warning) = self.config.version_warning() {
-            let style = Style::detect();
-            eprintln!("{} {warning}", style.yellow("warning:"));
+            eprintln!("{} {warning}", "warning:".yellow());
         }
     }
 

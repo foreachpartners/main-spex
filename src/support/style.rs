@@ -1,104 +1,30 @@
-use std::io::IsTerminal;
+use owo_colors::OwoColorize;
+use supports_hyperlinks::Stream;
 
 #[cfg(test)]
 #[path = "style_test.rs"]
 mod style_test;
 
 pub fn visible_width(text: &str) -> usize {
-    let mut width = 0;
-    let mut chars = text.chars();
-    while let Some(ch) = chars.next() {
-        if ch != '\u{1b}' {
-            width += 1;
-            continue;
-        }
-        match chars.next() {
-            Some('[') => {
-                chars.by_ref().find(char::is_ascii_alphabetic);
-            }
-            Some(']') => {
-                while let Some(next) = chars.next() {
-                    if next == '\u{1b}' {
-                        chars.next();
-                        break;
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-    width
+    anstream::adapter::strip_str(text)
+        .map(|part| part.chars().count())
+        .sum()
 }
 
-pub struct Style {
-    enabled: bool,
+pub fn version_line() -> String {
+    format!("spex {}", env!("CARGO_PKG_VERSION"))
+        .dimmed()
+        .to_string()
 }
 
-impl Style {
-    pub fn detect() -> Self {
-        Self::new(std::io::stdout().is_terminal())
+pub fn hyperlink(url: &str, text: &str) -> String {
+    if supports_hyperlinks::on(Stream::Stdout) {
+        osc8_link(url, text)
+    } else {
+        text.to_string()
     }
+}
 
-    #[cfg(test)]
-    pub fn plain() -> Self {
-        Self { enabled: false }
-    }
-
-    #[cfg(test)]
-    pub fn colored() -> Self {
-        Self { enabled: true }
-    }
-
-    fn new(is_terminal: bool) -> Self {
-        let enabled = is_terminal && std::env::var_os("NO_COLOR").is_none();
-        Self { enabled }
-    }
-
-    fn paint(&self, code: &str, text: &str) -> String {
-        if self.enabled {
-            format!("\u{1b}[{code}m{text}\u{1b}[0m")
-        } else {
-            text.to_string()
-        }
-    }
-
-    pub fn version_line(&self) -> String {
-        self.dim(&format!("spex {}", env!("CARGO_PKG_VERSION")))
-    }
-
-    pub fn bold(&self, text: &str) -> String {
-        self.paint("1", text)
-    }
-
-    pub fn dim(&self, text: &str) -> String {
-        self.paint("2", text)
-    }
-
-    pub fn red(&self, text: &str) -> String {
-        self.paint("31", text)
-    }
-
-    pub fn yellow(&self, text: &str) -> String {
-        self.paint("33", text)
-    }
-
-    pub fn green(&self, text: &str) -> String {
-        self.paint("32", text)
-    }
-
-    pub fn cyan(&self, text: &str) -> String {
-        self.paint("36", text)
-    }
-
-    pub fn blue(&self, text: &str) -> String {
-        self.paint("34", text)
-    }
-
-    pub fn hyperlink(&self, url: &str, text: &str) -> String {
-        if self.enabled {
-            format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")
-        } else {
-            text.to_string()
-        }
-    }
+fn osc8_link(url: &str, text: &str) -> String {
+    format!("\u{1b}]8;;{url}\u{1b}\\{text}\u{1b}]8;;\u{1b}\\")
 }

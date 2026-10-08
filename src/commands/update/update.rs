@@ -1,13 +1,14 @@
 use std::fs;
 use std::process::ExitCode;
 
+use anstream::println;
 use error_stack::ResultExt;
+use owo_colors::OwoColorize;
 
 use crate::config::spex::Spex;
 use crate::config::{CLI_VERSION, Config};
 use crate::error::{CliError, Result};
 use crate::support::fs::write_file;
-use crate::support::style::Style;
 use serde::Deserialize;
 
 use super::sync_templates::sync_templates;
@@ -39,19 +40,19 @@ pub fn run() -> Result<ExitCode> {
 
     write_file(&config_path, Config::set_cli_version(&raw, CLI_VERSION))?;
 
-    let style = Style::detect();
     println!(
         "{}",
-        style.green(&format!(
+        format!(
             "spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}"
-        ))
+        )
+        .green()
     );
 
     let entries = changelog_since(CHANGELOG, &previous.cli_version);
     if !entries.is_empty() {
         println!(
             "\n{}\n",
-            style.bold(&format!("Changes since {}:", previous.cli_version))
+            format!("Changes since {}:", previous.cli_version).bold()
         );
         println!("{}", entries.join("\n\n"));
     }
