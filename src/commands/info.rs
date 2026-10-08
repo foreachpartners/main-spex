@@ -22,7 +22,7 @@ pub struct InfoArgs {
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let spex = Spex::discover_and_warn()?;
+    let spex = Spex::discover()?;
     let value = serde_json::to_value(&spex.config).change_context_lazy(serialize_error)?;
 
     if let Some(field) = &args.print {

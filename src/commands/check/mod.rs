@@ -181,7 +181,7 @@ impl WorkspaceCheck {
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
-    let spex = Spex::discover_and_warn()?;
+    let spex = Spex::discover()?;
     let rules = spex.rules()?;
     let specs = spex.specs()?;
     let known_ids: HashMap<SpecId, HashSet<AcId>> = specs

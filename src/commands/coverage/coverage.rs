@@ -112,7 +112,7 @@ impl<'a> SpecRow<'a> {
 }
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
-    let spex = Spex::discover_and_warn()?;
+    let spex = Spex::discover()?;
     let specs = spex.specs()?;
 
     for short_name in &args.scope {

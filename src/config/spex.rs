@@ -21,11 +21,7 @@ impl Spex {
         let config_path = Self::locate_spex_config()?;
         let config = Config::load(&config_path)?;
         let dir = Config::dir_of(&config_path).to_path_buf();
-        Ok(Self { dir, config })
-    }
-
-    pub fn discover_and_warn() -> Result<Self> {
-        let spex = Self::discover()?;
+        let spex = Self { dir, config };
         spex.warn_if_cli_outdated();
         Ok(spex)
     }

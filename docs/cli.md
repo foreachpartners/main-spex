@@ -76,7 +76,7 @@ It updates an initialized project only: it fails when no `spex.yaml` is found, s
 - Overwrites managed files only; any skills, scripts, schemas, docs, or rules you added, and plans, are left untouched.
 - Updates `cli_version` in `spex.yaml` to the installed binary's version.
 - Prints the `CHANGELOG.md` entries newer than the previous `cli_version`, newest first; prints nothing if there are none, and every entry if the previous `cli_version` is not found in the changelog.
-- Run it after upgrading the `spex` binary to pull in framework updates; `check`, `coverage` and `info` warn when `cli_version` does not match the installed CLI.
+- Run it after upgrading the `spex` binary to pull in framework updates; `check`, `coverage`, `info`, `rules` and `specs` warn when `cli_version` does not match the installed CLI.
 
 ```sh
 spex update
