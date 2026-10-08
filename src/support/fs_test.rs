@@ -25,6 +25,14 @@ mod tests {
     }
 
     #[test]
+    fn file_url_encodes_characters_that_would_break_the_url() {
+        assert_eq!(
+            file_url(PathBuf::from("/workspace/proj#2/50%/a?.yaml").as_path()),
+            "file:///workspace/proj%232/50%25/a%3F.yaml"
+        );
+    }
+
+    #[test]
     fn write_embedded_dir_mirrors_bundled_paths_under_the_destination() {
         let dest = tempdir().expect("temp dir");
 

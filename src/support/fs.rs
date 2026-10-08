@@ -11,10 +11,7 @@ use crate::error::{CliError, Result};
 mod fs_test;
 
 pub fn file_url(path: &Path) -> String {
-    format!(
-        "file://{}",
-        canonical(path).to_string_lossy().replace(' ', "%20")
-    )
+    anstyle_hyperlink::file_to_url(None, &canonical(path)).unwrap_or_default()
 }
 
 pub fn current_dir() -> Result<PathBuf> {

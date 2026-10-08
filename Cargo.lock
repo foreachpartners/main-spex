@@ -53,6 +53,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
+name = "anstyle-hyperlink"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a14cad0fa1d1fb02de486a95ea7fd8dd28567b82f65b4ca34bffa7da81823e4"
+dependencies = [
+ "libc",
+ "percent-encoding",
+]
+
+[[package]]
 name = "anstyle-parse"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -732,6 +742,7 @@ name = "main-spex"
 version = "0.11.0"
 dependencies = [
  "anstream",
+ "anstyle-hyperlink",
  "ast-grep-config",
  "ast-grep-core",
  "ast-grep-language",
