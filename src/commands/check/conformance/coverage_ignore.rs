@@ -1,6 +1,8 @@
+use std::path::Path;
+
 use crate::spec::{ContractLevel, CoverageLayer, Spec};
 
-use super::Finding;
+use super::{Finding, rel};
 
 #[cfg(test)]
 #[path = "coverage_ignore_test.rs"]
@@ -11,7 +13,7 @@ mod coverage_ignore_test;
 // all; with `single` the contract is spec-level, so a per-criterion entry
 // can't match anything; only `for-each-ac` has per-criterion contracts to
 // waive.
-pub(super) fn validate_coverage_ignore(spec: &Spec) -> Vec<Finding> {
+pub(super) fn validate_coverage_ignore(spex_dir: &Path, spec: &Spec) -> Vec<Finding> {
     spec.coverage_ignore
         .iter()
         .filter(|ignore| ignore.layer == CoverageLayer::Contract)
@@ -29,7 +31,7 @@ pub(super) fn validate_coverage_ignore(spec: &Spec) -> Vec<Finding> {
                 Finding::error(
                     spec.id.as_str(),
                     "coverage-ignore",
-                    Some(spec.location()),
+                    Some(rel(spex_dir, &spec.path)),
                     message,
                 )
             })

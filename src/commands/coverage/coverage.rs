@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use std::path::Path;
 use std::process::ExitCode;
 
 use anstream::print;
@@ -120,7 +119,6 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
 
     for short_name in &args.scope {
         if !spex
-            .config
             .repositories
             .iter()
             .any(|repo| &repo.repository_short_name == short_name)
@@ -134,9 +132,9 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
         .filter(|spec| spec.scope_selected(&args.scope))
         .collect();
 
-    let found = Found::scan_workspace(&spex.dir, &spex.config)?;
+    let found = Found::scan_workspace(&spex)?;
 
-    Ok(report(&spex.dir, &specs, &found, args.verbose))
+    Ok(report(&specs, &found, args.verbose))
 }
 
 fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
@@ -153,9 +151,9 @@ fn ac_layer_summary(ac_rows: &[&AcCoverage]) -> String {
         .join(", ")
 }
 
-fn report(spex_dir: &Path, specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
+fn report(specs: &[Spec], found: &Found, verbose: bool) -> ExitCode {
     let rows = SpecRow::all(specs, found);
-    print!("{}", render(terminal_width(), verbose, spex_dir, &rows));
+    print!("{}", render(terminal_width(), verbose, &rows));
 
     if active_gaps(&rows) == 0 {
         ExitCode::SUCCESS
@@ -164,7 +162,7 @@ fn report(spex_dir: &Path, specs: &[Spec], found: &Found, verbose: bool) -> Exit
     }
 }
 
-fn render(width: usize, verbose: bool, spex_dir: &Path, rows: &[SpecRow]) -> String {
+fn render(width: usize, verbose: bool, rows: &[SpecRow]) -> String {
     let id_width = rows
         .iter()
         .filter(|row| row.has_gap() || row.has_pending())
@@ -175,7 +173,6 @@ fn render(width: usize, verbose: bool, spex_dir: &Path, rows: &[SpecRow]) -> Str
         width,
         verbose,
         id_width,
-        spex_dir,
         text: String::new(),
     };
 
@@ -218,15 +215,12 @@ fn status_groups<'a>(rows: &'a [SpecRow]) -> Vec<(Status, Vec<&'a SpecRow<'a>>)>
         .collect()
 }
 
-fn spec_url(spex_dir: &Path, spec: &Spec) -> String {
-    file_url(&spex_dir.join(spec.location()))
+fn spec_url(spec: &Spec) -> String {
+    file_url(&spec.path)
 }
 
-fn spec_link(spex_dir: &Path, spec: &Spec) -> String {
-    hyperlink(
-        &spec_url(spex_dir, spec),
-        &spec.id.as_str().cyan().to_string(),
-    )
+fn spec_link(spec: &Spec) -> String {
+    hyperlink(&spec_url(spec), &spec.id.as_str().cyan().to_string())
 }
 
 fn scope_groups<'a>(gapped: &[&'a SpecRow<'a>]) -> Vec<(Option<&'a str>, Vec<&'a SpecRow<'a>>)> {
@@ -276,15 +270,14 @@ fn ac_gap_label(ac: &AcCoverage) -> String {
 const DIM: Style = Style::new().dimmed();
 const RED: Style = Style::new().red();
 
-struct Printer<'a> {
+struct Printer {
     width: usize,
     verbose: bool,
     id_width: usize,
-    spex_dir: &'a Path,
     text: String,
 }
 
-impl Printer<'_> {
+impl Printer {
     fn line(&mut self, text: impl Display) {
         self.text.push_str(&text.to_string());
         self.text.push('\n');
@@ -339,7 +332,7 @@ impl Printer<'_> {
                 Status::Active => {}
                 _ => {
                     for row in group {
-                        self.line(format!("    {}", spec_link(self.spex_dir, row.spec)));
+                        self.line(format!("    {}", spec_link(row.spec)));
                         printed_blank = false;
                         if self.verbose && status == Status::Planned {
                             self.wrapped(6, &row.spec.description);
@@ -358,7 +351,7 @@ impl Printer<'_> {
     fn gap_row(&mut self, row: &SpecRow) {
         let id = format!(
             "{}{}",
-            spec_link(self.spex_dir, row.spec),
+            spec_link(row.spec),
             " ".repeat(self.id_width.saturating_sub(row.spec.id.as_str().len())),
         );
         let ac_text = format!("{}/{} AC", row.ac_done(), row.ac_total());

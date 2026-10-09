@@ -565,9 +565,10 @@ constraints:
         }
     }
 
-    fn repository(path: &str, rules: Vec<&str>) -> Repository {
+    fn repository(spex_dir: &Path, path: &str, rules: Vec<&str>) -> Repository {
         Repository {
             rules: rules.into_iter().map(testing::rule_id).collect(),
+            path: spex_dir.join(path),
             ..testing::repository("api", path)
         }
     }
@@ -596,7 +597,7 @@ constraints:
 
         let rules = [rule("x", vec![negated_glob.clone(), non_negated])];
 
-        let repository = repository("../api", vec!["x"]);
+        let repository = repository(&spex, "../api", vec!["x"]);
 
         // Without --files: negated check fires because dprint.json is absent.
         let findings = check_repo(
@@ -660,7 +661,7 @@ constraints:
         let mut collected = Vec::new();
         let mut repo_findings = check_repo(
             CheckRepoArgs {
-                repo: &repository("../api", vec!["x"]),
+                repo: &repository(&spex, "../api", vec!["x"]),
                 spex_dir: &spex,
                 rules: &rules,
                 known_ids: &HashMap::new(),
@@ -672,7 +673,7 @@ constraints:
         repo_findings.extend(
             check_repo(
                 CheckRepoArgs {
-                    repo: &repository("../web", vec!["x"]),
+                    repo: &repository(&spex, "../web", vec!["x"]),
                     spex_dir: &spex,
                     rules: &rules,
                     known_ids: &HashMap::new(),

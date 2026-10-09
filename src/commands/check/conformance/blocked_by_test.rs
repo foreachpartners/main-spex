@@ -27,7 +27,7 @@ mod tests {
         ];
         let spec = spec_with_blockers(&["missing", "done", "pending", "still-pending"]);
 
-        let findings = validate_blocked_by(&spec, &status_by_id(&specs));
+        let findings = validate_blocked_by(testing::spex_dir(), &spec, &status_by_id(&specs));
 
         assert_eq!(findings.len(), 2);
 
@@ -48,7 +48,7 @@ mod tests {
         let specs = [testing::spec("a-spec")];
         let spec = spec_with_blockers(&["a-rule"]);
 
-        let findings = validate_blocked_by(&spec, &status_by_id(&specs));
+        let findings = validate_blocked_by(testing::spex_dir(), &spec, &status_by_id(&specs));
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);

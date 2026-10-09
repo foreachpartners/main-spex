@@ -45,7 +45,6 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
 fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
     for name in &args.repo {
         if !spex
-            .config
             .repositories
             .iter()
             .any(|repo| repo.matches_any_repo_name(name))
@@ -88,7 +87,6 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
     }
 
     let repositories: Vec<&Repository> = spex
-        .config
         .repositories
         .iter()
         .filter(|repo| {

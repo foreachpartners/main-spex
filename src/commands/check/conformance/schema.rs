@@ -43,14 +43,14 @@ pub(super) fn validate_schema(
 
     for spec in specs {
         findings.extend(check_filename_matches_id(
-            spec.location(),
+            spex_dir,
             &spec.path,
             spec.id.as_str(),
         ));
     }
     for rule in rules {
         findings.extend(check_filename_matches_id(
-            rule.location(),
+            spex_dir,
             &rule.path,
             rule.id.as_str(),
         ));
@@ -94,14 +94,14 @@ fn validate_schema_group(spex_dir: &Path, files: &[PathBuf], schema_name: &str) 
 
 // A spec or rule file must be named after its own id (naming-convention: id
 // and filename are identical).
-fn check_filename_matches_id(location: String, path: &str, id: &str) -> Option<Finding> {
-    let stem = Path::new(path)
+fn check_filename_matches_id(spex_dir: &Path, path: &Path, id: &str) -> Option<Finding> {
+    let stem = path
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or_default();
     (id != stem).then(|| {
         conform_finding(
-            Some(location),
+            Some(rel(spex_dir, path)),
             format!("filename stem `{stem}` does not match id `{id}`"),
         )
     })

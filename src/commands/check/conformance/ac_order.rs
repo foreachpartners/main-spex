@@ -1,8 +1,10 @@
+use std::path::Path;
+
 use crate::rule::Rule;
 use crate::spec::Spec;
 use crate::support::commitment::Commitment;
 
-use super::{Finding, RULE_ID};
+use super::{Finding, RULE_ID, rel};
 
 #[cfg(test)]
 #[path = "ac_order_test.rs"]
@@ -14,7 +16,7 @@ const AC_ORDER_CHECK: &str = "ac-ordered";
 // commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A spec's
 // criteria carry the commitment as a key (`must`, `must_not`, ...); a rule's
 // are plain strings starting with it, and those without one are skipped.
-pub(super) fn validate_ac_order(specs: &[Spec], rules: &[Rule]) -> Vec<Finding> {
+pub(super) fn validate_ac_order(spex_dir: &Path, specs: &[Spec], rules: &[Rule]) -> Vec<Finding> {
     let mut findings = Vec::new();
 
     for spec in specs {
@@ -22,7 +24,7 @@ pub(super) fn validate_ac_order(specs: &[Spec], rules: &[Rule]) -> Vec<Finding> 
             .acceptance_criteria
             .iter()
             .map(|ac| (ac.line, ac.statement.commitment()));
-        findings.extend(check_order(&spec.location(), criteria));
+        findings.extend(check_order(&rel(spex_dir, &spec.path), criteria));
     }
 
     for rule in rules {
@@ -30,7 +32,7 @@ pub(super) fn validate_ac_order(specs: &[Spec], rules: &[Rule]) -> Vec<Finding> 
             .acceptance_criteria
             .iter()
             .filter_map(|ac| Some((ac.line, ac.commitment()?)));
-        findings.extend(check_order(&rule.location(), criteria));
+        findings.extend(check_order(&rel(spex_dir, &rule.path), criteria));
     }
 
     findings

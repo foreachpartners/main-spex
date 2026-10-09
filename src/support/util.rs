@@ -41,6 +41,7 @@ pub fn wrap_text(text: &str, width: usize) -> Vec<String> {
 
 pub struct YamlFile<T> {
     pub item: T,
+    pub path: PathBuf,
     pub rel_path: String,
     pub raw: String,
 }
@@ -76,6 +77,7 @@ pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<YamlFile<T>>
                 .into_owned();
             Ok(YamlFile {
                 item,
+                path,
                 rel_path,
                 raw,
             })
@@ -109,8 +111,15 @@ pub fn acceptance_criteria_lines(text: &str) -> Vec<usize> {
     lines
 }
 
-pub fn number_criteria<A>(criteria: &mut [A], raw: &str, set_line: impl Fn(&mut A, usize)) {
-    for (criterion, line) in criteria.iter_mut().zip(acceptance_criteria_lines(raw)) {
-        set_line(criterion, line);
-    }
+pub fn with_source_lines<C, A>(
+    criteria: Vec<C>,
+    raw: &str,
+    build: impl Fn(C, usize) -> A,
+) -> Vec<A> {
+    let lines = acceptance_criteria_lines(raw);
+    criteria
+        .into_iter()
+        .enumerate()
+        .map(|(index, criterion)| build(criterion, lines.get(index).copied().unwrap_or_default()))
+        .collect()
 }

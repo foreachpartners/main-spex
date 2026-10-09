@@ -1,8 +1,7 @@
-use std::path::Path;
-
 use error_stack::Report;
 
-use crate::config::{Config, Repository};
+use crate::config::Repository;
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 
 use super::ScopedFile;
@@ -17,13 +16,12 @@ mod select_test;
 // explicitly named `--repo`, so a `per-repo` script runs only where the files
 // live (plus any repository the user named outright).
 pub(super) fn select_repos<'a>(
-    config: &'a Config,
-    spex_dir: &Path,
+    spex: &'a Spex,
     names: &[String],
     files: &[String],
 ) -> Result<Vec<&'a Repository>> {
     for name in names {
-        if !config
+        if !spex
             .repositories
             .iter()
             .any(|repo| repo.matches_any_repo_name(name))
@@ -33,9 +31,10 @@ pub(super) fn select_repos<'a>(
     }
 
     for file in files {
-        let found = config.repositories.iter().any(|repo| {
-            !ScopedFile::provided(&spex_dir.join(&repo.path), std::slice::from_ref(file)).is_empty()
-        });
+        let found = spex
+            .repositories
+            .iter()
+            .any(|repo| !ScopedFile::provided(&repo.path, std::slice::from_ref(file)).is_empty());
         if !found {
             return Err(Report::new(CliError::Custom(format!(
                 "unknown file `{file}` — not found in any workspace repository"
@@ -44,7 +43,7 @@ pub(super) fn select_repos<'a>(
     }
 
     if files.is_empty() {
-        return Ok(config
+        return Ok(spex
             .repositories
             .iter()
             .filter(|repo| {
@@ -53,12 +52,12 @@ pub(super) fn select_repos<'a>(
             .collect());
     }
 
-    Ok(config
+    Ok(spex
         .repositories
         .iter()
         .filter(|repo| {
             names.iter().any(|name| repo.matches_any_repo_name(name))
-                || !ScopedFile::provided(&spex_dir.join(&repo.path), files).is_empty()
+                || !ScopedFile::provided(&repo.path, files).is_empty()
         })
         .collect())
 }

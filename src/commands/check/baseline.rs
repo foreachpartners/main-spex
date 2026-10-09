@@ -6,7 +6,7 @@ use anstream::println;
 use error_stack::ResultExt;
 use owo_colors::OwoColorize;
 
-use crate::config::{self, Config, PreexistingEntry, Repository};
+use crate::config::{self, PreexistingEntry, Repository, SpexConfig};
 use crate::error::{CliError, Result};
 use crate::rule::Severity;
 use crate::support::fs::write_file;
@@ -54,7 +54,7 @@ pub(super) fn fill_preexisting_errors(
                 continue;
             }
             let (repo_name, file) = if report.name == "workspace" {
-                match finding.owning_repo(selected) {
+                match finding.owning_repo(selected, spex_dir) {
                     Some(resolved) => resolved,
                     None => continue,
                 }
@@ -92,7 +92,7 @@ pub(super) fn fill_preexisting_errors(
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
     let raw = std::fs::read_to_string(&config_path)
         .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
-    let updated = Config::set_preexisting_errors(&raw, &by_repo);
+    let updated = SpexConfig::set_preexisting_errors(&raw, &by_repo);
     let changed = updated != raw;
     if changed {
         write_file(&config_path, &updated)?;

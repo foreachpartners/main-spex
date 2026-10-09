@@ -1,46 +1,48 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use strum::IntoStaticStr;
 
 use super::id::RuleId;
+use super::rule_config::RuleConfig;
 use crate::error::Result;
 use crate::support::commitment::Commitment;
 use crate::support::util;
 
+#[cfg(test)]
+#[path = "rule_test.rs"]
+mod rule_test;
+
 pub const RULES_DIR: &str = "rules";
 pub const SCRIPTS_DIR: &str = "scripts";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct Rule {
     pub id: RuleId,
-    #[serde(skip, default)]
-    pub path: String,
-    #[serde(default)]
+    pub path: PathBuf,
     pub acceptance_criteria: Vec<AcceptanceCriterion>,
-    #[serde(default)]
     pub checks: Vec<Check>,
 }
 
 impl Rule {
-    // Where the rule is defined, relative to the workspace root (e.g.
-    // `rules/secret-handling.yaml`).
-    pub fn location(&self) -> String {
-        format!("{RULES_DIR}/{}", self.path)
+    pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
+        Ok(util::load_yaml_dir::<RuleConfig>(rules_dir)?
+            .into_iter()
+            .map(|file| Self::from_config(file.item, file.path, &file.raw))
+            .collect())
     }
 
-    pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
-        Ok(util::load_yaml_dir::<Self>(rules_dir)?
-            .into_iter()
-            .map(|file| {
-                let mut rule = file.item;
-                rule.path = file.rel_path;
-                util::number_criteria(&mut rule.acceptance_criteria, &file.raw, |ac, line| {
-                    ac.line = line
-                });
-                rule
-            })
-            .collect())
+    fn from_config(config: RuleConfig, path: PathBuf, raw: &str) -> Self {
+        Self {
+            id: config.id,
+            path,
+            acceptance_criteria: util::with_source_lines(
+                config.acceptance_criteria,
+                raw,
+                |text, line| AcceptanceCriterion { text, line },
+            ),
+            checks: config.checks,
+        }
     }
 }
 
@@ -49,21 +51,8 @@ impl Rule {
 #[derive(Debug, Clone)]
 pub struct AcceptanceCriterion {
     pub text: String,
-    // The 1-indexed source line of this criterion, filled in by `Rule::load_all`
-    // from the raw file text (serde tracks no spans).
+    // The 1-indexed source line of this criterion in the rule file.
     pub line: usize,
-}
-
-impl<'de> serde::Deserialize<'de> for AcceptanceCriterion {
-    fn deserialize<D>(deserializer: D) -> core::result::Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        Ok(AcceptanceCriterion {
-            text: String::deserialize(deserializer)?,
-            line: 0,
-        })
-    }
 }
 
 impl AcceptanceCriterion {

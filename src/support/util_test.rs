@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{load_yaml_dir, number_criteria, wrap_text, yaml_files};
+    use super::super::{load_yaml_dir, with_source_lines, wrap_text, yaml_files};
     use serde::Deserialize;
     use tempfile::tempdir;
 
@@ -88,13 +88,21 @@ mod tests {
     }
 
     #[test]
-    fn number_criteria_assigns_each_list_item_its_source_line() {
+    fn with_source_lines_pairs_each_list_item_with_its_source_line() {
         let raw = "id: a\nacceptance_criteria:\n  - id: one\n    must: x\n  - id: two\n    must: y\ncontract: single\n";
-        let mut criteria = vec![0usize, 0usize];
 
-        number_criteria(&mut criteria, raw, |slot, line| *slot = line);
+        let numbered = with_source_lines(vec!["one", "two"], raw, |name, line| (name, line));
 
-        assert_eq!(criteria, vec![3, 5]);
+        assert_eq!(numbered, vec![("one", 3), ("two", 5)]);
+    }
+
+    #[test]
+    fn with_source_lines_numbers_criteria_without_a_list_item_line_as_zero() {
+        let raw = "id: a\nacceptance_criteria: [x, y]\n";
+
+        let numbered = with_source_lines(vec!["x", "y"], raw, |name, line| (name, line));
+
+        assert_eq!(numbered, vec![("x", 0), ("y", 0)]);
     }
 
     #[test]

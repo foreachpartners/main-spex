@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn finds_from_workspace_root() {
         let workspace = workspace();
-        let found = Config::find_file(workspace.path()).expect("found");
+        let found = SpexConfig::find_file(workspace.path()).expect("found");
         assert_eq!(
             found,
             workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
@@ -33,14 +33,14 @@ mod tests {
     fn finds_from_spex_dir() {
         let workspace = workspace();
         let spex = workspace.path().join(SPEX_REPO_DIR);
-        let found = Config::find_file(&spex).expect("found");
+        let found = SpexConfig::find_file(&spex).expect("found");
         assert_eq!(found, spex.join(SPEX_CONFIG_FILE));
     }
 
     #[test]
     fn finds_from_nested_repo_subdirectory() {
         let workspace = workspace();
-        let found = Config::find_file(&workspace.path().join("demo-api/src")).expect("found");
+        let found = SpexConfig::find_file(&workspace.path().join("demo-api/src")).expect("found");
         assert_eq!(
             found,
             workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn errors_when_not_in_a_workspace() {
         let dir = tempdir().expect("dir");
-        assert!(Config::find_file(dir.path()).is_err());
+        assert!(SpexConfig::find_file(dir.path()).is_err());
     }
 
     #[test]
@@ -60,7 +60,7 @@ mod tests {
         std::fs::create_dir_all(&templates).expect("templates dir");
         std::fs::write(templates.join(SPEX_CONFIG_FILE), "project_name: unknown\n")
             .expect("config");
-        assert!(Config::find_file(dir.path()).is_err());
+        assert!(SpexConfig::find_file(dir.path()).is_err());
     }
 
     #[test]
@@ -70,15 +70,15 @@ mod tests {
         std::fs::create_dir_all(&spex).expect("spex dir");
         std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
         assert_eq!(
-            Config::find_file(dir.path()).expect("found"),
+            SpexConfig::find_file(dir.path()).expect("found"),
             spex.join(SPEX_CONFIG_FILE)
         );
     }
 
-    fn config_with_version(version: &str) -> Config {
-        Config {
+    fn config_with_version(version: &str) -> SpexConfig {
+        SpexConfig {
             cli_version: version.to_string(),
-            ..testing::config(Vec::new())
+            ..testing::spex_config()
         }
     }
 
@@ -87,7 +87,7 @@ mod tests {
         let dir = tempdir().expect("dir");
         std::fs::write(dir.path().join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
         assert_eq!(
-            Config::find_file(dir.path()).expect("found"),
+            SpexConfig::find_file(dir.path()).expect("found"),
             dir.path().join(SPEX_CONFIG_FILE)
         );
     }
@@ -114,7 +114,7 @@ mod tests {
             repositories: []
         "};
         assert_eq!(
-            Config::set_cli_version(raw, "0.2.0"),
+            SpexConfig::set_cli_version(raw, "0.2.0"),
             indoc! {"
                 project_name: demo
                 cli_version: 0.2.0
@@ -130,7 +130,7 @@ mod tests {
             repositories: []
         "};
         assert_eq!(
-            Config::set_cli_version(raw, "0.2.0"),
+            SpexConfig::set_cli_version(raw, "0.2.0"),
             indoc! {"
                 project_name: demo
                 cli_version: 0.2.0
@@ -148,7 +148,7 @@ mod tests {
             repositories: []
         "};
         assert_eq!(
-            Config::set_cli_version(raw, "0.2.0"),
+            SpexConfig::set_cli_version(raw, "0.2.0"),
             indoc! {"
                 project_name: demo
                 cli_version: 0.2.0
@@ -185,7 +185,7 @@ mod tests {
             "api".to_string(),
             vec![entry("X", "no-cyrillic", &["README.md", "docs/intro.md"])],
         )]);
-        let out = Config::set_preexisting_errors(TWO_REPOS, &by_repo);
+        let out = SpexConfig::set_preexisting_errors(TWO_REPOS, &by_repo);
         assert_eq!(
             out,
             indoc! {"
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     fn set_preexisting_errors_renders_whole_check_without_files() {
         let by_repo = HashMap::from([("web".to_string(), vec![entry("Y", "commit-format", &[])])]);
-        let out = Config::set_preexisting_errors(TWO_REPOS, &by_repo);
+        let out = SpexConfig::set_preexisting_errors(TWO_REPOS, &by_repo);
         // A mid-document fragment keeps its 2-space indent, which indoc would strip.
         assert!(out.ends_with(
             "  - repository_name: web
@@ -248,7 +248,7 @@ mod tests {
             "api".to_string(),
             vec![entry("X", "no-cyrillic", &["README.md"])],
         )]);
-        let out = Config::set_preexisting_errors(raw, &by_repo);
+        let out = SpexConfig::set_preexisting_errors(raw, &by_repo);
         assert!(!out.contains("stale"), "old block survived:\n{out}");
         assert!(
             out.contains("check: no-cyrillic"),
@@ -271,7 +271,7 @@ mod tests {
         "};
         // api is in scope but has no current errors, so its block is dropped.
         let by_repo = HashMap::from([("api".to_string(), Vec::new())]);
-        let out = Config::set_preexisting_errors(raw, &by_repo);
+        let out = SpexConfig::set_preexisting_errors(raw, &by_repo);
         assert_eq!(
             out,
             indoc! {"
@@ -285,7 +285,7 @@ mod tests {
 
     #[test]
     fn serialization_keeps_descriptions_and_rules_unused() {
-        let config: Config = serde_yaml_ng::from_str(indoc! {"
+        let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
             description: A demo project.
@@ -315,7 +315,7 @@ mod tests {
 
     #[test]
     fn serialization_omits_absent_descriptions_but_keeps_empty_lists() {
-        let config: Config = serde_yaml_ng::from_str(indoc! {"
+        let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
             repositories:

@@ -123,12 +123,13 @@ mod tests {
         )
         .expect("write contract");
 
-        let config: crate::config::Config = serde_yaml_ng::from_str(
+        let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
             "project_name: demo\ncli_version: 0.0.0\nrepositories:\n  - repository_name: demo-api\n    repository_short_name: api\n    path: ../demo-api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
         )
         .expect("parse config");
 
-        let found = Found::scan_workspace(spex_dir, &config).expect("scan");
+        let spex = crate::config::spex::Spex::from_config(spex_dir.to_path_buf(), config);
+        let found = Found::scan_workspace(&spex).expect("scan");
         assert!(found.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
     }
 

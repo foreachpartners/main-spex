@@ -5,10 +5,9 @@ use std::path::Path;
 use error_stack::ResultExt;
 use strum::IntoEnumIterator;
 
-use crate::config::Config;
+use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::spec::{AcId, ContractLevel, CoverageLayer, Spec, SpecId};
-use crate::support::fs::canonical;
 use crate::support::repo_files::RepoFiles;
 use crate::tracing::annotations::{self, Annotation};
 
@@ -59,7 +58,7 @@ impl Found {
                 AcCoverage {
                     id: ac.id.clone(),
                     text: ac.statement.text().to_string(),
-                    is_done: ac.is_done(),
+                    is_done: ac.is_done,
                     missing: CoverageLayer::iter()
                         .filter(|&layer| required(layer) && !self.has_ac(&spec.id, &ac.id, layer))
                         .collect(),
@@ -88,26 +87,23 @@ impl Found {
     }
 
     // Scans every workspace repository except spex itself for spec-id annotations.
-    pub fn scan_workspace(spex_dir: &Path, config: &Config) -> Result<Self> {
-        let spex_canon = canonical(spex_dir);
+    pub fn scan_workspace(spex: &Spex) -> Result<Self> {
         let mut found = Self::new();
 
-        for repo in &config.repositories {
+        for repo in &spex.repositories {
             // Interface contracts live inside the spex repository's `contracts/`
             // folder, so scan them explicitly even though the spex dir itself is
             // skipped below; their `@spec contract` annotations are the contract layer.
-            for contract in &repo.contracts {
-                let contract_path = spex_dir.join(&contract.path);
-                if let Ok(content) = fs::read_to_string(&contract_path) {
+            for contract_path in &repo.contracts {
+                if let Ok(content) = fs::read_to_string(contract_path) {
                     found.record_all(annotations::parse(&content));
                 }
             }
 
-            let repo_path = spex_dir.join(&repo.path);
-            if !repo_path.is_dir() || canonical(&repo_path) == spex_canon {
+            if !repo.path.is_dir() || repo.is_spex_repo {
                 continue;
             }
-            found.scan_repo(&repo_path)?;
+            found.scan_repo(&repo.path)?;
         }
 
         Ok(found)

@@ -1,9 +1,10 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::spec::{AcceptanceCriterion, CoverageLayer, Spec, Statement, Status};
+    use crate::spec::{
+        AcceptanceCriterion, CoverageIgnore, CoverageLayer, Spec, Statement, Status,
+    };
     use crate::support::testing;
-    use std::path::Path;
 
     fn spec(id: &str, status: Status) -> Spec {
         Spec {
@@ -79,42 +80,39 @@ mod tests {
     #[test]
     fn spec_url_targets_the_spec_file() {
         let spec = spec("a", Status::Active);
-        assert_eq!(
-            spec_url(Path::new("/workspace"), &spec),
-            "file:///workspace/specs/a.yaml"
-        );
-    }
-
-    #[test]
-    fn omitting_status_defaults_to_planned_and_is_ignored() {
-        let spec: Spec = serde_yaml_ng::from_str("id: a\ncontract: single\n").expect("parse spec");
-        assert_eq!(spec.status, Status::Planned);
-        assert!(spec.coverage_ignore.is_empty());
-        let specs = [spec];
-        let rows = SpecRow::all(&specs, &Found::new());
-        assert!(!rows[0].is_tracked());
+        assert_eq!(spec_url(&spec), "file:///spex/specs/a.yaml");
     }
 
     #[test]
     fn tracked_rows_carries_coverage_ignore() {
-        let spec: Spec = serde_yaml_ng::from_str(
-            "id: a\ncontract: single\nstatus: active\ncoverage_ignore:\n  - layer: contract\n  - layer: test\n",
-        )
-        .expect("parse spec");
-        assert!(spec.layer_ignored(CoverageLayer::Contract));
-        assert!(spec.layer_ignored(CoverageLayer::Test));
-        assert!(!spec.layer_ignored(CoverageLayer::Impl));
+        let spec = Spec {
+            coverage_ignore: vec![
+                CoverageIgnore {
+                    layer: CoverageLayer::Contract,
+                    ac: None,
+                },
+                CoverageIgnore {
+                    layer: CoverageLayer::Test,
+                    ac: None,
+                },
+            ],
+            ..spec("a", Status::Active)
+        };
         let specs = [spec];
         let rows = SpecRow::all(&specs, &Found::new());
         assert!(!rows[0].contract_missing);
     }
 
     #[test]
-    fn tracked_rows_parses_per_ac_ignore() {
-        let spec: Spec = serde_yaml_ng::from_str(
-            "id: a\ncontract: single\nstatus: active\nacceptance_criteria:\n  - id: ac-a\n    must: \"do a\"\ncoverage_ignore:\n  - layer: impl\n    ac: ac-a\n",
-        )
-        .expect("parse spec");
+    fn tracked_rows_carries_per_ac_ignore() {
+        let spec = Spec {
+            acceptance_criteria: vec![testing::criterion("ac-a")],
+            coverage_ignore: vec![CoverageIgnore {
+                layer: CoverageLayer::Impl,
+                ac: Some(testing::ac_id("ac-a")),
+            }],
+            ..spec("a", Status::Active)
+        };
         let specs = [spec];
         let rows = SpecRow::all(&specs, &Found::new());
         assert_eq!(rows[0].ac_rows[0].missing, vec![CoverageLayer::Test]);
@@ -341,7 +339,7 @@ mod tests {
 
     fn rendered(width: usize, verbose: bool, specs: &[Spec]) -> String {
         let rows = SpecRow::all(specs, &Found::new());
-        let text = render(width, verbose, Path::new("/workspace"), &rows);
+        let text = render(width, verbose, &rows);
         anstream::adapter::strip_str(&text).to_string()
     }
 

@@ -12,7 +12,7 @@ mod tests {
         };
         let repositories = vec![testing::repository("api", "../api")];
 
-        let findings = validate_scope(&spec, &repositories);
+        let findings = validate_scope(testing::spex_dir(), &spec, &repositories);
 
         assert_eq!(findings.len(), 1);
         let finding = &findings[0];

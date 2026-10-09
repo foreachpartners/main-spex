@@ -49,7 +49,6 @@ pub fn run(args: SpecsArgs) -> Result<ExitCode> {
 fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
     for short_name in &args.scope {
         if !spex
-            .config
             .repositories
             .iter()
             .any(|repo| &repo.repository_short_name == short_name)

@@ -80,11 +80,9 @@ mod tests {
     }
 
     fn workspace(dir: &std::path::Path) -> Spex {
-        Spex {
-            dir: dir.to_path_buf(),
-            config: crate::config::Config::load(&dir.join(crate::config::SPEX_CONFIG_FILE))
-                .expect("load config"),
-        }
+        let config = crate::config::SpexConfig::load(&dir.join(crate::config::SPEX_CONFIG_FILE))
+            .expect("load config");
+        Spex::from_config(dir.to_path_buf(), config)
     }
 
     fn args(ai: bool, id: &[&str], scope: &[&str]) -> SpecsArgs {

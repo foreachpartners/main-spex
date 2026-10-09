@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::config::{PreexistingError, Repository};
 use crate::rule::{Check, Severity};
 
@@ -79,37 +81,34 @@ impl Finding {
         self.severity == Severity::Error && self.matches_baseline(baseline, self.file().as_deref())
     }
 
-    // Workspace findings carry a location prefixed by the owning repository's path
-    // (relative to the spex directory), so resolve each to its repository and match
-    // against that repository's baseline. There is no workspace-level baseline.
-    pub(super) fn is_preexisting_workspace(&self, repos: &[&Repository]) -> bool {
-        if self.severity != Severity::Error {
-            return false;
-        }
-        let Some(location) = self.location.as_deref() else {
-            return false;
-        };
-        repos.iter().any(|repo| {
-            let prefix = format!("{}/", repo.path);
-            location.strip_prefix(&prefix).is_some_and(|rel| {
-                self.matches_baseline(&repo.ignored_errors, Some(&Self::normalize_location(rel)))
+    // Workspace findings carry a location relative to the spex directory, so
+    // resolve each to its owning repository and match against that repository's
+    // baseline. There is no workspace-level baseline.
+    pub(super) fn is_preexisting_workspace(&self, repos: &[&Repository], spex_dir: &Path) -> bool {
+        self.severity == Severity::Error
+            && repos.iter().any(|repo| {
+                self.file_in(repo, spex_dir)
+                    .is_some_and(|file| self.matches_baseline(&repo.ignored_errors, Some(&file)))
             })
-        })
     }
 
     // Resolves a workspace finding to its owning repository and the repository-
-    // relative file, by matching its location against each repository's path.
-    pub(super) fn owning_repo(&self, repos: &[&Repository]) -> Option<(String, Option<String>)> {
-        let location = self.location.as_deref()?;
+    // relative file, by checking which repository's path contains its location.
+    pub(super) fn owning_repo(
+        &self,
+        repos: &[&Repository],
+        spex_dir: &Path,
+    ) -> Option<(String, Option<String>)> {
         repos.iter().find_map(|repo| {
-            let prefix = format!("{}/", repo.path);
-            location.strip_prefix(&prefix).map(|rel| {
-                (
-                    repo.repository_name.clone(),
-                    Some(Self::normalize_location(rel)),
-                )
-            })
+            self.file_in(repo, spex_dir)
+                .map(|file| (repo.repository_name.clone(), Some(file)))
         })
+    }
+
+    fn file_in(&self, repo: &Repository, spex_dir: &Path) -> Option<String> {
+        let located = spex_dir.join(self.file()?);
+        let relative = located.strip_prefix(&repo.path).ok()?;
+        (!relative.starts_with("..")).then(|| relative.to_string_lossy().into_owned())
     }
 
     fn matches_baseline(&self, baseline: &[PreexistingError], file: Option<&str>) -> bool {

@@ -1,8 +1,9 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use crate::spec::{Spec, SpecId, Status};
 
-use super::Finding;
+use super::{Finding, rel};
 
 #[cfg(test)]
 #[path = "blocked_by_test.rs"]
@@ -13,13 +14,14 @@ pub(super) fn status_by_id(specs: &[Spec]) -> HashMap<&SpecId, Status> {
 }
 
 pub(super) fn validate_blocked_by(
+    spex_dir: &Path,
     spec: &Spec,
     status_by_id: &HashMap<&SpecId, Status>,
 ) -> Vec<Finding> {
     spec.blocked_by
         .iter()
         .filter_map(|blocker| {
-            let location = Some(spec.location());
+            let location = Some(rel(spex_dir, &spec.path));
             match status_by_id.get(blocker) {
                 None => Some(Finding::error(
                     spec.id.as_str(),

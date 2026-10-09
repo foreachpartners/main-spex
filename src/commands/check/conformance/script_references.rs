@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use crate::rule::{CheckKind, RULES_DIR, Rule, SCRIPTS_DIR};
+use crate::rule::{CheckKind, Rule, SCRIPTS_DIR};
 
 use super::super::runners::resolve_script;
-use super::{Finding, conform_finding};
+use super::{Finding, conform_finding, rel};
 
 // Every script a rule check references must exist at
 // `scripts/<spec-id-lowercase>/<script>`.
@@ -20,7 +20,7 @@ pub(super) fn validate_script_references(spex_dir: &Path, rules: &[Rule]) -> Vec
             if resolve_script(script, spex_dir, rule.id.as_str()).is_none() {
                 let dir = spex_dir.join(SCRIPTS_DIR).join(rule.id.as_str());
                 findings.push(conform_finding(
-                    Some(format!("{RULES_DIR}/{}", rule.path)),
+                    Some(rel(spex_dir, &rule.path)),
                     format!("missing script {}/{script}", dir.display()),
                 ));
             }

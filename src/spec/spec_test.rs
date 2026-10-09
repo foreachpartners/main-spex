@@ -49,30 +49,6 @@ mod tests {
     }
 
     #[test]
-    fn coverage_ignore_parses_whole_layer_and_per_ac_entries() {
-        let spec: Spec = serde_yaml_ng::from_str(
-            "id: a\ncontract: single\ncoverage_ignore:\n  - layer: contract\n  - layer: impl\n    ac: no-null-typed-string\n",
-        )
-        .expect("parse spec");
-        assert!(spec.layer_ignored(CoverageLayer::Contract));
-        assert!(spec.ac_ignored(&testing::ac_id("no-null-typed-string"), CoverageLayer::Impl));
-        assert!(!spec.ac_ignored(&testing::ac_id("other-ac"), CoverageLayer::Impl));
-    }
-
-    #[test]
-    fn contract_parses_all_levels() {
-        for (yaml, level) in [
-            ("none", ContractLevel::None),
-            ("single", ContractLevel::Single),
-            ("for-each-ac", ContractLevel::ForEachAc),
-        ] {
-            let spec: Spec =
-                serde_yaml_ng::from_str(&format!("id: a\ncontract: {yaml}\n")).expect("parse spec");
-            assert_eq!(spec.contract, level);
-        }
-    }
-
-    #[test]
     fn ac_contract_required_respects_whole_layer_ignore() {
         let mut spec = spec(vec![ignore(CoverageLayer::Contract, None)]);
         spec.contract = ContractLevel::ForEachAc;
@@ -97,17 +73,29 @@ mod tests {
     }
 
     #[test]
-    fn is_done_defaults_true_when_absent() {
-        let ac = testing::criterion("a");
-        assert!(ac.is_done());
+    fn from_config_keeps_the_path_and_numbers_criteria_by_source_line() {
+        let raw = "id: a\ncontract: single\nacceptance_criteria:\n  - id: one\n    must: x\n  - id: two\n    must: y\n";
+        let config = serde_yaml_ng::from_str(raw).expect("parse spec config");
+
+        let spec = Spec::from_config(config, PathBuf::from("/spex/specs/a.yaml"), raw);
+
+        assert_eq!(spec.path, PathBuf::from("/spex/specs/a.yaml"));
+        let lines: Vec<usize> = spec.acceptance_criteria.iter().map(|ac| ac.line).collect();
+        assert_eq!(lines, vec![4, 6]);
     }
 
     #[test]
-    fn is_done_reads_explicit_false() {
-        let ac = AcceptanceCriterion {
-            is_done: Some(false),
-            ..testing::criterion("a")
-        };
-        assert!(!ac.is_done());
+    fn from_config_treats_absent_is_done_as_done() {
+        let raw = "id: a\ncontract: single\nacceptance_criteria:\n  - id: one\n    must: x\n  - id: two\n    must: y\n    is_done: false\n";
+        let config = serde_yaml_ng::from_str(raw).expect("parse spec config");
+
+        let spec = Spec::from_config(config, PathBuf::from("a.yaml"), raw);
+
+        let done: Vec<bool> = spec
+            .acceptance_criteria
+            .iter()
+            .map(|ac| ac.is_done)
+            .collect();
+        assert_eq!(done, vec![true, false]);
     }
 }

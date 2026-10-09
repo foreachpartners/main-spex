@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use anstream::println;
 use owo_colors::OwoColorize;
 
-use crate::config::Config;
+use crate::config::spex::Spex;
 use crate::rule::Severity;
 use crate::support::fs::file_url;
 use crate::support::style::{hyperlink, version_line};
@@ -16,7 +16,7 @@ use super::{Finding, RepoReport};
 #[path = "report_test.rs"]
 mod report_test;
 
-pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -> ExitCode {
+pub(super) fn report(spex: &Spex, reports: &[RepoReport]) -> ExitCode {
     println!("{}", version_line());
     println!();
     let mut total_errors = 0usize;
@@ -32,14 +32,14 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
         total_errors += errors;
         total_warnings += warnings;
 
-        let base = config.repo_base_dir(spex_dir, &repo.name);
+        let base = spex.repo_base_dir(&repo.name);
 
         println!("{}", repo.name.bold());
         if repo.findings.is_empty() {
             println!("  {}", "no issues".green());
         } else {
             for finding in &repo.findings {
-                print_finding(&base, finding);
+                print_finding(base, finding);
             }
             println!("  {}", count_summary(errors, warnings).dimmed());
         }
@@ -47,7 +47,7 @@ pub(super) fn report(config: &Config, spex_dir: &Path, reports: &[RepoReport]) -
     }
 
     let total = count_summary(total_errors, total_warnings);
-    println!("{}: {}", config.project_name.bold(), total.bold());
+    println!("{}: {}", spex.project_name.bold(), total.bold());
 
     if total_errors > 0 {
         ExitCode::FAILURE

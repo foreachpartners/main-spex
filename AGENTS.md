@@ -50,15 +50,18 @@ src/                CLI source
   templates.rs      Bundled templates directory and the names of its folders and files (constants only)
   spec/             Spec topic (mod.rs is an index only)
     id.rs           SpecId and AcId value objects and their id grammar
-    spec.rs         Spec model (status, acceptance criteria as {id, must|..., is_done} objects)
+    spec_config.rs  SpecConfig, the raw spec file as written in YAML (loaded 1 to 1)
+    spec.rs         Spec model built from SpecConfig, with its absolute path (status, acceptance criteria as {id, statement, is_done, line})
   rule/             Rule topic (mod.rs is an index only)
     id.rs           RuleId value object and its id grammar
-    rule.rs         Rule model
+    rule_config.rs  RuleConfig, the raw rule file as written in YAML (loaded 1 to 1)
+    rule.rs         Rule model built from RuleConfig, with its absolute path
   tracing/          Traceability topic
     annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
-    config.rs       Config loading
-    spex.rs         Resolved spex dir + config, with spec and rule loaders (shared by commands)
+    spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1), and its text edits
+    repository.rs   Repository model built from the raw repository config, with absolute repository and contract paths
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)

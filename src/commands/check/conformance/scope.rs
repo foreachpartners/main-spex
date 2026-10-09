@@ -1,13 +1,19 @@
+use std::path::Path;
+
 use crate::config::Repository;
 use crate::spec::Spec;
 
-use super::Finding;
+use super::{Finding, rel};
 
 #[cfg(test)]
 #[path = "scope_test.rs"]
 mod scope_test;
 
-pub(super) fn validate_scope(spec: &Spec, repositories: &[Repository]) -> Vec<Finding> {
+pub(super) fn validate_scope(
+    spex_dir: &Path,
+    spec: &Spec,
+    repositories: &[Repository],
+) -> Vec<Finding> {
     spec.scope
         .iter()
         .filter(|short_name| {
@@ -19,7 +25,7 @@ pub(super) fn validate_scope(spec: &Spec, repositories: &[Repository]) -> Vec<Fi
             Finding::error(
                 spec.id.as_str(),
                 "scope",
-                Some(spec.location()),
+                Some(rel(spex_dir, &spec.path)),
                 format!(
                     "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
                 ),

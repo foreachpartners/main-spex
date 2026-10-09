@@ -7,18 +7,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::{CliError, Result};
 use crate::rule::RuleId;
-use crate::support::fs::{canonical, dir_name};
+use crate::support::fs::dir_name;
 
 #[cfg(test)]
-#[path = "config_test.rs"]
-mod config_test;
+#[path = "spex_config_test.rs"]
+mod spex_config_test;
 
 pub const SPEX_CONFIG_FILE: &str = "spex.yaml";
 pub const SPEX_DIR_NAME: &str = "spex";
 pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Config {
+pub struct SpexConfig {
     pub project_name: String,
     pub cli_version: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -26,38 +26,34 @@ pub struct Config {
     #[serde(default)]
     pub rules_unused: Vec<RuleId>,
     #[serde(default)]
-    pub repositories: Vec<Repository>,
+    pub repositories: Vec<RepositoryConfig>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Repository {
+pub struct RepositoryConfig {
     pub repository_name: String,
     pub repository_short_name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub path: String,
     #[serde(default)]
-    pub contracts: Vec<Contract>,
+    pub contracts: Vec<ContractConfig>,
     #[serde(default)]
     pub rules: Vec<RuleId>,
     #[serde(default)]
     pub ignored_errors: Vec<PreexistingError>,
 }
 
-impl Repository {
+impl RepositoryConfig {
     pub fn matches_any_repo_name(&self, name: &str) -> bool {
         self.repository_name == name || self.repository_short_name == name
-    }
-
-    pub fn is_spex_repo(&self, spex_dir: &Path) -> bool {
-        canonical(&spex_dir.join(&self.path)) == canonical(spex_dir)
     }
 }
 
 // A repository's interface contract, stored inside the spex repository's
 // `contracts/` folder. `path` is relative to the spex directory.
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Contract {
+pub struct ContractConfig {
     pub path: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -83,7 +79,7 @@ pub struct PreexistingEntry {
     pub files: Vec<String>,
 }
 
-impl Config {
+impl SpexConfig {
     // Locates `spex.yaml`. Walks up from `start`; at each ancestor it uses a
     // directly present `spex.yaml`, then falls back to scanning that ancestor's
     // immediate child directories. The child scan lets discovery work from the
@@ -104,17 +100,6 @@ impl Config {
 
     pub fn dir_of(config_path: &Path) -> &Path {
         config_path.parent().unwrap_or(Path::new(""))
-    }
-
-    // The directory a repository's findings' `location` strings are relative to:
-    // the repository's own path for its report, or the spex directory for the
-    // synthetic `workspace` report, whose locations are already spex-relative.
-    pub fn repo_base_dir(&self, spex_dir: &Path, repo_name: &str) -> PathBuf {
-        self.repositories
-            .iter()
-            .find(|repo| repo.repository_name == repo_name)
-            .map(|repo| spex_dir.join(&repo.path))
-            .unwrap_or_else(|| spex_dir.to_path_buf())
     }
 
     pub fn is_spex_dir_name(name: &str) -> bool {

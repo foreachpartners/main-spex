@@ -196,7 +196,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         })
         .collect();
 
-    let selected = select_repos(&spex.config, &spex.dir, &args.repo, &args.files)?;
+    let selected = select_repos(&spex, &args.repo, &args.files)?;
 
     // The generator must see every current error, including ones an existing
     // baseline would otherwise suppress, so it can rewrite the full baseline.
@@ -228,7 +228,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     if !workspace_checks.is_empty() {
         let mut findings = run_workspace_checks(&spex.dir, &workspace_checks);
         if suppress {
-            findings.retain(|finding| !finding.is_preexisting_workspace(&selected));
+            findings.retain(|finding| !finding.is_preexisting_workspace(&selected, &spex.dir));
         }
         reports.push(RepoReport {
             name: "workspace".to_string(),
@@ -242,7 +242,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         return fill_preexisting_errors(&spex.dir, &selected, &reports);
     }
 
-    Ok(report(&spex.config, &spex.dir, &reports))
+    Ok(report(&spex, &reports))
 }
 
 fn check_repo(
@@ -257,7 +257,7 @@ fn check_repo(
         files,
     } = args;
 
-    let repo_path = spex_dir.join(&repo.path);
+    let repo_path = &repo.path;
     if !repo_path.is_dir() {
         return Ok(vec![Finding::repo_error(
             &repo.repository_name,
@@ -269,18 +269,18 @@ fn check_repo(
     }
 
     let candidates = if files.is_empty() {
-        ScopedFile::collect(&repo_path)?
+        ScopedFile::collect(repo_path)?
     } else {
-        ScopedFile::provided(&repo_path, files)
+        ScopedFile::provided(repo_path, files)
     };
 
     let ctx = RepoCtx {
-        repo_path: &repo_path,
+        repo_path,
         spex_dir,
         candidates: &candidates,
     };
 
-    let mut findings = validate_annotations(&ctx, repo.is_spex_repo(spex_dir), known_ids);
+    let mut findings = validate_annotations(&ctx, repo.is_spex_repo, known_ids);
 
     // Negated checks assert that something must exist in the repository
     // (e.g. "dprint.json must be present"). When --files narrows the
@@ -318,7 +318,7 @@ fn validate_specs(
     selected: &[&Repository],
     reports: &mut [RepoReport],
 ) -> Result<()> {
-    let Some(spex_repo) = selected.iter().find(|repo| repo.is_spex_repo(&spex.dir)) else {
+    let Some(spex_repo) = selected.iter().find(|repo| repo.is_spex_repo) else {
         return Ok(());
     };
     let Some(report) = reports
@@ -330,7 +330,7 @@ fn validate_specs(
 
     report.findings.extend(validate_conformance(
         &spex.dir,
-        &spex.config.repositories,
+        &spex.repositories,
         specs,
         rules,
     )?);

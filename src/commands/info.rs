@@ -22,8 +22,8 @@ pub struct InfoArgs {
 }
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let spex = Spex::discover()?;
-    let value = serde_json::to_value(&spex.config).change_context_lazy(serialize_error)?;
+    let (_, config) = Spex::discover_config()?;
+    let value = serde_json::to_value(&config).change_context_lazy(serialize_error)?;
 
     if let Some(field) = &args.print {
         return print_field(&value, field);
@@ -39,7 +39,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         .repo
         .iter()
         .map(|repo_filter| {
-            spex.config
+            config
                 .repositories
                 .iter()
                 .find(|r| r.matches_any_repo_name(repo_filter))
@@ -48,8 +48,8 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         .collect::<Result<Vec<_>>>()?;
 
     let filtered = serde_json::json!({
-        "project_name": spex.config.project_name,
-        "cli_version": spex.config.cli_version,
+        "project_name": config.project_name,
+        "cli_version": config.cli_version,
         "repositories": repos,
     });
     let json = serde_json::to_string_pretty(&filtered).change_context_lazy(serialize_error)?;

@@ -1,9 +1,10 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde::Deserialize;
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use super::id::{AcId, SpecId};
+use super::spec_config::{AcceptanceCriterionConfig, SpecConfig};
 use crate::error::Result;
 use crate::support::commitment::Commitment;
 use crate::support::util;
@@ -14,38 +15,25 @@ mod spec_test;
 
 pub const SPECS_DIR: &str = "specs";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 pub struct Spec {
     pub id: SpecId,
-    #[serde(skip, default)]
-    pub path: String,
-    #[serde(default)]
+    pub path: PathBuf,
     pub description: String,
-    #[serde(default)]
     pub acceptance_criteria: Vec<AcceptanceCriterion>,
-    #[serde(default)]
     pub blocked_by: Vec<SpecId>,
-    #[serde(default)]
     pub scope: Vec<String>,
-    #[serde(default)]
     pub status: Status,
     pub contract: ContractLevel,
-    #[serde(default)]
     pub coverage_ignore: Vec<CoverageIgnore>,
 }
 
 impl Spec {
-    // Where the spec is defined, relative to the workspace root (e.g.
-    // `specs/admin/foo.yaml`).
-    pub fn location(&self) -> String {
-        format!("{SPECS_DIR}/{}", self.path)
-    }
-
     pub fn ac_done_total(&self) -> (usize, usize) {
         let done = self
             .acceptance_criteria
             .iter()
-            .filter(|ac| ac.is_done())
+            .filter(|ac| ac.is_done)
             .count();
         (done, self.acceptance_criteria.len())
     }
@@ -85,40 +73,52 @@ impl Spec {
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
-        let mut specs: Vec<Self> = util::load_yaml_dir::<Self>(specs_dir)?
+        let mut specs: Vec<Self> = util::load_yaml_dir::<SpecConfig>(specs_dir)?
             .into_iter()
-            .map(|file| {
-                let mut spec = file.item;
-                spec.path = file.rel_path;
-                util::number_criteria(&mut spec.acceptance_criteria, &file.raw, |ac, line| {
-                    ac.line = line
-                });
-                spec
-            })
+            .map(|file| Self::from_config(file.item, file.path, &file.raw))
             .collect();
         specs.sort_by(|a, b| a.id.cmp(&b.id));
         Ok(specs)
     }
+
+    fn from_config(config: SpecConfig, path: PathBuf, raw: &str) -> Self {
+        Self {
+            id: config.id,
+            path,
+            description: config.description,
+            acceptance_criteria: util::with_source_lines(
+                config.acceptance_criteria,
+                raw,
+                AcceptanceCriterion::from_config,
+            ),
+            blocked_by: config.blocked_by,
+            scope: config.scope,
+            status: config.status,
+            contract: config.contract,
+            coverage_ignore: config.coverage_ignore,
+        }
+    }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct AcceptanceCriterion {
     pub id: AcId,
-    #[serde(flatten)]
     pub statement: Statement,
-    #[serde(default)]
-    pub is_done: Option<bool>,
-    // The 1-indexed source line of this criterion's `- id: ...` entry, filled
-    // in by `load_all` from the raw file text (serde tracks no spans).
-    #[serde(skip, default)]
+    pub is_done: bool,
+    // The 1-indexed source line of this criterion's `- id: ...` entry in the spec file.
     pub line: usize,
 }
 
 impl AcceptanceCriterion {
-    // Absent means done: `is_done` only exists to flag a criterion as
+    // Absent `is_done` means done: it only exists to flag a criterion as
     // deliberately not done yet.
-    pub fn is_done(&self) -> bool {
-        self.is_done.unwrap_or(true)
+    fn from_config(config: AcceptanceCriterionConfig, line: usize) -> Self {
+        Self {
+            id: config.id,
+            statement: config.statement,
+            is_done: config.is_done.unwrap_or(true),
+            line,
+        }
     }
 }
 

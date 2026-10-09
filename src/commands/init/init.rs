@@ -7,7 +7,7 @@ use anstream::println;
 use error_stack::{Report, ResultExt, bail};
 use owo_colors::OwoColorize;
 
-use crate::config::{CLI_VERSION, Config, SPEX_CONFIG_FILE, SPEX_DIR_NAME};
+use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, SpexConfig};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
@@ -88,7 +88,7 @@ fn config_from_template(project_name: &str) -> String {
             "repository_name: unknown",
             &format!("repository_name: {project_name}-{SPEX_DIR_NAME}"),
         );
-    Config::set_cli_version(&named, CLI_VERSION)
+    SpexConfig::set_cli_version(&named, CLI_VERSION)
 }
 
 fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
@@ -99,7 +99,7 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
 }
 
 fn is_inside_spex_dir(current_dir: &Path) -> bool {
-    dir_name(current_dir).is_some_and(Config::is_spex_dir_name)
+    dir_name(current_dir).is_some_and(SpexConfig::is_spex_dir_name)
 }
 
 // The workspace root is the current directory, unless `spex init` runs from
