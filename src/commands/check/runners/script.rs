@@ -6,6 +6,7 @@ use super::super::{Finding, ScopedFile, WorkspaceCheck};
 use super::{Hit, Outcome, outcome_findings};
 
 const SCRIPT_BATCH_SIZE: usize = 1000;
+const SPEX_DIR_ENV: &str = "SPEX_DIR";
 
 pub(in crate::commands::check) fn run_workspace_checks(
     spex_dir: &Path,
@@ -15,7 +16,7 @@ pub(in crate::commands::check) fn run_workspace_checks(
         .iter()
         .flat_map(|pending| {
             let outcome = locate_script(&pending.script_dir, &pending.script)
-                .and_then(|program| run_script_once(&program, spex_dir));
+                .and_then(|program| run_script_once(&program, spex_dir, spex_dir));
             outcome_findings(&pending.rule_id, &pending.check, outcome)
         })
         .collect()
@@ -24,6 +25,7 @@ pub(in crate::commands::check) fn run_workspace_checks(
 pub(in crate::commands::check) fn run_per_file_script(
     program: &Path,
     repo_path: &Path,
+    spex_dir: &Path,
     files: &[&ScopedFile],
 ) -> Outcome {
     let mut hits = Vec::new();
@@ -31,17 +33,22 @@ pub(in crate::commands::check) fn run_per_file_script(
         hits.extend(run_script(
             program,
             repo_path,
+            spex_dir,
             batch.iter().map(|file| file.rel.as_os_str()),
         )?);
     }
     Ok(hits)
 }
 
-pub(in crate::commands::check) fn run_script_once(program: &Path, cwd: &Path) -> Outcome {
-    run_script(program, cwd, std::iter::empty::<&OsStr>())
+pub(in crate::commands::check) fn run_script_once(
+    program: &Path,
+    cwd: &Path,
+    spex_dir: &Path,
+) -> Outcome {
+    run_script(program, cwd, spex_dir, std::iter::empty::<&OsStr>())
 }
 
-fn run_script<I, S>(program: &Path, cwd: &Path, args: I) -> Outcome
+fn run_script<I, S>(program: &Path, cwd: &Path, spex_dir: &Path, args: I) -> Outcome
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
@@ -49,6 +56,7 @@ where
     let output = Command::new(program)
         .args(args)
         .current_dir(cwd)
+        .env(SPEX_DIR_ENV, spex_dir)
         .output()
         .map_err(|err| format!("could not run script `{}`: {err}", program.display()))?;
 

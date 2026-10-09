@@ -46,6 +46,7 @@ Run from anywhere inside the workspace; `spex <command> --help` lists every opti
 - `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs.
 - `spex rules [--id <rule-id>...] [--repo <name>...] [--ai] [--output <file>]` — print the active rules per repository.
 - `spex info [--repo <name>...]` — print `spex.yaml`: project and per-repository configuration.
+- `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
 
 Pass `--ai` to `specs` and `rules`: it drops fields AI doesn't need and adds ones it does. Prefer `--output <file>` for them too: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.

@@ -5,7 +5,7 @@ use tempfile::tempdir;
 mod common;
 use common::{
     assert_fails_mentioning, copy_dir, report_text, run_spex, runners_project_fixture,
-    with_version_header,
+    script_env_project_fixture, with_version_header,
 };
 
 const API_REPORT: &str = r#"runners-project-api
@@ -105,6 +105,24 @@ workspace
   1 error, 0 warnings
 
 runners-project: 4 errors, 1 warning
+"#;
+
+const SCRIPT_ENV_REPORT: &str = r#"script-env-project-api
+  warn  spex-dir-env/per-file  (src/lib.rs)
+      SPEX_DIR is the spex directory
+  warn  spex-dir-env/per-repo
+      SPEX_DIR is the spex directory
+  0 errors, 2 warnings
+
+script-env-project-spex
+  no issues
+
+workspace
+  warn  spex-dir-env/workspace
+      SPEX_DIR is the spex directory
+  0 errors, 1 warning
+
+script-env-project: 0 errors, 3 warnings
 "#;
 
 fn expected_report(sections: &[&str], summary: &str) -> String {
@@ -224,5 +242,29 @@ fn check_repo_rejects_an_unknown_repository() {
     assert!(
         check.stdout.is_empty(),
         "no report should print when the repository is unknown"
+    );
+}
+
+#[test]
+fn check_exposes_the_spex_dir_to_a_script_at_every_run_scope() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    copy_dir(&script_env_project_fixture(), &project);
+    copy_dir(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas"),
+        &project.join("script-env-project-spex/schemas"),
+    );
+
+    let check = run_spex(&project, &["check"], "");
+
+    assert_eq!(
+        report_text(&check.stdout),
+        with_version_header(SCRIPT_ENV_REPORT),
+        "check report did not match\nstderr:\n{}",
+        String::from_utf8_lossy(&check.stderr),
+    );
+    assert!(
+        check.status.success(),
+        "only warnings, so check should exit 0"
     );
 }

@@ -135,8 +135,10 @@ impl RepoCtx<'_> {
             CheckKind::Script { script, run } => {
                 let program = locate_script(&rule.script_dir(), script)?;
                 match run {
-                    RunScope::PerFile => run_per_file_script(&program, self.repo_path, &files),
-                    RunScope::PerRepo => run_script_once(&program, self.repo_path),
+                    RunScope::PerFile => {
+                        run_per_file_script(&program, self.repo_path, self.spex_dir, &files)
+                    }
+                    RunScope::PerRepo => run_script_once(&program, self.repo_path, self.spex_dir),
                     RunScope::Workspace => Ok(Vec::new()),
                 }
             }

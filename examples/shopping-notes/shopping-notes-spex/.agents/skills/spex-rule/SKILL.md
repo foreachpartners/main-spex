@@ -88,7 +88,7 @@ Guidance:
   ```sh
   printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
   ```
-- When a script needs data from `spex.yaml` (the project name, the repository list), run `spex info` rather than parsing `spex.yaml` by hand — hand-parsing is brittle and duplicated across scripts. `spex info` prints the fully-resolved configuration as JSON, ready for `jq` (e.g. `spex info | jq -r '.project_name'`, `spex info | jq -r '.repositories[].path'`).
+- A script receives the absolute path of the spex repository in the `SPEX_DIR` environment variable. When it needs data from `spex.yaml` (the project name, the repository list), read it with `spex jq` rather than parsing `spex.yaml` by hand — hand-parsing is brittle and duplicated across scripts, and `jq` itself may not be installed. `spex jq` runs a jq filter on JSON or YAML (e.g. `spex jq -r .project_name "$SPEX_DIR/spex.yaml"`); pipe `spex info` into it for the fully-resolved configuration, with absolute repository paths (e.g. `spex info | spex jq -r '.repositories[].path'`).
 
 Draft the checks (and any script bodies) into the spec; you write them and offer edits in Step 5.
 

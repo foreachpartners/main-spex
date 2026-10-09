@@ -12,7 +12,7 @@ Rule scripts moved from `scripts/<rule-id>/` to a folder named after the rule fi
 
 ## 0.12.0
 
-`spex info --print <field>` was removed. In every script under `<workspace-root>/<project-name>-spex/scripts/**` that calls `spex info --print <field>`, replace it with `spex info | jq -r .<field>` (e.g. `spex info --print project_name` becomes `spex info | jq -r .project_name`), and make sure `jq` is installed. Scripts bundled with rules that set `sync_with_upstream: true` are rewritten by `spex update` and need no change.
+`spex info --print <field>` was removed. In every script under `<workspace-root>/<project-name>-spex/scripts/**` that calls `spex info --print <field>`, replace it with `spex info | spex jq -r .<field>` (e.g. `spex info --print project_name` becomes `spex info | spex jq -r .project_name`). Scripts bundled with rules that set `sync_with_upstream: true` are rewritten by `spex update` and need no change.
 
 ## 0.10.4
 

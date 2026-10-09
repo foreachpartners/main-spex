@@ -1,6 +1,6 @@
 [package]
 name = "main-spex"
-version = "0.13.0"
+version = "0.14.0"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT"
@@ -32,6 +32,8 @@ anstream = "1.0.0"
 walkdir = "2.5.0"
 supports-hyperlinks = "3.2.0"
 anstyle-hyperlink = { version = "1.0.2", features = ["file"] }
+jaq-all = { version = "0.3.0", default-features = false, features = ["std-all"] }
+jaq-json = { version = "2.0.3", features = ["serde"] }
 
 [dev-dependencies]
 tempfile = "3.27.0"

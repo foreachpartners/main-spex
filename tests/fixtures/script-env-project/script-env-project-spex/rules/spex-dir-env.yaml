@@ -1,0 +1,30 @@
+id: spex-dir-env
+title: Spex directory in the script environment
+description: >-
+  Every script check receives SPEX_DIR, the absolute path of the spex
+  repository, whatever its run scope.
+acceptance_criteria:
+  - "MUST expose SPEX_DIR to a per-file script"
+  - "MUST expose SPEX_DIR to a per-repo script"
+  - "MUST expose SPEX_DIR to a workspace script"
+checks:
+  - name: per-file
+    description: Reports the SPEX_DIR a per-file script received
+    type: script
+    run: per-file
+    script: report-spex-dir.sh
+    include:
+      - "src/**"
+    severity: warn
+  - name: per-repo
+    description: Reports the SPEX_DIR a per-repo script received
+    type: script
+    run: per-repo
+    script: report-spex-dir.sh
+    severity: warn
+  - name: workspace
+    description: Reports the SPEX_DIR a workspace script received
+    type: script
+    run: workspace
+    script: report-spex-dir.sh
+    severity: warn

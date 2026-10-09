@@ -16,6 +16,7 @@ spex --help
 | `spex check-schema` | Validate JSON or YAML files against a JSON Schema                      |
 | `spex coverage`     | Report `@spec` annotation coverage per acceptance criterion            |
 | `spex info`         | Print the resolved `spex.yaml` as JSON, for scripts                    |
+| `spex jq`           | Run a jq filter on JSON or YAML, for scripts and agents                |
 | `spex rules`        | Print the rules governing the selected repositories                    |
 | `spex specs`        | Print the workspace specs                                              |
 
@@ -26,6 +27,10 @@ Every command except `init` finds the spex repository from the current directory
 Every command exits `0` on success, `1` when it ran and reported failures (`check` errors, `coverage` gaps, `check-schema` violations), and `2` when it could not run (invalid arguments, a missing `spex.yaml`, an unreadable schema). A command that could not run prints one `error: <message>` line to stderr, so a CI script can tell a tool failure from a finding.
 
 ## Install
+
+### Supported platforms
+
+Linux and macOS, both built and tested in CI. On Windows, run spex inside [WSL](https://learn.microsoft.com/windows/wsl/install) as on Linux; a native Windows build is not supported, because `script` checks run POSIX `sh` scripts directly and `init` links `CLAUDE.md` to `AGENTS.md` with a symlink.
 
 ### Prerequisites:
 
@@ -101,6 +106,8 @@ A `script` check runs the program named by its `script:` filename (e.g. `writing
 - `run: per-file` (default) — pass the matched files as arguments.
 - `run: per-repo` — run once per repository, in that repository's directory, with no arguments.
 - `run: workspace` — run exactly once, with no arguments.
+
+Every script runs with the environment variable `SPEX_DIR` set to the absolute path of the spex repository, so it finds `spex.yaml` and the other spex files whatever its working directory. To read data from them it uses [`spex jq`](#spex-jq), e.g. `spex jq -r .project_name "$SPEX_DIR/spex.yaml"`.
 
 Violations are reported on stdout, one per line, as `<location><TAB><message>`: `<location>` is a repository-relative file, optionally `<file>:<line>`; `<message>` describes the violation. spex parses each line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check. A line with no location (empty before the tab, or no tab at all) becomes a file-less finding, and a script that exits non-zero without printing anything reports a single file-less finding built from its stderr or exit status. A non-zero exit code still means the check failed.
 
@@ -220,12 +227,12 @@ spex coverage --verbose
 
 ### `spex info`
 
-Prints the resolved `spex.yaml` configuration as pretty JSON, led by `spex_dir` — the absolute path of the spex repository, which the relative `path` of each contract is resolved against — followed by every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list and each repository's `path` resolved to an absolute path, so it opens from any working directory. It is the general-purpose form scripts pipe into `jq` for whatever field they need:
+Prints the resolved `spex.yaml` configuration as pretty JSON, led by `spex_dir` — the absolute path of the spex repository, which the relative `path` of each contract is resolved against — followed by every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list and each repository's `path` resolved to an absolute path, so it opens from any working directory. It is the general-purpose form scripts pipe into [`spex jq`](#spex-jq) for whatever field they need:
 
 ```sh
-spex info | jq -r '.project_name'
-spex info | jq -r '.spex_dir'
-spex info | jq -r '.repositories[].path'
+spex info | spex jq -r '.project_name'
+spex info | spex jq -r '.spex_dir'
+spex info | spex jq -r '.repositories[].path'
 ```
 
 #### Flags
@@ -234,6 +241,29 @@ spex info | jq -r '.repositories[].path'
 
 ```sh
 spex info --repo api frontend
+```
+
+### `spex jq`
+
+Runs a [jq](https://jqlang.org/manual/) filter on JSON or YAML data, so a script or an AI agent reads a field of `spex info`, `spex.yaml`, a spec, or a rule without installing `jq` or `yq`. The filter language is jq's, run by the embedded [jaq](https://gedenkt.at/jaq/manual/) engine, whose manual lists its differences from jq. Unlike most commands it does not look for `spex.yaml`; it reads only the given file or standard input.
+
+```sh
+spex jq [OPTIONS] <FILTER> [FILE]
+```
+
+- `<FILTER>` — the jq filter, e.g. `.project_name` or `.repositories[].path`.
+- `[FILE]` — the JSON or YAML file to read; standard input when omitted. The input is read as JSON when it is valid JSON, otherwise as YAML, and holds a single document.
+- Prints every result the filter produces on its own line, as indented JSON.
+- Exits `0` when the filter ran. Exits `2` when it could not run: an invalid filter, an unreadable or unparsable input, or a filter that fails at runtime, such as indexing a number.
+
+#### Flags
+
+- `--raw-output` (`-r`) — print a string result without quotes or escaping, so a script can capture it directly.
+- `--compact-output` (`-c`) — print each result on a single line.
+
+```sh
+spex jq -r .project_name spex.yaml
+spex info | spex jq -r '.repositories[].path'
 ```
 
 ### `spex rules`

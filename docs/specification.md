@@ -105,7 +105,7 @@ A check proves a rule's acceptance criterion.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a rule's checks through `rules`.
 - A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli.md](cli.md#script-checks).
-- A script that needs data from `spex.yaml` (the project name, the repository list) runs `spex info` rather than parsing `spex.yaml` by hand.
+- A script receives the absolute path of the spex repository as `SPEX_DIR`; when it needs data from `spex.yaml` (the project name, the repository list) it reads it with `spex jq` rather than parsing `spex.yaml` by hand.
 
 # Config (spex.yaml)
 

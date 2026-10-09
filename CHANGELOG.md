@@ -2,6 +2,13 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.14.0] - 2026-10-09
+
+- New `spex jq [-r] [-c] <filter> [file]` runs a jq filter, through the embedded jaq engine, on JSON or YAML read from a file or standard input, so a script or an AI agent reads data without installing `jq` or `yq`.
+- Script checks now run with `SPEX_DIR` set to the absolute path of the spex repository.
+- The bundled `naming-convention` `repo-dir.sh` script reads the project name with `spex jq` and `$SPEX_DIR`, so `jq` is no longer a prerequisite.
+- Supported platforms are now declared in `docs/cli.md`: Linux and macOS, with Windows through WSL; CI runs the tests on both Ubuntu and macOS.
+
 ## [0.13.0] - 2026-10-09
 
 - **Breaking**: a rule's scripts now live in a folder named after the rule file, beside it — `rules/<rule-id>.yaml` resolves its `script` checks at `rules/<rule-id>/<script>` (a nested `rules/<group>/<rule-id>.yaml` at `rules/<group>/<rule-id>/<script>`) — instead of the separate `scripts/<rule-id>/` folder. `spex check` reports a script missing from the new location, so existing projects move theirs per the migration guide.

@@ -15,6 +15,7 @@ use commands::check::CheckArgs;
 use commands::check_schema::CheckSchemaArgs;
 use commands::coverage::CoverageArgs;
 use commands::info::InfoArgs;
+use commands::jq::JqArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
 use error::{Result, describe};
@@ -44,6 +45,8 @@ enum Commands {
     CheckSchema(CheckSchemaArgs),
     #[command(about = "Print project configuration")]
     Info(InfoArgs),
+    #[command(about = "Query JSON or YAML with a jq filter")]
+    Jq(JqArgs),
     #[command(about = "Print the project rules")]
     Rules(RulesArgs),
     #[command(about = "Print the project specs")]
@@ -67,6 +70,7 @@ fn run(command: Commands) -> Result<ExitCode> {
         Commands::CheckSchema(args) => commands::check_schema::run(args),
         Commands::Coverage(args) => commands::coverage::run(args),
         Commands::Info(args) => commands::info::run(args),
+        Commands::Jq(args) => commands::jq::run(args),
         Commands::Rules(args) => commands::rules::run(args),
         Commands::Specs(args) => commands::specs::run(args),
     }

@@ -61,6 +61,10 @@ pub fn runners_project_fixture() -> std::path::PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/runners-project")
 }
 
+pub fn script_env_project_fixture() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/script-env-project")
+}
+
 pub fn temp_project(fixture: &Path) -> (tempfile::TempDir, std::path::PathBuf) {
     let workspace = tempfile::tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
