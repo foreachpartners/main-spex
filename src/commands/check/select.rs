@@ -4,7 +4,7 @@ use crate::config::Repository;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 
-use super::ScopedFile;
+use super::scoped_file::ScopedFile;
 
 #[cfg(test)]
 #[path = "select_test.rs"]

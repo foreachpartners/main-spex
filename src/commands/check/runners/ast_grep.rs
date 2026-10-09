@@ -6,8 +6,9 @@ use serde_yaml_ng::{Mapping, Value};
 
 use crate::rule::Check;
 
-use super::super::ScopedFile;
-use super::{Hit, Outcome};
+use super::super::finding::Location;
+use super::super::scoped_file::ScopedFile;
+use super::{Outcome, PATTERN_WORDING, presence_hits};
 
 pub(in crate::commands::check) fn run_ast_grep(
     check: &Check,
@@ -43,25 +44,18 @@ pub(in crate::commands::check) fn run_ast_grep(
             continue;
         };
         let tree = lang.ast_grep(&content);
-        let root = tree.root();
-        let mut matches = root.find_all(matcher).peekable();
-
-        if negate {
-            if matches.peek().is_none() {
-                hits.push(Hit::new(
-                    Some(file.rel_str()),
-                    check.message("required pattern not found"),
-                ));
-            }
-        } else {
-            for found in matches {
-                let line = found.start_pos().line() + 1;
-                hits.push(Hit::new(
-                    Some(format!("{}:{}", file.rel_str(), line)),
-                    check.message("matches forbidden pattern"),
-                ));
-            }
-        }
+        let found = tree
+            .root()
+            .find_all(matcher)
+            .map(|found| Location::at_line(&file.rel, found.start_pos().line() + 1))
+            .collect();
+        hits.extend(presence_hits(
+            check,
+            negate,
+            found,
+            Some(Location::in_file(&file.rel)),
+            &PATTERN_WORDING,
+        ));
     }
     Ok(hits)
 }

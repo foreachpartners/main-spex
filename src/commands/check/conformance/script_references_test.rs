@@ -33,7 +33,7 @@ mod tests {
         std::fs::write(rule_dir.join("lint.sh"), "").expect("script");
         let rule = script_rule(spex.path().join("rules/x.yaml"));
 
-        assert!(validate_script_references(spex.path(), &[rule]).is_empty());
+        assert!(validate_script_references(&[rule]).is_empty());
     }
 
     #[test]
@@ -44,7 +44,7 @@ mod tests {
         std::fs::write(rule_dir.join("lint.sh"), "").expect("script");
         let rule = script_rule(spex.path().join("rules/backend/x.yaml"));
 
-        assert!(validate_script_references(spex.path(), &[rule]).is_empty());
+        assert!(validate_script_references(&[rule]).is_empty());
     }
 
     #[test]
@@ -52,10 +52,13 @@ mod tests {
         let spex = tempdir().expect("spex dir");
         let rule = script_rule(spex.path().join("rules/x.yaml"));
 
-        let findings = validate_script_references(spex.path(), &[rule]);
+        let findings = validate_script_references(&[rule]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("rules/x.yaml"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::in_file(spex.path().join("rules/x.yaml")))
+        );
         assert_eq!(
             findings[0].message,
             format!(

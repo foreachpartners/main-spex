@@ -48,8 +48,11 @@ mod tests {
         let findings = validate_annotations(&ctx, false, &known(&["list-pizza-menu"]));
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, FORMAT_CHECK);
-        assert_eq!(findings[0].location.as_deref(), Some("src/lib.rs:2"));
+        assert_eq!(check_of(&findings[0]), FORMAT_CHECK);
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/lib.rs", 2))
+        );
     }
 
     #[test]
@@ -73,7 +76,7 @@ mod tests {
         let findings = validate_annotations(&ctx, false, &known_ids);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, ORPHAN_CHECK);
+        assert_eq!(check_of(&findings[0]), ORPHAN_CHECK);
         assert!(findings[0].message.contains("unknown-spec"));
     }
 
@@ -132,7 +135,7 @@ mod tests {
         );
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, ORPHAN_CHECK);
+        assert_eq!(check_of(&findings[0]), ORPHAN_CHECK);
         assert!(findings[0].message.contains("xxx"));
         assert!(findings[0].message.contains("delivery-time"));
     }
@@ -157,8 +160,11 @@ mod tests {
         );
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, FORMAT_CHECK);
-        assert_eq!(findings[0].location.as_deref(), Some("src/lib.rs:1"));
+        assert_eq!(check_of(&findings[0]), FORMAT_CHECK);
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/lib.rs", 1))
+        );
     }
 
     fn validate_content(content: &str, known_ids: &HashMap<SpecId, HashSet<AcId>>) -> Vec<Finding> {
@@ -172,11 +178,21 @@ mod tests {
         validate_annotations(&ctx, false, known_ids)
     }
 
-    fn locations(findings: &[Finding]) -> Vec<&str> {
+    fn locations(findings: &[Finding]) -> Vec<String> {
         findings
             .iter()
-            .map(|finding| finding.location.as_deref().expect("finding location"))
+            .map(|finding| {
+                finding
+                    .location
+                    .as_ref()
+                    .expect("finding location")
+                    .to_string()
+            })
             .collect()
+    }
+
+    fn check_of(finding: &Finding) -> &str {
+        finding.source.baseline_key().expect("check source").1
     }
 
     #[test]
@@ -186,7 +202,11 @@ mod tests {
             &known(&["a"]),
         );
 
-        assert!(findings.iter().all(|finding| finding.check == FORMAT_CHECK));
+        assert!(
+            findings
+                .iter()
+                .all(|finding| check_of(finding) == FORMAT_CHECK)
+        );
         assert_eq!(
             locations(&findings),
             vec!["src/lib.rs:1", "src/lib.rs:2", "src/lib.rs:3"]
@@ -205,7 +225,11 @@ mod tests {
             &known(&["a"]),
         );
 
-        assert!(findings.iter().all(|finding| finding.check == FORMAT_CHECK));
+        assert!(
+            findings
+                .iter()
+                .all(|finding| check_of(finding) == FORMAT_CHECK)
+        );
         assert_eq!(
             locations(&findings),
             vec![

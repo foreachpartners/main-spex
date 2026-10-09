@@ -51,7 +51,7 @@ mod location_url_tests {
         let base = Path::new("/workspace/services/api");
 
         assert_eq!(
-            location_url(base, "CLAUDE.md"),
+            location_url(base, &Location::in_file("CLAUDE.md")),
             "file:///workspace/services/api/CLAUDE.md"
         );
     }
@@ -61,7 +61,7 @@ mod location_url_tests {
         let base = Path::new("/workspace/services/api");
 
         assert_eq!(
-            location_url(base, "CLAUDE.md:50"),
+            location_url(base, &Location::at_line("CLAUDE.md", 50)),
             "file:///workspace/services/api/CLAUDE.md"
         );
     }
@@ -71,7 +71,7 @@ mod location_url_tests {
         let base = Path::new("/workspace/my repo");
 
         assert_eq!(
-            location_url(base, "CLAUDE.md"),
+            location_url(base, &Location::in_file("CLAUDE.md")),
             "file:///workspace/my%20repo/CLAUDE.md"
         );
     }

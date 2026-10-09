@@ -23,13 +23,13 @@ mod tests {
     #[test]
     fn coverage_ignore_whole_layer_contract_is_silent_with_contract_single() {
         let spec = spec(ContractLevel::Single, vec![contract_ignore(None)]);
-        assert!(validate_coverage_ignore(testing::spex_dir(), &spec).is_empty());
+        assert!(validate_coverage_ignore(&spec).is_empty());
     }
 
     #[test]
     fn coverage_ignore_whole_layer_contract_is_silent_with_for_each_ac() {
         let spec = spec(ContractLevel::ForEachAc, vec![contract_ignore(None)]);
-        assert!(validate_coverage_ignore(testing::spex_dir(), &spec).is_empty());
+        assert!(validate_coverage_ignore(&spec).is_empty());
     }
 
     #[test]
@@ -38,7 +38,7 @@ mod tests {
             ContractLevel::ForEachAc,
             vec![contract_ignore(Some("ac-a"))],
         );
-        assert!(validate_coverage_ignore(testing::spex_dir(), &spec).is_empty());
+        assert!(validate_coverage_ignore(&spec).is_empty());
     }
 
     #[test]
@@ -48,12 +48,14 @@ mod tests {
             vec![contract_ignore(None), contract_ignore(Some("ac-a"))],
         );
 
-        let findings = validate_coverage_ignore(testing::spex_dir(), &spec);
+        let findings = validate_coverage_ignore(&spec);
         assert_eq!(findings.len(), 2);
         for finding in &findings {
             assert_eq!(finding.severity, Severity::Error);
-            assert_eq!(finding.check, "coverage-ignore");
-            assert_eq!(finding.location.as_deref(), Some("specs/a.yaml"));
+            assert!(
+                matches!(&finding.source, Source::Spec { check, .. } if check == "coverage-ignore")
+            );
+            assert_eq!(finding.location, Some(Location::in_file(spec.path.clone())));
             assert!(finding.message.contains("contract: none"));
         }
     }
@@ -62,11 +64,13 @@ mod tests {
     fn coverage_ignore_per_ac_contract_errors_with_contract_single() {
         let spec = spec(ContractLevel::Single, vec![contract_ignore(Some("ac-a"))]);
 
-        let findings = validate_coverage_ignore(testing::spex_dir(), &spec);
+        let findings = validate_coverage_ignore(&spec);
         assert_eq!(findings.len(), 1);
         let finding = &findings[0];
         assert_eq!(finding.severity, Severity::Error);
-        assert_eq!(finding.check, "coverage-ignore");
+        assert!(
+            matches!(&finding.source, Source::Spec { check, .. } if check == "coverage-ignore")
+        );
         assert!(finding.message.contains("contract: single"));
         assert!(finding.message.contains("contract: for-each-ac"));
     }
@@ -86,6 +90,6 @@ mod tests {
                 },
             ],
         );
-        assert!(validate_coverage_ignore(testing::spex_dir(), &spec).is_empty());
+        assert!(validate_coverage_ignore(&spec).is_empty());
     }
 }

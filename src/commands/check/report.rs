@@ -10,7 +10,7 @@ use crate::support::fs::file_url;
 use crate::support::style::{hyperlink, version_line};
 use crate::support::util::plural;
 
-use super::Finding;
+use super::finding::{Finding, Location};
 
 #[cfg(test)]
 #[path = "report_test.rs"]
@@ -89,17 +89,12 @@ fn print_finding(base: &Path, finding: &Finding) {
         Severity::Error => label.red().to_string(),
         Severity::Warn => label.yellow().to_string(),
     };
-    let check = if finding.check.is_empty() {
-        finding.rule_id.clone()
-    } else {
-        format!("{}/{}", finding.rule_id, finding.check)
-    };
     let location = finding
         .location
-        .as_deref()
+        .as_ref()
         .map(|location| format!("  {}", location_link(base, location)))
         .unwrap_or_default();
-    println!("  {severity}  {}{location}", check.cyan());
+    println!("  {severity}  {}{location}", finding.source.cyan());
     for line in finding.message.lines() {
         println!("      {line}");
     }
@@ -108,13 +103,13 @@ fn print_finding(base: &Path, finding: &Finding) {
 // Renders a finding's location as a terminal hyperlink to the absolute file
 // (display text stays the short repository-relative form), so it opens
 // correctly regardless of the shell's current directory.
-fn location_link(base: &Path, location: &str) -> String {
+fn location_link(base: &Path, location: &Location) -> String {
     let text = format!("({location})").dimmed().to_string();
     hyperlink(&location_url(base, location), &text)
 }
 
-fn location_url(base: &Path, location: &str) -> String {
-    file_url(&base.join(Finding::normalize_location(location)))
+fn location_url(base: &Path, location: &Location) -> String {
+    file_url(&base.join(&location.file))
 }
 
 fn count_summary(errors: usize, warnings: usize) -> String {

@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::commands::check::conformance::RULE_ID;
     use crate::rule;
     use crate::spec;
     use tempfile::tempdir;
@@ -36,7 +37,10 @@ mod tests {
         let findings = validate_no_duplicate_ids(dir.path(), &specs, &rules);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, DUPLICATE_ID_CHECK);
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some((RULE_ID, DUPLICATE_ID_CHECK))
+        );
         assert!(findings[0].message.contains("shared"));
     }
 
@@ -59,7 +63,10 @@ mod tests {
         let findings = validate_no_duplicate_ids(dir.path(), &specs, &rules);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, DUPLICATE_ID_CHECK);
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some((RULE_ID, DUPLICATE_ID_CHECK))
+        );
         assert!(findings[0].message.contains("shared"));
     }
 }

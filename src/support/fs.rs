@@ -36,6 +36,10 @@ pub fn canonical(path: &Path) -> PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
+pub fn relative_to<'a>(path: &'a Path, base: &Path) -> &'a Path {
+    path.strip_prefix(base).unwrap_or(path)
+}
+
 pub fn write_embedded_dir(dir: &Dir, dest_root: &Path) -> Result<()> {
     write_embedded_dir_at(dir, &dest_root.join(dir.path()))
 }

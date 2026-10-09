@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anstream::println;
@@ -12,7 +12,12 @@ use crate::rule::Severity;
 use crate::support::fs::write_file;
 use crate::support::util::plural;
 
-use super::{CheckReport, ReportTarget};
+use super::finding::Finding;
+use super::report::{CheckReport, ReportTarget};
+
+#[cfg(test)]
+#[path = "baseline_test.rs"]
+mod baseline_test;
 
 // Either the whole check is baselined (a file-less error) or a specific set of
 // files is. A file-less error widens the entry to the whole check.
@@ -22,14 +27,75 @@ enum Baseline {
 }
 
 impl Baseline {
-    fn add_file(&mut self, file: Option<String>) {
+    fn add_file(&mut self, file: Option<PathBuf>) {
         match (self, file) {
             (Baseline::WholeCheck, _) => {}
             (slot @ Baseline::Files(_), None) => *slot = Baseline::WholeCheck,
             (Baseline::Files(files), Some(file)) => {
-                files.insert(file);
+                files.insert(file.to_string_lossy().into_owned());
             }
         }
+    }
+}
+
+struct Owner<'a> {
+    repo: &'a Repository,
+    file: Option<PathBuf>,
+}
+
+fn owner<'a>(
+    target: &ReportTarget<'a>,
+    finding: &Finding,
+    selected: &[&'a Repository],
+) -> Option<Owner<'a>> {
+    let file = finding
+        .location
+        .as_ref()
+        .map(|location| location.file.as_path());
+    match target {
+        ReportTarget::Repository(repo) => Some(Owner {
+            repo,
+            file: file.map(Path::to_path_buf),
+        }),
+        ReportTarget::Workspace { spex_dir } => {
+            let located = spex_dir.join(file?);
+            selected.iter().find_map(|repo| {
+                let relative = located.strip_prefix(&repo.path).ok()?;
+                (!relative.starts_with("..")).then(|| Owner {
+                    repo,
+                    file: Some(relative.to_path_buf()),
+                })
+            })
+        }
+    }
+}
+
+fn is_baselined(finding: &Finding, owner: &Owner) -> bool {
+    finding.severity == Severity::Error
+        && finding
+            .source
+            .baseline_key()
+            .is_some_and(|(rule_id, check)| {
+                owner.repo.ignored_errors.iter().any(|entry| {
+                    entry.rule_id == rule_id
+                        && entry.check == check
+                        && (entry.files.is_empty()
+                            || owner.file.as_ref().is_some_and(|file| {
+                                entry.files.iter().any(|listed| Path::new(listed) == file)
+                            }))
+                })
+            })
+}
+
+pub(super) fn drop_baselined_findings<'a>(
+    reports: &mut [CheckReport<'a>],
+    selected: &[&'a Repository],
+) {
+    for report in reports {
+        let target = &report.target;
+        report.findings.retain(|finding| {
+            !owner(target, finding, selected).is_some_and(|owner| is_baselined(finding, &owner))
+        });
     }
 }
 
@@ -50,21 +116,20 @@ pub(super) fn fill_preexisting_errors(
 
     for report in reports {
         for finding in &report.findings {
-            if finding.severity != Severity::Error || finding.check.is_empty() {
+            if finding.severity != Severity::Error {
                 continue;
             }
-            let (repo_name, file) = match &report.target {
-                ReportTarget::Repository(repo) => (repo.repository_name.clone(), finding.file()),
-                ReportTarget::Workspace { .. } => match finding.owning_repo(selected, spex_dir) {
-                    Some(resolved) => resolved,
-                    None => continue,
-                },
+            let Some((rule_id, check)) = finding.source.baseline_key() else {
+                continue;
             };
-            let Some(checks) = grouped.get_mut(&repo_name) else {
+            let Some(Owner { repo, file }) = owner(&report.target, finding, selected) else {
+                continue;
+            };
+            let Some(checks) = grouped.get_mut(&repo.repository_name) else {
                 continue;
             };
             checks
-                .entry((finding.rule_id.clone(), finding.check.clone()))
+                .entry((rule_id.to_string(), check.to_string()))
                 .or_insert_with(|| Baseline::Files(BTreeSet::new()))
                 .add_file(file);
         }

@@ -5,7 +5,11 @@ use crate::error::Result;
 use crate::rule::Rule;
 use crate::spec::Spec;
 
-use super::Finding;
+use super::finding::{Finding, Location, Source};
+
+#[cfg(test)]
+#[path = "conformance_test.rs"]
+mod conformance_test;
 
 mod ac_order;
 mod blocked_by;
@@ -52,32 +56,32 @@ pub(super) fn validate_conformance(
     let mut findings = Vec::new();
 
     for spec in specs {
-        findings.extend(status_finding(spex_dir, spec));
-        findings.extend(active_incomplete_finding(spex_dir, spec));
+        findings.extend(status_finding(spec));
+        findings.extend(active_incomplete_finding(spec));
     }
 
     for spec in specs {
-        findings.extend(validate_blocked_by(spex_dir, spec, &status_by_id));
-        findings.extend(validate_scope(spex_dir, spec, repositories));
-        findings.extend(validate_coverage_ignore(spex_dir, spec));
+        findings.extend(validate_blocked_by(spec, &status_by_id));
+        findings.extend(validate_scope(spec, repositories));
+        findings.extend(validate_coverage_ignore(spec));
     }
 
     findings.extend(validate_schema(spex_dir, specs, rules)?);
-    findings.extend(validate_script_references(spex_dir, rules));
-    findings.extend(validate_ac_order(spex_dir, specs, rules));
+    findings.extend(validate_script_references(rules));
+    findings.extend(validate_ac_order(specs, rules));
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));
-    findings.extend(validate_no_duplicate_ac_ids(spex_dir, specs));
+    findings.extend(validate_no_duplicate_ac_ids(specs));
     findings.extend(validate_property_order(spex_dir)?);
-    Ok(findings)
+    Ok(findings
+        .into_iter()
+        .map(|finding| finding.relative_to(spex_dir))
+        .collect())
 }
 
-fn rel(spex_dir: &Path, file: &Path) -> String {
-    file.strip_prefix(spex_dir)
-        .unwrap_or(file)
-        .to_string_lossy()
-        .into_owned()
+fn conformance_error(check: &str, location: Option<Location>, message: String) -> Finding {
+    Finding::error(Source::internal(RULE_ID, check), location, message)
 }
 
-fn conform_finding(location: Option<String>, message: String) -> Finding {
-    Finding::error(RULE_ID, CONFORM_CHECK, location, message)
+fn conform_finding(location: Option<Location>, message: String) -> Finding {
+    conformance_error(CONFORM_CHECK, location, message)
 }

@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use super::super::runners::{build_globset, resolve_script};
     use super::super::*;
+    use crate::commands::check::finding::Location;
+    use crate::commands::check::runners::{build_globset, resolve_script};
     use crate::rule::{RULES_DIR, Severity};
     use crate::support::testing;
     use serial_test::serial;
@@ -133,11 +134,11 @@ mod tests {
             "missing.rs".to_string(),
         ];
         let resolved = ScopedFile::provided(dir.path(), &files);
-        let names: Vec<String> = resolved.iter().map(ScopedFile::rel_str).collect();
+        let names: Vec<&Path> = resolved.iter().map(|file| file.rel.as_path()).collect();
 
         assert_eq!(
             names,
-            vec!["src/api/main.rs".to_string(), "README.md".to_string()]
+            vec![Path::new("src/api/main.rs"), Path::new("README.md")]
         );
     }
 
@@ -169,7 +170,10 @@ mod tests {
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.rs:1"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.rs", 1))
+        );
     }
 
     #[test]
@@ -182,7 +186,7 @@ mod tests {
         let findings = run_scoped(&dir, "license", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.rs"));
+        assert_eq!(findings[0].location, Some(Location::in_file("src/main.rs")));
     }
 
     #[test]
@@ -195,7 +199,7 @@ mod tests {
         let findings = run_scoped(&dir, "secret-handling", &check, vec![bak, src]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("notes.bak"));
+        assert_eq!(findings[0].location, Some(Location::in_file("notes.bak")));
     }
 
     #[test]
@@ -224,7 +228,10 @@ mod tests {
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.ts", 2))
+        );
     }
 
     #[test]
@@ -237,7 +244,10 @@ mod tests {
         let findings = run_scoped(&dir, "secret-handling", &check, vec![ts, py]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:1"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.ts", 1))
+        );
     }
 
     #[test]
@@ -256,16 +266,16 @@ mod tests {
 
         let locations: Vec<_> = findings
             .iter()
-            .map(|finding| finding.location.as_deref())
+            .map(|finding| finding.location.clone())
             .collect();
         assert_eq!(
             locations,
             [
-                Some("src/a.ts:1"),
-                Some("src/b.js:1"),
-                Some("src/c.tsx:1"),
-                Some("src/d.rs:1"),
-                Some("src/e.py:1"),
+                Some(Location::at_line("src/a.ts", 1)),
+                Some(Location::at_line("src/b.js", 1)),
+                Some(Location::at_line("src/c.tsx", 1)),
+                Some(Location::at_line("src/d.rs", 1)),
+                Some(Location::at_line("src/e.py", 1)),
             ]
         );
     }
@@ -280,7 +290,7 @@ mod tests {
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts"));
+        assert_eq!(findings[0].location, Some(Location::in_file("src/main.ts")));
     }
 
     #[test]
@@ -309,7 +319,10 @@ constraints:
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.ts", 2))
+        );
     }
 
     #[test]
@@ -322,7 +335,10 @@ constraints:
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, "sample");
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some(("secret-handling", "sample"))
+        );
         assert!(findings[0].location.is_none());
     }
 
@@ -353,7 +369,10 @@ rule:
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.ts:2"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.ts", 2))
+        );
     }
 
     #[test]
@@ -383,7 +402,10 @@ rule:
         let findings = run_scoped(&dir, "secret-handling", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].location.as_deref(), Some("src/main.rs:2"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("src/main.rs", 2))
+        );
     }
 
     #[test]
@@ -414,18 +436,12 @@ constraints:
 
         let findings = run_scoped(&dir, "testing", &check, vec![file]);
 
-        let mut locations: Vec<_> = findings
+        let mut lines: Vec<_> = findings
             .iter()
-            .map(|finding| finding.location.clone().unwrap())
+            .map(|finding| finding.location.clone().expect("location").line)
             .collect();
-        locations.sort();
-        assert_eq!(
-            locations,
-            vec![
-                "src/main.test.ts:1".to_string(),
-                "src/main.test.ts:2".to_string(),
-            ]
-        );
+        lines.sort();
+        assert_eq!(lines, vec![Some(1), Some(2)]);
     }
 
     #[test]
@@ -525,7 +541,10 @@ constraints:
         let findings = run_in(&repo, &spex, "writing-style", &check, &[]);
 
         assert_eq!(findings.len(), 2);
-        assert_eq!(findings[0].location.as_deref(), Some("docs/intro.md:40"));
+        assert_eq!(
+            findings[0].location,
+            Some(Location::at_line("docs/intro.md", 40))
+        );
         assert_eq!(findings[0].message, "matches forbidden writing pattern");
         assert!(findings[1].location.is_none());
         assert_eq!(findings[1].message, "a stray diagnostic");
@@ -561,8 +580,8 @@ constraints:
         check.exclude = vec!["**/*_test.rs".to_string()];
 
         let scoped = scope_files(&check, &files).expect("scoped");
-        let names: Vec<String> = scoped.iter().map(|file| file.rel_str()).collect();
-        assert_eq!(names, vec!["src/main.rs".to_string()]);
+        let names: Vec<&Path> = scoped.iter().map(|file| file.rel.as_path()).collect();
+        assert_eq!(names, vec![Path::new("src/main.rs")]);
     }
 
     fn rule(id: &str, checks: Vec<Check>) -> Rule {
@@ -578,6 +597,10 @@ constraints:
             path: spex_dir.join(path),
             ..testing::repository("api", path)
         }
+    }
+
+    fn check_name(finding: &Finding) -> &str {
+        finding.source.baseline_key().expect("check source").1
     }
 
     fn named_glob_check(name: &str, pattern: &str) -> Check {
@@ -619,8 +642,12 @@ constraints:
         )
         .expect("check");
         assert_eq!(findings.len(), 2);
-        assert!(findings.iter().any(|f| f.check == "dprint-config-present"));
-        assert!(findings.iter().any(|f| f.check == "no-rs-files"));
+        assert!(
+            findings
+                .iter()
+                .any(|f| check_name(f) == "dprint-config-present")
+        );
+        assert!(findings.iter().any(|f| check_name(f) == "no-rs-files"));
 
         // With --files: negated check is skipped, non-negated still fires.
         let findings = check_repo(
@@ -635,8 +662,12 @@ constraints:
         )
         .expect("check");
         assert_eq!(findings.len(), 1);
-        assert!(findings.iter().all(|f| f.check != "dprint-config-present"));
-        assert!(findings.iter().any(|f| f.check == "no-rs-files"));
+        assert!(
+            findings
+                .iter()
+                .all(|f| check_name(f) != "dprint-config-present")
+        );
+        assert!(findings.iter().any(|f| check_name(f) == "no-rs-files"));
     }
 
     #[test]
@@ -710,13 +741,19 @@ constraints:
         assert!(
             findings
                 .iter()
-                .all(|finding| finding.rule_id == "x" && finding.check == "list")
+                .all(|finding| finding.source.baseline_key() == Some(("x", "list")))
         );
-        let locations: Vec<&str> = findings
+        let locations: Vec<Location> = findings
             .iter()
-            .filter_map(|finding| finding.location.as_deref())
+            .filter_map(|finding| finding.location.clone())
             .collect();
-        assert!(locations.contains(&"api/a.txt"), "got: {locations:?}");
-        assert!(locations.contains(&"web/b.txt"), "got: {locations:?}");
+        assert!(
+            locations.contains(&Location::in_file("api/a.txt")),
+            "got: {locations:?}"
+        );
+        assert!(
+            locations.contains(&Location::in_file("web/b.txt")),
+            "got: {locations:?}"
+        );
     }
 }

@@ -1,10 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{file_url, write_embedded_dir, write_embedded_dir_at};
+    use super::super::{file_url, relative_to, write_embedded_dir, write_embedded_dir_at};
     use crate::templates::BUNDLED_TEMPLATES_DIR;
     use include_dir::{Dir, include_dir};
     use std::fs;
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
     use tempfile::tempdir;
 
     static EMBEDDED: Dir = include_dir!("$CARGO_MANIFEST_DIR/templates/schemas");
@@ -30,6 +30,25 @@ mod tests {
         assert_eq!(
             file_url(PathBuf::from("/workspace/proj#2/50%/a?.yaml").as_path()),
             "file:///workspace/proj%232/50%25/a%3F.yaml"
+        );
+    }
+
+    #[test]
+    fn relative_to_drops_the_base_prefix() {
+        assert_eq!(
+            relative_to(
+                Path::new("/workspace/spex/specs/a.yaml"),
+                Path::new("/workspace/spex")
+            ),
+            Path::new("specs/a.yaml")
+        );
+    }
+
+    #[test]
+    fn relative_to_keeps_a_path_outside_the_base() {
+        assert_eq!(
+            relative_to(Path::new("/elsewhere/a.yaml"), Path::new("/workspace/spex")),
+            Path::new("/elsewhere/a.yaml")
         );
     }
 

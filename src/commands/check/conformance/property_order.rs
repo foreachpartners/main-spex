@@ -9,7 +9,8 @@ use crate::spec::SPECS_DIR;
 use crate::support::util::yaml_files;
 use crate::templates::SCHEMAS_DIRNAME;
 
-use super::{Finding, RULE_ID, rel};
+use super::super::finding::{Finding, Location};
+use super::conformance_error;
 
 #[cfg(test)]
 #[path = "property_order_test.rs"]
@@ -171,33 +172,18 @@ pub(super) fn validate_property_order(spex_dir: &Path) -> Result<Vec<Finding>> {
 
     let spec_schema = load_schema_file(&mut cache, &schemas_dir, "spec.schema.json");
     for file in yaml_files(&spex_dir.join(SPECS_DIR))? {
-        check_file_property_order(
-            spex_dir,
-            &file,
-            &spec_schema,
-            &mut cache,
-            &schemas_dir,
-            &mut findings,
-        );
+        check_file_property_order(&file, &spec_schema, &mut cache, &schemas_dir, &mut findings);
     }
 
     let rule_schema = load_schema_file(&mut cache, &schemas_dir, "rule.schema.json");
     for file in yaml_files(&spex_dir.join(RULES_DIR))? {
-        check_file_property_order(
-            spex_dir,
-            &file,
-            &rule_schema,
-            &mut cache,
-            &schemas_dir,
-            &mut findings,
-        );
+        check_file_property_order(&file, &rule_schema, &mut cache, &schemas_dir, &mut findings);
     }
 
     let spex_yaml = spex_dir.join(crate::config::SPEX_CONFIG_FILE);
     if spex_yaml.is_file() {
         let spex_schema = load_schema_file(&mut cache, &schemas_dir, "spex.schema.json");
         check_file_property_order(
-            spex_dir,
             &spex_yaml,
             &spex_schema,
             &mut cache,
@@ -209,7 +195,6 @@ pub(super) fn validate_property_order(spex_dir: &Path) -> Result<Vec<Finding>> {
 }
 
 fn check_file_property_order(
-    spex_dir: &Path,
     file: &Path,
     schema: &Value,
     cache: &mut HashMap<String, Value>,
@@ -227,7 +212,6 @@ fn check_file_property_order(
     };
 
     check_node_order(
-        spex_dir,
         file,
         "",
         &value,
@@ -241,7 +225,6 @@ fn check_file_property_order(
 
 #[allow(clippy::too_many_arguments)]
 fn check_node_order(
-    spex_dir: &Path,
     file: &Path,
     label: &str,
     actual: &serde_yaml_ng::Value,
@@ -265,10 +248,9 @@ fn check_node_order(
                 .filter_map(|k| k.as_str().map(str::to_string))
                 .collect();
             if let Some((found, expected)) = find_order_violation(&canonical, &actual_keys) {
-                findings.push(Finding::error(
-                    RULE_ID,
+                findings.push(conformance_error(
                     PROPERTY_ORDER_CHECK,
-                    Some(rel(spex_dir, file)),
+                    Some(Location::in_file(file)),
                     property_order_message(&found, &expected, &canonical, label),
                 ));
             }
@@ -286,7 +268,6 @@ fn check_node_order(
                     format!("{label}.{key}")
                 };
                 check_node_order(
-                    spex_dir,
                     file,
                     &child_label,
                     value,
@@ -305,7 +286,6 @@ fn check_node_order(
             for (index, item) in items.iter().enumerate() {
                 let child_label = format!("{label}[{index}]");
                 check_node_order(
-                    spex_dir,
                     file,
                     &child_label,
                     item,

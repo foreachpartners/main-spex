@@ -2,8 +2,9 @@ use regex::Regex;
 
 use crate::rule::Check;
 
-use super::super::ScopedFile;
-use super::{Hit, Outcome};
+use super::super::finding::Location;
+use super::super::scoped_file::ScopedFile;
+use super::{Outcome, PATTERN_WORDING, presence_hits};
 
 pub(in crate::commands::check) fn run_regexp(
     check: &Check,
@@ -19,23 +20,19 @@ pub(in crate::commands::check) fn run_regexp(
             continue;
         };
 
-        if negate {
-            if !content.lines().any(|line| regex.is_match(line)) {
-                hits.push(Hit::new(
-                    Some(file.rel_str()),
-                    check.message("required pattern not found"),
-                ));
-            }
-        } else {
-            for (index, line) in content.lines().enumerate() {
-                if regex.is_match(line) {
-                    hits.push(Hit::new(
-                        Some(format!("{}:{}", file.rel_str(), index + 1)),
-                        check.message("matches forbidden pattern"),
-                    ));
-                }
-            }
-        }
+        let found = content
+            .lines()
+            .enumerate()
+            .filter(|(_, line)| regex.is_match(line))
+            .map(|(index, _)| Location::at_line(&file.rel, index + 1))
+            .collect();
+        hits.extend(presence_hits(
+            check,
+            negate,
+            found,
+            Some(Location::in_file(&file.rel)),
+            &PATTERN_WORDING,
+        ));
     }
     Ok(hits)
 }

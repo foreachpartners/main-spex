@@ -1,150 +1,118 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::support::testing;
-
-    fn finding(severity: Severity, check: &str, location: Option<&str>) -> Finding {
-        Finding {
-            severity,
-            rule_id: "X".to_string(),
-            check: check.to_string(),
-            location: location.map(str::to_string),
-            message: "boom".to_string(),
-        }
-    }
-
-    fn preexisting(check: &str, files: Vec<&str>) -> PreexistingError {
-        PreexistingError {
-            rule_id: "X".to_string(),
-            check: check.to_string(),
-            files: files.into_iter().map(str::to_string).collect(),
-        }
-    }
 
     #[test]
-    fn normalize_location_drops_trailing_line_number() {
-        assert_eq!(Finding::normalize_location("src/main.rs:42"), "src/main.rs");
-        assert_eq!(Finding::normalize_location("src/main.rs"), "src/main.rs");
-        // A non-numeric suffix is part of the path, not a line number.
-        assert_eq!(Finding::normalize_location("a:b/c.rs"), "a:b/c.rs");
-    }
-
-    #[test]
-    fn preexisting_empty_files_suppresses_whole_check() {
-        let baseline = vec![preexisting("no-cyrillic", vec![])];
-        assert!(
-            finding(Severity::Error, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
-        );
-        assert!(finding(Severity::Error, "no-cyrillic", None).is_preexisting(&baseline));
-    }
-
-    #[test]
-    fn preexisting_matches_listed_file_only() {
-        let baseline = vec![preexisting("no-cyrillic", vec!["docs/old.md"])];
-        // Listed file, normalized from `file:line`, is suppressed.
-        assert!(
-            finding(Severity::Error, "no-cyrillic", Some("docs/old.md:3"))
-                .is_preexisting(&baseline)
-        );
-        // A new error in another file still surfaces.
-        assert!(
-            !finding(Severity::Error, "no-cyrillic", Some("docs/new.md:3"))
-                .is_preexisting(&baseline)
-        );
-    }
-
-    #[test]
-    fn preexisting_never_suppresses_warnings_or_other_checks() {
-        let baseline = vec![preexisting("no-cyrillic", vec![])];
-        // Warnings are never a baseline concern.
-        assert!(
-            !finding(Severity::Warn, "no-cyrillic", Some("README.md:1")).is_preexisting(&baseline)
-        );
-        // A different check name does not match.
-        assert!(
-            !finding(Severity::Error, "writing", Some("README.md:1")).is_preexisting(&baseline)
-        );
-    }
-
-    fn repository_at(path: &str, ignored_errors: Vec<PreexistingError>) -> Repository {
-        Repository {
-            ignored_errors,
-            is_spex_repo: path == ".",
-            ..testing::repository(path, path)
-        }
-    }
-
-    fn owner(finding: &Finding, repos: &[&Repository]) -> Option<(String, Option<String>)> {
-        finding.owning_repo(repos, testing::spex_dir())
-    }
-
-    #[test]
-    fn owning_repo_resolves_a_location_to_the_repository_containing_it() {
-        let api = repository_at("../api", vec![]);
-        let web = repository_at("../web", vec![]);
-        let located = finding(Severity::Error, "check", Some("../web/src/main.ts:4"));
-
+    fn parse_splits_a_trailing_line_number_from_the_file() {
         assert_eq!(
-            owner(&located, &[&api, &web]),
-            Some(("../web".to_string(), Some("src/main.ts".to_string())))
-        );
-    }
-
-    #[test]
-    fn owning_repo_does_not_give_a_sibling_location_to_the_spex_repository() {
-        let spex = repository_at(".", vec![]);
-        let api = repository_at("../api", vec![]);
-        let located = finding(Severity::Error, "check", Some("../api/src/main.rs"));
-
-        assert_eq!(
-            owner(&located, &[&spex, &api]),
-            Some(("../api".to_string(), Some("src/main.rs".to_string())))
-        );
-    }
-
-    #[test]
-    fn owning_repo_gives_a_spex_dir_location_to_the_spex_repository() {
-        let spex = repository_at(".", vec![]);
-        let api = repository_at("../api", vec![]);
-        let located = finding(Severity::Error, "check", Some("specs/a.yaml:2"));
-
-        assert_eq!(
-            owner(&located, &[&api, &spex]),
-            Some((".".to_string(), Some("specs/a.yaml".to_string())))
-        );
-    }
-
-    #[test]
-    fn owning_repo_is_none_without_a_location_or_a_containing_repository() {
-        let api = repository_at("../api", vec![]);
-
-        assert_eq!(
-            owner(&finding(Severity::Error, "check", None), &[&api]),
-            None
+            Location::parse("src/main.rs:42"),
+            Location::at_line("src/main.rs", 42)
         );
         assert_eq!(
-            owner(
-                &finding(Severity::Error, "check", Some("../web/x.ts")),
-                &[&api]
-            ),
-            None
+            Location::parse("src/main.rs"),
+            Location::in_file("src/main.rs")
         );
     }
 
     #[test]
-    fn preexisting_workspace_matches_the_owning_repositorys_baseline_file() {
-        let api = repository_at(
-            "../api",
-            vec![preexisting("no-cyrillic", vec!["src/old.rs"])],
+    fn parse_keeps_a_non_numeric_suffix_in_the_file() {
+        assert_eq!(Location::parse("a:b/c.rs"), Location::in_file("a:b/c.rs"));
+        assert_eq!(Location::parse("a.rs:"), Location::in_file("a.rs:"));
+    }
+
+    #[test]
+    fn a_location_displays_as_file_and_optional_line() {
+        assert_eq!(Location::in_file("src/main.rs").to_string(), "src/main.rs");
+        assert_eq!(
+            Location::at_line("src/main.rs", 42).to_string(),
+            "src/main.rs:42"
         );
-        let is_preexisting = |severity, location| {
-            finding(severity, "no-cyrillic", Some(location))
-                .is_preexisting_workspace(&[&api], testing::spex_dir())
+    }
+
+    #[test]
+    fn relative_to_strips_the_base_and_keeps_the_line() {
+        assert_eq!(
+            Location::at_line("/spex/specs/a.yaml", 3).relative_to(Path::new("/spex")),
+            Location::at_line("specs/a.yaml", 3)
+        );
+    }
+
+    #[test]
+    fn relative_to_keeps_a_file_outside_the_base() {
+        assert_eq!(
+            Location::in_file("/elsewhere/a.yaml").relative_to(Path::new("/spex")),
+            Location::in_file("/elsewhere/a.yaml")
+        );
+    }
+
+    #[test]
+    fn a_finding_rebases_its_location() {
+        let finding = Finding::error(
+            Source::rule("x", "check"),
+            Some(Location::in_file("/spex/specs/a.yaml")),
+            "boom".to_string(),
+        )
+        .relative_to(Path::new("/spex"));
+
+        assert_eq!(finding.location, Some(Location::in_file("specs/a.yaml")));
+    }
+
+    #[test]
+    fn a_check_source_displays_as_owner_and_check() {
+        assert_eq!(
+            Source::rule("writing", "no-cyrillic").to_string(),
+            "writing/no-cyrillic"
+        );
+        assert_eq!(
+            Source::spec("place-order", "status").to_string(),
+            "place-order/status"
+        );
+        assert_eq!(
+            Source::internal("spex-internal-conformance", "ac-ordered").to_string(),
+            "spex-internal-conformance/ac-ordered"
+        );
+    }
+
+    #[test]
+    fn a_source_without_a_check_displays_its_label_alone() {
+        let unknown_rule = Source::UnknownRule {
+            rule_id: "writing".to_string(),
+        };
+        let unreachable = Source::UnreachableRepository {
+            name: "proj-api".to_string(),
         };
 
-        assert!(is_preexisting(Severity::Error, "../api/src/old.rs:9"));
-        assert!(!is_preexisting(Severity::Error, "../api/src/new.rs:9"));
-        assert!(!is_preexisting(Severity::Error, "../web/src/old.rs:9"));
-        assert!(!is_preexisting(Severity::Warn, "../api/src/old.rs:9"));
+        assert_eq!(unknown_rule.to_string(), "writing");
+        assert_eq!(unreachable.to_string(), "proj-api");
+    }
+
+    #[test]
+    fn only_check_sources_have_a_baseline_key() {
+        assert_eq!(
+            Source::rule("writing", "no-cyrillic").baseline_key(),
+            Some(("writing", "no-cyrillic"))
+        );
+        assert_eq!(
+            Source::spec("place-order", "status").baseline_key(),
+            Some(("place-order", "status"))
+        );
+        assert_eq!(
+            Source::internal("spex-internal-conformance", "ac-ordered").baseline_key(),
+            Some(("spex-internal-conformance", "ac-ordered"))
+        );
+        assert_eq!(
+            Source::UnknownRule {
+                rule_id: "writing".to_string()
+            }
+            .baseline_key(),
+            None
+        );
+        assert_eq!(
+            Source::UnreachableRepository {
+                name: "proj-api".to_string()
+            }
+            .baseline_key(),
+            None
+        );
     }
 }

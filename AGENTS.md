@@ -62,7 +62,7 @@ src/                CLI source
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders, repository selection by name, and scope validation (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
-    fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)
+    fs.rs           Filesystem operations (file writes, dir creation, paths, relative paths, file URLs, embedded dir extraction, symlinks, exec bits)
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
     style.rs        Terminal hyperlinks, version line, dim/red styles, terminal width and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
@@ -70,9 +70,9 @@ src/                CLI source
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
-    check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
-      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore)
-      runners/      One runner per check type (ast_grep, glob, regexp, script)
+    check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, repo selection, report, spec-id annotation tracing
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in its mod.rs
+      runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 docs/                          Framework reference docs (single source of truth); only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
   framework-principles.md  Non-negotiable foundation spex is built on

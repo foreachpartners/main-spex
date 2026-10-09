@@ -4,7 +4,10 @@ use std::path::Path;
 use crate::rule::Rule;
 use crate::spec::Spec;
 
-use super::{Finding, RULE_ID, rel};
+use crate::support::fs::relative_to;
+
+use super::super::finding::Location;
+use super::{Finding, conformance_error};
 
 #[cfg(test)]
 #[path = "duplicate_ids_test.rs"]
@@ -21,27 +24,28 @@ pub(super) fn validate_no_duplicate_ids(
     rules: &[Rule],
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
-    let mut seen: HashMap<&str, String> = HashMap::new();
-    let locations: Vec<(&str, String)> = specs
+    let mut seen: HashMap<&str, &Path> = HashMap::new();
+    let definitions = specs
         .iter()
-        .map(|spec| (spec.id.as_str(), rel(spex_dir, &spec.path)))
+        .map(|spec| (spec.id.as_str(), spec.path.as_path()))
         .chain(
             rules
                 .iter()
-                .map(|rule| (rule.id.as_str(), rel(spex_dir, &rule.path))),
-        )
-        .collect();
+                .map(|rule| (rule.id.as_str(), rule.path.as_path())),
+        );
 
-    for (id, location) in &locations {
+    for (id, path) in definitions {
         if let Some(first_seen) = seen.get(id) {
-            findings.push(Finding::error(
-                RULE_ID,
+            findings.push(conformance_error(
                 DUPLICATE_ID_CHECK,
-                Some(location.clone()),
-                format!("duplicate id `{id}`: already defined in `{first_seen}`"),
+                Some(Location::in_file(path)),
+                format!(
+                    "duplicate id `{id}`: already defined in `{}`",
+                    relative_to(first_seen, spex_dir).display()
+                ),
             ));
         } else {
-            seen.insert(id, location.clone());
+            seen.insert(id, path);
         }
     }
     findings

@@ -4,7 +4,9 @@ use std::fs;
 use crate::spec::{AcId, SpecId};
 use crate::tracing::annotations;
 
-use super::{Finding, RepoCtx, ScopedFile};
+use super::check::RepoCtx;
+use super::finding::{Finding, Location, Source};
+use super::scoped_file::ScopedFile;
 
 #[cfg(test)]
 #[path = "spec_id_tracing_test.rs"]
@@ -65,7 +67,7 @@ fn check_format(file: &ScopedFile, content: &str) -> Vec<Finding> {
         .map(|line| {
             finding(
                 FORMAT_CHECK,
-                Some(format!("{}:{line}", file.rel_str())),
+                Location::at_line(&file.rel, line),
                 "malformed spec-id annotation".to_string(),
             )
         })
@@ -99,11 +101,11 @@ fn check_orphans(
                 ),
                 _ => format!("orphan annotation references unknown spec `{spec_id}`"),
             };
-            finding(ORPHAN_CHECK, Some(file.rel_str()), message)
+            finding(ORPHAN_CHECK, Location::in_file(&file.rel), message)
         })
         .collect()
 }
 
-fn finding(check: &str, location: Option<String>, message: String) -> Finding {
-    Finding::error(RULE_ID, check, location, message)
+fn finding(check: &str, location: Location, message: String) -> Finding {
+    Finding::error(Source::internal(RULE_ID, check), Some(location), message)
 }

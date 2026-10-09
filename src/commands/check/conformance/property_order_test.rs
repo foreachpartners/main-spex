@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::commands::check::conformance::RULE_ID;
     use tempfile::tempdir;
 
     fn write_schemas(dir: &std::path::Path) {
@@ -69,7 +70,10 @@ mod tests {
         let findings = validate_property_order(dir.path()).expect("validate");
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some((RULE_ID, PROPERTY_ORDER_CHECK))
+        );
         assert!(findings[0].message.contains("sync_with_upstream"));
     }
 
@@ -133,7 +137,10 @@ mod tests {
         let findings = validate_property_order(dir.path()).expect("validate");
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some((RULE_ID, PROPERTY_ORDER_CHECK))
+        );
         assert!(findings[0].message.contains("checks[0]"));
         assert!(findings[0].message.contains("severity"));
     }
@@ -158,7 +165,10 @@ mod tests {
         let findings = validate_property_order(dir.path()).expect("validate");
 
         assert_eq!(findings.len(), 1);
-        assert_eq!(findings[0].check, PROPERTY_ORDER_CHECK);
+        assert_eq!(
+            findings[0].source.baseline_key(),
+            Some((RULE_ID, PROPERTY_ORDER_CHECK))
+        );
         assert!(findings[0].message.contains("repositories[0]"));
         assert!(findings[0].message.contains("repository_name"));
     }

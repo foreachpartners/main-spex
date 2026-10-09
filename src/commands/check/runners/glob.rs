@@ -2,8 +2,9 @@ use globset::Glob;
 
 use crate::rule::Check;
 
-use super::super::ScopedFile;
-use super::{Hit, Outcome};
+use super::super::finding::Location;
+use super::super::scoped_file::ScopedFile;
+use super::{Outcome, Wording, presence_hits};
 
 pub(in crate::commands::check) fn run_glob(
     check: &Check,
@@ -15,24 +16,15 @@ pub(in crate::commands::check) fn run_glob(
         .map_err(|err| format!("invalid glob: {err}"))?
         .compile_matcher();
 
-    let matched: Vec<&&ScopedFile> = files
+    let found = files
         .iter()
         .filter(|file| matcher.is_match(&file.rel))
+        .map(|file| Location::in_file(&file.rel))
         .collect();
-
-    if negate {
-        return Ok(if matched.is_empty() {
-            vec![Hit::new(
-                None,
-                check.message(&format!("required path not found: {pattern}")),
-            )]
-        } else {
-            Vec::new()
-        });
-    }
-
-    Ok(matched
-        .into_iter()
-        .map(|file| Hit::new(Some(file.rel_str()), check.message("forbidden path")))
-        .collect())
+    let required = format!("required path not found: {pattern}");
+    let wording = Wording {
+        forbidden: "forbidden path",
+        required: &required,
+    };
+    Ok(presence_hits(check, negate, found, None, &wording))
 }

@@ -7,7 +7,8 @@ use crate::spec::{SPECS_DIR, Spec};
 use crate::support::util::yaml_files;
 use crate::templates::SCHEMAS_DIRNAME;
 
-use super::{Finding, conform_finding, rel};
+use super::super::finding::{Finding, Location};
+use super::conform_finding;
 
 pub(super) fn validate_schema(
     spex_dir: &Path,
@@ -42,18 +43,10 @@ pub(super) fn validate_schema(
     ));
 
     for spec in specs {
-        findings.extend(check_filename_matches_id(
-            spex_dir,
-            &spec.path,
-            spec.id.as_str(),
-        ));
+        findings.extend(check_filename_matches_id(&spec.path, spec.id.as_str()));
     }
     for rule in rules {
-        findings.extend(check_filename_matches_id(
-            spex_dir,
-            &rule.path,
-            rule.id.as_str(),
-        ));
+        findings.extend(check_filename_matches_id(&rule.path, rule.id.as_str()));
     }
     Ok(findings)
 }
@@ -78,12 +71,12 @@ fn validate_schema_group(spex_dir: &Path, files: &[PathBuf], schema_name: &str) 
         match check_schema::validate_file(&validator, file) {
             Ok(messages) => {
                 for message in messages {
-                    findings.push(conform_finding(Some(rel(spex_dir, file)), message));
+                    findings.push(conform_finding(Some(Location::in_file(file)), message));
                 }
             }
             Err(err) => {
                 findings.push(conform_finding(
-                    Some(rel(spex_dir, file)),
+                    Some(Location::in_file(file)),
                     format!("{err:?}"),
                 ));
             }
@@ -94,14 +87,14 @@ fn validate_schema_group(spex_dir: &Path, files: &[PathBuf], schema_name: &str) 
 
 // A spec or rule file must be named after its own id (naming-convention: id
 // and filename are identical).
-fn check_filename_matches_id(spex_dir: &Path, path: &Path, id: &str) -> Option<Finding> {
+fn check_filename_matches_id(path: &Path, id: &str) -> Option<Finding> {
     let stem = path
         .file_stem()
         .and_then(|s| s.to_str())
         .unwrap_or_default();
     (id != stem).then(|| {
         conform_finding(
-            Some(rel(spex_dir, path)),
+            Some(Location::in_file(path)),
             format!("filename stem `{stem}` does not match id `{id}`"),
         )
     })

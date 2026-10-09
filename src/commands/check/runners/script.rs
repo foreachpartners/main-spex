@@ -2,7 +2,9 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use super::super::{Finding, ScopedFile, WorkspaceCheck};
+use super::super::check::WorkspaceCheck;
+use super::super::finding::{Finding, Location};
+use super::super::scoped_file::ScopedFile;
 use super::{Hit, Outcome, outcome_findings};
 
 const SCRIPT_BATCH_SIZE: usize = 1000;
@@ -86,7 +88,7 @@ fn parse_script_line(line: &str) -> Hit {
         Some((location, message)) => {
             let location = location.trim();
             Hit::new(
-                (!location.is_empty()).then(|| location.to_string()),
+                (!location.is_empty()).then(|| Location::parse(location)),
                 message.trim(),
             )
         }

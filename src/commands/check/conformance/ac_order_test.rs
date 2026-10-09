@@ -1,11 +1,19 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::commands::check::conformance::RULE_ID;
     use crate::spec;
     use indoc::indoc;
     use tempfile::tempdir;
 
     const OUT_OF_ORDER_SUFFIX: &str = "(order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY)";
+
+    fn rebased(findings: Vec<Finding>, base: &Path) -> Vec<Finding> {
+        findings
+            .into_iter()
+            .map(|finding| finding.relative_to(base))
+            .collect()
+    }
 
     fn spec_findings(yaml: &str) -> Vec<Finding> {
         let dir = tempdir().expect("temp dir");
@@ -14,7 +22,7 @@ mod tests {
         std::fs::write(specs_dir.join("sample.yaml"), yaml).expect("spec");
 
         let specs = Spec::load_all(&specs_dir).expect("specs");
-        validate_ac_order(dir.path(), &specs, &[])
+        rebased(validate_ac_order(&specs, &[]), dir.path())
     }
 
     fn rule_findings(yaml: &str) -> Vec<Finding> {
@@ -24,13 +32,15 @@ mod tests {
         std::fs::write(rules_dir.join("sample.yaml"), yaml).expect("rule");
 
         let rules = Rule::load_all(&rules_dir).expect("rules");
-        validate_ac_order(dir.path(), &[], &rules)
+        rebased(validate_ac_order(&[], &rules), dir.path())
     }
 
     fn assert_out_of_order(finding: &Finding, location: &str, label: &str, prev_label: &str) {
-        assert_eq!(finding.rule_id, RULE_ID);
-        assert_eq!(finding.check, AC_ORDER_CHECK);
-        assert_eq!(finding.location.as_deref(), Some(location));
+        assert_eq!(
+            finding.source.baseline_key(),
+            Some((RULE_ID, AC_ORDER_CHECK))
+        );
+        assert_eq!(finding.location, Some(Location::parse(location)));
         assert_eq!(
             finding.message,
             format!(

@@ -12,12 +12,12 @@ mod tests {
         };
         let repositories = vec![testing::repository("api", "../api")];
 
-        let findings = validate_scope(testing::spex_dir(), &spec, &repositories);
+        let findings = validate_scope(&spec, &repositories);
 
         assert_eq!(findings.len(), 1);
         let finding = &findings[0];
         assert_eq!(finding.severity, Severity::Error);
-        assert_eq!(finding.check, "scope");
+        assert!(matches!(&finding.source, Source::Spec { check, .. } if check == "scope"));
         assert!(finding.message.contains("unknown"));
         assert!(finding.message.contains("repository_short_name"));
     }
