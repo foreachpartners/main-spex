@@ -34,11 +34,9 @@ just help       # spex --help
 
 ## Rules
 
-On version change fill `CHANGELOG.md`
-
-On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
-
-When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
+- On version change fill `CHANGELOG.md`
+- On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
+- When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
 
 ## Project structure
 
@@ -61,7 +59,7 @@ src/                CLI source
   config/           Configuration topic (mod.rs is an index only)
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1), and its text edits
     repository.rs   Repository model built from the raw repository config, with absolute repository and contract paths
-    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders and scope validation (shared by commands)
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders, repository selection by name, and scope validation (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)

@@ -58,6 +58,30 @@ impl Spex {
         Spec::load_all(&self.dir.join(spec::SPECS_DIR))
     }
 
+    pub fn validate_repository_names(&self, names: &[String]) -> Result<()> {
+        for name in names {
+            if !self
+                .repositories
+                .iter()
+                .any(|repo| repo.matches_any_repo_name(name))
+            {
+                return Err(Report::new(CliError::UnknownRepo(name.clone())));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn select_repositories(&self, names: &[String]) -> Result<Vec<&Repository>> {
+        self.validate_repository_names(names)?;
+        Ok(self
+            .repositories
+            .iter()
+            .filter(|repo| {
+                names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name))
+            })
+            .collect())
+    }
+
     pub fn validate_scopes(&self, scopes: &[String]) -> Result<()> {
         for short_name in scopes {
             if !self

@@ -20,15 +20,11 @@ pub(super) fn select_repos<'a>(
     names: &[String],
     files: &[String],
 ) -> Result<Vec<&'a Repository>> {
-    for name in names {
-        if !spex
-            .repositories
-            .iter()
-            .any(|repo| repo.matches_any_repo_name(name))
-        {
-            return Err(Report::new(CliError::UnknownRepo(name.clone())));
-        }
+    if files.is_empty() {
+        return spex.select_repositories(names);
     }
+
+    spex.validate_repository_names(names)?;
 
     for file in files {
         let found = spex
@@ -40,16 +36,6 @@ pub(super) fn select_repos<'a>(
                 "unknown file `{file}` — not found in any workspace repository"
             ))));
         }
-    }
-
-    if files.is_empty() {
-        return Ok(spex
-            .repositories
-            .iter()
-            .filter(|repo| {
-                names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name))
-            })
-            .collect());
     }
 
     Ok(spex

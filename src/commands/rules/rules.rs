@@ -42,15 +42,7 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
 }
 
 fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
-    for name in &args.repo {
-        if !spex
-            .repositories
-            .iter()
-            .any(|repo| repo.matches_any_repo_name(name))
-        {
-            return Err(Report::new(CliError::UnknownRepo(name.clone())));
-        }
-    }
+    let repositories = spex.select_repositories(&args.repo)?;
 
     let rules: Vec<serde_json::Value> =
         util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
@@ -72,18 +64,6 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
             return Err(Report::new(CliError::UnknownRuleId(id.clone())));
         }
     }
-
-    let repositories: Vec<&Repository> = spex
-        .repositories
-        .iter()
-        .filter(|repo| {
-            args.repo.is_empty()
-                || args
-                    .repo
-                    .iter()
-                    .any(|name| repo.matches_any_repo_name(name))
-        })
-        .collect();
 
     let output: Vec<&serde_json::Value> = rules
         .iter()

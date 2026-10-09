@@ -44,12 +44,6 @@ pub struct RepositoryConfig {
     pub ignored_errors: Vec<PreexistingError>,
 }
 
-impl RepositoryConfig {
-    pub fn matches_any_repo_name(&self, name: &str) -> bool {
-        self.repository_name == name || self.repository_short_name == name
-    }
-}
-
 // A repository's interface contract, stored inside the spex repository's
 // `contracts/` folder. `path` is relative to the spex directory.
 #[derive(Debug, Deserialize, Serialize)]

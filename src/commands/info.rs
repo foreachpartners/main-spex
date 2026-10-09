@@ -1,13 +1,12 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use error_stack::ResultExt;
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::config::Repository;
 use crate::config::spex::Spex;
-use crate::config::{RepositoryConfig, SpexConfig};
 use crate::error::{CliError, Result};
 use crate::support::fs::canonical;
 
@@ -30,15 +29,29 @@ struct Info {
 
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
     let (dir, config) = Spex::discover_config()?;
-    let repositories = named_repositories(&config, &args.repo)?
-        .into_iter()
-        .map(|repository| repository_with_absolute_path(repository, &dir))
-        .collect::<Result<Vec<_>>>()?;
-
     let mut config_json = to_json(&config)?;
-    config_json["repositories"] = Value::Array(repositories);
+    let raw_repositories = config
+        .repositories
+        .iter()
+        .map(to_json)
+        .collect::<Result<Vec<_>>>()?;
+    let spex = Spex::from_config(dir, config);
+    let selected = spex.select_repositories(&args.repo)?;
+
+    config_json["repositories"] = Value::Array(
+        raw_repositories
+            .into_iter()
+            .zip(&spex.repositories)
+            .filter(|(_, repository)| {
+                selected
+                    .iter()
+                    .any(|picked| std::ptr::eq(*picked, *repository))
+            })
+            .map(|(json, repository)| repository_with_absolute_path(json, repository))
+            .collect(),
+    );
     let info = Info {
-        spex_dir: dir.to_string_lossy().into_owned(),
+        spex_dir: spex.dir.to_string_lossy().into_owned(),
         config: config_json,
     };
     let json = serde_json::to_string_pretty(&info).change_context_lazy(|| {
@@ -55,30 +68,7 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
     })
 }
 
-fn repository_with_absolute_path(repository: &RepositoryConfig, spex_dir: &Path) -> Result<Value> {
-    let absolute_path = canonical(&spex_dir.join(&repository.path));
-    let mut json = to_json(repository)?;
-    json["path"] = Value::String(absolute_path.to_string_lossy().into_owned());
-    Ok(json)
-}
-
-fn named_repositories<'a>(
-    config: &'a SpexConfig,
-    names: &[String],
-) -> Result<Vec<&'a RepositoryConfig>> {
-    if let Some(unknown) = names.iter().find(|name| {
-        !config
-            .repositories
-            .iter()
-            .any(|repo| repo.matches_any_repo_name(name))
-    }) {
-        return Err(Report::new(CliError::UnknownRepo(unknown.clone())));
-    }
-    Ok(config
-        .repositories
-        .iter()
-        .filter(|repo| {
-            names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name))
-        })
-        .collect())
+fn repository_with_absolute_path(mut json: Value, repository: &Repository) -> Value {
+    json["path"] = Value::String(canonical(&repository.path).to_string_lossy().into_owned());
+    json
 }
