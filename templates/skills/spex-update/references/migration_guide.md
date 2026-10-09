@@ -2,6 +2,10 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.12.0
+
+`spex info --print <field>` was removed. In every script under `<workspace-root>/<project-name>-spex/scripts/**` that calls `spex info --print <field>`, replace it with `spex info | jq -r .<field>` (e.g. `spex info --print project_name` becomes `spex info | jq -r .project_name`), and make sure `jq` is installed. Scripts bundled with rules that set `sync_with_upstream: true` are rewritten by `spex update` and need no change.
+
 ## 0.10.4
 
 The spex repository skill is now the bundled `spex` skill, which replaces the per-project `<project-name>-spex` skill, and `spex update` doesn't delete files, so the old skill lingers. Delete the folder `<workspace-root>/<project-name>-spex/.agents/skills/<project-name>-spex/`.

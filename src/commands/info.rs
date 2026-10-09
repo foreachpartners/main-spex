@@ -2,17 +2,14 @@ use std::process::ExitCode;
 
 use clap::Args;
 use error_stack::{Report, ResultExt};
+use serde::Serialize;
 
+use crate::config::SpexConfig;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 
 #[derive(Args)]
 pub struct InfoArgs {
-    #[arg(
-        long,
-        help = "Print a single top-level scalar field (e.g. `project_name`)"
-    )]
-    print: Option<String>,
     #[arg(
         long,
         num_args = 1..,
@@ -21,16 +18,23 @@ pub struct InfoArgs {
     repo: Vec<String>,
 }
 
-pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let (_, config) = Spex::discover_config()?;
-    let value = serde_json::to_value(&config).change_context_lazy(serialize_error)?;
+#[derive(Serialize)]
+struct Info<'a> {
+    spex_dir: String,
+    #[serde(flatten)]
+    config: &'a SpexConfig,
+}
 
-    if let Some(field) = &args.print {
-        return print_field(&value, field);
-    }
+pub fn run(args: InfoArgs) -> Result<ExitCode> {
+    let (dir, config) = Spex::discover_config()?;
+    let spex_dir = dir.to_string_lossy().into_owned();
 
     if args.repo.is_empty() {
-        let json = serde_json::to_string_pretty(&value).change_context_lazy(serialize_error)?;
+        let json = serde_json::to_string_pretty(&Info {
+            spex_dir,
+            config: &config,
+        })
+        .change_context_lazy(serialize_error)?;
         println!("{json}");
         return Ok(ExitCode::SUCCESS);
     }
@@ -48,6 +52,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         .collect::<Result<Vec<_>>>()?;
 
     let filtered = serde_json::json!({
+        "spex_dir": spex_dir,
         "project_name": config.project_name,
         "cli_version": config.cli_version,
         "repositories": repos,
@@ -60,25 +65,4 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
 
 fn serialize_error() -> CliError {
     CliError::Internal("could not serialize the spex configuration".into())
-}
-
-fn print_field(value: &serde_json::Value, field: &str) -> Result<ExitCode> {
-    let Some(found) = value.get(field) else {
-        return Err(Report::new(CliError::Custom(format!(
-            "no field `{field}` in the spex configuration"
-        ))));
-    };
-
-    match found {
-        serde_json::Value::String(s) => println!("{s}"),
-        serde_json::Value::Number(n) => println!("{n}"),
-        serde_json::Value::Bool(b) => println!("{b}"),
-        _ => {
-            return Err(Report::new(CliError::Custom(format!(
-                "field `{field}` is not a single value"
-            ))));
-        }
-    }
-
-    Ok(ExitCode::SUCCESS)
 }

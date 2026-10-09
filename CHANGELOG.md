@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.12.0] - 2026-10-09
+
+- **Breaking**: removed `spex info --print <field>`; read a field from the JSON with `spex info | jq -r .<field>` (e.g. `spex info | jq -r .project_name`). The bundled `naming-convention` `repo-dir.sh` script now uses `jq`, so `jq` must be installed wherever `spex check` runs.
+- `spex info` now prints `spex_dir`, the absolute path of the spex repository, as its first field (with `--repo` too), so a script can resolve the relative repository and contract paths: `spex info | jq -r .spex_dir`.
+
 ## [0.11.0] - 2026-10-06
 
 - **Breaking**: the project is renamed from spex to Main spex (spex for short) and the crate from `spex` to `main-spex`; the CLI binary and command stay `spex`, and the repository moved to `https://github.com/foreachpartners/main-spex`. Existing installs must reinstall from the renamed repository with `cargo install --path . --force`.

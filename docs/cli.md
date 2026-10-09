@@ -218,19 +218,19 @@ spex coverage --verbose
 
 ### `spex info`
 
-Prints the resolved `spex.yaml` configuration as pretty JSON — every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list. It is the general-purpose form scripts pipe into `jq` for whatever field they need:
+Prints the resolved `spex.yaml` configuration as pretty JSON, led by `spex_dir` — the absolute path of the spex repository, which the relative `path` of each repository and contract is resolved against — followed by every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list. It is the general-purpose form scripts pipe into `jq` for whatever field they need:
 
 ```sh
+spex info | jq -r '.project_name'
+spex info | jq -r '.spex_dir'
 spex info | jq -r '.repositories[].path'
 ```
 
 #### Flags
 
-- `--print <field>` — print one top-level scalar field bare, with no quoting or JSON escaping. Errors (non-zero exit, message to stderr) when the field does not exist or is not a scalar (e.g. `repositories`, which is a list — use plain `spex info` for that).
-- `--repo <name>...` — limit output to the general fields (`project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`. Errors when any given name matches no repository.
+- `--repo <name>...` — limit output to the general fields (`spex_dir`, `project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`. Errors when any given name matches no repository.
 
 ```sh
-spex info --print project_name
 spex info --repo api frontend
 ```
 

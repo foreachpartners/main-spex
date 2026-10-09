@@ -12,10 +12,11 @@ set -eu
 
 dir=$(basename "$(pwd -P)")
 
-project_name=$(spex info --print project_name) || {
+info=$(spex info) || {
   echo "Could not find spex.yaml to determine the project name"
   exit 1
 }
+project_name=$(printf '%s' "$info" | jq -r .project_name)
 
 if ! printf '%s' "$dir" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then
   echo "Repository directory name '$dir' is not kebab-case"

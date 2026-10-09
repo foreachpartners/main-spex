@@ -1,7 +1,10 @@
 mod common;
+use std::path::Path;
+
 use common::{assert_fails_mentioning, dummy_project_fixture, run_spex, temp_project};
 
 const EXPECTED_INFO: &str = r#"{
+  "spex_dir": {spex_dir},
   "project_name": "dummy-project",
   "cli_version": "0.8.8",
   "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a workspace whose specs cover every lifecycle state.",
@@ -43,6 +46,7 @@ const EXPECTED_INFO: &str = r#"{
 "#;
 
 const EXPECTED_INFO_API: &str = r#"{
+  "spex_dir": {spex_dir},
   "project_name": "dummy-project",
   "cli_version": "0.8.8",
   "repositories": [
@@ -64,6 +68,12 @@ const EXPECTED_INFO_API: &str = r#"{
   ]
 }
 "#;
+
+fn with_spex_dir(template: &str, spex_dir: &Path) -> String {
+    let spex_dir = spex_dir.canonicalize().expect("canonical spex dir");
+    let spex_dir_json = serde_json::to_string(&spex_dir).expect("spex dir as JSON");
+    template.replace("{spex_dir}", &spex_dir_json)
+}
 
 fn listed_short_names(stdout: &[u8]) -> Vec<String> {
     let info: serde_json::Value = serde_json::from_slice(stdout).expect("info prints JSON");
@@ -87,36 +97,23 @@ fn info_prints_the_resolved_configuration_as_json() {
     let info = run_spex(&project, &["info"], "");
 
     assert!(info.status.success(), "info should exit 0");
-    assert_eq!(String::from_utf8_lossy(&info.stdout), EXPECTED_INFO);
-}
-
-#[test]
-fn info_print_outputs_a_bare_scalar_field() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
-
-    let project_name = run_spex(&project, &["info", "--print", "project_name"], "");
-    let cli_version = run_spex(&project, &["info", "--print", "cli_version"], "");
-
-    assert!(project_name.status.success());
     assert_eq!(
-        String::from_utf8_lossy(&project_name.stdout),
-        "dummy-project\n"
+        String::from_utf8_lossy(&info.stdout),
+        with_spex_dir(EXPECTED_INFO, &project.join("dummy-project-spex"))
     );
-    assert!(cli_version.status.success());
-    assert_eq!(String::from_utf8_lossy(&cli_version.stdout), "0.8.8\n");
 }
 
 #[test]
-fn info_print_rejects_a_missing_or_non_scalar_field() {
+fn info_reports_the_spex_dir_from_any_workspace_repository() {
     let (_workspace, project) = temp_project(&dummy_project_fixture());
 
-    let missing = run_spex(&project, &["info", "--print", "nope"], "");
-    let list = run_spex(&project, &["info", "--print", "repositories"], "");
+    let info = run_spex(&project.join("dummy-project-api"), &["info"], "");
 
-    assert_fails_mentioning(&missing, "no field `nope`");
-    assert!(missing.stdout.is_empty());
-    assert_fails_mentioning(&list, "field `repositories` is not a single value");
-    assert!(list.stdout.is_empty());
+    assert!(info.status.success(), "info should exit 0");
+    assert_eq!(
+        String::from_utf8_lossy(&info.stdout),
+        with_spex_dir(EXPECTED_INFO, &project.join("dummy-project-spex"))
+    );
 }
 
 #[test]
@@ -127,14 +124,13 @@ fn info_repo_limits_output_to_the_general_fields_and_named_repositories() {
     let by_full_name = run_spex(&project, &["info", "--repo", "dummy-project-api"], "");
     let several = run_spex(&project, &["info", "--repo", "api", "frontend"], "");
 
+    let expected = with_spex_dir(EXPECTED_INFO_API, &project.join("dummy-project-spex"));
+
     assert!(by_short_name.status.success());
-    assert_eq!(
-        String::from_utf8_lossy(&by_short_name.stdout),
-        EXPECTED_INFO_API
-    );
+    assert_eq!(String::from_utf8_lossy(&by_short_name.stdout), expected);
     assert_eq!(
         String::from_utf8_lossy(&by_full_name.stdout),
-        EXPECTED_INFO_API,
+        expected,
         "--repo should match a repository by full name as well as short name",
     );
     assert_eq!(listed_short_names(&several.stdout), ["api", "frontend"]);
