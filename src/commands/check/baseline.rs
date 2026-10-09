@@ -12,7 +12,7 @@ use crate::rule::Severity;
 use crate::support::fs::write_file;
 use crate::support::util::plural;
 
-use super::RepoReport;
+use super::{CheckReport, ReportTarget};
 
 // Either the whole check is baselined (a file-less error) or a specific set of
 // files is. A file-less error widens the entry to the whole check.
@@ -40,7 +40,7 @@ impl Baseline {
 pub(super) fn fill_preexisting_errors(
     spex_dir: &Path,
     selected: &[&Repository],
-    reports: &[RepoReport],
+    reports: &[CheckReport],
 ) -> Result<ExitCode> {
     // repository name -> (spec, check) -> baselined files
     let mut grouped: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
@@ -53,13 +53,12 @@ pub(super) fn fill_preexisting_errors(
             if finding.severity != Severity::Error || finding.check.is_empty() {
                 continue;
             }
-            let (repo_name, file) = if report.name == "workspace" {
-                match finding.owning_repo(selected, spex_dir) {
+            let (repo_name, file) = match &report.target {
+                ReportTarget::Repository(repo) => (repo.repository_name.clone(), finding.file()),
+                ReportTarget::Workspace { .. } => match finding.owning_repo(selected, spex_dir) {
                     Some(resolved) => resolved,
                     None => continue,
-                }
-            } else {
-                (report.name.clone(), finding.file())
+                },
             };
             let Some(checks) = grouped.get_mut(&repo_name) else {
                 continue;

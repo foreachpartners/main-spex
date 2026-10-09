@@ -4,42 +4,69 @@ use std::process::ExitCode;
 use anstream::println;
 use owo_colors::OwoColorize;
 
-use crate::config::spex::Spex;
+use crate::config::Repository;
 use crate::rule::Severity;
 use crate::support::fs::file_url;
 use crate::support::style::{hyperlink, version_line};
 use crate::support::util::plural;
 
-use super::{Finding, RepoReport};
+use super::Finding;
 
 #[cfg(test)]
 #[path = "report_test.rs"]
 mod report_test;
 
-pub(super) fn report(spex: &Spex, reports: &[RepoReport]) -> ExitCode {
+pub(super) enum ReportTarget<'a> {
+    Repository(&'a Repository),
+    Workspace { spex_dir: &'a Path },
+}
+
+impl ReportTarget<'_> {
+    pub(super) fn name(&self) -> &str {
+        match self {
+            Self::Repository(repo) => &repo.repository_name,
+            Self::Workspace { .. } => "workspace",
+        }
+    }
+
+    pub(super) fn base_dir(&self) -> &Path {
+        match self {
+            Self::Repository(repo) => &repo.path,
+            Self::Workspace { spex_dir } => spex_dir,
+        }
+    }
+
+    pub(super) fn is_spex_repo(&self) -> bool {
+        matches!(self, Self::Repository(repo) if repo.is_spex_repo)
+    }
+}
+
+pub(super) struct CheckReport<'a> {
+    pub(super) target: ReportTarget<'a>,
+    pub(super) findings: Vec<Finding>,
+}
+
+pub(super) fn report(project_name: &str, reports: &[CheckReport]) -> ExitCode {
     println!("{}", version_line());
     println!();
     let mut total_errors = 0usize;
     let mut total_warnings = 0usize;
 
-    for repo in reports {
-        let errors = repo
-            .findings
+    for CheckReport { target, findings } in reports {
+        let errors = findings
             .iter()
             .filter(|f| f.severity == Severity::Error)
             .count();
-        let warnings = repo.findings.len() - errors;
+        let warnings = findings.len() - errors;
         total_errors += errors;
         total_warnings += warnings;
 
-        let base = spex.repo_base_dir(&repo.name);
-
-        println!("{}", repo.name.bold());
-        if repo.findings.is_empty() {
+        println!("{}", target.name().bold());
+        if findings.is_empty() {
             println!("  {}", "no issues".green());
         } else {
-            for finding in &repo.findings {
-                print_finding(base, finding);
+            for finding in findings {
+                print_finding(target.base_dir(), finding);
             }
             println!("  {}", count_summary(errors, warnings).dimmed());
         }
@@ -47,7 +74,7 @@ pub(super) fn report(spex: &Spex, reports: &[RepoReport]) -> ExitCode {
     }
 
     let total = count_summary(total_errors, total_warnings);
-    println!("{}: {}", spex.project_name.bold(), total.bold());
+    println!("{}: {}", project_name.bold(), total.bold());
 
     if total_errors > 0 {
         ExitCode::FAILURE

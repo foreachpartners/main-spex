@@ -22,8 +22,8 @@ mod spec_id_tracing;
 
 use baseline::fill_preexisting_errors;
 use conformance::validate_conformance;
-use finding::{Finding, RepoReport};
-use report::report;
+use finding::Finding;
+use report::{CheckReport, ReportTarget, report};
 use runners::{
     Outcome, locate_script, outcome_findings, run_ast_grep, run_glob, run_per_file_script,
     run_regexp, run_script_once, run_workspace_checks, scope_files,
@@ -204,8 +204,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     let mut reports = Vec::with_capacity(selected.len());
     let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
-    for repo in &selected {
-        let repo = *repo;
+    for &repo in &selected {
         let mut findings = check_repo(
             CheckRepoArgs {
                 repo,
@@ -219,8 +218,8 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         if suppress {
             findings.retain(|finding| !finding.is_preexisting(&repo.ignored_errors));
         }
-        reports.push(RepoReport {
-            name: repo.repository_name.clone(),
+        reports.push(CheckReport {
+            target: ReportTarget::Repository(repo),
             findings,
         });
     }
@@ -230,19 +229,21 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         if suppress {
             findings.retain(|finding| !finding.is_preexisting_workspace(&selected, &spex.dir));
         }
-        reports.push(RepoReport {
-            name: "workspace".to_string(),
+        reports.push(CheckReport {
+            target: ReportTarget::Workspace {
+                spex_dir: &spex.dir,
+            },
             findings,
         });
     }
 
-    validate_specs(&spex, &specs, &rules, &selected, &mut reports)?;
+    validate_specs(&spex, &specs, &rules, &mut reports)?;
 
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&spex.dir, &selected, &reports);
     }
 
-    Ok(report(&spex, &reports))
+    Ok(report(&spex.project_name, &reports))
 }
 
 fn check_repo(
@@ -315,20 +316,16 @@ fn validate_specs(
     spex: &Spex,
     specs: &[Spec],
     rules: &[Rule],
-    selected: &[&Repository],
-    reports: &mut [RepoReport],
+    reports: &mut [CheckReport],
 ) -> Result<()> {
-    let Some(spex_repo) = selected.iter().find(|repo| repo.is_spex_repo) else {
-        return Ok(());
-    };
-    let Some(report) = reports
+    let Some(spex_report) = reports
         .iter_mut()
-        .find(|report| report.name == spex_repo.repository_name)
+        .find(|report| report.target.is_spex_repo())
     else {
         return Ok(());
     };
 
-    report.findings.extend(validate_conformance(
+    spex_report.findings.extend(validate_conformance(
         &spex.dir,
         &spex.repositories,
         specs,

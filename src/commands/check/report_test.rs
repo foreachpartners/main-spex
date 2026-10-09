@@ -1,29 +1,45 @@
-use crate::support::testing::{repository, spex, spex_dir};
+use crate::support::testing::{repository, spex_dir};
 
 use super::*;
 
-mod repo_base_dir_tests {
+mod report_target_tests {
     use super::*;
 
     #[test]
-    fn resolves_to_the_named_repository_path() {
-        let spex = spex(vec![repository("api", "services/api")]);
+    fn a_repository_target_is_named_and_based_at_the_repository() {
+        let api = repository("api", "services/api");
+        let target = ReportTarget::Repository(&api);
 
-        assert_eq!(spex.repo_base_dir("api"), spex_dir().join("services/api"));
+        assert_eq!(target.name(), "api");
+        assert_eq!(target.base_dir(), spex_dir().join("services/api"));
     }
 
     #[test]
-    fn falls_back_to_the_spex_dir_for_the_workspace_report() {
-        let spex = spex(vec![repository("api", "services/api")]);
+    fn the_workspace_target_is_based_at_the_spex_dir() {
+        let target = ReportTarget::Workspace {
+            spex_dir: spex_dir(),
+        };
 
-        assert_eq!(spex.repo_base_dir("workspace"), spex_dir());
+        assert_eq!(target.name(), "workspace");
+        assert_eq!(target.base_dir(), spex_dir());
     }
 
     #[test]
-    fn falls_back_to_the_spex_dir_for_an_unknown_repository_name() {
-        let spex = spex(vec![repository("api", "services/api")]);
+    fn only_the_spex_repository_target_is_the_spex_repo() {
+        let api = repository("api", "services/api");
+        let spex_repo = Repository {
+            is_spex_repo: true,
+            ..repository("demo-spex", ".")
+        };
 
-        assert_eq!(spex.repo_base_dir("unknown"), spex_dir());
+        assert!(ReportTarget::Repository(&spex_repo).is_spex_repo());
+        assert!(!ReportTarget::Repository(&api).is_spex_repo());
+        assert!(
+            !ReportTarget::Workspace {
+                spex_dir: spex_dir()
+            }
+            .is_spex_repo()
+        );
     }
 }
 

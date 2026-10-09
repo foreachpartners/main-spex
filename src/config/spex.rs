@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use anstream::eprintln;
 use owo_colors::OwoColorize;
@@ -51,16 +51,6 @@ impl Spex {
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
         Spec::load_all(&self.dir.join(spec::SPECS_DIR))
-    }
-
-    // The directory a repository's findings' `location` strings are relative to:
-    // the repository's own path for its report, or the spex directory for the
-    // synthetic `workspace` report, whose locations are already spex-relative.
-    pub fn repo_base_dir(&self, repo_name: &str) -> &Path {
-        self.repositories
-            .iter()
-            .find(|repo| repo.repository_name == repo_name)
-            .map_or(self.dir.as_path(), |repo| repo.path.as_path())
     }
 }
 

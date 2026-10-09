@@ -132,8 +132,3 @@ impl Finding {
         location.to_string()
     }
 }
-
-pub(super) struct RepoReport {
-    pub(super) name: String,
-    pub(super) findings: Vec<Finding>,
-}
