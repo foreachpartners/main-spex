@@ -19,6 +19,23 @@ mod tests {
     }
 
     #[test]
+    fn scope_selected_matches_any_requested_scope() {
+        let api_and_web = Spec {
+            scope: vec!["api".to_string(), "web".to_string()],
+            ..testing::spec("a")
+        };
+        let web = Spec {
+            scope: vec!["web".to_string()],
+            ..testing::spec("b")
+        };
+        let unscoped = testing::spec("c");
+
+        assert!(api_and_web.scope_selected(&["api".to_string()]));
+        assert!(!web.scope_selected(&["api".to_string()]));
+        assert!(unscoped.scope_selected(&[]));
+    }
+
+    #[test]
     fn layer_ignored_true_for_whole_layer_entry() {
         let spec = spec(vec![ignore(CoverageLayer::Contract, None)]);
         assert!(spec.layer_ignored(CoverageLayer::Contract));

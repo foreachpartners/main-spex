@@ -39,15 +39,7 @@ pub fn run(args: SpecsArgs) -> Result<ExitCode> {
 }
 
 fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
-    for short_name in &args.scope {
-        if !spex
-            .repositories
-            .iter()
-            .any(|repo| &repo.repository_short_name == short_name)
-        {
-            return Err(Report::new(CliError::UnknownScope(short_name.clone())));
-        }
-    }
+    spex.validate_scopes(&args.scope)?;
 
     let specs: Vec<serde_json::Value> =
         util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?

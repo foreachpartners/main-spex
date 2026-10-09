@@ -3,17 +3,16 @@ use std::fs;
 use std::path::Path;
 
 use error_stack::ResultExt;
-use strum::IntoEnumIterator;
 
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
-use crate::spec::{AcId, ContractLevel, CoverageLayer, Spec, SpecId};
+use crate::spec::{AcId, CoverageLayer, SpecId};
 use crate::support::repo_files::RepoFiles;
 use crate::tracing::annotations::{self, Annotation};
 
 #[cfg(test)]
-#[path = "found_test.rs"]
-mod found_test;
+#[path = "annotation_index_test.rs"]
+mod annotation_index_test;
 
 // Spec-id annotations found across the workspace: `bare` holds layers found
 // without a `#ac-id` (a whole-spec annotation), `by_ac` holds layers found
@@ -22,12 +21,12 @@ mod found_test;
 // contract requirement under `contract: for-each-ac`, and still stands for
 // the whole spec under `contract: single`.
 #[derive(Debug, Default)]
-pub struct Found {
+pub struct AnnotationIndex {
     bare: HashMap<SpecId, HashSet<CoverageLayer>>,
     by_ac: HashMap<(SpecId, AcId), HashSet<CoverageLayer>>,
 }
 
-impl Found {
+impl AnnotationIndex {
     pub fn new() -> Self {
         Self::default()
     }
@@ -41,54 +40,24 @@ impl Found {
     // A whole-spec annotation never satisfies per-criterion coverage — only a
     // `#ac-id`-qualified one does, otherwise a single bare annotation would
     // trivially satisfy every criterion and defeat the point of tracking them.
-    fn has_ac(&self, spec_id: &SpecId, ac_id: &AcId, layer: CoverageLayer) -> bool {
+    pub fn has_ac(&self, spec_id: &SpecId, ac_id: &AcId, layer: CoverageLayer) -> bool {
         self.by_ac
             .get(&(spec_id.clone(), ac_id.clone()))
             .is_some_and(|layers| layers.contains(&layer))
     }
 
-    pub fn ac_coverage(&self, spec: &Spec) -> Vec<AcCoverage> {
-        spec.acceptance_criteria
-            .iter()
-            .map(|ac| {
-                let required = |layer| match layer {
-                    CoverageLayer::Contract => spec.ac_contract_required(&ac.id),
-                    _ => !spec.ac_ignored(&ac.id, layer),
-                };
-                AcCoverage {
-                    id: ac.id.clone(),
-                    text: ac.statement.text().to_string(),
-                    is_done: ac.is_done,
-                    missing: CoverageLayer::iter()
-                        .filter(|&layer| required(layer) && !self.has_ac(&spec.id, &ac.id, layer))
-                        .collect(),
-                }
-            })
-            .collect()
-    }
-
-    // Spec-level contract coverage. Under `contract: single` one `@spec
-    // contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
-    // disables contract coverage; `for-each-ac` has no spec-level requirement —
-    // each acceptance criterion carries its own (see `ac_coverage`).
-    pub fn contract_missing(&self, spec: &Spec) -> bool {
-        spec.contract == ContractLevel::Single
-            && !spec.layer_ignored(CoverageLayer::Contract)
-            && !self.has_bare(&spec.id, CoverageLayer::Contract)
-    }
-
     // Scans one piece of content for spec-id annotations; a test-only helper for
-    // building a `Found` from a fixture string instead of real files on disk.
+    // building an `AnnotationIndex` from a fixture string instead of real files on disk.
     #[cfg(test)]
     pub fn scan(content: &str) -> Self {
-        let mut found = Self::new();
-        found.record_all(annotations::parse(content));
-        found
+        let mut index = Self::new();
+        index.record_all(annotations::parse(content));
+        index
     }
 
     // Scans every workspace repository except spex itself for spec-id annotations.
     pub fn scan_workspace(spex: &Spex) -> Result<Self> {
-        let mut found = Self::new();
+        let mut index = Self::new();
 
         for repo in &spex.repositories {
             // Interface contracts live inside the spex repository's `contracts/`
@@ -96,17 +65,17 @@ impl Found {
             // skipped below; their `@spec contract` annotations are the contract layer.
             for contract_path in &repo.contracts {
                 if let Ok(content) = fs::read_to_string(contract_path) {
-                    found.record_all(annotations::parse(&content));
+                    index.record_all(annotations::parse(&content));
                 }
             }
 
             if !repo.path.is_dir() || repo.is_spex_repo {
                 continue;
             }
-            found.scan_repo(&repo.path)?;
+            index.scan_repo(&repo.path)?;
         }
 
-        Ok(found)
+        Ok(index)
     }
 
     fn scan_repo(&mut self, repo_path: &Path) -> Result<()> {
@@ -146,34 +115,5 @@ impl Found {
             .entry((spec_id, ac_id))
             .or_default()
             .insert(layer);
-    }
-}
-
-pub struct AcCoverage {
-    pub id: AcId,
-    pub text: String,
-    pub is_done: bool,
-    pub missing: Vec<CoverageLayer>,
-}
-
-impl AcCoverage {
-    pub fn is_missing(&self, layer: CoverageLayer) -> bool {
-        self.missing.contains(&layer)
-    }
-
-    pub fn impl_ok(&self) -> bool {
-        !self.is_missing(CoverageLayer::Impl)
-    }
-
-    pub fn is_ok(&self) -> bool {
-        self.missing.is_empty()
-    }
-
-    pub fn is_gap(&self) -> bool {
-        self.is_done && !self.is_ok()
-    }
-
-    pub fn is_pending(&self) -> bool {
-        !self.is_done && !self.is_ok()
     }
 }

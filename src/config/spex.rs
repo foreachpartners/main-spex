@@ -1,13 +1,18 @@
 use std::path::PathBuf;
 
 use anstream::eprintln;
+use error_stack::Report;
 use owo_colors::OwoColorize;
 
 use crate::config::{Repository, SpexConfig};
-use crate::error::Result;
+use crate::error::{CliError, Result};
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec};
 use crate::support::fs::current_dir;
+
+#[cfg(test)]
+#[path = "spex_test.rs"]
+mod spex_test;
 
 pub struct Spex {
     pub dir: PathBuf,
@@ -51,6 +56,19 @@ impl Spex {
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
         Spec::load_all(&self.dir.join(spec::SPECS_DIR))
+    }
+
+    pub fn validate_scopes(&self, scopes: &[String]) -> Result<()> {
+        for short_name in scopes {
+            if !self
+                .repositories
+                .iter()
+                .any(|repo| &repo.repository_short_name == short_name)
+            {
+                return Err(Report::new(CliError::UnknownScope(short_name.clone())));
+            }
+        }
+        Ok(())
     }
 }
 

@@ -61,16 +61,16 @@ src/                CLI source
   config/           Configuration topic (mod.rs is an index only)
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1), and its text edits
     repository.rs   Repository model built from the raw repository config, with absolute repository and contract paths
-    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders (shared by commands)
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders and scope validation (shared by commands)
   support/          Cross-topic helpers
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, file URLs, embedded dir extraction, symlinks, exec bits)
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
-    style.rs        Terminal hyperlinks, version line and visible-width measuring (shared by commands)
+    style.rs        Terminal hyperlinks, version line, dim/red styles, terminal width and visible-width measuring (shared by commands)
     util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info is a single file)
-    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds found, the workspace scan of annotations and per-criterion coverage lookups)
+    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (mod), finding and baseline matching, baseline fill, repo selection, report, spec-id annotation tracing
       conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore)
