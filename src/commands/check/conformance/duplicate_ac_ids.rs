@@ -2,8 +2,8 @@ use std::collections::HashSet;
 
 use crate::spec::{AcId, Spec};
 
-use super::super::finding::Location;
-use super::{Finding, conformance_error};
+use super::super::finding::{Finding, Location};
+use super::conformance_error;
 
 const DUPLICATE_AC_ID_CHECK: &str = "no-duplicate-ac-ids";
 

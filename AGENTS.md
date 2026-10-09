@@ -32,12 +32,6 @@ just install    # Reinstall cli
 just help       # spex --help
 ```
 
-## Rules
-
-- On version change fill `CHANGELOG.md`
-- On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
-- When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
-
 ## Project structure
 
 ```
@@ -71,7 +65,7 @@ src/                CLI source
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, repo selection, report, spec-id annotation tracing
-      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in its mod.rs
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 docs/                          Framework reference docs (single source of truth); only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
@@ -99,7 +93,7 @@ tests that drive the compiled binary live in `tests/`.
 
 Keep this section in sync when the structure changes.
 
-# Core discipline
+## Rules
 
 - **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
 - **Single source of truth**: every piece of data, logic, or business rule must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it.
@@ -109,7 +103,10 @@ Keep this section in sync when the structure changes.
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
 - **Systemic Fix Over Quick Fix**: Never apply temporary workarounds, hacks, or band-aids to bypass a structural issue. If a proper, clean fix requires refactoring, architectural changes, or expanding the scope of the current task, stop immediately. Present the proper solution and ask the user for explicit permission to make that change before proceeding.
 - **Change only what the task requires**: don't refactor, rename, or reformat adjacent code that isn't part of it unless triggered by the "Systemic Fix Over Quick Fix" rule.
-- **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
-- **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli.md` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
+- **Use changelog**: On version change fill `CHANGELOG.md`
+- **Keep CLI commands in sync with template**: On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
+- **Migrations for agent**: When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
+- **Specification is single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli.md` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
+- **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
+- **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.

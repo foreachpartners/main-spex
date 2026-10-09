@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::commands::check::conformance::RULE_ID;
+    use crate::commands::check::conformance::conformance::RULE_ID;
     use crate::spec;
     use indoc::indoc;
     use tempfile::tempdir;

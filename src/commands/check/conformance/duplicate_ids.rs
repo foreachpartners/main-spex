@@ -6,8 +6,8 @@ use crate::spec::Spec;
 
 use crate::support::fs::relative_to;
 
-use super::super::finding::Location;
-use super::{Finding, conformance_error};
+use super::super::finding::{Finding, Location};
+use super::conformance_error;
 
 #[cfg(test)]
 #[path = "duplicate_ids_test.rs"]
