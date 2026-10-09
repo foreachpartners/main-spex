@@ -228,7 +228,7 @@ spex info | jq -r '.repositories[].path'
 
 #### Flags
 
-- `--repo <name>...` — limit output to the general fields (`spex_dir`, `project_name`, `cli_version`) plus the named repositories, each matched by either `repository_name` or `repository_short_name`. Errors when any given name matches no repository.
+- `--repo <name>...` — filter the `repositories` list to the named repositories, each matched by either `repository_name` or `repository_short_name`; every other field is printed unchanged. Repositories keep their `spex.yaml` order. Errors when any given name matches no repository.
 
 ```sh
 spex info --repo api frontend

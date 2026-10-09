@@ -49,6 +49,8 @@ const EXPECTED_INFO_API: &str = r#"{
   "spex_dir": {spex_dir},
   "project_name": "dummy-project",
   "cli_version": "0.8.8",
+  "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a workspace whose specs cover every lifecycle state.",
+  "rules_unused": [],
   "repositories": [
     {
       "repository_name": "dummy-project-api",
@@ -117,12 +119,12 @@ fn info_reports_the_spex_dir_from_any_workspace_repository() {
 }
 
 #[test]
-fn info_repo_limits_output_to_the_general_fields_and_named_repositories() {
+fn info_repo_filters_only_the_repositories_list() {
     let (_workspace, project) = temp_project(&dummy_project_fixture());
 
     let by_short_name = run_spex(&project, &["info", "--repo", "api"], "");
     let by_full_name = run_spex(&project, &["info", "--repo", "dummy-project-api"], "");
-    let several = run_spex(&project, &["info", "--repo", "api", "frontend"], "");
+    let several = run_spex(&project, &["info", "--repo", "frontend", "api"], "");
 
     let expected = with_spex_dir(EXPECTED_INFO_API, &project.join("dummy-project-spex"));
 
