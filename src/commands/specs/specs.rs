@@ -18,19 +18,11 @@ mod specs_test;
 pub struct SpecsArgs {
     #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
     ai: bool,
-    #[arg(long, num_args = 1.., help = "Spec IDs to include (default: all)")]
+    #[arg(long, num_args = 1.., help = "Filter by spec ids")]
     id: Vec<String>,
-    #[arg(
-        long,
-        num_args = 1..,
-        value_name = "REPOSITORY_SHORT_NAME",
-        help = "Repository short names to include by spec `scope` (default: all)"
-    )]
+    #[arg(long, num_args = 1.., help = "Filter by repository short name")]
     scope: Vec<String>,
-    #[arg(
-        long,
-        help = "Write the output to this file instead of stdout — the full specs list is large and can get truncated when printed to a terminal or piped through a shell"
-    )]
+    #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
 

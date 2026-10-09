@@ -21,14 +21,11 @@ const FIELDS_AI_DOES_NOT_NEED: [&str; 2] = ["sync_with_upstream", "checks"];
 pub struct RulesArgs {
     #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
     ai: bool,
-    #[arg(long, num_args = 1.., help = "Rule IDs to include (default: all)")]
+    #[arg(long, num_args = 1.., help = "Filter by rule ids")]
     id: Vec<String>,
-    #[arg(long, num_args = 1.., help = "Workspace repository names to include (default: all)")]
+    #[arg(long, num_args = 1.., help = "Filter by repository names")]
     repo: Vec<String>,
-    #[arg(
-        long,
-        help = "Write the output to this file instead of stdout — the full rules list is large and can get truncated when printed to a terminal or piped through a shell"
-    )]
+    #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
 
