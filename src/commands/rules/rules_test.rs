@@ -3,7 +3,7 @@ mod tests {
     use super::super::*;
     use crate::config::Repository;
     use crate::support::testing;
-    use indoc::indoc;
+    use indoc::{formatdoc, indoc};
     use tempfile::tempdir;
 
     fn repo(name: &str, rules: &[&str]) -> Repository {
@@ -162,14 +162,14 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: secret-handling
-                  path: rules/secret-handling.yaml
+                  path: {dir}/rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -214,16 +214,16 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: spec-id-tracing
-                  path: rules/spec-id-tracing.yaml
+                  path: {dir}/rules/spec-id-tracing.yaml
                   title: Spec ID tracing
                   description: Traces artifacts back to their spec.
                   acceptance_criteria:
                   - MUST annotate the boundary
                   examples:
                     contract: 'x-spec: \"@spec contract list-pizza-menu\"'
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -261,21 +261,21 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: secret-handling
-                  path: rules/secret-handling.yaml
+                  path: {dir}/rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
 
                 - id: writing-style
-                  path: rules/writing-style.yaml
+                  path: {dir}/rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
                   - MUST use plain language
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -289,14 +289,14 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: writing-style
-                  path: rules/writing-style.yaml
+                  path: {dir}/rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
                   - MUST use plain language
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -311,21 +311,21 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: secret-handling
-                  path: rules/secret-handling.yaml
+                  path: {dir}/rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
 
                 - id: writing-style
-                  path: rules/writing-style.yaml
+                  path: {dir}/rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
                   - MUST use plain language
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -339,14 +339,14 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: secret-handling
-                  path: rules/secret-handling.yaml
+                  path: {dir}/rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   acceptance_criteria:
                   - MUST not commit secrets
-            "}
+            ", dir = dir.path().display()}
         );
     }
 

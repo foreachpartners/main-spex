@@ -68,6 +68,13 @@ pub fn temp_project(fixture: &Path) -> (tempfile::TempDir, std::path::PathBuf) {
     (workspace, project)
 }
 
+pub fn canonical_display(path: &Path) -> String {
+    path.canonicalize()
+        .expect("canonical path")
+        .display()
+        .to_string()
+}
+
 pub fn listed_ids(stdout: &[u8]) -> Vec<String> {
     let mut ids: Vec<String> = String::from_utf8_lossy(stdout)
         .lines()

@@ -22,9 +22,8 @@ mod tests {
 
         assert_eq!(ids, vec!["NESTED", "TOP"]);
         assert!(
-            files
-                .iter()
-                .any(|file| file.item.id == "NESTED" && file.rel_path == "frontend/nested.yaml")
+            files.iter().any(|file| file.item.id == "NESTED"
+                && file.path == dir.path().join("frontend/nested.yaml"))
         );
     }
 
@@ -39,7 +38,7 @@ mod tests {
 
         assert_eq!(files.len(), 1);
         assert_eq!(files[0].item.id, "NESTED");
-        assert_eq!(files[0].rel_path, "frontend/deep/nested.yaml");
+        assert_eq!(files[0].path, dir.path().join("frontend/deep/nested.yaml"));
     }
 
     #[test]
@@ -56,8 +55,8 @@ mod tests {
             .collect();
         assert_eq!(ids, vec!["A", "B"]);
         assert_eq!(docs[0].item["title"], "A doc");
-        assert_eq!(docs[0].rel_path, "a.yaml");
-        assert_eq!(docs[1].rel_path, "nested/b.yaml");
+        assert_eq!(docs[0].path, dir.path().join("a.yaml"));
+        assert_eq!(docs[1].path, dir.path().join("nested/b.yaml"));
     }
 
     #[test]

@@ -1,8 +1,11 @@
 mod common;
-use common::{assert_fails_mentioning, dummy_project_fixture, listed_ids, run_spex, temp_project};
+use common::{
+    assert_fails_mentioning, canonical_display, dummy_project_fixture, listed_ids, run_spex,
+    temp_project,
+};
 
 const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
-  path: specs/active-with-gap.yaml
+  path: {spex_dir}/specs/active-with-gap.yaml
   title: Validate registration input
   description: Validates a new account's registration input before it is created, rejecting invalid or duplicate submissions.
   acceptance_criteria:
@@ -20,7 +23,7 @@ const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
   contract: single
 
 - id: planned-one
-  path: specs/planned-one.yaml
+  path: {spex_dir}/specs/planned-one.yaml
   title: Let customers save a favorite order
   description: Lets a returning customer save an order as a favorite so they can reorder it in one click next time.
   acceptance_criteria:
@@ -65,9 +68,10 @@ fn specs_ai_adds_the_spec_path_after_the_id() {
     );
 
     assert!(specs.status.success());
+    let spex_dir = canonical_display(&project.join("dummy-project-spex"));
     assert_eq!(
         String::from_utf8_lossy(&specs.stdout),
-        EXPECTED_SPECS_FOR_AI
+        EXPECTED_SPECS_FOR_AI.replace("{spex_dir}", &spex_dir)
     );
 }
 

@@ -57,26 +57,17 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
         }
     }
 
-    let mut specs = util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?;
-    if args.ai {
-        for file in &mut specs {
-            if let Some(obj) = file.item.as_object_mut() {
-                let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
-                for (key, value) in std::mem::take(obj) {
-                    let is_id = key == "id";
-                    with_path.insert(key, value);
-                    if is_id {
-                        with_path.insert(
-                            "path".to_string(),
-                            serde_json::Value::String(format!("{SPECS_DIR}/{}", file.rel_path)),
-                        );
-                    }
+    let specs: Vec<serde_json::Value> =
+        util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?
+            .iter()
+            .map(|file| {
+                if args.ai {
+                    util::ai_view(file, &[])
+                } else {
+                    file.item.clone()
                 }
-                *obj = with_path;
-            }
-        }
-    }
-    let specs: Vec<serde_json::Value> = specs.into_iter().map(|file| file.item).collect();
+            })
+            .collect();
 
     for id in &args.id {
         if !specs

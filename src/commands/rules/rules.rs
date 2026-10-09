@@ -15,6 +15,8 @@ use crate::support::util;
 #[path = "rules_test.rs"]
 mod rules_test;
 
+const FIELDS_AI_DOES_NOT_NEED: [&str; 2] = ["sync_with_upstream", "checks"];
+
 #[derive(Args)]
 pub struct RulesArgs {
     #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
@@ -53,29 +55,17 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
         }
     }
 
-    let mut rules = util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?;
-    if args.ai {
-        for file in &mut rules {
-            if let Some(obj) = file.item.as_object_mut() {
-                let mut with_path = serde_json::Map::with_capacity(obj.len() + 1);
-                for (key, value) in std::mem::take(obj) {
-                    if key == "sync_with_upstream" || key == "checks" {
-                        continue;
-                    }
-                    let is_id = key == "id";
-                    with_path.insert(key, value);
-                    if is_id {
-                        with_path.insert(
-                            "path".to_string(),
-                            serde_json::Value::String(format!("{RULES_DIR}/{}", file.rel_path)),
-                        );
-                    }
+    let rules: Vec<serde_json::Value> =
+        util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
+            .iter()
+            .map(|file| {
+                if args.ai {
+                    util::ai_view(file, &FIELDS_AI_DOES_NOT_NEED)
+                } else {
+                    file.item.clone()
                 }
-                *obj = with_path;
-            }
-        }
-    }
-    let rules: Vec<serde_json::Value> = rules.into_iter().map(|file| file.item).collect();
+            })
+            .collect();
 
     for id in &args.id {
         if !rules

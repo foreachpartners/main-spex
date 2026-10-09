@@ -42,8 +42,25 @@ pub fn wrap_text(text: &str, width: usize) -> Vec<String> {
 pub struct YamlFile<T> {
     pub item: T,
     pub path: PathBuf,
-    pub rel_path: String,
     pub raw: String,
+}
+
+pub fn ai_view(file: &YamlFile<serde_json::Value>, dropped_fields: &[&str]) -> serde_json::Value {
+    let Some(object) = file.item.as_object() else {
+        return file.item.clone();
+    };
+    let path = serde_json::Value::String(file.path.to_string_lossy().into_owned());
+    let mut view = serde_json::Map::with_capacity(object.len() + 1);
+    for (key, value) in object {
+        if dropped_fields.contains(&key.as_str()) {
+            continue;
+        }
+        view.insert(key.clone(), value.clone());
+        if key == "id" {
+            view.insert("path".to_string(), path.clone());
+        }
+    }
+    serde_json::Value::Object(view)
 }
 
 pub fn yaml_files(dir: &Path) -> Result<Vec<PathBuf>> {
@@ -70,17 +87,7 @@ pub fn load_yaml_dir<T: DeserializeOwned>(dir: &Path) -> Result<Vec<YamlFile<T>>
                 .change_context_lazy(|| CliError::ReadFile(path.clone()))?;
             let item = serde_yaml_ng::from_str(&raw)
                 .change_context_lazy(|| CliError::ParseFile(path.clone()))?;
-            let rel_path = path
-                .strip_prefix(dir)
-                .unwrap_or(&path)
-                .to_string_lossy()
-                .into_owned();
-            Ok(YamlFile {
-                item,
-                path,
-                rel_path,
-                raw,
-            })
+            Ok(YamlFile { item, path, raw })
         })
         .collect()
 }

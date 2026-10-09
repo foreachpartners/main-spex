@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use indoc::indoc;
+    use indoc::{formatdoc, indoc};
     use tempfile::tempdir;
 
     fn spec(id: &str, extra: &str) -> serde_json::Value {
@@ -134,16 +134,16 @@ mod tests {
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: place-pizza-order
-                  path: specs/place-pizza-order.yaml
+                  path: {dir}/specs/place-pizza-order.yaml
                   title: Place a pizza order
                   description: Lets a customer place an order.
                   acceptance_criteria:
                   - '[ ] MUST accept a cart'
                   scope:
                   - api
-            "}
+            ", dir = dir.path().display()}
         );
     }
 

@@ -1,6 +1,7 @@
 mod common;
 use common::{
-    assert_fails_mentioning, listed_ids, run_spex, runners_project_fixture, temp_project,
+    assert_fails_mentioning, canonical_display, listed_ids, run_spex, runners_project_fixture,
+    temp_project,
 };
 
 const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
@@ -23,7 +24,7 @@ const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
 "#;
 
 const EXPECTED_GLOB_RULE_FOR_AI: &str = r#"- id: glob-runner
-  path: rules/glob-runner.yaml
+  path: {spex_dir}/rules/glob-runner.yaml
   title: Glob runner
   description: Exercises the glob runner with a forbidden path and a required path.
   acceptance_criteria:
@@ -130,9 +131,10 @@ fn rules_ai_drops_checks_and_the_sync_flag_and_adds_the_rule_path() {
     let rules = run_spex(&project, &["rules", "--ai", "--id", "glob-runner"], "");
 
     assert!(rules.status.success());
+    let spex_dir = canonical_display(&project.join("runners-project-spex"));
     assert_eq!(
         String::from_utf8_lossy(&rules.stdout),
-        EXPECTED_GLOB_RULE_FOR_AI
+        EXPECTED_GLOB_RULE_FOR_AI.replace("{spex_dir}", &spex_dir)
     );
 }
 
