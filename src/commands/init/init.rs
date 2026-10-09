@@ -39,7 +39,7 @@ pub fn run() -> Result<ExitCode> {
 
     let project_name = confirm_project_name(default_name)?;
 
-    // The spex repository directory follows the naming convention <project-name>-spex
+    // The spex repository directory follows the naming convention <project-name>-spex by default
     let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
     verify_empty(&spex_dir)?;
 
