@@ -14,7 +14,6 @@ use crate::support::util;
 mod rule_test;
 
 pub const RULES_DIR: &str = "rules";
-pub const SCRIPTS_DIR: &str = "scripts";
 
 #[derive(Debug)]
 pub struct Rule {
@@ -25,6 +24,10 @@ pub struct Rule {
 }
 
 impl Rule {
+    pub fn script_dir(&self) -> PathBuf {
+        self.path.with_extension("")
+    }
+
     pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
         Ok(util::load_yaml_dir::<RuleConfig>(rules_dir)?
             .into_iter()

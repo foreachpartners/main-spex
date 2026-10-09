@@ -81,13 +81,10 @@
     },
     "blocked_by": {
       "type": "array",
-      "description": "Spec or rule IDs that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
+      "description": "Spec IDs that must be in place before this spec can be implemented. List only genuine blockers that are not yet satisfied; remove one once it ships or is established. Absent or empty means nothing blocks this spec. Do not list a shared foundation that every capability rides on (e.g. the API surface) — only the specs whose absence prevents this one from being built.",
       "items": {
-        "description": "A spec or rule ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
-        "anyOf": [
-          { "$ref": "spec-id.schema.json" },
-          { "$ref": "rule-id.schema.json" }
-        ]
+        "description": "A spec ID that blocks this spec: this spec cannot be implemented until that spec is in place.",
+        "$ref": "spec-id.schema.json"
       }
     },
     "status": {

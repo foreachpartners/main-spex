@@ -42,10 +42,7 @@ pub fn run() -> Result<ExitCode> {
 
     println!(
         "{}",
-        format!(
-            "spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}"
-        )
-        .green()
+        format!("spex skills, schemas and rules updated, cli_version set to {CLI_VERSION}").green()
     );
 
     let entries = changelog_since(CHANGELOG, &previous.cli_version);

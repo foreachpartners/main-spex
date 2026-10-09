@@ -2,8 +2,6 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use crate::rule;
-
 use super::super::{Finding, ScopedFile, WorkspaceCheck};
 use super::{Hit, Outcome, outcome_findings};
 
@@ -16,7 +14,7 @@ pub(in crate::commands::check) fn run_workspace_checks(
     workspace_checks
         .iter()
         .flat_map(|pending| {
-            let outcome = locate_script(&pending.rule_id, &pending.script, spex_dir)
+            let outcome = locate_script(&pending.script_dir, &pending.script)
                 .and_then(|program| run_script_once(&program, spex_dir));
             outcome_findings(&pending.rule_id, &pending.check, outcome)
         })
@@ -89,22 +87,18 @@ fn parse_script_line(line: &str) -> Hit {
 }
 
 pub(in crate::commands::check) fn locate_script(
-    rule_id: &str,
+    script_dir: &Path,
     reference: &str,
-    spex_dir: &Path,
 ) -> core::result::Result<PathBuf, String> {
-    resolve_script(reference, spex_dir, rule_id).ok_or_else(|| {
-        let dir = spex_dir.join(rule::SCRIPTS_DIR).join(rule_id);
-        format!("script `{reference}` not found in {}", dir.display())
-    })
+    resolve_script(script_dir, reference)
+        .ok_or_else(|| format!("script `{reference}` not found in {}", script_dir.display()))
 }
 
 pub(in crate::commands::check) fn resolve_script(
+    script_dir: &Path,
     reference: &str,
-    base: &Path,
-    rule_id: &str,
 ) -> Option<PathBuf> {
-    let script = base.join(rule::SCRIPTS_DIR).join(rule_id).join(reference);
+    let script = script_dir.join(reference);
     script.is_file().then_some(script)
 }
 

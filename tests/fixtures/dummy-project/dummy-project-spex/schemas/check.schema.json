@@ -117,7 +117,7 @@
     {
       "if": { "properties": { "type": { "const": "script" } } },
       "then": {
-        "description": "Runs an external script stored in the spex directory at `scripts/<rule-id>/<script>`.",
+        "description": "Runs an external script stored in the rule's script folder: a folder named after the rule file, beside it (`rules/<rule-id>/<script>`).",
         "properties": {
           "run": {
             "type": "string",
@@ -127,7 +127,7 @@
           },
           "script": {
             "type": "string",
-            "description": "Script filename (for example `writing-style.sh`). Resolved in the spex directory at `scripts/<rule-id>/<script>`, so the `<rule-id>` folder keeps checks from different rules from sharing a path.",
+            "description": "Script filename (for example `writing-style.sh`). Resolved in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>/<script>`), so checks from different rules never share a path.",
             "minLength": 1
           }
         },

@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{file_url, write_embedded_dir};
+    use super::super::{file_url, write_embedded_dir, write_embedded_dir_at};
+    use crate::templates::BUNDLED_TEMPLATES_DIR;
     use include_dir::{Dir, include_dir};
     use std::fs;
     use std::path::PathBuf;
@@ -46,6 +47,27 @@ mod tests {
                 file.path().display()
             );
         }
+    }
+
+    #[test]
+    fn write_embedded_dir_at_writes_the_dir_contents_into_the_destination() {
+        let dest = tempdir().expect("temp dir");
+        let scripts = BUNDLED_TEMPLATES_DIR
+            .get_dir("rules/writing-style")
+            .expect("bundled script folder");
+
+        write_embedded_dir_at(scripts, dest.path()).expect("write embedded dir");
+
+        for file in scripts.files() {
+            let name = file.path().file_name().expect("file name");
+            assert_eq!(
+                fs::read(dest.path().join(name)).expect("read written file"),
+                file.contents(),
+                "`{}` differs from the embedded file",
+                file.path().display()
+            );
+        }
+        assert!(!dest.path().join("rules").exists());
     }
 
     #[cfg(unix)]

@@ -50,7 +50,7 @@ It prompts to confirm the project name (defaulting to the workspace root folder 
 
 - `spex.yaml`, seeded from the bundled template with the project name filled in and the installed CLI's version as `cli_version`. It lists only the spex repository (`<project-name>-spex`) and the rules that apply to it
 - `<project-name>.code-workspace`, seeded from the bundled template with a folder for the spex repository only
-- the bundled templates: schemas, docs, scripts, skills, and every bundled rule, plus empty `specs/`, `plans/`, and `contracts/` folders
+- the bundled templates: schemas, docs, skills, and every bundled rule with its scripts, plus empty `specs/`, `plans/`, and `contracts/` folders
 - `.agents/skills/` with the bundled skills, and a `.claude` -> `.agents` symlink, so different agent tools detect the same skills
 - a root `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink. A `# Project` marker splits `AGENTS.md`: content above it is managed and kept in sync by `spex update`, content from the marker onward is the user's own and is never touched
 
@@ -64,7 +64,7 @@ Finish setup afterwards by running the `/spex-setup` skill: it adds the other wo
 
 ### `spex update`
 
-Rewrites the bundled templates in the spex repository — skills, schemas, docs, scripts, and rules (including their checks) — with the versions shipped in the installed `spex` binary.
+Rewrites the bundled templates in the spex repository — skills, schemas, docs, and rules (including their checks and scripts) — with the versions shipped in the installed `spex` binary.
 
 It updates an initialized project only: it fails when no `spex.yaml` is found, so run `spex init` first.
 
@@ -73,7 +73,7 @@ It updates an initialized project only: it fails when no `spex.yaml` is found, s
 - Rewrites a bundled rule (and its scripts) already present locally only when it has `sync_with_upstream: true`; a local rule without it is left untouched, so consumers can override a global rule.
 - Deploys a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there records a deliberate deletion, so it stays deleted on future updates.
 - Rewrites the managed section of the root `AGENTS.md` (everything above the `# Project` marker), preserving everything from that marker onward; a local `AGENTS.md` predating the marker is fully overwritten, since managed and user content cannot be told apart in it.
-- Overwrites managed files only; any skills, scripts, schemas, docs, or rules you added, and plans, are left untouched.
+- Overwrites managed files only; any skills, schemas, docs, or rules you added (and the scripts beside them), and plans, are left untouched.
 - Updates `cli_version` in `spex.yaml` to the installed binary's version.
 - Prints the `CHANGELOG.md` entries newer than the previous `cli_version`, newest first; prints nothing if there are none, and every entry if the previous `cli_version` is not found in the changelog.
 - Run it after upgrading the `spex` binary to pull in framework updates; `check`, `coverage`, `info`, `rules` and `specs` warn when `cli_version` does not match the installed CLI.
@@ -94,7 +94,7 @@ Runs the checks declared in `spex.yaml` against each workspace repository, repor
 
 #### Script checks
 
-A `script` check runs the program named by its `script:` filename (e.g. `writing-style.sh`), resolved at `scripts/<rule-id>/<script>` under the spex directory. The `run` mode controls the invocation:
+A `script` check runs the program named by its `script:` filename (e.g. `writing-style.sh`), resolved in the rule's script folder: a folder named after the rule file, beside it (`rules/<rule-id>.yaml` has its scripts at `rules/<rule-id>/<script>`, and a nested `rules/backend/<rule-id>.yaml` at `rules/backend/<rule-id>/<script>`). The `run` mode controls the invocation:
 
 - `run: per-file` (default) — pass the matched files as arguments.
 - `run: per-repo` — run once per repository, in that repository's directory, with no arguments.
@@ -139,11 +139,11 @@ When the `spex` repository itself is in scope, `spex check` also validates it di
 - `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
 - A spec id, acceptance criterion id, or rule id outside the id grammar (lowercase letters and hyphens only, at most 40 characters) cannot be loaded: the command stops with a parse error naming the file instead of reporting a finding.
 - Each spec file must be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
-- Every script a rule check references must exist at `scripts/<rule-id>/<script>`.
+- Every script a rule check references must exist in the rule's script folder, beside the rule file.
 - Declared properties must follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).
 - Each spec's and rule's `acceptance_criteria` must be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` must be unique within its spec.
 - No id may repeat across `specs/` and `rules/`.
-- Every `@spec` annotation must match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec. Markdown files are skipped, as are the spex directory's `schemas/` and the spex repository's `specs/`, `rules/`, and `scripts/`, which hold illustrative example annotations rather than real references.
+- Every `@spec` annotation must match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec. Markdown files are skipped, as are the spex directory's `schemas/` and the spex repository's `specs/` and `rules/` (with each rule's script folder), which hold illustrative example annotations rather than real references.
 - A `blocked_by` reference must name an existing spec — a rule id errors — and be dropped once satisfied: referencing an already-`active` spec warns.
 - A `scope` entry must match a repository's `repository_short_name` in `spex.yaml`.
 - A `coverage_ignore` entry must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).

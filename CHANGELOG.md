@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.13.0] - 2026-10-09
+
+- **Breaking**: a rule's scripts now live in a folder named after the rule file, beside it — `rules/<rule-id>.yaml` resolves its `script` checks at `rules/<rule-id>/<script>` (a nested `rules/<group>/<rule-id>.yaml` at `rules/<group>/<rule-id>/<script>`) — instead of the separate `scripts/<rule-id>/` folder. `spex check` reports a script missing from the new location, so existing projects move theirs per the migration guide.
+- `init`/`update`: no longer create the `scripts/` folder; each bundled rule's script folder is written beside the rule file, under the same `sync_with_upstream` gating as the rule. The `update` summary line no longer mentions scripts.
+
 ## [0.12.0] - 2026-10-09
 
 - **Breaking**: removed `spex info --print <field>`; read a field from the JSON with `spex info | jq -r .<field>` (e.g. `spex info | jq -r .project_name`). The bundled `naming-convention` `repo-dir.sh` script now uses `jq`, so `jq` must be installed wherever `spex check` runs.

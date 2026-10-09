@@ -14,7 +14,7 @@ const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 const PROJECT_SECTION: &str = "\n---\n\n# Project";
 
 const SYNCED_RULE: &str = "rules/writing-style.yaml";
-const SYNCED_RULE_SCRIPT: &str = "scripts/writing-style/writing-style.sh";
+const SYNCED_RULE_SCRIPT: &str = "rules/writing-style/writing-style.sh";
 const SYNCED_SKILL: &str = ".agents/skills/spex-spec/SKILL.md";
 
 struct Project {
@@ -167,7 +167,7 @@ fn update_upgrades_project_written_by_older_cli() {
     let stdout = String::from_utf8_lossy(&update.stdout);
     assert!(
         stdout.starts_with(&format!(
-            "spex skills, schemas, scripts and rules updated, cli_version set to {CLI_VERSION}\n"
+            "spex skills, schemas and rules updated, cli_version set to {CLI_VERSION}\n"
         )),
         "unexpected update summary\n{stdout}",
     );
@@ -347,7 +347,7 @@ fn update_leaves_files_added_to_the_spex_repository_untouched() {
     let project = Project::init(workspace.path());
     let added = [
         ("rules/local-rule.yaml", "id: local-rule\n"),
-        ("scripts/local-rule/run.sh", "#!/bin/sh\nexit 0\n"),
+        ("rules/local-rule/run.sh", "#!/bin/sh\nexit 0\n"),
         ("schemas/local.schema.json", "{}\n"),
         ("docs/local.md", "# Local\n"),
         ("plans/local-plan.md", "# Plan\n"),

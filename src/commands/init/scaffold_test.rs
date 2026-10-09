@@ -9,7 +9,7 @@ mod tests_unit {
     const SCHEMA: &str = "schemas/spex.schema.json";
     const DOC: &str = "docs/glossary.md";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/commit-message-format/commit-spec-id-trace.sh";
+    const SCRIPT: &str = "rules/commit-message-format/commit-spec-id-trace.sh";
     const RULE: &str = "rules/secret-handling.yaml";
 
     #[test]

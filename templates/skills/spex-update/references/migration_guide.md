@@ -2,6 +2,14 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.13.0
+
+Rule scripts moved from `scripts/<rule-id>/` to a folder named after the rule file, beside it: the scripts of `rules/<rule-id>.yaml` now live in `rules/<rule-id>/`, and those of a nested `rules/<group>/<rule-id>.yaml` in `rules/<group>/<rule-id>/`. `spex check` reports a script missing from the new location. In `<workspace-root>/<project-name>-spex/`:
+
+- For every rule without `sync_with_upstream: true`, move `scripts/<rule-id>/` to the folder beside its rule file, and update any path inside a moved script that still points under `scripts/`.
+- For every rule with `sync_with_upstream: true`, `spex update` writes its scripts at the new location, so delete its old `scripts/<rule-id>/` folder, which `spex update` leaves behind.
+- Delete the `scripts/` folder once it is empty.
+
 ## 0.12.0
 
 `spex info --print <field>` was removed. In every script under `<workspace-root>/<project-name>-spex/scripts/**` that calls `spex info --print <field>`, replace it with `spex info | jq -r .<field>` (e.g. `spex info --print project_name` becomes `spex info | jq -r .project_name`), and make sure `jq` is installed. Scripts bundled with rules that set `sync_with_upstream: true` are rewritten by `spex update` and need no change.

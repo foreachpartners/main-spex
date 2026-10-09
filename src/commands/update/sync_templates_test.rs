@@ -9,7 +9,7 @@ mod tests_unit {
     const SCHEMA: &str = "schemas/spex.schema.json";
     const DOC: &str = "docs/glossary.md";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
-    const SCRIPT: &str = "scripts/commit-message-format/commit-spec-id-trace.sh";
+    const SCRIPT: &str = "rules/commit-message-format/commit-spec-id-trace.sh";
     const RULE: &str = "rules/secret-handling.yaml";
     // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
     // gating together.
@@ -157,6 +157,33 @@ mod tests_unit {
     }
 
     #[test]
+    fn sync_writes_the_scripts_of_a_nested_rule_beside_it() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path()).expect("scaffold");
+
+        let rules = spex_dir.path().join("rules");
+        let nested_rule = rules.join("policy").join("commit-message-format.yaml");
+        fs::create_dir_all(nested_rule.parent().unwrap()).expect("create nested folder");
+        fs::rename(spex_dir.path().join(MANAGED_SPEC), &nested_rule)
+            .expect("move rule into nested folder");
+        fs::remove_dir_all(rules.join(MANAGED_SPEC_ID)).expect("remove flat script folder");
+
+        sync_templates(spex_dir.path(), &[]).expect("sync");
+
+        assert!(
+            nested_rule
+                .with_extension("")
+                .join("commit-spec-id-trace.sh")
+                .is_file(),
+            "script should be written beside the nested rule"
+        );
+        assert!(
+            !rules.join(MANAGED_SPEC_ID).exists(),
+            "script folder should not be recreated beside the flat rule path"
+        );
+    }
+
+    #[test]
     fn sync_preserves_additional_files() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path()).expect("scaffold");
@@ -170,7 +197,9 @@ mod tests_unit {
         fs::create_dir_all(extra_skill.parent().unwrap()).expect("create custom skill dir");
         fs::write(&extra_skill, "custom").expect("write custom skill");
 
-        let extra_script = spex_dir.path().join(SCRIPTS_DIR).join("custom.sh");
+        let extra_script = spex_dir
+            .path()
+            .join("rules/commit-message-format/custom.sh");
         fs::write(&extra_script, "echo custom").expect("write custom script");
 
         sync_templates(spex_dir.path(), &[]).expect("sync");

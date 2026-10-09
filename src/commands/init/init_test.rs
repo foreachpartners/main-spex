@@ -171,7 +171,7 @@ mod tests_unit {
 
         assert!(spex_dir.path().join("rules").is_dir());
         assert!(spex_dir.path().join("specs").is_dir());
-        assert!(spex_dir.path().join("scripts").is_dir());
+        assert!(spex_dir.path().join("rules/commit-message-format").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
         assert!(spex_dir.path().join("contracts").is_dir());
     }
@@ -229,7 +229,7 @@ mod tests_unit {
 
         let script = spex_dir
             .path()
-            .join("scripts/commit-message-format/commit-spec-id-trace.sh");
+            .join("rules/commit-message-format/commit-spec-id-trace.sh");
         let mode = fs::metadata(&script)
             .expect("read metadata")
             .permissions()

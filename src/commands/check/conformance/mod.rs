@@ -39,7 +39,7 @@ const CONFORM_CHECK: &str = "spec-files-conform";
 // Validates the spex repository's own spec files: `spex.yaml` and every file
 // in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
 // must be named `<id>.yaml`, every script a rule check
-// references must exist under `scripts/<spec-id>/`, every
+// references must exist in the rule's script folder beside the rule file, every
 // spec's acceptance criteria must be ordered by RFC 2119 commitment level,
 // and every acceptance criterion id must be unique within its spec.
 pub(super) fn validate_conformance(

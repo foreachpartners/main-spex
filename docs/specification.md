@@ -21,7 +21,7 @@ Turn business goals into verified code through a chain of artifacts, each tracea
 
 A project spans several workspace repositories under one workspace root folder; [glossary.md](glossary.md) defines the workspace, its repositories, and their naming.
 
-- The spex repository holds the specs, rules, schemas, scripts, skills, config, and the contracts shared across repositories. An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
+- The spex repository holds the specs, rules (with their scripts), schemas, skills, config, and the contracts shared across repositories. An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
 - The layout follows [conventions.md](conventions.md): tool-agnostic (specs, contracts, and checks are plain files and deterministic commands) and single-source-of-truth (every fact one authoritative source, referenced rather than copied).
 
 ## Traceability
@@ -104,7 +104,7 @@ A check proves a rule's acceptance criterion.
 - `negate` inverts a `regexp`, `glob`, or `ast-grep` check: a forbidden pattern versus a required pattern.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a rule's checks through `rules`.
-- A script check resolves at `scripts/<rule-id>/<script>`, with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli.md](cli.md#script-checks).
+- A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli.md](cli.md#script-checks).
 - A script that needs data from `spex.yaml` (the project name, the repository list) runs `spex info` rather than parsing `spex.yaml` by hand.
 
 # Config (spex.yaml)

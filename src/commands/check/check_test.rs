@@ -2,7 +2,7 @@
 mod tests {
     use super::super::runners::{build_globset, resolve_script};
     use super::super::*;
-    use crate::rule::Severity;
+    use crate::rule::{RULES_DIR, Severity};
     use crate::support::testing;
     use serial_test::serial;
     use tempfile::{TempDir, tempdir};
@@ -90,6 +90,13 @@ mod tests {
         }
     }
 
+    fn rule_in(spex_dir: &Path, id: &str) -> Rule {
+        Rule {
+            path: spex_dir.join(RULES_DIR).join(format!("{id}.yaml")),
+            ..testing::rule(id)
+        }
+    }
+
     fn run_in(
         repo_path: &Path,
         spex_dir: &Path,
@@ -102,7 +109,7 @@ mod tests {
             spex_dir,
             candidates: files,
         };
-        ctx.run_check(rule_id, check)
+        ctx.run_check(&rule_in(spex_dir, rule_id), check)
     }
 
     fn run_scoped(
@@ -172,7 +179,7 @@ mod tests {
         let mut check = regexp_check("Copyright");
         set_negate(&mut check, true);
 
-        let findings = run_scoped(&dir, "LICENSE", &check, vec![file]);
+        let findings = run_scoped(&dir, "license", &check, vec![file]);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location.as_deref(), Some("src/main.rs"));
@@ -198,7 +205,7 @@ mod tests {
         let mut check = glob_check("**/LICENSE");
         set_negate(&mut check, true);
 
-        let findings = run_scoped(&dir, "LICENSE", &check, vec![src]);
+        let findings = run_scoped(&dir, "license", &check, vec![src]);
 
         assert_eq!(findings.len(), 1);
         assert!(findings[0].location.is_none());
@@ -422,23 +429,23 @@ constraints:
     }
 
     #[test]
-    fn resolve_script_joins_scripts_and_spec_dir() {
+    fn resolve_script_joins_script_dir_and_reference() {
         let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/x")).expect("spex scripts");
-        std::fs::write(spex.join("scripts/x/lint.sh"), "").expect("spex script");
+        let script_dir = workspace.path().join("spex/rules/x");
+        std::fs::create_dir_all(&script_dir).expect("rule script dir");
+        std::fs::write(script_dir.join("lint.sh"), "").expect("rule script");
 
-        let resolved = resolve_script("lint.sh", &spex, "x").expect("resolved");
-        assert_eq!(resolved, spex.join("scripts/x/lint.sh"));
+        let resolved = resolve_script(&script_dir, "lint.sh").expect("resolved");
+        assert_eq!(resolved, script_dir.join("lint.sh"));
     }
 
     #[test]
     fn resolve_script_returns_none_when_missing() {
         let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&spex).expect("spex");
+        let script_dir = workspace.path().join("spex/rules/x");
+        std::fs::create_dir_all(&script_dir).expect("rule script dir");
 
-        assert!(resolve_script("lint.sh", &spex, "x").is_none());
+        assert!(resolve_script(&script_dir, "lint.sh").is_none());
     }
 
     // Tests that create a script and then execute it run serially: `Command`
@@ -451,9 +458,9 @@ constraints:
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/commit-message-format")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("rules/commit-message-format")).expect("rule scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/commit-message-format/sample.sh");
+        let script = spex.join("rules/commit-message-format/sample.sh");
         std::fs::write(&script, "#!/bin/sh\necho boom\nexit 1\n").expect("write script");
         make_executable(&script);
 
@@ -473,9 +480,9 @@ constraints:
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/writing-style")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("rules/writing-style")).expect("rule scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/writing-style/echo-args.sh");
+        let script = spex.join("rules/writing-style/echo-args.sh");
         std::fs::write(
             &script,
             "#!/bin/sh\n[ \"$#\" -gt 0 ] || exit 0\necho \"$1\"\nexit 1\n",
@@ -501,9 +508,9 @@ constraints:
         let workspace = tempdir().expect("workspace");
         let repo = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(spex.join("scripts/writing-style")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("rules/writing-style")).expect("rule scripts");
         std::fs::create_dir_all(&repo).expect("repo");
-        let script = spex.join("scripts/writing-style/locations.sh");
+        let script = spex.join("rules/writing-style/locations.sh");
         // Emits two contract lines (one with a location, one file-less) plus a
         // blank line that must be ignored.
         std::fs::write(
@@ -639,11 +646,11 @@ constraints:
         let spex = workspace.path().join("spex");
         let api = workspace.path().join("api");
         let web = workspace.path().join("web");
-        std::fs::create_dir_all(spex.join("scripts/x")).expect("spex scripts");
+        std::fs::create_dir_all(spex.join("rules/x")).expect("rule scripts");
         std::fs::create_dir_all(&api).expect("api");
         std::fs::create_dir_all(&web).expect("web");
 
-        let script = spex.join("scripts/x/list.sh");
+        let script = spex.join("rules/x/list.sh");
         // Fails if handed any file arguments, records each invocation, and emits
         // its own contract findings: a workspace script gets no files and must
         // discover its own paths.
@@ -656,7 +663,10 @@ constraints:
 
         let mut listing = script_check("list.sh", RunScope::Workspace);
         listing.name = "list".to_string();
-        let rules = [rule("x", vec![listing])];
+        let rules = [Rule {
+            checks: vec![listing],
+            ..rule_in(&spex, "x")
+        }];
 
         let mut collected = Vec::new();
         let mut repo_findings = check_repo(

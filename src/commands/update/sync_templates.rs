@@ -3,10 +3,10 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
-use crate::commands::init::scaffold::{copy_docs_and_schemas, copy_rule_scripts, link_claude_dir};
+use crate::commands::init::scaffold::{copy_docs_and_schemas, link_claude_dir, write_rule};
 use crate::error::Result;
-use crate::rule::{RULES_DIR, SCRIPTS_DIR};
-use crate::support::fs::{create_dir_all, make_files_executable, write_embedded_dir, write_file};
+use crate::rule::RULES_DIR;
+use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
 use crate::support::util;
 use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
 
@@ -27,8 +27,7 @@ pub fn sync_templates(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     sync_rules(spex_dir, removed_rules)?;
     sync_skills(spex_dir)?;
     sync_agents_md(spex_dir)?;
-    link_claude_dir(spex_dir)?;
-    make_files_executable(&spex_dir.join(SCRIPTS_DIR))
+    link_claude_dir(spex_dir)
 }
 
 fn split_project_section(contents: &str) -> Option<(&str, &str)> {
@@ -139,8 +138,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
             continue;
         }
 
-        write_file(&dest, file.contents())?;
-        copy_rule_scripts(&rule_id, spex_dir)?;
+        write_rule(file, &dest)?;
     }
 
     Ok(())

@@ -93,7 +93,7 @@ struct RepoCtx<'a> {
 impl RepoCtx<'_> {
     fn dispatch_check(
         &self,
-        rule_id: &str,
+        rule: &Rule,
         check: &Check,
         workspace_checks: &mut Vec<WorkspaceCheck>,
     ) -> Vec<Finding> {
@@ -102,18 +102,18 @@ impl RepoCtx<'_> {
                 script,
                 run: RunScope::Workspace,
             } => {
-                WorkspaceCheck::collect(rule_id, check, script, workspace_checks);
+                WorkspaceCheck::collect(rule, check, script, workspace_checks);
                 Vec::new()
             }
-            _ => self.run_check(rule_id, check),
+            _ => self.run_check(rule, check),
         }
     }
 
-    fn run_check(&self, rule_id: &str, check: &Check) -> Vec<Finding> {
-        outcome_findings(rule_id, check, self.check_hits(rule_id, check))
+    fn run_check(&self, rule: &Rule, check: &Check) -> Vec<Finding> {
+        outcome_findings(rule.id.as_str(), check, self.check_hits(rule, check))
     }
 
-    fn check_hits(&self, rule_id: &str, check: &Check) -> Outcome {
+    fn check_hits(&self, rule: &Rule, check: &Check) -> Outcome {
         let files = scope_files(check, self.candidates)?;
 
         match &check.kind {
@@ -133,7 +133,7 @@ impl RepoCtx<'_> {
                 &files,
             ),
             CheckKind::Script { script, run } => {
-                let program = locate_script(rule_id, script, self.spex_dir)?;
+                let program = locate_script(&rule.script_dir(), script)?;
                 match run {
                     RunScope::PerFile => run_per_file_script(&program, self.repo_path, &files),
                     RunScope::PerRepo => run_script_once(&program, self.repo_path),
@@ -159,6 +159,7 @@ struct CheckRepoArgs<'a> {
 // files; the script discovers its own from the spex directory.
 struct WorkspaceCheck {
     rule_id: String,
+    script_dir: PathBuf,
     script: String,
     check: Check,
 }
@@ -166,13 +167,14 @@ struct WorkspaceCheck {
 impl WorkspaceCheck {
     // Defers a `workspace`-scoped check, deduplicating by `(rule_id, name)` so a
     // check inherited by several repositories still runs exactly once.
-    fn collect(rule_id: &str, check: &Check, script: &str, workspace_checks: &mut Vec<Self>) {
+    fn collect(rule: &Rule, check: &Check, script: &str, workspace_checks: &mut Vec<Self>) {
         let already_pending = workspace_checks
             .iter()
-            .any(|pending| pending.rule_id == rule_id && pending.check.name == check.name);
+            .any(|pending| pending.rule_id == rule.id.as_str() && pending.check.name == check.name);
         if !already_pending {
             workspace_checks.push(Self {
-                rule_id: rule_id.to_string(),
+                rule_id: rule.id.to_string(),
+                script_dir: rule.script_dir(),
                 script: script.to_string(),
                 check: check.clone(),
             });
@@ -302,7 +304,7 @@ fn check_repo(
             if has_files && check.kind.negate() {
                 continue;
             }
-            findings.extend(ctx.dispatch_check(rule.id.as_str(), check, workspace_checks));
+            findings.extend(ctx.dispatch_check(rule, check, workspace_checks));
         }
     }
 

@@ -85,9 +85,8 @@ docs/                          Framework reference docs (single source of truth)
   faq.md                   Frequently asked questions
 templates/                     Assets scaffolded into projects
   schemas/                     JSON Schemas for spex.yaml, specs, rules, and plans
-  scripts/                     Helper scripts
   skills/                      Agent skills
-  rules/                       Reusable rule templates
+  rules/                       Reusable rule templates, each with its script folder (same name, beside the rule file) when it has scripts
   docs/                        Framework docs shipped to projects (symlinks into docs/)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
   README.md                    Contributor notes on scaffolding rules; never scaffolded

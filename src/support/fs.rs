@@ -37,11 +37,20 @@ pub fn canonical(path: &Path) -> PathBuf {
 }
 
 pub fn write_embedded_dir(dir: &Dir, dest_root: &Path) -> Result<()> {
+    write_embedded_dir_at(dir, &dest_root.join(dir.path()))
+}
+
+pub fn write_embedded_dir_at(dir: &Dir, dest_dir: &Path) -> Result<()> {
+    write_embedded_entries(dir, dir.path(), dest_dir)
+}
+
+fn write_embedded_entries(dir: &Dir, root: &Path, dest_dir: &Path) -> Result<()> {
     for entry in dir.entries() {
         match entry {
-            DirEntry::Dir(sub) => write_embedded_dir(sub, dest_root)?,
+            DirEntry::Dir(sub) => write_embedded_entries(sub, root, dest_dir)?,
             DirEntry::File(file) => {
-                let dest = dest_root.join(file.path());
+                let relative = file.path().strip_prefix(root).unwrap_or(file.path());
+                let dest = dest_dir.join(relative);
                 if let Some(parent) = dest.parent() {
                     create_dir_all(parent)?;
                 }

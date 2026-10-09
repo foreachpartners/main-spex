@@ -40,8 +40,8 @@ pub(super) fn validate_annotations(
 // references; every workspace's schemas/ directory holds the same kind of
 // illustrative content (e.g. a JSON Schema description showing the
 // `<spec-id>` grammar placeholder), and the spex workspace repo's own
-// specs/, rules/, and scripts/ hold real-looking but illustrative examples
-// too.
+// specs/ and rules/ (with each rule's script folder) hold real-looking but
+// illustrative examples too.
 fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
     if file.rel.extension().is_some_and(|ext| ext == "md") {
         return true;
@@ -55,7 +55,7 @@ fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
     is_spex_repo
         && file.rel.components().next().is_some_and(|first| {
             let first = first.as_os_str();
-            first == "specs" || first == "rules" || first == "scripts"
+            first == "specs" || first == "rules"
         })
 }
 

@@ -38,7 +38,7 @@ A convention still gets its own dedicated file when it has multiple related acce
 
 First decide whether this is a new spec or a change to one that already exists:
 
-- If the user names an existing rule ID (for example `secret-handling`) or asks to update, amend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/rules/<rule-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Also read its checks and any `script` bodies at `<workspace-root>/<project-name>-spex/scripts/<rule-id>/`. Confirm with the user what should change (revised or new acceptance criteria, new or adjusted checks, a scope change), applying the same field rules as Steps 3–4. Skip straight to Step 5, editing the existing file (and any check scripts) in place rather than starting over; preserve every untouched field, its ordering, and formatting.
+- If the user names an existing rule ID (for example `secret-handling`) or asks to update, amend, fix, or change a spec, this is an **edit**. Read `<workspace-root>/<project-name>-spex/rules/<rule-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Also read its checks and any `script` bodies at `<workspace-root>/<project-name>-spex/rules/<rule-id>/`. Confirm with the user what should change (revised or new acceptance criteria, new or adjusted checks, a scope change), applying the same field rules as Steps 3–4. Skip straight to Step 5, editing the existing file (and any check scripts) in place rather than starting over; preserve every untouched field, its ordering, and formatting.
 - Otherwise, this is a **new spec** — continue with Step 0's source-gathering below, then Steps 1–4.
 
 ### Establish the source (new specs only)
@@ -76,14 +76,14 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 - `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
 - `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
-- `script` — run an external script named by `script:` (a bare filename, resolved at `scripts/<rule-id>/<script>`). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments. Set `run: per-repo` to invoke it once per repository, in that repository's directory, with no arguments. Set `run: workspace` to invoke it exactly once, with no arguments.
+- `script` — run an external script named by `script:` (a bare filename, resolved in the rule's script folder `rules/<rule-id>/<script>`, beside the rule file). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments. Set `run: per-repo` to invoke it once per repository, in that repository's directory, with no arguments. Set `run: workspace` to invoke it exactly once, with no arguments.
 
 Guidance:
 
-- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved at `scripts/<rule-id>/<script>` so checks from different rules never share a path.
+- Name each check in kebab-case, unique within the spec. A `script` check names its program with `script:` (just the filename), resolved in the rule's script folder `rules/<rule-id>/` so checks from different rules never share a path.
 - Set `severity: warn` for advisory checks and `error` (default) for enforced ones.
 - Not every criterion needs a check. When a criterion can only be judged by AI or human review, say so and leave it without a check rather than inventing a brittle one.
-- When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero on violation. Store it at `scripts/<rule-id>/<check-name>.sh` and mirror the header style of existing scripts (`# <rule-id> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.
+- When you propose a `script` check, also draft the file it references: a POSIX `sh` script that exits non-zero on violation. Store it at `rules/<rule-id>/<check-name>.sh` and mirror the header style of existing scripts (`# <rule-id> / <name>`). A `per-file` script receives the candidate files as arguments; a `per-repo` script receives none.
 - A failing script MUST emit one finding per line on stdout following the script location contract: `<location><TAB><message>`, where `<location>` is a repository-relative file (optionally `<file>:<line>`) and `<message>` describes the violation. This gives script errors the same per-file precision as `regexp` and `glob` checks, so an `ignored_errors` baseline can suppress them per file. Emit a file-less finding (no location, leaving the part before the tab empty, or printing a line with no tab) only when the violation has no natural path, for example a rule about git history. Do not print a multi-line dump for one violation — emit one tab-separated line per location:
   ```sh
   printf '%s:%s\t%s\n' "$file" "$lineno" "matches forbidden pattern"
@@ -95,7 +95,7 @@ Draft the checks (and any script bodies) into the spec; you write them and offer
 ## Step 5 — Write, then offer edits
 
 1. Write the spec to `<workspace-root>/<project-name>-spex/rules/<rule-id>.yaml` — the filename must equal the `<rule-id>` (`general-rules.yaml` or `general-rules-<repo>.yaml` when folding into the catch-all bucket). Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing spec — including appending to an existing general-rules bucket — change only what the user asked for and leave every other field, its ordering, and formatting untouched.
-2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/scripts/<rule-id>/<name>.sh`) and make them executable.
+2. Write any `script` check bodies to the path referenced by `script:` (`<workspace-root>/<project-name>-spex/rules/<rule-id>/<name>.sh`) and make them executable.
 3. For a new spec (including a newly created general-rules bucket), add its `id` under `rules` in `spex.yaml` for each repository the user said it applies to.
 4. Run `spex check` to validate compliance.
 5. Tell the user the spec and checks you wrote (or the diff you applied, for an edit) and where, then ask whether they want to change anything further. Apply any requested edits in place.

@@ -1,5 +1,5 @@
 project_name: shopping-notes
-cli_version: 0.10.6
+cli_version: 0.13.0
 description: >-
   Web application for managing shopping lists, letting users note items to
   buy so they don't forget them at the store.

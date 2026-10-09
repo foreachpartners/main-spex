@@ -17,7 +17,7 @@ Read `cli_version` from `<workspace-root>/<project-name>-spex/spex.yaml`. This i
 
 ## Step 3 — Update
 
-Run `spex update`. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc, script and skill — including this skill's `references/migration_guide.md`, which now holds the latest steps.
+Run `spex update`. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc, rule (with its scripts) and skill — including this skill's `references/migration_guide.md`, which now holds the latest steps.
 
 Read `cli_version` from `spex.yaml` again. This is the current version.
 
