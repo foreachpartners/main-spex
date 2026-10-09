@@ -7,7 +7,7 @@ use error_stack::{Report, ResultExt};
 use jsonschema::{Retrieve, Uri, Validator};
 use serde_json::Value;
 
-use crate::error::{CliError, Result};
+use crate::error::{CliError, Result, describe};
 
 #[cfg(test)]
 #[path = "check_schema_test.rs"]
@@ -40,7 +40,7 @@ pub fn run(args: CheckSchemaArgs) -> Result<ExitCode> {
             }
             Err(report) => {
                 failed = true;
-                eprintln!("{file}: {report:?}");
+                eprintln!("{file}: {}", describe(&report));
             }
         }
     }
@@ -69,10 +69,9 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
         // The error borrows `schema`, so render it before `schema` is dropped.
         .map_err(|err| {
             Report::new(CliError::Internal(format!(
-                "invalid schema `{}`",
+                "invalid schema `{}`: {err}",
                 schema_path.display()
             )))
-            .attach(err.to_string())
         })
 }
 

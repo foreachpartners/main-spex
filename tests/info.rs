@@ -155,3 +155,21 @@ fn info_repo_rejects_an_unknown_repository() {
     assert_fails_mentioning(&info, "unknown workspace repository `bogus`");
     assert!(info.stdout.is_empty());
 }
+
+#[test]
+fn tool_failure_prints_one_plain_line_and_exits_two() {
+    let (_workspace, project) = temp_project(&dummy_project_fixture());
+
+    let info = run_spex(&project, &["info", "--repo", "bogus"], "");
+
+    let stderr = String::from_utf8_lossy(&info.stderr);
+    assert_eq!(info.status.code(), Some(2));
+    assert!(
+        stderr.ends_with("error: unknown workspace repository `bogus` — not listed in spex.yaml\n"),
+        "unexpected stderr:\n{stderr}",
+    );
+    assert!(
+        !stderr.contains('\u{1b}') && !stderr.contains("╰╴"),
+        "stderr carries colour or a source location:\n{stderr}",
+    );
+}

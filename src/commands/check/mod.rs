@@ -200,14 +200,10 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
     let selected = select_repos(&spex, &args.repo, &args.files)?;
 
-    // The generator must see every current error, including ones an existing
-    // baseline would otherwise suppress, so it can rewrite the full baseline.
-    let suppress = !args.fill_preexisting_errors;
-
     let mut reports = Vec::with_capacity(selected.len());
     let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
     for &repo in &selected {
-        let mut findings = check_repo(
+        let findings = check_repo(
             CheckRepoArgs {
                 repo,
                 spex_dir: &spex.dir,
@@ -217,9 +213,6 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             },
             &mut workspace_checks,
         )?;
-        if suppress {
-            findings.retain(|finding| !finding.is_preexisting(&repo.ignored_errors));
-        }
         reports.push(CheckReport {
             target: ReportTarget::Repository(repo),
             findings,
@@ -227,15 +220,11 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     }
 
     if !workspace_checks.is_empty() {
-        let mut findings = run_workspace_checks(&spex.dir, &workspace_checks);
-        if suppress {
-            findings.retain(|finding| !finding.is_preexisting_workspace(&selected, &spex.dir));
-        }
         reports.push(CheckReport {
             target: ReportTarget::Workspace {
                 spex_dir: &spex.dir,
             },
-            findings,
+            findings: run_workspace_checks(&spex.dir, &workspace_checks),
         });
     }
 
@@ -245,7 +234,21 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         return fill_preexisting_errors(&spex.dir, &selected, &reports);
     }
 
+    drop_baselined_findings(&mut reports, &selected, &spex.dir);
     Ok(report(&spex.project_name, &reports))
+}
+
+fn drop_baselined_findings(reports: &mut [CheckReport], selected: &[&Repository], spex_dir: &Path) {
+    for report in reports {
+        match report.target {
+            ReportTarget::Repository(repo) => report
+                .findings
+                .retain(|finding| !finding.is_preexisting(&repo.ignored_errors)),
+            ReportTarget::Workspace { .. } => report
+                .findings
+                .retain(|finding| !finding.is_preexisting_workspace(selected, spex_dir)),
+        }
+    }
 }
 
 fn check_repo(

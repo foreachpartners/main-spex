@@ -1,13 +1,28 @@
 use std::path::PathBuf;
 
-use error_stack::Report;
+use error_stack::{FrameKind, Report};
 use thiserror::Error;
 
 use crate::config::SPEX_CONFIG_FILE;
 use crate::rule::RULES_DIR;
 use crate::spec::SPECS_DIR;
 
+#[cfg(test)]
+#[path = "error_test.rs"]
+mod error_test;
+
 pub type Result<T> = core::result::Result<T, Report<CliError>>;
+
+pub fn describe(report: &Report<CliError>) -> String {
+    report
+        .frames()
+        .filter_map(|frame| match frame.kind() {
+            FrameKind::Context(context) => Some(context.to_string()),
+            FrameKind::Attachment(_) => None,
+        })
+        .collect::<Vec<_>>()
+        .join(": ")
+}
 
 #[derive(Debug, Error)]
 pub enum CliError {

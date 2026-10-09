@@ -17,7 +17,7 @@ use commands::coverage::CoverageArgs;
 use commands::info::InfoArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
-use error::Result;
+use error::{Result, describe};
 
 #[derive(Parser)]
 #[command(
@@ -50,10 +50,12 @@ enum Commands {
     Specs(SpecsArgs),
 }
 
+const TOOL_FAILURE_EXIT_CODE: u8 = 2;
+
 fn main() -> ExitCode {
     run(Cli::parse().command).unwrap_or_else(|report| {
-        eprintln!("error: {report:?}");
-        ExitCode::FAILURE
+        eprintln!("error: {}", describe(&report));
+        ExitCode::from(TOOL_FAILURE_EXIT_CODE)
     })
 }
 

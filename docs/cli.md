@@ -23,6 +23,8 @@ Every command except `init` finds the spex repository from the current directory
 
 `rules` and `specs` print a YAML list, to stdout or to `--output`.
 
+Every command exits `0` on success, `1` when it ran and reported failures (`check` errors, `coverage` gaps, `check-schema` violations), and `2` when it could not run (invalid arguments, a missing `spex.yaml`, an unreadable schema). A command that could not run prints one `error: <message>` line to stderr, so a CI script can tell a tool failure from a finding.
+
 ## Install
 
 ### Prerequisites:

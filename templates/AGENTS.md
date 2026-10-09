@@ -18,7 +18,7 @@ Every behavioral change traces to a spec acceptance creterion via a trace commen
 For `@spec test` and `@spec impl` ac-id for each acceptance criterion is required. Contract type is defined in spec, e.g `contract: for-each-ac`:
 
 - `for-each-ac` - contract for each ac is requred, same as for `@spec impl` and `@spec test`/
-- `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec impl place-pizza-order`.
+- `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec contract place-pizza-order`.
 - `none` - no contract required.
 
 Trace comment should be placed on the smallest unit that actually satisfies the AC — a specific field, function, or test case — not on the file, the test suite's top-level describe, or the enclosing type. Widen the placement only when the AC's scope genuinely spans that boundary (e.g. an endpoint, contract). Target minimal tracing amount that make sense.

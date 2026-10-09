@@ -46,7 +46,7 @@ When a change requires migration steps in a spex project, fill `templates/skills
 .github/workflows/  CI: tests and format checks on pull requests
 src/                CLI source
   main.rs           Entry point, arg parsing
-  error.rs          CliError, the single error enum for every command, and the shared Result alias
+  error.rs          CliError, the single error enum for every command, its one-line description for users, and the shared Result alias
   templates.rs      Bundled templates directory and the names of its folders and files (constants only)
   spec/             Spec topic (mod.rs is an index only)
     id.rs           SpecId and AcId value objects and their id grammar

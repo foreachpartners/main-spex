@@ -196,6 +196,43 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 }
 
 #[test]
+fn fill_preexisting_errors_baselines_spec_conformance_errors() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    copy_dir(&dummy_project_fixture(), &project);
+    let spec_path = project.join("dummy-project-spex/specs/active-full-coverage.yaml");
+    let spec = fs::read_to_string(&spec_path).expect("read spec");
+    fs::write(
+        &spec_path,
+        spec.replace("id: shows-tax", "id: shows-subtotal"),
+    )
+    .expect("write spec with a duplicate acceptance criterion id");
+
+    let broken = run_spex(&project, &["check"], "");
+    assert_eq!(broken.status.code(), Some(1));
+    assert!(
+        report_text(&broken.stdout).contains("spex-internal-conformance/no-duplicate-ac-ids"),
+        "the duplicate acceptance criterion id was not reported",
+    );
+
+    let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
+    assert!(fill.status.success(), "fill should exit 0");
+
+    let check = run_spex(&project, &["check"], "");
+    let report = report_text(&check.stdout);
+    assert!(
+        !report.contains("no-duplicate-ac-ids"),
+        "generated baseline did not suppress the conformance error\n{report}",
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 after the baseline is generated (exit {:?})",
+        check.status.code(),
+    );
+}
+
+#[test]
 fn check_dummy_project_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
