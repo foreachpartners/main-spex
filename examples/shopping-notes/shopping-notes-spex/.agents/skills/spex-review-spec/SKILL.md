@@ -47,4 +47,4 @@ End with a one-line summary: total findings, and the worst issue (if any).
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

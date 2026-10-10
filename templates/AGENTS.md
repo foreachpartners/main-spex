@@ -1,6 +1,6 @@
 # spex
 
-This project is governed by `spex`. The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat. AI operates fast — the framework's job is unleash it speed while ensuring slop-free verifiable results.
+This project is governed by `spex`. The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat. AI operates fast — the framework's job is to unleash its speed while ensuring slop-free verifiable results.
 
 ## Artifact chain
 
@@ -13,11 +13,11 @@ BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (in
 
 ## Traceability
 
-Every behavioral change traces to a spec acceptance creterion via a trace comment `@spec impl|test|contract <spec-id>#<ac-id>` e.g `@spec impl place-pizza-order#auth-required` for implementation acceptance criterion.
+Every behavioral change traces to a spec acceptance criterion via a trace comment `@spec impl|test|contract <spec-id>#<ac-id>` e.g `@spec impl place-pizza-order#auth-required` for implementation acceptance criterion.
 
 For `@spec test` and `@spec impl` ac-id for each acceptance criterion is required. Contract type is defined in spec, e.g `contract: for-each-ac`:
 
-- `for-each-ac` - contract for each ac is requred, same as for `@spec impl` and `@spec test`/
+- `for-each-ac` - contract for each ac is required, same as for `@spec impl` and `@spec test`.
 - `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec contract place-pizza-order`.
 - `none` - no contract required.
 
@@ -33,7 +33,7 @@ A change isn't finished until:
 
 ## Workspace layout
 
-The workspace root holds this repo (the single source of truth for specs, rules, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configurarition.
+The workspace root holds this repo (the single source of truth for specs, rules, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configuration.
 
 Skills live under `.agents/skills`; `.claude` is a symlink to `.agents`, so `.claude/skills` is the same directory — edit skill files under `.agents/skills` only.
 
@@ -86,4 +86,4 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

@@ -11,7 +11,7 @@ A contract is the _interface_ derived from a spec. For an API: endpoints, method
 
 All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
 
-Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenaAPI which is used by api and frontend are put in spex `<workspace-root>/<project-name>-spex/contracts/`, contracts that are specific to only one repository, like figma design references are put in repository they belong to (for example `<workspace-root>/shopping-notes-frontend/contracts/figma.md`).
+Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenAPI which is used by api and frontend are put in spex `<workspace-root>/<project-name>-spex/contracts/`, contracts that are specific to only one repository, like figma design references are put in repository they belong to (for example `<workspace-root>/shopping-notes-frontend/contracts/figma.md`).
 
 ## Step 0 — Establish the target specs
 
@@ -139,4 +139,4 @@ Follow the project's writing style: imperative and directive, clarity over brevi
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

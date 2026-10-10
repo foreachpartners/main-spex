@@ -78,7 +78,7 @@ fn check_schema_reports_each_violation_per_file_and_exits_non_zero() {
     assert_eq!(
         String::from_utf8_lossy(&check.stderr),
         concat!(
-            "bad-id.yaml: /id: \"Bad_ID\" does not match \"^[a-z]+(-[a-z]+)*$\"\n",
+            "bad-id.yaml: /id: \"Bad_ID\" does not match \"^[a-z0-9]+(-[a-z0-9]+)*$\"\n",
             "missing-fields.yaml: \"acceptance_criteria\" is a required property\n",
             "missing-fields.yaml: \"contract\" is a required property\n",
             "missing-fields.yaml: \"description\" is a required property\n",

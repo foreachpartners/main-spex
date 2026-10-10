@@ -33,4 +33,4 @@ Run `spex check` and `spex coverage` again. Fix any issues they report before fi
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

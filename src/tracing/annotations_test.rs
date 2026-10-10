@@ -15,8 +15,21 @@ mod tests {
     }
 
     #[test]
-    fn parse_skips_an_id_with_digits_instead_of_cutting_it_short() {
-        assert!(parse("// @spec impl delivery-time2\n").is_empty());
+    fn parse_reads_ids_with_digits() {
+        let annotations = parse("// @spec impl oauth2-login#2fa-step, s3-upload\n");
+
+        assert_eq!(annotations.len(), 2);
+        assert_eq!(annotations[0].spec_id.as_str(), "oauth2-login");
+        assert_eq!(
+            annotations[0].ac_id.as_ref().map(AcId::as_str),
+            Some("2fa-step")
+        );
+        assert_eq!(annotations[1].spec_id.as_str(), "s3-upload");
+    }
+
+    #[test]
+    fn parse_skips_an_id_with_an_uppercase_letter_instead_of_cutting_it_short() {
+        assert!(parse("// @spec impl delivery-timeX\n").is_empty());
     }
 
     #[test]
@@ -28,7 +41,7 @@ mod tests {
 
     #[test]
     fn parse_skips_the_whole_annotation_when_a_listed_id_is_invalid() {
-        let content = "// @spec impl alpha, delivery-time2, beta#step-one\n";
+        let content = "// @spec impl alpha, Delivery-Time, beta#step-one\n";
 
         assert!(parse(content).is_empty());
         assert_eq!(malformed_lines(content), vec![1]);
@@ -53,7 +66,7 @@ mod tests {
     fn malformed_lines_reports_an_id_that_breaks_the_id_grammar() {
         let long_id = "a".repeat(41);
         let content = format!(
-            "// @spec impl delivery-time2\n// @spec impl a#step-1\n// @spec impl {long_id}\n// @spec impl a#step-one\n"
+            "// @spec impl delivery-timeX\n// @spec impl a#Step\n// @spec impl {long_id}\n// @spec impl a#step-one\n"
         );
 
         assert_eq!(malformed_lines(&content), vec![1, 2, 3]);

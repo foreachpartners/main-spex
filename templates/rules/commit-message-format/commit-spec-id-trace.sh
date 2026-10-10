@@ -23,7 +23,7 @@ if [ "$(git rev-parse --show-toplevel 2>/dev/null)" != "$PWD" ]; then
 fi
 
 # Keep in sync with schemas/spec-id.schema.json
-id='[a-z]+(-[a-z]+)*'
+id='[a-z0-9]+(-[a-z0-9]+)*'
 id_list=" ${id}(, ${id})*"
 
 bad=0

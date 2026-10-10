@@ -9,6 +9,16 @@ mod tests {
     }
 
     #[test]
+    fn spec_id_accepts_digits_anywhere() {
+        for valid in ["oauth2-login", "s3-upload", "2fa-login", "step-2", "123"] {
+            assert!(
+                SpecId::try_from(valid.to_string()).is_ok(),
+                "`{valid}` should be accepted"
+            );
+        }
+    }
+
+    #[test]
     fn spec_id_accepts_an_id_of_the_maximum_length() {
         assert!(SpecId::try_from("a".repeat(ID_MAX_LENGTH)).is_ok());
     }
@@ -24,7 +34,6 @@ mod tests {
             "",
             "Bad-Id",
             "bad_id",
-            "delivery-time2",
             "-leading",
             "trailing-",
             "double--hyphen",

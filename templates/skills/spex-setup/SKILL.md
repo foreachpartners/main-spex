@@ -1,6 +1,6 @@
 ---
 name: spex-setup
-description: Configure one or multiple new project repositories for usage with spex gramework, define them in spex.yaml configuration, create repository skill for each. Use this skill when user wants to setup new project repositories in spex framework.
+description: Configure one or multiple new project repositories for usage with spex framework, define them in spex.yaml configuration, create repository skill for each. Use this skill when user wants to setup new project repositories in spex framework.
 ---
 
 # Set up new repositories
@@ -98,4 +98,4 @@ Offer to author the first spec with `spex-spec` (a capability the system must pr
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

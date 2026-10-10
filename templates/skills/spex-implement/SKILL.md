@@ -113,4 +113,4 @@ Ask the user to do an optional review with `spex-review`, then to add test cover
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

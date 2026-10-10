@@ -32,7 +32,7 @@ impl Annotation {
 }
 
 fn token_pattern() -> String {
-    let id = r"[a-z]+(?:-[a-z]+)*";
+    let id = r"[a-z0-9]+(?:-[a-z0-9]+)*";
     format!(r"{id}(?:#{id})?")
 }
 

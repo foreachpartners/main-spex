@@ -37,7 +37,7 @@ On top of whatever the repo documents, the review always carries the **smell bas
 Each smell reads _what it is_ -> _how to fix_; match it against the diff:
 
 - **Mysterious Name** — a function, variable, or type whose name doesn't reveal what it does or holds. -> rename it; if no honest name comes, the design's murky.
-- **Duplicated Code** — the same logic shape appears in more than one hunk or file in the change -> extract the shared shape, call it from both. If duplication is simple and abstraction makes it less readable -> leave it as is, simplicity and redability always wins.
+- **Duplicated Code** — the same logic shape appears in more than one hunk or file in the change -> extract the shared shape, call it from both. If duplication is simple and abstraction makes it less readable -> leave it as is, simplicity and readability always wins.
 - **Feature Envy** — a method that reaches into another object's data more than its own. -> move the method onto the data it envies.
 - **Data Clumps** — the same few fields or params keep travelling together (a type wanting to be born). -> bundle them into one type, pass that.
 - **Primitive Obsession** — a primitive or string standing in for a domain concept that deserves its own type. -> give the concept its own small type.
@@ -71,4 +71,4 @@ End with a one-line summary: total findings, and the worst issue (if any).
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

@@ -47,14 +47,14 @@ Agent skills drive the artifact chain: each packages the instructions an AI codi
 
 A spec, defined in [glossary.md](glossary.md), lives at `specs/<spec-id>.yaml`, nested subdirectories allowed; the Spec ID is the filename, whatever the nesting.
 
-- The `id` follows `schemas/spec-id.schema.json`: lowercase letters and hyphens only, at most 40 characters.
+- The `id` follows `schemas/spec-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters.
 - Has required `id`, `title`, `description`, `acceptance_criteria`, and `contract`; optional `scope`, `blocked_by`, `status`, `coverage_ignore`, and `examples`.
 - `contract` sets the contract coverage granularity: `single` (the migration default) requires one spec-level `@spec contract <spec-id>` annotation for the whole spec, `for-each-ac` requires a `@spec contract <spec-id>#<ac-id>` annotation for every acceptance criterion, `none` disables contract coverage.
 - `examples` holds named illustrative snippets showing the spec applied in context — placement and usage that prose cannot carry.
 - Holds its specifics in the acceptance criteria, ordered by RFC 2119 commitment level: `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`.
 - Each acceptance criterion is `{id, must|must_not|should|should_not|may, is_done}`:
   - Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the verifiable statement.
-  - `id` follows `schemas/ac-id.schema.json`: lowercase letters and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
+  - `id` follows `schemas/ac-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
   - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads `#<ac-id>`-qualified annotations separately; a criterion missing its annotations while flagged `is_done: false` is reported as pending, not a gap.
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
@@ -88,7 +88,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 
 A rule, defined in [glossary.md](glossary.md), lives at `rules/<rule-id>.yaml`, nested subdirectories allowed; the Rule ID is the filename, whatever the nesting.
 
-- The `id` follows `schemas/rule-id.schema.json`: lowercase letters and hyphens only, at most 40 characters.
+- The `id` follows `schemas/rule-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters.
 - Has required `id`, `title`, `description`, and `acceptance_criteria`; optional `checks`, `examples`, and `sync_with_upstream`.
 - A repository opts into a rule by listing it in `rules` in `spex.yaml`; the rule then applies repo-wide, not per feature. A rule has no lifecycle status, and its acceptance criteria carry no implementation flag.
 - Holds its individual rules in the acceptance criteria, ordered `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`, each criterion a string starting with that commitment.

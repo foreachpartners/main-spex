@@ -6,7 +6,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 ## Goal: unleash AI's full speed without slop
 
-AI operates fast — the framework's job is unleash it speed while ensuring slop-free verifiable results.
+AI operates fast — the framework's job is to unleash its speed while ensuring slop-free verifiable results.
 
 ## Core Concepts
 
@@ -66,7 +66,7 @@ Say you're want to add shopping item creation functionality to the backend. Here
 
 1. **Create spec** `/spex-spec backend add shopping item endpoint`. Will create `shopping-notes-spex/specs/add-shopping-item.yaml`
 2. **Derive the contract** for a spec `/spex-contract add-shopping-item`. Will add the endpoint to `shopping-notes-spex/contracts/api.openapi.yaml`.
-3. **Implement it** `/spex-implement add-shopping-item`. Will implement a spec as writen following applicable rules and skill instructions.
+3. **Implement it** `/spex-implement add-shopping-item`. Will implement a spec as written following applicable rules and skill instructions.
 4. **Review** review implementation with `/spex-review add-shopping-item` to ensure conformance with spec and applicable rules.
 5. **Add tests** `/spex-test add-shopping-item`. Will add tests coverage for the implemented spec.
 

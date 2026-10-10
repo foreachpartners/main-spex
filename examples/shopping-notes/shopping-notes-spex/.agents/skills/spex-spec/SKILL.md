@@ -51,7 +51,7 @@ Pre-fill every field you can from the source and existing context. Then ask the 
 
 Draft each spec following the field rules in `<workspace-root>/<project-name>-spex/schemas/spec.schema.json`, using its `examples` as the model for the YAML you write. Key points while drafting:
 
-- `id` must convey the capability so it reads without opening the spec. It should be unique enough so that global search will find no other matches, prefer two or more words with dash as it's unlikelly to match anything.
+- `id` must convey the capability so it reads without opening the spec. It should be unique enough so that global search will find no other matches, prefer two or more words with dash as it's unlikely to match anything.
 - Write `acceptance_criteria` as a list of `{id, must|must_not|should|should_not|may, is_done}` objects. Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, naming the commitment level; its value is the verifiable statement. Order criteria MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. These are the spec's specifics. `id` is a kebab-case slug unique within the spec that names the criterion's behavior, not its position (e.g. `auth-required`, not `ac-1`). Every criterion you write — new spec or new criterion added to an existing one — gets `is_done: false`, since nothing is implemented yet; `spex-test` clears it once `spex coverage` shows the criterion fully traced. Never set `is_done: false` on a criterion the user didn't ask you to add or change.
 - Be specific. When the user has given a concrete decision — a constant, default, threshold, rate, or rule (e.g. each pizza takes one minute to make, two workers are on shift, the estimate is rounded to whole minutes) — capture it verbatim as its own verifiable criterion. Do not soften a value the user supplied into a vague directional statement, and do not invent a value the user did not supply: if a detail needed to make a criterion verifiable is missing, ask for it (see Step 2) instead of guessing.
 - Describe end behavior, not implementation steps. A criterion must be verifiable from the outside — what the system does or exposes — not the internal steps taken to build it (installing a package, adding a dependency, creating a file, writing a migration).
@@ -123,4 +123,4 @@ Follow the `writing-style` rule read in Step 1.
 
 # Project
 
-Everything above `Project` is overrided on `spex update`, any project spicific data should be added here
+Everything above `Project` is overridden on `spex update`, any project specific data should be added here

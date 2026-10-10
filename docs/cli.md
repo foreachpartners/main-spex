@@ -146,7 +146,7 @@ spex check --repo frontend --fill-preexisting-errors
 When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule:
 
 - `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
-- A spec id, acceptance criterion id, or rule id outside the id grammar (lowercase letters and hyphens only, at most 40 characters) cannot be loaded: the command stops with a parse error naming the file instead of reporting a finding.
+- A spec id, acceptance criterion id, or rule id outside the id grammar (lowercase letters, digits and hyphens only, at most 40 characters) cannot be loaded: the command stops with a parse error naming the file instead of reporting a finding.
 - Each spec file must be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - Every script a rule check references must exist in the rule's script folder, beside the rule file.
 - Declared properties must follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).

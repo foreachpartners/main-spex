@@ -83,10 +83,10 @@ Run `spex check` in terminal from anywhere in the workspace, you will see `depen
 
 **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies repo-wide.
 
-Each repostirory has rules that it needs to follow, applicable rules for each repo are defined in `spex.yaml` and one of the rules for api is
+Each repository has rules that it needs to follow, applicable rules for each repo are defined in `spex.yaml` and one of the rules for api is
 reported `dependencies-rules`. You can open `shopping-notes-spex/rules/dependencies-rules.yaml` and check it description and acceptance_criteria repo must follow with deterministic `checks`. Our error comes from `npm-floating-version` which requires `package.json dependencies must pin an exact version, not a range`. We can fix it by opening `/shopping-notes-api/package.json` and removing `^`.
 
-Rules are a way to ensure AI generates code in a way we want. Rules applicable to repository are loaded in AI context when it works on this repository and if possible they also have determenistic checks which we can validate by running `spex check`.
+Rules are a way to ensure AI generates code in a way we want. Rules applicable to repository are loaded in AI context when it works on this repository and if possible they also have deterministic checks which we can validate by running `spex check`.
 
 Commit your fixes, run `spex check` again and ensure there is no more errors.
 
@@ -96,9 +96,9 @@ Commit your fixes, run `spex check` again and ensure there is no more errors.
 
 **Spec** (specification) is a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_.
 
-Specs are short, fast to generate and review, ironing out details and creating a single source of truth for how our application works. It's like a waterfall from spec down to implementation, we can always point agent to spec and say `follow it`, `check implementation against it` or do it ourselfs. Specs helps us to quicky reason about application behaviour, removes uncertainty of how things should be and help us to move fast.
+Specs are short, fast to generate and review, ironing out details and creating a single source of truth for how our application works. It's like a waterfall from spec down to implementation, we can always point agent to spec and say `follow it`, `check implementation against it` or do it ourselves. Specs helps us to quickly reason about application behaviour, removes uncertainty of how things should be and help us to move fast.
 
-Let's create a simple specs for api, our technical lead wants a helthcheck for api so that other tools, services and frontend could check if api is working fine.
+Let's create a simple specs for api, our technical lead wants a healthcheck for api so that other tools, services and frontend could check if api is working fine.
 
 Let's invoke a skill for spec creation for this task, ask AI `/spex-spec healthcheck endpoint for api, id api-healthcheck`.
 
@@ -106,7 +106,7 @@ Agent will ask you details, feel free to pick what you think right for example, 
 
 Review created spec and edit it if needed.
 
-Run `spex coverage` - a command that shows you a current state of project and ensures that each spec has contract if applicable, implementation adn tests for eac acceptance criterion. For now you will see only our spec `api-healthcheck` as planned.
+Run `spex coverage` - a command that shows you a current state of project and ensures that each spec has contract if applicable, implementation and tests for each acceptance criterion. For now you will see only our spec `api-healthcheck` as planned.
 
 Commit the change.
 
@@ -130,19 +130,19 @@ Try to remove `x-spec: "@spec contract api-healthcheck"` in `api.openapi.yaml` a
 
 **Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
-Tracing is like a thread going through from spec to it's artifacts in format of comment `@spec <type> <spec-id>` like `@spec contract api-healthcheck`. Trace helps AI and us to quickly find code and test related to spec and the other way around, while determenistic `spex coverage` check ensures nothing is missing, spec has contract and **each** spec acceptance creation has implementation and test. You may know that AI sometimes forget to implement or test some small part of our request, one ac, with `spex coverage` this problem is no longer exists.
+Tracing is like a thread going through from spec to its artifacts in format of comment `@spec <type> <spec-id>` like `@spec contract api-healthcheck`. Trace helps AI and us to quickly find code and test related to spec and the other way around, while deterministic `spex coverage` check ensures nothing is missing, spec has contract and **each** spec acceptance criterion has implementation and test. You may know that AI sometimes forget to implement or test some small part of our request, one ac, with `spex coverage` this problem is no longer exists.
 
 Put back trace for contract and let's continue with implementation.
 
 #### Implement
 
-Like with everyting else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all nessesary context for the task - spec, applicable rules, repo skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
+Like with everything else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all necessary context for the task - spec, applicable rules, repo skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
 
 #### Review
 
 While our change is small and we can manually review it, in case of bigger changes we would want agent to review implementation, let's try it out, run `/spex-review api-healthcheck api repo implementation`.
 
-Review skill will spawn two subagents in parallel where first will review if implementation follows rules, second will review if implementation follows spec. Review skill itself delegates to `spex-review-rule` and `spex-review-spec` skills for each subagent. It's like a constructor where you can combine pieces to achive desired process, we will see it later using `spex-assembly-line` skill.
+Review skill will spawn two subagents in parallel where first will review if implementation follows rules, second will review if implementation follows spec. Review skill itself delegates to `spex-review-rule` and `spex-review-spec` skills for each subagent. It's like a constructor where you can combine pieces to achieve desired process, we will see it later using `spex-assembly-line` skill.
 
 #### Test
 
@@ -198,4 +198,4 @@ Commit it, if needed publish repository as private and share results with your m
 
 ## 🎉 Congratulations!
 
-You did it! Now you can use spex in real project. And don't forget to contrubite good rules and skills and other improvements back to spex for everyone to use.
+You did it! Now you can use spex in real project. And don't forget to contribute good rules and skills and other improvements back to spex for everyone to use.

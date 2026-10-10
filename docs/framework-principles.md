@@ -4,7 +4,7 @@ These principles form the foundation of spex. They are non-negotiable. Everythin
 
 ## Goal: unleash AI's full speed without slop
 
-AI operates fast — the framework's job is unleash it speed while ensuring slop-free verifiable results.
+AI operates fast — the framework's job is to unleash its speed while ensuring slop-free verifiable results.
 
 ## 1. AI over Manual Coding
 

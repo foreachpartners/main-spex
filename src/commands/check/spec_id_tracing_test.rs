@@ -141,12 +141,12 @@ mod tests {
     }
 
     #[test]
-    fn does_not_truncate_an_id_with_a_digit_into_a_known_prefix() {
+    fn does_not_truncate_an_id_with_an_uppercase_letter_into_a_known_prefix() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![write_candidate(
             dir.path(),
             "src/lib.rs",
-            "// @spec impl delivery-time2#estimate-on-delivery\n",
+            "// @spec impl delivery-timeX#estimate-on-delivery\n",
         )];
         let ctx = RepoCtx {
             repo_path: dir.path(),
@@ -220,7 +220,7 @@ mod tests {
              // @spec impl a, B\n\
              // @spec impl a#b#c\n\
              // @spec impl aB\n\
-             // @spec impl a2\n\
+             // @spec impl a--b\n\
              // @spec impl a\u{430}\n",
             &known(&["a"]),
         );

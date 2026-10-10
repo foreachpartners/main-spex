@@ -4,7 +4,7 @@ The AI-first development framework that turns natural specifications into determ
 
 ## Goal: unleash AI's full speed without slop
 
-AI operates fast — the framework's job is unleash it speed while ensuring slop-free verifiable results.
+AI operates fast — the framework's job is to unleash its speed while ensuring slop-free verifiable results.
 
 ## Core Concepts
 

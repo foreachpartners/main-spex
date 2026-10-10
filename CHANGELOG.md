@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.15.0] - 2026-10-10
+
+- Spec, acceptance criterion and rule ids may now contain digits, anywhere in the id, so a name can be written as it is spoken instead of spelling the digit out: `s3-login`, `oauth2-login`, `2fa-login`, `5xx-retries`. The id format is lowercase letters, digits and single hyphens (`^[a-z0-9]+(-[a-z0-9]+)*$`), at most 40 characters, with no hyphen at either end or doubled; uppercase letters, underscores and other characters are still rejected.
+
 ## [0.14.0] - 2026-10-09
 
 - New `spex jq [-r] [-c] <filter> [file]` runs a jq filter, through the embedded jaq engine, on JSON or YAML read from a file or standard input, so a script or an AI agent reads data without installing `jq` or `yq`.

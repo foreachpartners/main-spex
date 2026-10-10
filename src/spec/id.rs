@@ -9,7 +9,7 @@ use serde::Deserialize;
 #[path = "id_test.rs"]
 mod id_test;
 
-const ID_PATTERN: &str = "^[a-z]+(-[a-z]+)*$";
+const ID_PATTERN: &str = "^[a-z0-9]+(-[a-z0-9]+)*$";
 const ID_MAX_LENGTH: usize = 40;
 
 static ID: LazyLock<Regex> = LazyLock::new(|| Regex::new(ID_PATTERN).expect("valid id regex"));
@@ -24,7 +24,7 @@ impl fmt::Display for InvalidId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "invalid {} `{}`: use lowercase letters separated by single hyphens, at most {ID_MAX_LENGTH} characters",
+            "invalid {} `{}`: use lowercase letters and digits separated by single hyphens, at most {ID_MAX_LENGTH} characters",
             self.kind, self.value
         )
     }
