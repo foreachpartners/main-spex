@@ -59,18 +59,13 @@ mod tests {
 
     #[test]
     fn grammar_matches_the_id_schemas() {
-        for schema in ["rule-id"] {
-            let file = crate::templates::BUNDLED_TEMPLATES_DIR
-                .get_file(format!("schemas/{schema}.schema.json"))
-                .expect("bundled id schema");
-            let schema_json: serde_json::Value =
-                serde_json::from_str(file.contents_utf8().expect("utf8 schema")).expect("json");
+        let file = crate::templates::BUNDLED_TEMPLATES_DIR
+            .get_file("schemas/rule-id.schema.json")
+            .expect("bundled id schema");
+        let schema_json: serde_json::Value =
+            serde_json::from_str(file.contents_utf8().expect("utf8 schema")).expect("json");
 
-            assert_eq!(schema_json["pattern"], ID_PATTERN, "{schema} pattern");
-            assert_eq!(
-                schema_json["maxLength"], ID_MAX_LENGTH,
-                "{schema} maxLength"
-            );
-        }
+        assert_eq!(schema_json["pattern"], ID_PATTERN, "rule-id pattern");
+        assert_eq!(schema_json["maxLength"], ID_MAX_LENGTH, "rule-id maxLength");
     }
 }

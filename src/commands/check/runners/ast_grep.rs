@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 use ast_grep_config::{DeserializeEnv, RuleCore, RuleCoreError, SerializableRuleCore};
 use ast_grep_language::{Language, LanguageExt, SupportLang};
@@ -37,12 +38,13 @@ pub(in crate::commands::check) fn run_ast_grep(
         let Some(lang) = explicit_lang.or_else(|| SupportLang::from_path(&file.rel)) else {
             continue;
         };
-        if !matchers.contains_key(&lang) {
-            let matcher = build_ast_grep_matcher(&rule_core, lang)
-                .map_err(|err| format!("invalid ast-grep rule: {err}"))?;
-            matchers.insert(lang, matcher);
-        }
-        let matcher = &matchers[&lang];
+        let matcher: &RuleCore = match matchers.entry(lang) {
+            Entry::Occupied(cached) => cached.into_mut(),
+            Entry::Vacant(slot) => slot.insert(
+                build_ast_grep_matcher(&rule_core, lang)
+                    .map_err(|err| format!("invalid ast-grep rule: {err}"))?,
+            ),
+        };
 
         let Ok(content) = std::fs::read_to_string(&file.abs) else {
             continue;

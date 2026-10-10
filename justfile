@@ -2,7 +2,7 @@ default:
     @just --list
 
 lint:
-    cargo check
+    cargo clippy --all-targets -- -D warnings
 
 fmt: fmt-docs
     cargo fmt

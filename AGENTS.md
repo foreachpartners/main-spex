@@ -22,7 +22,7 @@ Main spex, or spex for short, is built on four simple pieces:
 ## Quick commands
 
 ```sh
-just lint       # cargo check
+just lint       # cargo clippy, warnings denied
 just fmt        # Format everything (fmt-docs + cargo fmt)
 just test       # cargo test
 just fmt-docs   # dprint fmt (md/yaml/json)
