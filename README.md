@@ -1,12 +1,8 @@
 # 🦉 Main spex
 
-The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed, with humans safely in the driver’s seat.
+The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
 
 _The name `spex` comes from a casual shorthand for specifications._
-
-## Goal: unleash AI's full speed without slop
-
-AI operates fast — the framework's job is to unleash its speed while ensuring slop-free verifiable results.
 
 ## Core Concepts
 
