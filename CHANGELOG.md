@@ -2,6 +2,10 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.15.1] - 2026-10-10
+
+- `AGENTS.md` template, Core discipline: "Systemic Fix Over Quick Fix" now makes the proper, maintainable solution the default and allows a workaround only when the user explicitly asks for one. Two new items: "Stop on major findings" has the agent stop, report, and ask how to proceed when investigation reveals a major problem, related to the task or not, and "Propose major improvements" has it stop and propose a substantially better approach, as a spec change first when behavior changes. Both leave minor findings for the end of the task.
+
 ## [0.15.0] - 2026-10-10
 
 - Spec, acceptance criterion and rule ids may now contain digits, anywhere in the id, so a name can be written as it is spoken instead of spelling the digit out: `s3-login`, `oauth2-login`, `2fa-login`, `5xx-retries`. The id format is lowercase letters, digits and single hyphens (`^[a-z0-9]+(-[a-z0-9]+)*$`), at most 40 characters, with no hyphen at either end or doubled; uppercase letters, underscores and other characters are still rejected.
