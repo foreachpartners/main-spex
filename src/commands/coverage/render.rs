@@ -82,7 +82,7 @@ fn progress_text(coverage: &SpecCoverage) -> String {
 fn missing_summary(coverage: &SpecCoverage) -> String {
     let mut parts = Vec::new();
 
-    if coverage.contract_missing {
+    if coverage.has_contract_gap() {
         parts.push("contract".to_string());
     }
 
@@ -95,7 +95,18 @@ fn missing_summary(coverage: &SpecCoverage) -> String {
 }
 
 fn pending_summary(coverage: &SpecCoverage) -> String {
-    layer_summary(&coverage.pending_criteria())
+    let mut parts = Vec::new();
+
+    if coverage.has_contract_pending() {
+        parts.push("contract".to_string());
+    }
+
+    let layers = layer_summary(&coverage.pending_criteria());
+    if !layers.is_empty() {
+        parts.push(layers);
+    }
+
+    parts.join(", ")
 }
 
 fn layer_summary(criteria: &[&CriterionCoverage]) -> String {
@@ -255,7 +266,7 @@ impl ReportWriter {
     }
 
     fn verbose_progress(&mut self, coverage: &SpecCoverage, lead: &str) {
-        if coverage.contract_missing {
+        if coverage.has_contract_gap() {
             self.wrapped_after(lead, "missing: contract", RED);
         } else {
             self.line(lead.trim_end());

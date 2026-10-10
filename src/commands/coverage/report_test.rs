@@ -134,19 +134,29 @@ mod tests {
     }
 
     #[test]
-    fn active_gap_count_ignores_in_progress_gaps() {
+    fn gapped_includes_active_and_in_progress_specs() {
         let specs = vec![spec("a", Status::Active), spec("b", Status::InProgress)];
         let report = report(&specs);
-        assert_eq!(report.gapped().len(), 2);
-        assert_eq!(report.active_gap_count(), 1);
+        assert_eq!(ids(&report.gapped()), vec!["a", "b"]);
     }
 
     #[test]
-    fn exit_code_fails_only_when_an_active_spec_has_a_gap() {
-        let in_progress_gap = vec![spec("a", Status::InProgress)];
-        assert_eq!(report(&in_progress_gap).exit_code(), ExitCode::SUCCESS);
+    fn exit_code_fails_when_an_active_or_in_progress_spec_has_a_gap() {
+        for status in [Status::Active, Status::InProgress] {
+            let gapped = vec![spec("a", status)];
+            assert_eq!(report(&gapped).exit_code(), ExitCode::FAILURE);
+        }
+    }
 
-        let active_gap = vec![spec("a", Status::Active)];
-        assert_eq!(report(&active_gap).exit_code(), ExitCode::FAILURE);
+    #[test]
+    fn exit_code_succeeds_without_a_gap() {
+        let no_gap = vec![
+            Spec {
+                contract: crate::spec::ContractLevel::None,
+                ..spec("a", Status::InProgress)
+            },
+            spec("b", Status::Planned),
+        ];
+        assert_eq!(report(&no_gap).exit_code(), ExitCode::SUCCESS);
     }
 }

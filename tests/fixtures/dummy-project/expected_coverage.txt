@@ -11,8 +11,8 @@ Gaps (7)
     ✗  foreach-with-gap     1/2 AC  missing: contract(splits-across-accounts),
                                     impl(splits-across-accounts), test(splits-across-cards,
                                     splits-across-accounts)
-    ✗  in-progress-mixed    1/3 AC  missing: impl(retries-on-failure), test(retries-on-failure)
-                                    in-progress: impl(schedules-followup), test(schedules-followup)
+    ✗  in-progress-mixed    2/3 AC  missing: impl(retries-on-failure), test(retries-on-failure,
+                                    schedules-followup)
     ✗  none-not-covered     0/2 AC  missing: impl(schedules-reorder-day, cancels-scheduled-reorder),
                                     test(schedules-reorder-day, cancels-scheduled-reorder)
     ✗  none-with-gap        1/2 AC  missing: impl(resumes-favorite), test(resumes-favorite)
@@ -26,7 +26,7 @@ Gaps (7)
                                     edits-reorder-before-submit), impl(reorders-past-order,
                                     edits-reorder-before-submit), test(reorders-past-order,
                                     edits-reorder-before-submit)
-    ✗  in-progress-mixed    1/3 AC  missing: impl(retries-on-failure), test(retries-on-failure)
-                                    in-progress: impl(schedules-followup), test(schedules-followup)
+    ✗  in-progress-mixed    2/3 AC  missing: impl(retries-on-failure), test(retries-on-failure,
+                                    schedules-followup)
 
 planned (2), in-progress (2), active (9), gaps (7)

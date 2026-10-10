@@ -230,15 +230,127 @@ mod tests {
     }
 
     #[test]
-    fn missing_per_ac_contract_is_pending_when_not_done_under_for_each_ac() {
+    fn missing_per_ac_contract_is_a_gap_when_not_done_but_implemented_under_for_each_ac() {
         let spec = Spec {
             contract: ContractLevel::ForEachAc,
             acceptance_criteria: vec![not_done("ac-a")],
             ..spec(&[])
         };
         let coverage = coverage(&spec, "// @spec impl a#ac-a\n// @spec test a#ac-a\n");
+        assert_eq!(coverage.health(), SpecHealth::Gap);
+        assert_eq!(coverage.gapped_criteria().len(), 1);
+        assert!(coverage.pending_criteria().is_empty());
+    }
+
+    #[test]
+    fn missing_per_ac_contract_is_pending_when_not_done_and_unimplemented_under_for_each_ac() {
+        let spec = Spec {
+            contract: ContractLevel::ForEachAc,
+            acceptance_criteria: vec![not_done("ac-a")],
+            ..spec(&[])
+        };
+        let coverage = coverage(&spec, "// @spec test a#ac-a\n");
         assert_eq!(coverage.health(), SpecHealth::Pending);
         assert_eq!(coverage.pending_criteria().len(), 1);
+    }
+
+    fn not_done_spec() -> Spec {
+        Spec {
+            acceptance_criteria: vec![not_done("ac-a")],
+            ..spec(&[])
+        }
+    }
+
+    #[test]
+    fn not_done_criterion_with_impl_but_no_test_is_a_gap() {
+        let spec = not_done_spec();
+        let coverage = coverage(&spec, "// @spec contract a\n// @spec impl a#ac-a\n");
+        assert!(coverage.criteria[0].is_started);
+        assert!(coverage.criteria[0].is_gap());
+        assert_eq!(coverage.health(), SpecHealth::Gap);
+        assert_eq!(coverage.criteria[0].missing, vec![CoverageLayer::Test]);
+    }
+
+    #[test]
+    fn not_done_criterion_without_impl_stays_pending_whatever_else_is_annotated() {
+        let spec = not_done_spec();
+        for annotations in ["", "// @spec test a#ac-a\n", "// @spec contract a\n"] {
+            let coverage = coverage(&spec, annotations);
+            assert!(!coverage.criteria[0].is_started, "{annotations}");
+            assert!(coverage.criteria[0].is_pending(), "{annotations}");
+            assert!(!coverage.has_gap(), "{annotations}");
+        }
+    }
+
+    #[test]
+    fn not_done_criterion_with_every_layer_is_covered() {
+        let spec = not_done_spec();
+        let coverage = coverage(&spec, FULL_COVERAGE_OF_AC_A);
+        assert!(coverage.criteria[0].is_covered());
+        assert_eq!(coverage.health(), SpecHealth::Complete);
+    }
+
+    #[test]
+    fn not_done_criterion_with_its_impl_waived_stays_pending() {
+        let spec = Spec {
+            coverage_ignore: vec![ignoring(CoverageLayer::Impl, Some("ac-a"))],
+            ..not_done_spec()
+        };
+        let coverage = coverage(&spec, "");
+        assert!(coverage.criteria[0].is_pending());
+        assert!(!coverage.has_gap());
+    }
+
+    #[test]
+    fn single_contract_is_pending_while_every_criterion_is_not_done_and_unimplemented() {
+        let spec = Spec {
+            acceptance_criteria: vec![not_done("ac-a"), not_done("ac-b")],
+            ..spec(&[])
+        };
+        let coverage = coverage(&spec, "// @spec test a#ac-a\n");
+        assert!(coverage.contract_missing);
+        assert!(coverage.has_contract_pending());
+        assert!(!coverage.has_contract_gap());
+        assert!(!coverage.has_gap());
+        assert_eq!(coverage.health(), SpecHealth::Pending);
+    }
+
+    #[test]
+    fn single_contract_is_a_gap_once_a_criterion_has_an_impl() {
+        let spec = Spec {
+            acceptance_criteria: vec![not_done("ac-a"), not_done("ac-b")],
+            ..spec(&[])
+        };
+        let coverage = coverage(&spec, "// @spec impl a#ac-b\n// @spec test a#ac-b\n");
+        assert!(coverage.has_contract_gap());
+        assert!(!coverage.has_contract_pending());
+        assert_eq!(coverage.health(), SpecHealth::Gap);
+    }
+
+    #[test]
+    fn single_contract_is_a_gap_once_a_criterion_is_done() {
+        let spec = Spec {
+            acceptance_criteria: vec![testing::criterion("ac-a"), not_done("ac-b")],
+            ..spec(&[])
+        };
+        let coverage = coverage(&spec, "");
+        assert!(coverage.has_contract_gap());
+        assert!(!coverage.has_contract_pending());
+    }
+
+    #[test]
+    fn single_contract_is_a_gap_for_a_spec_without_criteria() {
+        let spec = spec(&[]);
+        let coverage = coverage(&spec, "");
+        assert!(coverage.has_contract_gap());
+    }
+
+    #[test]
+    fn present_single_contract_is_neither_a_gap_nor_pending() {
+        let spec = not_done_spec();
+        let coverage = coverage(&spec, "// @spec contract a\n");
+        assert!(!coverage.has_contract_gap());
+        assert!(!coverage.has_contract_pending());
     }
 
     #[test]

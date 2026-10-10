@@ -88,15 +88,8 @@ impl<'a> CoverageReport<'a> {
         groups
     }
 
-    pub fn active_gap_count(&self) -> usize {
-        self.specs
-            .iter()
-            .filter(|coverage| coverage.spec.status == Status::Active && coverage.has_gap())
-            .count()
-    }
-
     pub fn exit_code(&self) -> ExitCode {
-        if self.active_gap_count() == 0 {
+        if self.gapped().is_empty() {
             ExitCode::SUCCESS
         } else {
             ExitCode::FAILURE

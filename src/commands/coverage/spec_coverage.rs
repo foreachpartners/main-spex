@@ -12,6 +12,7 @@ pub struct CriterionCoverage {
     pub id: AcId,
     pub text: String,
     pub is_done: bool,
+    pub is_started: bool,
     pub missing: Vec<CoverageLayer>,
 }
 
@@ -25,6 +26,7 @@ impl CriterionCoverage {
             id: criterion.id.clone(),
             text: criterion.statement.text().to_string(),
             is_done: criterion.is_done,
+            is_started: index.has_ac(&spec.id, &criterion.id, CoverageLayer::Impl),
             missing: CoverageLayer::iter()
                 .filter(|&layer| required(layer) && !index.has_ac(&spec.id, &criterion.id, layer))
                 .collect(),
@@ -43,12 +45,16 @@ impl CriterionCoverage {
         self.missing.is_empty()
     }
 
+    pub fn is_unstarted(&self) -> bool {
+        !self.is_done && !self.is_started
+    }
+
     pub fn is_gap(&self) -> bool {
-        self.is_done && !self.is_covered()
+        !self.is_covered() && !self.is_unstarted()
     }
 
     pub fn is_pending(&self) -> bool {
-        !self.is_done && !self.is_covered()
+        !self.is_covered() && self.is_unstarted()
     }
 }
 
@@ -100,12 +106,24 @@ impl<'a> SpecCoverage<'a> {
         self.implemented_count() == self.criteria.len()
     }
 
+    pub fn is_contract_awaited(&self) -> bool {
+        !self.criteria.is_empty() && self.criteria.iter().all(CriterionCoverage::is_unstarted)
+    }
+
+    pub fn has_contract_gap(&self) -> bool {
+        self.contract_missing && !self.is_contract_awaited()
+    }
+
+    pub fn has_contract_pending(&self) -> bool {
+        self.contract_missing && self.is_contract_awaited()
+    }
+
     pub fn has_gap(&self) -> bool {
-        self.contract_missing || self.criteria.iter().any(CriterionCoverage::is_gap)
+        self.has_contract_gap() || self.criteria.iter().any(CriterionCoverage::is_gap)
     }
 
     pub fn has_pending(&self) -> bool {
-        self.criteria.iter().any(CriterionCoverage::is_pending)
+        self.has_contract_pending() || self.criteria.iter().any(CriterionCoverage::is_pending)
     }
 
     pub fn health(&self) -> SpecHealth {

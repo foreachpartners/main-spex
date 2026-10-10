@@ -180,7 +180,7 @@ spex check-schema --schema schemas/spec.schema.json --files specs/list-pizza-men
 
 ### `spex coverage`
 
-Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion. The report opens with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it. Exits non-zero when an `active` spec has a gap; gaps on `in-progress` specs are reported but do not affect the exit code.
+Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion. The report opens with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it. Exits non-zero when an `active` or `in-progress` spec has a gap.
 
 For every spec whose `status` is `active` or `in-progress`, coverage requires:
 
@@ -189,6 +189,8 @@ For every spec whose `status` is `active` or `in-progress`, coverage requires:
   - `for-each-ac` — a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion.
   - `none` — none.
 - **Impl and test** — for every acceptance criterion: `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`.
+
+Whether a missing requirement is a gap or only pending depends on the criterion's `is_done` flag and its impl annotation, as laid out in [Coverage states](specification.md#coverage-states).
 
 A bare, unqualified `@spec impl|test <spec-id>` never satisfies a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec. A spec with no `status` field defaults to `planned` and is ignored (its ID is still listed under its status).
 
@@ -209,9 +211,9 @@ coverage_ignore:
 
 #### Report
 
-- Lists specs grouped by status (omitting any status with no specs), each tracked spec showing its progress as `done/total AC` — a criterion counts once its required impl annotation is present, whether or not its required test annotation is; a missing test annotation is reported as a gap or as pending instead.
-- The "Gaps" section lists only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation while its `is_done` is `true` or absent), each with its progress and what's missing, naming the acceptance criterion ids involved (e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`). A gapped spec with pending criteria reports them on a separate line labeled `in-progress`.
-- An acceptance criterion missing a required annotation while flagged `is_done: false` is pending, not a gap — expected on an in-progress spec still being worked on. A pending-only `in-progress` spec (`●`) is listed under its `in-progress` status group instead of "Gaps".
+- Lists specs grouped by status (omitting any status with no specs), each tracked spec showing its progress as `done/total AC` — a criterion counts once its required impl annotation is present, whether or not its required test annotation is; a missing test annotation on an implemented criterion is reported as a gap instead.
+- The "Gaps" section lists only the active or in-progress specs that have a gap (`✗` — a required contract annotation missing: spec-level under `contract: single`, per criterion under `contract: for-each-ac`; or an acceptance criterion missing a required impl or test annotation), each with its progress and what's missing, naming the acceptance criterion ids involved (e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`). A gapped spec with pending criteria reports them on a separate line labeled `in-progress`.
+- A missing requirement is pending, not a gap, only while the acceptance criterion is flagged `is_done: false` and has no impl annotation yet — expected on an in-progress spec still being worked on; the spec-level contract under `contract: single` is pending too while every criterion is. A pending-only `in-progress` spec (`●`) is listed under its `in-progress` status group instead of "Gaps".
 - The "Gaps" header counts the gapped specs only, and a spec with no gap is not listed at all. Gapped specs are grouped by `scope`, sorted alphabetically with unscoped specs last under `unscoped`; a spec with several scopes appears under each, and the header counts it once.
 - The report ends with a one-line summary of spec counts per status and the gap count, e.g. `planned (5), in-progress (3), active (2), gaps (1)`.
 

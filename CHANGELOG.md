@@ -2,6 +2,13 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.16.0] - 2026-10-10
+
+- **Breaking**: `coverage` now exits non-zero when an `in-progress` spec has a gap, not only an `active` one, so CI fails on any gap in a tracked spec.
+- `coverage`: `is_done: false` is now mostly a marker — `spex check` still reads it for a spec's `status` — and coverage uses it only to keep a criterion pending while it has no impl annotation. Once a criterion has an impl annotation, a missing test, or a missing contract where one is required, is a gap even while flagged `is_done: false`, so a change is verified in its own repository without first updating the spec in another one. A criterion with `is_done` `true` or absent still has every missing requirement reported as a gap.
+- `coverage`: under `contract: single`, the spec-level contract is now pending, not a gap, while every criterion is `is_done: false` with no impl annotation; it is a gap as soon as any criterion is done or has an impl annotation.
+- `spex-implement` and `spex-spec` skills: updated for the new meaning of `is_done: false`.
+
 ## [0.15.1] - 2026-10-10
 
 - `AGENTS.md` template, Core discipline: "Systemic Fix Over Quick Fix" now makes the proper, maintainable solution the default and allows a workaround only when the user explicitly asks for one. Two new items: "Stop on major findings" has the agent stop, report, and ask how to proceed when investigation reveals a major problem, related to the task or not, and "Propose major improvements" has it stop and propose a substantially better approach, as a spec change first when behavior changes. Both leave minor findings for the end of the task.

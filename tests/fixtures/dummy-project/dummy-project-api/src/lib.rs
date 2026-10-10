@@ -30,3 +30,6 @@ fn retry_payment_test() {}
 
 // @spec impl foreach-with-gap#splits-across-cards
 fn split_payment() {}
+
+// @spec impl in-progress-mixed#schedules-followup
+fn schedule_followup_reminder() {}

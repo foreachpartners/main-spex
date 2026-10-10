@@ -6,8 +6,8 @@ Specs (4)
 
 Gaps (3)
   api
-    ✗  in-progress-mixed    1/3 AC  missing: impl(retries-on-failure), test(retries-on-failure)
-                                    in-progress: impl(schedules-followup), test(schedules-followup)
+    ✗  in-progress-mixed    2/3 AC  missing: impl(retries-on-failure), test(retries-on-failure,
+                                    schedules-followup)
   frontend
     ✗  active-with-gap      2/4 AC  missing: contract, impl(rejects-duplicate, logs-attempt),
                                     test(normalizes-format, logs-attempt)
@@ -15,7 +15,7 @@ Gaps (3)
                                     edits-reorder-before-submit), impl(reorders-past-order,
                                     edits-reorder-before-submit), test(reorders-past-order,
                                     edits-reorder-before-submit)
-    ✗  in-progress-mixed    1/3 AC  missing: impl(retries-on-failure), test(retries-on-failure)
-                                    in-progress: impl(schedules-followup), test(schedules-followup)
+    ✗  in-progress-mixed    2/3 AC  missing: impl(retries-on-failure), test(retries-on-failure,
+                                    schedules-followup)
 
 planned (1), in-progress (1), active (2), gaps (3)

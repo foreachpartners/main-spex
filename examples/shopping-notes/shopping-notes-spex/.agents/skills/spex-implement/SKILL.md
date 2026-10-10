@@ -47,7 +47,7 @@ If a task fails or an agent cannot complete it, stop, report what failed, and as
 
 This step implements the change only — it does not write tests. Use `spex-test` for that once implementation is done.
 
-As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or, for a contract, an OpenAPI `x-*` vendor extension whose value is `@spec contract <spec-id>` — anchored per criterion as `@spec contract <spec-id>#<ac-id>` when the spec's `contract` is `for-each-ac`), tagging the specific criterion id it satisfies. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap.
+As you implement each acceptance criterion, annotate its boundary with `@spec impl <spec-id>#<ac-id>` (or, for a contract, an OpenAPI `x-*` vendor extension whose value is `@spec contract <spec-id>` — anchored per criterion as `@spec contract <spec-id>#<ac-id>` when the spec's `contract` is `for-each-ac`), tagging the specific criterion id it satisfies. `spex coverage` traces active and in-progress specs per criterion from these annotations, so a criterion implemented without one still shows as a gap. A criterion flagged `is_done: false` stays pending until its impl annotation exists; once it does, `spex coverage` reports its missing test (and contract, where required) as a gap too.
 
 Place each annotation on the smallest unit that actually satisfies the criterion — a specific field, function, or handler — not on the file, the enclosing type, or a whole module. Widen the placement only when the criterion's scope genuinely spans that boundary (e.g. an endpoint, contract). Keep the total number of annotations minimal.
 
@@ -74,6 +74,8 @@ Prove the work completes the governing specs:
 ```sh
 spex coverage
 ```
+
+A missing `test` for a criterion you just annotated is expected here — `spex-test` adds it next. Any other gap is yours to fix.
 
 ## Step 5 — Delete the plan
 

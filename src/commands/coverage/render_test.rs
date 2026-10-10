@@ -33,6 +33,7 @@ mod tests {
             id: testing::ac_id(id),
             text: String::new(),
             is_done,
+            is_started: impl_present,
             missing,
         }
     }
@@ -42,6 +43,7 @@ mod tests {
             id: testing::ac_id(id),
             text: String::new(),
             is_done: true,
+            is_started: false,
             missing: if contract_present {
                 Vec::new()
             } else {
@@ -155,6 +157,33 @@ mod tests {
         criterion.is_done = false;
         let coverage = coverage(&spec, false, vec![criterion]);
         assert_eq!(pending_summary(&coverage), "contract(ac-a)");
+    }
+
+    #[test]
+    fn single_contract_is_pending_while_no_criterion_is_started_or_done() {
+        let spec = spec("a", Status::Active);
+        let coverage = coverage(
+            &spec,
+            true,
+            vec![pending_criterion("ac-a", false, false, false)],
+        );
+        assert_eq!(missing_summary(&coverage), "");
+        assert_eq!(
+            pending_summary(&coverage),
+            "contract, impl(ac-a), test(ac-a)"
+        );
+    }
+
+    #[test]
+    fn started_criterion_missing_its_test_is_listed_as_missing_not_pending() {
+        let spec = spec("a", Status::Active);
+        let coverage = coverage(
+            &spec,
+            false,
+            vec![pending_criterion("ac-a", true, false, false)],
+        );
+        assert_eq!(missing_summary(&coverage), "test(ac-a)");
+        assert_eq!(pending_summary(&coverage), "");
     }
 
     #[test]

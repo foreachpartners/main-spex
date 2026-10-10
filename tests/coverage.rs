@@ -1,3 +1,6 @@
+use std::fs;
+use std::io::Write;
+
 use tempfile::tempdir;
 
 mod common;
@@ -104,4 +107,84 @@ fn coverage_scope_rejects_an_unknown_repository() {
 
     assert_fails_mentioning(&coverage, "unknown repository short name `bogus`");
     assert!(coverage.stdout.is_empty());
+}
+
+const IN_PROGRESS_SPEC: &str = r#"id: ci-check
+title: Verify a change before its spec is updated
+description: >-
+  A criterion still flagged not done in the spec repository.
+acceptance_criteria:
+  - id: rejects-empty-cart
+    must: "reject checkout of an empty cart"
+    is_done: false
+scope:
+  - api
+status: in-progress
+contract: single
+"#;
+
+fn append(path: &std::path::Path, text: &str) {
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .open(path)
+        .expect("open file for append");
+    file.write_all(text.as_bytes()).expect("append to file");
+}
+
+#[test]
+fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    let specs = project.join("dummy-project-spex/specs");
+    fs::remove_dir_all(&specs).expect("clear specs");
+    fs::create_dir(&specs).expect("recreate specs");
+    fs::write(specs.join("ci-check.yaml"), IN_PROGRESS_SPEC).expect("write spec");
+    let contracts = project.join("dummy-project-spex/contracts.md");
+    let api_source = project.join("dummy-project-api/src/lib.rs");
+    fs::write(&api_source, "").expect("clear api source");
+    fs::write(&contracts, "<!-- @spec contract ci-check -->\n").expect("write contract");
+
+    let nothing_started = run_spex(&project, &["coverage"], "");
+    assert!(
+        report_text(&nothing_started.stdout).contains(
+            "●  ci-check  0/1 AC  in-progress: impl(rejects-empty-cart), test(rejects-empty-cart)"
+        ),
+        "{}",
+        report_text(&nothing_started.stdout),
+    );
+    assert_eq!(
+        nothing_started.status.code(),
+        Some(0),
+        "a criterion not started yet is pending, not an error"
+    );
+
+    append(
+        &api_source,
+        "// @spec impl ci-check#rejects-empty-cart\nfn reject_empty_cart() {}\n",
+    );
+    let implemented = run_spex(&project, &["coverage"], "");
+    assert!(
+        report_text(&implemented.stdout)
+            .contains("✗  ci-check  1/1 AC  missing: test(rejects-empty-cart)"),
+        "{}",
+        report_text(&implemented.stdout),
+    );
+    assert_eq!(
+        implemented.status.code(),
+        Some(1),
+        "an implemented criterion without a test is an error even while flagged not done"
+    );
+
+    append(
+        &api_source,
+        "// @spec test ci-check#rejects-empty-cart\nfn reject_empty_cart_test() {}\n",
+    );
+    let tested = run_spex(&project, &["coverage"], "");
+    assert_eq!(
+        tested.status.code(),
+        Some(0),
+        "{}",
+        report_text(&tested.stdout)
+    );
 }

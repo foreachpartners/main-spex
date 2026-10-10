@@ -55,7 +55,7 @@ A spec, defined in [glossary.md](glossary.md), lives at `specs/<spec-id>.yaml`, 
 - Each acceptance criterion is `{id, must|must_not|should|should_not|may, is_done}`:
   - Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the verifiable statement.
   - `id` follows `schemas/ac-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
-  - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads `#<ac-id>`-qualified annotations separately; a criterion missing its annotations while flagged `is_done: false` is reported as pending, not a gap.
+  - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads it only as a marker that a criterion with no impl annotation yet is pending rather than a gap; see [Coverage states](#coverage-states).
 - `scope` lists the `repository_short_name`s of the repositories that implement the capability.
 - `blocked_by` lists specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
 - `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion's `is_done` to be `true` or absent, `in-progress` is for a spec being implemented but not yet complete.
@@ -81,6 +81,23 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - A contract annotation carries `#<ac-id>` only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` one bare `@spec contract <spec-id>` suffices, and a criterion-anchored annotation also counts as the spec-level contract.
 - `<spec-id>` and `<ac-id>` follow the same id grammar as the ids they reference; an annotation naming an id outside it is malformed.
 - Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli.md](cli.md#self-validation)).
+
+## Coverage states
+
+`spex coverage` classifies each acceptance criterion of an `active` or `in-progress` spec from its annotations and its `is_done` flag. A required layer is the criterion's impl and test, plus its contract when the spec's `contract` is `for-each-ac`, minus whatever `coverage_ignore` waives.
+
+| Criterion state                                                | Result    |
+| -------------------------------------------------------------- | --------- |
+| Every required layer annotated                                 | `covered` |
+| A required layer missing, `is_done` `true` or absent           | `gap`     |
+| A required layer missing, `is_done: false`, impl annotated     | `gap`     |
+| A required layer missing, `is_done: false`, no impl annotation | `pending` |
+
+- A gap is an error and makes `spex coverage` exit non-zero, whatever the spec's status. Pending is work not yet started and never fails.
+- `is_done: false` is mostly a marker: `spex check` still reads it for the spec's `status`, and coverage uses it only to keep a criterion pending until it has an impl annotation. It never excuses a criterion that already has an impl annotation, so a change is verified in the repository that makes it, without first updating the spec in another repository.
+- The impl annotation is the trigger, not the test or the contract, so contract-first and test-first work stays pending until the impl lands. With the impl waived by `coverage_ignore` there is normally no impl annotation to trigger on, so such a criterion stays pending until `is_done` is cleared.
+- Under `contract: single` the spec-level contract is one more requirement of the spec: a gap once any criterion is `is_done` `true` or absent or has an impl annotation, pending while every criterion is `is_done: false` with no impl annotation.
+- A spec in any other status (`planned`, `blocked`, `deprecated`) is not classified at all, however much of it is annotated.
 
 # Rules
 
