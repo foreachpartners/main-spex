@@ -112,7 +112,6 @@ mod tests {
     fn set_preexisting_errors_renders_whole_check_without_files() {
         let by_repo = HashMap::from([("web".to_string(), vec![entry("Y", "commit-format", &[])])]);
         let out = set_preexisting_errors(TWO_REPOS, &by_repo);
-        // A mid-document fragment keeps its 2-space indent, which indoc would strip.
         assert!(out.ends_with(
             "  - repository_name: web
     path: ../web
@@ -123,7 +122,6 @@ mod tests {
         check: commit-format
 "
         ));
-        // The api repository is out of scope, so it keeps no block.
         assert!(!out.contains("check: commit-format\n  - repository_name: web"));
         assert_eq!(out.matches("ignored_errors:").count(), 1);
     }
@@ -153,7 +151,6 @@ mod tests {
             out.contains("check: no-cyrillic"),
             "new block missing:\n{out}"
         );
-        // The block is regenerated once, not duplicated.
         assert_eq!(out.matches("ignored_errors:").count(), 1);
     }
 
@@ -168,7 +165,6 @@ mod tests {
                   - rule_id: X
                     check: gone
         "};
-        // api is in scope but has no current errors, so its block is dropped.
         let by_repo = HashMap::from([("api".to_string(), Vec::new())]);
         let out = set_preexisting_errors(raw, &by_repo);
         assert_eq!(

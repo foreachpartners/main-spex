@@ -9,9 +9,6 @@ use serde::{Deserialize, Serialize};
 #[path = "id_test.rs"]
 mod id_test;
 
-// Kebab-case: lowercase ASCII words separated by single hyphens, no digits, no
-// leading, trailing or repeated hyphens (e.g. `shopping-list`), at most
-// `ID_MAX_LENGTH` characters.
 const ID_PATTERN: &str = "^[a-z]+(-[a-z]+)*$";
 const ID_MAX_LENGTH: usize = 40;
 

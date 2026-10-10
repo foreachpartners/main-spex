@@ -6,9 +6,6 @@ use tempfile::tempdir;
 mod common;
 use common::{copy_dir, dummy_project_fixture, report_text, run_spex, with_version_header};
 
-// Snapshot of `spex check` for a freshly initialized copy of the
-// `no-spex-project` fixture. The findings are intentional: the fixture ships
-// demo violations.
 const EXPECTED_CHECK_REPORT: &str = r#"proj-spex
   no issues
 
@@ -25,7 +22,6 @@ proj-frontend
 proj: 1 error, 1 warning
 "#;
 
-// Snapshot of `spex coverage` for the freshly initialized no-spex-project fixture.
 const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
   none found
 
@@ -35,8 +31,6 @@ Gaps (0)
 planned (0), in-progress (0), active (0), gaps (0)
 "#;
 
-// Snapshot of `spex check` for the dummy-project fixture, whose specs cover
-// every lifecycle state.
 const EXPECTED_DUMMY_CHECK_REPORT: &str = r#"dummy-project-api
   no issues
 
@@ -114,8 +108,6 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
 
     add_repositories(&project);
 
-    // Baseline the frontend's pre-existing no-cyrillic error on README.md. A new
-    // error in any other file would still surface.
     let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
@@ -157,7 +149,6 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     add_repositories(&project);
 
-    // The freshly initialized fixture has one error: the frontend README.
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
     assert!(
         fill.status.success(),
@@ -174,14 +165,12 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
         "baseline was not written into spex.yaml:\n{config}",
     );
 
-    // Running it again is idempotent: nothing new to baseline.
     let refill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
     let config_after =
         fs::read_to_string(project.join("proj-spex/spex.yaml")).expect("reread spex.yaml");
     assert_eq!(config, config_after, "second fill changed spex.yaml");
     assert!(refill.status.success());
 
-    // With the baseline in place, the error is suppressed and check passes.
     let check = run_spex(&project, &["check"], "");
     let report = report_text(&check.stdout);
     assert!(
@@ -367,10 +356,6 @@ fn specs_output_flag_writes_file_matching_stdout() {
     );
 }
 
-// Copies the no-spex-project fixture into `project` and, mirroring tutorial
-// Step 2.1, renames its repositories to follow naming-convention
-// (`<project-name>-<repository-short-name>`). The project name defaults to the
-// workspace folder name, so the prefix is derived from it.
 fn copy_no_spex(project: &Path) {
     let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/no-spex-project");
     copy_dir(&fixture, project);
@@ -389,9 +374,6 @@ fn copy_no_spex(project: &Path) {
     }
 }
 
-// `spex init` lists only the spex repository (adding the other repositories is
-// `spex-setup`'s job). Mimic what the skill would do for the no-spex-project
-// fixture, so `check` exercises the demo violations it ships.
 fn add_repositories(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
     let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");

@@ -6,12 +6,6 @@ use super::spex_config::PreexistingError;
 #[path = "spex_yaml_edit_test.rs"]
 mod spex_yaml_edit_test;
 
-// Rewrites each in-scope repository's `ignored_errors` block in raw
-// `spex.yaml` text, leaving the rest of the file byte-stable. `by_repo` is keyed
-// on `repository_name` and holds every repository whose block should be
-// regenerated (an empty entry list removes a now-stale block); repositories
-// absent from the map are left untouched. The regenerated block is appended to
-// the end of the repository's section.
 pub fn set_preexisting_errors(
     raw: &str,
     by_repo: &HashMap<String, Vec<PreexistingError>>,
@@ -28,11 +22,9 @@ pub fn set_preexisting_errors(
         let trimmed = line.trim_start();
 
         let repo_start = indent == 2 && trimmed.starts_with("- repository_name:");
-        let boundary = repo_start || (indent == 0 && !trimmed.is_empty());
+        let closes_previous_section = repo_start || (indent == 0 && !trimmed.is_empty());
 
-        // A repository start or any top-level key closes the previous section,
-        // so flush its regenerated block before emitting the boundary line.
-        if boundary {
+        if closes_previous_section {
             if let Some(block) = pending.take() {
                 out.push_str(&block);
             }
@@ -53,8 +45,6 @@ pub fn set_preexisting_errors(
             continue;
         }
 
-        // Drop the existing block (its key line plus every more-indented child)
-        // for in-scope repositories; the regenerated block replaces it.
         if in_scope && indent == 4 && trimmed.starts_with("ignored_errors:") {
             i += 1;
             while i < lines.len() && indent_of(lines[i]) > 4 {
@@ -89,8 +79,6 @@ fn render_preexisting_block(entries: &[PreexistingError]) -> String {
     block
 }
 
-// Rewrites the `cli_version` line in raw `spex.yaml` text, preserving comments
-// and field order. Inserts it after `project_name` when absent.
 pub fn set_cli_version(raw: &str, version: &str) -> String {
     let new_line = format!("cli_version: {version}");
 

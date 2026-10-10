@@ -39,7 +39,6 @@ pub fn run() -> Result<ExitCode> {
 
     let project_name = confirm_project_name(default_name)?;
 
-    // The spex repository directory follows the naming convention <project-name>-spex by default
     let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
     verify_empty(&spex_dir)?;
 
@@ -100,8 +99,6 @@ fn is_inside_spex_dir(current_dir: &Path) -> bool {
     dir_name(current_dir).is_some_and(SpexConfig::is_spex_dir_name)
 }
 
-// The workspace root is the current directory, unless `spex init` runs from
-// inside the spex repository directory, in which case it is the parent.
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     if is_inside_spex_dir(current_dir) {
         let parent = current_dir.parent().ok_or_else(|| {
@@ -114,9 +111,6 @@ fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     Ok(current_dir.to_path_buf())
 }
 
-// Resolves the spex repository directory (`<project-name>-spex`), creating it
-// when it does not yet exist. Reuses the current directory when `spex init` runs
-// from inside the spex repository.
 fn ensure_spex_dir(
     current_dir: &Path,
     workspace_root: &Path,

@@ -12,9 +12,6 @@ use super::scoped_file::ScopedFile;
 #[path = "spec_id_tracing_test.rs"]
 mod spec_id_tracing_test;
 
-// Spec-id annotation checks are built into `spex check` itself rather than
-// declared as a rule, since every repository must satisfy them regardless of
-// which rules it opts into.
 const RULE_ID: &str = "spex-internal-spec-id-tracing";
 const FORMAT_CHECK: &str = "annotation-format";
 const ORPHAN_CHECK: &str = "no-orphan-annotations";
@@ -26,7 +23,7 @@ pub(super) fn validate_annotations(
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
     for file in ctx.candidates {
-        if is_excluded(ctx, file, is_spex_repo) {
+        if holds_illustrative_annotations(ctx, file, is_spex_repo) {
             continue;
         }
         let Ok(content) = fs::read_to_string(&file.abs) else {
@@ -38,13 +35,7 @@ pub(super) fn validate_annotations(
     findings
 }
 
-// Markdown files carry illustrative example annotations in prose, not real
-// references; every workspace's schemas/ directory holds the same kind of
-// illustrative content (e.g. a JSON Schema description showing the
-// `<spec-id>` grammar placeholder), and the spex workspace repo's own
-// specs/ and rules/ (with each rule's script folder) hold real-looking but
-// illustrative examples too.
-fn is_excluded(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
+fn holds_illustrative_annotations(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
     if file.rel.extension().is_some_and(|ext| ext == "md") {
         return true;
     }

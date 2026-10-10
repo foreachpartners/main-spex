@@ -14,12 +14,6 @@ use crate::tracing::annotations::{self, Annotation};
 #[path = "annotation_index_test.rs"]
 mod annotation_index_test;
 
-// Spec-id annotations found across the workspace: `bare` holds layers found
-// without a `#ac-id` (a whole-spec annotation), `by_ac` holds layers found
-// qualified with a specific acceptance criterion. A contract annotation
-// anchored to one criterion lands in both: it satisfies that criterion's own
-// contract requirement under `contract: for-each-ac`, and still stands for
-// the whole spec under `contract: single`.
 #[derive(Debug, Default)]
 pub struct AnnotationIndex {
     bare: HashMap<SpecId, HashSet<CoverageLayer>>,
@@ -37,17 +31,12 @@ impl AnnotationIndex {
             .is_some_and(|layers| layers.contains(&layer))
     }
 
-    // A whole-spec annotation never satisfies per-criterion coverage — only a
-    // `#ac-id`-qualified one does, otherwise a single bare annotation would
-    // trivially satisfy every criterion and defeat the point of tracking them.
     pub fn has_ac(&self, spec_id: &SpecId, ac_id: &AcId, layer: CoverageLayer) -> bool {
         self.by_ac
             .get(&(spec_id.clone(), ac_id.clone()))
             .is_some_and(|layers| layers.contains(&layer))
     }
 
-    // Scans one piece of content for spec-id annotations; a test-only helper for
-    // building an `AnnotationIndex` from a fixture string instead of real files on disk.
     #[cfg(test)]
     pub fn scan(content: &str) -> Self {
         let mut index = Self::new();
@@ -55,14 +44,10 @@ impl AnnotationIndex {
         index
     }
 
-    // Scans every workspace repository except spex itself for spec-id annotations.
     pub fn scan_workspace(spex: &Spex) -> Result<Self> {
         let mut index = Self::new();
 
         for repo in &spex.repositories {
-            // Interface contracts live inside the spex repository's `contracts/`
-            // folder, so scan them explicitly even though the spex dir itself is
-            // skipped below; their `@spec contract` annotations are the contract layer.
             for contract_path in &repo.contracts {
                 if let Ok(content) = fs::read_to_string(contract_path) {
                     index.record_all(annotations::parse(&content));

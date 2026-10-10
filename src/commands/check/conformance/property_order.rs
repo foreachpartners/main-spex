@@ -30,10 +30,6 @@ fn load_schema_file(cache: &mut HashMap<String, Value>, schemas_dir: &Path, name
     value
 }
 
-// Follows a schema node's `$ref` chain (a bare filename for a sibling schema,
-// or `#/...` for a pointer within its own document) until it lands on a
-// concrete node, returning that node alongside the document it now belongs to
-// (needed so a further internal `$ref` inside it resolves correctly).
 fn resolve_ref(
     cache: &mut HashMap<String, Value>,
     schemas_dir: &Path,
@@ -59,12 +55,6 @@ fn resolve_ref(
     }
 }
 
-// The canonical property order for an object schema node: its own declared
-// `properties` order, with each `allOf` conditional branch's properties
-// spliced in right after the discriminator property its `if` matches on (so
-// e.g. a check's `pattern`/`negate` land right after `type`, ahead of the
-// base schema's trailing `include`/`exclude`/`severity`). A key already
-// placed keeps its first position.
 fn ordered_properties(resolved: &Value) -> Vec<String> {
     let mut order: Vec<String> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
@@ -109,8 +99,6 @@ fn ordered_properties(resolved: &Value) -> Vec<String> {
     order
 }
 
-// Looks up the (still unresolved) schema node for a property, checking the
-// schema's own `properties` first, then each `allOf` branch's `then.properties`.
 fn property_schema(resolved: &Value, key: &str) -> Option<Value> {
     if let Some(node) = resolved
         .get("properties")
@@ -131,9 +119,6 @@ fn property_schema(resolved: &Value, key: &str) -> Option<Value> {
     )
 }
 
-// Finds the first key whose position in `actual` disagrees with `canonical`,
-// ignoring keys absent from either side (an unknown key or one the schema
-// doesn't declare is somebody else's problem, e.g. `spec-files-conform`).
 fn find_order_violation(canonical: &[String], actual: &[String]) -> Option<(String, String)> {
     let filtered_actual: Vec<&String> = actual.iter().filter(|k| canonical.contains(k)).collect();
     let filtered_canonical: Vec<&String> =
@@ -162,9 +147,6 @@ fn property_order_message(
     )
 }
 
-// Verifies every spec file, rule file, and `spex.yaml` declares its
-// properties — at every nesting level their JSON Schema describes — in the
-// order the schema declares them.
 pub(super) fn validate_property_order(spex_dir: &Path) -> Result<Vec<Finding>> {
     let schemas_dir = spex_dir.join(SCHEMAS_DIRNAME);
     let mut cache: HashMap<String, Value> = HashMap::new();

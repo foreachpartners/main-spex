@@ -46,25 +46,17 @@ impl Spec {
                 .any(|short_name| self.scope.contains(short_name))
     }
 
-    // Whether this one acceptance criterion needs its own contract
-    // annotation — only under `contract: for-each-ac`, and only when the
-    // contract layer (or this criterion's contract requirement specifically)
-    // isn't waived by `coverage_ignore`.
     pub fn ac_contract_required(&self, ac_id: &AcId) -> bool {
         self.contract == ContractLevel::ForEachAc
             && !self.ac_ignored(ac_id, CoverageLayer::Contract)
     }
 
-    // A layer waived for the whole spec, via a `coverage_ignore` entry with
-    // no `ac`.
     pub fn layer_ignored(&self, layer: CoverageLayer) -> bool {
         self.coverage_ignore
             .iter()
             .any(|ignore| ignore.layer == layer && ignore.ac.is_none())
     }
 
-    // A layer waived for one acceptance criterion, either because the whole
-    // layer is ignored or because this criterion specifically is.
     pub fn ac_ignored(&self, ac_id: &AcId, layer: CoverageLayer) -> bool {
         self.layer_ignored(layer)
             || self
@@ -106,13 +98,10 @@ pub struct AcceptanceCriterion {
     pub id: AcId,
     pub statement: Statement,
     pub is_done: bool,
-    // The 1-indexed source line of this criterion's `- id: ...` entry in the spec file.
     pub line: usize,
 }
 
 impl AcceptanceCriterion {
-    // Absent `is_done` means done: it only exists to flag a criterion as
-    // deliberately not done yet.
     fn from_config(config: AcceptanceCriterionConfig, line: usize) -> Self {
         Self {
             id: config.id,
@@ -123,9 +112,6 @@ impl AcceptanceCriterion {
     }
 }
 
-// The statement of an acceptance criterion as written in a spec file: the key
-// itself (`must`, `must_not`, ...) names the commitment, its value the
-// criterion text.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Statement {
@@ -158,11 +144,6 @@ impl Statement {
     }
 }
 
-// A `coverage_ignore` entry: `layer` is required, `ac` is optional. Without
-// `ac` it waives that layer for the whole spec (every acceptance criterion);
-// with `ac` it waives just that one criterion's impl, test, or (under
-// `contract: for-each-ac`) contract annotation. `spex check` verifies the
-// entry matches the spec's `contract` setting.
 #[derive(Debug, Clone, Deserialize)]
 pub struct CoverageIgnore {
     pub layer: CoverageLayer,
@@ -196,9 +177,6 @@ impl Status {
     }
 }
 
-// `contract` coverage granularity of a spec: `none` disables contract
-// coverage, `single` requires one spec-level annotation, `for-each-ac`
-// requires one annotation per acceptance criterion.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, EnumIter, IntoStaticStr)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]

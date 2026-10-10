@@ -11,8 +11,6 @@ mod tests_unit {
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
     const SCRIPT: &str = "rules/commit-message-format/commit-spec-id-trace.sh";
     const RULE: &str = "rules/secret-handling.yaml";
-    // Spec/script pair sharing a spec id, used to test `sync_with_upstream`
-    // gating together.
     const MANAGED_SPEC: &str = "rules/commit-message-format.yaml";
     const MANAGED_SPEC_ID: &str = "commit-message-format";
 
@@ -105,8 +103,6 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::remove_file(&spec).expect("delete rule");
 
-        // Listing the spec id in `rules_unused` records the deletion as
-        // deliberate, so syncing must not resurrect it.
         sync_templates(spex_dir.path(), &[MANAGED_SPEC_ID.to_string()]).expect("sync");
 
         assert!(
@@ -123,8 +119,6 @@ mod tests_unit {
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::remove_file(&spec).expect("delete rule");
 
-        // Without the spec id in `rules_unused`, its absence is treated
-        // as newly available upstream, so it is (re)deployed.
         sync_templates(spex_dir.path(), &[]).expect("sync");
 
         assert!(

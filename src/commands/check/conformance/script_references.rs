@@ -8,8 +8,6 @@ use super::conform_finding;
 #[path = "script_references_test.rs"]
 mod script_references_test;
 
-// Every script a rule check references must exist in the rule's script folder,
-// beside the rule file.
 pub(super) fn validate_script_references(rules: &[Rule]) -> Vec<Finding> {
     let mut findings = Vec::new();
     let mut rules: Vec<&Rule> = rules.iter().collect();

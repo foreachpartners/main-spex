@@ -28,7 +28,6 @@ mod tests {
 
         let files = vec!["a.txt".to_string(), "b.txt".to_string()];
 
-        // Files in api and web select exactly their owning repositories.
         let selected = select_repos(&spex, &[], &files).expect("select");
         let names: Vec<&str> = selected
             .iter()
@@ -36,7 +35,6 @@ mod tests {
             .collect();
         assert_eq!(names, vec!["api", "web"]);
 
-        // --repo cli unions in even though no provided file lives there.
         let selected = select_repos(&spex, &["cli".to_string()], &files).expect("select");
         let names: Vec<&str> = selected
             .iter()
@@ -44,10 +42,8 @@ mod tests {
             .collect();
         assert_eq!(names, vec!["api", "web", "cli"]);
 
-        // An unknown --repo name still errors.
         assert!(select_repos(&spex, &["ghost".to_string()], &files).is_err());
 
-        // A --files entry that doesn't exist in any repository errors.
         let missing = vec!["missing.txt".to_string()];
         assert!(select_repos(&spex, &[], &missing).is_err());
     }

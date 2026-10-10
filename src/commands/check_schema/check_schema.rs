@@ -66,7 +66,6 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
     jsonschema::options()
         .with_retriever(DirRetriever { dir })
         .build(&schema)
-        // The error borrows `schema`, so render it before `schema` is dropped.
         .map_err(|err| {
             Report::new(CliError::Internal(format!(
                 "invalid schema `{}`: {err}",
@@ -84,8 +83,6 @@ pub(crate) fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<St
     Ok(validate_instance(validator, &instance))
 }
 
-// Validates a single already-parsed instance, sorted and deduplicated so
-// callers get a stable, readable message list.
 pub(crate) fn validate_instance(validator: &Validator, instance: &Value) -> Vec<String> {
     let mut messages: Vec<String> = validator
         .iter_errors(instance)
@@ -103,8 +100,6 @@ pub(crate) fn validate_instance(validator: &Validator, instance: &Value) -> Vec<
     messages
 }
 
-// Resolves cross-file `$ref`s against sibling schema files in the schema's own
-// directory, so validation stays offline and uses the consumer's own schemas.
 struct DirRetriever {
     dir: PathBuf,
 }

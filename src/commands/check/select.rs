@@ -10,11 +10,6 @@ use super::scoped_file::ScopedFile;
 #[path = "select_test.rs"]
 mod select_test;
 
-// Selects the repositories to check, preserving `spex.yaml` order. Without
-// `--files`, that is the `--repo` names (or every repository). With `--files`,
-// it is every repository that owns at least one provided file, unioned with any
-// explicitly named `--repo`, so a `per-repo` script runs only where the files
-// live (plus any repository the user named outright).
 pub(super) fn select_repos<'a>(
     spex: &'a Spex,
     names: &[String],

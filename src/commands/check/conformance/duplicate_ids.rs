@@ -15,9 +15,6 @@ mod duplicate_ids_test;
 
 pub(super) const DUPLICATE_ID_CHECK: &str = "no-duplicate-ids";
 
-// Every id must be unique across both `rules/`
-// and `specs/`, since rule ids and spec ids share the same naming
-// convention and could otherwise collide.
 pub(super) fn validate_no_duplicate_ids(
     spex_dir: &Path,
     specs: &[Spec],

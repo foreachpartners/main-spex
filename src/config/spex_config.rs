@@ -43,8 +43,6 @@ pub struct RepositoryConfig {
     pub ignored_errors: Vec<PreexistingError>,
 }
 
-// A repository's interface contract, stored inside the spex repository's
-// `contracts/` folder. `path` is relative to the spex directory.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ContractConfig {
     pub path: String,
@@ -52,10 +50,6 @@ pub struct ContractConfig {
     pub description: Option<String>,
 }
 
-// A baseline entry that suppresses pre-existing `error`-severity findings for an
-// inherited or additional check identified by `rule_id` + `check`. An empty `files`
-// suppresses the whole check; otherwise only findings whose location file is
-// listed are suppressed, so new errors in other files still surface.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PreexistingError {
     pub rule_id: String,
@@ -65,11 +59,6 @@ pub struct PreexistingError {
 }
 
 impl SpexConfig {
-    // Locates `spex.yaml`. Walks up from `start`; at each ancestor it uses a
-    // directly present `spex.yaml`, then falls back to scanning that ancestor's
-    // immediate child directories. The child scan lets discovery work from the
-    // workspace root or a sibling repository even though the spex repository
-    // directory is named `<project-name>-spex`.
     pub fn find_file(start: &Path) -> Result<PathBuf> {
         for dir in start.ancestors() {
             let config_path = dir.join(SPEX_CONFIG_FILE);
@@ -116,8 +105,6 @@ impl SpexConfig {
             .change_context_lazy(|| CliError::ParseFile(config_path.to_path_buf()))
     }
 
-    // Warns when the version that wrote `spex.yaml` differs from the running CLI so
-    // the user knows to run `spex update` and resync the bundled templates.
     pub fn version_warning(&self) -> Option<String> {
         if self.cli_version == CLI_VERSION {
             return None;

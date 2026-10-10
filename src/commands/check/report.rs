@@ -100,9 +100,6 @@ fn print_finding(base: &Path, finding: &Finding) {
     }
 }
 
-// Renders a finding's location as a terminal hyperlink to the absolute file
-// (display text stays the short repository-relative form), so it opens
-// correctly regardless of the shell's current directory.
 fn location_link(base: &Path, location: &Location) -> String {
     let text = format!("({location})").dimmed().to_string();
     hyperlink(&location_url(base, location), &text)

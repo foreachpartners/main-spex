@@ -6,10 +6,6 @@ use super::super::finding::{Finding, Location, Source};
 #[path = "status_test.rs"]
 mod status_test;
 
-// A spec with every acceptance criterion marked done is implemented, so its
-// status must say so. Specs with no criteria or any not-done criterion are
-// exempt. This only reads `is_done`; whether that's actually true (proven by
-// impl/test annotations) is `spex coverage`'s job, not `spex check`'s.
 pub(super) fn status_finding(spec: &Spec) -> Option<Finding> {
     let (done, total) = spec.ac_done_total();
     if total == 0 || done != total || spec.status.is_implemented() {
@@ -25,9 +21,6 @@ pub(super) fn status_finding(spec: &Spec) -> Option<Finding> {
     ))
 }
 
-// `active` means fully implemented, so it requires every acceptance
-// criterion to be marked done (`is_done` absent or `true`); a spec still
-// being worked on belongs in `in-progress` until then.
 pub(super) fn active_incomplete_finding(spec: &Spec) -> Option<Finding> {
     let (done, total) = spec.ac_done_total();
     if spec.status != Status::Active || done == total {

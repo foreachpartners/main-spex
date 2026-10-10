@@ -25,10 +25,6 @@ mod tests {
         assert!(resolve_script(&script_dir, "lint.sh").is_none());
     }
 
-    // Tests that create a script and then execute it run serially: `Command`
-    // forks, and a sibling thread's fork inherits the whole process fd table, so
-    // it can briefly hold another test's still-open write handle to its script
-    // open for writing, making that script's exec fail with ETXTBSY.
     #[test]
     #[serial(script_exec)]
     fn script_run_once_reports_a_hit_on_failure() {
@@ -77,8 +73,6 @@ mod tests {
         let spex = workspace.path().join("spex");
         std::fs::create_dir_all(&repo).expect("repo");
         let program = spex.join("rules/writing-style/locations.sh");
-        // Emits two contract lines (one with a location, one file-less) plus a
-        // blank line that must be ignored.
         write_script(
             &program,
             "#!/bin/sh\nprintf 'docs/intro.md:40\\tmatches forbidden writing pattern\\n'\nprintf '\\n'\nprintf 'a stray diagnostic\\n'\nexit 1\n",

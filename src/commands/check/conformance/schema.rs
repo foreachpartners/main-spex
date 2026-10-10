@@ -85,8 +85,6 @@ fn validate_schema_group(spex_dir: &Path, files: &[PathBuf], schema_name: &str) 
     findings
 }
 
-// A spec or rule file must be named after its own id (naming-convention: id
-// and filename are identical).
 fn check_filename_matches_id(path: &Path, id: &str) -> Option<Finding> {
     let stem = path
         .file_stem()

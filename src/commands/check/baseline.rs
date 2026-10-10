@@ -19,8 +19,6 @@ use super::report::{CheckReport, ReportTarget};
 #[path = "baseline_test.rs"]
 mod baseline_test;
 
-// Either the whole check is baselined (a file-less error) or a specific set of
-// files is. A file-less error widens the entry to the whole check.
 enum Baseline {
     WholeCheck,
     Files(BTreeSet<String>),
@@ -99,17 +97,12 @@ pub(super) fn drop_baselined_findings<'a>(
     }
 }
 
-// Records the current error findings into each selected repository's
-// `ignored_errors` block in `spex.yaml`. File-less errors widen to a
-// whole-check entry; repository-level errors with no check are skipped because
-// they cannot be keyed. Out-of-scope repositories are left untouched.
 pub(super) fn fill_preexisting_errors(
     spex_dir: &Path,
     selected: &[&Repository],
     reports: &[CheckReport],
 ) -> Result<ExitCode> {
-    // repository name -> (spec, check) -> baselined files
-    let mut grouped: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
+    let mut baselines_by_repo: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
         .iter()
         .map(|repo| (repo.repository_name.clone(), BTreeMap::new()))
         .collect();
@@ -125,7 +118,7 @@ pub(super) fn fill_preexisting_errors(
             let Some(Owner { repo, file }) = owner(&report.target, finding, selected) else {
                 continue;
             };
-            let Some(checks) = grouped.get_mut(&repo.repository_name) else {
+            let Some(checks) = baselines_by_repo.get_mut(&repo.repository_name) else {
                 continue;
             };
             checks
@@ -135,7 +128,7 @@ pub(super) fn fill_preexisting_errors(
         }
     }
 
-    let by_repo: HashMap<String, Vec<PreexistingError>> = grouped
+    let by_repo: HashMap<String, Vec<PreexistingError>> = baselines_by_repo
         .into_iter()
         .map(|(name, checks)| {
             let entries = checks

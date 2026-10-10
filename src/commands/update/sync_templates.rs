@@ -16,10 +16,6 @@ mod sync_templates_test;
 
 const SKILL_FILE: &str = "SKILL.md";
 
-// Marks where the user-owned section of `AGENTS.md` and of every bundled
-// `SKILL.md` begins. Content before this marker is bundled and kept in sync by
-// `update`; content from the marker onward (the "Project" section and anything
-// the user adds under it) is preserved untouched.
 const PROJECT_SECTION_MARKER: &str = "\n---\n\n# Project";
 
 pub fn sync_templates(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
@@ -35,12 +31,7 @@ fn split_project_section(contents: &str) -> Option<(&str, &str)> {
     Some(contents.split_at(idx))
 }
 
-// Merges a bundled file with its local copy. If the local file has
-// `PROJECT_SECTION_MARKER`, only the managed section above it is replaced,
-// preserving the user's "Project" section untouched; a file that lacks the
-// marker (e.g. one written before this split existed) is fully overwritten,
-// since there is no safe way to tell managed from user content in it.
-fn merge_project_section(template: &[u8], local: &str) -> Vec<u8> {
+fn replace_managed_section(template: &[u8], local: &str) -> Vec<u8> {
     let Some((_, preserved)) = split_project_section(local) else {
         return template.to_vec();
     };
@@ -63,17 +54,13 @@ fn sync_agents_md(spex_dir: &Path) -> Result<()> {
         return Ok(());
     };
 
-    let updated = merge_project_section(template.contents(), &local_contents);
+    let updated = replace_managed_section(template.contents(), &local_contents);
     if updated != local_contents.as_bytes() {
         write_file(&agents, updated)?;
     }
     Ok(())
 }
 
-// A spec opts into `spex update` overwriting it (and its scripts) by setting
-// `sync_with_upstream: true`. If the local file is missing or fails to parse,
-// it is treated as not synced, so a brand-new local spec never gets silently
-// overwritten by a same-named bundled one.
 fn is_synced_with_upstream(spec_path: &Path) -> bool {
     fs::read_to_string(spec_path)
         .ok()
@@ -82,8 +69,6 @@ fn is_synced_with_upstream(spec_path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-// Extracts the YAML frontmatter (the block between the leading `---` lines)
-// from a `SKILL.md` file's contents.
 fn frontmatter(contents: &str) -> Option<&str> {
     let rest = contents.strip_prefix("---")?;
     let end = rest.find("\n---")?;
@@ -111,16 +96,13 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     let rules_dest = spex_dir.join(RULES_DIR);
     create_dir_all(&rules_dest)?;
 
-    // Rules may be grouped into nested folders, so a bundled rule already
-    // present under a nested folder must be matched there rather than
-    // re-created flat at `rules_dest/<name>`.
-    let existing_rules = yaml_files(&rules_dest)?;
+    let existing_rules_in_any_folder = yaml_files(&rules_dest)?;
 
     for file in dir.files() {
         let Some(name) = file.path().file_name() else {
             continue;
         };
-        let dest = existing_rules
+        let dest = existing_rules_in_any_folder
             .iter()
             .find(|path| path.file_name() == Some(name))
             .cloned()
@@ -170,7 +152,7 @@ fn sync_skills(spex_dir: &Path) -> Result<()> {
         {
             write_file(
                 &skill_md,
-                merge_project_section(template.contents(), &local),
+                replace_managed_section(template.contents(), &local),
             )?;
         }
     }

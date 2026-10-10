@@ -86,16 +86,13 @@ mod tests {
         std::fs::create_dir_all(repo.join("src")).expect("src");
         std::fs::write(repo.join("src/main.rs"), "fn main() {}").expect("file");
 
-        // A negated glob check: "dprint.json must exist"
         let negated_glob = glob_check("dprint-config-present", "dprint.json", true);
-        // A non-negated glob check: "*.rs files are forbidden"
         let non_negated = glob_check("no-rs-files", "**/*.rs", false);
 
         let rules = [rule("x", vec![negated_glob.clone(), non_negated])];
 
         let repository = repository(&spex, "../api", vec!["x"]);
 
-        // Without --files: negated check fires because dprint.json is absent.
         let findings = check_repo(
             CheckRepoArgs {
                 repo: &repository,
@@ -115,7 +112,6 @@ mod tests {
         );
         assert!(findings.iter().any(|f| check_name(f) == "no-rs-files"));
 
-        // With --files: negated check is skipped, non-negated still fires.
         let findings = check_repo(
             CheckRepoArgs {
                 repo: &repository,
@@ -147,9 +143,6 @@ mod tests {
         std::fs::create_dir_all(&web).expect("web");
 
         let script = spex.join("rules/x/list.sh");
-        // Fails if handed any file arguments, records each invocation, and emits
-        // its own contract findings: a workspace script gets no files and must
-        // discover its own paths.
         write_script(
             &script,
             "#!/bin/sh\n[ \"$#\" -eq 0 ] || { echo \"unexpected args: $*\"; exit 1; }\necho run >> runs.log\nprintf 'api/a.txt\\tflagged\\n'\nprintf 'web/b.txt\\tflagged\\n'\nexit 1\n",
@@ -191,18 +184,14 @@ mod tests {
             .expect("web"),
         );
 
-        // The workspace check is deferred, so neither repository reports it, and
-        // the two repositories collapse into a single pending check.
         assert!(repo_findings.is_empty());
         assert_eq!(collected.len(), 1);
 
         let findings = run_workspace_checks(&spex, &collected);
 
-        // It ran exactly once, despite both repositories inheriting it.
         let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
         assert_eq!(runs.lines().count(), 1);
 
-        // The script's own contract lines become findings.
         assert_eq!(findings.len(), 2);
         assert!(
             findings

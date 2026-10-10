@@ -50,17 +50,13 @@ impl Rule {
     }
 }
 
-// A rule's acceptance criteria are plain `"MUST ..."` strings (unlike a
-// spec's, which key the commitment level), so each carries its own text.
 #[derive(Debug, Clone)]
 pub struct AcceptanceCriterion {
     pub text: String,
-    // The 1-indexed source line of this criterion in the rule file.
     pub line: usize,
 }
 
 impl AcceptanceCriterion {
-    // `None` when the text doesn't start with a commitment keyword.
     pub fn commitment(&self) -> Option<Commitment> {
         Commitment::from_text(&self.text)
     }

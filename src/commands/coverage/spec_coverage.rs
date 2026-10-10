@@ -133,10 +133,6 @@ impl<'a> SpecCoverage<'a> {
     }
 }
 
-// Spec-level contract coverage. Under `contract: single` one `@spec
-// contract <spec-id>` annotation anywhere satisfies the whole spec; `none`
-// disables contract coverage; `for-each-ac` has no spec-level requirement —
-// each acceptance criterion carries its own (see `CriterionCoverage::new`).
 fn is_spec_contract_missing(spec: &Spec, index: &AnnotationIndex) -> bool {
     spec.contract == ContractLevel::Single
         && !spec.layer_ignored(CoverageLayer::Contract)

@@ -6,11 +6,6 @@ use super::super::finding::{Finding, Location, Source};
 #[path = "coverage_ignore_test.rs"]
 mod coverage_ignore_test;
 
-// A `coverage_ignore` entry for the contract layer must match the spec's
-// `contract` setting: with `none` there is no contract coverage to waive at
-// all; with `single` the contract is spec-level, so a per-criterion entry
-// can't match anything; only `for-each-ac` has per-criterion contracts to
-// waive.
 pub(super) fn validate_coverage_ignore(spec: &Spec) -> Vec<Finding> {
     spec.coverage_ignore
         .iter()

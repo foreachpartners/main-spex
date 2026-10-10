@@ -5,14 +5,10 @@ use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-// `/bin/sh` echo interprets the literal `\b` in writing-style.sh into backspace
-// bytes; drop them so snapshots stay portable across shells.
 pub fn report_text(stdout: &[u8]) -> String {
     String::from_utf8_lossy(stdout).replace('\u{8}', "")
 }
 
-// Every report opens with the running CLI's version, e.g. `spex 0.10.0`,
-// followed by a blank line; the snapshots hold the report body only.
 pub fn with_version_header(body: &str) -> String {
     format!("spex {}\n\n{body}", env!("CARGO_PKG_VERSION"))
 }
@@ -49,10 +45,6 @@ pub fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output 
     child.wait_with_output().expect("wait for spex")
 }
 
-// The dummy `dummy-project` fixture: a lean workspace (few specs, no real
-// app code beyond `@spec` annotations) used by tests that need a valid
-// project but don't care about its content, plus the coverage-focused tests
-// that do.
 pub fn dummy_project_fixture() -> std::path::PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/dummy-project")
 }
@@ -113,8 +105,6 @@ pub fn copy_dir(src: &Path, dst: &Path) {
             let target = fs::read_link(&from).expect("read symlink target");
             std::os::unix::fs::symlink(target, &to).expect("create symlink");
         } else if file_type.is_dir() {
-            // Skip build artifacts so copies stay deterministic regardless of
-            // whatever a developer has built locally inside an example.
             let name = entry.file_name();
             if matches!(
                 name.to_str(),

@@ -21,19 +21,9 @@ use super::status::{active_incomplete_finding, status_finding};
 #[path = "conformance_test.rs"]
 mod conformance_test;
 
-// Findings from this module are attributed to a synthetic spec id rather than
-// a real rule, since spex's own conformance checks are built into `spex
-// check` itself rather than declared in a rule (they must run even before
-// any rules can be trusted to parse).
 pub(super) const RULE_ID: &str = "spex-internal-conformance";
 const CONFORM_CHECK: &str = "spec-files-conform";
 
-// Validates the spex repository's own spec files: `spex.yaml` and every file
-// in `specs/` and `rules/` must satisfy its JSON Schema, each spec file
-// must be named `<id>.yaml`, every script a rule check
-// references must exist in the rule's script folder beside the rule file, every
-// spec's acceptance criteria must be ordered by RFC 2119 commitment level,
-// and every acceptance criterion id must be unique within its spec.
 pub(in crate::commands::check) fn validate_conformance(
     spex_dir: &Path,
     repositories: &[Repository],

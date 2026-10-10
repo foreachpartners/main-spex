@@ -5,8 +5,6 @@ mod tests {
     use indoc::indoc;
     use tempfile::tempdir;
 
-    // The spex repository directory is named `<project-name>-spex`, so discovery
-    // must match the `-spex` suffix and the `spex.yaml` it holds, not a fixed name.
     const SPEX_REPO_DIR: &str = "demo-spex";
 
     fn workspace() -> tempfile::TempDir {

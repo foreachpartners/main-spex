@@ -13,10 +13,6 @@ mod ac_order_test;
 
 const AC_ORDER_CHECK: &str = "ac-ordered";
 
-// Verifies each spec and rule lists its `acceptance_criteria` in RFC 2119
-// commitment order: MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A spec's
-// criteria carry the commitment as a key (`must`, `must_not`, ...); a rule's
-// are plain strings starting with it, and those without one are skipped.
 pub(super) fn validate_ac_order(specs: &[Spec], rules: &[Rule]) -> Vec<Finding> {
     let mut findings = Vec::new();
 

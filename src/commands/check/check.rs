@@ -39,8 +39,6 @@ pub struct CheckArgs {
     fill_preexisting_errors: bool,
 }
 
-// Read-only context for checking a single repository, threaded through the
-// dispatch path so individual checks don't each take the same arguments.
 pub(super) struct RepoCtx<'a> {
     pub(super) repo_path: &'a Path,
     pub(super) spex_dir: &'a Path,
@@ -88,8 +86,6 @@ impl RepoCtx<'_> {
     }
 }
 
-// Read-only inputs for `check_repo`, grouped so callers can't accidentally
-// transpose same-typed positional arguments.
 struct CheckRepoArgs<'a> {
     repo: &'a Repository,
     spex_dir: &'a Path,
@@ -219,11 +215,7 @@ fn check_repo<'a>(
 
     let mut findings = validate_annotations(&ctx, repo.is_spex_repo, known_ids);
 
-    // Negated checks assert that something must exist in the repository
-    // (e.g. "dprint.json must be present"). When --files narrows the
-    // candidate set to an explicit subset, a negated check cannot be
-    // meaningfully evaluated, so we skip them to avoid false positives.
-    let has_files = !files.is_empty();
+    let skip_negated_checks = !files.is_empty();
 
     for rule_id in &repo.rules {
         let Some(rule) = rules.iter().find(|rule| rule.id == *rule_id) else {
@@ -238,7 +230,7 @@ fn check_repo<'a>(
         };
 
         for check in &rule.checks {
-            if has_files && check.kind.negate() {
+            if skip_negated_checks && check.kind.negate() {
                 continue;
             }
             if check.kind.is_workspace_scoped() {
@@ -252,9 +244,6 @@ fn check_repo<'a>(
     Ok(findings)
 }
 
-// Validates the spec set itself (statuses and `blocked_by` references) and
-// attributes any findings to the spex repository, which owns the spec files.
-// Runs only when the spex repository is in scope.
 fn validate_specs(
     spex: &Spex,
     specs: &[Spec],
