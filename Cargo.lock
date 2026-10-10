@@ -943,7 +943,6 @@ dependencies = [
  "anstream",
  "anstyle-hyperlink",
  "ast-grep-config",
- "ast-grep-core",
  "ast-grep-language",
  "clap",
  "derive_more",

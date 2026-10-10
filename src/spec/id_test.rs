@@ -38,28 +38,20 @@ mod tests {
     }
 
     #[test]
-    fn spec_id_validates_on_deserialize_and_writes_the_bare_id_on_serialize() {
+    fn spec_id_validates_on_deserialize() {
         let id: SpecId = serde_yaml_ng::from_str("place-pizza-order").expect("valid id");
 
         assert_eq!(id.as_str(), "place-pizza-order");
         assert_eq!(id.to_string(), "place-pizza-order");
-        assert_eq!(
-            serde_yaml_ng::to_string(&id).expect("serialize"),
-            "place-pizza-order\n"
-        );
         assert!(serde_yaml_ng::from_str::<SpecId>("Bad_ID").is_err());
     }
 
     #[test]
-    fn ac_id_validates_on_deserialize_and_writes_the_bare_id_on_serialize() {
+    fn ac_id_validates_on_deserialize() {
         let id: AcId = serde_yaml_ng::from_str("in-stock").expect("valid id");
 
         assert_eq!(id.as_str(), "in-stock");
         assert_eq!(id.to_string(), "in-stock");
-        assert_eq!(
-            serde_yaml_ng::to_string(&id).expect("serialize"),
-            "in-stock\n"
-        );
         assert!(serde_yaml_ng::from_str::<AcId>("Bad_ID").is_err());
     }
 

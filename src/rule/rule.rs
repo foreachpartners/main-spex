@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use strum::IntoStaticStr;
 
 use super::id::RuleId;
@@ -62,7 +62,7 @@ impl AcceptanceCriterion {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Check {
     pub name: String,
     #[serde(default)]
@@ -85,7 +85,7 @@ impl Check {
     }
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub enum CheckKind {
     Regexp {
@@ -136,7 +136,7 @@ impl CheckKind {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum RunScope {
     #[default]
@@ -145,7 +145,7 @@ pub enum RunScope {
     Workspace,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize, IntoStaticStr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, IntoStaticStr)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]
 pub enum Severity {
