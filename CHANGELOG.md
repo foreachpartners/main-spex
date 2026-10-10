@@ -2,6 +2,12 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.18.0] - 2026-10-10
+
+- The bundled `openapi-conventions` rule gains a `vacuum-lint` check that lints every OpenAPI document (`*.openapi.{yaml,yml,json}` and `openapi.{yaml,yml,json}`) with [vacuum](https://quobix.com/vacuum/installing/) against a bundled ruleset covering the rule's `MUST` and `MUST NOT` criteria (OpenAPI version, `operationId`, `summary`, responses, `x-spec`, `$ref`-only schemas, casing, secret fields, discriminators, leaked internals). The rule's `SHOULD` criteria and the ones that need judgment (explicit error responses, `writeOnly`) stay with the agent.
+- `spex check` reports an error when an OpenAPI document is in scope and vacuum is not installed.
+- `spex update` writes the new `vacuum-lint.sh` and `vacuum-ruleset.json` beside the rule file (`rules/openapi-conventions/`). The ruleset is JSON because every `.yaml` file under `rules/` is loaded as a rule.
+
 ## [0.17.0] - 2026-10-10
 
 - `spex.yaml` accepts a root `coverage_ignore` that waives coverage requirements by spec id: each entry is a spec's `coverage_ignore` entry (`layer`, optional `ac`) plus the `spec_id` it applies to. It is merged with the spec's own `coverage_ignore`.

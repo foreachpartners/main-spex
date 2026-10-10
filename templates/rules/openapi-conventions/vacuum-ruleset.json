@@ -1,0 +1,211 @@
+{
+  "rules": {
+    "openapi-version": {
+      "description": "MUST use OpenAPI 3.1.1",
+      "given": "$",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "openapi",
+        "function": "pattern",
+        "functionOptions": {
+          "match": "^3\\.1\\.1$"
+        }
+      }
+    },
+    "operation-operation-id": {
+      "description": "MUST declare every endpoint with an operationId",
+      "given": "$.paths[*][get,put,post,delete,options,head,patch,trace]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "operationId",
+        "function": "truthy"
+      }
+    },
+    "operation-summary": {
+      "description": "MUST declare every endpoint with a summary",
+      "given": "$.paths[*][get,put,post,delete,options,head,patch,trace]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "summary",
+        "function": "truthy"
+      }
+    },
+    "operation-responses": {
+      "description": "MUST declare every endpoint with at least one response",
+      "given": "$.paths[*][get,put,post,delete,options,head,patch,trace]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "responses",
+        "function": "length",
+        "functionOptions": {
+          "min": 1
+        }
+      }
+    },
+    "operation-id-unique": {
+      "description": "MUST give every operationId a unique value across the document",
+      "given": "$",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "oasOpIdUnique"
+      }
+    },
+    "operation-x-spec": {
+      "description": "MUST annotate each operation with its spec via the x-spec extension",
+      "given": "$.paths[*][get,put,post,delete,options,head,patch,trace]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "x-spec",
+        "function": "truthy"
+      }
+    },
+    "schema-ref": {
+      "description": "MUST define request and response shapes in components/schemas and reference them with $ref",
+      "given": [
+        "$.paths[*][*].requestBody.content[*].schema",
+        "$.paths[*][*].responses[*].content[*].schema",
+        "$.components.requestBodies[*].content[*].schema",
+        "$.components.responses[*].content[*].schema"
+      ],
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "$ref",
+        "function": "truthy"
+      }
+    },
+    "security-scheme-name": {
+      "description": "MUST name every components/securitySchemes key with ^[a-zA-Z0-9._-]+$",
+      "given": "$.components.securitySchemes[*]~",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "match": "^[a-zA-Z0-9._-]+$"
+        }
+      }
+    },
+    "secret-x-sensitive": {
+      "description": "MUST mark every secret-bearing field with x-sensitive: true",
+      "given": "$..properties[?(@property.match(/(^|_)(password|token|key|credential)s?($|_)/))]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "x-sensitive",
+        "function": "truthy"
+      }
+    },
+    "secret-password-format": {
+      "description": "MUST set format: password on secret string fields",
+      "given": "$..properties[?(@.type == 'string' && @property.match(/(^|_)(password|token|key|credential)s?($|_)/))]",
+      "resolved": false,
+      "severity": "error",
+      "then": [
+        {
+          "field": "format",
+          "function": "truthy"
+        },
+        {
+          "field": "format",
+          "function": "pattern",
+          "functionOptions": {
+            "match": "^password$"
+          }
+        }
+      ]
+    },
+    "property-snake-case": {
+      "description": "MUST use snake_case for property names",
+      "given": "$..properties[*]~",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "casing",
+        "functionOptions": {
+          "type": "snake"
+        }
+      }
+    },
+    "query-parameter-snake-case": {
+      "description": "MUST use snake_case for query parameter names",
+      "given": "$..parameters[?(@.in=='query')].name",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "casing",
+        "functionOptions": {
+          "type": "snake"
+        }
+      }
+    },
+    "enum-value-snake-case": {
+      "description": "MUST use snake_case for enum values",
+      "given": "$..enum[*]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "casing",
+        "functionOptions": {
+          "type": "snake"
+        }
+      }
+    },
+    "path-kebab-case": {
+      "description": "MUST use kebab-case for URL path segments",
+      "given": "$.paths[*]~",
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "match": "^(/|(/([a-z0-9]+(-[a-z0-9]+)*|\\{[a-z0-9]+(_[a-z0-9]+)*\\}))+)$"
+        }
+      }
+    },
+    "composition-discriminator": {
+      "description": "MUST NOT use anyOf / oneOf without a discriminator",
+      "given": "$..[?(@.oneOf || @.anyOf)]",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "field": "discriminator",
+        "function": "truthy"
+      }
+    },
+    "info-description-no-spec": {
+      "description": "MUST NOT duplicate spec mappings between x-spec and info.description",
+      "given": "$.info",
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "field": "description",
+        "function": "pattern",
+        "functionOptions": {
+          "notMatch": "@spec"
+        }
+      }
+    },
+    "description-no-internal-details": {
+      "description": "MUST NOT leak internal implementation or persistence details in descriptions",
+      "given": "$..description",
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "notMatch": "(?i)\\b(hash(ed|ing)?|encrypt(ed|ion)?|normaliz(ed|ation)|stor(ed|age)|datastore|database|argon2|bcrypt)\\b"
+        }
+      }
+    }
+  }
+}
