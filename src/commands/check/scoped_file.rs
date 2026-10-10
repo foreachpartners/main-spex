@@ -6,6 +6,10 @@ use crate::error::{CliError, Result};
 use crate::support::fs::relative_to;
 use crate::support::repo_files::RepoFiles;
 
+#[cfg(test)]
+#[path = "scoped_file_test.rs"]
+mod scoped_file_test;
+
 pub(super) struct ScopedFile {
     pub(super) abs: PathBuf,
     pub(super) rel: PathBuf,

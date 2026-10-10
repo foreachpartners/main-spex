@@ -6,6 +6,10 @@ use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
 use super::{Hit, Outcome};
 
+#[cfg(test)]
+#[path = "script_test.rs"]
+mod script_test;
+
 const SCRIPT_BATCH_SIZE: usize = 1000;
 const SPEX_DIR_ENV: &str = "SPEX_DIR";
 

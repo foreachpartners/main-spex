@@ -6,6 +6,10 @@ use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
 use super::{Outcome, Wording, presence_hits};
 
+#[cfg(test)]
+#[path = "glob_test.rs"]
+mod glob_test;
+
 pub(in crate::commands::check) fn run_glob(
     check: &Check,
     pattern: &str,

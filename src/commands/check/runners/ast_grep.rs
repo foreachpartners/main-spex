@@ -10,6 +10,10 @@ use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
 use super::{Outcome, PATTERN_WORDING, presence_hits};
 
+#[cfg(test)]
+#[path = "ast_grep_test.rs"]
+mod ast_grep_test;
+
 pub(in crate::commands::check) fn run_ast_grep(
     check: &Check,
     pattern: Option<&str>,

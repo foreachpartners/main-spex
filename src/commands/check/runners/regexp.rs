@@ -6,6 +6,10 @@ use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
 use super::{Outcome, PATTERN_WORDING, presence_hits};
 
+#[cfg(test)]
+#[path = "regexp_test.rs"]
+mod regexp_test;
+
 pub(in crate::commands::check) fn run_regexp(
     check: &Check,
     pattern: &str,

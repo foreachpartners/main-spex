@@ -15,6 +15,10 @@ pub(super) use glob::run_glob;
 pub(super) use regexp::run_regexp;
 pub(super) use script::{locate_script, resolve_script, run_per_file_script, run_script_once};
 
+#[cfg(test)]
+#[path = "mod_test.rs"]
+mod mod_test;
+
 pub(super) type Outcome = core::result::Result<Vec<Hit>, String>;
 
 pub(super) struct Hit {

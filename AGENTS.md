@@ -64,7 +64,7 @@ src/                CLI source
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
-    check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, repo selection, report, spec-id annotation tracing
+    check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, repo selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
       conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 docs/                          Framework reference docs (single source of truth); only those symlinked from templates/docs/ are bundled into projects by init/update
