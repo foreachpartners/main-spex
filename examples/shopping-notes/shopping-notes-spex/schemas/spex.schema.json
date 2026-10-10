@@ -86,7 +86,7 @@
           "type": "array",
           "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
           "items": {
-            "$ref": "#/$defs/preexisting_error"
+            "$ref": "#/$defs/ignored_error"
           }
         }
       },
@@ -129,7 +129,7 @@
       "required": ["spec_id", "layer"],
       "additionalProperties": false
     },
-    "preexisting_error": {
+    "ignored_error": {
       "type": "object",
       "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
       "properties": {

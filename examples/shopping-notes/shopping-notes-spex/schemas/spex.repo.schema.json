@@ -17,7 +17,7 @@
       "type": "array",
       "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, merged with the `ignored_errors` of this repository's entry in `spex.yaml`. Files are relative to this repository's root.",
       "items": {
-        "$ref": "spex.schema.json#/$defs/preexisting_error"
+        "$ref": "spex.schema.json#/$defs/ignored_error"
       }
     }
   },
