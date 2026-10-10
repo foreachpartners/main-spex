@@ -1,6 +1,6 @@
 # Specification
 
-How the spex framework behaves, written as specs: each section states one behavior with its acceptance criteria. [framework-principles.md](framework-principles.md) is the non-negotiable foundation, [conventions.md](conventions.md) the engineering values it follows, [glossary.md](glossary.md) the terms, [cli.md](cli.md) the command behavior, and the bundled `schemas/` the field rules.
+How the spex framework behaves, written as specs: each section states one behavior with its acceptance criteria. [framework-principles.md](framework-principles.md) is the non-negotiable foundation, [conventions.md](conventions.md) the engineering values it follows, [glossary.md](glossary.md) the terms, [cli/](cli/README.md) the command behavior, and the bundled `schemas/` the field rules.
 
 # Framework
 
@@ -30,7 +30,7 @@ Every behavioral change traces to a spec, and one Spec ID traces across the repo
 
 # CLI
 
-The CLI behavior — every command, its flags, reports, and exit codes — is specified in [cli.md](cli.md).
+The CLI behavior — every command, its flags, reports, and exit codes — is specified in [cli/](cli/README.md).
 
 # Skills
 
@@ -39,7 +39,7 @@ Agent skills drive the artifact chain: each packages the instructions an AI codi
 - Skills live in the spex repository, installed under `.agents/skills/`; the bundled ones ship from `templates/skills/`, each `SKILL.md` describing what it does and when to load it.
 - A skill is triggered by name (e.g. `/spex-spec`) or loaded on demand by the agent from its description.
 - Every bundled `SKILL.md` ends with a `# Project` section for project-specific additions; `spex update` rewrites everything above it and never touches it.
-- A skill's `SKILL.md` frontmatter follows the [Agent Skills specification](https://agentskills.io/specification); whether `spex update` overwrites it is in [cli.md](cli.md#spex-update).
+- A skill's `SKILL.md` frontmatter follows the [Agent Skills specification](https://agentskills.io/specification); whether `spex update` overwrites it is in [cli/update.md](cli/update.md).
 
 # Specs
 
@@ -82,7 +82,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - An impl or test annotation carries the `#<ac-id>` of the acceptance criterion it satisfies: `spex coverage` never counts a bare, unqualified annotation toward a criterion of a spec.
 - A contract annotation carries `#<ac-id>` only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` one bare `@spec contract <spec-id>` suffices, and a criterion-anchored annotation also counts as the spec-level contract.
 - `<spec-id>` and `<ac-id>` follow the same id grammar as the ids they reference; an annotation naming an id outside it is malformed.
-- Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli.md](cli.md#self-validation)).
+- Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli/check.md](cli/check.md#self-validation)).
 
 ## Coverage states
 
@@ -123,7 +123,7 @@ A check proves a rule's acceptance criterion.
 - `negate` inverts a `regexp`, `glob`, or `ast-grep` check: a forbidden pattern versus a required pattern.
 - `severity` is `error` (default) or `warn`.
 - A repository inherits a rule's checks through `rules`.
-- A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli.md](cli.md#script-checks).
+- A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli/check.md](cli/check.md#script-checks).
 - A script receives the absolute path of the spex repository as `SPEX_DIR`; when it needs data from `spex.yaml` (the project name, the repository list) it reads it with `spex jq` rather than parsing `spex.yaml` by hand.
 
 # Config (spex.yaml)
@@ -174,4 +174,4 @@ ignored_errors:
 Records and reconciles the CLI version that wrote the config.
 
 - `spex.yaml` records the CLI version that wrote it as `cli_version`.
-- A mismatch with the installed binary is reported by the commands that load the workspace and resolved by running `spex update` ([cli.md](cli.md#spex-update)).
+- A mismatch with the installed binary is reported by the commands that load the workspace and resolved by running `spex update` ([cli/update.md](cli/update.md)).

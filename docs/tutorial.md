@@ -9,7 +9,7 @@ By the end you will have recreated a project similar to `examples/shopping-notes
 
 ## Install spex
 
-Follow the installation process in [cli.md](cli.md#install).
+Follow the installation process in [install.md](cli/install.md).
 
 ## Copy the example project
 

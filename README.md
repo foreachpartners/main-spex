@@ -23,7 +23,7 @@ Main spex, or spex for short, is built on four simple pieces:
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
-- **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](docs/cli.md#supported-platforms)
+- **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](docs/cli/install.md#supported-platforms)
 - **spex CLI**: Clone the Main spex repository and install the `spex` CLI tool:
   ```sh
   git clone https://github.com/foreachpartners/main-spex

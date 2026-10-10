@@ -17,7 +17,7 @@ Main spex, or spex for short, is built on four simple pieces:
 
 ## Specification
 
-`docs/specification.md` is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria), and `docs/cli.md` for the CLI's command behavior. Consult them before changing behavior, and keep them in sync when behavior changes. Also on changes update if needed `docs/tutorial.md` and `examples/shopping-notes`.
+`docs/specification.md` is the single source of truth for how the framework behaves, written as specs (description + acceptance criteria), and `docs/cli/` for the CLI's command behavior. Consult them before changing behavior, and keep them in sync when behavior changes. Also on changes update if needed `docs/tutorial.md` and `examples/shopping-notes`.
 
 ## Quick commands
 
@@ -77,7 +77,7 @@ docs/                          Framework reference docs (single source of truth)
   framework-principles.md  Non-negotiable foundation spex is built on
   conventions.md           Engineering values spex follows but didn't invent
   specification.md         Framework behavior, minus the CLI
-  cli.md                   Single source of truth for CLI behavior
+  cli/                     Single source of truth for CLI behavior: README.md (overview and shared behavior), install.md, development.md, one file per command
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
 templates/                     Assets scaffolded into projects
@@ -114,6 +114,6 @@ Keep this section in sync when the structure changes.
 - **Use changelog**: On version change fill `CHANGELOG.md`
 - **Keep CLI commands in sync with template**: On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
 - **Migrations for agent**: When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
-- **Specification is single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli.md` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
+- **Specification is single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli/` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
 - **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.
