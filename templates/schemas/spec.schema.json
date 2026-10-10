@@ -105,8 +105,7 @@
         "type": "object",
         "properties": {
           "layer": {
-            "type": "string",
-            "enum": ["contract", "impl", "test"]
+            "$ref": "coverage-layer.schema.json"
           },
           "ac": {
             "$ref": "ac-id.schema.json"

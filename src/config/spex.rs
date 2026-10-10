@@ -4,10 +4,10 @@ use anstream::eprintln;
 use error_stack::Report;
 use owo_colors::OwoColorize;
 
-use crate::config::{Repository, SpexConfig};
+use crate::config::{RepoConfig, Repository, SpexConfig};
 use crate::error::{CliError, Result};
 use crate::rule::{self, Rule};
-use crate::spec::{self, Spec};
+use crate::spec::{self, Spec, SpecCoverageIgnore};
 use crate::support::fs::current_dir;
 
 #[cfg(test)]
@@ -18,6 +18,7 @@ pub struct Spex {
     pub dir: PathBuf,
     pub project_name: String,
     pub repositories: Vec<Repository>,
+    pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 impl Spex {
@@ -27,7 +28,7 @@ impl Spex {
 
     pub fn discover() -> Result<Self> {
         let (dir, config) = Self::discover_config()?;
-        Ok(Self::from_config(dir, config))
+        Self::from_config(dir, config).with_repo_configs()
     }
 
     pub fn discover_config() -> Result<(PathBuf, SpexConfig)> {
@@ -47,7 +48,17 @@ impl Spex {
             dir,
             project_name: config.project_name,
             repositories,
+            coverage_ignore: config.coverage_ignore,
         }
+    }
+
+    fn with_repo_configs(mut self) -> Result<Self> {
+        for repo in &mut self.repositories {
+            let repo_config = RepoConfig::load(&repo.path)?;
+            self.coverage_ignore.extend(repo_config.coverage_ignore);
+            repo.ignored_errors.extend(repo_config.ignored_errors);
+        }
+        Ok(self)
     }
 
     pub fn rules(&self) -> Result<Vec<Rule>> {
@@ -55,7 +66,16 @@ impl Spex {
     }
 
     pub fn specs(&self) -> Result<Vec<Spec>> {
-        Spec::load_all(&self.dir.join(spec::SPECS_DIR))
+        let mut specs = Spec::load_all(&self.dir.join(spec::SPECS_DIR))?;
+        for spec in &mut specs {
+            let waivers = self
+                .coverage_ignore
+                .iter()
+                .filter(|waiver| waiver.spec_id == spec.id)
+                .map(|waiver| waiver.ignore.clone());
+            spec.coverage_ignore.extend(waivers);
+        }
+        Ok(specs)
     }
 
     pub fn validate_repository_names(&self, names: &[String]) -> Result<()> {

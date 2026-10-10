@@ -2,6 +2,14 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.17.0] - 2026-10-10
+
+- `spex.yaml` accepts a root `coverage_ignore` that waives coverage requirements by spec id: each entry is a spec's `coverage_ignore` entry (`layer`, optional `ac`) plus the `spec_id` it applies to. It is merged with the spec's own `coverage_ignore`.
+- New optional `spex.repo.yaml` at the root of a workspace repository, with its own `coverage_ignore` and `ignored_errors`. Every repository's `coverage_ignore` is merged with `spex.yaml`'s and the specs' own; a repository's `ignored_errors` is merged with its `ignored_errors` in `spex.yaml`. `spex check` validates each against the new `schemas/spex.repo.schema.json`, and checks a spec's merged `coverage_ignore` against its `contract` setting.
+- `check --fill-preexisting-errors` still reads and writes only `spex.yaml`; it never modifies a `spex.repo.yaml`.
+- `info` prints the new `coverage_ignore` of `spex.yaml` as an empty list when absent, and still omits any `spex.repo.yaml`.
+- Schemas: new `coverage-layer.schema.json`, shared by `spec.schema.json` and `spex.schema.json`, and `spex.repo.schema.json`; `spex update` adds them.
+
 ## [0.16.0] - 2026-10-10
 
 - **Breaking**: `coverage` now exits non-zero when an `in-progress` spec has a gap, not only an `active` one, so CI fails on any gap in a tracked spec.

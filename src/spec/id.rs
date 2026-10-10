@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 
 use derive_more::Display;
 use regex::Regex;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 #[cfg(test)]
 #[path = "id_test.rs"]
@@ -43,7 +43,7 @@ fn validate_id(kind: &'static str, value: &str) -> Result<(), InvalidId> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Display, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Display, Deserialize, Serialize)]
 #[serde(try_from = "String")]
 pub struct SpecId(String);
 
@@ -62,7 +62,7 @@ impl TryFrom<String> for SpecId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Display, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Display, Deserialize, Serialize)]
 #[serde(try_from = "String")]
 pub struct AcId(String);
 

@@ -127,13 +127,22 @@ repositories:
         files: [README.md, docs/intro.md]
 ```
 
+A repository can also keep its baseline in its own [`spex.repo.yaml`](specification.md#repository-config-spexrepoyaml), where `ignored_errors` takes the same entries without the surrounding `repositories` block. It is merged with that repository's `ignored_errors` in `spex.yaml`, so an error is dropped when either lists it:
+
+```yaml
+ignored_errors:
+  - rule_id: writing-style
+    check: no-cyrillic
+    files: [README.md, docs/intro.md]
+```
+
 #### Flags
 
 - `--repo <name>...` — limit the run to the named workspace repositories, matched by either full `repository_name` or `repository_short_name`. Defaults to all repositories in `spex.yaml`; errors on a name matching no repository.
 - `--files <path>...` — limit the run to the given files (relative to each repository). A `per-repo` script then runs only in the repositories that contain a listed file, unioned with any `--repo` named; a `workspace` script always runs once. Defaults to all non-ignored files; errors when a given file doesn't exist in any workspace repository. Negated `regexp`, `glob`, and `ast-grep` checks are skipped, because a negated check needs the full file set to prove a forbidden pattern is absent — a subset would only produce false positives.
 - `--fill-preexisting-errors` — record the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating. Use it to adopt a check on a repository that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
 
-  It runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `ignored_errors` entry per check into that repository's block. A finding tied to a file is baselined for that file; a file-less error (e.g. a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. Each selected repository's baseline is regenerated from the current findings — dropping entries whose errors are gone — while the rest of `spex.yaml` and any unselected repository stay byte-stable. It always exits `0`. Repository-level errors that belong to no named check (e.g. a misconfigured override) are not baselined; fix those directly.
+  It runs every selected repository's checks, groups the resulting `error` findings by check and file, and writes one `ignored_errors` entry per check into that repository's block. A finding tied to a file is baselined for that file; a file-less error (e.g. a per-repo script that inspects git history) is baselined as a whole-check entry that omits `files`. Each selected repository's baseline is regenerated from the current findings — dropping entries whose errors are gone — while the rest of `spex.yaml` and any unselected repository stay byte-stable. It reads and writes only `spex.yaml`: a repository's `spex.repo.yaml` is never modified, and its entries are not subtracted from the generated baseline. It always exits `0`. Repository-level errors that belong to no named check (e.g. a misconfigured override) are not baselined; fix those directly.
 
 ```sh
 spex check --repo api frontend
@@ -145,7 +154,7 @@ spex check --repo frontend --fill-preexisting-errors
 
 When the `spex` repository itself is in scope, `spex check` also validates it directly, without a rule:
 
-- `spex.yaml`, every `specs/<spec-id>.yaml`, and every `rules/<rule-id>.yaml` must satisfy their JSON Schema.
+- `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.repo.yaml` of every workspace repository that has one must satisfy their JSON Schema.
 - A spec id, acceptance criterion id, or rule id outside the id grammar (lowercase letters, digits and hyphens only, at most 40 characters) cannot be loaded: the command stops with a parse error naming the file instead of reporting a finding.
 - Each spec file must be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - Every script a rule check references must exist in the rule's script folder, beside the rule file.
@@ -155,7 +164,7 @@ When the `spex` repository itself is in scope, `spex check` also validates it di
 - Every `@spec` annotation must match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and reference an existing Spec ID — and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec. Markdown files are skipped, as are the spex directory's `schemas/` and the spex repository's `specs/` and `rules/` (with each rule's script folder), which hold illustrative example annotations rather than real references.
 - A `blocked_by` reference must name an existing spec — a rule id errors — and be dropped once satisfied: referencing an already-`active` spec warns.
 - A `scope` entry must match a repository's `repository_short_name` in `spex.yaml`.
-- A `coverage_ignore` entry must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
+- A `coverage_ignore` entry, whether in the spec, in `spex.yaml`, or in a repository's `spex.repo.yaml`, must match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
 - A spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is neither `active` nor `deprecated` warns; a spec with no acceptance criteria does not warn. A spec whose `status` is `active` with any acceptance criterion still `is_done: false` errors, since `active` means fully implemented (use `in-progress` until then).
 
 This reads only each criterion's `is_done` field — whether that is actually backed by impl/test annotations is `spex coverage`'s job.
@@ -198,7 +207,7 @@ The annotation search is not scoped to the spec's `scope` — a spec kept in the
 
 #### Waivers
 
-A spec can relax the requirements with the optional `coverage_ignore` field in its YAML. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec; given (an acceptance criterion id), it waives just that one criterion's impl or test requirement, or its contract requirement under `contract: for-each-ac`. The entry must match the spec's `contract` setting — whole-spec contract waives work under `single` and `for-each-ac`, per-criterion contract waives only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch:
+A spec can relax the requirements with the optional `coverage_ignore` field in its YAML, and `spex.yaml` and each repository's `spex.repo.yaml` can add waivers by spec id. Each entry is `{layer, ac}`: `layer` is required; `ac` is optional — omitted, it waives that layer for the whole spec; given (an acceptance criterion id), it waives just that one criterion's impl or test requirement, or its contract requirement under `contract: for-each-ac`. The entry must match the spec's `contract` setting — whole-spec contract waives work under `single` and `for-each-ac`, per-criterion contract waives only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch:
 
 ```yaml
 id: place-pizza-order
@@ -206,6 +215,17 @@ status: active
 coverage_ignore:
   - layer: contract
   - layer: impl
+    ac: no-null-typed-string
+```
+
+The root `coverage_ignore` of `spex.yaml`, and that of every workspace repository's [`spex.repo.yaml`](specification.md#repository-config-spexrepoyaml), take the same entries plus the `spec_id` they apply to. A spec's waivers are the union of its own `coverage_ignore` and every entry naming its id, wherever declared, regardless of the repositories in its `scope`. An entry naming a spec that does not exist waives nothing:
+
+```yaml
+coverage_ignore:
+  - spec_id: place-pizza-order
+    layer: contract
+  - spec_id: place-pizza-order
+    layer: impl
     ac: no-null-typed-string
 ```
 
@@ -229,7 +249,7 @@ spex coverage --verbose
 
 ### `spex info`
 
-Prints the resolved `spex.yaml` configuration as pretty JSON, led by `spex_dir` — the absolute path of the spex repository, which the relative `path` of each contract is resolved against — followed by every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, or `rules_unused` printed as an empty list and each repository's `path` resolved to an absolute path, so it opens from any working directory. It is the general-purpose form scripts pipe into [`spex jq`](#spex-jq) for whatever field they need:
+Prints the resolved `spex.yaml` configuration as pretty JSON, led by `spex_dir` — the absolute path of the spex repository, which the relative `path` of each contract is resolved against — followed by every declared field, descriptions included, with an absent `contracts`, `rules`, `ignored_errors`, `rules_unused`, or `coverage_ignore` printed as an empty list and each repository's `path` resolved to an absolute path, so it opens from any working directory. It reports `spex.yaml` as written, without merging in any repository's `spex.repo.yaml`. It is the general-purpose form scripts pipe into [`spex jq`](#spex-jq) for whatever field they need:
 
 ```sh
 spex info | spex jq -r '.project_name'

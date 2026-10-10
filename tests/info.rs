@@ -41,7 +41,8 @@ const EXPECTED_INFO: &str = r#"{
       "rules": [],
       "ignored_errors": []
     }
-  ]
+  ],
+  "coverage_ignore": []
 }
 "#;
 
@@ -67,7 +68,8 @@ const EXPECTED_INFO_API: &str = r#"{
       ],
       "ignored_errors": []
     }
-  ]
+  ],
+  "coverage_ignore": []
 }
 "#;
 

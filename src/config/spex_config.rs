@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::{CliError, Result};
 use crate::rule::RuleId;
+use crate::spec::SpecCoverageIgnore;
 use crate::support::fs::dir_name;
 
 #[cfg(test)]
@@ -26,6 +27,8 @@ pub struct SpexConfig {
     pub rules_unused: Vec<RuleId>,
     #[serde(default)]
     pub repositories: Vec<RepositoryConfig>,
+    #[serde(default)]
+    pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString, IntoStaticStr};
 
 use super::id::{AcId, SpecId};
@@ -144,11 +144,18 @@ impl Statement {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CoverageIgnore {
     pub layer: CoverageLayer,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ac: Option<AcId>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct SpecCoverageIgnore {
+    pub spec_id: SpecId,
+    #[serde(flatten)]
+    pub ignore: CoverageIgnore,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, EnumIter, IntoStaticStr)]
@@ -187,7 +194,17 @@ pub enum ContractLevel {
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, EnumIter, EnumString, IntoStaticStr,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Deserialize,
+    Serialize,
+    EnumIter,
+    EnumString,
+    IntoStaticStr,
 )]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "kebab-case")]

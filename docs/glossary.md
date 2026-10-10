@@ -120,6 +120,8 @@
   frontend
   ```
 
+- **Repository config** (`spex.repo.yaml`) — optional file at the root of a workspace repository that holds the coverage waivers and the pre-existing error baseline concerning that repository, merged by spex with the same fields of `spex.yaml`.
+
 - **AI coding agent** (AI agent, agent) — the tool a person picks to do the work: an autonomous assistant that reads, runs, and edits code on their behalf. Hosted inside an editor (Zed, VS Code, Cursor) or run from the terminal (Claude Code, Codex).
 
 - **Agent Skill** (skill) — a modular, reusable capability that packages specialized instructions an AI agent loads on demand when a request matches the skill's description. Defined as a folder with a `SKILL.md` entry point, following the [Agent Skills](https://agentskills.io/) spec. In spex, a skill is the instructions an AI agent follows to do the job, taking all applicable rules and implementing a spec.

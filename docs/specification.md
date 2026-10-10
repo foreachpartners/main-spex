@@ -71,6 +71,8 @@ coverage_ignore:
     ac: no-null-typed-string
 ```
 
+A waiver can also be declared outside the spec file, in `spex.yaml` or a repository's `spex.repo.yaml`, so the repository that cannot satisfy a layer owns the waiver without editing the spec; see [Config](#config-spexyaml).
+
 ## Spec ID annotations
 
 Annotations link a contract, implementation, or test to its spec, and optionally to one specific acceptance criterion.
@@ -130,10 +132,42 @@ A check proves a rule's acceptance criterion.
 
 Declares the project and its repositories.
 
-- Root fields: required `project_name` and `cli_version`, plus optional `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), and `repositories`.
+- Root fields: required `project_name` and `cli_version`, plus optional `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), `repositories`, and `coverage_ignore`.
 - Each repository entry has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, and `path` (relative to the spex directory) required, plus an optional `description`, `contracts` list, `rules` list, and `ignored_errors` baseline.
 - Each `contracts` entry has a `path` and a `description`, both required; the path is user-owned, typically inside the owning repository, and relative to the spex directory.
+- `coverage_ignore` waives coverage requirements by spec id, one `{spec_id, layer, ac}` entry per waiver: `spec_id` and `layer` are required, `ac` is optional, and `layer` and `ac` mean what they do in a [spec's `coverage_ignore`](#spec).
 - Validated against `schemas/spex.schema.json`.
+
+```yaml
+coverage_ignore:
+  - spec_id: place-pizza-order
+    layer: contract
+  - spec_id: place-pizza-order
+    layer: impl
+    ac: no-null-typed-string
+```
+
+## Repository config (spex.repo.yaml)
+
+Lets a workspace repository own the waivers and the baseline that concern it.
+
+- Optional: `spex.repo.yaml` sits at the root of a workspace repository, and a repository without one has nothing to merge.
+- Has optional `coverage_ignore`, with the entries of the root `coverage_ignore` of `spex.yaml`, and `ignored_errors`, with the entries of a repository's `ignored_errors` there, its `files` relative to this repository's root.
+- Everything is merged by union, none overrides another:
+  - A spec's coverage waivers are its own `coverage_ignore`, the `coverage_ignore` entries of `spex.yaml` naming its id, and those of every repository's `spex.repo.yaml` naming its id, whichever repositories the spec is `scope`d to.
+  - A repository's `ignored_errors` baseline is its entry's in `spex.yaml` plus its own `spex.repo.yaml`'s.
+- Validated against `schemas/spex.repo.schema.json`.
+
+```yaml
+coverage_ignore:
+  - spec_id: place-pizza-order
+    layer: impl
+    ac: no-null-typed-string
+ignored_errors:
+  - rule_id: writing-style
+    check: no-cyrillic
+    files: [README.md]
+```
 
 ## Versioning
 

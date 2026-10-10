@@ -52,9 +52,10 @@ src/                CLI source
     annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)
+    repo_config.rs  RepoConfig, the raw optional spex.repo.yaml at a repository root (coverage_ignore, ignored_errors), loaded 1 to 1
     spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, ignored_errors blocks)
     repository.rs   Repository model built from the raw repository config, with absolute repository and contract paths
-    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders, repository selection by name, and scope validation (shared by commands)
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories, coverage_ignore), with each repository's spex.repo.yaml merged in on discovery, spec (adding the coverage_ignore by spec id) and rule loaders, repository selection by name, and scope validation (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
     ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)

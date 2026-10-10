@@ -74,6 +74,7 @@ pub fn spex(repositories: Vec<Repository>) -> Spex {
         dir: spex_dir().to_path_buf(),
         project_name: "demo".to_string(),
         repositories,
+        coverage_ignore: Vec::new(),
     }
 }
 
@@ -84,5 +85,6 @@ pub fn spex_config() -> SpexConfig {
         description: None,
         rules_unused: Vec::new(),
         repositories: Vec::new(),
+        coverage_ignore: Vec::new(),
     }
 }

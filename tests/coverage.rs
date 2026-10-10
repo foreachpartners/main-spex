@@ -188,3 +188,123 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
         report_text(&tested.stdout)
     );
 }
+
+const NONE_WITH_GAP_WAIVERS: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: impl
+    ac: resumes-favorite
+  - spec_id: none-with-gap
+    layer: test
+    ac: resumes-favorite
+"#;
+
+const NONE_WITH_GAP_IMPL_WAIVER: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: impl
+    ac: resumes-favorite
+"#;
+
+const NONE_WITH_GAP_TEST_WAIVER: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: test
+    ac: resumes-favorite
+"#;
+
+#[test]
+fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    append(
+        &project.join("dummy-project-spex/spex.yaml"),
+        NONE_WITH_GAP_WAIVERS,
+    );
+
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    let report = report_text(&coverage.stdout);
+    assert!(
+        !report.contains("none-with-gap"),
+        "the waived spec should have no gap\n{report}"
+    );
+    assert!(
+        report.ends_with("planned (2), in-progress (2), active (9), gaps (6)\n"),
+        "{report}"
+    );
+}
+
+#[test]
+fn coverage_honors_a_repository_spex_repo_yaml_coverage_ignore() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/spex.repo.yaml"),
+        NONE_WITH_GAP_WAIVERS.trim_start(),
+    )
+    .expect("write spex.repo.yaml");
+
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    let report = report_text(&coverage.stdout);
+    assert!(
+        !report.contains("none-with-gap"),
+        "the waived spec should have no gap\n{report}"
+    );
+    assert!(
+        report.ends_with("planned (2), in-progress (2), active (9), gaps (6)\n"),
+        "{report}"
+    );
+}
+
+#[test]
+fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_repository() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+
+    append(
+        &project.join("dummy-project-spex/spex.yaml"),
+        NONE_WITH_GAP_IMPL_WAIVER,
+    );
+    let partly_waived = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(
+        partly_waived.contains("missing: test(resumes-favorite)"),
+        "waiving only impl should leave the test gap\n{partly_waived}"
+    );
+    assert!(
+        !partly_waived.contains("impl(resumes-favorite)"),
+        "the impl waiver should apply\n{partly_waived}"
+    );
+
+    fs::write(
+        project.join("dummy-project-frontend/spex.repo.yaml"),
+        NONE_WITH_GAP_TEST_WAIVER.trim_start(),
+    )
+    .expect("write spex.repo.yaml");
+    let fully_waived = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(
+        !fully_waived.contains("none-with-gap"),
+        "the impl and test waivers should merge\n{fully_waived}"
+    );
+}
+
+#[test]
+fn coverage_fails_on_an_invalid_spex_repo_yaml() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/spex.repo.yaml"),
+        "coverage_ignore:\n  - spec_id: Not_A_Spec_Id\n    layer: impl\n",
+    )
+    .expect("write spex.repo.yaml");
+
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    assert_fails_mentioning(&coverage, "spex.repo.yaml");
+    assert!(coverage.stdout.is_empty());
+}

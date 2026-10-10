@@ -1,5 +1,5 @@
 project_name: script-env-project
-cli_version: 0.16.0
+cli_version: 0.17.0
 description: >-
   Fixture for the environment a script check runs in, at each run scope
   (per-file, per-repo, workspace).

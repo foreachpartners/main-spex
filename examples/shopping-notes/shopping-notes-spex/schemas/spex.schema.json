@@ -33,6 +33,14 @@
       "items": {
         "$ref": "#/$defs/repository"
       }
+    },
+    "coverage_ignore": {
+      "type": "array",
+      "description": "Coverage requirements to waive for specs, merged with each spec's own `coverage_ignore` and with the `coverage_ignore` of every repository's `spex.repo.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to.",
+      "items": {
+        "$ref": "#/$defs/spec_coverage_ignore"
+      },
+      "uniqueItems": true
     }
   },
   "$defs": {
@@ -101,6 +109,24 @@
         }
       },
       "required": ["path", "description"],
+      "additionalProperties": false
+    },
+    "spec_coverage_ignore": {
+      "type": "object",
+      "description": "A coverage waiver for one spec: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec, or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `spex check` verifies the waiver matches the spec's `contract` setting.",
+      "properties": {
+        "spec_id": {
+          "description": "Spec ID of the spec whose coverage requirement is waived.",
+          "$ref": "spec-id.schema.json"
+        },
+        "layer": {
+          "$ref": "coverage-layer.schema.json"
+        },
+        "ac": {
+          "$ref": "ac-id.schema.json"
+        }
+      },
+      "required": ["spec_id", "layer"],
       "additionalProperties": false
     },
     "preexisting_error": {

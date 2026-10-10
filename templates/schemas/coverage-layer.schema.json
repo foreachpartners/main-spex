@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/coverage-layer.schema.json",
+  "title": "Coverage Layer",
+  "description": "A layer of `@spec` annotation coverage: `contract` (the interface contract), `impl` (the implementation) or `test` (the test). Named by `coverage_ignore` entries to waive that layer's requirement.",
+  "type": "string",
+  "enum": ["contract", "impl", "test"],
+  "examples": ["impl"]
+}

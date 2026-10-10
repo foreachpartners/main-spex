@@ -44,7 +44,7 @@ pub(in crate::commands::check) fn validate_conformance(
         findings.extend(validate_coverage_ignore(spec));
     }
 
-    findings.extend(validate_schema(spex_dir, specs, rules)?);
+    findings.extend(validate_schema(spex_dir, repositories, specs, rules)?);
     findings.extend(validate_script_references(rules));
     findings.extend(validate_ac_order(specs, rules));
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));
