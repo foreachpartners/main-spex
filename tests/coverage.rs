@@ -15,7 +15,7 @@ const EXPECTED_COVERAGE_SCOPE_FRONTEND: &str =
 fn coverage_report_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    common::copy_dir(&dummy_project_fixture(), &project);
+    common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage"], "");
     assert_eq!(
@@ -35,7 +35,7 @@ fn coverage_report_matches_expected() {
 fn coverage_verbose_report_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    common::copy_dir(&dummy_project_fixture(), &project);
+    common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--verbose"], "");
     assert_eq!(
@@ -55,7 +55,7 @@ fn coverage_verbose_report_matches_expected() {
 fn coverage_scope_limits_the_report_to_specs_in_that_scope() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    common::copy_dir(&dummy_project_fixture(), &project);
+    common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--scope", "frontend"], "");
     assert_eq!(
@@ -75,7 +75,7 @@ fn coverage_scope_limits_the_report_to_specs_in_that_scope() {
 fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    common::copy_dir(&dummy_project_fixture(), &project);
+    common::copy_project(&dummy_project_fixture(), &project);
 
     let everything = report_text(&run_spex(&project, &["coverage"], "").stdout);
     let scoped =
@@ -98,7 +98,7 @@ fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
 fn coverage_scope_rejects_an_unknown_repository() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    common::copy_dir(&dummy_project_fixture(), &project);
+    common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--scope", "bogus"], "");
 

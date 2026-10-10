@@ -7,7 +7,7 @@ use std::process::Output;
 use tempfile::tempdir;
 
 mod common;
-use common::{copy_dir, dummy_project_fixture, run_spex};
+use common::{copy_project, dummy_project_fixture, run_spex};
 
 const CHANGELOG: &str = include_str!("../CHANGELOG.md");
 const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -141,7 +141,7 @@ fn printed_headers(stdout: &[u8]) -> Vec<String> {
 fn update_upgrades_project_written_by_older_cli() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
     let spex = project.join("dummy-project-spex");
 
     let stale_check = run_spex(&project, &["check"], "");

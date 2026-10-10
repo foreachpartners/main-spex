@@ -50,7 +50,7 @@ fn jq_prints_compact_json() {
 fn jq_pipes_from_spex_info() {
     let dir = tempdir().expect("tempdir");
     let project = dir.path().join("proj");
-    common::copy_dir(&common::dummy_project_fixture(), &project);
+    common::copy_project(&common::dummy_project_fixture(), &project);
     let info = run_spex(&project, &["info"], "");
     assert!(info.status.success(), "{info:?}");
 

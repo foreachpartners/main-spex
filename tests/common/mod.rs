@@ -60,8 +60,24 @@ pub fn script_env_project_fixture() -> std::path::PathBuf {
 pub fn temp_project(fixture: &Path) -> (tempfile::TempDir, std::path::PathBuf) {
     let workspace = tempfile::tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_dir(fixture, &project);
+    copy_project(fixture, &project);
     (workspace, project)
+}
+
+pub fn copy_project(fixture: &Path, project: &Path) {
+    copy_dir(fixture, project);
+    let bundled_schemas = Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas");
+    for entry in fs::read_dir(project).expect("read project dir") {
+        let path = entry.expect("read dir entry").path();
+        let is_spex_dir = path.is_dir()
+            && path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.ends_with("-spex"));
+        if is_spex_dir {
+            copy_dir(&bundled_schemas, &path.join("schemas"));
+        }
+    }
 }
 
 pub fn canonical_display(path: &Path) -> String {

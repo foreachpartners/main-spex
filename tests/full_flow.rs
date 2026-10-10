@@ -4,7 +4,9 @@ use std::path::Path;
 use tempfile::tempdir;
 
 mod common;
-use common::{copy_dir, dummy_project_fixture, report_text, run_spex, with_version_header};
+use common::{
+    copy_dir, copy_project, dummy_project_fixture, report_text, run_spex, with_version_header,
+};
 
 const EXPECTED_CHECK_REPORT: &str = r#"proj-spex
   no issues
@@ -189,7 +191,7 @@ fn fill_preexisting_errors_baselines_spec_conformance_errors() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
     let spec_path = project.join("dummy-project-spex/specs/active-full-coverage.yaml");
     let spec = fs::read_to_string(&spec_path).expect("read spec");
     fs::write(
@@ -226,7 +228,7 @@ fn check_dummy_project_matches_expected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
@@ -247,7 +249,7 @@ fn check_flags_annotation_referencing_rule_id_as_orphan() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/src/rule_reference.rs"),
         "// @spec impl no-todo-comments\n",
@@ -271,7 +273,7 @@ fn rules_output_flag_writes_file_matching_stdout() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
 
     let stdout_run = run_spex(&project, &["rules"], "");
     assert!(
@@ -316,7 +318,7 @@ fn specs_output_flag_writes_file_matching_stdout() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
 
-    copy_dir(&dummy_project_fixture(), &project);
+    copy_project(&dummy_project_fixture(), &project);
 
     let stdout_run = run_spex(&project, &["specs"], "");
     assert!(

@@ -1,10 +1,8 @@
-use std::path::Path;
-
 use tempfile::tempdir;
 
 mod common;
 use common::{
-    assert_fails_mentioning, copy_dir, report_text, run_spex, runners_project_fixture,
+    assert_fails_mentioning, copy_project, report_text, run_spex, runners_project_fixture,
     script_env_project_fixture, with_version_header,
 };
 
@@ -129,19 +127,11 @@ fn expected_report(sections: &[&str], summary: &str) -> String {
     with_version_header(&format!("{}{summary}\n", sections.concat()))
 }
 
-fn copy_runners_project(project: &Path) {
-    copy_dir(&runners_project_fixture(), project);
-    copy_dir(
-        &Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas"),
-        &project.join("runners-project-spex/schemas"),
-    );
-}
-
 #[test]
 fn check_reports_every_runner_and_script_scope() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_runners_project(&project);
+    copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
@@ -164,7 +154,7 @@ fn check_reports_every_runner_and_script_scope() {
 fn check_files_narrows_each_runner_and_script_scope() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_runners_project(&project);
+    copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check", "--files", "src/index.ts"], "");
     assert_eq!(
@@ -184,7 +174,7 @@ fn check_files_narrows_each_runner_and_script_scope() {
 fn check_repo_limits_the_report_to_the_named_repository() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_runners_project(&project);
+    copy_project(&runners_project_fixture(), &project);
 
     let by_short_name = run_spex(&project, &["check", "--repo", "frontend"], "");
     assert_eq!(
@@ -214,7 +204,7 @@ fn check_repo_limits_the_report_to_the_named_repository() {
 fn check_repo_runs_a_workspace_script_only_when_a_repository_using_it_is_selected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_runners_project(&project);
+    copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check", "--repo", "spex"], "");
 
@@ -234,7 +224,7 @@ fn check_repo_runs_a_workspace_script_only_when_a_repository_using_it_is_selecte
 fn check_repo_rejects_an_unknown_repository() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_runners_project(&project);
+    copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check", "--repo", "bogus"], "");
 
@@ -249,11 +239,7 @@ fn check_repo_rejects_an_unknown_repository() {
 fn check_exposes_the_spex_dir_to_a_script_at_every_run_scope() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
-    copy_dir(&script_env_project_fixture(), &project);
-    copy_dir(
-        &Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/schemas"),
-        &project.join("script-env-project-spex/schemas"),
-    );
+    copy_project(&script_env_project_fixture(), &project);
 
     let check = run_spex(&project, &["check"], "");
 
