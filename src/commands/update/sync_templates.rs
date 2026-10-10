@@ -7,7 +7,7 @@ use crate::commands::init::scaffold::{copy_docs_and_schemas, link_claude_dir, wr
 use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
-use crate::support::util;
+use crate::support::yaml_dir::yaml_files;
 use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
 
 #[cfg(test)]
@@ -114,7 +114,7 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     // Rules may be grouped into nested folders, so a bundled rule already
     // present under a nested folder must be matched there rather than
     // re-created flat at `rules_dest/<name>`.
-    let existing_rules = util::yaml_files(&rules_dest)?;
+    let existing_rules = yaml_files(&rules_dest)?;
 
     for file in dir.files() {
         let Some(name) = file.path().file_name() else {

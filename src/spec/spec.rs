@@ -6,8 +6,9 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 use super::id::{AcId, SpecId};
 use super::spec_config::{AcceptanceCriterionConfig, SpecConfig};
 use crate::error::Result;
+use crate::support::acceptance_criteria_lines::with_source_lines;
 use crate::support::commitment::Commitment;
-use crate::support::util;
+use crate::support::yaml_dir::load_yaml_dir;
 
 #[cfg(test)]
 #[path = "spec_test.rs"]
@@ -73,7 +74,7 @@ impl Spec {
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
-        let mut specs: Vec<Self> = util::load_yaml_dir::<SpecConfig>(specs_dir)?
+        let mut specs: Vec<Self> = load_yaml_dir::<SpecConfig>(specs_dir)?
             .into_iter()
             .map(|file| Self::from_config(file.item, file.path, &file.raw))
             .collect();
@@ -86,7 +87,7 @@ impl Spec {
             id: config.id,
             path,
             description: config.description,
-            acceptance_criteria: util::with_source_lines(
+            acceptance_criteria: with_source_lines(
                 config.acceptance_criteria,
                 raw,
                 AcceptanceCriterion::from_config,

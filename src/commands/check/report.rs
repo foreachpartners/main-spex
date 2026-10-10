@@ -8,7 +8,7 @@ use crate::config::Repository;
 use crate::rule::Severity;
 use crate::support::fs::file_url;
 use crate::support::style::{hyperlink, version_line};
-use crate::support::util::plural;
+use crate::support::text::plural;
 
 use super::finding::{Finding, Location};
 

@@ -51,16 +51,20 @@ src/                CLI source
   tracing/          Traceability topic
     annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
-    spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1), and its text edits
+    spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)
+    spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, ignored_errors blocks)
     repository.rs   Repository model built from the raw repository config, with absolute repository and contract paths
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved repositories), with spec and rule loaders, repository selection by name, and scope validation (shared by commands)
   support/          Cross-topic helpers
+    acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
+    ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, relative paths, file URLs, embedded dir extraction, symlinks, exec bits)
     repo_files.rs   Iterator over a workspace repository's files (gitignore, dotfiles, skipped names)
     style.rs        Terminal hyperlinks, version line, dim/red styles, terminal width and visible-width measuring (shared by commands)
-    util.rs         Shared helpers (yaml walking and loading, acceptance criteria lines, text wrapping, pluralize)
     testing.rs      Shared unit-test builders for specs, rules, repositories and config (test builds only)
+    text.rs         Text helpers (word wrapping, pluralize)
+    yaml_dir.rs     Yaml file walking and loading of a directory (YamlFile: parsed item, path, raw text)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)

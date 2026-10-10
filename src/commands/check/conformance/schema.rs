@@ -4,7 +4,7 @@ use crate::commands::check_schema;
 use crate::error::Result;
 use crate::rule::{RULES_DIR, Rule};
 use crate::spec::{SPECS_DIR, Spec};
-use crate::support::util::yaml_files;
+use crate::support::yaml_dir::yaml_files;
 use crate::templates::SCHEMAS_DIRNAME;
 
 use super::super::finding::{Finding, Location};

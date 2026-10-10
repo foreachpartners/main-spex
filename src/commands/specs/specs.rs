@@ -7,8 +7,9 @@ use error_stack::{Report, ResultExt};
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
+use crate::support::ai_view::ai_view;
 use crate::support::fs::write_file;
-use crate::support::util;
+use crate::support::yaml_dir::load_yaml_dir;
 
 #[cfg(test)]
 #[path = "specs_test.rs"]
@@ -42,11 +43,11 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
     spex.validate_scopes(&args.scope)?;
 
     let specs: Vec<serde_json::Value> =
-        util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?
+        load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?
             .iter()
             .map(|file| {
                 if args.ai {
-                    util::ai_view(file, &[])
+                    ai_view(file, &[])
                 } else {
                     file.item.clone()
                 }

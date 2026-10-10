@@ -6,11 +6,11 @@ use anstream::println;
 use error_stack::ResultExt;
 use owo_colors::OwoColorize;
 
-use crate::config::{self, PreexistingEntry, Repository, SpexConfig};
+use crate::config::{self, PreexistingError, Repository, spex_yaml_edit};
 use crate::error::{CliError, Result};
 use crate::rule::Severity;
 use crate::support::fs::write_file;
-use crate::support::util::plural;
+use crate::support::text::plural;
 
 use super::finding::Finding;
 use super::report::{CheckReport, ReportTarget};
@@ -135,12 +135,12 @@ pub(super) fn fill_preexisting_errors(
         }
     }
 
-    let by_repo: HashMap<String, Vec<PreexistingEntry>> = grouped
+    let by_repo: HashMap<String, Vec<PreexistingError>> = grouped
         .into_iter()
         .map(|(name, checks)| {
             let entries = checks
                 .into_iter()
-                .map(|((rule_id, check), baseline)| PreexistingEntry {
+                .map(|((rule_id, check), baseline)| PreexistingError {
                     rule_id,
                     check,
                     files: match baseline {
@@ -156,7 +156,7 @@ pub(super) fn fill_preexisting_errors(
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
     let raw = std::fs::read_to_string(&config_path)
         .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
-    let updated = SpexConfig::set_preexisting_errors(&raw, &by_repo);
+    let updated = spex_yaml_edit::set_preexisting_errors(&raw, &by_repo);
     let changed = updated != raw;
     if changed {
         write_file(&config_path, &updated)?;
@@ -168,7 +168,7 @@ pub(super) fn fill_preexisting_errors(
 
 fn report_fill(
     selected: &[&Repository],
-    by_repo: &HashMap<String, Vec<PreexistingEntry>>,
+    by_repo: &HashMap<String, Vec<PreexistingError>>,
     changed: bool,
 ) {
     println!("{}", "spex check --fill-preexisting-errors".bold());

@@ -6,7 +6,7 @@ use strum::IntoEnumIterator;
 use crate::spec::{CoverageLayer, Spec, Status};
 use crate::support::fs::file_url;
 use crate::support::style::{DIM, RED, hyperlink, version_line, visible_width};
-use crate::support::util::wrap_text;
+use crate::support::text::wrap_text;
 
 use super::report::CoverageReport;
 use super::spec_coverage::{CriterionCoverage, SpecCoverage, SpecHealth};

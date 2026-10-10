@@ -6,8 +6,9 @@ use strum::IntoStaticStr;
 use super::id::RuleId;
 use super::rule_config::RuleConfig;
 use crate::error::Result;
+use crate::support::acceptance_criteria_lines::with_source_lines;
 use crate::support::commitment::Commitment;
-use crate::support::util;
+use crate::support::yaml_dir::load_yaml_dir;
 
 #[cfg(test)]
 #[path = "rule_test.rs"]
@@ -29,7 +30,7 @@ impl Rule {
     }
 
     pub fn load_all(rules_dir: &Path) -> Result<Vec<Self>> {
-        Ok(util::load_yaml_dir::<RuleConfig>(rules_dir)?
+        Ok(load_yaml_dir::<RuleConfig>(rules_dir)?
             .into_iter()
             .map(|file| Self::from_config(file.item, file.path, &file.raw))
             .collect())
@@ -39,7 +40,7 @@ impl Rule {
         Self {
             id: config.id,
             path,
-            acceptance_criteria: util::with_source_lines(
+            acceptance_criteria: with_source_lines(
                 config.acceptance_criteria,
                 raw,
                 |text, line| AcceptanceCriterion { text, line },

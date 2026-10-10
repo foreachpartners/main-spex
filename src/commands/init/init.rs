@@ -7,7 +7,7 @@ use anstream::println;
 use error_stack::{Report, ResultExt, bail};
 use owo_colors::OwoColorize;
 
-use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, SpexConfig};
+use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, SpexConfig, spex_yaml_edit};
 use crate::error::{CliError, Result};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
@@ -86,7 +86,7 @@ fn config_from_template(project_name: &str) -> String {
             "repository_name: unknown",
             &format!("repository_name: {project_name}-{SPEX_DIR_NAME}"),
         );
-    SpexConfig::set_cli_version(&named, CLI_VERSION)
+    spex_yaml_edit::set_cli_version(&named, CLI_VERSION)
 }
 
 fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {

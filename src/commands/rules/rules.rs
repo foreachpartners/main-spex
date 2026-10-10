@@ -8,8 +8,9 @@ use crate::config::Repository;
 use crate::config::spex::Spex;
 use crate::error::{CliError, Result};
 use crate::rule::RULES_DIR;
+use crate::support::ai_view::ai_view;
 use crate::support::fs::write_file;
-use crate::support::util;
+use crate::support::yaml_dir::load_yaml_dir;
 
 #[cfg(test)]
 #[path = "rules_test.rs"]
@@ -45,11 +46,11 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
     let repositories = spex.select_repositories(&args.repo)?;
 
     let rules: Vec<serde_json::Value> =
-        util::load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
+        load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
             .iter()
             .map(|file| {
                 if args.ai {
-                    util::ai_view(file, &FIELDS_AI_DOES_NOT_NEED)
+                    ai_view(file, &FIELDS_AI_DOES_NOT_NEED)
                 } else {
                     file.item.clone()
                 }

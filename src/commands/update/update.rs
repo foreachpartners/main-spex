@@ -6,7 +6,7 @@ use error_stack::ResultExt;
 use owo_colors::OwoColorize;
 
 use crate::config::spex::Spex;
-use crate::config::{CLI_VERSION, SpexConfig};
+use crate::config::{CLI_VERSION, SpexConfig, spex_yaml_edit};
 use crate::error::{CliError, Result};
 use crate::support::fs::write_file;
 use serde::Deserialize;
@@ -38,7 +38,10 @@ pub fn run() -> Result<ExitCode> {
     sync_templates(SpexConfig::dir_of(&config_path), &previous.rules_unused)
         .change_context_lazy(|| CliError::Internal("could not rewrite bundled templates".into()))?;
 
-    write_file(&config_path, SpexConfig::set_cli_version(&raw, CLI_VERSION))?;
+    write_file(
+        &config_path,
+        spex_yaml_edit::set_cli_version(&raw, CLI_VERSION),
+    )?;
 
     println!(
         "{}",
