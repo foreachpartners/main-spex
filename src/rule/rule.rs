@@ -127,6 +127,16 @@ impl CheckKind {
             CheckKind::Script { .. } => false,
         }
     }
+
+    pub fn is_workspace_scoped(&self) -> bool {
+        matches!(
+            self,
+            CheckKind::Script {
+                run: RunScope::Workspace,
+                ..
+            }
+        )
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]

@@ -2,27 +2,12 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use super::super::check::WorkspaceCheck;
-use super::super::finding::{Finding, Location};
+use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
-use super::{Hit, Outcome, outcome_findings};
+use super::{Hit, Outcome};
 
 const SCRIPT_BATCH_SIZE: usize = 1000;
 const SPEX_DIR_ENV: &str = "SPEX_DIR";
-
-pub(in crate::commands::check) fn run_workspace_checks(
-    spex_dir: &Path,
-    workspace_checks: &[WorkspaceCheck],
-) -> Vec<Finding> {
-    workspace_checks
-        .iter()
-        .flat_map(|pending| {
-            let outcome = locate_script(&pending.script_dir, &pending.script)
-                .and_then(|program| run_script_once(&program, spex_dir, spex_dir));
-            outcome_findings(&pending.rule_id, &pending.check, outcome)
-        })
-        .collect()
-}
 
 pub(in crate::commands::check) fn run_per_file_script(
     program: &Path,

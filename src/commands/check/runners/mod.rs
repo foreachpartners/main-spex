@@ -13,9 +13,7 @@ mod script;
 pub(super) use ast_grep::run_ast_grep;
 pub(super) use glob::run_glob;
 pub(super) use regexp::run_regexp;
-pub(super) use script::{
-    locate_script, resolve_script, run_per_file_script, run_script_once, run_workspace_checks,
-};
+pub(super) use script::{locate_script, resolve_script, run_per_file_script, run_script_once};
 
 pub(super) type Outcome = core::result::Result<Vec<Hit>, String>;
 

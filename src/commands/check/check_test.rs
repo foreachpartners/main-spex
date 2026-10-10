@@ -6,6 +6,7 @@ mod tests {
     use crate::rule::{RULES_DIR, Severity};
     use crate::support::testing;
     use serial_test::serial;
+    use std::path::PathBuf;
     use tempfile::{TempDir, tempdir};
 
     fn check(kind: CheckKind) -> Check {
@@ -699,13 +700,17 @@ constraints:
             ..rule_in(&spex, "x")
         }];
 
+        let api_repo = repository(&spex, "../api", vec!["x"]);
+        let web_repo = repository(&spex, "../web", vec!["x"]);
+        let known_ids = HashMap::new();
+
         let mut collected = Vec::new();
         let mut repo_findings = check_repo(
             CheckRepoArgs {
-                repo: &repository(&spex, "../api", vec!["x"]),
+                repo: &api_repo,
                 spex_dir: &spex,
                 rules: &rules,
-                known_ids: &HashMap::new(),
+                known_ids: &known_ids,
                 files: &[],
             },
             &mut collected,
@@ -714,10 +719,10 @@ constraints:
         repo_findings.extend(
             check_repo(
                 CheckRepoArgs {
-                    repo: &repository(&spex, "../web", vec!["x"]),
+                    repo: &web_repo,
                     spex_dir: &spex,
                     rules: &rules,
-                    known_ids: &HashMap::new(),
+                    known_ids: &known_ids,
                     files: &[],
                 },
                 &mut collected,

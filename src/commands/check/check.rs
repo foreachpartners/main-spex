@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -16,7 +16,7 @@ use super::finding::{Finding, Source};
 use super::report::{CheckReport, ReportTarget, report};
 use super::runners::{
     Outcome, locate_script, outcome_findings, run_ast_grep, run_glob, run_per_file_script,
-    run_regexp, run_script_once, run_workspace_checks, scope_files,
+    run_regexp, run_script_once, scope_files,
 };
 use super::scoped_file::ScopedFile;
 use super::select::select_repos;
@@ -47,25 +47,9 @@ pub(super) struct RepoCtx<'a> {
     pub(super) candidates: &'a [ScopedFile],
 }
 
-impl RepoCtx<'_> {
-    fn dispatch_check(
-        &self,
-        rule: &Rule,
-        check: &Check,
-        workspace_checks: &mut Vec<WorkspaceCheck>,
-    ) -> Vec<Finding> {
-        match &check.kind {
-            CheckKind::Script {
-                script,
-                run: RunScope::Workspace,
-            } => {
-                WorkspaceCheck::collect(rule, check, script, workspace_checks);
-                Vec::new()
-            }
-            _ => self.run_check(rule, check),
-        }
-    }
+type WorkspaceChecks<'a> = Vec<(&'a Rule, &'a Check)>;
 
+impl RepoCtx<'_> {
     fn run_check(&self, rule: &Rule, check: &Check) -> Vec<Finding> {
         outcome_findings(rule.id.as_str(), check, self.check_hits(rule, check))
     }
@@ -95,8 +79,9 @@ impl RepoCtx<'_> {
                     RunScope::PerFile => {
                         run_per_file_script(&program, self.repo_path, self.spex_dir, &files)
                     }
-                    RunScope::PerRepo => run_script_once(&program, self.repo_path, self.spex_dir),
-                    RunScope::Workspace => Ok(Vec::new()),
+                    RunScope::PerRepo | RunScope::Workspace => {
+                        run_script_once(&program, self.repo_path, self.spex_dir)
+                    }
                 }
             }
         }
@@ -113,32 +98,29 @@ struct CheckRepoArgs<'a> {
     files: &'a [String],
 }
 
-// A `workspace`-scoped script check, deferred until every repository has been
-// scanned so it runs exactly once across the whole workspace. It receives no
-// files; the script discovers its own from the spex directory.
-pub(super) struct WorkspaceCheck {
-    pub(super) rule_id: String,
-    pub(super) script_dir: PathBuf,
-    pub(super) script: String,
-    pub(super) check: Check,
+fn defer_workspace_check<'a>(
+    workspace_checks: &mut WorkspaceChecks<'a>,
+    rule: &'a Rule,
+    check: &'a Check,
+) {
+    let already_deferred = workspace_checks.iter().any(|(deferred_rule, deferred)| {
+        deferred_rule.id == rule.id && deferred.name == check.name
+    });
+    if !already_deferred {
+        workspace_checks.push((rule, check));
+    }
 }
 
-impl WorkspaceCheck {
-    // Defers a `workspace`-scoped check, deduplicating by `(rule_id, name)` so a
-    // check inherited by several repositories still runs exactly once.
-    fn collect(rule: &Rule, check: &Check, script: &str, workspace_checks: &mut Vec<Self>) {
-        let already_pending = workspace_checks
-            .iter()
-            .any(|pending| pending.rule_id == rule.id.as_str() && pending.check.name == check.name);
-        if !already_pending {
-            workspace_checks.push(Self {
-                rule_id: rule.id.to_string(),
-                script_dir: rule.script_dir(),
-                script: script.to_string(),
-                check: check.clone(),
-            });
-        }
-    }
+fn run_workspace_checks(spex_dir: &Path, workspace_checks: &WorkspaceChecks) -> Vec<Finding> {
+    let ctx = RepoCtx {
+        repo_path: spex_dir,
+        spex_dir,
+        candidates: &[],
+    };
+    workspace_checks
+        .iter()
+        .flat_map(|(rule, check)| ctx.run_check(rule, check))
+        .collect()
 }
 
 pub fn run(args: CheckArgs) -> Result<ExitCode> {
@@ -160,7 +142,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let selected = select_repos(&spex, &args.repo, &args.files)?;
 
     let mut reports = Vec::with_capacity(selected.len());
-    let mut workspace_checks: Vec<WorkspaceCheck> = Vec::new();
+    let mut workspace_checks = WorkspaceChecks::new();
     for &repo in &selected {
         let findings = check_repo(
             CheckRepoArgs {
@@ -197,9 +179,9 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     Ok(report(&spex.project_name, &reports))
 }
 
-fn check_repo(
-    args: CheckRepoArgs,
-    workspace_checks: &mut Vec<WorkspaceCheck>,
+fn check_repo<'a>(
+    args: CheckRepoArgs<'a>,
+    workspace_checks: &mut WorkspaceChecks<'a>,
 ) -> Result<Vec<Finding>> {
     let CheckRepoArgs {
         repo,
@@ -259,7 +241,11 @@ fn check_repo(
             if has_files && check.kind.negate() {
                 continue;
             }
-            findings.extend(ctx.dispatch_check(rule, check, workspace_checks));
+            if check.kind.is_workspace_scoped() {
+                defer_workspace_check(workspace_checks, rule, check);
+            } else {
+                findings.extend(ctx.run_check(rule, check));
+            }
         }
     }
 
