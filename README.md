@@ -13,6 +13,8 @@ Main spex, or spex for short, is built on four simple pieces:
 - **Skills** are the instructions an AI agent follows to do the job consistently and correctly.
 - **Traceability** is the thread that stitches together spec, contract, implementations, and tests — ensuring full coverage and tracing for spec and every acceptance criterion.
 
+spex provides the core flow plus skills and rules you can extend, adapt, or replace for your project needs. Whatever you don't customize updates with each new version, bringing you the latest improvements contributed by the community.
+
 ## Quickstart
 
 ### Prerequisites
