@@ -54,23 +54,27 @@ Repository directories follow `<project-name>-<repository-short-name>` (naming-c
 
 After setup is completed you get basic skills and rules which you can customize for your project or leave them as is to be synced from upstream.
 
-For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to change user nickname registration length, ask AI to generate spec based on how user registration currently works, then do your changes.
+For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to limit the shopping item name length, ask AI to generate spec based on how adding a shopping item currently works, then do your changes.
 
 ### Typical workflow
 
-Say you're want to add shopping item creation functionality to the backend. Here's what you will do:
+#### Feature
 
-1. **Create spec** `/spex-spec backend add shopping item endpoint`. Will create `shopping-notes-spex/specs/add-shopping-item.yaml`
-2. **Derive the contract** for a spec `/spex-contract add-shopping-item`. Will add the endpoint to `shopping-notes-spex/contracts/api.openapi.yaml`.
-3. **Implement it** `/spex-implement add-shopping-item`. Will implement a spec as written following applicable rules and skill instructions.
-4. **Review** review implementation with `/spex-review add-shopping-item` to ensure conformance with spec and applicable rules.
-5. **Add tests** `/spex-test add-shopping-item`. Will add tests coverage for the implemented spec.
+Say you want to add shopping item creation functionality to the backend. Here's what you will do:
 
-Tip: you can combine skills `/spex-spec /spex-contract` or run `spex-assembly-line` to implement, review and fix in loop and test.
+1. **Create spec** `/spex-spec backend add shopping item endpoint`. Will create `shopping-notes-spex/specs/api-add-shopping-item.yaml`
+2. **Derive the contract** for a spec `/spex-contract api-add-shopping-item`. Will add the `createItem` endpoint to `shopping-notes-spex/contracts/api.openapi.yaml`.
+3. **Implement it** `/spex-implement api-add-shopping-item`. Will implement a spec as written following applicable rules and skill instructions.
+4. **Review** review focused on implementation with `/spex-review api-add-shopping-item` to ensure conformance with spec and applicable rules.
+5. **Add tests** `/spex-test api-add-shopping-item`. Will add tests coverage for the implemented spec and at the same time work as last verification layer.
 
-Say you're want to add rule. Here's what you will do:
+Tip: you can combine skills `/spex-spec /spex-contract` or run `/spex-assembly-line` to implement, review and fix in loop and test.
 
-**Create a rule**: `/spex-rule secret handling`. Will create `shopping-notes-spex/rules/secret-handling.yaml` with scripts to verify it.
+#### Rule
+
+Say you want to add a rule to ensure we don't commit sensitive information. Here's what you will do:
+
+**Create a rule**: `/spex-rule secret handling`. Will create `shopping-notes-spex/rules/secret-handling.yaml` with checks to verify it.
 
 ## Framework Principles
 
@@ -87,19 +91,21 @@ See full principles in [framework-principles.md](docs/framework-principles.md).
 
 ### The flow from business goal to verified code:
 
-For example, a shopping item feature moves through the flow like this:
+For example, the shopping item feature of the [shopping-notes example](examples/shopping-notes/README.md) moves through the flow like this:
 
-1. **BRD** — help shoppers keep track of what to buy to increase engagement
-2. **PRD** — users can add shopping items on the website
-3. **Spec** — `add-shopping-item`: Customer can add a shopping item.
+1. **BRD** — let users note down shopping items so they don't forget to buy them when visiting a store
+2. **PRD** — users manage a shopping list in the web app: add, view, mark as bought, delete, and clear items
+3. **Spec** — [`api-add-shopping-item`](examples/shopping-notes/shopping-notes-spex/specs/api-add-shopping-item.yaml): Create a shopping item.
 
    Acceptance criteria:
-   - MUST return 201 from POST /items with the created item
-   - MUST let the customer add the item from the shopping notes page
+   - MUST create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`
+   - MUST assign each created item a unique `id`
+   - MUST persist the created item to the JSON file store so it survives an API restart
+   - MUST NOT create an item when `name` is missing or empty
 
-4. **Contract** — OpenAPI definition of `addItem` returning `201`, plus a Figma reference for the shopping notes page
-5. **Implementation** — the `addItem()` handler in code
-6. **Test** — verifies that adding an item returns `201`
+4. **Contract** — [OpenAPI definition](examples/shopping-notes/shopping-notes-spex/contracts/api.openapi.yaml) of `createItem` returning `201`, tagged `@spec contract api-add-shopping-item`. The frontend counterpart `fe-add-shopping-item` uses a [Figma reference](examples/shopping-notes/shopping-notes-frontend/contracts/figma.md) as its contract instead
+5. **Implementation** — the `POST /items` handler in [`app.ts`](examples/shopping-notes/shopping-notes-api/src/app.ts), tagged `@spec impl api-add-shopping-item#create-item-with-name`
+6. **Test** — [`app.test.ts`](examples/shopping-notes/shopping-notes-api/src/app.test.ts) verifies that an item is created with the given name and `bought: false`, tagged `@spec test api-add-shopping-item#create-item-with-name`
 
 ```mermaid
 flowchart TD
@@ -116,11 +122,11 @@ flowchart TD
 
 ### Rules live outside the feature flow — they govern how every artifact is built:
 
-For example, the rule `secret-handling` works like this:
+For example, the rule [`secret-handling`](examples/shopping-notes/shopping-notes-spex/rules/secret-handling.yaml) works like this:
 
 1. **Rule** — `secret-handling`: "Secret protection"
 2. **Governs** — every contract, file, and test in the repo, regardless of feature
-3. **Proven by** — a secret scan check running in CI or manually with `spex check`
+3. **Proven by** — checks such as `no-secret-in-console-log` and `no-backup-files` running in CI or manually with `spex check`
 
 Even if a deterministic check is not possible, rules are read and followed by AI and can be used for a review by a human or another agent, which gives pretty good results.
 
