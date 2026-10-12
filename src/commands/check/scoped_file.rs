@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
-use error_stack::ResultExt;
+use eros::Context;
 
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::support::fs::relative_to;
 use crate::support::repo_files::RepoFiles;
 
@@ -19,9 +19,7 @@ impl ScopedFile {
     pub(super) fn collect(repo_path: &Path) -> Result<Vec<Self>> {
         let mut files = Vec::new();
         for result in RepoFiles::new(repo_path) {
-            let abs = result.change_context_lazy(|| {
-                CliError::Internal("could not walk workspace repository files".into())
-            })?;
+            let abs = result.context("could not walk workspace repository files")?;
             let rel = relative_to(&abs, repo_path).to_path_buf();
             files.push(Self { abs, rel });
         }

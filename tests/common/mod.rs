@@ -14,6 +14,15 @@ pub fn with_version_header(body: &str) -> String {
 }
 
 pub fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output {
+    run_spex_with_env(dir, args, stdin, &[])
+}
+
+pub fn run_spex_with_env(
+    dir: &Path,
+    args: &[&str],
+    stdin: &str,
+    envs: &[(&str, &str)],
+) -> std::process::Output {
     let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
     let bin_dir = bin.parent().expect("binary directory");
     let path = match std::env::var_os("PATH") {
@@ -29,6 +38,9 @@ pub fn run_spex(dir: &Path, args: &[&str], stdin: &str) -> std::process::Output 
         .args(args)
         .current_dir(dir)
         .env("PATH", path)
+        .env_remove("RUST_BACKTRACE")
+        .env_remove("RUST_LIB_BACKTRACE")
+        .envs(envs.iter().copied())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

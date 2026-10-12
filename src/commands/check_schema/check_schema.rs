@@ -3,11 +3,11 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use eros::Context;
 use jsonschema::{Retrieve, Uri, Validator};
 use serde_json::Value;
 
-use crate::error::{CliError, Result, describe};
+use crate::error::{Result, could_not_parse, could_not_read, describe};
 
 #[cfg(test)]
 #[path = "check_schema_test.rs"]
@@ -38,9 +38,9 @@ pub fn run(args: CheckSchemaArgs) -> Result<ExitCode> {
                     eprintln!("{file}: {message}");
                 }
             }
-            Err(report) => {
+            Err(error) => {
                 failed = true;
-                eprintln!("{file}: {}", describe(&report));
+                eprintln!("{file}: {}", describe(&error));
             }
         }
     }
@@ -53,10 +53,9 @@ pub fn run(args: CheckSchemaArgs) -> Result<ExitCode> {
 }
 
 pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
-    let text = fs::read_to_string(schema_path)
-        .change_context_lazy(|| CliError::ReadFile(schema_path.to_path_buf()))?;
-    let schema: Value = serde_json::from_str(&text)
-        .change_context_lazy(|| CliError::ParseFile(schema_path.to_path_buf()))?;
+    let text = fs::read_to_string(schema_path).with_context(|| could_not_read(schema_path))?;
+    let schema: Value =
+        serde_json::from_str(&text).with_context(|| could_not_parse(schema_path))?;
 
     let dir = schema_path
         .parent()
@@ -66,19 +65,12 @@ pub(crate) fn build_validator(schema_path: &Path) -> Result<Validator> {
     jsonschema::options()
         .with_retriever(DirRetriever { dir })
         .build(&schema)
-        .map_err(|err| {
-            Report::new(CliError::Internal(format!(
-                "invalid schema `{}`: {err}",
-                schema_path.display()
-            )))
-        })
+        .map_err(|err| eros::error!("invalid schema `{}`: {err}", schema_path.display()))
 }
 
 pub(crate) fn validate_file(validator: &Validator, path: &Path) -> Result<Vec<String>> {
-    let text =
-        fs::read_to_string(path).change_context_lazy(|| CliError::ReadFile(path.to_path_buf()))?;
-    let instance: Value = serde_yaml_ng::from_str(&text)
-        .change_context_lazy(|| CliError::ParseFile(path.to_path_buf()))?;
+    let text = fs::read_to_string(path).with_context(|| could_not_read(path))?;
+    let instance: Value = serde_yaml_ng::from_str(&text).with_context(|| could_not_parse(path))?;
 
     Ok(validate_instance(validator, &instance))
 }

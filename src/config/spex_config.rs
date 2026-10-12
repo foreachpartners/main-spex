@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use error_stack::{Report, ResultExt};
+use eros::{Context, IntoAnyUnion};
 use serde::{Deserialize, Serialize};
 
-use crate::error::{CliError, Result};
+use crate::error::{Result, config_not_found, could_not_parse, could_not_read};
 use crate::rule::RuleId;
 use crate::spec::SpecCoverageIgnore;
 use crate::support::fs::dir_name;
@@ -72,7 +72,7 @@ impl SpexConfig {
                 return Ok(child_config_path);
             }
         }
-        Err(Report::new(CliError::ConfigNotFound))
+        Err(config_not_found())
     }
 
     pub fn dir_of(config_path: &Path) -> &Path {
@@ -98,14 +98,14 @@ impl SpexConfig {
 
     pub fn load(config_path: &Path) -> Result<Self> {
         if !config_path.exists() {
-            return Err(Report::new(CliError::ConfigNotFound));
+            return Err(config_not_found());
         }
 
-        let raw = fs::read_to_string(config_path)
-            .change_context_lazy(|| CliError::ReadFile(config_path.to_path_buf()))?;
+        let raw = fs::read_to_string(config_path).with_context(|| could_not_read(config_path))?;
 
         serde_yaml_ng::from_str(&raw)
-            .change_context_lazy(|| CliError::ParseFile(config_path.to_path_buf()))
+            .with_context(|| could_not_parse(config_path))
+            .any_union()
     }
 
     pub fn version_warning(&self) -> Option<String> {

@@ -2,6 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::config::REPO_CONFIG_FILE;
+    use crate::error::describe;
     use crate::spec::CoverageLayer;
     use crate::support::testing;
     use indoc::indoc;
@@ -29,10 +30,10 @@ mod tests {
     fn validate_scopes_rejects_the_first_unknown_short_name() {
         let scopes = ["api".to_string(), "nope".to_string(), "other".to_string()];
         let error = spex().validate_scopes(&scopes).expect_err("unknown scope");
-        assert!(matches!(
-            error.current_context(),
-            CliError::UnknownScope(name) if name == "nope"
-        ));
+        assert_eq!(
+            describe(&error),
+            "unknown repository short name `nope` — not listed in spex.yaml"
+        );
     }
 
     fn selected_short_names(names: &[&str]) -> Vec<String> {
@@ -62,10 +63,10 @@ mod tests {
         let error = spex()
             .select_repositories(&names)
             .expect_err("unknown repo");
-        assert!(matches!(
-            error.current_context(),
-            CliError::UnknownRepo(name) if name == "ghost"
-        ));
+        assert_eq!(
+            describe(&error),
+            "unknown workspace repository `ghost` — not listed in spex.yaml"
+        );
     }
 
     fn write_spec(spex_dir: &std::path::Path, id: &str) {
@@ -196,6 +197,8 @@ mod tests {
             .err()
             .expect("invalid repo config");
 
-        assert!(matches!(error.current_context(), CliError::ParseFile(_)));
+        let message = describe(&error);
+        assert!(message.starts_with("could not parse `"), "{message}");
+        assert!(message.contains(REPO_CONFIG_FILE), "{message}");
     }
 }

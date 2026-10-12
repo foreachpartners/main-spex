@@ -1,7 +1,9 @@
 mod common;
 use std::path::Path;
 
-use common::{assert_fails_mentioning, dummy_project_fixture, run_spex, temp_project};
+use common::{
+    assert_fails_mentioning, dummy_project_fixture, run_spex, run_spex_with_env, temp_project,
+};
 
 const EXPECTED_INFO: &str = r#"{
   "spex_dir": {spex_dir},
@@ -173,5 +175,33 @@ fn tool_failure_prints_one_plain_line_and_exits_two() {
     assert!(
         !stderr.contains('\u{1b}') && !stderr.contains("╰╴"),
         "stderr carries colour or a source location:\n{stderr}",
+    );
+}
+
+#[test]
+fn tool_failure_with_rust_backtrace_follows_the_error_line_with_a_detailed_report() {
+    let (_workspace, project) = temp_project(&dummy_project_fixture());
+
+    let info = run_spex_with_env(
+        &project,
+        &["info", "--repo", "bogus"],
+        "",
+        &[("RUST_BACKTRACE", "1")],
+    );
+
+    let stderr = String::from_utf8_lossy(&info.stderr);
+    assert_eq!(info.status.code(), Some(2));
+    assert!(
+        stderr
+            .contains("error: unknown workspace repository `bogus` — not listed in spex.yaml\n\n"),
+        "the error line is missing:\n{stderr}",
+    );
+    assert!(
+        stderr.contains("[src/config/spex.rs:"),
+        "the error location is missing:\n{stderr}",
+    );
+    assert!(
+        stderr.contains("Backtrace (captured)"),
+        "the backtrace is missing:\n{stderr}",
     );
 }

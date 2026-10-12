@@ -4,11 +4,11 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anstream::println;
-use error_stack::{Report, ResultExt, bail};
+use eros::{Context, bail};
 use owo_colors::OwoColorize;
 
 use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, SpexConfig, spex_yaml_edit};
-use crate::error::{CliError, Result};
+use crate::error::{Result, could_not_read_dir};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
 
@@ -31,11 +31,8 @@ pub fn run() -> Result<ExitCode> {
 
     let workspace_root = workspace_root(&current_dir)?;
 
-    let default_name = dir_name(&workspace_root).ok_or_else(|| {
-        Report::new(CliError::Internal(
-            "could not read the workspace root name".into(),
-        ))
-    })?;
+    let default_name = dir_name(&workspace_root)
+        .ok_or_else(|| eros::error!("could not read the workspace root name"))?;
 
     let project_name = confirm_project_name(default_name)?;
 
@@ -102,9 +99,7 @@ fn is_inside_spex_dir(current_dir: &Path) -> bool {
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     if is_inside_spex_dir(current_dir) {
         let parent = current_dir.parent().ok_or_else(|| {
-            Report::new(CliError::Internal(
-                "expected the spex directory to live inside a workspace root".into(),
-            ))
+            eros::error!("expected the spex directory to live inside a workspace root")
         })?;
         return Ok(parent.to_path_buf());
     }
@@ -126,13 +121,12 @@ fn ensure_spex_dir(
 }
 
 fn verify_empty(spex_dir: &Path) -> Result<()> {
-    let mut entries =
-        fs::read_dir(spex_dir).change_context_lazy(|| CliError::ReadDir(spex_dir.to_path_buf()))?;
+    let mut entries = fs::read_dir(spex_dir).with_context(|| could_not_read_dir(spex_dir))?;
     if entries.next().is_some() {
-        bail!(CliError::Custom(format!(
+        bail!(
             "`{}` is not empty — `spex init` sets up a fresh project in an empty directory, use `spex update` for an initialized one",
             spex_dir.display()
-        )));
+        );
     }
     Ok(())
 }
@@ -167,13 +161,11 @@ fn to_kebab_case(name: &str) -> String {
 
 fn prompt(message: &str) -> Result<String> {
     print!("{message}");
-    io::stdout()
-        .flush()
-        .change_context_lazy(|| CliError::Internal("could not flush stdout".into()))?;
+    io::stdout().flush().context("could not flush stdout")?;
 
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
-        .change_context_lazy(|| CliError::Internal("could not read from stdin".into()))?;
+        .context("could not read from stdin")?;
     Ok(input)
 }

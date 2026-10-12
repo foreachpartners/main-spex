@@ -2,10 +2,10 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use eros::{Context, IntoAnyUnion, bail};
 
 use crate::config::spex::Spex;
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::spec::SPECS_DIR;
 use crate::support::ai_view::ai_view;
 use crate::support::fs::write_file;
@@ -59,7 +59,7 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
             .iter()
             .any(|spec| spec.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
-            return Err(Report::new(CliError::UnknownSpecId(id.clone())));
+            bail!("unknown spec id `{id}` — not found in {SPECS_DIR}");
         }
     }
 
@@ -71,14 +71,16 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
 
     if output.is_empty() {
         return serde_yaml_ng::to_string(&output)
-            .change_context_lazy(|| CliError::Internal("could not serialize specs".into()));
+            .context("could not serialize specs")
+            .any_union();
     }
 
     output
         .iter()
         .map(|spec| {
             serde_yaml_ng::to_string(&[spec])
-                .change_context_lazy(|| CliError::Internal("could not serialize specs".into()))
+                .context("could not serialize specs")
+                .any_union()
         })
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))

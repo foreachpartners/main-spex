@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::error::describe;
     use crate::spec::CoverageLayer;
     use indoc::indoc;
     use tempfile::tempdir;
@@ -96,10 +97,11 @@ mod tests {
 
         let error = RepoConfig::load(repo.path()).expect_err("invalid yaml");
 
-        assert!(matches!(
-            error.current_context(),
-            CliError::ParseFile(failed) if failed == &path
-        ));
+        assert!(
+            describe(&error).starts_with(&format!("could not parse `{}`: ", path.display())),
+            "{}",
+            describe(&error)
+        );
     }
 
     #[test]

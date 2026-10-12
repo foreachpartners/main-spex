@@ -2,12 +2,12 @@ use std::fs;
 use std::process::ExitCode;
 
 use anstream::println;
-use error_stack::ResultExt;
+use eros::Context;
 use owo_colors::OwoColorize;
 
 use crate::config::spex::Spex;
-use crate::config::{CLI_VERSION, SpexConfig, spex_yaml_edit};
-use crate::error::{CliError, Result};
+use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
+use crate::error::{Result, could_not_read};
 use crate::support::fs::write_file;
 use serde::Deserialize;
 
@@ -28,15 +28,18 @@ struct UpdateConfig {
 }
 
 pub fn run() -> Result<ExitCode> {
-    let config_path = Spex::locate_spex_config().change_context(CliError::NotInitialized)?;
+    let config_path = Spex::locate_spex_config().with_context(|| {
+        format!(
+            "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
+        )
+    })?;
 
-    let raw = fs::read_to_string(&config_path)
-        .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
+    let raw = fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
     sync_templates(SpexConfig::dir_of(&config_path), &previous.rules_unused)
-        .change_context_lazy(|| CliError::Internal("could not rewrite bundled templates".into()))?;
+        .context("could not rewrite bundled templates")?;
 
     write_file(
         &config_path,

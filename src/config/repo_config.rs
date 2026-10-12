@@ -1,11 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-use error_stack::ResultExt;
+use eros::{Context, IntoAnyUnion};
 use serde::Deserialize;
 
 use super::spex_config::PreexistingError;
-use crate::error::{CliError, Result};
+use crate::error::{Result, could_not_parse, could_not_read};
 use crate::spec::SpecCoverageIgnore;
 
 #[cfg(test)]
@@ -29,9 +29,10 @@ impl RepoConfig {
             return Ok(Self::default());
         }
 
-        let raw = fs::read_to_string(&config_path)
-            .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
+        let raw = fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
 
-        serde_yaml_ng::from_str(&raw).change_context_lazy(|| CliError::ParseFile(config_path))
+        serde_yaml_ng::from_str(&raw)
+            .with_context(|| could_not_parse(&config_path))
+            .any_union()
     }
 }

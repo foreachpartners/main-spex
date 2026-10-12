@@ -26,4 +26,4 @@ Every command except `init` finds the spex repository from the current directory
 
 `rules` and `specs` print a YAML list, to stdout or to `--output`.
 
-Every command exits `0` on success, `1` when it ran and reported failures (`check` errors, `coverage` gaps, `check-schema` violations), and `2` when it could not run (invalid arguments, a missing `spex.yaml`, an unreadable schema). A command that could not run prints one `error: <message>` line to stderr, so a CI script can tell a tool failure from a finding.
+Every command exits `0` on success, `1` when it ran and reported failures (`check` errors, `coverage` gaps, `check-schema` violations), and `2` when it could not run (invalid arguments, a missing `spex.yaml`, an unreadable schema). A command that could not run prints one `error: <message>` line to stderr, so a CI script can tell a tool failure from a finding. When `RUST_BACKTRACE` is set, a detailed report follows that line: the source location where the error arose, each added context with its location, and a backtrace.

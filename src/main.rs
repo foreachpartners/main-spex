@@ -18,7 +18,7 @@ use commands::info::InfoArgs;
 use commands::jq::JqArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
-use error::{Result, describe};
+use error::{Result, failure_report};
 
 #[derive(Parser)]
 #[command(
@@ -56,8 +56,8 @@ enum Commands {
 const TOOL_FAILURE_EXIT_CODE: u8 = 2;
 
 fn main() -> ExitCode {
-    run(Cli::parse().command).unwrap_or_else(|report| {
-        eprintln!("error: {}", describe(&report));
+    run(Cli::parse().command).unwrap_or_else(|error| {
+        eprintln!("{}", failure_report(&error));
         ExitCode::from(TOOL_FAILURE_EXIT_CODE)
     })
 }

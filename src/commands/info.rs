@@ -1,13 +1,13 @@
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::ResultExt;
+use eros::{Context, IntoAnyUnion};
 use serde::Serialize;
 use serde_json::Value;
 
 use crate::config::Repository;
 use crate::config::spex::Spex;
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::support::fs::canonical;
 
 #[derive(Args)]
@@ -54,18 +54,17 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         spex_dir: spex.dir.to_string_lossy().into_owned(),
         config: config_json,
     };
-    let json = serde_json::to_string_pretty(&info).change_context_lazy(|| {
-        CliError::Internal("could not serialize the spex configuration".into())
-    })?;
+    let json = serde_json::to_string_pretty(&info)
+        .context("could not serialize the spex configuration")?;
     println!("{json}");
 
     Ok(ExitCode::SUCCESS)
 }
 
 fn to_json(value: &impl Serialize) -> Result<Value> {
-    serde_json::to_value(value).change_context_lazy(|| {
-        CliError::Internal("could not serialize the spex configuration".into())
-    })
+    serde_json::to_value(value)
+        .context("could not serialize the spex configuration")
+        .any_union()
 }
 
 fn repository_with_absolute_path(mut json: Value, repository: &Repository) -> Value {

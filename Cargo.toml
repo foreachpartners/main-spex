@@ -14,8 +14,6 @@ module_inception = "allow"
 
 [dependencies]
 clap = { version = "4.6.7", features = ["derive"] }
-error-stack = "0.8.0"
-thiserror = "2.0.21"
 derive_more = { version = "2.1.1", default-features = false, features = ["display"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_yaml_ng = "0.10.0"
@@ -36,6 +34,7 @@ supports-hyperlinks = "3.2.0"
 anstyle-hyperlink = { version = "1.0.2", features = ["file"] }
 jaq-all = { version = "0.3.0", default-features = false, features = ["std-all"] }
 jaq-json = { version = "2.0.3", features = ["serde"] }
+eros = { version = "0.8.1", features = ["location"] }
 
 [dev-dependencies]
 tempfile = "3.27.0"

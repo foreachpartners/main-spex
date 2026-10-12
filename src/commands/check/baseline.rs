@@ -3,11 +3,11 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anstream::println;
-use error_stack::ResultExt;
+use eros::Context;
 use owo_colors::OwoColorize;
 
 use crate::config::{self, PreexistingError, Repository, spex_yaml_edit};
-use crate::error::{CliError, Result};
+use crate::error::{Result, could_not_read};
 use crate::rule::Severity;
 use crate::support::fs::write_file;
 use crate::support::text::plural;
@@ -147,8 +147,8 @@ pub(super) fn fill_preexisting_errors(
         .collect();
 
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
-    let raw = std::fs::read_to_string(&config_path)
-        .change_context_lazy(|| CliError::ReadFile(config_path.clone()))?;
+    let raw =
+        std::fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
     let updated = spex_yaml_edit::set_preexisting_errors(&raw, &by_repo);
     let changed = updated != raw;
     if changed {

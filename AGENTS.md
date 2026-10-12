@@ -34,7 +34,7 @@ just help       # spex --help
 .github/workflows/  CI: tests and format checks on pull requests
 src/                CLI source
   main.rs           Entry point, arg parsing
-  error.rs          CliError, the single error enum for every command, its one-line description for users, and the shared Result alias
+  error.rs          The shared eros Result alias, the one-line description of an error for users, the report printed for a failed command, and the wording shared by several commands
   templates.rs      Bundled templates directory and the names of its folders and files (constants only)
   spec/             Spec topic (mod.rs is an index only)
     id.rs           SpecId and AcId value objects and their id grammar

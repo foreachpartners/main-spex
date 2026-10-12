@@ -2,11 +2,11 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use eros::{Context, IntoAnyUnion, bail};
 
 use crate::config::Repository;
 use crate::config::spex::Spex;
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::support::ai_view::ai_view;
 use crate::support::fs::write_file;
@@ -62,7 +62,7 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
             .iter()
             .any(|rule| rule.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
-            return Err(Report::new(CliError::UnknownRuleId(id.clone())));
+            bail!("unknown rule id `{id}` — not found in {RULES_DIR}");
         }
     }
 
@@ -74,14 +74,16 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
 
     if output.is_empty() {
         return serde_yaml_ng::to_string(&output)
-            .change_context_lazy(|| CliError::Internal("could not serialize rules".into()));
+            .context("could not serialize rules")
+            .any_union();
     }
 
     output
         .iter()
         .map(|rule| {
             serde_yaml_ng::to_string(&[rule])
-                .change_context_lazy(|| CliError::Internal("could not serialize rules".into()))
+                .context("could not serialize rules")
+                .any_union()
         })
         .collect::<Result<Vec<_>>>()
         .map(|docs| docs.join("\n"))

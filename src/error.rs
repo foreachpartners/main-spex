@@ -1,59 +1,48 @@
-use std::path::PathBuf;
+use std::backtrace::BacktraceStatus;
+use std::path::Path;
 
-use error_stack::{FrameKind, Report};
-use thiserror::Error;
+use eros::ErrorUnion;
+pub use eros::Result;
 
 use crate::config::SPEX_CONFIG_FILE;
-use crate::rule::RULES_DIR;
-use crate::spec::SPECS_DIR;
 
 #[cfg(test)]
 #[path = "error_test.rs"]
 mod error_test;
 
-pub type Result<T> = core::result::Result<T, Report<CliError>>;
-
-pub fn describe(report: &Report<CliError>) -> String {
-    report
-        .frames()
-        .filter_map(|frame| match frame.kind() {
-            FrameKind::Context(context) => Some(context.to_string()),
-            FrameKind::Attachment(_) => None,
-        })
+pub fn describe(error: &ErrorUnion) -> String {
+    error
+        .contexts()
+        .rev()
+        .map(ToString::to_string)
+        .chain(std::iter::once(error.inner().to_string()))
         .collect::<Vec<_>>()
         .join(": ")
 }
 
-#[derive(Debug, Error)]
-pub enum CliError {
-    #[error(
+pub fn failure_report(error: &ErrorUnion) -> String {
+    let summary = format!("error: {}", describe(error));
+    match error.backtrace().status() {
+        BacktraceStatus::Captured => format!("{summary}\n\n{error:?}"),
+        _ => summary,
+    }
+}
+
+#[track_caller]
+pub fn config_not_found() -> ErrorUnion {
+    eros::error!(
         "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any workspace repository"
-    )]
-    ConfigNotFound,
-    #[error(
-        "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
-    )]
-    NotInitialized,
-    #[error("could not read directory `{}`", .0.display())]
-    ReadDir(PathBuf),
-    #[error("could not read `{}`", .0.display())]
-    ReadFile(PathBuf),
-    #[error("could not parse `{}`", .0.display())]
-    ParseFile(PathBuf),
-    #[error("could not write `{}`", .0.display())]
-    WriteFile(PathBuf),
-    #[error("could not create directory `{}`", .0.display())]
-    CreateDir(PathBuf),
-    #[error("unknown workspace repository `{0}` — not listed in {SPEX_CONFIG_FILE}")]
-    UnknownRepo(String),
-    #[error("unknown repository short name `{0}` — not listed in {SPEX_CONFIG_FILE}")]
-    UnknownScope(String),
-    #[error("unknown spec id `{0}` — not found in {SPECS_DIR}")]
-    UnknownSpecId(String),
-    #[error("unknown rule id `{0}` — not found in {RULES_DIR}")]
-    UnknownRuleId(String),
-    #[error("{0}")]
-    Custom(String),
-    #[error("{0}")]
-    Internal(String),
+    )
+}
+
+pub fn could_not_read(path: &Path) -> String {
+    format!("could not read `{}`", path.display())
+}
+
+pub fn could_not_parse(path: &Path) -> String {
+    format!("could not parse `{}`", path.display())
+}
+
+pub fn could_not_read_dir(path: &Path) -> String {
+    format!("could not read directory `{}`", path.display())
 }

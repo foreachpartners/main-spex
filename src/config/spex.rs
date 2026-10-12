@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
 use anstream::eprintln;
-use error_stack::Report;
+use eros::bail;
 use owo_colors::OwoColorize;
 
-use crate::config::{RepoConfig, Repository, SpexConfig};
-use crate::error::{CliError, Result};
+use crate::config::{RepoConfig, Repository, SPEX_CONFIG_FILE, SpexConfig};
+use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec, SpecCoverageIgnore};
 use crate::support::fs::current_dir;
@@ -85,7 +85,7 @@ impl Spex {
                 .iter()
                 .any(|repo| repo.matches_any_repo_name(name))
             {
-                return Err(Report::new(CliError::UnknownRepo(name.clone())));
+                bail!("unknown workspace repository `{name}` — not listed in {SPEX_CONFIG_FILE}");
             }
         }
         Ok(())
@@ -109,7 +109,9 @@ impl Spex {
                 .iter()
                 .any(|repo| &repo.repository_short_name == short_name)
             {
-                return Err(Report::new(CliError::UnknownScope(short_name.clone())));
+                bail!(
+                    "unknown repository short name `{short_name}` — not listed in {SPEX_CONFIG_FILE}"
+                );
             }
         }
         Ok(())

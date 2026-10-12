@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Args;
-use error_stack::{Report, ResultExt};
+use eros::{Context, IntoAnyUnion};
 use jaq_all::jaq_core::{Vars, unwrap_valr};
 use jaq_all::load::{FileReports, FileReportsDisp};
 use jaq_all::{compile_with, data, defs};
@@ -12,7 +12,7 @@ use jaq_json::Val;
 use jaq_json::read;
 use jaq_json::write::{self, Pp};
 
-use crate::error::{CliError, Result};
+use crate::error::{Result, could_not_read};
 
 #[cfg(test)]
 #[path = "jq_test.rs"]
@@ -48,22 +48,20 @@ pub fn run(args: JqArgs) -> Result<ExitCode> {
     evaluate(&args.filter, &text, output, &mut stdout)?;
     stdout
         .flush()
-        .change_context_lazy(|| CliError::Internal("could not write to standard output".into()))?;
+        .context("could not write to standard output")?;
     Ok(ExitCode::SUCCESS)
 }
 
 fn read_input(file: Option<&Path>) -> Result<String> {
     match file {
-        Some(path) => {
-            fs::read_to_string(path).change_context_lazy(|| CliError::ReadFile(path.to_path_buf()))
-        }
+        Some(path) => fs::read_to_string(path)
+            .with_context(|| could_not_read(path))
+            .any_union(),
         None => {
             let mut text = String::new();
             io::stdin()
                 .read_to_string(&mut text)
-                .change_context_lazy(|| {
-                    CliError::Internal("could not read standard input".into())
-                })?;
+                .context("could not read standard input")?;
             Ok(text)
         }
     }
@@ -71,7 +69,7 @@ fn read_input(file: Option<&Path>) -> Result<String> {
 
 fn evaluate(filter: &str, text: &str, output: Output, out: &mut dyn Write) -> Result<()> {
     let compiled = compile_with(filter, defs(), data::base_funs(), &[])
-        .map_err(|reports| Report::new(CliError::Custom(describe_filter_errors(&reports))))?;
+        .map_err(|reports| eros::error!("{}", describe_filter_errors(&reports)))?;
     let input = parse_input(text)?;
     let pp = printer(output);
 
@@ -80,13 +78,11 @@ fn evaluate(filter: &str, text: &str, output: Output, out: &mut dyn Write) -> Re
         &compiled,
         Vars::default(),
         std::iter::once(Ok::<_, String>(input)),
-        |message| Report::new(CliError::Internal(message)),
+        |message| eros::error!("{message}"),
         |result| {
-            let value = unwrap_valr(result)
-                .map_err(|err| Report::new(CliError::Custom(format!("jq: {err}"))))?;
-            write_value(out, &pp, output, &value).change_context_lazy(|| {
-                CliError::Internal("could not write to standard output".into())
-            })
+            let value = unwrap_valr(result).map_err(|err| eros::error!("jq: {err}"))?;
+            write_value(out, &pp, output, &value).context("could not write to standard output")?;
+            Ok(())
         },
     )
 }
@@ -95,9 +91,9 @@ fn parse_input(text: &str) -> Result<Val> {
     if let Ok(value) = read::parse_single(text.as_bytes()) {
         return Ok(value);
     }
-    serde_yaml_ng::from_str(text).change_context_lazy(|| {
-        CliError::Custom("could not parse the input as JSON or YAML".into())
-    })
+    serde_yaml_ng::from_str(text)
+        .context("could not parse the input as JSON or YAML")
+        .any_union()
 }
 
 fn printer(output: Output) -> Pp {

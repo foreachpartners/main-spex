@@ -2,10 +2,10 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
 
-use error_stack::ResultExt;
+use eros::Context;
 
 use crate::config::spex::Spex;
-use crate::error::{CliError, Result};
+use crate::error::Result;
 use crate::spec::{AcId, CoverageLayer, SpecId};
 use crate::support::repo_files::RepoFiles;
 use crate::tracing::annotations::{self, Annotation};
@@ -65,9 +65,7 @@ impl AnnotationIndex {
 
     fn scan_repo(&mut self, repo_path: &Path) -> Result<()> {
         for result in RepoFiles::new(repo_path) {
-            let path = result.change_context_lazy(|| {
-                CliError::Internal("could not walk workspace repository files".into())
-            })?;
+            let path = result.context("could not walk workspace repository files")?;
             let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };

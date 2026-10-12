@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use error_stack::ResultExt;
+use eros::{Context, IntoAnyUnion};
 use include_dir::{Dir, DirEntry};
 
-use crate::error::{CliError, Result};
+use crate::error::{Result, could_not_read_dir};
 
 #[cfg(test)]
 #[path = "fs_test.rs"]
@@ -15,17 +15,21 @@ pub fn file_url(path: &Path) -> String {
 }
 
 pub fn current_dir() -> Result<PathBuf> {
-    std::env::current_dir().change_context_lazy(|| {
-        CliError::Internal("could not determine the current directory".into())
-    })
+    std::env::current_dir()
+        .context("could not determine the current directory")
+        .any_union()
 }
 
 pub fn write_file(path: &Path, contents: impl AsRef<[u8]>) -> Result<()> {
-    fs::write(path, contents).change_context_lazy(|| CliError::WriteFile(path.to_path_buf()))
+    fs::write(path, contents)
+        .with_context(|| format!("could not write `{}`", path.display()))
+        .any_union()
 }
 
 pub fn create_dir_all(path: &Path) -> Result<()> {
-    fs::create_dir_all(path).change_context_lazy(|| CliError::CreateDir(path.to_path_buf()))
+    fs::create_dir_all(path)
+        .with_context(|| format!("could not create directory `{}`", path.display()))
+        .any_union()
 }
 
 pub fn dir_name(path: &Path) -> Option<&str> {
@@ -73,9 +77,9 @@ pub fn symlink_if_absent(link: &Path, target: &str) -> Result<()> {
         return Ok(());
     }
 
-    symlink(target, link).change_context_lazy(|| {
-        CliError::Internal(format!("could not link `{}` to `{target}`", link.display()))
-    })
+    symlink(target, link)
+        .with_context(|| format!("could not link `{}` to `{target}`", link.display()))
+        .any_union()
 }
 
 #[cfg(not(unix))]
@@ -94,21 +98,18 @@ pub fn make_files_executable(dir: &Path) -> Result<()> {
     }
 
     for entry in WalkDir::new(dir) {
-        let entry = entry.change_context_lazy(|| CliError::ReadDir(dir.to_path_buf()))?;
+        let entry = entry.with_context(|| could_not_read_dir(dir))?;
         if !entry.file_type().is_file() {
             continue;
         }
         let path = entry.path();
         let mut permissions = entry
             .metadata()
-            .change_context_lazy(|| {
-                CliError::Internal(format!("could not read metadata of `{}`", path.display()))
-            })?
+            .with_context(|| format!("could not read metadata of `{}`", path.display()))?
             .permissions();
         permissions.set_mode(permissions.mode() | 0o111);
-        fs::set_permissions(path, permissions).change_context_lazy(|| {
-            CliError::Internal(format!("could not set permissions on `{}`", path.display()))
-        })?;
+        fs::set_permissions(path, permissions)
+            .with_context(|| format!("could not set permissions on `{}`", path.display()))?;
     }
     Ok(())
 }
