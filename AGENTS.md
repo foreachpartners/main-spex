@@ -87,10 +87,17 @@ templates/                     Assets scaffolded into projects
   project-name.code-workspace  Editor workspace file seeded by init
 examples/                      Sample example projects with/without spex(shopping-notes, shopping-notes-no-spex)
 tests/                         Integration tests that build and run the spex binary
+  cli/                         The one integration test binary; main.rs is an index only
+    common.rs                  Helpers shared across commands (running spex, copying fixture projects)
+    <command>.rs               One file per command with all its tests and helpers
+    check/                     One file per check type (regexp, glob, ast_grep, script), declared as modules of check.rs
+  fixtures/                    Projects the integration tests copy and run spex against
+  changelog_format.rs          CHANGELOG.md format test, not tied to a command
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end
-tests that drive the compiled binary live in `tests/`.
+tests that drive the compiled binary live in `tests/cli/`, split by the command
+they belong to.
 
 Keep this section in sync when the structure changes.
 

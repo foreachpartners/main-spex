@@ -3,8 +3,13 @@ use std::path::PathBuf;
 
 use tempfile::TempDir;
 
-mod common;
-use common::{assert_fails_mentioning, dummy_project_fixture, run_spex, temp_project};
+use crate::common::{assert_fails_mentioning, dummy_project_fixture, run_spex, temp_project};
+
+fn spex_dir() -> (TempDir, PathBuf) {
+    let (workspace, project) = temp_project(&dummy_project_fixture());
+    let spex = project.join("dummy-project-spex");
+    (workspace, spex)
+}
 
 const BAD_ID_SPEC: &str = "id: Bad_ID
 title: Bad spec
@@ -16,16 +21,8 @@ contract: none
 ";
 
 const TITLE_ONLY_SPEC: &str = "title: Only a title\n";
-
 const VALID_JSON_RULE: &str = r#"{"id":"json-rule","title":"Json rule","description":"A rule written as JSON.","acceptance_criteria":["MUST do a thing"]}"#;
-
 const INCOMPLETE_JSON_RULE: &str = r#"{"id":"json-rule"}"#;
-
-fn spex_dir() -> (TempDir, PathBuf) {
-    let (workspace, project) = temp_project(&dummy_project_fixture());
-    let spex = project.join("dummy-project-spex");
-    (workspace, spex)
-}
 
 #[test]
 fn check_schema_accepts_valid_files_without_output() {

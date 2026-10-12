@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::fs;
 use std::io::Write;
 use std::path::Path;
@@ -145,4 +143,31 @@ pub fn copy_dir(src: &Path, dst: &Path) {
             fs::copy(&from, &to).expect("copy file");
         }
     }
+}
+
+pub fn copy_no_spex(project: &Path) {
+    let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/no-spex-project");
+    copy_dir(&fixture, project);
+
+    let project_name = project
+        .file_name()
+        .and_then(|name| name.to_str())
+        .expect("project folder name")
+        .to_string();
+    for short in ["api", "frontend"] {
+        fs::rename(
+            project.join(short),
+            project.join(format!("{project_name}-{short}")),
+        )
+        .expect("rename repository to follow naming convention");
+    }
+}
+
+pub fn add_repositories(project: &Path) {
+    let config_path = project.join("proj-spex/spex.yaml");
+    let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");
+    config.push_str(
+        "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules:\n      - secret-handling\n  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
+    );
+    fs::write(&config_path, config).expect("write spex.yaml");
 }

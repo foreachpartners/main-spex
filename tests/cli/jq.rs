@@ -1,8 +1,9 @@
-mod common;
 use std::fs;
 
-use common::{assert_fails_mentioning, run_spex};
 use tempfile::tempdir;
+
+use crate::common;
+use crate::common::{assert_fails_mentioning, run_spex};
 
 #[test]
 fn jq_reads_json_from_stdin() {

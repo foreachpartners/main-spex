@@ -3,16 +3,64 @@ use std::io::Write;
 
 use tempfile::tempdir;
 
-mod common;
-use common::{
+use crate::common;
+use crate::common::{
     assert_fails_mentioning, dummy_project_fixture, report_text, run_spex, with_version_header,
 };
 
-const EXPECTED_COVERAGE: &str = include_str!("fixtures/dummy-project/expected_coverage.txt");
+fn append(path: &std::path::Path, text: &str) {
+    let mut file = fs::OpenOptions::new()
+        .append(true)
+        .open(path)
+        .expect("open file for append");
+    file.write_all(text.as_bytes()).expect("append to file");
+}
+
+const NONE_WITH_GAP_WAIVERS: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: impl
+    ac: resumes-favorite
+  - spec_id: none-with-gap
+    layer: test
+    ac: resumes-favorite
+"#;
+
+const EXPECTED_COVERAGE: &str = include_str!("../fixtures/dummy-project/expected_coverage.txt");
+
 const EXPECTED_COVERAGE_VERBOSE: &str =
-    include_str!("fixtures/dummy-project/expected_coverage_verbose.txt");
+    include_str!("../fixtures/dummy-project/expected_coverage_verbose.txt");
+
 const EXPECTED_COVERAGE_SCOPE_FRONTEND: &str =
-    include_str!("fixtures/dummy-project/expected_coverage_scope_frontend.txt");
+    include_str!("../fixtures/dummy-project/expected_coverage_scope_frontend.txt");
+
+const NONE_WITH_GAP_IMPL_WAIVER: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: impl
+    ac: resumes-favorite
+"#;
+
+const NONE_WITH_GAP_TEST_WAIVER: &str = r#"
+coverage_ignore:
+  - spec_id: none-with-gap
+    layer: test
+    ac: resumes-favorite
+"#;
+
+const IN_PROGRESS_SPEC: &str = r#"id: ci-check
+title: Verify a change before its spec is updated
+description: >-
+  A criterion still flagged not done in the spec repository.
+acceptance_criteria:
+  - id: rejects-empty-cart
+    must: "reject checkout of an empty cart"
+    is_done: false
+scope:
+  - api
+status: in-progress
+contract: single
+"#;
 
 #[test]
 fn coverage_report_matches_expected() {
@@ -109,28 +157,6 @@ fn coverage_scope_rejects_an_unknown_repository() {
     assert!(coverage.stdout.is_empty());
 }
 
-const IN_PROGRESS_SPEC: &str = r#"id: ci-check
-title: Verify a change before its spec is updated
-description: >-
-  A criterion still flagged not done in the spec repository.
-acceptance_criteria:
-  - id: rejects-empty-cart
-    must: "reject checkout of an empty cart"
-    is_done: false
-scope:
-  - api
-status: in-progress
-contract: single
-"#;
-
-fn append(path: &std::path::Path, text: &str) {
-    let mut file = fs::OpenOptions::new()
-        .append(true)
-        .open(path)
-        .expect("open file for append");
-    file.write_all(text.as_bytes()).expect("append to file");
-}
-
 #[test]
 fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test() {
     let workspace = tempdir().expect("create temp workspace");
@@ -188,30 +214,6 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
         report_text(&tested.stdout)
     );
 }
-
-const NONE_WITH_GAP_WAIVERS: &str = r#"
-coverage_ignore:
-  - spec_id: none-with-gap
-    layer: impl
-    ac: resumes-favorite
-  - spec_id: none-with-gap
-    layer: test
-    ac: resumes-favorite
-"#;
-
-const NONE_WITH_GAP_IMPL_WAIVER: &str = r#"
-coverage_ignore:
-  - spec_id: none-with-gap
-    layer: impl
-    ac: resumes-favorite
-"#;
-
-const NONE_WITH_GAP_TEST_WAIVER: &str = r#"
-coverage_ignore:
-  - spec_id: none-with-gap
-    layer: test
-    ac: resumes-favorite
-"#;
 
 #[test]
 fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {

@@ -1,7 +1,6 @@
-mod common;
 use std::path::Path;
 
-use common::{
+use crate::common::{
     assert_fails_mentioning, dummy_project_fixture, run_spex, run_spex_with_env, temp_project,
 };
 
@@ -48,6 +47,20 @@ const EXPECTED_INFO: &str = r#"{
 }
 "#;
 
+fn with_workspace_dirs(template: &str, project: &Path) -> String {
+    let as_json = |repository_dir: &str| {
+        let dir = project
+            .join(repository_dir)
+            .canonicalize()
+            .expect("canonical repository dir");
+        serde_json::to_string(&dir).expect("repository dir as JSON")
+    };
+    template
+        .replace("{spex_dir}", &as_json("dummy-project-spex"))
+        .replace("{api_dir}", &as_json("dummy-project-api"))
+        .replace("{frontend_dir}", &as_json("dummy-project-frontend"))
+}
+
 const EXPECTED_INFO_API: &str = r#"{
   "spex_dir": {spex_dir},
   "project_name": "dummy-project",
@@ -74,20 +87,6 @@ const EXPECTED_INFO_API: &str = r#"{
   "coverage_ignore": []
 }
 "#;
-
-fn with_workspace_dirs(template: &str, project: &Path) -> String {
-    let as_json = |repository_dir: &str| {
-        let dir = project
-            .join(repository_dir)
-            .canonicalize()
-            .expect("canonical repository dir");
-        serde_json::to_string(&dir).expect("repository dir as JSON")
-    };
-    template
-        .replace("{spex_dir}", &as_json("dummy-project-spex"))
-        .replace("{api_dir}", &as_json("dummy-project-api"))
-        .replace("{frontend_dir}", &as_json("dummy-project-frontend"))
-}
 
 fn listed_short_names(stdout: &[u8]) -> Vec<String> {
     let info: serde_json::Value = serde_json::from_slice(stdout).expect("info prints JSON");

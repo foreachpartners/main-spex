@@ -6,13 +6,11 @@ use std::process::Output;
 
 use tempfile::tempdir;
 
-mod common;
-use common::{copy_project, dummy_project_fixture, run_spex};
+use crate::common::{copy_project, dummy_project_fixture, run_spex};
 
-const CHANGELOG: &str = include_str!("../CHANGELOG.md");
+const CHANGELOG: &str = include_str!("../../CHANGELOG.md");
 const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 const PROJECT_SECTION: &str = "\n---\n\n# Project";
-
 const SYNCED_RULE: &str = "rules/writing-style.yaml";
 const SYNCED_RULE_SCRIPT: &str = "rules/writing-style/writing-style.sh";
 const SYNCED_SKILL: &str = ".agents/skills/spex-spec/SKILL.md";
@@ -81,6 +79,23 @@ impl Project {
     }
 }
 
+fn changelog_headers_newer_than(version: &str) -> Vec<String> {
+    CHANGELOG
+        .lines()
+        .filter(|line| line.starts_with("## ["))
+        .take_while(|line| !line.starts_with(&format!("## [{version}]")))
+        .map(str::to_string)
+        .collect()
+}
+
+fn printed_headers(stdout: &[u8]) -> Vec<String> {
+    String::from_utf8_lossy(stdout)
+        .lines()
+        .filter(|line| line.starts_with("## ["))
+        .map(str::to_string)
+        .collect()
+}
+
 fn read_tree(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
     let mut tree = BTreeMap::new();
     collect_tree(root, root, &mut tree);
@@ -117,23 +132,6 @@ fn changed_paths(
         .chain(after.keys())
         .filter(|path| before.get(*path) != after.get(*path))
         .cloned()
-        .collect()
-}
-
-fn changelog_headers_newer_than(version: &str) -> Vec<String> {
-    CHANGELOG
-        .lines()
-        .filter(|line| line.starts_with("## ["))
-        .take_while(|line| !line.starts_with(&format!("## [{version}]")))
-        .map(str::to_string)
-        .collect()
-}
-
-fn printed_headers(stdout: &[u8]) -> Vec<String> {
-    String::from_utf8_lossy(stdout)
-        .lines()
-        .filter(|line| line.starts_with("## ["))
-        .map(str::to_string)
         .collect()
 }
 

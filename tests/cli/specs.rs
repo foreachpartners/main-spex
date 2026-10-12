@@ -1,7 +1,10 @@
-mod common;
-use common::{
-    assert_fails_mentioning, canonical_display, dummy_project_fixture, listed_ids, run_spex,
-    temp_project,
+use std::fs;
+
+use tempfile::tempdir;
+
+use crate::common::{
+    assert_fails_mentioning, canonical_display, copy_project, dummy_project_fixture, listed_ids,
+    run_spex, temp_project,
 };
 
 const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
@@ -137,4 +140,49 @@ fn specs_rejects_an_unknown_scope() {
 
     assert_fails_mentioning(&specs, "unknown repository short name `bogus`");
     assert!(specs.stdout.is_empty());
+}
+
+#[test]
+fn specs_output_flag_writes_file_matching_stdout() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("proj");
+
+    copy_project(&dummy_project_fixture(), &project);
+
+    let stdout_run = run_spex(&project, &["specs"], "");
+    assert!(
+        stdout_run.status.success(),
+        "specs failed (exit {:?})\nstderr:\n{}",
+        stdout_run.status.code(),
+        String::from_utf8_lossy(&stdout_run.stderr),
+    );
+    let stdout_yaml = String::from_utf8_lossy(&stdout_run.stdout).into_owned();
+    assert!(!stdout_yaml.is_empty(), "expected specs on stdout");
+
+    let output_path = workspace.path().join("specs.yaml");
+    let file_run = run_spex(
+        &project,
+        &[
+            "specs",
+            "--output",
+            output_path.to_str().expect("utf8 path"),
+        ],
+        "",
+    );
+    assert!(
+        file_run.status.success(),
+        "specs --output failed (exit {:?})\nstderr:\n{}",
+        file_run.status.code(),
+        String::from_utf8_lossy(&file_run.stderr),
+    );
+    assert!(
+        file_run.stdout.is_empty(),
+        "specs --output should not print to stdout"
+    );
+
+    let file_yaml = fs::read_to_string(&output_path).expect("read --output file");
+    assert_eq!(
+        file_yaml, stdout_yaml,
+        "--output file contents should match stdout output"
+    );
 }
