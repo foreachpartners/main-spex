@@ -1,6 +1,6 @@
 # `spex init`
 
-Initializes a spex project in one of the three [layouts](../specification.md#layout): `multi-repo`, `single-repo`, or `monorepo`. Run it from the workspace root — the folder holding the packages in multi-repo, the repository root otherwise — or from inside an empty spex directory (`<project-name>-spex` in multi-repo, `spex` otherwise), which is reused instead of created.
+Initializes a spex project in one of the three [layouts](../specification.md#layout): `multi-repo`, `single-repo`, or `monorepo`. Run it from the workspace root — the folder holding the packages in multi-repo, the repository root otherwise — or from inside an empty spex directory (`<project-name>-spex` in multi-repo, `spex` otherwise), which is reused instead of created. A folder is taken for the spex directory only when its name fits and it is empty or already holds a `spex.yaml`; any other folder is the workspace root, so a repository that happens to be named `spex` initializes like any other and its folder name is the default project name.
 
 It sets up a fresh project only: it fails when the spex directory is not empty, so it never overwrites it. Use `spex update` for an initialized project.
 

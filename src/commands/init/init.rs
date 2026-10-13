@@ -43,7 +43,7 @@ pub fn run() -> Result<ExitCode> {
     let layout = confirm_layout()?;
     let project_name = confirm_project_name(default_name)?;
 
-    let spex_dir = locate_spex_dir(&current_dir, &workspace_root, layout, &project_name);
+    let spex_dir = locate_spex_dir(&current_dir, &workspace_root, layout, &project_name)?;
     verify_empty(&spex_dir)?;
     let agent_root = normalize(&spex_dir.join(layout.agent_root()));
     verify_agent_files(&agent_root)?;
@@ -128,12 +128,14 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     Ok(())
 }
 
-fn is_inside_spex_dir(current_dir: &Path) -> bool {
-    dir_name(current_dir).is_some_and(SpexConfig::is_spex_dir_name)
+fn is_inside_spex_dir(current_dir: &Path) -> Result<bool> {
+    let is_named_like_spex_dir = dir_name(current_dir).is_some_and(SpexConfig::is_spex_dir_name);
+    Ok(is_named_like_spex_dir
+        && (current_dir.join(SPEX_CONFIG_FILE).is_file() || is_empty_dir(current_dir)?))
 }
 
 fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
-    if is_inside_spex_dir(current_dir) {
+    if is_inside_spex_dir(current_dir)? {
         let parent = current_dir.parent().ok_or_else(|| {
             eros::error!("expected the spex directory to live inside a workspace root")
         })?;
@@ -147,27 +149,28 @@ fn locate_spex_dir(
     workspace_root: &Path,
     layout: Layout,
     project_name: &str,
-) -> PathBuf {
-    if is_inside_spex_dir(current_dir) {
-        return current_dir.to_path_buf();
+) -> Result<PathBuf> {
+    if is_inside_spex_dir(current_dir)? {
+        return Ok(current_dir.to_path_buf());
     }
 
-    workspace_root.join(layout.spex_dir_name(project_name))
+    Ok(workspace_root.join(layout.spex_dir_name(project_name)))
+}
+
+fn is_empty_dir(dir: &Path) -> Result<bool> {
+    let mut entries = fs::read_dir(dir).with_context(|| could_not_read_dir(dir))?;
+    Ok(entries.next().is_none())
 }
 
 fn verify_empty(spex_dir: &Path) -> Result<()> {
-    if !spex_dir.exists() {
+    if !spex_dir.exists() || is_empty_dir(spex_dir)? {
         return Ok(());
     }
 
-    let mut entries = fs::read_dir(spex_dir).with_context(|| could_not_read_dir(spex_dir))?;
-    if entries.next().is_some() {
-        bail!(
-            "`{}` is not empty — `spex init` sets up a fresh project in an empty directory, use `spex update` for an initialized one",
-            spex_dir.display()
-        );
-    }
-    Ok(())
+    bail!(
+        "`{}` is not empty — `spex init` sets up a fresh project in an empty directory, use `spex update` for an initialized one",
+        spex_dir.display()
+    );
 }
 
 fn confirm_layout() -> Result<Layout> {

@@ -201,11 +201,53 @@ mod tests_unit {
     }
 
     #[test]
+    fn workspace_root_of_a_non_empty_folder_named_like_a_spex_directory_is_the_folder() {
+        let workspace = workspace_with(&["spex", "pizza-shop-spex"], &[]);
+
+        for name in ["spex", "pizza-shop-spex"] {
+            let repository = workspace.path().join(name);
+            fs::write(repository.join("README.md"), "").expect("create file");
+
+            assert_eq!(
+                workspace_root(&repository).expect("workspace root"),
+                repository
+            );
+        }
+    }
+
+    #[test]
+    fn workspace_root_from_inside_an_initialized_spex_directory() {
+        let workspace = workspace_with(&["spex"], &[]);
+        let spex_dir = workspace.path().join("spex");
+        fs::write(spex_dir.join(SPEX_CONFIG_FILE), "").expect("create config");
+
+        assert_eq!(
+            workspace_root(&spex_dir).expect("workspace root"),
+            workspace.path()
+        );
+    }
+
+    #[test]
+    fn locate_spex_dir_puts_the_directory_inside_a_non_empty_folder_named_spex() {
+        let workspace = workspace_with(&["spex"], &[]);
+        let repository = workspace.path().join("spex");
+        fs::write(repository.join("README.md"), "").expect("create file");
+
+        for layout in [Layout::SingleRepo, Layout::Monorepo] {
+            let located =
+                locate_spex_dir(&repository, &repository, layout, "spex").expect("locate");
+
+            assert_eq!(located, repository.join("spex"));
+        }
+    }
+
+    #[test]
     fn locate_spex_dir_reuses_current_when_inside_spex_directory() {
         let workspace = workspace_with(&["pizza-shop-spex"], &[]);
         let spex_dir = workspace.path().join("pizza-shop-spex");
 
-        let located = locate_spex_dir(&spex_dir, workspace.path(), Layout::MultiRepo, "pizza-shop");
+        let located = locate_spex_dir(&spex_dir, workspace.path(), Layout::MultiRepo, "pizza-shop")
+            .expect("locate spex dir");
 
         assert_eq!(located, spex_dir);
     }
@@ -219,7 +261,8 @@ mod tests_unit {
             workspace.path(),
             Layout::MultiRepo,
             "pizza-shop",
-        );
+        )
+        .expect("locate spex dir");
 
         assert_eq!(located, workspace.path().join("pizza-shop-spex"));
     }
@@ -229,7 +272,8 @@ mod tests_unit {
         let workspace = workspace_with(&["server"], &[]);
 
         for layout in [Layout::SingleRepo, Layout::Monorepo] {
-            let located = locate_spex_dir(workspace.path(), workspace.path(), layout, "pizza-shop");
+            let located = locate_spex_dir(workspace.path(), workspace.path(), layout, "pizza-shop")
+                .expect("locate spex dir");
 
             assert_eq!(located, workspace.path().join("spex"));
         }
@@ -244,7 +288,8 @@ mod tests_unit {
             workspace.path(),
             Layout::SingleRepo,
             "pizza-shop",
-        );
+        )
+        .expect("locate spex dir");
 
         assert!(!located.exists());
     }

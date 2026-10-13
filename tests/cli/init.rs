@@ -197,6 +197,45 @@ fn init_monorepo_lists_no_package_and_puts_agent_files_in_the_root() {
 }
 
 #[test]
+fn init_in_a_non_empty_repository_named_spex_uses_it_as_the_workspace_root() {
+    for (layout_answer, layout) in [("2", "single-repo"), ("3", "monorepo")] {
+        let workspace = tempdir().expect("create temp workspace");
+        let project = workspace.path().join("spex");
+        fs::create_dir_all(project.join("src")).expect("create src");
+        fs::write(project.join("src/main.rs"), "fn main() {}\n").expect("write source");
+
+        let init = init_with(&project, &format!("{layout_answer}\n\n"));
+        assert!(
+            init.status.success(),
+            "{layout} init failed\nstderr:\n{}",
+            String::from_utf8_lossy(&init.stderr)
+        );
+
+        let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
+        assert!(config.contains("project_name: spex\n"), "{config}");
+        assert!(config.contains(&format!("layout: {layout}\n")), "{config}");
+        assert!(project.join("AGENTS.md").is_file(), "{layout}");
+        assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
+        assert!(project.join("src/main.rs").is_file());
+        assert!(!workspace.path().join("AGENTS.md").exists());
+    }
+}
+
+#[test]
+fn init_inside_an_initialized_spex_directory_fails_without_nesting_a_project() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = workspace.path().join("snake");
+    fs::create_dir_all(&project).expect("create project");
+    assert!(init_with(&project, "2\n\n").status.success());
+
+    let spex_dir = project.join("spex");
+    let again = init_with(&spex_dir, "2\n\n");
+
+    assert_fails_mentioning(&again, "not empty");
+    assert!(!spex_dir.join("spex").exists(), "nothing may be nested");
+}
+
+#[test]
 fn init_multi_repo_keeps_everything_in_the_spex_repository() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
