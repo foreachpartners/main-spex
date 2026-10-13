@@ -2,7 +2,7 @@
 
 An example workspace used to test the spex framework. It is a small shopping
 notes application that let's user note down shoping items to not forget to buy them when visiting a store
-split into the kind of sibling repositories spex expects to
+split into the kind of sibling packages spex expects to
 manage, but **without** `spex` initialized.
 
 Use it as a clean starting point to try `spex init` and the rest of the flow

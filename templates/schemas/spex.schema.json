@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/spex.schema.json",
   "title": "Spex Workspace Config",
-  "description": "Workspace configuration (spex.yaml): the project and the workspace repositories that spex manages together.",
+  "description": "Workspace configuration (spex.yaml): the project and the packages that spex manages together.",
   "type": "object",
   "properties": {
     "project_name": {
@@ -14,6 +14,16 @@
       "type": "string",
       "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the workspace finds a mismatch with the installed CLI; run `spex update` to sync.",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "layout": {
+      "type": "string",
+      "description": "How the project is arranged on disk. `multi-repo`: every package is its own git repository under the workspace root and the spex repository is the spex directory. `single-repo`: the project is one git repository and the spex directory is its `spex/` folder. `monorepo`: one git repository holds several packages and the spex directory is its `spex/` folder.",
+      "enum": ["multi-repo", "single-repo", "monorepo"]
+    },
+    "agent_root": {
+      "type": "string",
+      "description": "Directory holding the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills/`, `.claude`), relative to the spex directory: `.` in multi-repo, `..` (the repository root) in single-repo and monorepo.",
+      "minLength": 1
     },
     "description": {
       "type": "string",
@@ -27,16 +37,16 @@
         "$ref": "rule-id.schema.json"
       }
     },
-    "repositories": {
+    "packages": {
       "type": "array",
-      "description": "Workspace repositories that spex manages for this project.",
+      "description": "Packages that spex manages for this project.",
       "items": {
-        "$ref": "#/$defs/repository"
+        "$ref": "#/$defs/package"
       }
     },
     "coverage_ignore": {
       "type": "array",
-      "description": "Coverage requirements to waive for specs, merged with each spec's own `coverage_ignore` and with the `coverage_ignore` of every repository's `spex.repo.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to.",
+      "description": "Coverage requirements to waive for specs, merged with each spec's own `coverage_ignore` and with the `coverage_ignore` of every package's `spex.package.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to.",
       "items": {
         "$ref": "#/$defs/spec_coverage_ignore"
       },
@@ -44,62 +54,62 @@
     }
   },
   "$defs": {
-    "repository": {
+    "package": {
       "type": "object",
-      "description": "A single workspace repository.",
+      "description": "A single package.",
       "properties": {
-        "repository_name": {
+        "package_name": {
           "type": "string",
-          "description": "Full kebab-case name of the repository, `<project-name>-<repository-short-name>` (for example `shopping-notes-api`). Matches the repository directory name per naming-convention.",
+          "description": "Full kebab-case name of the package, `<project-name>-<package-short-name>` (for example `shopping-notes-api`). In multi-repo it matches the package directory name per naming-convention; in single-repo it is the project name.",
           "minLength": 1
         },
-        "repository_short_name": {
+        "package_short_name": {
           "type": "string",
-          "description": "Kebab-case name of the repository excluding the project name (for example `api`). Used to derive cross-cutting identifiers in naming-convention.",
+          "description": "Kebab-case name of the package excluding the project name (for example `api`; in single-repo the project name itself). Used to derive cross-cutting identifiers in naming-convention.",
           "minLength": 1
         },
         "description": {
           "type": "string",
-          "description": "Optional summary of what the repository is and does.",
+          "description": "Optional summary of what the package is and does.",
           "minLength": 1
         },
         "path": {
           "type": "string",
-          "description": "Path to the repository, relative to the spex directory.",
+          "description": "Path to the package, relative to the spex directory.",
           "minLength": 1
         },
         "contracts": {
           "type": "array",
-          "description": "Interface contracts this repository owns. Each entry points at a contract file wherever it lives (typically inside this repository's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across repositories) and summarizes it.",
+          "description": "Interface contracts this package owns. Each entry points at a contract file wherever it lives (typically inside this package's own directory; the spex repository's `contracts/` folder is only a convention for contracts shared across packages) and summarizes it.",
           "items": {
             "$ref": "#/$defs/contract"
           }
         },
         "rules": {
           "type": "array",
-          "description": "Rule IDs that apply to this repository. Each ID corresponds to a yaml file named after it under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
+          "description": "Rule IDs that apply to this package. Each ID corresponds to a yaml file named after it under `rules/` (for example `secret-handling` -> `rules/secret-handling.yaml`).",
           "items": {
             "$ref": "rule-id.schema.json"
           }
         },
         "ignored_errors": {
           "type": "array",
-          "description": "Baseline of pre-existing `error`-severity findings to suppress for this repository, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
+          "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
           "items": {
             "$ref": "#/$defs/ignored_error"
           }
         }
       },
-      "required": ["repository_name", "repository_short_name", "path"],
+      "required": ["package_name", "package_short_name", "path"],
       "additionalProperties": false
     },
     "contract": {
       "type": "object",
-      "description": "An interface contract owned by a repository: OpenAPI, proto, GraphQL SDL, AsyncAPI, or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
+      "description": "An interface contract owned by a package: OpenAPI, proto, GraphQL SDL, AsyncAPI, or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
       "properties": {
         "path": {
           "type": "string",
-          "description": "Path to the contract file, relative to the spex directory (for example `../shopping-notes-api/contracts/api.openapi.yaml` when the contract lives in the owning repository, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
+          "description": "Path to the contract file, relative to the spex directory (for example `../shopping-notes-api/contracts/api.openapi.yaml` when the contract lives in the owning package, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
           "minLength": 1
         },
         "description": {
@@ -134,7 +144,7 @@
       "description": "A baseline entry that suppresses pre-existing `error`-severity findings for one check.",
       "properties": {
         "rule_id": {
-          "description": "Rule ID of the check whose pre-existing errors are baselined. Must be one of the repository's rules.",
+          "description": "Rule ID of the check whose pre-existing errors are baselined. Must be one of the package's rules.",
           "$ref": "rule-id.schema.json"
         },
         "check": {
@@ -144,7 +154,7 @@
         },
         "files": {
           "type": "array",
-          "description": "Repository-relative files whose pre-existing errors are suppressed. Omit or leave empty to suppress the whole check. A regexp finding's `file:line` location is matched on its file part.",
+          "description": "Package-relative files whose pre-existing errors are suppressed. Omit or leave empty to suppress the whole check. A regexp finding's `file:line` location is matched on its file part.",
           "items": {
             "type": "string",
             "minLength": 1
@@ -155,17 +165,19 @@
       "additionalProperties": false
     }
   },
-  "required": ["project_name", "cli_version"],
+  "required": ["project_name", "cli_version", "layout", "agent_root"],
   "additionalProperties": false,
   "examples": [
     {
       "project_name": "shopping-notes",
       "cli_version": "0.3.1",
+      "layout": "multi-repo",
+      "agent_root": ".",
       "description": "Shopping list app for keeping track of items to buy.",
-      "repositories": [
+      "packages": [
         {
-          "repository_name": "shopping-notes-api",
-          "repository_short_name": "api",
+          "package_name": "shopping-notes-api",
+          "package_short_name": "api",
           "description": "Backend service that handles shopping items.",
           "path": "../shopping-notes-api",
           "contracts": [
@@ -177,8 +189,8 @@
           "rules": ["secret-handling", "naming-convention"]
         },
         {
-          "repository_name": "shopping-notes-frontend",
-          "repository_short_name": "frontend",
+          "package_name": "shopping-notes-frontend",
+          "package_short_name": "frontend",
           "description": "React web client that lets users manage their shopping notes.",
           "path": "../shopping-notes-frontend",
           "rules": ["writing-style", "naming-convention"]

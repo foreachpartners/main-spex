@@ -19,14 +19,60 @@ Turn business goals into verified code through a chain of artifacts, each tracea
 
 ## Layout
 
-A project spans several workspace repositories under one workspace root folder; [glossary.md](glossary.md) defines the workspace, its repositories, and their naming.
+A project uses one of three layouts, chosen at `spex init` and recorded as `layout` in `spex.yaml`; [glossary.md](glossary.md) defines the layouts, the workspace, its packages, and their naming.
 
-- The spex repository holds the specs, rules (with their scripts), schemas, skills, config, and the contracts shared across repositories. An editor workspace file (`<project-name>.code-workspace`) opens every repository together.
+- `multi-repo` — every package is its own git repository under the workspace root folder. The spex repository (`<project-name>-spex`) is one of them and is both the spex directory and the agent root. An editor workspace file (`<project-name>.code-workspace`) in it opens every package together.
+
+  ```text
+  shopping-notes/                  workspace root
+    shopping-notes-api/
+    shopping-notes-frontend/
+    shopping-notes-spex/           spex directory and agent root
+      spex.yaml
+      shopping-notes.code-workspace
+      AGENTS.md
+      CLAUDE.md -> AGENTS.md
+      .agents/skills/
+      .claude -> .agents
+      docs/  schemas/  rules/  specs/  plans/  contracts/
+  ```
+
+- `single-repo` — the project is one git repository, and its root is the agent root. The spex directory is its `spex/` folder. `packages` lists the single package, named after the project, at `path: ..`.
+
+  ```text
+  snake/                           workspace root, agent root
+    AGENTS.md
+    CLAUDE.md -> AGENTS.md
+    .agents/skills/
+    .claude -> .agents
+    src/
+    spex/                          spex directory
+      spex.yaml
+      docs/  schemas/  rules/  specs/  plans/  contracts/
+  ```
+
+- `monorepo` — one git repository holds several packages, and its root is the agent root. The spex directory is its `spex/` folder. `packages` lists each package, at its path inside the repository.
+
+  ```text
+  shopping-notes/                  workspace root, agent root
+    AGENTS.md
+    CLAUDE.md -> AGENTS.md
+    .agents/skills/
+    .claude -> .agents
+    apps/api/
+    apps/frontend/
+    spex/                          spex directory
+      spex.yaml
+      docs/  schemas/  rules/  specs/  plans/  contracts/
+  ```
+
+- The spex directory holds `spex.yaml`, the specs, rules (with their scripts), schemas, docs, plans, and the contracts shared across packages. The agent root holds `AGENTS.md`, `CLAUDE.md` (a symlink to `AGENTS.md`), and the skills in `.agents/skills/`, which `.claude` links to so different agent tools detect the same skills: `.claude` is a symlink to `.agents`, or, when the repository already has a `.claude` directory, only `.claude/skills` is a symlink to `../.agents/skills`.
+- Once `spex.yaml` is found, every command resolves the other locations from it, never from folder names: the spex directory is the directory holding it, and the agent root is its `agent_root`.
 - The layout follows [conventions.md](conventions.md): tool-agnostic (specs, contracts, and checks are plain files and deterministic commands) and single-source-of-truth (every fact one authoritative source, referenced rather than copied).
 
 ## Traceability
 
-Every behavioral change traces to a spec, and one Spec ID traces across the repositories that satisfy it. The principle, including the bidirectional trace and commit-level provenance, is [framework-principles.md](framework-principles.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
+Every behavioral change traces to a spec, and one Spec ID traces across the packages that satisfy it. The principle, including the bidirectional trace and commit-level provenance, is [framework-principles.md](framework-principles.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
 
 # CLI
 
@@ -34,9 +80,9 @@ The CLI behavior — every command, its flags, reports, and exit codes — is sp
 
 # Skills
 
-Agent skills drive the artifact chain: each packages the instructions an AI coding agent follows to run one workflow step, applying every rule that governs the repositories it touches.
+Agent skills drive the artifact chain: each packages the instructions an AI coding agent follows to run one workflow step, applying every rule that governs the packages it touches.
 
-- Skills live in the spex repository, installed under `.agents/skills/`; the bundled ones ship from `templates/skills/`, each `SKILL.md` describing what it does and when to load it.
+- Skills live in the agent root, installed under `.agents/skills/`; the bundled ones ship from `templates/skills/`, each `SKILL.md` describing what it does and when to load it.
 - A skill is triggered by name (e.g. `/spex-spec`) or loaded on demand by the agent from its description.
 - Every bundled `SKILL.md` ends with a `# Project` section for project-specific additions; `spex update` rewrites everything above it and never touches it.
 - A skill's `SKILL.md` frontmatter follows the [Agent Skills specification](https://agentskills.io/specification); whether `spex update` overwrites it is in [cli/update.md](cli/update.md).
@@ -56,7 +102,7 @@ A spec, defined in [glossary.md](glossary.md), lives at `specs/<spec-id>.yaml`, 
   - Exactly one of `must`, `must_not`, `should`, `should_not`, `may` is present, its value the verifiable statement.
   - `id` follows `schemas/ac-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters. It is unique within the spec and names the criterion's behavior rather than its position.
   - `is_done` is optional and defaults to `true`; set it to `false` to flag a criterion as not actually done yet. `spex check` reads it — not annotations — to decide whether a spec's status can be `active`. `spex coverage` reads it only as a marker that a criterion with no impl annotation yet is pending rather than a gap; see [Coverage states](#coverage-states).
-- `scope` lists the `repository_short_name`s of the repositories that implement the capability.
+- `scope` lists the `package_short_name`s of the packages that implement the capability.
 - `blocked_by` lists specs that must be in place before this spec can be implemented; it holds only genuine, unsatisfied blockers, so an already shipped or established one is never listed.
 - `status` defaults to `planned`; `active` means fully implemented and requires every acceptance criterion's `is_done` to be `true` or absent, `in-progress` is for a spec being implemented but not yet complete.
 - `coverage_ignore` waives a coverage requirement, one `{layer, ac}` entry per waiver:
@@ -71,7 +117,7 @@ coverage_ignore:
     ac: no-null-typed-string
 ```
 
-A waiver can also be declared outside the spec file, in `spex.yaml` or a repository's `spex.repo.yaml`, so the repository that cannot satisfy a layer owns the waiver without editing the spec; see [Config](#config-spexyaml).
+A waiver can also be declared outside the spec file, in `spex.yaml` or a package's `spex.package.yaml`, so the package that cannot satisfy a layer owns the waiver without editing the spec; see [Config](#config-spexyaml).
 
 ## Spec ID annotations
 
@@ -82,7 +128,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 - An impl or test annotation carries the `#<ac-id>` of the acceptance criterion it satisfies: `spex coverage` never counts a bare, unqualified annotation toward a criterion of a spec.
 - A contract annotation carries `#<ac-id>` only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract; under `contract: single` one bare `@spec contract <spec-id>` suffices, and a criterion-anchored annotation also counts as the spec-level contract.
 - `<spec-id>` and `<ac-id>` follow the same id grammar as the ids they reference; an annotation naming an id outside it is malformed.
-- Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every repository regardless of which rules it opts into ([cli/check.md](cli/check.md#self-validation)).
+- Never reference a Spec ID with no spec file. `spex check` enforces the grammar and the no-orphan rule, built in, in every package regardless of which rules it opts into ([cli/check.md](cli/check.md#self-validation)).
 
 ## Coverage states
 
@@ -96,7 +142,7 @@ Annotations link a contract, implementation, or test to its spec, and optionally
 | A required layer missing, `is_done: false`, no impl annotation | `pending` |
 
 - A gap is an error and makes `spex coverage` exit non-zero, whatever the spec's status. Pending is work not yet started and never fails.
-- `is_done: false` is mostly a marker: `spex check` still reads it for the spec's `status`, and coverage uses it only to keep a criterion pending until it has an impl annotation. It never excuses a criterion that already has an impl annotation, so a change is verified in the repository that makes it, without first updating the spec in another repository.
+- `is_done: false` is mostly a marker: `spex check` still reads it for the spec's `status`, and coverage uses it only to keep a criterion pending until it has an impl annotation. It never excuses a criterion that already has an impl annotation, so a change is verified in the package that makes it, without first updating the spec in another package.
 - The impl annotation is the trigger, not the test or the contract, so contract-first and test-first work stays pending until the impl lands. With the impl waived by `coverage_ignore` there is normally no impl annotation to trigger on, so such a criterion stays pending until `is_done` is cleared.
 - Under `contract: single` the spec-level contract is one more requirement of the spec: a gap once any criterion is `is_done` `true` or absent or has an impl annotation, pending while every criterion is `is_done: false` with no impl annotation.
 - A spec in any other status (`planned`, `blocked`, `deprecated`) is not classified at all, however much of it is annotated.
@@ -109,7 +155,7 @@ A rule, defined in [glossary.md](glossary.md), lives at `rules/<rule-id>.yaml`, 
 
 - The `id` follows `schemas/rule-id.schema.json`: lowercase letters, digits and hyphens only, at most 40 characters.
 - Has required `id`, `title`, `description`, and `acceptance_criteria`; optional `checks`, `examples`, and `sync_with_upstream`.
-- A repository opts into a rule by listing it in `rules` in `spex.yaml`; the rule then applies repo-wide, not per feature. A rule has no lifecycle status, and its acceptance criteria carry no implementation flag.
+- A package opts into a rule by listing it in `rules` in `spex.yaml`; the rule then applies package-wide, not per feature. A rule has no lifecycle status, and its acceptance criteria carry no implementation flag.
 - Holds its individual rules in the acceptance criteria, ordered `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`, each criterion a string starting with that commitment.
 - `sync_with_upstream: true` marks a global framework rule kept in sync from the bundled template by `spex update` (with its scripts); unsetting it customizes the rule locally and keeps those changes across updates.
 - A deleted bundled rule is recognized as deliberate only once its id is added to `rules_unused` in `spex.yaml`.
@@ -119,22 +165,22 @@ A rule, defined in [glossary.md](glossary.md), lives at `rules/<rule-id>.yaml`, 
 A check proves a rule's acceptance criterion.
 
 - Has type `regexp` (file contents), `glob` (file paths), `ast-grep` (structural code patterns), or `script` (external program).
-- `include` / `exclude` globs narrow the file set of every check except `per-repo` and `workspace` scripts, which discover their own files.
+- `include` / `exclude` globs narrow the file set of every check except `per-package` and `workspace` scripts, which discover their own files.
 - `negate` inverts a `regexp`, `glob`, or `ast-grep` check: a forbidden pattern versus a required pattern.
 - `severity` is `error` (default) or `warn`.
-- A repository inherits a rule's checks through `rules`.
-- A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-repo`, or `workspace`; how each runs, and what a script must report, is in [cli/check.md](cli/check.md#script-checks).
-- A script receives the absolute path of the spex repository as `SPEX_DIR`; when it needs data from `spex.yaml` (the project name, the repository list) it reads it with `spex jq` rather than parsing `spex.yaml` by hand.
+- A package inherits a rule's checks through `rules`.
+- A script check resolves in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>.yaml` → `rules/<rule-id>/<script>`), with `run` `per-file` (default), `per-package`, or `workspace`; how each runs, and what a script must report, is in [cli/check.md](cli/check.md#script-checks).
+- A script receives the absolute path of the spex directory as `SPEX_DIR`; when it needs data from `spex.yaml` (the project name, the package list) it reads it with `spex jq` rather than parsing `spex.yaml` by hand.
 
 # Config (spex.yaml)
 
 ## Structure
 
-Declares the project and its repositories.
+Declares the project and its packages.
 
-- Root fields: required `project_name` and `cli_version`, plus optional `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), `repositories`, and `coverage_ignore`.
-- Each repository entry has `repository_name` (the full `<project-name>-<repository-short-name>`, matching its directory), `repository_short_name`, and `path` (relative to the spex directory) required, plus an optional `description`, `contracts` list, `rules` list, and `ignored_errors` baseline.
-- Each `contracts` entry has a `path` and a `description`, both required; the path is user-owned, typically inside the owning repository, and relative to the spex directory.
+- Root fields: required `project_name`, `cli_version`, `layout` (`multi-repo`, `single-repo`, or `monorepo`), and `agent_root` (the [agent root](glossary.md), relative to the spex directory), plus optional `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), `packages`, and `coverage_ignore`. `spex init` writes `layout` and `agent_root`.
+- Each package entry has `package_name` (the full `<project-name>-<package-short-name>`, matching its directory in multi-repo; in single-repo the project name, which is then also the `package_short_name`), `package_short_name`, and `path` (relative to the spex directory) required, plus an optional `description`, `contracts` list, `rules` list, and `ignored_errors` baseline.
+- Each `contracts` entry has a `path` and a `description`, both required; the path is user-owned, typically inside the owning package, and relative to the spex directory.
 - `coverage_ignore` waives coverage requirements by spec id, one `{spec_id, layer, ac}` entry per waiver: `spec_id` and `layer` are required, `ac` is optional, and `layer` and `ac` mean what they do in a [spec's `coverage_ignore`](#spec).
 - Validated against `schemas/spex.schema.json`.
 
@@ -147,16 +193,16 @@ coverage_ignore:
     ac: no-null-typed-string
 ```
 
-## Repository config (spex.repo.yaml)
+## Package config (`spex.package.yaml`)
 
-Lets a workspace repository own the waivers and the baseline that concern it.
+Lets a package own the waivers and the baseline that concern it.
 
-- Optional: `spex.repo.yaml` sits at the root of a workspace repository, and a repository without one has nothing to merge.
-- Has optional `coverage_ignore`, with the entries of the root `coverage_ignore` of `spex.yaml`, and `ignored_errors`, with the entries of a repository's `ignored_errors` there, its `files` relative to this repository's root.
+- Optional: `spex.package.yaml` sits at the root of a package, and a package without one has nothing to merge.
+- Has optional `coverage_ignore`, with the entries of the root `coverage_ignore` of `spex.yaml`, and `ignored_errors`, with the entries of a package's `ignored_errors` there, its `files` relative to this package's root.
 - Everything is merged by union, none overrides another:
-  - A spec's coverage waivers are its own `coverage_ignore`, the `coverage_ignore` entries of `spex.yaml` naming its id, and those of every repository's `spex.repo.yaml` naming its id, whichever repositories the spec is `scope`d to.
-  - A repository's `ignored_errors` baseline is its entry's in `spex.yaml` plus its own `spex.repo.yaml`'s.
-- Validated against `schemas/spex.repo.schema.json`.
+  - A spec's coverage waivers are its own `coverage_ignore`, the `coverage_ignore` entries of `spex.yaml` naming its id, and those of every package's `spex.package.yaml` naming its id, whichever packages the spec is `scope`d to.
+  - A package's `ignored_errors` baseline is its entry's in `spex.yaml` plus its own `spex.package.yaml`'s.
+- Validated against `schemas/spex.package.schema.json`.
 
 ```yaml
 coverage_ignore:

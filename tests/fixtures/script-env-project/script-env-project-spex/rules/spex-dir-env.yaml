@@ -5,7 +5,7 @@ description: >-
   repository, whatever its run scope.
 acceptance_criteria:
   - "MUST expose SPEX_DIR to a per-file script"
-  - "MUST expose SPEX_DIR to a per-repo script"
+  - "MUST expose SPEX_DIR to a per-package script"
   - "MUST expose SPEX_DIR to a workspace script"
 checks:
   - name: per-file
@@ -16,10 +16,10 @@ checks:
     include:
       - "src/**"
     severity: warn
-  - name: per-repo
-    description: Reports the SPEX_DIR a per-repo script received
+  - name: per-package
+    description: Reports the SPEX_DIR a per-package script received
     type: script
-    run: per-repo
+    run: per-package
     script: report-spex-dir.sh
     severity: warn
   - name: workspace

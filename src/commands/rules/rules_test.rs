@@ -1,15 +1,15 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::config::Repository;
+    use crate::config::Package;
     use crate::support::testing;
     use indoc::{formatdoc, indoc};
     use tempfile::tempdir;
 
-    fn repo(name: &str, rules: &[&str]) -> Repository {
-        Repository {
+    fn package(name: &str, rules: &[&str]) -> Package {
+        Package {
             rules: rules.iter().map(|r| testing::rule_id(r)).collect(),
-            ..testing::repository(name, &format!("../{name}"))
+            ..testing::package(name, &format!("../{name}"))
         }
     }
 
@@ -18,10 +18,10 @@ mod tests {
     }
 
     #[test]
-    fn repo_has_rule_matches_assigned_ids_only() {
-        let api = repo("demo-api", &["secret-handling"]);
-        assert!(repo_has_rule(&api, &rule("secret-handling", "")));
-        assert!(!repo_has_rule(&api, &rule("writing-style", "")));
+    fn package_has_rule_matches_assigned_ids_only() {
+        let api = package("demo-api", &["secret-handling"]);
+        assert!(package_has_rule(&api, &rule("secret-handling", "")));
+        assert!(!package_has_rule(&api, &rule("writing-style", "")));
     }
 
     #[test]
@@ -37,13 +37,13 @@ mod tests {
     }
 
     #[test]
-    fn repo_has_rule_and_id_selected_together_filter_assigned_and_selected_rules() {
-        let api = repo("demo-api", &["a", "b"]);
+    fn package_has_rule_and_id_selected_together_filter_assigned_and_selected_rules() {
+        let api = package("demo-api", &["a", "b"]);
         let rules = [rule("a", ""), rule("b", ""), rule("c", "")];
 
         let ids: Vec<&str> = rules
             .iter()
-            .filter(|rule| repo_has_rule(&api, rule))
+            .filter(|rule| package_has_rule(&api, rule))
             .filter(|rule| id_selected(rule, &[]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
@@ -51,7 +51,7 @@ mod tests {
 
         let filtered_ids: Vec<&str> = rules
             .iter()
-            .filter(|rule| repo_has_rule(&api, rule))
+            .filter(|rule| package_has_rule(&api, rule))
             .filter(|rule| id_selected(rule, &["a".to_string()]))
             .map(|r| r["id"].as_str().unwrap())
             .collect();
@@ -64,13 +64,15 @@ mod tests {
             indoc! {"
                 project_name: demo
                 cli_version: 0.0.0
-                repositories:
-                  - repository_name: demo-api
-                    repository_short_name: api
+                layout: multi-repo
+                agent_root: .
+                packages:
+                  - package_name: demo-api
+                    package_short_name: api
                     path: ../demo-api
                     rules: [secret-handling]
-                  - repository_name: demo-frontend
-                    repository_short_name: frontend
+                  - package_name: demo-frontend
+                    package_short_name: frontend
                     path: ../demo-frontend
                     rules: [writing-style]
             "},
@@ -112,11 +114,11 @@ mod tests {
         Spex::from_config(dir.to_path_buf(), config)
     }
 
-    fn args(ai: bool, id: &[&str], repo: &[&str]) -> RulesArgs {
+    fn args(ai: bool, id: &[&str], package: &[&str]) -> RulesArgs {
         RulesArgs {
             ai,
             id: id.iter().map(|s| s.to_string()).collect(),
-            repo: repo.iter().map(|s| s.to_string()).collect(),
+            package: package.iter().map(|s| s.to_string()).collect(),
             output: None,
         }
     }
@@ -181,9 +183,11 @@ mod tests {
             indoc! {"
                 project_name: demo
                 cli_version: 0.0.0
-                repositories:
-                  - repository_name: demo-api
-                    repository_short_name: api
+                layout: multi-repo
+                agent_root: .
+                packages:
+                  - package_name: demo-api
+                    package_short_name: api
                     path: ../demo-api
                     rules: [spec-id-tracing]
             "},
@@ -280,7 +284,7 @@ mod tests {
     }
 
     #[test]
-    fn render_with_single_repo_returns_only_that_repos_rule() {
+    fn render_with_single_repo_returns_only_that_packages_rule() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
@@ -301,7 +305,7 @@ mod tests {
     }
 
     #[test]
-    fn render_with_multiple_repos_returns_union_of_their_rules() {
+    fn render_with_multiple_packages_returns_union_of_their_rules() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
@@ -330,7 +334,7 @@ mod tests {
     }
 
     #[test]
-    fn render_with_repo_short_name_matches_same_as_full_name() {
+    fn render_with_package_short_name_matches_same_as_full_name() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
         let workspace = workspace(dir.path());
@@ -351,7 +355,7 @@ mod tests {
     }
 
     #[test]
-    fn render_errors_on_unknown_repo() {
+    fn render_errors_on_unknown_package() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
         let workspace = workspace(dir.path());

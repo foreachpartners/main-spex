@@ -75,15 +75,15 @@ fn check_files_narrows_regexp_findings_and_skips_negated_checks() {
 }
 
 #[test]
-fn check_repo_limits_regexp_findings_to_the_named_repository() {
+fn check_package_limits_regexp_findings_to_the_named_package() {
     let (_workspace, project) = project_with_rules(&["regexp-runner"]);
 
-    let check = run_spex(&project, &["check", "--repo", "frontend"], "");
+    let check = run_spex(&project, &["check", "--package", "frontend"], "");
 
     assert_eq!(
         report_text(&check.stdout),
         expected_report(&[FRONTEND_REPORT], "runners-project: 1 error, 1 warning"),
-        "check --repo report did not match\nstderr:\n{}",
+        "check --package report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
     assert_eq!(

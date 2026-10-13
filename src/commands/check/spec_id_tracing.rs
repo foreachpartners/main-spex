@@ -1,10 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
-use crate::spec::{AcId, SpecId};
+use crate::rule::RULES_DIR;
+use crate::spec::{AcId, SPECS_DIR, SpecId};
+use crate::templates::SCHEMAS_DIRNAME;
 use crate::tracing::annotations;
 
-use super::check::RepoCtx;
+use super::check::PackageCtx;
 use super::finding::{Finding, Location, Source};
 use super::scoped_file::ScopedFile;
 
@@ -17,13 +19,12 @@ const FORMAT_CHECK: &str = "annotation-format";
 const ORPHAN_CHECK: &str = "no-orphan-annotations";
 
 pub(super) fn validate_annotations(
-    ctx: &RepoCtx,
-    is_spex_repo: bool,
+    ctx: &PackageCtx,
     known_ids: &HashMap<SpecId, HashSet<AcId>>,
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
     for file in ctx.candidates {
-        if holds_illustrative_annotations(ctx, file, is_spex_repo) {
+        if holds_illustrative_annotations(ctx, file) {
             continue;
         }
         let Ok(content) = fs::read_to_string(&file.abs) else {
@@ -35,21 +36,13 @@ pub(super) fn validate_annotations(
     findings
 }
 
-fn holds_illustrative_annotations(ctx: &RepoCtx, file: &ScopedFile, is_spex_repo: bool) -> bool {
+fn holds_illustrative_annotations(ctx: &PackageCtx, file: &ScopedFile) -> bool {
     if file.rel.extension().is_some_and(|ext| ext == "md") {
         return true;
     }
-    if file
-        .abs
-        .starts_with(ctx.spex_dir.join(crate::templates::SCHEMAS_DIRNAME))
-    {
-        return true;
-    }
-    is_spex_repo
-        && file.rel.components().next().is_some_and(|first| {
-            let first = first.as_os_str();
-            first == "specs" || first == "rules"
-        })
+    [SCHEMAS_DIRNAME, SPECS_DIR, RULES_DIR]
+        .iter()
+        .any(|dir| file.abs.starts_with(ctx.spex_dir.join(dir)))
 }
 
 fn check_format(file: &ScopedFile, content: &str) -> Vec<Finding> {

@@ -3,7 +3,7 @@
 An example workspace used to test the spex framework. It is a small shopping
 notes application that lets a user note down shopping items so they don't
 forget to buy them when visiting a store, split into the kind of sibling
-repositories spex expects to manage, **with** `spex` fully set up: specs,
+packages spex expects to manage, **with** `spex` fully set up: specs,
 contracts, implementation, and tests for every acceptance criterion.
 
 Use it as a reference for what a completed [Tutorial](../../docs/tutorial.md)

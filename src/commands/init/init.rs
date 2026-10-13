@@ -3,15 +3,18 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use clap::ValueEnum;
+
 use anstream::println;
 use eros::{Context, bail};
 use owo_colors::OwoColorize;
 
-use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SPEX_DIR_NAME, SpexConfig, spex_yaml_edit};
+use crate::config::{CLI_VERSION, Layout, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
 use crate::error::{Result, could_not_read_dir};
 use crate::spec::SPECS_DIR;
-use crate::support::fs::{create_dir_all, current_dir, dir_name, write_file};
+use crate::support::fs::{create_dir_all, current_dir, dir_name, normalize, write_file};
 
+use super::agent_files::verify_agent_files;
 use super::scaffold::scaffold;
 
 #[cfg(test)]
@@ -22,7 +25,10 @@ const PLANS_DIR_NAME: &str = "plans";
 const CONTRACTS_DIR_NAME: &str = "contracts";
 
 const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
-const CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.yaml");
+const MULTI_PACKAGE_CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.yaml");
+const SINGLE_PACKAGE_CONFIG_TEMPLATE: &str =
+    include_str!("../../../templates/spex.single-repo.yaml");
+const MONOPACKAGE_CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.monorepo.yaml");
 const CODE_WORKSPACE_TEMPLATE: &str =
     include_str!("../../../templates/project-name.code-workspace");
 
@@ -34,25 +40,31 @@ pub fn run() -> Result<ExitCode> {
     let default_name = dir_name(&workspace_root)
         .ok_or_else(|| eros::error!("could not read the workspace root name"))?;
 
+    let layout = confirm_layout()?;
     let project_name = confirm_project_name(default_name)?;
 
-    let spex_dir = ensure_spex_dir(&current_dir, &workspace_root, &project_name)?;
+    let spex_dir = locate_spex_dir(&current_dir, &workspace_root, layout, &project_name);
     verify_empty(&spex_dir)?;
+    let agent_root = normalize(&spex_dir.join(layout.agent_root()));
+    verify_agent_files(&agent_root)?;
 
-    write_config(&spex_dir, &project_name)?;
-    write_code_workspace(&spex_dir, &project_name)?;
-    copy_templates(&spex_dir)?;
+    create_dir_all(&spex_dir)?;
+    write_config(&spex_dir, layout, &project_name)?;
+    if layout.is_multi_repo() {
+        write_code_workspace(&spex_dir, &project_name)?;
+    }
+    copy_templates(&spex_dir, &agent_root)?;
 
     println!(
         "{}",
-        "spex repository initialized, open project in workspace and run agent skill `/spex-setup` to add workspace repositories and complete setup"
+        "spex initialized, open project in your editor and run agent skill `/spex-setup` to complete setup"
             .green()
     );
     Ok(ExitCode::SUCCESS)
 }
 
-fn copy_templates(spex_dir: &Path) -> Result<()> {
-    scaffold(spex_dir)?;
+fn copy_templates(spex_dir: &Path, agent_root: &Path) -> Result<()> {
+    scaffold(spex_dir, agent_root)?;
 
     let specs = spex_dir.join(SPECS_DIR);
     create_dir_all(&specs)?;
@@ -66,21 +78,45 @@ fn copy_templates(spex_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn write_config(spex_dir: &Path, project_name: &str) -> Result<()> {
+fn write_config(spex_dir: &Path, layout: Layout, project_name: &str) -> Result<()> {
     let config_path = spex_dir.join(SPEX_CONFIG_FILE);
-    write_file(&config_path, config_from_template(project_name))?;
+    write_file(&config_path, config_from_template(layout, project_name))?;
     Ok(())
 }
 
-fn config_from_template(project_name: &str) -> String {
-    let named = CONFIG_TEMPLATE
+fn config_template(layout: Layout) -> &'static str {
+    match layout {
+        Layout::MultiRepo => MULTI_PACKAGE_CONFIG_TEMPLATE,
+        Layout::SingleRepo => SINGLE_PACKAGE_CONFIG_TEMPLATE,
+        Layout::Monorepo => MONOPACKAGE_CONFIG_TEMPLATE,
+    }
+}
+
+fn package_name(layout: Layout, project_name: &str) -> String {
+    match layout {
+        Layout::MultiRepo => layout.spex_dir_name(project_name),
+        Layout::SingleRepo | Layout::Monorepo => project_name.to_string(),
+    }
+}
+
+fn config_from_template(layout: Layout, project_name: &str) -> String {
+    let named = config_template(layout)
         .replace(
             "project_name: unknown",
             &format!("project_name: {project_name}"),
         )
+        .replace("layout: unknown", &format!("layout: {layout}"))
         .replace(
-            "repository_name: unknown",
-            &format!("repository_name: {project_name}-{SPEX_DIR_NAME}"),
+            "agent_root: unknown",
+            &format!("agent_root: {}", layout.agent_root()),
+        )
+        .replace(
+            "package_name: unknown",
+            &format!("package_name: {}", package_name(layout, project_name)),
+        )
+        .replace(
+            "package_short_name: unknown",
+            &format!("package_short_name: {project_name}"),
         );
     spex_yaml_edit::set_cli_version(&named, CLI_VERSION)
 }
@@ -106,21 +142,24 @@ fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
     Ok(current_dir.to_path_buf())
 }
 
-fn ensure_spex_dir(
+fn locate_spex_dir(
     current_dir: &Path,
     workspace_root: &Path,
+    layout: Layout,
     project_name: &str,
-) -> Result<PathBuf> {
+) -> PathBuf {
     if is_inside_spex_dir(current_dir) {
-        return Ok(current_dir.to_path_buf());
+        return current_dir.to_path_buf();
     }
 
-    let spex_dir = workspace_root.join(format!("{project_name}-{SPEX_DIR_NAME}"));
-    create_dir_all(&spex_dir)?;
-    Ok(spex_dir)
+    workspace_root.join(layout.spex_dir_name(project_name))
 }
 
 fn verify_empty(spex_dir: &Path) -> Result<()> {
+    if !spex_dir.exists() {
+        return Ok(());
+    }
+
     let mut entries = fs::read_dir(spex_dir).with_context(|| could_not_read_dir(spex_dir))?;
     if entries.next().is_some() {
         bail!(
@@ -129,6 +168,42 @@ fn verify_empty(spex_dir: &Path) -> Result<()> {
         );
     }
     Ok(())
+}
+
+fn confirm_layout() -> Result<Layout> {
+    let layouts = Layout::value_variants();
+    println!("Layout:");
+    for (index, layout) in layouts.iter().enumerate() {
+        println!("  {}) {layout}", index + 1);
+    }
+    let default_number = layouts
+        .iter()
+        .position(|layout| *layout == Layout::default())
+        .map_or(1, |index| index + 1);
+    let input = prompt(&format!("Choose [{default_number}]: "))?;
+    parse_layout(input.trim())
+}
+
+fn parse_layout(answer: &str) -> Result<Layout> {
+    if answer.is_empty() {
+        return Ok(Layout::default());
+    }
+    let layouts = Layout::value_variants();
+    let by_number = answer
+        .parse::<usize>()
+        .ok()
+        .and_then(|number| number.checked_sub(1))
+        .and_then(|index| layouts.get(index));
+    by_number
+        .copied()
+        .or_else(|| Layout::from_str(answer, true).ok())
+        .ok_or_else(|| {
+            eros::error!(
+                "unknown layout `{answer}` — enter a number from 1 to {} or one of: {}",
+                layouts.len(),
+                Layout::choices()
+            )
+        })
 }
 
 fn confirm_project_name(default_name: &str) -> Result<String> {

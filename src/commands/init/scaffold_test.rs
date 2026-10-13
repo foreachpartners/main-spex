@@ -6,6 +6,8 @@ mod tests_unit {
     use serde_json::Value;
     use tempfile::tempdir;
 
+    use crate::templates::{AGENTS_FILENAME, CLAUDE_FILENAME};
+
     const SCHEMA: &str = "schemas/spex.schema.json";
     const DOC: &str = "docs/glossary.md";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
@@ -16,7 +18,7 @@ mod tests_unit {
     fn scaffold_writes_managed_content() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         for managed in [SCHEMA, DOC, SKILL, SCRIPT, RULE] {
             assert!(
@@ -30,7 +32,7 @@ mod tests_unit {
     fn scaffold_writes_every_bundled_rule_and_skill() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         let rules = BUNDLED_TEMPLATES_DIR
             .get_dir(RULES_DIR)
@@ -72,7 +74,7 @@ mod tests_unit {
     fn scaffold_writes_bundled_docs_only() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         let docs = BUNDLED_TEMPLATES_DIR
             .get_dir(DOCS_DIRNAME)
@@ -105,7 +107,7 @@ mod tests_unit {
     fn scaffold_writes_agents_md_and_claude_link() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        scaffold(spex_dir.path()).expect("scaffold");
+        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         let agents = spex_dir.path().join(AGENTS_FILENAME);
         let expected = BUNDLED_TEMPLATES_DIR

@@ -22,11 +22,11 @@ mod tests {
         }
     }
 
-    fn repository_at(path: &str, ignored_errors: Vec<PreexistingError>) -> Repository {
-        Repository {
+    fn package_at(path: &str, ignored_errors: Vec<PreexistingError>) -> Package {
+        Package {
             ignored_errors,
-            is_spex_repo: path == ".",
-            ..testing::repository(path, path)
+            is_spex_dir: path == ".",
+            ..testing::package(path, path)
         }
     }
 
@@ -35,9 +35,9 @@ mod tests {
         baseline: Vec<PreexistingError>,
         file: Option<&str>,
     ) -> bool {
-        let repo = repository_at("../api", baseline);
+        let package = package_at("../api", baseline);
         let owner = Owner {
-            repo: &repo,
+            package: &package,
             file: file.map(PathBuf::from),
         };
         is_baselined(finding, &owner)
@@ -110,12 +110,13 @@ mod tests {
 
     fn workspace_owner(
         finding: &Finding,
-        repos: &[&Repository],
+        packages: &[&Package],
     ) -> Option<(String, Option<PathBuf>)> {
         let target = ReportTarget::Workspace {
             spex_dir: testing::spex_dir(),
         };
-        owner(&target, finding, repos).map(|owner| (owner.repo.repository_name.clone(), owner.file))
+        owner(&target, finding, packages)
+            .map(|owner| (owner.package.package_name.clone(), owner.file))
     }
 
     fn workspace_finding(location: Option<Location>) -> Finding {
@@ -123,24 +124,24 @@ mod tests {
     }
 
     #[test]
-    fn a_repository_report_owns_its_findings() {
-        let api = repository_at("../api", vec![]);
+    fn a_package_report_owns_its_findings() {
+        let api = package_at("../api", vec![]);
         let located = finding(
             Severity::Error,
             "check",
             Some(Location::at_line("src/main.rs", 4)),
         );
 
-        let owned = owner(&ReportTarget::Repository(&api), &located, &[]).expect("owner");
+        let owned = owner(&ReportTarget::Package(&api), &located, &[]).expect("owner");
 
-        assert_eq!(owned.repo.repository_name, "../api");
+        assert_eq!(owned.package.package_name, "../api");
         assert_eq!(owned.file, Some(PathBuf::from("src/main.rs")));
     }
 
     #[test]
-    fn a_workspace_location_resolves_to_the_repository_containing_it() {
-        let api = repository_at("../api", vec![]);
-        let web = repository_at("../web", vec![]);
+    fn a_workspace_location_resolves_to_the_package_containing_it() {
+        let api = package_at("../api", vec![]);
+        let web = package_at("../web", vec![]);
         let located = workspace_finding(Some(Location::at_line("../web/src/main.ts", 4)));
 
         assert_eq!(
@@ -151,8 +152,8 @@ mod tests {
 
     #[test]
     fn a_workspace_sibling_location_does_not_belong_to_the_spex_repository() {
-        let spex = repository_at(".", vec![]);
-        let api = repository_at("../api", vec![]);
+        let spex = package_at(".", vec![]);
+        let api = package_at("../api", vec![]);
         let located = workspace_finding(Some(Location::in_file("../api/src/main.rs")));
 
         assert_eq!(
@@ -163,8 +164,8 @@ mod tests {
 
     #[test]
     fn a_workspace_spex_dir_location_belongs_to_the_spex_repository() {
-        let spex = repository_at(".", vec![]);
-        let api = repository_at("../api", vec![]);
+        let spex = package_at(".", vec![]);
+        let api = package_at("../api", vec![]);
         let located = workspace_finding(Some(Location::at_line("specs/a.yaml", 2)));
 
         assert_eq!(
@@ -174,8 +175,8 @@ mod tests {
     }
 
     #[test]
-    fn a_workspace_finding_without_a_location_or_containing_repository_has_no_owner() {
-        let api = repository_at("../api", vec![]);
+    fn a_workspace_finding_without_a_location_or_containing_package_has_no_owner() {
+        let api = package_at("../api", vec![]);
 
         assert_eq!(workspace_owner(&workspace_finding(None), &[&api]), None);
         assert_eq!(
@@ -189,7 +190,7 @@ mod tests {
 
     #[test]
     fn drop_baselined_findings_applies_each_targets_owner_baseline() {
-        let api = repository_at(
+        let api = package_at(
             "../api",
             vec![preexisting("no-cyrillic", vec!["src/old.rs"])],
         );
@@ -202,7 +203,7 @@ mod tests {
         };
         let mut reports = vec![
             CheckReport {
-                target: ReportTarget::Repository(&api),
+                target: ReportTarget::Package(&api),
                 findings: vec![error_in("src/old.rs"), error_in("src/new.rs")],
             },
             CheckReport {

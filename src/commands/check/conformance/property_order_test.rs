@@ -146,7 +146,7 @@ mod tests {
     }
 
     #[test]
-    fn property_order_flags_a_nested_repository_field_out_of_order_in_spex_yaml() {
+    fn property_order_flags_a_nested_package_field_out_of_order_in_spex_yaml() {
         let dir = tempdir().expect("temp dir");
         write_schemas(dir.path());
         std::fs::write(
@@ -154,9 +154,11 @@ mod tests {
             indoc::indoc! {r#"
                 project_name: pizza
                 cli_version: 0.1.0
-                repositories:
-                  - repository_short_name: api
-                    repository_name: pizza-api
+                layout: multi-repo
+                agent_root: .
+                packages:
+                  - package_short_name: api
+                    package_name: pizza-api
                     path: ../pizza-api
             "#},
         )
@@ -169,7 +171,7 @@ mod tests {
             findings[0].source.baseline_key(),
             Some((RULE_ID, PROPERTY_ORDER_CHECK))
         );
-        assert!(findings[0].message.contains("repositories[0]"));
-        assert!(findings[0].message.contains("repository_name"));
+        assert!(findings[0].message.contains("packages[0]"));
+        assert!(findings[0].message.contains("package_name"));
     }
 }

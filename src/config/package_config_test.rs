@@ -7,18 +7,18 @@ mod tests {
     use tempfile::tempdir;
 
     #[test]
-    fn load_returns_an_empty_config_when_the_repository_has_no_file() {
-        let repo = tempdir().expect("repo dir");
+    fn load_returns_an_empty_config_when_the_package_has_no_file() {
+        let package = tempdir().expect("package dir");
 
-        let config = RepoConfig::load(repo.path()).expect("load");
+        let config = PackageConfig::load(package.path()).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
         assert!(config.ignored_errors.is_empty());
     }
 
     #[test]
-    fn load_returns_an_empty_config_when_the_repository_path_does_not_exist() {
-        let config = RepoConfig::load(Path::new("/no/such/repository")).expect("load");
+    fn load_returns_an_empty_config_when_the_package_path_does_not_exist() {
+        let config = PackageConfig::load(Path::new("/no/such/package")).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
         assert!(config.ignored_errors.is_empty());
@@ -26,9 +26,9 @@ mod tests {
 
     #[test]
     fn load_reads_coverage_ignore_and_ignored_errors() {
-        let repo = tempdir().expect("repo dir");
+        let package = tempdir().expect("package dir");
         fs::write(
-            repo.path().join(REPO_CONFIG_FILE),
+            package.path().join(PACKAGE_CONFIG_FILE),
             indoc! {"
                 coverage_ignore:
                   - spec_id: place-order
@@ -42,9 +42,9 @@ mod tests {
                     files: [README.md]
             "},
         )
-        .expect("write repo config");
+        .expect("write package config");
 
-        let config = RepoConfig::load(repo.path()).expect("load");
+        let config = PackageConfig::load(package.path()).expect("load");
 
         assert_eq!(config.coverage_ignore.len(), 2);
         assert_eq!(config.coverage_ignore[0].spec_id.as_str(), "place-order");
@@ -68,14 +68,14 @@ mod tests {
 
     #[test]
     fn load_accepts_a_file_holding_only_comments() {
-        let repo = tempdir().expect("repo dir");
+        let package = tempdir().expect("package dir");
         fs::write(
-            repo.path().join(REPO_CONFIG_FILE),
+            package.path().join(PACKAGE_CONFIG_FILE),
             "# nothing to ignore yet\n",
         )
-        .expect("write repo config");
+        .expect("write package config");
 
-        let config = RepoConfig::load(repo.path()).expect("load");
+        let config = PackageConfig::load(package.path()).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
         assert!(config.ignored_errors.is_empty());
@@ -83,19 +83,19 @@ mod tests {
 
     #[test]
     fn load_accepts_an_empty_file() {
-        let repo = tempdir().expect("repo dir");
-        fs::write(repo.path().join(REPO_CONFIG_FILE), "").expect("write repo config");
+        let package = tempdir().expect("package dir");
+        fs::write(package.path().join(PACKAGE_CONFIG_FILE), "").expect("write package config");
 
-        assert!(RepoConfig::load(repo.path()).is_ok());
+        assert!(PackageConfig::load(package.path()).is_ok());
     }
 
     #[test]
     fn load_errors_naming_the_file_when_it_is_not_valid_yaml() {
-        let repo = tempdir().expect("repo dir");
-        let path = repo.path().join(REPO_CONFIG_FILE);
-        fs::write(&path, "coverage_ignore: [unclosed\n").expect("write repo config");
+        let package = tempdir().expect("package dir");
+        let path = package.path().join(PACKAGE_CONFIG_FILE);
+        fs::write(&path, "coverage_ignore: [unclosed\n").expect("write package config");
 
-        let error = RepoConfig::load(repo.path()).expect_err("invalid yaml");
+        let error = PackageConfig::load(package.path()).expect_err("invalid yaml");
 
         assert!(
             describe(&error).starts_with(&format!("could not parse `{}`: ", path.display())),
@@ -106,13 +106,13 @@ mod tests {
 
     #[test]
     fn load_errors_when_an_entry_names_an_invalid_spec_id() {
-        let repo = tempdir().expect("repo dir");
+        let package = tempdir().expect("package dir");
         fs::write(
-            repo.path().join(REPO_CONFIG_FILE),
+            package.path().join(PACKAGE_CONFIG_FILE),
             "coverage_ignore:\n  - spec_id: Not_Valid\n    layer: impl\n",
         )
-        .expect("write repo config");
+        .expect("write package config");
 
-        assert!(RepoConfig::load(repo.path()).is_err());
+        assert!(PackageConfig::load(package.path()).is_err());
     }
 }

@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use eros::{Context, IntoAnyUnion};
 use include_dir::{Dir, DirEntry};
@@ -38,6 +38,18 @@ pub fn dir_name(path: &Path) -> Option<&str> {
 
 pub fn canonical(path: &Path) -> PathBuf {
     path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
+
+pub fn normalize(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir if normalized.pop() => {}
+            other => normalized.push(other),
+        }
+    }
+    normalized
 }
 
 pub fn relative_to<'a>(path: &'a Path, base: &Path) -> &'a Path {

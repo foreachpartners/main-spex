@@ -6,7 +6,7 @@ use anstream::println;
 use eros::Context;
 use owo_colors::OwoColorize;
 
-use crate::config::{self, PreexistingError, Repository, spex_yaml_edit};
+use crate::config::{self, Package, PreexistingError, spex_yaml_edit};
 use crate::error::{Result, could_not_read};
 use crate::rule::Severity;
 use crate::support::fs::write_file;
@@ -37,30 +37,31 @@ impl Baseline {
 }
 
 struct Owner<'a> {
-    repo: &'a Repository,
+    package: &'a Package,
     file: Option<PathBuf>,
 }
 
 fn owner<'a>(
     target: &ReportTarget<'a>,
     finding: &Finding,
-    selected: &[&'a Repository],
+    selected: &[&'a Package],
 ) -> Option<Owner<'a>> {
     let file = finding
         .location
         .as_ref()
         .map(|location| location.file.as_path());
     match target {
-        ReportTarget::Repository(repo) => Some(Owner {
-            repo,
+        ReportTarget::Package(package) => Some(Owner {
+            package,
             file: file.map(Path::to_path_buf),
         }),
+        ReportTarget::Spex { .. } => None,
         ReportTarget::Workspace { spex_dir } => {
             let located = spex_dir.join(file?);
-            selected.iter().find_map(|repo| {
-                let relative = located.strip_prefix(&repo.path).ok()?;
+            selected.iter().find_map(|package| {
+                let relative = located.strip_prefix(&package.path).ok()?;
                 (!relative.starts_with("..")).then(|| Owner {
-                    repo,
+                    package,
                     file: Some(relative.to_path_buf()),
                 })
             })
@@ -74,7 +75,7 @@ fn is_baselined(finding: &Finding, owner: &Owner) -> bool {
             .source
             .baseline_key()
             .is_some_and(|(rule_id, check)| {
-                owner.repo.ignored_errors.iter().any(|entry| {
+                owner.package.ignored_errors.iter().any(|entry| {
                     entry.rule_id == rule_id
                         && entry.check == check
                         && (entry.files.is_empty()
@@ -87,7 +88,7 @@ fn is_baselined(finding: &Finding, owner: &Owner) -> bool {
 
 pub(super) fn drop_baselined_findings<'a>(
     reports: &mut [CheckReport<'a>],
-    selected: &[&'a Repository],
+    selected: &[&'a Package],
 ) {
     for report in reports {
         let target = &report.target;
@@ -99,12 +100,12 @@ pub(super) fn drop_baselined_findings<'a>(
 
 pub(super) fn fill_preexisting_errors(
     spex_dir: &Path,
-    selected: &[&Repository],
+    selected: &[&Package],
     reports: &[CheckReport],
 ) -> Result<ExitCode> {
-    let mut baselines_by_repo: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
+    let mut baselines_by_package: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
         .iter()
-        .map(|repo| (repo.repository_name.clone(), BTreeMap::new()))
+        .map(|package| (package.package_name.clone(), BTreeMap::new()))
         .collect();
 
     for report in reports {
@@ -115,10 +116,10 @@ pub(super) fn fill_preexisting_errors(
             let Some((rule_id, check)) = finding.source.baseline_key() else {
                 continue;
             };
-            let Some(Owner { repo, file }) = owner(&report.target, finding, selected) else {
+            let Some(Owner { package, file }) = owner(&report.target, finding, selected) else {
                 continue;
             };
-            let Some(checks) = baselines_by_repo.get_mut(&repo.repository_name) else {
+            let Some(checks) = baselines_by_package.get_mut(&package.package_name) else {
                 continue;
             };
             checks
@@ -128,7 +129,7 @@ pub(super) fn fill_preexisting_errors(
         }
     }
 
-    let by_repo: HashMap<String, Vec<PreexistingError>> = baselines_by_repo
+    let by_package: HashMap<String, Vec<PreexistingError>> = baselines_by_package
         .into_iter()
         .map(|(name, checks)| {
             let entries = checks
@@ -149,25 +150,25 @@ pub(super) fn fill_preexisting_errors(
     let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
     let raw =
         std::fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
-    let updated = spex_yaml_edit::set_preexisting_errors(&raw, &by_repo);
+    let updated = spex_yaml_edit::set_preexisting_errors(&raw, &by_package);
     let changed = updated != raw;
     if changed {
         write_file(&config_path, &updated)?;
     }
 
-    report_fill(selected, &by_repo, changed);
+    report_fill(selected, &by_package, changed);
     Ok(ExitCode::SUCCESS)
 }
 
 fn report_fill(
-    selected: &[&Repository],
-    by_repo: &HashMap<String, Vec<PreexistingError>>,
+    selected: &[&Package],
+    by_package: &HashMap<String, Vec<PreexistingError>>,
     changed: bool,
 ) {
     println!("{}", "spex check --fill-preexisting-errors".bold());
     println!();
-    for repo in selected {
-        let count = by_repo.get(&repo.repository_name).map_or(0, Vec::len);
+    for package in selected {
+        let count = by_package.get(&package.package_name).map_or(0, Vec::len);
         let summary = if count == 0 {
             "no pre-existing errors".green().to_string()
         } else {
@@ -175,7 +176,7 @@ fn report_fill(
                 .dimmed()
                 .to_string()
         };
-        println!("  {}  {summary}", repo.repository_name.bold());
+        println!("  {}  {summary}", package.package_name.bold());
     }
     println!();
     if changed {

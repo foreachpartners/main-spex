@@ -1,11 +1,11 @@
 ---
 name: shopping-notes-api
-description: Information, rules, commands and other shopping-notes-api repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.
+description: Information, rules, commands and other shopping-notes-api package context. MUST be loaded before reading, writing, testing, or running any code in that package.
 ---
 
 # General
 
-Run `spex info --repo api` for general repository information and applicable rules. Fastify REST API backend for the shopping notes application.
+Run `spex info --package api` for general package information and applicable rules. Fastify REST API backend for the shopping notes application.
 
 # Project structure
 
@@ -17,7 +17,7 @@ Run `spex info --repo api` for general repository information and applicable rul
 
 # Commands
 
-Run from the `shopping-notes-api` repository root.
+Run from the `shopping-notes-api` package root.
 
 - `npm start` - serve the app (http://localhost:3000)
 - `npm test` - run unit tests (vitest)

@@ -10,14 +10,14 @@ mod tests {
         let raw = indoc! {"
             project_name: demo
             cli_version: 0.0.1
-            repositories: []
+            packages: []
         "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
             indoc! {"
                 project_name: demo
                 cli_version: 0.2.0
-                repositories: []
+                packages: []
             "}
         );
     }
@@ -26,14 +26,14 @@ mod tests {
     fn set_cli_version_inserts_after_project_name() {
         let raw = indoc! {"
             project_name: demo
-            repositories: []
+            packages: []
         "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
             indoc! {"
                 project_name: demo
                 cli_version: 0.2.0
-                repositories: []
+                packages: []
             "}
         );
     }
@@ -44,7 +44,7 @@ mod tests {
             project_name: demo
             cli_version: 0.0.1
             # keep me
-            repositories: []
+            packages: []
         "};
         assert_eq!(
             set_cli_version(raw, "0.2.0"),
@@ -52,7 +52,7 @@ mod tests {
                 project_name: demo
                 cli_version: 0.2.0
                 # keep me
-                repositories: []
+                packages: []
             "}
         );
     }
@@ -67,12 +67,12 @@ mod tests {
 
     const TWO_REPOS: &str = indoc! {"
         project_name: demo
-        repositories:
-          - repository_name: api
+        packages:
+          - package_name: api
             path: ../api
             rules:
               - X
-          - repository_name: web
+          - package_name: web
             path: ../web
             rules:
               - X
@@ -80,17 +80,17 @@ mod tests {
 
     #[test]
     fn set_preexisting_errors_appends_block_with_files() {
-        let by_repo = HashMap::from([(
+        let by_package = HashMap::from([(
             "api".to_string(),
             vec![entry("X", "no-cyrillic", &["README.md", "docs/intro.md"])],
         )]);
-        let out = set_preexisting_errors(TWO_REPOS, &by_repo);
+        let out = set_preexisting_errors(TWO_REPOS, &by_package);
         assert_eq!(
             out,
             indoc! {"
                 project_name: demo
-                repositories:
-                  - repository_name: api
+                packages:
+                  - package_name: api
                     path: ../api
                     rules:
                       - X
@@ -100,7 +100,7 @@ mod tests {
                         files:
                           - README.md
                           - docs/intro.md
-                  - repository_name: web
+                  - package_name: web
                     path: ../web
                     rules:
                       - X
@@ -110,10 +110,11 @@ mod tests {
 
     #[test]
     fn set_preexisting_errors_renders_whole_check_without_files() {
-        let by_repo = HashMap::from([("web".to_string(), vec![entry("Y", "commit-format", &[])])]);
-        let out = set_preexisting_errors(TWO_REPOS, &by_repo);
+        let by_package =
+            HashMap::from([("web".to_string(), vec![entry("Y", "commit-format", &[])])]);
+        let out = set_preexisting_errors(TWO_REPOS, &by_package);
         assert!(out.ends_with(
-            "  - repository_name: web
+            "  - package_name: web
     path: ../web
     rules:
       - X
@@ -122,7 +123,7 @@ mod tests {
         check: commit-format
 "
         ));
-        assert!(!out.contains("check: commit-format\n  - repository_name: web"));
+        assert!(!out.contains("check: commit-format\n  - package_name: web"));
         assert_eq!(out.matches("ignored_errors:").count(), 1);
     }
 
@@ -130,8 +131,8 @@ mod tests {
     fn set_preexisting_errors_replaces_existing_block() {
         let raw = indoc! {"
             project_name: demo
-            repositories:
-              - repository_name: api
+            packages:
+              - package_name: api
                 path: ../api
                 ignored_errors:
                   - rule_id: X
@@ -141,11 +142,11 @@ mod tests {
                 rules:
                   - X
         "};
-        let by_repo = HashMap::from([(
+        let by_package = HashMap::from([(
             "api".to_string(),
             vec![entry("X", "no-cyrillic", &["README.md"])],
         )]);
-        let out = set_preexisting_errors(raw, &by_repo);
+        let out = set_preexisting_errors(raw, &by_package);
         assert!(!out.contains("stale"), "old block survived:\n{out}");
         assert!(
             out.contains("check: no-cyrillic"),
@@ -158,21 +159,21 @@ mod tests {
     fn set_preexisting_errors_removes_stale_block_when_empty() {
         let raw = indoc! {"
             project_name: demo
-            repositories:
-              - repository_name: api
+            packages:
+              - package_name: api
                 path: ../api
                 ignored_errors:
                   - rule_id: X
                     check: gone
         "};
-        let by_repo = HashMap::from([("api".to_string(), Vec::new())]);
-        let out = set_preexisting_errors(raw, &by_repo);
+        let by_package = HashMap::from([("api".to_string(), Vec::new())]);
+        let out = set_preexisting_errors(raw, &by_package);
         assert_eq!(
             out,
             indoc! {"
                 project_name: demo
-                repositories:
-                  - repository_name: api
+                packages:
+                  - package_name: api
                     path: ../api
             "}
         );

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::config::spex::Spex;
-use crate::config::{Repository, SpexConfig};
+use crate::config::{Layout, Package, SpexConfig};
 use crate::rule::{RULES_DIR, Rule, RuleId};
 use crate::spec::{
     AcId, AcceptanceCriterion, ContractLevel, SPECS_DIR, Spec, SpecId, Statement, Status,
@@ -57,23 +57,25 @@ pub fn criterion(id: &str) -> AcceptanceCriterion {
     }
 }
 
-pub fn repository(name: &str, path: &str) -> Repository {
-    Repository {
-        repository_name: name.to_string(),
-        repository_short_name: name.to_string(),
+pub fn package(name: &str, path: &str) -> Package {
+    Package {
+        package_name: name.to_string(),
+        package_short_name: name.to_string(),
         path: spex_dir().join(path),
         contracts: Vec::new(),
         rules: Vec::new(),
         ignored_errors: Vec::new(),
-        is_spex_repo: false,
+        is_spex_dir: false,
     }
 }
 
-pub fn spex(repositories: Vec<Repository>) -> Spex {
+pub fn spex(packages: Vec<Package>) -> Spex {
     Spex {
         dir: spex_dir().to_path_buf(),
         project_name: "demo".to_string(),
-        repositories,
+        layout: Layout::MultiRepo,
+        agent_root: spex_dir().to_path_buf(),
+        packages,
         coverage_ignore: Vec::new(),
     }
 }
@@ -82,9 +84,11 @@ pub fn spex_config() -> SpexConfig {
     SpexConfig {
         project_name: "demo".to_string(),
         cli_version: "0.0.0".to_string(),
+        layout: Layout::MultiRepo,
+        agent_root: ".".to_string(),
         description: None,
         rules_unused: Vec::new(),
-        repositories: Vec::new(),
+        packages: Vec::new(),
         coverage_ignore: Vec::new(),
     }
 }

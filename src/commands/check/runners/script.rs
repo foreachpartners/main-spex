@@ -15,7 +15,7 @@ const SPEX_DIR_ENV: &str = "SPEX_DIR";
 
 pub(in crate::commands::check) fn run_per_file_script(
     program: &Path,
-    repo_path: &Path,
+    package_path: &Path,
     spex_dir: &Path,
     files: &[&ScopedFile],
 ) -> Outcome {
@@ -23,7 +23,7 @@ pub(in crate::commands::check) fn run_per_file_script(
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
         hits.extend(run_script(
             program,
-            repo_path,
+            package_path,
             spex_dir,
             batch.iter().map(|file| file.rel.as_os_str()),
         )?);

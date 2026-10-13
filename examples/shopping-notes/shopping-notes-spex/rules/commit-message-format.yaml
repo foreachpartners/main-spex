@@ -14,13 +14,13 @@ checks:
   - name: commit-conventional-format
     description: Recent commits must follow the Conventional Commits subject format
     type: script
-    run: per-repo
+    run: per-package
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
     description: Recent commits adding a spec annotation must carry a matching @spec ID list
     type: script
-    run: per-repo
+    run: per-package
     script: commit-spec-id-trace.sh
     severity: warn
 examples:

@@ -116,12 +116,43 @@ mod tests {
         .expect("write contract");
 
         let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
-            "project_name: demo\ncli_version: 0.0.0\nrepositories:\n  - repository_name: demo-api\n    repository_short_name: api\n    path: ../demo-api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
+            "project_name: demo\ncli_version: 0.0.0\nlayout: multi-repo\nagent_root: .\npackages:\n  - package_name: demo-api\n    package_short_name: api\n    path: ../demo-api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
         )
         .expect("parse config");
 
         let spex = crate::config::spex::Spex::from_config(spex_dir.to_path_buf(), config);
         let index = AnnotationIndex::scan_workspace(&spex).expect("scan");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
+    }
+
+    #[test]
+    fn scan_workspace_skips_the_spex_dir_nested_in_a_package() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path().join("spex");
+        std::fs::create_dir_all(spex_dir.join("specs")).expect("specs dir");
+        std::fs::create_dir_all(dir.path().join("src")).expect("src dir");
+        std::fs::write(spex_dir.join("specs/a.yaml"), "# @spec impl a#some-ac\n")
+            .expect("write spec");
+        std::fs::write(dir.path().join("src/lib.rs"), "// @spec test b#other-ac\n")
+            .expect("write source");
+
+        let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
+            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\npackages:\n  - package_name: demo\n    package_short_name: demo\n    path: ..\n",
+        )
+        .expect("parse config");
+
+        let spex = crate::config::spex::Spex::from_config(spex_dir, config);
+        let index = AnnotationIndex::scan_workspace(&spex).expect("scan");
+
+        assert!(!index.has_ac(
+            &testing::spec_id("a"),
+            &testing::ac_id("some-ac"),
+            CoverageLayer::Impl
+        ));
+        assert!(index.has_ac(
+            &testing::spec_id("b"),
+            &testing::ac_id("other-ac"),
+            CoverageLayer::Test
+        ));
     }
 }

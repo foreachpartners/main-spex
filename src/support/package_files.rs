@@ -4,8 +4,8 @@ use std::path::{Path, PathBuf};
 use ignore::{Walk, WalkBuilder};
 
 #[cfg(test)]
-#[path = "repo_files_test.rs"]
-mod repo_files_test;
+#[path = "package_files_test.rs"]
+mod package_files_test;
 
 const SKIPPED_NAMES: &[&str] = &[
     ".git",
@@ -24,9 +24,9 @@ const SKIPPED_NAMES: &[&str] = &[
     "yarn.lock",
 ];
 
-pub struct RepoFiles(Walk);
+pub struct PackageFiles(Walk);
 
-impl RepoFiles {
+impl PackageFiles {
     pub fn new(root: &Path) -> Self {
         Self(
             WalkBuilder::new(root)
@@ -41,7 +41,7 @@ impl RepoFiles {
     }
 }
 
-impl Iterator for RepoFiles {
+impl Iterator for PackageFiles {
     type Item = Result<PathBuf, ignore::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {

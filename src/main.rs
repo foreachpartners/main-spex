@@ -33,7 +33,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    #[command(about = "Initialize the spex workspace repository")]
+    #[command(about = "Initialize a spex project")]
     Init,
     #[command(about = "Update spex to the latest version (skills, rules, docs, etc.)")]
     Update,

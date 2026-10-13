@@ -31,7 +31,7 @@ pub fn failure_report(error: &ErrorUnion) -> String {
 #[track_caller]
 pub fn config_not_found() -> ErrorUnion {
     eros::error!(
-        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any workspace repository"
+        "`{SPEX_CONFIG_FILE}` not found — run `spex` from the workspace root or any package"
     )
 }
 

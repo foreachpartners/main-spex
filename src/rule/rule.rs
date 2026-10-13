@@ -141,7 +141,7 @@ impl CheckKind {
 pub enum RunScope {
     #[default]
     PerFile,
-    PerRepo,
+    PerPackage,
     Workspace,
 }
 

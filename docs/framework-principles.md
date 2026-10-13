@@ -22,15 +22,15 @@ Clear, well-defined specs eliminate guesswork: they provide explicit acceptance 
 
 Asking an agent to "implement me a snake game where snake is blue and has big eyes" will produce expected results most of the time.
 
-The same problem shows up at the repository level: without a skill, every session re-explains the same commands and conventions from scratch. A repository skill (for example `shopping-notes-api`) writes that down once and autoloads before any read, write, test, or run, so the agent doesn't have to guess or ask.
+The same problem shows up at the package level: without a skill, every session re-explains the same commands and conventions from scratch. A package skill (for example `shopping-notes-api`) writes that down once and autoloads before any read, write, test, or run, so the agent doesn't have to guess or ask.
 
-**Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted. Likewise, a developer explains a repo's structure and commands by hand instead of relying on an autoloaded skill — the knowledge stays in the developer's head, not in the framework.
+**Violation test**: an agent implements a feature with no acceptance criteria to verify against — the result is whatever the model imagined, not what was wanted. Likewise, a developer explains a package's structure and commands by hand instead of relying on an autoloaded skill — the knowledge stays in the developer's head, not in the framework.
 
 ## 3. Rules over Tribal Knowledge
 
 Cross-cutting technical rules and patterns — code style, structure, testing, security — are captured as rules (`*`) instead of living as tribal knowledge, to ensure project maintainability over the long term.
 
-They apply repo-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability.
+They apply package-wide and are proven by automated checks (linters, CI gates) or AI, so every change follows the same rules no matter who — human or AI model — writes the code. A one-off technical implementation — a specific endpoint, integration, or mechanism — is not a cross-cutting rule; it is a capability.
 
 Task skills (`spex-spec`, `spex-plan`, `spex-implement`, `spex-test`, `spex-review`, ...) do the same for workflow steps: invoke one by name and it runs that step with the right rules and acceptance criteria already built in, instead of everyone reconstructing them from memory. Chat still handles the judgment calls a skill leaves open, but it doesn't replace the skill.
 

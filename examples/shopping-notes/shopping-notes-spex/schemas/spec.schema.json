@@ -72,7 +72,7 @@
     },
     "scope": {
       "type": "array",
-      "description": "Workspace repository short names targeted for implementing this spec. Each must match a repository_short_name in spex.yaml.",
+      "description": "Package short names targeted for implementing this spec. Each must match a package_short_name in spex.yaml.",
       "items": {
         "type": "string",
         "minLength": 1

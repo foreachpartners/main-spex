@@ -1,11 +1,11 @@
 ---
-name: <repository-name>
-description: Information, rules, commands and other <repository-name> repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.
+name: <package-name>
+description: Information, rules, commands and other <package-name> package context. MUST be loaded before reading, writing, testing, or running any code in that package.
 ---
 
 # General
 
-Run `spex info --repo <repository-short-name>` for general repository information and applicable rules. <One-line description of what this repository is and does>.
+Run `spex info --package <package-short-name>` for general package information and applicable rules. <One-line description of what this package is and does>.
 
 # Project structure
 
@@ -17,7 +17,7 @@ Run `spex info --repo <repository-short-name>` for general repository informatio
 
 # Commands
 
-Run from the `<repository-name>` repository root.
+Run from the `<package-name>` package root.
 
 - `npm dev` - serve the app
 - `npm test` - run unit tests
@@ -32,6 +32,6 @@ After all changes run `npm format`, `npm lint` and `npm test`.
 
 Read individual files for detailed explanations and code examples:
 
-- `references/error-handling.md` - error handling patterns used in this repository
+- `references/error-handling.md` - error handling patterns used in this package
 - `references/testing.md` - testing strategy and conventions
 - `scripts/migrate.sh` - runs the database migration

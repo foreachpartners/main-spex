@@ -5,7 +5,7 @@ use eros::{Context, IntoAnyUnion};
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::support::fs::canonical;
@@ -15,9 +15,9 @@ pub struct InfoArgs {
     #[arg(
         long,
         num_args = 1..,
-        help = "Filter the repositories list (by name or short_name)"
+        help = "Filter the packages list (by name or short_name)"
     )]
-    repo: Vec<String>,
+    package: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -30,26 +30,28 @@ struct Info {
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
     let (dir, config) = Spex::discover_config()?;
     let mut config_json = to_json(&config)?;
-    let raw_repositories = config
-        .repositories
+    let raw_packages = config
+        .packages
         .iter()
         .map(to_json)
         .collect::<Result<Vec<_>>>()?;
     let spex = Spex::from_config(dir, config);
-    let selected = spex.select_repositories(&args.repo)?;
+    let selected = spex.select_packages(&args.package)?;
 
-    config_json["repositories"] = Value::Array(
-        raw_repositories
+    config_json["packages"] = Value::Array(
+        raw_packages
             .into_iter()
-            .zip(&spex.repositories)
-            .filter(|(_, repository)| {
+            .zip(&spex.packages)
+            .filter(|(_, package)| {
                 selected
                     .iter()
-                    .any(|picked| std::ptr::eq(*picked, *repository))
+                    .any(|picked| std::ptr::eq(*picked, *package))
             })
-            .map(|(json, repository)| repository_with_absolute_path(json, repository))
+            .map(|(json, package)| package_with_absolute_path(json, package))
             .collect(),
     );
+    config_json["agent_root"] =
+        Value::String(canonical(&spex.agent_root).to_string_lossy().into_owned());
     let info = Info {
         spex_dir: spex.dir.to_string_lossy().into_owned(),
         config: config_json,
@@ -67,7 +69,7 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
         .any_union()
 }
 
-fn repository_with_absolute_path(mut json: Value, repository: &Repository) -> Value {
-    json["path"] = Value::String(canonical(&repository.path).to_string_lossy().into_owned());
+fn package_with_absolute_path(mut json: Value, package: &Package) -> Value {
+    json["path"] = Value::String(canonical(&package.path).to_string_lossy().into_owned());
     json
 }

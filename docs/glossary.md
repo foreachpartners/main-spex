@@ -26,7 +26,7 @@
   contract: single
   ```
 
-- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies repo-wide. A specific capability the system provides is a spec, not a rule.
+- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies across whole packages. A specific capability the system provides is a spec, not a rule.
 
   ```yaml
   id: secret-handling
@@ -83,7 +83,7 @@
   Status: not-started
   ```
 
-- **Project** — the whole product being built, named after its workspace root folder (e.g. `shopping-notes`). One project spans several workspace repositories that share a single set of specs.
+- **Project** — the whole product being built, named after its workspace root folder (e.g. `shopping-notes`). One project spans one or several packages that share a single set of specs.
 
 - **Project name** — the identifier of the project, taken from the name of its workspace root folder.
 
@@ -91,20 +91,22 @@
   shopping-notes
   ```
 
-- **Workspace** — the set of workspace repositories that spex manages together for one project, declared in `spex.yaml`.
+- **Workspace** — the set of packages that spex manages together for one project, declared in `spex.yaml`.
 
-- **Workspace root** — the top-level folder that holds a project: it groups the workspace repositories that spex manages.
+- **Workspace root** — the top-level folder that holds a project. In a multi-repo project it groups the packages that spex manages, each a git repository; in a single-repo or monorepo project it is the root of the git repository.
 
   ```text
   shopping-notes/             <- workspace root
-    shopping-notes-spex/      <- workspace repository
-    shopping-notes-api/       <- workspace repository
-    shopping-notes-frontend/  <- workspace repository
+    shopping-notes-spex/      <- package
+    shopping-notes-api/       <- package
+    shopping-notes-frontend/  <- package
   ```
 
-- **Workspace repository** (repository, repo) — a single git repository inside the workspace root that spex manages (`spex`, `api`, `frontend`, and so on). Each lives in its own repository so access can be granted per repository and one Spec ID can trace across many of them. Always call these workspace repositories (repos) or by more specific role (service, mobile).
+- **Spex directory** (spex dir) — the directory holding `spex.yaml`, the specs, rules, schemas, docs, plans, and the contracts shared across packages. It is the spex repository in a multi-repo project, and the `spex/` folder at the repository root in a single-repo or monorepo project.
 
-- **Workspace repository name** (repository name, repo full name) — the identifier of a workspace repository, taken from the name of its folder inside the workspace root/git.
+- **Package** — one deliverable part of the project that spex manages (`spex`, `api`, `frontend`, `mobile`, `infra`, `docs`, and so on), with its own code, tests, contracts, and rules. In a multi-repo project each package is its own git repository inside the workspace root, so access can be granted per repository and one Spec ID can trace across many of them. In a monorepo each package is a folder of the repository, listed in `spex.yaml` without being a git repository of its own; in a single-repo project the one repository is the single package. Not a dependency or a package published to a registry. Always call these packages, or by a more specific role (service, mobile, infra, docs).
+
+- **Package name** — the identifier of a package, taken from the name of its folder inside the workspace root; in a single-repo project, the project name.
 
   ```text
   shopping-notes-spex
@@ -112,7 +114,7 @@
   shopping-notes-frontend
   ```
 
-- **Workspace repository short name** (repository short name, repo short name) — workspace repository name excluding project name.
+- **Package short name** — package name excluding project name; in a single-repo project, the project name itself.
 
   ```text
   spex
@@ -120,7 +122,7 @@
   frontend
   ```
 
-- **Repository config** (`spex.repo.yaml`) — optional file at the root of a workspace repository that holds the coverage waivers and the pre-existing error baseline concerning that repository, merged by spex with the same fields of `spex.yaml`.
+- **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the coverage waivers and the pre-existing error baseline concerning that package, merged by spex with the same fields of `spex.yaml`.
 
 - **AI coding agent** (AI agent, agent) — the tool a person picks to do the work: an autonomous assistant that reads, runs, and edits code on their behalf. Hosted inside an editor (Zed, VS Code, Cursor) or run from the terminal (Claude Code, Codex).
 

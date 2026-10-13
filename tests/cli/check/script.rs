@@ -23,7 +23,7 @@ const API_REPORT: &str = r#"runners-project-api
 const FRONTEND_REPORT: &str = r#"runners-project-frontend
   warn  script-runner/per-file-hack  (src/index.ts:3)
       HACK marker left in code
-  error  script-runner/per-repo-changelog
+  error  script-runner/per-package-changelog
       CHANGELOG.md is missing from runners-project-frontend
   1 error, 1 warning
 
@@ -37,7 +37,7 @@ const WORKSPACE_REPORT: &str = r#"workspace
 const SCRIPT_ENV_REPORT: &str = r#"script-env-project-api
   warn  spex-dir-env/per-file  (src/lib.rs)
       SPEX_DIR is the spex directory
-  warn  spex-dir-env/per-repo
+  warn  spex-dir-env/per-package
       SPEX_DIR is the spex directory
   0 errors, 2 warnings
 
@@ -97,10 +97,10 @@ fn check_files_narrows_script_findings_at_each_run_scope() {
 }
 
 #[test]
-fn check_repo_limits_script_findings_to_the_named_repository() {
+fn check_package_limits_script_findings_to_the_named_package() {
     let (_workspace, project) = project_with_rules(&["script-runner", "script-failures"]);
 
-    let check = run_spex(&project, &["check", "--repo", "frontend"], "");
+    let check = run_spex(&project, &["check", "--package", "frontend"], "");
 
     assert_eq!(
         report_text(&check.stdout),
@@ -108,7 +108,7 @@ fn check_repo_limits_script_findings_to_the_named_repository() {
             &[FRONTEND_REPORT, WORKSPACE_REPORT],
             "runners-project: 2 errors, 1 warning"
         ),
-        "check --repo report did not match\nstderr:\n{}",
+        "check --package report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
     assert_eq!(
@@ -119,22 +119,22 @@ fn check_repo_limits_script_findings_to_the_named_repository() {
 }
 
 #[test]
-fn check_repo_runs_a_workspace_script_only_when_a_repository_using_it_is_selected() {
+fn check_package_runs_a_workspace_script_only_when_a_package_using_it_is_selected() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
-    let check = run_spex(&project, &["check", "--repo", "spex"], "");
+    let check = run_spex(&project, &["check", "--package", "spex"], "");
 
     assert_eq!(
         report_text(&check.stdout),
         expected_report(&[SPEX_REPORT], "runners-project: 0 errors, 0 warnings"),
-        "check --repo spex report did not match\nstderr:\n{}",
+        "check --package spex report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
     assert!(
         check.status.success(),
-        "check should exit 0 when the selected repository has no findings"
+        "check should exit 0 when the selected package has no findings"
     );
 }
 

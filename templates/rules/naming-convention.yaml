@@ -2,42 +2,42 @@ id: naming-convention
 title: Derived naming convention
 sync_with_upstream: true
 description: >-
-  A workspace repository owns many cross-cutting identifiers: repository directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the repository short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
+  A package owns many cross-cutting identifiers: package directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the package short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
 acceptance_criteria:
-  - "MUST derive every cross-cutting identifier from the project name plus the repository short name and optional data so it's globally identifiable on its own"
+  - "MUST derive every cross-cutting identifier from the project name plus the package short name and optional data so it's globally identifiable on its own"
   - "MUST use conventional case and delimiter based on use case"
-  - "MUST use <project-name>-<repository-short-name> for repository directory, crate, binary and container image"
-  - "MUST use <project_name>_<repository_short_name> for db (names both the database and its user)"
-  - "MUST use <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA> for config and env variables"
-  - "MUST use <project_name>.<repository_short_name>.<data> for proto_package"
+  - "MUST use <project-name>-<package-short-name> for package directory, crate, binary and container image"
+  - "MUST use <project_name>_<package_short_name> for db (names both the database and its user)"
+  - "MUST use <PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA> for config and env variables"
+  - "MUST use <project_name>.<package_short_name>.<data> for proto_package"
   - "MUST use lowercase for a Spec ID or Rule ID (e.g. `delivery-time`) everywhere it is referenced — prose, filename, script directory, and for a Spec ID also `@spec` annotations and `x-spec:` — so the id is always identical to the spec's filename and script directory (`specs/add-shopping-item.yaml` and `add-shopping-item`, `rules/secret-handling/` and `secret-handling`)"
-  - "MUST extend this convention, not individual repositories, when a new cross-cutting identifier is needed"
+  - "MUST extend this convention, not individual packages, when a new cross-cutting identifier is needed"
 checks:
-  - name: repo-dir
-    description: Repository directory name must be <project-name>-<repository-short-name>
+  - name: package-dir
+    description: Package directory name must be <project-name>-<package-short-name>
     type: script
-    run: per-repo
-    script: repo-dir.sh
+    run: per-package
+    script: package-dir.sh
     severity: error
 examples:
   formats: |
-    used by:  repository directory, crate, binary, container image
-    format:   <project-name>-<repository-short-name>
+    used by:  package directory, crate, binary, container image
+    format:   <project-name>-<package-short-name>
     example:  shopping-notes-api
     example:  shopping-notes-frontend
 
     used by:  db (names both the database and its user)
-    format:   <project_name>_<repository_short_name>
+    format:   <project_name>_<package_short_name>
     example:  shopping_notes_api
     example:  shopping_notes_frontend
 
     used by:  config, env variables
-    format:   <PROJECT_NAME>_<REPOSITORY_SHORT_NAME>_<DATA>
+    format:   <PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA>
     example:  SHOPPING_NOTES_FRONTEND_SERVER_PORT
     example:  SHOPPING_NOTES_API_DATABASE_URL
 
     used by:  proto_package
-    format:   <project_name>.<repository_short_name>.<data>
+    format:   <project_name>.<package_short_name>.<data>
     example:  shopping_notes.api.v1
     example:  shopping_notes.frontend.v1
 

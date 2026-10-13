@@ -2,9 +2,9 @@ id: script-runner
 title: Script runner
 description: >-
   Exercises the script runner at each run scope: per-file receives the matched
-  files, per-repo runs once in each repository, workspace runs once overall.
+  files, per-package runs once in each package, workspace runs once overall.
 acceptance_criteria:
-  - "MUST keep a CHANGELOG.md in every repository"
+  - "MUST keep a CHANGELOG.md in every package"
   - "MUST keep the api and frontend versions identical"
   - "MUST NOT leave a HACK marker in source code"
 checks:
@@ -18,11 +18,11 @@ checks:
     exclude:
       - "src/generated/**"
     severity: warn
-  - name: per-repo-changelog
-    description: Flags a repository without a CHANGELOG.md
+  - name: per-package-changelog
+    description: Flags a package without a CHANGELOG.md
     type: script
-    run: per-repo
-    script: per-repo-changelog.sh
+    run: per-package
+    script: per-package-changelog.sh
     severity: error
   - name: workspace-versions
     description: Flags api and frontend versions that differ

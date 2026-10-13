@@ -11,7 +11,7 @@ acceptance_criteria:
   - "MUST prioritize clarity over brevity; brevity over all else"
   - "MUST use RFC 2119 for commitment level - MUST for mandatory rules, SHOULD for recommended, MAY for optional, MUST NOT for prohibited, SHOULD NOT for discouraged"
   - "MUST use English"
-  - "MUST write substitution placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`); in a format template that defines an identifier's required casing, the placeholder MUST instead mirror the produced case and delimiter (`<PROJECT_NAME>_<DATA>`, `<project_name>.<data>`)"
+  - "MUST write substitution placeholders in angle brackets with a lowercase, hyphenated name, marking a value the reader replaces with a real one, whether in a path (`<spex-dir>/specs/<spec-id>.yaml`) or inline (`@spec impl <spec-id>`); in a format template that defines an identifier's required casing, the placeholder MUST instead mirror the produced case and delimiter (`<PROJECT_NAME>_<DATA>`, `<project_name>.<data>`)"
   - "MUST NOT use motivational phrases ('Great job!', 'Perfect!', 'Excellent!'), uncertainty markers ('maybe', 'perhaps', 'I think'), apologies ('sorry', 'unfortunately'), or conversational check-ins ('Make sense?', 'Got it?')"
   - "SHOULD use sentence case for titles and headings, capitalizing only the first word and proper nouns or acronyms: 'Commit message format', 'OpenAPI conventions'"
 checks:
@@ -38,5 +38,5 @@ examples:
   prefer: |
     MUST load configuration at startup.
   placeholder: |
-    <workspace-root>/<project-name>-spex/specs/<spec-id>.yaml
+    <spex-dir>/specs/<spec-id>.yaml
     e.g. shopping-notes/shopping-notes-spex/specs/add-shopping-item.yaml

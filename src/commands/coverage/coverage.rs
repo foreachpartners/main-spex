@@ -17,7 +17,7 @@ pub struct CoverageArgs {
     #[arg(
         long,
         num_args = 1..,
-        help = "Filter by repository short names"
+        help = "Filter by package short names"
     )]
     scope: Vec<String>,
     #[arg(

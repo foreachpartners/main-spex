@@ -6,7 +6,7 @@ Runs a [jq](https://jqlang.org/manual/) filter on JSON or YAML data, so a script
 spex jq [OPTIONS] <FILTER> [FILE]
 ```
 
-- `<FILTER>` — the jq filter, e.g. `.project_name` or `.repositories[].path`.
+- `<FILTER>` — the jq filter, e.g. `.project_name` or `.packages[].path`.
 - `[FILE]` — the JSON or YAML file to read; standard input when omitted. The input is read as JSON when it is valid JSON, otherwise as YAML, and holds a single document.
 - Prints every result the filter produces on its own line, as indented JSON.
 - Exits `0` when the filter ran. Exits `2` when it could not run: an invalid filter, an unreadable or unparsable input, or a filter that fails at runtime, such as indexing a number.
@@ -18,5 +18,5 @@ spex jq [OPTIONS] <FILTER> [FILE]
 
 ```sh
 spex jq -r .project_name spex.yaml
-spex info | spex jq -r '.repositories[].path'
+spex info | spex jq -r '.packages[].path'
 ```

@@ -17,13 +17,13 @@ Your output must be machine and human-readable, deterministic, and structured fo
 
 Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for every planned spec. Confirm with the user how to handle any unresolved blocker.
 
-Resolve a `Repositories scope` for requested changes.
+Resolve a `Packages scope` for requested changes.
 
-Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the resolved `Repositories scope`, then read `<tmp-path>` for the governing rules.
+Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages scope`, then read `<tmp-path>` for the governing rules.
 
-Read each affected repository's information in `Repositories scope` from `spex.yaml`.
+Read each affected package's information in `Packages scope` from `spex.yaml`.
 
-Read related contracts in `<workspace-root>/<project-name>-spex/contracts/`.
+Read related contracts in `<spex-dir>/contracts/`.
 
 Read all existing code related to changes: domain models, database schema, repositories, handlers, endpoints, components.
 
@@ -31,7 +31,7 @@ Ground every interface you plan to change, extend or create.
 
 # Create the plan file
 
-Create a spec file in `<workspace-root>/<project-name>-spex/plans/<date>-<slug>.md`. `<date>` is today's real date (`YYYY-MM-DD`). `<slug>` is a short lowercase hyphenated summary. The filename stem must validate against `plan-filename.schema.json` and stay within 50 characters.
+Create a spec file in `<spex-dir>/plans/<date>-<slug>.md`. `<date>` is today's real date (`YYYY-MM-DD`). `<slug>` is a short lowercase hyphenated summary. The filename stem must validate against `plan-filename.schema.json` and stay within 50 characters.
 
 If more than one spec is provided, pick a leading one for `<spec-id>` and generate the slug based on the main changes.
 
@@ -39,7 +39,7 @@ If more than one spec is provided, pick a leading one for `<spec-id>` and genera
 
 Write `Specs` that the user provided.
 
-Write `Repositories scope` based on changes we need to implement (don't include spex itself).
+Write `Packages scope` based on changes we need to implement (don't include spex itself).
 
 Write `Rules` in the plan from the governing rules already read in `<tmp-path>` that are applicable to changes.
 
@@ -49,7 +49,7 @@ Break the work into ordered steps. Within a step, split into tasks only when the
 
 - Every task in one step MUST be safe to run in parallel: it must not depend on another task's output in the same step, and must not edit the same files as another task in that step.
 - Put work that depends on an earlier result in a later step — a schema or contract change comes before the code that consumes it.
-- Give each task a disjoint write scope (its own files) and state which repository it runs in.
+- Give each task a disjoint write scope (its own files) and state which package it runs in.
 
 Describe only the shape of each change, never its logic:
 

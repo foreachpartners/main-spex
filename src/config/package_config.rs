@@ -9,22 +9,22 @@ use crate::error::{Result, could_not_parse, could_not_read};
 use crate::spec::SpecCoverageIgnore;
 
 #[cfg(test)]
-#[path = "repo_config_test.rs"]
-mod repo_config_test;
+#[path = "package_config_test.rs"]
+mod package_config_test;
 
-pub const REPO_CONFIG_FILE: &str = "spex.repo.yaml";
+pub const PACKAGE_CONFIG_FILE: &str = "spex.package.yaml";
 
 #[derive(Debug, Default, Deserialize)]
-pub struct RepoConfig {
+pub struct PackageConfig {
     #[serde(default)]
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
     #[serde(default)]
     pub ignored_errors: Vec<PreexistingError>,
 }
 
-impl RepoConfig {
-    pub fn load(repo_path: &Path) -> Result<Self> {
-        let config_path = repo_path.join(REPO_CONFIG_FILE);
+impl PackageConfig {
+    pub fn load(package_path: &Path) -> Result<Self> {
+        let config_path = package_path.join(PACKAGE_CONFIG_FILE);
         if !config_path.is_file() {
             return Ok(Self::default());
         }

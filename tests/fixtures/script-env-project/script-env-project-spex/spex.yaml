@@ -1,15 +1,17 @@
 project_name: script-env-project
 cli_version: 0.17.0
+layout: multi-repo
+agent_root: .
 description: >-
   Fixture for the environment a script check runs in, at each run scope
-  (per-file, per-repo, workspace).
-repositories:
-  - repository_name: script-env-project-api
-    repository_short_name: api
+  (per-file, per-package, workspace).
+packages:
+  - package_name: script-env-project-api
+    package_short_name: api
     path: ../script-env-project-api
     rules:
       - spex-dir-env
-  - repository_name: script-env-project-spex
-    repository_short_name: spex
+  - package_name: script-env-project-spex
+    package_short_name: spex
     path: .
     rules: []

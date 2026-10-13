@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.19.0] - 2026-10-12
+
+- `spex init` supports `single-repo` and `monorepo` layouts besides `multi-repo`: it asks for the layout, records it as `layout` with `agent_root` in `spex.yaml`, puts the spex directory in `spex/` and the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills`, `.claude`) in the repository root. Both are required, so existing projects must add `layout: multi-repo` and `agent_root: .` to `spex.yaml` (see the migration guide).
+- **Breaking**: a workspace repository is now a **package**, one word for a separate git repository (multi-repo), a package folder (monorepo) and the single repository (single-repo). In `spex.yaml`, `repositories` is now `packages`, `repository_name` is `package_name`, and `repository_short_name` is `package_short_name`. The optional per-repository `spex.repo.yaml` is now `spex.package.yaml`, validated by `schemas/spex.package.schema.json`. The `--repo` option of `spex check` and `spex info` is now `--package`, and a check's `run: per-repo` is now `run: per-package`. The bundled `naming-convention` rule's `repo-dir` check is now `package-dir` (and its script `package-dir.sh`), and the `spex-setup` skill's `GENERIC-REPO-SKILL-TEMPLATE.md` is now `GENERIC-PACKAGE-SKILL-TEMPLATE.md`. See the migration guide.
+
 ## [0.18.0] - 2026-10-10
 
 - The bundled `openapi-conventions` rule gains a `vacuum-lint` check that lints every OpenAPI document (`*.openapi.{yaml,yml,json}` and `openapi.{yaml,yml,json}`) with [vacuum](https://quobix.com/vacuum/installing/) against a bundled ruleset covering the rule's `MUST` and `MUST NOT` criteria (OpenAPI version, `operationId`, `summary`, responses, `x-spec`, `$ref`-only schemas, casing, secret fields, discriminators, leaked internals). The rule's `SHOULD` criteria and the ones that need judgment (explicit error responses, `writeOnly`) stay with the agent.

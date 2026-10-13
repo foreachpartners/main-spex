@@ -42,12 +42,14 @@ mod tests {
             indoc! {"
                 project_name: demo
                 cli_version: 0.0.0
-                repositories:
-                  - repository_name: demo-api
-                    repository_short_name: api
+                layout: multi-repo
+                agent_root: .
+                packages:
+                  - package_name: demo-api
+                    package_short_name: api
                     path: ../demo-api
-                  - repository_name: demo-frontend
-                    repository_short_name: frontend
+                  - package_name: demo-frontend
+                    package_short_name: frontend
                     path: ../demo-frontend
             "},
         )
@@ -170,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn render_with_full_repo_name_does_not_match_scope() {
+    fn render_with_full_package_name_does_not_match_scope() {
         let dir = tempdir().expect("temp dir");
         write_workspace(dir.path());
         let workspace = workspace(dir.path());

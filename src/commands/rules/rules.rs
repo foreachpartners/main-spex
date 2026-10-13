@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use clap::Args;
 use eros::{Context, IntoAnyUnion, bail};
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
@@ -24,8 +24,8 @@ pub struct RulesArgs {
     ai: bool,
     #[arg(long, num_args = 1.., help = "Filter by rule ids")]
     id: Vec<String>,
-    #[arg(long, num_args = 1.., help = "Filter by repository names")]
-    repo: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Filter by package names")]
+    package: Vec<String>,
     #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
@@ -43,7 +43,7 @@ pub fn run(args: RulesArgs) -> Result<ExitCode> {
 }
 
 fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
-    let repositories = spex.select_repositories(&args.repo)?;
+    let packages = spex.select_packages(&args.package)?;
 
     let rules: Vec<serde_json::Value> =
         load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
@@ -68,7 +68,11 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
 
     let output: Vec<&serde_json::Value> = rules
         .iter()
-        .filter(|rule| repositories.iter().any(|repo| repo_has_rule(repo, rule)))
+        .filter(|rule| {
+            packages
+                .iter()
+                .any(|package| package_has_rule(package, rule))
+        })
         .filter(|rule| id_selected(rule, &args.id))
         .collect();
 
@@ -89,10 +93,10 @@ fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
         .map(|docs| docs.join("\n"))
 }
 
-fn repo_has_rule(repo: &Repository, rule: &serde_json::Value) -> bool {
+fn package_has_rule(package: &Package, rule: &serde_json::Value) -> bool {
     rule.get("id")
         .and_then(|v| v.as_str())
-        .is_some_and(|rule_id| repo.rules.iter().any(|id| id.as_str() == rule_id))
+        .is_some_and(|rule_id| package.rules.iter().any(|id| id.as_str() == rule_id))
 }
 
 fn id_selected(value: &serde_json::Value, ids: &[String]) -> bool {

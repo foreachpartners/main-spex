@@ -7,7 +7,7 @@ This project is governed by `spex`. The AI-first development framework that turn
 BRD (why, optional) -> PRD (what, optional) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
 
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
-- **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each repository must adhere to a list of rules applicable to it defined in `spex.yaml`
+- **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`
 - **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
 - **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
 
@@ -27,25 +27,19 @@ Trace comment should be placed on the smallest unit that actually satisfies the 
 
 A change isn't finished until:
 
-- `spex check` passes (no error-severity findings) for every affected repository.
+- `spex check` passes (no error-severity findings) for every affected package.
 - `spex coverage` shows no gap for any spec acceptance criterion the change touches.
 - Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
-
-## Workspace layout
-
-The workspace root holds this repo (the single source of truth for specs, rules, contracts, and plans) alongside the other workspace repositories. Check `spex.yaml` for all project configuration.
-
-Skills live under `.agents/skills`; `.claude` is a symlink to `.agents`, so `.claude/skills` is the same directory — edit skill files under `.agents/skills` only.
 
 ## CLI commands
 
 Run from anywhere inside the workspace; `spex <command> --help` lists every option.
 
-- `spex check [--repo <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
-- `spex coverage [--scope <repository-short-name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
+- `spex info [--package <name>...]` — print `spex.yaml`: project and per-package configuration, including paths.
+- `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
+- `spex coverage [--scope <package-short-name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
 - `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs.
-- `spex rules [--id <rule-id>...] [--repo <name>...] [--ai] [--output <file>]` — print the active rules per repository.
-- `spex info [--repo <name>...]` — print `spex.yaml`: project and per-repository configuration.
+- `spex rules [--id <rule-id>...] [--package <name>...] [--ai] [--output <file>]` — print the active rules per package.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
 

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::config::REPO_CONFIG_FILE;
+    use crate::config::PACKAGE_CONFIG_FILE;
     use crate::error::describe;
     use crate::spec::CoverageLayer;
     use crate::support::testing;
@@ -10,8 +10,8 @@ mod tests {
 
     fn spex() -> Spex {
         testing::spex(vec![
-            testing::repository("api", "../api"),
-            testing::repository("web", "../web"),
+            testing::package("api", "../api"),
+            testing::package("web", "../web"),
         ])
     }
 
@@ -21,7 +21,7 @@ mod tests {
     }
 
     #[test]
-    fn validate_scopes_accepts_known_repository_short_names() {
+    fn validate_scopes_accepts_known_package_short_names() {
         let scopes = ["api".to_string(), "web".to_string()];
         assert!(spex().validate_scopes(&scopes).is_ok());
     }
@@ -32,40 +32,38 @@ mod tests {
         let error = spex().validate_scopes(&scopes).expect_err("unknown scope");
         assert_eq!(
             describe(&error),
-            "unknown repository short name `nope` — not listed in spex.yaml"
+            "unknown package short name `nope` — not listed in spex.yaml"
         );
     }
 
     fn selected_short_names(names: &[&str]) -> Vec<String> {
         let names: Vec<String> = names.iter().map(|name| name.to_string()).collect();
         spex()
-            .select_repositories(&names)
+            .select_packages(&names)
             .expect("select")
             .iter()
-            .map(|repo| repo.repository_short_name.clone())
+            .map(|package| package.package_short_name.clone())
             .collect()
     }
 
     #[test]
-    fn select_repositories_without_names_returns_every_repository() {
+    fn select_packages_without_names_returns_every_package() {
         assert_eq!(selected_short_names(&[]), vec!["api", "web"]);
     }
 
     #[test]
-    fn select_repositories_keeps_spex_yaml_order_and_matches_name_or_short_name() {
+    fn select_packages_keeps_spex_yaml_order_and_matches_name_or_short_name() {
         assert_eq!(selected_short_names(&["web", "api"]), vec!["api", "web"]);
         assert_eq!(selected_short_names(&["web"]), vec!["web"]);
     }
 
     #[test]
-    fn select_repositories_rejects_the_first_unknown_name() {
+    fn select_packages_rejects_the_first_unknown_name() {
         let names = ["api".to_string(), "ghost".to_string(), "other".to_string()];
-        let error = spex()
-            .select_repositories(&names)
-            .expect_err("unknown repo");
+        let error = spex().select_packages(&names).expect_err("unknown package");
         assert_eq!(
             describe(&error),
-            "unknown workspace repository `ghost` — not listed in spex.yaml"
+            "unknown package `ghost` — not listed in spex.yaml"
         );
     }
 
@@ -116,16 +114,16 @@ mod tests {
     }
 
     #[test]
-    fn with_repo_configs_merges_every_repository_file_into_the_workspace() {
+    fn with_package_configs_merges_every_package_file_into_the_workspace() {
         let workspace = tempdir().expect("workspace");
         let api = workspace.path().join("api");
         let web = workspace.path().join("web");
         let bare = workspace.path().join("bare");
         for dir in [&api, &web, &bare] {
-            std::fs::create_dir_all(dir).expect("repo dir");
+            std::fs::create_dir_all(dir).expect("package dir");
         }
         std::fs::write(
-            api.join(REPO_CONFIG_FILE),
+            api.join(PACKAGE_CONFIG_FILE),
             indoc! {"
                 coverage_ignore:
                   - spec_id: from-api
@@ -138,27 +136,27 @@ mod tests {
         )
         .expect("write api config");
         std::fs::write(
-            web.join(REPO_CONFIG_FILE),
+            web.join(PACKAGE_CONFIG_FILE),
             "coverage_ignore:\n  - spec_id: from-web\n    layer: test\n",
         )
         .expect("write web config");
-        let mut api_repo = testing::repository("api", "api");
-        api_repo.path = api;
-        api_repo.ignored_errors = serde_yaml_ng::from_str(indoc! {"
+        let mut api_package = testing::package("api", "api");
+        api_package.path = api;
+        api_package.ignored_errors = serde_yaml_ng::from_str(indoc! {"
             - rule_id: writing-style
               check: no-todo
         "})
         .expect("parse baseline");
-        let mut web_repo = testing::repository("web", "web");
-        web_repo.path = web;
-        let mut bare_repo = testing::repository("bare", "bare");
-        bare_repo.path = bare;
+        let mut web_package = testing::package("web", "web");
+        web_package.path = web;
+        let mut bare_package = testing::package("bare", "bare");
+        bare_package.path = bare;
         let spex = Spex {
             coverage_ignore: vec![waiver("from-spex-yaml", "contract")],
-            ..testing::spex(vec![api_repo, web_repo, bare_repo])
+            ..testing::spex(vec![api_package, web_package, bare_package])
         };
 
-        let spex = spex.with_repo_configs().expect("merge repository configs");
+        let spex = spex.with_package_configs().expect("merge package configs");
 
         let spec_ids: Vec<&str> = spex
             .coverage_ignore
@@ -167,10 +165,10 @@ mod tests {
             .collect();
         assert_eq!(spec_ids, vec!["from-spex-yaml", "from-api", "from-web"]);
         let checks = |name: &str| -> Vec<String> {
-            spex.repositories
+            spex.packages
                 .iter()
-                .find(|repo| repo.repository_name == name)
-                .expect("repository")
+                .find(|package| package.package_name == name)
+                .expect("package")
                 .ignored_errors
                 .iter()
                 .map(|entry| entry.check.clone())
@@ -182,23 +180,23 @@ mod tests {
     }
 
     #[test]
-    fn with_repo_configs_fails_when_a_repository_file_is_invalid() {
-        let repo_dir = tempdir().expect("repo dir");
+    fn with_package_configs_fails_when_a_package_file_is_invalid() {
+        let package_dir = tempdir().expect("package dir");
         std::fs::write(
-            repo_dir.path().join(REPO_CONFIG_FILE),
+            package_dir.path().join(PACKAGE_CONFIG_FILE),
             "coverage_ignore: 3\n",
         )
-        .expect("write repo config");
-        let mut repo = testing::repository("api", "api");
-        repo.path = repo_dir.path().to_path_buf();
+        .expect("write package config");
+        let mut package = testing::package("api", "api");
+        package.path = package_dir.path().to_path_buf();
 
-        let error = testing::spex(vec![repo])
-            .with_repo_configs()
+        let error = testing::spex(vec![package])
+            .with_package_configs()
             .err()
-            .expect("invalid repo config");
+            .expect("invalid package config");
 
         let message = describe(&error);
         assert!(message.starts_with("could not parse `"), "{message}");
-        assert!(message.contains(REPO_CONFIG_FILE), "{message}");
+        assert!(message.contains(PACKAGE_CONFIG_FILE), "{message}");
     }
 }

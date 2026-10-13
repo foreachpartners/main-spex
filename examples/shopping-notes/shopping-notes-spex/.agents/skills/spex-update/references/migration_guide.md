@@ -2,6 +2,19 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.19.0
+
+`spex.yaml` gained two required fields: `layout`, how the project is arranged on disk (`multi-repo`, `single-repo`, or `monorepo`), and `agent_root`, the directory holding `AGENTS.md`, `CLAUDE.md` and `.agents/skills/`, relative to the spex directory. Every existing project is a `multi-repo` project, whose agent files live in the spex repository itself, so add `layout: multi-repo` and `agent_root: .` to `<workspace-root>/<project-name>-spex/spex.yaml`, in that order, right after `cli_version`. Until they are added, every command except `spex update` fails to load `spex.yaml`.
+
+A workspace repository is now called a package: one word for a separate git repository (multi-repo), a package folder (monorepo) and the single repository (single-repo). Rename the following. Until `spex.yaml` is renamed, every command except `spex update` fails to load it. In `<workspace-root>/<project-name>-spex/`:
+
+- In `spex.yaml`, rename the `repositories` key to `packages`, and in each of its entries `repository_name` to `package_name` and `repository_short_name` to `package_short_name`, keeping each field where it is.
+- In every package that has a `spex.repo.yaml`, rename it to `spex.package.yaml`.
+- Delete `schemas/spex.repo.schema.json`: `spex update` writes `schemas/spex.package.schema.json` and doesn't delete files.
+- In every rule under `rules/**/*.yaml`, replace `run: per-repo` with `run: per-package`. In every script, skill, or doc of the project that runs `spex info --repo` or `spex check --repo`, replace `--repo` with `--package`. Rules with `sync_with_upstream: true` and their scripts are rewritten by `spex update` and need no change.
+- In every `ignored_errors` entry of `spex.yaml` or a `spex.package.yaml` that names the `naming-convention` rule's check `repo-dir`, rename the check to `package-dir`.
+- Delete the files `spex update` leaves behind after their renames: `rules/naming-convention/repo-dir.sh` (now `package-dir.sh`), and `.agents/skills/spex-setup/references/GENERIC-REPO-SKILL-TEMPLATE.md` (now `GENERIC-PACKAGE-SKILL-TEMPLATE.md`) under the agent root.
+
 ## 0.13.0
 
 Rule scripts moved from `scripts/<rule-id>/` to a folder named after the rule file, beside it: the scripts of `rules/<rule-id>.yaml` now live in `rules/<rule-id>/`, and those of a nested `rules/<group>/<rule-id>.yaml` in `rules/<group>/<rule-id>/`. `spex check` reports a script missing from the new location. In `<workspace-root>/<project-name>-spex/`:

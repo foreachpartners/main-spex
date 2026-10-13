@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::commands::check_schema;
-use crate::config::{REPO_CONFIG_FILE, Repository};
+use crate::config::{PACKAGE_CONFIG_FILE, Package};
 use crate::error::Result;
 use crate::rule::{RULES_DIR, Rule};
 use crate::spec::{SPECS_DIR, Spec};
@@ -13,7 +13,7 @@ use super::conform_finding;
 
 pub(super) fn validate_schema(
     spex_dir: &Path,
-    repositories: &[Repository],
+    packages: &[Package],
     specs: &[Spec],
     rules: &[Rule],
 ) -> Result<Vec<Finding>> {
@@ -33,15 +33,15 @@ pub(super) fn validate_schema(
         ));
     }
 
-    let repo_configs: Vec<PathBuf> = repositories
+    let package_configs: Vec<PathBuf> = packages
         .iter()
-        .map(|repo| repo.path.join(REPO_CONFIG_FILE))
+        .map(|package| package.path.join(PACKAGE_CONFIG_FILE))
         .filter(|path| path.is_file())
         .collect();
     findings.extend(validate_schema_group(
         spex_dir,
-        &repo_configs,
-        "spex.repo.schema.json",
+        &package_configs,
+        "spex.package.schema.json",
     ));
 
     findings.extend(validate_schema_group(

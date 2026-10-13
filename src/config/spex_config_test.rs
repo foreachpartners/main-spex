@@ -10,7 +10,7 @@ mod tests {
     fn workspace() -> tempfile::TempDir {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join(SPEX_REPO_DIR);
-        std::fs::create_dir_all(workspace.path().join("demo-api/src")).expect("repo");
+        std::fs::create_dir_all(workspace.path().join("demo-api/src")).expect("package");
         std::fs::create_dir_all(&spex).expect("spex dir");
         std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
         workspace
@@ -35,7 +35,7 @@ mod tests {
     }
 
     #[test]
-    fn finds_from_nested_repo_subdirectory() {
+    fn finds_from_nested_package_subdirectory() {
         let workspace = workspace();
         let found = SpexConfig::find_file(&workspace.path().join("demo-api/src")).expect("found");
         assert_eq!(
@@ -108,12 +108,14 @@ mod tests {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
+            layout: multi-repo
+            agent_root: .
             description: A demo project.
             rules_unused:
               - graphql-conventions
-            repositories:
-              - repository_name: demo-api
-                repository_short_name: api
+            packages:
+              - package_name: demo-api
+                package_short_name: api
                 description: REST API.
                 path: ../demo-api
                 contracts:
@@ -126,9 +128,9 @@ mod tests {
 
         assert_eq!(json["description"], "A demo project.");
         assert_eq!(json["rules_unused"][0], "graphql-conventions");
-        assert_eq!(json["repositories"][0]["description"], "REST API.");
+        assert_eq!(json["packages"][0]["description"], "REST API.");
         assert_eq!(
-            json["repositories"][0]["contracts"][0]["description"],
+            json["packages"][0]["contracts"][0]["description"],
             "OpenAPI contract."
         );
     }
@@ -138,9 +140,11 @@ mod tests {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
-            repositories:
-              - repository_name: demo-api
-                repository_short_name: api
+            layout: multi-repo
+            agent_root: .
+            packages:
+              - package_name: demo-api
+                package_short_name: api
                 path: ../demo-api
         "})
         .expect("parse config");
@@ -149,8 +153,8 @@ mod tests {
 
         assert!(json.get("description").is_none());
         assert_eq!(json["rules_unused"], serde_json::json!([]));
-        assert!(json["repositories"][0].get("description").is_none());
-        assert_eq!(json["repositories"][0]["contracts"], serde_json::json!([]));
+        assert!(json["packages"][0].get("description").is_none());
+        assert_eq!(json["packages"][0]["contracts"], serde_json::json!([]));
     }
 
     #[test]
@@ -158,6 +162,8 @@ mod tests {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
+            layout: multi-repo
+            agent_root: .
             coverage_ignore:
               - spec_id: place-order
                 layer: contract
@@ -179,10 +185,23 @@ mod tests {
     }
 
     #[test]
+    fn rejects_a_config_without_a_layout() {
+        let parsed = serde_yaml_ng::from_str::<SpexConfig>(indoc! {"
+            project_name: demo
+            cli_version: 0.0.0
+            agent_root: .
+        "});
+
+        assert!(parsed.is_err());
+    }
+
+    #[test]
     fn serialization_keeps_an_absent_coverage_ignore_as_an_empty_list() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
+            layout: multi-repo
+            agent_root: .
         "})
         .expect("parse config");
 

@@ -3,10 +3,12 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
-use crate::commands::init::scaffold::{copy_docs_and_schemas, link_claude_dir, write_rule};
+use crate::commands::init::agent_files::link_claude_dir;
+use crate::commands::init::scaffold::{copy_docs_and_schemas, write_rule};
 use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
+use crate::support::managed_section::replace_managed_section;
 use crate::support::yaml_dir::yaml_files;
 use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
 
@@ -16,40 +18,20 @@ mod sync_templates_test;
 
 const SKILL_FILE: &str = "SKILL.md";
 
-const PROJECT_SECTION_MARKER: &str = "\n---\n\n# Project";
-
-pub fn sync_templates(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
+pub fn sync_templates(spex_dir: &Path, agent_root: &Path, removed_rules: &[String]) -> Result<()> {
     copy_docs_and_schemas(spex_dir)?;
     sync_rules(spex_dir, removed_rules)?;
-    sync_skills(spex_dir)?;
-    sync_agents_md(spex_dir)?;
-    link_claude_dir(spex_dir)
+    sync_skills(agent_root)?;
+    sync_agents_md(agent_root)?;
+    link_claude_dir(agent_root)
 }
 
-fn split_project_section(contents: &str) -> Option<(&str, &str)> {
-    let idx = contents.find(PROJECT_SECTION_MARKER)?;
-    Some(contents.split_at(idx))
-}
-
-fn replace_managed_section(template: &[u8], local: &str) -> Vec<u8> {
-    let Some((_, preserved)) = split_project_section(local) else {
-        return template.to_vec();
-    };
-    let Some((managed, _)) = std::str::from_utf8(template)
-        .ok()
-        .and_then(split_project_section)
-    else {
-        return local.as_bytes().to_vec();
-    };
-    format!("{managed}{preserved}").into_bytes()
-}
-
-fn sync_agents_md(spex_dir: &Path) -> Result<()> {
+fn sync_agents_md(agent_root: &Path) -> Result<()> {
     let Some(template) = BUNDLED_TEMPLATES_DIR.get_file(AGENTS_FILENAME) else {
         return Ok(());
     };
 
-    let agents = spex_dir.join(AGENTS_FILENAME);
+    let agents = agent_root.join(AGENTS_FILENAME);
     let Ok(local_contents) = fs::read_to_string(&agents) else {
         return Ok(());
     };
@@ -126,12 +108,12 @@ fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
     Ok(())
 }
 
-fn sync_skills(spex_dir: &Path) -> Result<()> {
+fn sync_skills(agent_root: &Path) -> Result<()> {
     let Some(skills) = BUNDLED_TEMPLATES_DIR.get_dir(SKILLS_DIRNAME) else {
         return Ok(());
     };
 
-    let agents_dir = spex_dir.join(AGENTS_DIRNAME);
+    let agents_dir = agent_root.join(AGENTS_DIRNAME);
     let dest_root = agents_dir.join(SKILLS_DIRNAME);
     create_dir_all(&dest_root)?;
 

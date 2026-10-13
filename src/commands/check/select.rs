@@ -1,6 +1,6 @@
 use eros::bail;
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 
@@ -10,33 +10,34 @@ use super::scoped_file::ScopedFile;
 #[path = "select_test.rs"]
 mod select_test;
 
-pub(super) fn select_repos<'a>(
+pub(super) fn select_packages<'a>(
     spex: &'a Spex,
     names: &[String],
     files: &[String],
-) -> Result<Vec<&'a Repository>> {
+) -> Result<Vec<&'a Package>> {
     if files.is_empty() {
-        return spex.select_repositories(names);
+        return spex.select_packages(names);
     }
 
-    spex.validate_repository_names(names)?;
+    spex.validate_package_names(names)?;
 
     for file in files {
-        let found = spex
-            .repositories
-            .iter()
-            .any(|repo| !ScopedFile::provided(&repo.path, std::slice::from_ref(file)).is_empty());
+        let found = spex.packages.iter().any(|package| {
+            !ScopedFile::provided(&package.path, std::slice::from_ref(file)).is_empty()
+        });
         if !found {
-            bail!("unknown file `{file}` — not found in any workspace repository");
+            bail!("unknown file `{file}` — not found in any package");
         }
     }
 
     Ok(spex
-        .repositories
+        .packages
         .iter()
-        .filter(|repo| {
-            names.iter().any(|name| repo.matches_any_repo_name(name))
-                || !ScopedFile::provided(&repo.path, files).is_empty()
+        .filter(|package| {
+            names
+                .iter()
+                .any(|name| package.matches_any_package_name(name))
+                || !ScopedFile::provided(&package.path, files).is_empty()
         })
         .collect())
 }

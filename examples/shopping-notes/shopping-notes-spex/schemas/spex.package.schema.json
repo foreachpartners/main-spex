@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/spex.package.schema.json",
+  "title": "Spex Package Config",
+  "description": "Optional config (spex.package.yaml) at the root of a package. Lets the package own the coverage waivers and the pre-existing error baseline that concern it. spex merges it into the workspace config of spex.yaml.",
+  "type": "object",
+  "properties": {
+    "coverage_ignore": {
+      "type": "array",
+      "description": "Coverage requirements to waive for specs, merged with each spec's own `coverage_ignore` and with the `coverage_ignore` of `spex.yaml` and of every other package's `spex.package.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to.",
+      "items": {
+        "$ref": "spex.schema.json#/$defs/spec_coverage_ignore"
+      },
+      "uniqueItems": true
+    },
+    "ignored_errors": {
+      "type": "array",
+      "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, merged with the `ignored_errors` of this package's entry in `spex.yaml`. Files are relative to this package's root.",
+      "items": {
+        "$ref": "spex.schema.json#/$defs/ignored_error"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "coverage_ignore": [
+        {
+          "spec_id": "place-pizza-order",
+          "layer": "impl",
+          "ac": "no-null-typed-string"
+        }
+      ],
+      "ignored_errors": [
+        {
+          "rule_id": "writing-style",
+          "check": "no-cyrillic",
+          "files": ["README.md"]
+        }
+      ]
+    }
+  ]
+}

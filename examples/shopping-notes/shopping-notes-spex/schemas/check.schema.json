@@ -121,8 +121,8 @@
         "properties": {
           "run": {
             "type": "string",
-            "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments. `per-repo` runs it once per governed repository with no arguments. `workspace` runs it exactly once with no arguments",
-            "enum": ["per-file", "per-repo", "workspace"],
+            "description": "Invocation granularity. `per-file` runs the script with the matched files (after include/exclude) as arguments. `per-package` runs it once per governed package with no arguments. `workspace` runs it exactly once with no arguments",
+            "enum": ["per-file", "per-package", "workspace"],
             "default": "per-file"
           },
           "script": {

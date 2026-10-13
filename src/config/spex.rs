@@ -4,11 +4,11 @@ use anstream::eprintln;
 use eros::bail;
 use owo_colors::OwoColorize;
 
-use crate::config::{RepoConfig, Repository, SPEX_CONFIG_FILE, SpexConfig};
+use crate::config::{Layout, Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
 use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec, SpecCoverageIgnore};
-use crate::support::fs::current_dir;
+use crate::support::fs::{current_dir, normalize};
 
 #[cfg(test)]
 #[path = "spex_test.rs"]
@@ -17,7 +17,9 @@ mod spex_test;
 pub struct Spex {
     pub dir: PathBuf,
     pub project_name: String,
-    pub repositories: Vec<Repository>,
+    pub layout: Layout,
+    pub agent_root: PathBuf,
+    pub packages: Vec<Package>,
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
@@ -28,7 +30,7 @@ impl Spex {
 
     pub fn discover() -> Result<Self> {
         let (dir, config) = Self::discover_config()?;
-        Self::from_config(dir, config).with_repo_configs()
+        Self::from_config(dir, config).with_package_configs()
     }
 
     pub fn discover_config() -> Result<(PathBuf, SpexConfig)> {
@@ -39,24 +41,26 @@ impl Spex {
     }
 
     pub fn from_config(dir: PathBuf, config: SpexConfig) -> Self {
-        let repositories = config
-            .repositories
+        let packages = config
+            .packages
             .into_iter()
-            .map(|repo| Repository::from_config(repo, &dir))
+            .map(|package| Package::from_config(package, &dir))
             .collect();
         Self {
+            agent_root: normalize(&dir.join(&config.agent_root)),
             dir,
             project_name: config.project_name,
-            repositories,
+            layout: config.layout,
+            packages,
             coverage_ignore: config.coverage_ignore,
         }
     }
 
-    fn with_repo_configs(mut self) -> Result<Self> {
-        for repo in &mut self.repositories {
-            let repo_config = RepoConfig::load(&repo.path)?;
-            self.coverage_ignore.extend(repo_config.coverage_ignore);
-            repo.ignored_errors.extend(repo_config.ignored_errors);
+    fn with_package_configs(mut self) -> Result<Self> {
+        for package in &mut self.packages {
+            let package_config = PackageConfig::load(&package.path)?;
+            self.coverage_ignore.extend(package_config.coverage_ignore);
+            package.ignored_errors.extend(package_config.ignored_errors);
         }
         Ok(self)
     }
@@ -78,26 +82,29 @@ impl Spex {
         Ok(specs)
     }
 
-    pub fn validate_repository_names(&self, names: &[String]) -> Result<()> {
+    pub fn validate_package_names(&self, names: &[String]) -> Result<()> {
         for name in names {
             if !self
-                .repositories
+                .packages
                 .iter()
-                .any(|repo| repo.matches_any_repo_name(name))
+                .any(|package| package.matches_any_package_name(name))
             {
-                bail!("unknown workspace repository `{name}` — not listed in {SPEX_CONFIG_FILE}");
+                bail!("unknown package `{name}` — not listed in {SPEX_CONFIG_FILE}");
             }
         }
         Ok(())
     }
 
-    pub fn select_repositories(&self, names: &[String]) -> Result<Vec<&Repository>> {
-        self.validate_repository_names(names)?;
+    pub fn select_packages(&self, names: &[String]) -> Result<Vec<&Package>> {
+        self.validate_package_names(names)?;
         Ok(self
-            .repositories
+            .packages
             .iter()
-            .filter(|repo| {
-                names.is_empty() || names.iter().any(|name| repo.matches_any_repo_name(name))
+            .filter(|package| {
+                names.is_empty()
+                    || names
+                        .iter()
+                        .any(|name| package.matches_any_package_name(name))
             })
             .collect())
     }
@@ -105,12 +112,12 @@ impl Spex {
     pub fn validate_scopes(&self, scopes: &[String]) -> Result<()> {
         for short_name in scopes {
             if !self
-                .repositories
+                .packages
                 .iter()
-                .any(|repo| &repo.repository_short_name == short_name)
+                .any(|package| &package.package_short_name == short_name)
             {
                 bail!(
-                    "unknown repository short name `{short_name}` — not listed in {SPEX_CONFIG_FILE}"
+                    "unknown package short name `{short_name}` — not listed in {SPEX_CONFIG_FILE}"
                 );
             }
         }

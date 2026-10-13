@@ -9,7 +9,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 Main spex, or spex for short, is built on four simple pieces:
 
 - **Specs** define _what_ a feature does — a capability with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
-- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each repository must adhere to a list of rules applicable to it.
+- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each package must adhere to a list of rules applicable to it.
 - **Skills** are the instructions an AI agent follows to do the job consistently and correctly.
 - **Traceability** is the thread that stitches together spec, contract, implementations, and tests — ensuring full coverage and tracing for spec and every acceptance criterion.
 
@@ -35,22 +35,24 @@ We will create the following structure:
 
 ```
 shopping-notes/                       # workspace root
-├── shopping-notes-api/                # existing api repository
-├── shopping-notes-frontend/           # existing frontend repository
-├── ...                                # repeat for other repositories
+├── shopping-notes-api/                # existing api package
+├── shopping-notes-frontend/           # existing frontend package
+├── ...                                # repeat for other packages
 └── shopping-notes-spex/               # new spex repository (created by spex cli)
 ```
 
-Repository directories follow `<project-name>-<repository-short-name>` (naming-convention), so rename existing repositories to match before running `/spex-setup`.
+Package directories follow `<project-name>-<package-short-name>` (naming-convention), so rename existing packages to match before running `/spex-setup`.
 
-1. Put all project git repos in one shared folder (workspace root folder)
-2. Run terminal command `spex init` in workspace root to create the `shopping-notes-spex` repo
-3. Open workspace to work across all repositories at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
+1. Put all project packages (each a git repository) in one shared folder (workspace root folder)
+2. Run terminal command `spex init` in workspace root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
+3. Open workspace to work across all packages at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
    - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
    - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend ..` from `shopping-notes-spex` repo
-   - Zed: add project, pick all workspace repos (folders)
-4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to add the workspace repositories and complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
+   - Zed: add project, pick all packages (folders)
+4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to add the packages and complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
+
+Prefer one git repository? Run `spex init` in its root and pick `single-repo` (the project is the repository) or `monorepo` (one repository, several packages). Either way it creates a `spex/` folder and puts `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root, keeping any you already have.
 
 ### Adoption
 
@@ -127,7 +129,7 @@ flowchart TD
 For example, the rule [`secret-handling`](examples/shopping-notes/shopping-notes-spex/rules/secret-handling.yaml) works like this:
 
 1. **Rule** — `secret-handling`: "Secret protection"
-2. **Governs** — every contract, file, and test in the repo, regardless of feature
+2. **Governs** — every contract, file, and test in the package, regardless of feature
 3. **Proven by** — checks such as `no-secret-in-console-log` and `no-backup-files` running in CI or manually with `spex check`
 
 Even if a deterministic check is not possible, rules are read and followed by AI and can be used for a review by a human or another agent, which gives pretty good results.

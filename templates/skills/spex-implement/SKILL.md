@@ -1,6 +1,6 @@
 ---
 name: spex-implement
-description: Carry out an existing plan, or implement an ad-hoc user request. Use when the user wants to carry out a plan from <workspace-root>/<project-name>-spex/plans/<plan-name>, or asks for a change without a formal plan.
+description: Carry out an existing plan, or implement an ad-hoc user request. Use when the user wants to carry out a plan from <spex-dir>/plans/<plan-name>, or asks for a change without a formal plan.
 ---
 
 # Process
@@ -17,8 +17,8 @@ Read the plan. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the plan's
 
 ### Without a plan (ad-hoc user request)
 
-1. Determine repositories we will work on (e.g. scope: frontend, backend).
-2. Run `spex rules --repo <repo-a> <repo-b> --ai --output <tmp-path>` for the affected scope from step 1, then read `<tmp-path>` for the governing rules.
+1. Determine packages we will work on (e.g. scope: frontend, backend).
+2. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected scope from step 1, then read `<tmp-path>` for the governing rules.
 3. Determine all governing spec IDs related to the request.
 4. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
 5. Produce a note in response with a list of governing rules and specs.
@@ -37,7 +37,7 @@ Edit the `Status` in place as you go. Use only `not-started`, `in-progress` and 
 
 ### Without a plan (ad-hoc user request)
 
-Split the request into tasks only when it spans independent repositories or clearly separable files; most requests are a single task.
+Split the request into tasks only when it spans independent packages or clearly separable files; most requests are a single task.
 
 ### Both paths
 
@@ -53,7 +53,7 @@ Place each annotation on the smallest unit that actually satisfies the criterion
 
 ## Step 3 — Finalize the specs
 
-For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<workspace-root>/<project-name>-spex/specs/<spec-id>.yaml`:
+For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<spex-dir>/specs/<spec-id>.yaml`:
 
 - If `status:` is absent or `planned`, set it to `in-progress` (add the line if absent). Never set it to `active` here — this skill doesn't write tests, so it can't know a criterion is actually done; that determination, and clearing each criterion's `is_done: false`, is `spex-test`'s job once it verifies impl+test tracing with `spex coverage`.
 
@@ -66,7 +66,7 @@ Run formatters and linters, and run the existing test suite to confirm the chang
 Prove the work respects the governing rules:
 
 ```sh
-spex check --repo <repo-a> <repo-b>
+spex check --package <package-a> <package-b>
 ```
 
 Prove the work completes the governing specs:
@@ -91,11 +91,11 @@ Don't ask user for confirmation about plan deletion.
 
 Nothing to delete.
 
-## Step 6 — Update repo skill documentation
+## Step 6 — Update package skill documentation
 
-For every repository touched, check whether its `<repo-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
+For every package touched, check whether its `<package-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
 
-Update only what's now inaccurate or missing — don't rewrite unrelated sections. The skill doc's job is agent-facing instructions and context that specs and rules don't cover — e.g. project/directory structure, build/test/run commands, architecture and how components fit together, non-obvious computations or workflows, tooling quirks, or where to find things. Don't duplicate what specs or rules already state — reference them instead. Add a new `references/*.md` file only when the change introduces repository-specific context worth documenting this way, and index it in `SKILL.md`.
+Update only what's now inaccurate or missing — don't rewrite unrelated sections. The skill doc's job is agent-facing instructions and context that specs and rules don't cover — e.g. project/directory structure, build/test/run commands, architecture and how components fit together, non-obvious computations or workflows, tooling quirks, or where to find things. Don't duplicate what specs or rules already state — reference them instead. Add a new `references/*.md` file only when the change introduces package-specific context worth documenting this way, and index it in `SKILL.md`.
 
 ## Step 7 — Report
 
@@ -105,7 +105,7 @@ Summarize the run:
 - Which specs you set to `in-progress` (or left as-is), and which acceptance criteria `spex coverage` still shows untraced.
 - The format, lints, tests, `spex check` and `spex coverage` run outcome.
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
-- Which repo skill docs you updated or added, and why.
+- Which package skill docs you updated or added, and why.
 
 ## Step 8 — Point to the next skill
 

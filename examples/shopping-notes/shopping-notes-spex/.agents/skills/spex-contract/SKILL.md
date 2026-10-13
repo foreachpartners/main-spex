@@ -5,13 +5,13 @@ description: Derive or update the interface contract from one or more specs. Use
 
 # Create an Interface Contract
 
-A contract is the _interface_ derived from a spec. For an API: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a repository boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the repositories they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the _interface_ derived from a spec. For an API: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a package boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the packages they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 ## Paths
 
-All paths are relative to the workspace root (the folder that holds every workspace repository). Replace `<workspace-root>` with the real folder name and `<spec-id>` with the spec's `id`.
+Replace `<spex-dir>` with the spex directory, printed by `spex info | spex jq -r .spex_dir`, and `<spec-id>` with the spec's `id`.
 
-Each repository declares its contracts under `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenAPI which is used by api and frontend are put in spex `<workspace-root>/<project-name>-spex/contracts/`, contracts that are specific to only one repository, like figma design references are put in repository they belong to (for example `<workspace-root>/shopping-notes-frontend/contracts/figma.md`).
+Each package declares its contracts under `contracts` in `<spex-dir>/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenAPI which is used by api and frontend are put in spex `<spex-dir>/contracts/`, contracts that are specific to only one package, like figma design references are put in the package they belong to (for example `contracts/figma.md` inside the frontend package).
 
 ## Step 0 — Establish the target specs
 
@@ -23,21 +23,21 @@ Determine which specs to contract before doing anything else:
 
 ## Step 1 — Gather context first
 
-Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs. Capture each spec's `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope repositories). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a repository boundary and therefore need an interface.
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs. Capture each spec's `title`, `description`, every `acceptance_criteria`, and its `scope` (the in-scope packages). The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a package boundary and therefore need an interface.
 
 ## Step 2 — Resolve scope, existing contracts, and conventions
 
-From `<workspace-root>/<project-name>-spex/spex.yaml` (repository names are arbitrary — only `spex` is fixed — so read each repository's `description` to learn its role):
+From `<spex-dir>/spex.yaml` (package names are arbitrary, so read each package's `description` to learn its role):
 
-- Collect the union of every targeted spec's `scope` — these are the affected repositories.
-- For each affected repository, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
-- For each affected repository, run `spex info --repo <repo>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `openapi-conventions` (for OpenAPI) or `graphql-conventions` (for GraphQL SDL) — so the contract respects naming, casing, error responses, and secret handling.
+- Collect the union of every targeted spec's `scope` — these are the affected packages.
+- For each affected package, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
+- For each affected package, run `spex info --package <package-name>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `openapi-conventions` (for OpenAPI) or `graphql-conventions` (for GraphQL SDL) — so the contract respects naming, casing, error responses, and secret handling.
 
 ## Step 3 — Decide what the contract needs
 
 Map each acceptance criterion that crosses a boundary to the interface element that exposes it: an endpoint, a message, a schema field, an error, an auth requirement — or, for a UI-facing spec, the visual design it must match.
 
-- If an affected repository exposes no API and no UI needing a design reference (for example a backend job with no consumer-facing surface), it needs no new contract. State that and move on.
+- If an affected package exposes no API and no UI needing a design reference (for example a backend job with no consumer-facing surface), it needs no new contract. State that and move on.
 - If no targeted spec changes any contract, say so plainly and skip to Step 6 — there is nothing to write.
 - Reuse existing operations and schemas where the spec extends them; add new ones only where the behavior is genuinely new.
 
@@ -66,10 +66,10 @@ The contract is the consumer-facing interface and may be published, served, or t
 
 For each affected contract:
 
-1. If the repository already has a matching entry under `contracts` in `spex.yaml`, write to its declared `path`.
-2. Otherwise, this is a new contract file: ask the user where it should live, defaulting to inside the owning repository itself (for example `<workspace-root>/<repository-name>/contracts/api.openapi.yaml`, or `contracts/figma.md` for a design reference); offer `<workspace-root>/<project-name>-spex/contracts/` as the alternative for a contract meant to be shared across repositories. Write the file at whichever path the user confirms.
-3. Record any new contract file under its repository's `contracts` in `<workspace-root>/<project-name>-spex/spex.yaml`, with a `path` (relative to the spex directory) and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
-4. Validate `spex.yaml` against `<workspace-root>/<project-name>-spex/schemas/spex.schema.json`.
+1. If the package already has a matching entry under `contracts` in `spex.yaml`, write to its declared `path`.
+2. Otherwise, this is a new contract file: ask the user where it should live, defaulting to inside the owning package itself (for example `<package-path>/contracts/api.openapi.yaml`, with `<package-path>` from `spex info --package <package-name>`, or `contracts/figma.md` for a design reference); offer `<spex-dir>/contracts/` as the alternative for a contract meant to be shared across packages. Write the file at whichever path the user confirms.
+3. Record any new contract file under its package's `contracts` in `<spex-dir>/spex.yaml`, with a `path` (relative to the spex directory) and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
+4. Validate `spex.yaml` against `<spex-dir>/schemas/spex.schema.json`.
 5. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
 
 ## Example

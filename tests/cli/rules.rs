@@ -12,8 +12,8 @@ const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
   sync_with_upstream: true
   description: Exercises the glob runner with a forbidden path and a required path.
   acceptance_criteria:
-  - MUST provide a README.md in the repository root
-  - MUST NOT keep backup files in a repository
+  - MUST provide a README.md in the package root
+  - MUST NOT keep backup files in a package
   checks:
   - name: no-backup-files
     type: glob
@@ -31,12 +31,12 @@ const EXPECTED_GLOB_RULE_FOR_AI: &str = r#"- id: glob-runner
   title: Glob runner
   description: Exercises the glob runner with a forbidden path and a required path.
   acceptance_criteria:
-  - MUST provide a README.md in the repository root
-  - MUST NOT keep backup files in a repository
+  - MUST provide a README.md in the package root
+  - MUST NOT keep backup files in a package
 "#;
 
 #[test]
-fn rules_lists_each_rule_once_however_many_repositories_use_it() {
+fn rules_lists_each_rule_once_however_many_packages_use_it() {
     let (_workspace, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules"], "");
@@ -55,12 +55,12 @@ fn rules_lists_each_rule_once_however_many_repositories_use_it() {
 }
 
 #[test]
-fn rules_repo_limits_output_to_the_rules_of_named_repositories() {
+fn rules_package_limits_output_to_the_rules_of_named_packages() {
     let (_workspace, project) = temp_project(&runners_project_fixture());
 
-    let frontend = run_spex(&project, &["rules", "--repo", "frontend"], "");
-    let api = run_spex(&project, &["rules", "--repo", "api"], "");
-    let spex = run_spex(&project, &["rules", "--repo", "spex"], "");
+    let frontend = run_spex(&project, &["rules", "--package", "frontend"], "");
+    let api = run_spex(&project, &["rules", "--package", "api"], "");
+    let spex = run_spex(&project, &["rules", "--package", "spex"], "");
 
     assert_eq!(
         listed_ids(&frontend.stdout),
@@ -86,13 +86,13 @@ fn rules_repo_limits_output_to_the_rules_of_named_repositories() {
 }
 
 #[test]
-fn rules_repo_matches_a_repository_by_short_or_full_name() {
+fn rules_package_matches_a_package_by_short_or_full_name() {
     let (_workspace, project) = temp_project(&runners_project_fixture());
 
-    let by_short_name = run_spex(&project, &["rules", "--repo", "frontend"], "");
+    let by_short_name = run_spex(&project, &["rules", "--package", "frontend"], "");
     let by_full_name = run_spex(
         &project,
-        &["rules", "--repo", "runners-project-frontend"],
+        &["rules", "--package", "runners-project-frontend"],
         "",
     );
 
@@ -152,12 +152,12 @@ fn rules_rejects_an_unknown_rule_id() {
 }
 
 #[test]
-fn rules_rejects_an_unknown_repository() {
+fn rules_rejects_an_unknown_package() {
     let (_workspace, project) = temp_project(&runners_project_fixture());
 
-    let rules = run_spex(&project, &["rules", "--repo", "bogus"], "");
+    let rules = run_spex(&project, &["rules", "--package", "bogus"], "");
 
-    assert_fails_mentioning(&rules, "unknown workspace repository `bogus`");
+    assert_fails_mentioning(&rules, "unknown package `bogus`");
     assert!(rules.stdout.is_empty());
 }
 

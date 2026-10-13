@@ -10,12 +10,12 @@ checks:
   - name: stderr-only
     description: A script that fails with a message on stderr
     type: script
-    run: per-repo
+    run: per-package
     script: fail-with-stderr.sh
     severity: error
   - name: exit-status-only
     description: A script that fails without any output
     type: script
-    run: per-repo
+    run: per-package
     script: fail-silently.sh
     severity: warn

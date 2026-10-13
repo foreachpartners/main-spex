@@ -11,8 +11,8 @@ fn jq_reads_json_from_stdin() {
 
     let output = run_spex(
         dir.path(),
-        &["jq", "-r", ".repositories[].path"],
-        r#"{"repositories": [{"path": "../api"}, {"path": "../frontend"}]}"#,
+        &["jq", "-r", ".packages[].path"],
+        r#"{"packages": [{"path": "../api"}, {"path": "../frontend"}]}"#,
     );
 
     assert!(output.status.success(), "{output:?}");
@@ -57,7 +57,7 @@ fn jq_pipes_from_spex_info() {
 
     let output = run_spex(
         &project,
-        &["jq", "-r", ".repositories[].repository_short_name"],
+        &["jq", "-r", ".packages[].package_short_name"],
         &String::from_utf8_lossy(&info.stdout),
     );
 

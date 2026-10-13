@@ -1,11 +1,13 @@
 project_name: unknown
+layout: unknown
+agent_root: unknown
 description: >-
   unknown
-repositories:
-  - repository_name: unknown
-    repository_short_name: spex
+packages:
+  - package_name: unknown
+    package_short_name: spex
     description: >-
-      Spex workspace repository. Holds the specs, rules, skills
+      Spex repository. Holds the specs, rules, skills
       and config that govern the project.
     path: .
     rules:

@@ -1,13 +1,15 @@
 project_name: shopping-notes
-cli_version: 0.18.0
+cli_version: 0.19.0
+layout: multi-repo
+agent_root: .
 description: >-
   Web application for managing shopping lists, letting users note items to
   buy so they don't forget them at the store.
 rules_unused:
   - graphql-conventions
-repositories:
-  - repository_name: shopping-notes-api
-    repository_short_name: api
+packages:
+  - package_name: shopping-notes-api
+    package_short_name: api
     description: Fastify REST API backend for the shopping notes application.
     path: ../shopping-notes-api
     contracts:
@@ -21,8 +23,8 @@ repositories:
       - secret-handling
       - testing-rules
       - writing-style
-  - repository_name: shopping-notes-frontend
-    repository_short_name: frontend
+  - package_name: shopping-notes-frontend
+    package_short_name: frontend
     description: React SPA that lets users create and manage shopping notes against the API.
     path: ../shopping-notes-frontend
     contracts:
@@ -35,10 +37,10 @@ repositories:
       - secret-handling
       - testing-rules
       - writing-style
-  - repository_name: shopping-notes-spex
-    repository_short_name: spex
+  - package_name: shopping-notes-spex
+    package_short_name: spex
     description: >-
-      Spex workspace repository. Holds the specs and config that govern the
+      Spex repository. Holds the specs and config that govern the
       project: schemas/ (JSON Schemas for spex.yaml and the spec files),
       rules/ (cross-cutting conventions and rules), specs/ (the
       functionality the system provides) and docs/ (framework reference).

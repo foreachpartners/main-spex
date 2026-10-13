@@ -21,7 +21,7 @@ pub struct SpecsArgs {
     ai: bool,
     #[arg(long, num_args = 1.., help = "Filter by spec ids")]
     id: Vec<String>,
-    #[arg(long, num_args = 1.., help = "Filter by repository short name")]
+    #[arg(long, num_args = 1.., help = "Filter by package short name")]
     scope: Vec<String>,
     #[arg(long, help = "Write the output to this file")]
     output: Option<String>,

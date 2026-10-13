@@ -1,4 +1,4 @@
-use crate::support::testing::{repository, spex_dir};
+use crate::support::testing::{package, spex_dir};
 
 use super::*;
 
@@ -6,9 +6,9 @@ mod report_target_tests {
     use super::*;
 
     #[test]
-    fn a_repository_target_is_named_and_based_at_the_repository() {
-        let api = repository("api", "services/api");
-        let target = ReportTarget::Repository(&api);
+    fn a_package_target_is_named_and_based_at_the_package() {
+        let api = package("api", "services/api");
+        let target = ReportTarget::Package(&api);
 
         assert_eq!(target.name(), "api");
         assert_eq!(target.base_dir(), spex_dir().join("services/api"));
@@ -26,19 +26,19 @@ mod report_target_tests {
 
     #[test]
     fn only_the_spex_repository_target_is_the_spex_repo() {
-        let api = repository("api", "services/api");
-        let spex_repo = Repository {
-            is_spex_repo: true,
-            ..repository("demo-spex", ".")
+        let api = package("api", "services/api");
+        let spex_repo = Package {
+            is_spex_dir: true,
+            ..package("demo-spex", ".")
         };
 
-        assert!(ReportTarget::Repository(&spex_repo).is_spex_repo());
-        assert!(!ReportTarget::Repository(&api).is_spex_repo());
+        assert!(ReportTarget::Package(&spex_repo).is_spex_dir());
+        assert!(!ReportTarget::Package(&api).is_spex_dir());
         assert!(
             !ReportTarget::Workspace {
                 spex_dir: spex_dir()
             }
-            .is_spex_repo()
+            .is_spex_dir()
         );
     }
 }
@@ -68,11 +68,11 @@ mod location_url_tests {
 
     #[test]
     fn encodes_spaces_in_the_path() {
-        let base = Path::new("/workspace/my repo");
+        let base = Path::new("/workspace/my package");
 
         assert_eq!(
             location_url(base, &Location::in_file("CLAUDE.md")),
-            "file:///workspace/my%20repo/CLAUDE.md"
+            "file:///workspace/my%20package/CLAUDE.md"
         );
     }
 }

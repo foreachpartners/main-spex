@@ -29,13 +29,13 @@ mod tests {
     #[serial(script_exec)]
     fn script_run_once_reports_a_hit_on_failure() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
+        let package = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/commit-message-format/sample.sh");
         write_script(&program, "#!/bin/sh\necho boom\nexit 1\n");
 
-        let hits = run_script_once(&program, &repo, &spex).expect("script outcome");
+        let hits = run_script_once(&program, &package, &spex).expect("script outcome");
 
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].message, "boom");
@@ -45,9 +45,9 @@ mod tests {
     #[serial(script_exec)]
     fn per_file_script_passes_files_as_arguments() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
+        let package = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/writing-style/echo-args.sh");
         write_script(
             &program,
@@ -55,11 +55,12 @@ mod tests {
         );
 
         let file = ScopedFile {
-            abs: repo.join("README.md"),
+            abs: package.join("README.md"),
             rel: PathBuf::from("README.md"),
         };
 
-        let hits = run_per_file_script(&program, &repo, &spex, &[&file]).expect("script outcome");
+        let hits =
+            run_per_file_script(&program, &package, &spex, &[&file]).expect("script outcome");
 
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].message, "README.md");
@@ -69,16 +70,16 @@ mod tests {
     #[serial(script_exec)]
     fn script_emits_one_hit_per_location_line() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
+        let package = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/writing-style/locations.sh");
         write_script(
             &program,
             "#!/bin/sh\nprintf 'docs/intro.md:40\\tmatches forbidden writing pattern\\n'\nprintf '\\n'\nprintf 'a stray diagnostic\\n'\nexit 1\n",
         );
 
-        let hits = run_script_once(&program, &repo, &spex).expect("script outcome");
+        let hits = run_script_once(&program, &package, &spex).expect("script outcome");
 
         assert_eq!(hits.len(), 2);
         assert_eq!(

@@ -4,7 +4,7 @@ use eros::Context;
 
 use crate::error::Result;
 use crate::support::fs::relative_to;
-use crate::support::repo_files::RepoFiles;
+use crate::support::package_files::PackageFiles;
 
 #[cfg(test)]
 #[path = "scoped_file_test.rs"]
@@ -16,22 +16,22 @@ pub(super) struct ScopedFile {
 }
 
 impl ScopedFile {
-    pub(super) fn collect(repo_path: &Path) -> Result<Vec<Self>> {
+    pub(super) fn collect(package_path: &Path) -> Result<Vec<Self>> {
         let mut files = Vec::new();
-        for result in RepoFiles::new(repo_path) {
-            let abs = result.context("could not walk workspace repository files")?;
-            let rel = relative_to(&abs, repo_path).to_path_buf();
+        for result in PackageFiles::new(package_path) {
+            let abs = result.context("could not walk package files")?;
+            let rel = relative_to(&abs, package_path).to_path_buf();
             files.push(Self { abs, rel });
         }
         Ok(files)
     }
 
-    pub(super) fn provided(repo_path: &Path, files: &[String]) -> Vec<Self> {
+    pub(super) fn provided(package_path: &Path, files: &[String]) -> Vec<Self> {
         files
             .iter()
             .filter_map(|file| {
                 let rel = PathBuf::from(file.trim_start_matches("./"));
-                let abs = repo_path.join(&rel);
+                let abs = package_path.join(&rel);
                 abs.is_file().then_some(Self { abs, rel })
             })
             .collect()

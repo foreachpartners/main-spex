@@ -1,19 +1,19 @@
 #[cfg(test)]
 mod tests {
-    use super::super::RepoFiles;
+    use super::super::PackageFiles;
     use std::collections::HashSet;
     use std::path::{Path, PathBuf};
     use tempfile::tempdir;
 
     fn walked_files(root: &Path) -> HashSet<PathBuf> {
-        RepoFiles::new(root)
+        PackageFiles::new(root)
             .filter_map(Result::ok)
             .map(|path| path.strip_prefix(root).unwrap_or(&path).to_path_buf())
             .collect()
     }
 
     fn walked_in_order(root: &Path) -> Vec<PathBuf> {
-        RepoFiles::new(root)
+        PackageFiles::new(root)
             .filter_map(Result::ok)
             .map(|path| path.strip_prefix(root).unwrap_or(&path).to_path_buf())
             .collect()

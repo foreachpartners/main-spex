@@ -51,7 +51,7 @@ coverage_ignore:
 const IN_PROGRESS_SPEC: &str = r#"id: ci-check
 title: Verify a change before its spec is updated
 description: >-
-  A criterion still flagged not done in the spec repository.
+  A criterion still flagged not done in the spec package.
 acceptance_criteria:
   - id: rejects-empty-cart
     must: "reject checkout of an empty cart"
@@ -146,14 +146,14 @@ fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
 }
 
 #[test]
-fn coverage_scope_rejects_an_unknown_repository() {
+fn coverage_scope_rejects_an_unknown_package() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--scope", "bogus"], "");
 
-    assert_fails_mentioning(&coverage, "unknown repository short name `bogus`");
+    assert_fails_mentioning(&coverage, "unknown package short name `bogus`");
     assert!(coverage.stdout.is_empty());
 }
 
@@ -239,15 +239,15 @@ fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {
 }
 
 #[test]
-fn coverage_honors_a_repository_spex_repo_yaml_coverage_ignore() {
+fn coverage_honors_a_package_spex_repo_yaml_coverage_ignore() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     fs::write(
-        project.join("dummy-project-api/spex.repo.yaml"),
+        project.join("dummy-project-api/spex.package.yaml"),
         NONE_WITH_GAP_WAIVERS.trim_start(),
     )
-    .expect("write spex.repo.yaml");
+    .expect("write spex.package.yaml");
 
     let coverage = run_spex(&project, &["coverage"], "");
 
@@ -263,7 +263,7 @@ fn coverage_honors_a_repository_spex_repo_yaml_coverage_ignore() {
 }
 
 #[test]
-fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_repository() {
+fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
@@ -283,10 +283,10 @@ fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_repository() {
     );
 
     fs::write(
-        project.join("dummy-project-frontend/spex.repo.yaml"),
+        project.join("dummy-project-frontend/spex.package.yaml"),
         NONE_WITH_GAP_TEST_WAIVER.trim_start(),
     )
-    .expect("write spex.repo.yaml");
+    .expect("write spex.package.yaml");
     let fully_waived = report_text(&run_spex(&project, &["coverage"], "").stdout);
     assert!(
         !fully_waived.contains("none-with-gap"),
@@ -300,13 +300,13 @@ fn coverage_fails_on_an_invalid_spex_repo_yaml() {
     let project = workspace.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     fs::write(
-        project.join("dummy-project-api/spex.repo.yaml"),
+        project.join("dummy-project-api/spex.package.yaml"),
         "coverage_ignore:\n  - spec_id: Not_A_Spec_Id\n    layer: impl\n",
     )
-    .expect("write spex.repo.yaml");
+    .expect("write spex.package.yaml");
 
     let coverage = run_spex(&project, &["coverage"], "");
 
-    assert_fails_mentioning(&coverage, "spex.repo.yaml");
+    assert_fails_mentioning(&coverage, "spex.package.yaml");
     assert!(coverage.stdout.is_empty());
 }

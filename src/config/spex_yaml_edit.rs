@@ -8,7 +8,7 @@ mod spex_yaml_edit_test;
 
 pub fn set_preexisting_errors(
     raw: &str,
-    by_repo: &HashMap<String, Vec<PreexistingError>>,
+    by_package: &HashMap<String, Vec<PreexistingError>>,
 ) -> String {
     let lines: Vec<&str> = raw.lines().collect();
     let mut out = String::with_capacity(raw.len());
@@ -21,8 +21,8 @@ pub fn set_preexisting_errors(
         let indent = indent_of(line);
         let trimmed = line.trim_start();
 
-        let repo_start = indent == 2 && trimmed.starts_with("- repository_name:");
-        let closes_previous_section = repo_start || (indent == 0 && !trimmed.is_empty());
+        let package_start = indent == 2 && trimmed.starts_with("- package_name:");
+        let closes_previous_section = package_start || (indent == 0 && !trimmed.is_empty());
 
         if closes_previous_section {
             if let Some(block) = pending.take() {
@@ -31,9 +31,9 @@ pub fn set_preexisting_errors(
             in_scope = false;
         }
 
-        if repo_start {
-            let name = trimmed["- repository_name:".len()..].trim();
-            if let Some(entries) = by_repo.get(name) {
+        if package_start {
+            let name = trimmed["- package_name:".len()..].trim();
+            if let Some(entries) = by_package.get(name) {
                 in_scope = true;
                 if !entries.is_empty() {
                     pending = Some(render_preexisting_block(entries));

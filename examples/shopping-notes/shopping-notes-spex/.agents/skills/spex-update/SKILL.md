@@ -9,11 +9,11 @@ description: Updates a spex project's CLI version and applies the migration step
 
 ## Step 1 — Verify a clean baseline
 
-Run `spex check` and `spex coverage`. If either reports a failure, stop and ask the user whether to fix the existing issues first or update anyway.
+Run `spex check` and `spex coverage`. If either reports a failure, stop and ask the user whether to fix the existing issues first or update anyway. A failure to load `spex.yaml` because it lacks a field the installed CLI requires is expected after upgrading the binary: go to Step 2, since Step 3 still runs and Step 4 adds the field.
 
 ## Step 2 — Record the current version
 
-Read `cli_version` from `<workspace-root>/<project-name>-spex/spex.yaml`. This is the previous version — record it before Step 3 overwrites it.
+Read `cli_version` from `<spex-dir>/spex.yaml`. This is the previous version — record it before Step 3 overwrites it.
 
 ## Step 3 — Update
 

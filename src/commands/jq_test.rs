@@ -41,10 +41,11 @@ mod tests {
 
     #[test]
     fn reads_yaml_input() {
-        let yaml = "project_name: shopping-notes\nrepositories:\n  - path: ../api\n  - path: ../frontend\n";
+        let yaml =
+            "project_name: shopping-notes\npackages:\n  - path: ../api\n  - path: ../frontend\n";
 
         assert_eq!(
-            evaluated(".repositories[].path", yaml, RAW),
+            evaluated(".packages[].path", yaml, RAW),
             "../api\n../frontend\n"
         );
     }

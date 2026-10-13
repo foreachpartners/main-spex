@@ -7,8 +7,8 @@ mod tests {
 
     use crate::support::testing;
 
-    fn write_candidate(repo_path: &std::path::Path, rel: &str, content: &str) -> ScopedFile {
-        let abs = repo_path.join(rel);
+    fn write_candidate(package_path: &std::path::Path, rel: &str, content: &str) -> ScopedFile {
+        let abs = package_path.join(rel);
         if let Some(parent) = abs.parent() {
             std::fs::create_dir_all(parent).expect("parent dirs");
         }
@@ -40,12 +40,12 @@ mod tests {
             "src/lib.rs",
             "// @spec impl list-pizza-menu\n// @spec bogus list-pizza-menu\n",
         )];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, false, &known(&["list-pizza-menu"]));
+        let findings = validate_annotations(&ctx, &known(&["list-pizza-menu"]));
 
         assert_eq!(findings.len(), 1);
         assert_eq!(check_of(&findings[0]), FORMAT_CHECK);
@@ -63,8 +63,8 @@ mod tests {
             "src/lib.rs",
             "// @spec impl list-pizza-menu#in-stock-only, rate-limit\n// @spec test unknown-spec#some-ac\n",
         )];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
@@ -73,7 +73,7 @@ mod tests {
             testing::spec_id("list-pizza-menu"),
             HashSet::from([testing::ac_id("in-stock-only")]),
         );
-        let findings = validate_annotations(&ctx, false, &known_ids);
+        let findings = validate_annotations(&ctx, &known_ids);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(check_of(&findings[0]), ORPHAN_CHECK);
@@ -87,30 +87,51 @@ mod tests {
             write_candidate(dir.path(), "docs/notes.md", "@spec bogus\n"),
             write_candidate(dir.path(), "specs/example.yaml", "@spec bogus\n"),
         ];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, true, &HashMap::new());
+        let findings = validate_annotations(&ctx, &HashMap::new());
 
         assert!(findings.is_empty());
     }
 
     #[test]
-    fn skips_schemas_dir_in_any_repo() {
+    fn skips_the_spex_dir_nested_in_the_package_but_not_its_code() {
+        let dir = tempdir().expect("temp dir");
+        let candidates = vec![
+            write_candidate(dir.path(), "spex/specs/example.yaml", "@spec bogus\n"),
+            write_candidate(dir.path(), "spex/rules/example/check.sh", "@spec bogus\n"),
+            write_candidate(dir.path(), "spex/schemas/spec.schema.json", "@spec bogus\n"),
+            write_candidate(dir.path(), "src/lib.rs", "// @spec impl bogus\n"),
+        ];
+        let spex_dir = dir.path().join("spex");
+        let ctx = PackageCtx {
+            package_path: dir.path(),
+            spex_dir: &spex_dir,
+            candidates: &candidates,
+        };
+        let findings = validate_annotations(&ctx, &HashMap::new());
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].location, Some(Location::in_file("src/lib.rs")));
+    }
+
+    #[test]
+    fn skips_schemas_dir_in_any_package() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![write_candidate(
             dir.path(),
             "schemas/spec.schema.json",
             "@spec bogus\n",
         )];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, false, &HashMap::new());
+        let findings = validate_annotations(&ctx, &HashMap::new());
 
         assert!(findings.is_empty());
     }
@@ -123,14 +144,13 @@ mod tests {
             "src/lib.rs",
             "// @spec impl delivery-time#estimate-on-delivery\n// @spec impl delivery-time#xxx\n",
         )];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
         let findings = validate_annotations(
             &ctx,
-            false,
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
         );
 
@@ -148,14 +168,13 @@ mod tests {
             "src/lib.rs",
             "// @spec impl delivery-timeX#estimate-on-delivery\n",
         )];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
         let findings = validate_annotations(
             &ctx,
-            false,
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
         );
 
@@ -170,12 +189,12 @@ mod tests {
     fn validate_content(content: &str, known_ids: &HashMap<SpecId, HashSet<AcId>>) -> Vec<Finding> {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![write_candidate(dir.path(), "src/lib.rs", content)];
-        let ctx = RepoCtx {
-            repo_path: dir.path(),
+        let ctx = PackageCtx {
+            package_path: dir.path(),
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        validate_annotations(&ctx, false, known_ids)
+        validate_annotations(&ctx, known_ids)
     }
 
     fn locations(findings: &[Finding]) -> Vec<String> {

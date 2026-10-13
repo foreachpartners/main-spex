@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use crate::error::describe;
     use std::fs;
     use tempfile::{TempDir, tempdir};
 
@@ -16,64 +17,155 @@ mod tests_unit {
     }
 
     #[test]
+    fn parse_layout_defaults_to_multi_repo_on_an_empty_answer() {
+        assert_eq!(parse_layout("").expect("layout"), Layout::MultiRepo);
+    }
+
+    #[test]
+    fn parse_layout_accepts_the_number_in_the_listed_order() {
+        assert_eq!(parse_layout("1").expect("layout"), Layout::MultiRepo);
+        assert_eq!(parse_layout("2").expect("layout"), Layout::SingleRepo);
+        assert_eq!(parse_layout("3").expect("layout"), Layout::Monorepo);
+    }
+
+    #[test]
+    fn parse_layout_accepts_the_name_in_any_case() {
+        assert_eq!(parse_layout("monorepo").expect("layout"), Layout::Monorepo);
+        assert_eq!(
+            parse_layout("Single-Repo").expect("layout"),
+            Layout::SingleRepo
+        );
+    }
+
+    #[test]
+    fn parse_layout_rejects_numbers_outside_the_list_and_unknown_names() {
+        for answer in ["0", "4", "-1", "polyrepo"] {
+            let error = parse_layout(answer).expect_err("unknown layout");
+            assert!(
+                describe(&error).contains(&format!("unknown layout `{answer}`")),
+                "unexpected error for `{answer}`: {}",
+                describe(&error)
+            );
+        }
+    }
+
+    #[test]
     fn to_kebab_case_lowercases_and_replaces_separators() {
-        assert_eq!(to_kebab_case("Repo Name"), "repo-name");
-        assert_eq!(to_kebab_case("repo_name"), "repo-name");
-        assert_eq!(to_kebab_case("Repo-Name"), "repo-name");
+        assert_eq!(to_kebab_case("Package Name"), "package-name");
+        assert_eq!(to_kebab_case("package_name"), "package-name");
+        assert_eq!(to_kebab_case("Package-Name"), "package-name");
     }
 
     #[test]
     fn to_kebab_case_strips_non_english_chars_without_splitting() {
         assert_eq!(to_kebab_case("répo@näme!"), "rponme");
-        assert_eq!(to_kebab_case("repo.name123"), "reponame123");
-        assert_eq!(to_kebab_case("repo_name.v2"), "repo-namev2");
+        assert_eq!(to_kebab_case("package.name123"), "packagename123");
+        assert_eq!(to_kebab_case("package_name.v2"), "package-namev2");
     }
 
     #[test]
     fn to_kebab_case_collapses_and_trims_separators() {
-        assert_eq!(to_kebab_case("  repo   name  "), "repo-name");
-        assert_eq!(to_kebab_case("__repo__name__"), "repo-name");
+        assert_eq!(to_kebab_case("  package   name  "), "package-name");
+        assert_eq!(to_kebab_case("__package__name__"), "package-name");
         assert_eq!(to_kebab_case("---"), "");
     }
 
-    #[test]
-    fn config_from_template_names_project_and_spex_repository() {
-        let yaml = config_from_template("pizza-shop");
+    fn parsed_config(layout: Layout) -> SpexConfig {
+        serde_yaml_ng::from_str(&config_from_template(layout, "pizza-shop")).expect("parse config")
+    }
 
-        let config: SpexConfig = serde_yaml_ng::from_str(&yaml).expect("parse config");
+    #[test]
+    fn multi_repo_config_names_project_and_lists_the_spex_repository() {
+        let config = parsed_config(Layout::MultiRepo);
+
         assert_eq!(config.project_name, "pizza-shop");
-        assert_eq!(config.repositories.len(), 1);
-        let spex = &config.repositories[0];
-        assert_eq!(spex.repository_name, "pizza-shop-spex");
-        assert_eq!(spex.repository_short_name, "spex");
+        assert_eq!(config.layout, Layout::MultiRepo);
+        assert_eq!(config.agent_root, ".");
+        assert_eq!(config.packages.len(), 1);
+        let spex = &config.packages[0];
+        assert_eq!(spex.package_name, "pizza-shop-spex");
+        assert_eq!(spex.package_short_name, "spex");
         assert_eq!(spex.path, ".");
     }
 
     #[test]
-    fn config_from_template_records_installed_cli_version() {
-        let yaml = config_from_template("pizza-shop");
+    fn single_repo_config_lists_the_package_named_after_the_project() {
+        let config = parsed_config(Layout::SingleRepo);
 
-        let config: SpexConfig = serde_yaml_ng::from_str(&yaml).expect("parse config");
-        assert_eq!(config.cli_version, CLI_VERSION);
+        assert_eq!(config.layout, Layout::SingleRepo);
+        assert_eq!(config.agent_root, "..");
+        assert_eq!(config.packages.len(), 1);
+        let package = &config.packages[0];
+        assert_eq!(package.package_name, "pizza-shop");
+        assert_eq!(package.package_short_name, "pizza-shop");
+        assert_eq!(package.path, "..");
+        assert!(
+            package
+                .rules
+                .iter()
+                .all(|rule| rule.as_str() != "naming-convention")
+        );
+    }
+
+    #[test]
+    fn monorepo_config_lists_no_package() {
+        let config = parsed_config(Layout::Monorepo);
+
+        assert_eq!(config.layout, Layout::Monorepo);
+        assert_eq!(config.agent_root, "..");
+        assert!(config.packages.is_empty());
+    }
+
+    #[test]
+    fn config_from_template_records_installed_cli_version() {
+        for layout in [Layout::MultiRepo, Layout::SingleRepo, Layout::Monorepo] {
+            assert_eq!(parsed_config(layout).cli_version, CLI_VERSION);
+        }
     }
 
     #[test]
     fn config_from_template_leaves_no_unnamed_placeholders() {
-        let yaml = config_from_template("pizza-shop");
+        for layout in [Layout::MultiRepo, Layout::SingleRepo, Layout::Monorepo] {
+            let yaml = config_from_template(layout, "pizza-shop");
 
-        assert!(!yaml.contains("project_name: unknown"));
-        assert!(!yaml.contains("repository_name: unknown"));
+            for field in [
+                "project_name",
+                "layout",
+                "agent_root",
+                "package_name",
+                "package_short_name",
+            ] {
+                assert!(
+                    !yaml.contains(&format!("{field}: unknown")),
+                    "`{field}` left unnamed for {layout}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn config_from_template_lists_root_fields_in_schema_order() {
+        let yaml = config_from_template(Layout::SingleRepo, "pizza-shop");
+
+        let positions: Vec<usize> = ["project_name:", "cli_version:", "layout:", "agent_root:"]
+            .iter()
+            .map(|field| yaml.find(field).expect("root field"))
+            .collect();
+        assert!(positions.is_sorted());
     }
 
     #[test]
     fn write_config_writes_file_to_spex_dir() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        write_config(spex_dir.path(), "pizza-shop").expect("write config");
+        write_config(spex_dir.path(), Layout::SingleRepo, "pizza-shop").expect("write config");
 
         let config_path = spex_dir.path().join(SPEX_CONFIG_FILE);
         let written = fs::read_to_string(&config_path).expect("read config");
-        assert_eq!(written, config_from_template("pizza-shop"));
+        assert_eq!(
+            written,
+            config_from_template(Layout::SingleRepo, "pizza-shop")
+        );
     }
 
     #[test]
@@ -109,35 +201,59 @@ mod tests_unit {
     }
 
     #[test]
-    fn ensure_spex_dir_reuses_current_when_inside_spex_directory() {
+    fn locate_spex_dir_reuses_current_when_inside_spex_directory() {
         let workspace = workspace_with(&["pizza-shop-spex"], &[]);
         let spex_dir = workspace.path().join("pizza-shop-spex");
 
-        let resolved =
-            ensure_spex_dir(&spex_dir, workspace.path(), "pizza-shop").expect("ensure spex dir");
+        let located = locate_spex_dir(&spex_dir, workspace.path(), Layout::MultiRepo, "pizza-shop");
 
-        assert_eq!(resolved, spex_dir);
+        assert_eq!(located, spex_dir);
     }
 
     #[test]
-    fn ensure_spex_dir_creates_project_named_directory() {
+    fn locate_spex_dir_names_the_multi_repo_directory_after_the_project() {
         let workspace = workspace_with(&["server"], &[]);
 
-        let resolved = ensure_spex_dir(workspace.path(), workspace.path(), "pizza-shop")
-            .expect("ensure spex dir");
+        let located = locate_spex_dir(
+            workspace.path(),
+            workspace.path(),
+            Layout::MultiRepo,
+            "pizza-shop",
+        );
 
-        assert_eq!(resolved, workspace.path().join("pizza-shop-spex"));
-        assert!(resolved.is_dir(), "spex directory was not created");
+        assert_eq!(located, workspace.path().join("pizza-shop-spex"));
     }
 
     #[test]
-    fn ensure_spex_dir_reuses_existing_directory() {
-        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
+    fn locate_spex_dir_names_the_other_layouts_directory_spex() {
+        let workspace = workspace_with(&["server"], &[]);
 
-        let resolved = ensure_spex_dir(workspace.path(), workspace.path(), "pizza-shop")
-            .expect("ensure spex dir");
+        for layout in [Layout::SingleRepo, Layout::Monorepo] {
+            let located = locate_spex_dir(workspace.path(), workspace.path(), layout, "pizza-shop");
 
-        assert_eq!(resolved, workspace.path().join("pizza-shop-spex"));
+            assert_eq!(located, workspace.path().join("spex"));
+        }
+    }
+
+    #[test]
+    fn locate_spex_dir_does_not_create_the_directory() {
+        let workspace = workspace_with(&[], &[]);
+
+        let located = locate_spex_dir(
+            workspace.path(),
+            workspace.path(),
+            Layout::SingleRepo,
+            "pizza-shop",
+        );
+
+        assert!(!located.exists());
+    }
+
+    #[test]
+    fn verify_empty_passes_on_a_directory_that_does_not_exist() {
+        let workspace = workspace_with(&[], &[]);
+
+        assert!(verify_empty(&workspace.path().join("spex")).is_ok());
     }
 
     #[test]
@@ -167,7 +283,7 @@ mod tests_unit {
     fn copy_templates_writes_rules_and_scripts() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        copy_templates(spex_dir.path()).expect("copy templates");
+        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("rules").is_dir());
         assert!(spex_dir.path().join("specs").is_dir());
@@ -180,7 +296,7 @@ mod tests_unit {
     fn copy_templates_writes_schemas() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        copy_templates(spex_dir.path()).expect("copy templates");
+        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         assert!(spex_dir.path().join("schemas").is_dir());
         assert!(spex_dir.path().join("schemas/spec.schema.json").is_file());
@@ -190,7 +306,7 @@ mod tests_unit {
     fn copy_templates_relocates_skills_into_agents() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        copy_templates(spex_dir.path()).expect("copy templates");
+        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         assert!(!spex_dir.path().join("skills").exists());
         assert!(spex_dir.path().join(".agents/skills").is_dir());
@@ -207,7 +323,7 @@ mod tests_unit {
     fn copy_templates_links_claude_to_agents() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        copy_templates(spex_dir.path()).expect("copy templates");
+        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         let claude = spex_dir.path().join(".claude");
         let target = fs::read_link(&claude).expect("read .claude symlink");
@@ -225,7 +341,7 @@ mod tests_unit {
 
         let spex_dir = tempdir().expect("create spex dir");
 
-        copy_templates(spex_dir.path()).expect("copy templates");
+        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         let script = spex_dir
             .path()

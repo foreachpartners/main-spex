@@ -6,9 +6,9 @@ use eros::Context;
 use owo_colors::OwoColorize;
 
 use crate::config::spex::Spex;
-use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
+use crate::config::{CLI_VERSION, Layout, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
 use crate::error::{Result, could_not_read};
-use crate::support::fs::write_file;
+use crate::support::fs::{normalize, write_file};
 use serde::Deserialize;
 
 use super::sync_templates::sync_templates;
@@ -25,6 +25,8 @@ struct UpdateConfig {
     cli_version: String,
     #[serde(default)]
     rules_unused: Vec<String>,
+    #[serde(default)]
+    agent_root: Option<String>,
 }
 
 pub fn run() -> Result<ExitCode> {
@@ -38,7 +40,16 @@ pub fn run() -> Result<ExitCode> {
 
     let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
 
-    sync_templates(SpexConfig::dir_of(&config_path), &previous.rules_unused)
+    let spex_dir = SpexConfig::dir_of(&config_path);
+    let agent_root = normalize(
+        &spex_dir.join(
+            previous
+                .agent_root
+                .as_deref()
+                .unwrap_or(Layout::MultiRepo.agent_root()),
+        ),
+    );
+    sync_templates(spex_dir, &agent_root, &previous.rules_unused)
         .context("could not rewrite bundled templates")?;
 
     write_file(

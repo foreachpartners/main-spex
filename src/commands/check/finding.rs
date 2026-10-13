@@ -20,7 +20,7 @@ pub(super) enum Source {
     Spec { spec_id: String, check: String },
     Internal { id: String, check: String },
     UnknownRule { rule_id: String },
-    UnreachableRepository { name: String },
+    UnreachablePackage { name: String },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -91,7 +91,7 @@ impl Source {
                 check,
             }
             | Self::Internal { id: owner, check } => Some((owner, check)),
-            Self::UnknownRule { .. } | Self::UnreachableRepository { .. } => None,
+            Self::UnknownRule { .. } | Self::UnreachablePackage { .. } => None,
         }
     }
 }
@@ -109,7 +109,7 @@ impl fmt::Display for Source {
             }
             | Self::Internal { id: owner, check } => write!(formatter, "{owner}/{check}"),
             Self::UnknownRule { rule_id } => write!(formatter, "{rule_id}"),
-            Self::UnreachableRepository { name } => write!(formatter, "{name}"),
+            Self::UnreachablePackage { name } => write!(formatter, "{name}"),
         }
     }
 }

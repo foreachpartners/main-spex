@@ -7,7 +7,7 @@ use eros::Context;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::spec::{AcId, CoverageLayer, SpecId};
-use crate::support::repo_files::RepoFiles;
+use crate::support::package_files::PackageFiles;
 use crate::tracing::annotations::{self, Annotation};
 
 #[cfg(test)]
@@ -47,25 +47,28 @@ impl AnnotationIndex {
     pub fn scan_workspace(spex: &Spex) -> Result<Self> {
         let mut index = Self::new();
 
-        for repo in &spex.repositories {
-            for contract_path in &repo.contracts {
+        for package in &spex.packages {
+            for contract_path in &package.contracts {
                 if let Ok(content) = fs::read_to_string(contract_path) {
                     index.record_all(annotations::parse(&content));
                 }
             }
 
-            if !repo.path.is_dir() || repo.is_spex_repo {
+            if !package.path.is_dir() {
                 continue;
             }
-            index.scan_repo(&repo.path)?;
+            index.scan_package(&package.path, &spex.dir)?;
         }
 
         Ok(index)
     }
 
-    fn scan_repo(&mut self, repo_path: &Path) -> Result<()> {
-        for result in RepoFiles::new(repo_path) {
-            let path = result.context("could not walk workspace repository files")?;
+    fn scan_package(&mut self, package_path: &Path, spex_dir: &Path) -> Result<()> {
+        for result in PackageFiles::new(package_path) {
+            let path = result.context("could not walk package files")?;
+            if path.starts_with(spex_dir) {
+                continue;
+            }
             let Ok(content) = fs::read_to_string(path) else {
                 continue;
             };

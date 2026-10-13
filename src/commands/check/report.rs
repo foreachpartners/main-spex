@@ -4,7 +4,7 @@ use std::process::ExitCode;
 use anstream::println;
 use owo_colors::OwoColorize;
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::rule::Severity;
 use crate::support::fs::file_url;
 use crate::support::style::{hyperlink, version_line};
@@ -17,27 +17,29 @@ use super::finding::{Finding, Location};
 mod report_test;
 
 pub(super) enum ReportTarget<'a> {
-    Repository(&'a Repository),
+    Package(&'a Package),
     Workspace { spex_dir: &'a Path },
+    Spex { spex_dir: &'a Path },
 }
 
 impl ReportTarget<'_> {
     pub(super) fn name(&self) -> &str {
         match self {
-            Self::Repository(repo) => &repo.repository_name,
+            Self::Package(package) => &package.package_name,
             Self::Workspace { .. } => "workspace",
+            Self::Spex { .. } => "spex",
         }
     }
 
     pub(super) fn base_dir(&self) -> &Path {
         match self {
-            Self::Repository(repo) => &repo.path,
-            Self::Workspace { spex_dir } => spex_dir,
+            Self::Package(package) => &package.path,
+            Self::Workspace { spex_dir } | Self::Spex { spex_dir } => spex_dir,
         }
     }
 
-    pub(super) fn is_spex_repo(&self) -> bool {
-        matches!(self, Self::Repository(repo) if repo.is_spex_repo)
+    pub(super) fn is_spex_dir(&self) -> bool {
+        matches!(self, Self::Package(package) if package.is_spex_dir)
     }
 }
 

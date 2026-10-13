@@ -138,7 +138,7 @@ fn specs_rejects_an_unknown_scope() {
 
     let specs = run_spex(&project, &["specs", "--scope", "bogus"], "");
 
-    assert_fails_mentioning(&specs, "unknown repository short name `bogus`");
+    assert_fails_mentioning(&specs, "unknown package short name `bogus`");
     assert!(specs.stdout.is_empty());
 }
 

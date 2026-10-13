@@ -12,17 +12,17 @@ spex --help
 
 | Command                                | Purpose                                                                |
 | -------------------------------------- | ---------------------------------------------------------------------- |
-| [`spex init`](init.md)                 | Create the spex workspace repository                                   |
-| [`spex update`](update.md)             | Refresh the bundled templates in the spex repository                   |
+| [`spex init`](init.md)                 | Create the spex directory and agent files for a project                |
+| [`spex update`](update.md)             | Refresh the bundled templates in the spex directory and agent root     |
 | [`spex check`](check.md)               | Run the rule checks declared in `spex.yaml`; fails on `error` findings |
 | [`spex check-schema`](check-schema.md) | Validate JSON or YAML files against a JSON Schema                      |
 | [`spex coverage`](coverage.md)         | Report `@spec` annotation coverage per acceptance criterion            |
 | [`spex info`](info.md)                 | Print the resolved `spex.yaml` as JSON, for scripts                    |
 | [`spex jq`](jq.md)                     | Run a jq filter on JSON or YAML, for scripts and agents                |
-| [`spex rules`](rules.md)               | Print the rules governing the selected repositories                    |
+| [`spex rules`](rules.md)               | Print the rules governing the selected packages                        |
 | [`spex specs`](specs.md)               | Print the workspace specs                                              |
 
-Every command except `init` finds the spex repository from the current directory — walking up and checking each directory it passes, plus its immediate subdirectories named `spex` or ending in `-spex`, for a `spex.yaml` — so any of them can run from anywhere inside the workspace.
+Every command except `init` finds the spex directory from the current directory — walking up and checking each directory it passes, plus its immediate subdirectories named `spex` or ending in `-spex`, for a `spex.yaml` — so any of them can run from anywhere inside the workspace.
 
 `rules` and `specs` print a YAML list, to stdout or to `--output`.
 

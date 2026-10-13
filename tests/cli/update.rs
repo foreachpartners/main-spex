@@ -454,3 +454,67 @@ fn update_fails_outside_a_spex_workspace() {
         "update should explain why it failed",
     );
 }
+
+#[test]
+fn update_in_single_repo_rewrites_the_agent_files_in_the_package_root() {
+    let workspace = tempdir().expect("create temp workspace");
+    let root = workspace.path().join("snake");
+    fs::create_dir_all(root.join("src")).expect("create package");
+    let init = run_spex(&root, &["init"], "single-repo\n\n");
+    assert!(init.status.success(), "init failed");
+    let skill = root.join(SYNCED_SKILL);
+    let pristine_skill = fs::read_to_string(&skill).expect("read skill");
+    fs::write(&skill, "tampered").expect("tamper skill");
+    let agents = root.join("AGENTS.md");
+    let pristine_agents = fs::read_to_string(&agents).expect("read AGENTS.md");
+    fs::write(
+        &agents,
+        pristine_agents.replacen(
+            PROJECT_SECTION,
+            &format!("\nTampered managed line.{PROJECT_SECTION}"),
+            1,
+        ),
+    )
+    .expect("tamper AGENTS.md");
+    let schema = root.join("spex/schemas/spex.schema.json");
+    fs::write(&schema, "tampered").expect("tamper schema");
+
+    let update = run_spex(&root.join("src"), &["update"], "");
+
+    assert!(
+        update.status.success(),
+        "update failed\nstderr:\n{}",
+        String::from_utf8_lossy(&update.stderr)
+    );
+    assert_eq!(
+        fs::read_to_string(&skill).expect("read skill"),
+        pristine_skill
+    );
+    assert_eq!(
+        fs::read_to_string(&agents).expect("read AGENTS.md"),
+        pristine_agents
+    );
+    assert_ne!(
+        fs::read_to_string(&schema).expect("read schema"),
+        "tampered",
+        "schemas are rewritten in the spex directory"
+    );
+    assert!(
+        !root.join("spex/.agents").exists(),
+        "update must not create agent files in the spex directory"
+    );
+}
+
+#[test]
+fn update_still_runs_on_a_project_that_predates_agent_root() {
+    let workspace = tempdir().expect("create temp workspace");
+    let project = Project::init(workspace.path());
+    let config = project.read("spex.yaml");
+    project.write("spex.yaml", &config.replace("agent_root: .\n", ""));
+    project.write(SYNCED_SKILL, "tampered");
+
+    project.update();
+
+    assert_ne!(project.read(SYNCED_SKILL), "tampered");
+    assert!(!project.read("spex.yaml").contains("agent_root"));
+}

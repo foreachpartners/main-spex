@@ -83,7 +83,7 @@ pub fn copy_project(fixture: &Path, project: &Path) {
             && path
                 .file_name()
                 .and_then(|name| name.to_str())
-                .is_some_and(|name| name.ends_with("-spex"));
+                .is_some_and(|name| name == "spex" || name.ends_with("-spex"));
         if is_spex_dir {
             copy_dir(&bundled_schemas, &path.join("schemas"));
         }
@@ -159,15 +159,15 @@ pub fn copy_no_spex(project: &Path) {
             project.join(short),
             project.join(format!("{project_name}-{short}")),
         )
-        .expect("rename repository to follow naming convention");
+        .expect("rename package to follow naming convention");
     }
 }
 
-pub fn add_repositories(project: &Path) {
+pub fn add_packages(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
     let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");
     config.push_str(
-        "  - repository_name: proj-api\n    repository_short_name: api\n    path: ../proj-api\n    rules:\n      - secret-handling\n  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
+        "  - package_name: proj-api\n    package_short_name: api\n    path: ../proj-api\n    rules:\n      - secret-handling\n  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
     );
     fs::write(&config_path, config).expect("write spex.yaml");
 }

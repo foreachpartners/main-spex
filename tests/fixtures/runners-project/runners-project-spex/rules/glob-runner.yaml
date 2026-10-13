@@ -4,8 +4,8 @@ sync_with_upstream: true
 description: >-
   Exercises the glob runner with a forbidden path and a required path.
 acceptance_criteria:
-  - "MUST provide a README.md in the repository root"
-  - "MUST NOT keep backup files in a repository"
+  - "MUST provide a README.md in the package root"
+  - "MUST NOT keep backup files in a package"
 checks:
   - name: no-backup-files
     type: glob

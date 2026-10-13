@@ -1,4 +1,4 @@
-use crate::config::Repository;
+use crate::config::Package;
 use crate::spec::Spec;
 
 use super::super::finding::{Finding, Location, Source};
@@ -7,20 +7,20 @@ use super::super::finding::{Finding, Location, Source};
 #[path = "scope_test.rs"]
 mod scope_test;
 
-pub(super) fn validate_scope(spec: &Spec, repositories: &[Repository]) -> Vec<Finding> {
+pub(super) fn validate_scope(spec: &Spec, packages: &[Package]) -> Vec<Finding> {
     spec.scope
         .iter()
         .filter(|short_name| {
-            !repositories
+            !packages
                 .iter()
-                .any(|repo| &repo.repository_short_name == *short_name)
+                .any(|package| &package.package_short_name == *short_name)
         })
         .map(|short_name| {
             Finding::error(
                 Source::spec(spec.id.as_str(), "scope"),
                 Some(Location::in_file(&spec.path)),
                 format!(
-                    "`scope` references `{short_name}`, which does not match any repository_short_name in spex.yaml"
+                    "`scope` references `{short_name}`, which does not match any package_short_name in spex.yaml"
                 ),
             )
         })

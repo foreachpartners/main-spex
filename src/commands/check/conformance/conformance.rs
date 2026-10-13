@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::error::Result;
 use crate::rule::Rule;
 use crate::spec::Spec;
@@ -26,7 +26,7 @@ const CONFORM_CHECK: &str = "spec-files-conform";
 
 pub(in crate::commands::check) fn validate_conformance(
     spex_dir: &Path,
-    repositories: &[Repository],
+    packages: &[Package],
     specs: &[Spec],
     rules: &[Rule],
 ) -> Result<Vec<Finding>> {
@@ -40,11 +40,11 @@ pub(in crate::commands::check) fn validate_conformance(
 
     for spec in specs {
         findings.extend(validate_blocked_by(spec, &status_by_id));
-        findings.extend(validate_scope(spec, repositories));
+        findings.extend(validate_scope(spec, packages));
         findings.extend(validate_coverage_ignore(spec));
     }
 
-    findings.extend(validate_schema(spex_dir, repositories, specs, rules)?);
+    findings.extend(validate_schema(spex_dir, packages, specs, rules)?);
     findings.extend(validate_script_references(rules));
     findings.extend(validate_ac_order(specs, rules));
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));

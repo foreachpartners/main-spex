@@ -78,7 +78,7 @@ mod tests {
         let unknown_rule = Source::UnknownRule {
             rule_id: "writing".to_string(),
         };
-        let unreachable = Source::UnreachableRepository {
+        let unreachable = Source::UnreachablePackage {
             name: "proj-api".to_string(),
         };
 
@@ -108,7 +108,7 @@ mod tests {
             None
         );
         assert_eq!(
-            Source::UnreachableRepository {
+            Source::UnreachablePackage {
                 name: "proj-api".to_string()
             }
             .baseline_key(),

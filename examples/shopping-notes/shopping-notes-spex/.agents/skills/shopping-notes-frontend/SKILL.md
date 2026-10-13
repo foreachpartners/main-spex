@@ -1,11 +1,11 @@
 ---
 name: shopping-notes-frontend
-description: Information, rules, commands and other shopping-notes-frontend repository context. MUST be loaded before reading, writing, testing, or running any code in that repository.
+description: Information, rules, commands and other shopping-notes-frontend package context. MUST be loaded before reading, writing, testing, or running any code in that package.
 ---
 
 # General
 
-Run `spex info --repo frontend` for general repository information and applicable rules. React SPA that lets users create and manage shopping notes against the API.
+Run `spex info --package frontend` for general package information and applicable rules. React SPA that lets users create and manage shopping notes against the API.
 
 # Project structure
 
@@ -16,7 +16,7 @@ Run `spex info --repo frontend` for general repository information and applicabl
 
 # Commands
 
-Run from the `shopping-notes-frontend` repository root.
+Run from the `shopping-notes-frontend` package root.
 
 - `npm start` - serve the app (http://localhost:5173)
 - `npm test` - run unit tests then e2e tests

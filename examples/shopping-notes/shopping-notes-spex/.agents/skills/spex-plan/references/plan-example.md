@@ -1,14 +1,14 @@
 # Plan: Let users reset a forgotten password
 
 - Specs: reset-password
-- Repositories scope: api, frontend
+- Packages scope: api, frontend
 - Rules: naming-convention, secret-handling
 
 ## Step 1 — Store reset tokens and expose the reset endpoints
 
 Status: not-started
 
-### Task 1.1 — Reset-token storage and endpoints (repo: api)
+### Task 1.1 — Reset-token storage and endpoints (package: api)
 
 Status: not-started
 
@@ -56,7 +56,7 @@ async fn request_reset(body: RequestResetBody) -> Result<StatusCode, ApiError>; 
 async fn confirm_reset(body: ConfirmResetBody) -> Result<StatusCode, ApiError>; // POST /password-resets/confirm
 ```
 
-### Task 1.2 — Reset request and confirm UI (repo: frontend)
+### Task 1.2 — Reset request and confirm UI (package: frontend)
 
 Status: not-started
 
@@ -80,7 +80,7 @@ interface ResetPasswordFormProps {
 
 Status: not-started
 
-Changed `SessionRepository` in `src/api/session_repo.rs` (repo: api):
+Changed `SessionRepository` in `src/api/session_repo.rs` (package: api):
 
 ```rust
 // added

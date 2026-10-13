@@ -4,7 +4,7 @@ use std::path::Path;
 use tempfile::tempdir;
 
 use crate::common::{
-    add_repositories, assert_fails_mentioning, copy_no_spex, copy_project, dummy_project_fixture,
+    add_packages, assert_fails_mentioning, copy_no_spex, copy_project, dummy_project_fixture,
     report_text, run_spex, runners_project_fixture, temp_project, with_version_header,
 };
 
@@ -37,9 +37,9 @@ fn project_with_todo_errors() -> (tempfile::TempDir, std::path::PathBuf) {
     (workspace, project)
 }
 
-fn write_api_repo_config(project: &Path, text: &str) {
-    fs::write(project.join("dummy-project-api/spex.repo.yaml"), text)
-        .expect("write spex.repo.yaml");
+fn write_api_package_config(project: &Path, text: &str) {
+    fs::write(project.join("dummy-project-api/spex.package.yaml"), text)
+        .expect("write spex.package.yaml");
 }
 
 const SPEX_REPORT: &str = r#"runners-project-spex
@@ -79,30 +79,30 @@ dummy-project: 0 errors, 0 warnings
 "#;
 
 #[test]
-fn check_repo_rejects_an_unknown_repository() {
+fn check_package_rejects_an_unknown_package() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
-    let check = run_spex(&project, &["check", "--repo", "bogus"], "");
+    let check = run_spex(&project, &["check", "--package", "bogus"], "");
 
-    assert_fails_mentioning(&check, "unknown workspace repository `bogus`");
+    assert_fails_mentioning(&check, "unknown package `bogus`");
     assert!(
         check.stdout.is_empty(),
-        "no report should print when the repository is unknown"
+        "no report should print when the package is unknown"
     );
 }
 
 #[test]
-fn check_repo_matches_a_repository_by_short_or_full_name() {
+fn check_package_matches_a_package_by_short_or_full_name() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
-    let by_short_name = run_spex(&project, &["check", "--repo", "frontend"], "");
+    let by_short_name = run_spex(&project, &["check", "--package", "frontend"], "");
     let by_full_name = run_spex(
         &project,
-        &["check", "--repo", "runners-project-frontend"],
+        &["check", "--package", "runners-project-frontend"],
         "",
     );
 
@@ -110,12 +110,12 @@ fn check_repo_matches_a_repository_by_short_or_full_name() {
     assert_eq!(
         report_text(&by_full_name.stdout),
         report_text(&by_short_name.stdout),
-        "--repo should match a repository by full name as well as short name",
+        "--package should match a package by full name as well as short name",
     );
 }
 
 #[test]
-fn check_honors_a_repository_spex_repo_yaml_baseline_for_its_own_files_only() {
+fn check_honors_a_package_spex_repo_yaml_baseline_for_its_own_files_only() {
     let (_workspace, project) = project_with_todo_errors();
     let unbaselined = run_spex(&project, &["check"], "");
     let report = report_text(&unbaselined.stdout);
@@ -124,7 +124,7 @@ fn check_honors_a_repository_spex_repo_yaml_baseline_for_its_own_files_only() {
         "{report}"
     );
 
-    write_api_repo_config(&project, BASELINE_TODO_FILE);
+    write_api_package_config(&project, BASELINE_TODO_FILE);
     let check = run_spex(&project, &["check"], "");
 
     let report = report_text(&check.stdout);
@@ -140,16 +140,16 @@ fn check_honors_a_repository_spex_repo_yaml_baseline_for_its_own_files_only() {
 }
 
 #[test]
-fn check_merges_the_spex_yaml_baseline_with_the_repository_spex_repo_yaml() {
+fn check_merges_the_spex_yaml_baseline_with_the_package_spex_repo_yaml() {
     let (_workspace, project) = project_with_todo_errors();
-    write_api_repo_config(&project, BASELINE_TODO_FILE);
+    write_api_package_config(&project, BASELINE_TODO_FILE);
     let spex_yaml = project.join("dummy-project-spex/spex.yaml");
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
     let patched = config.replace(
         "    rules:\n      - no-todo-comments\n",
         "    rules:\n      - no-todo-comments\n    ignored_errors:\n      - rule_id: no-todo-comments\n        check: no-todo\n        files: [src/other_todo.rs]\n",
     );
-    assert_ne!(patched, config, "api repository not found in spex.yaml");
+    assert_ne!(patched, config, "api package not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
 
     let check = run_spex(&project, &["check"], "");
@@ -164,26 +164,26 @@ fn check_merges_the_spex_yaml_baseline_with_the_repository_spex_repo_yaml() {
 }
 
 #[test]
-fn check_flags_an_unknown_key_in_a_repository_spex_repo_yaml() {
+fn check_flags_an_unknown_key_in_a_package_spex_repo_yaml() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
-    write_api_repo_config(&project, "ignored_error:\n  - rule_id: a\n    check: b\n");
+    write_api_package_config(&project, "ignored_error:\n  - rule_id: a\n    check: b\n");
 
     let check = run_spex(&project, &["check"], "");
 
     let report = report_text(&check.stdout);
     assert_eq!(check.status.code(), Some(1), "{report}");
-    assert!(report.contains("spex.repo.yaml"), "{report}");
+    assert!(report.contains("spex.package.yaml"), "{report}");
     assert!(report.contains("ignored_error"), "{report}");
 }
 
 #[test]
-fn check_accepts_a_valid_repository_spex_repo_yaml() {
+fn check_accepts_a_valid_package_spex_repo_yaml() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
-    write_api_repo_config(
+    write_api_package_config(
         &project,
         "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\nignored_errors:\n  - rule_id: no-todo-comments\n    check: no-todo\n",
     );
@@ -192,21 +192,21 @@ fn check_accepts_a_valid_repository_spex_repo_yaml() {
 
     assert!(
         check.status.success(),
-        "a valid spex.repo.yaml should pass\n{}",
+        "a valid spex.package.yaml should pass\n{}",
         report_text(&check.stdout)
     );
 }
 
 #[test]
-fn check_fails_on_an_unparsable_repository_spex_repo_yaml() {
+fn check_fails_on_an_unparsable_package_spex_repo_yaml() {
     let workspace = tempdir().expect("create temp workspace");
     let project = workspace.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
-    write_api_repo_config(&project, "coverage_ignore: [unclosed\n");
+    write_api_package_config(&project, "coverage_ignore: [unclosed\n");
 
     let check = run_spex(&project, &["check"], "");
 
-    assert_fails_mentioning(&check, "spex.repo.yaml");
+    assert_fails_mentioning(&check, "spex.package.yaml");
 }
 
 #[test]
@@ -229,16 +229,16 @@ fn check_flags_a_spex_yaml_coverage_ignore_that_mismatches_the_spec_contract() {
 #[test]
 fn fill_preexisting_errors_writes_spex_yaml_and_leaves_spex_repo_yaml_untouched() {
     let (_workspace, project) = project_with_todo_errors();
-    write_api_repo_config(&project, BASELINE_TODO_FILE);
+    write_api_package_config(&project, BASELINE_TODO_FILE);
 
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
 
     assert!(fill.status.success(), "fill should exit 0");
     assert_eq!(
-        fs::read_to_string(project.join("dummy-project-api/spex.repo.yaml"))
-            .expect("read spex.repo.yaml"),
+        fs::read_to_string(project.join("dummy-project-api/spex.package.yaml"))
+            .expect("read spex.package.yaml"),
         BASELINE_TODO_FILE,
-        "fill must not touch spex.repo.yaml"
+        "fill must not touch spex.package.yaml"
     );
     let config =
         fs::read_to_string(project.join("dummy-project-spex/spex.yaml")).expect("read spex.yaml");
@@ -259,18 +259,15 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let init = run_spex(&project, &["init"], "\n");
     assert!(init.status.success(), "init failed");
 
-    add_repositories(&project);
+    add_packages(&project);
 
     let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
-        "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
-        "  - repository_name: proj-frontend\n    repository_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n    ignored_errors:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
+        "  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n    ignored_errors:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
     );
-    assert_ne!(
-        patched, config,
-        "frontend repository not found in spex.yaml"
-    );
+    assert_ne!(patched, config, "frontend package not found in spex.yaml");
     fs::write(&config_path, patched).expect("write spex.yaml");
 
     let check = run_spex(&project, &["check"], "");
@@ -300,7 +297,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
     let init = run_spex(&project, &["init"], "\n");
     assert!(init.status.success(), "init failed");
 
-    add_repositories(&project);
+    add_packages(&project);
 
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
     assert!(

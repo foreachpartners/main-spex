@@ -15,7 +15,7 @@ mod tests {
                 description: None,
                 kind: CheckKind::Script {
                     script: "lint.sh".to_string(),
-                    run: RunScope::PerRepo,
+                    run: RunScope::PerPackage,
                 },
                 include: Vec::new(),
                 exclude: Vec::new(),

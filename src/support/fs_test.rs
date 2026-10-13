@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use super::super::{file_url, relative_to, write_embedded_dir, write_embedded_dir_at};
+    use super::super::{
+        file_url, normalize, relative_to, write_embedded_dir, write_embedded_dir_at,
+    };
     use crate::templates::BUNDLED_TEMPLATES_DIR;
     use include_dir::{Dir, include_dir};
     use std::fs;
@@ -20,8 +22,8 @@ mod tests {
     #[test]
     fn file_url_encodes_spaces() {
         assert_eq!(
-            file_url(PathBuf::from("/workspace/my repo/foo.yaml").as_path()),
-            "file:///workspace/my%20repo/foo.yaml"
+            file_url(PathBuf::from("/workspace/my package/foo.yaml").as_path()),
+            "file:///workspace/my%20package/foo.yaml"
         );
     }
 
@@ -31,6 +33,27 @@ mod tests {
             file_url(PathBuf::from("/workspace/proj#2/50%/a?.yaml").as_path()),
             "file:///workspace/proj%232/50%25/a%3F.yaml"
         );
+    }
+
+    #[test]
+    fn normalize_resolves_parent_and_current_components() {
+        assert_eq!(
+            normalize(Path::new("/workspace/snake/spex/..")),
+            Path::new("/workspace/snake")
+        );
+        assert_eq!(
+            normalize(Path::new("/workspace/demo-spex/./../demo-api")),
+            Path::new("/workspace/demo-api")
+        );
+        assert_eq!(
+            normalize(Path::new("/workspace/demo-spex/.")),
+            Path::new("/workspace/demo-spex")
+        );
+    }
+
+    #[test]
+    fn normalize_keeps_a_parent_component_it_cannot_resolve() {
+        assert_eq!(normalize(Path::new("../api")), Path::new("../api"));
     }
 
     #[test]

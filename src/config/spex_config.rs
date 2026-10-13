@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use eros::{Context, IntoAnyUnion};
 use serde::{Deserialize, Serialize};
 
+use super::Layout;
 use crate::error::{Result, config_not_found, could_not_parse, could_not_read};
 use crate::rule::RuleId;
 use crate::spec::SpecCoverageIgnore;
@@ -21,20 +22,22 @@ pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub struct SpexConfig {
     pub project_name: String,
     pub cli_version: String,
+    pub layout: Layout,
+    pub agent_root: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(default)]
     pub rules_unused: Vec<RuleId>,
     #[serde(default)]
-    pub repositories: Vec<RepositoryConfig>,
+    pub packages: Vec<PackageEntry>,
     #[serde(default)]
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct RepositoryConfig {
-    pub repository_name: String,
-    pub repository_short_name: String,
+pub struct PackageEntry {
+    pub package_name: String,
+    pub package_short_name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub path: String,

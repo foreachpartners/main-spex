@@ -4,7 +4,7 @@ use std::process::ExitCode;
 
 use clap::Args;
 
-use crate::config::Repository;
+use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope};
@@ -19,7 +19,7 @@ use super::runners::{
     run_regexp, run_script_once, scope_files,
 };
 use super::scoped_file::ScopedFile;
-use super::select::select_repos;
+use super::select::select_packages;
 use super::spec_id_tracing::validate_annotations;
 
 #[cfg(test)]
@@ -28,26 +28,26 @@ mod check_test;
 
 #[derive(Args)]
 pub struct CheckArgs {
-    #[arg(long, num_args = 1.., help = "Workspace repository names to include (default: all)")]
-    repo: Vec<String>,
+    #[arg(long, num_args = 1.., help = "package names to include (default: all)")]
+    package: Vec<String>,
     #[arg(long, num_args = 1.., help = "Files to check (default: all non-ignored files)")]
     files: Vec<String>,
     #[arg(
         long,
-        help = "Record the current error findings as a per-repository baseline in spex.yaml"
+        help = "Record the current error findings as a per-package baseline in spex.yaml"
     )]
     fill_preexisting_errors: bool,
 }
 
-pub(super) struct RepoCtx<'a> {
-    pub(super) repo_path: &'a Path,
+pub(super) struct PackageCtx<'a> {
+    pub(super) package_path: &'a Path,
     pub(super) spex_dir: &'a Path,
     pub(super) candidates: &'a [ScopedFile],
 }
 
 type WorkspaceChecks<'a> = Vec<(&'a Rule, &'a Check)>;
 
-impl RepoCtx<'_> {
+impl PackageCtx<'_> {
     fn run_check(&self, rule: &Rule, check: &Check) -> Vec<Finding> {
         outcome_findings(rule.id.as_str(), check, self.check_hits(rule, check))
     }
@@ -75,10 +75,10 @@ impl RepoCtx<'_> {
                 let program = locate_script(&rule.script_dir(), script)?;
                 match run {
                     RunScope::PerFile => {
-                        run_per_file_script(&program, self.repo_path, self.spex_dir, &files)
+                        run_per_file_script(&program, self.package_path, self.spex_dir, &files)
                     }
-                    RunScope::PerRepo | RunScope::Workspace => {
-                        run_script_once(&program, self.repo_path, self.spex_dir)
+                    RunScope::PerPackage | RunScope::Workspace => {
+                        run_script_once(&program, self.package_path, self.spex_dir)
                     }
                 }
             }
@@ -86,8 +86,8 @@ impl RepoCtx<'_> {
     }
 }
 
-struct CheckRepoArgs<'a> {
-    repo: &'a Repository,
+struct CheckPackageArgs<'a> {
+    package: &'a Package,
     spex_dir: &'a Path,
     rules: &'a [Rule],
     known_ids: &'a HashMap<SpecId, HashSet<AcId>>,
@@ -108,8 +108,8 @@ fn defer_workspace_check<'a>(
 }
 
 fn run_workspace_checks(spex_dir: &Path, workspace_checks: &WorkspaceChecks) -> Vec<Finding> {
-    let ctx = RepoCtx {
-        repo_path: spex_dir,
+    let ctx = PackageCtx {
+        package_path: spex_dir,
         spex_dir,
         candidates: &[],
     };
@@ -135,14 +135,14 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         })
         .collect();
 
-    let selected = select_repos(&spex, &args.repo, &args.files)?;
+    let selected = select_packages(&spex, &args.package, &args.files)?;
 
     let mut reports = Vec::with_capacity(selected.len());
     let mut workspace_checks = WorkspaceChecks::new();
-    for &repo in &selected {
-        let findings = check_repo(
-            CheckRepoArgs {
-                repo,
+    for &package in &selected {
+        let findings = check_package(
+            CheckPackageArgs {
+                package,
                 spex_dir: &spex.dir,
                 rules: &rules,
                 known_ids: &known_ids,
@@ -151,7 +151,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             &mut workspace_checks,
         )?;
         reports.push(CheckReport {
-            target: ReportTarget::Repository(repo),
+            target: ReportTarget::Package(package),
             findings,
         });
     }
@@ -165,7 +165,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         });
     }
 
-    validate_specs(&spex, &specs, &rules, &mut reports)?;
+    validate_spex_dir(&spex, &specs, &rules, &mut reports)?;
 
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&spex.dir, &selected, &reports);
@@ -175,49 +175,46 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     Ok(report(&spex.project_name, &reports))
 }
 
-fn check_repo<'a>(
-    args: CheckRepoArgs<'a>,
+fn check_package<'a>(
+    args: CheckPackageArgs<'a>,
     workspace_checks: &mut WorkspaceChecks<'a>,
 ) -> Result<Vec<Finding>> {
-    let CheckRepoArgs {
-        repo,
+    let CheckPackageArgs {
+        package,
         spex_dir,
         rules,
         known_ids,
         files,
     } = args;
 
-    let repo_path = &repo.path;
-    if !repo_path.is_dir() {
+    let package_path = &package.path;
+    if !package_path.is_dir() {
         return Ok(vec![Finding::error(
-            Source::UnreachableRepository {
-                name: repo.repository_name.clone(),
+            Source::UnreachablePackage {
+                name: package.package_name.clone(),
             },
             None,
-            format!(
-                "workspace repository path not found: {}",
-                repo_path.display()
-            ),
+            format!("package path not found: {}", package_path.display()),
         )]);
     }
 
     let candidates = if files.is_empty() {
-        ScopedFile::collect(repo_path)?
+        ScopedFile::collect(package_path)?
     } else {
-        ScopedFile::provided(repo_path, files)
+        ScopedFile::provided(package_path, files)
     };
 
-    let ctx = RepoCtx {
-        repo_path,
+    let ctx = PackageCtx {
+        package_path,
         spex_dir,
         candidates: &candidates,
     };
 
-    let mut findings = validate_annotations(&ctx, repo.is_spex_repo, known_ids);
+    let mut findings = validate_annotations(&ctx, known_ids);
 
     let skip_negated_checks = !files.is_empty();
 
-    for rule_id in &repo.rules {
+    for rule_id in &package.rules {
         let Some(rule) = rules.iter().find(|rule| rule.id == *rule_id) else {
             findings.push(Finding::error(
                 Source::UnknownRule {
@@ -244,24 +241,28 @@ fn check_repo<'a>(
     Ok(findings)
 }
 
-fn validate_specs(
-    spex: &Spex,
+fn validate_spex_dir<'a>(
+    spex: &'a Spex,
     specs: &[Spec],
     rules: &[Rule],
-    reports: &mut [CheckReport],
+    reports: &mut Vec<CheckReport<'a>>,
 ) -> Result<()> {
-    let Some(spex_report) = reports
+    let spex_report = reports
         .iter_mut()
-        .find(|report| report.target.is_spex_repo())
-    else {
+        .find(|report| report.target.is_spex_dir());
+    if spex_report.is_none() && spex.layout.is_multi_repo() {
         return Ok(());
-    };
+    }
 
-    spex_report.findings.extend(validate_conformance(
-        &spex.dir,
-        &spex.repositories,
-        specs,
-        rules,
-    )?);
+    let findings = validate_conformance(&spex.dir, &spex.packages, specs, rules)?;
+    match spex_report {
+        Some(report) => report.findings.extend(findings),
+        None => reports.push(CheckReport {
+            target: ReportTarget::Spex {
+                spex_dir: &spex.dir,
+            },
+            findings,
+        }),
+    }
     Ok(())
 }

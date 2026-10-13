@@ -7,7 +7,7 @@
 #   feat(ui): list available pizzas @spec list-pizza-menu
 # See https://www.conventionalcommits.org/
 #
-# Runs once in the repository directory and inspects git history, not the
+# Runs once in the package directory and inspects git history, not the
 # working tree. The initial commit subject ("initial commit", any case) is
 # exempt.
 #

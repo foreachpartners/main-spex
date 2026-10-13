@@ -2,7 +2,7 @@
 
 A simple tutorial where you learn spex on a simple project from scratch.
 
-You will create a `shopping-notes` application that lets a user note down shopping items so they don't forget to buy them when visiting a store. It will have a simple frontend (react SPA) and api (node) repositories.
+You will create a `shopping-notes` application that lets a user note down shopping items so they don't forget to buy them when visiting a store. It will have a simple frontend (react SPA) and api (node) packages.
 
 By the end you will have recreated a project similar to `examples/shopping-notes` from the simple empty api and frontend
 `examples/shopping-notes-no-spex` starting point.
@@ -15,7 +15,7 @@ Follow the installation process in [install.md](cli/install.md).
 
 Copy `examples/shopping-notes-no-spex` somewhere on your machine and rename the
 copy to `shopping-notes`. This folder becomes your **workspace root**, containing the
-`shopping-notes-api` and `shopping-notes-frontend` repositories side by side.
+`shopping-notes-api` and `shopping-notes-frontend` packages side by side.
 
 ### Get familiar with project
 
@@ -27,7 +27,7 @@ Ask AI to init git repositories for api and frontend and commit existing files.
 
 ## Set up spex and workspace
 
-Run `spex init` to generate `shopping-notes-spex` in terminal while in `shopping-notes` workspace root.
+Run `spex init` to generate `shopping-notes-spex` in terminal while in `shopping-notes` workspace root, and pick the `multi-repo` layout when asked.
 
 ### Get familiar with spex
 
@@ -39,14 +39,14 @@ Ask AI to init git in `shopping-notes-spex` repository and commit existing files
 
 ### Setup workspace
 
-Open the workspace to work across all repositories at once and integrate with an AI coding agent:
+Open the workspace to work across all packages at once and integrate with an AI coding agent:
 
 - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
 - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
 - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend` from `shopping-notes-spex` repo
-- Zed: add project, pick all workspace repos (folders)
+- Zed: add project, pick all packages (folders)
 
-The workspace file lists only `shopping-notes-spex` for now, the `/spex-setup` skill below adds the other repositories to it.
+The workspace file lists only `shopping-notes-spex` for now, the `/spex-setup` skill below adds the other packages to it.
 
 ### Skills
 
@@ -70,10 +70,10 @@ for example if user says `let's setup spex` - it will match skill metadata descr
 The skill that we will run `shopping-notes-spex/.agents/skills/spex-setup/SKILL.md` is instruction for AI to
 update `spex.yaml` (which is main spex configuration file for your project) and:
 
-- add the workspace repositories (`shopping-notes-api`, `shopping-notes-frontend`) to `spex.yaml` and the workspace file
-- add descriptions for your project and each repository
-- pick rules from bundled with spex that applicable to each project repository and remove unused
-- generate main skills for each repo with metadata that requires them to be loaded when AI works on any repository. Skills will describe each repository and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
+- add the packages (`shopping-notes-api`, `shopping-notes-frontend`) to `spex.yaml` and the workspace file
+- add descriptions for your project and each package
+- pick rules from bundled with spex that applicable to each package and remove unused
+- generate main skills for each package with metadata that requires them to be loaded when AI works on any package. Skills will describe each package and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
 
 Run your first skill `/spex-setup` in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit.
 
@@ -81,12 +81,12 @@ Run your first skill `/spex-setup` in AI chat window or agent CLI to complete se
 
 Run `spex check` in terminal from anywhere in the workspace, you will see `dependencies-rules/npm-floating-version` errors in api.
 
-**Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies repo-wide.
+**Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies across whole packages.
 
-Each repository has rules that it needs to follow, applicable rules for each repo are defined in `spex.yaml` and one of the rules for api is
-reported `dependencies-rules`. You can open `shopping-notes-spex/rules/dependencies-rules.yaml` and check it description and acceptance_criteria repo must follow with deterministic `checks`. Our error comes from `npm-floating-version` which requires `package.json dependencies must pin an exact version, not a range`. We can fix it by opening `/shopping-notes-api/package.json` and removing `^`.
+Each package has rules that it needs to follow, applicable rules for each package are defined in `spex.yaml` and one of the rules for api is
+reported `dependencies-rules`. You can open `shopping-notes-spex/rules/dependencies-rules.yaml` and check it description and acceptance_criteria package must follow with deterministic `checks`. Our error comes from `npm-floating-version` which requires `package.json dependencies must pin an exact version, not a range`. We can fix it by opening `/shopping-notes-api/package.json` and removing `^`.
 
-Rules are a way to ensure AI generates code in a way we want. Rules applicable to repository are loaded in AI context when it works on this repository and if possible they also have deterministic checks which we can validate by running `spex check`.
+Rules are a way to ensure AI generates code in a way we want. Rules applicable to a package are loaded in AI context when it works on this package and if possible they also have deterministic checks which we can validate by running `spex check`.
 
 Commit your fixes, run `spex check` again and ensure there is no more errors.
 
@@ -136,11 +136,11 @@ Put back trace for contract and let's continue with implementation.
 
 #### Implement
 
-Like with everything else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all necessary context for the task - spec, applicable rules, repo skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
+Like with everything else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all necessary context for the task - spec, applicable rules, package skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
 
 #### Review
 
-While our change is small and we can manually review it, in case of bigger changes we would want agent to review implementation, let's try it out, run `/spex-review api-healthcheck api repo implementation`.
+While our change is small and we can manually review it, in case of bigger changes we would want agent to review implementation, let's try it out, run `/spex-review api-healthcheck api package implementation`.
 
 Review skill will spawn two subagents in parallel where first will review if implementation follows rules, second will review if implementation follows spec. Review skill itself delegates to `spex-review-rule` and `spex-review-spec` skills for each subagent. It's like a constructor where you can combine pieces to achieve desired process, we will see it later using `spex-assembly-line` skill.
 

@@ -42,11 +42,11 @@ mod tests {
         }
     }
 
-    fn repository(spex_dir: &Path, path: &str, rules: Vec<&str>) -> Repository {
-        Repository {
+    fn package(spex_dir: &Path, path: &str, rules: Vec<&str>) -> Package {
+        Package {
             rules: rules.into_iter().map(testing::rule_id).collect(),
             path: spex_dir.join(path),
-            ..testing::repository("api", path)
+            ..testing::package("api", path)
         }
     }
 
@@ -57,14 +57,14 @@ mod tests {
     #[test]
     fn run_check_reports_config_error_when_script_missing() {
         let workspace = tempdir().expect("workspace");
-        let repo = workspace.path().join("api");
+        let package_dir = workspace.path().join("api");
         let spex = workspace.path().join("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
+        std::fs::create_dir_all(&package_dir).expect("package");
         std::fs::create_dir_all(&spex).expect("spex");
 
-        let check = script_check("sample", "sample.sh", RunScope::PerRepo);
-        let ctx = RepoCtx {
-            repo_path: &repo,
+        let check = script_check("sample", "sample.sh", RunScope::PerPackage);
+        let ctx = PackageCtx {
+            package_path: &package_dir,
             spex_dir: &spex,
             candidates: &[],
         };
@@ -77,25 +77,25 @@ mod tests {
     }
 
     #[test]
-    fn check_repo_skips_negated_checks_when_files_provided() {
+    fn check_package_skips_negated_checks_when_files_provided() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
-        let repo = workspace.path().join("api");
+        let package_dir = workspace.path().join("api");
         std::fs::create_dir_all(&spex).expect("spex");
-        std::fs::create_dir_all(&repo).expect("repo");
-        std::fs::create_dir_all(repo.join("src")).expect("src");
-        std::fs::write(repo.join("src/main.rs"), "fn main() {}").expect("file");
+        std::fs::create_dir_all(&package_dir).expect("package");
+        std::fs::create_dir_all(package_dir.join("src")).expect("src");
+        std::fs::write(package_dir.join("src/main.rs"), "fn main() {}").expect("file");
 
         let negated_glob = glob_check("dprint-config-present", "dprint.json", true);
         let non_negated = glob_check("no-rs-files", "**/*.rs", false);
 
         let rules = [rule("x", vec![negated_glob.clone(), non_negated])];
 
-        let repository = repository(&spex, "../api", vec!["x"]);
+        let package = package(&spex, "../api", vec!["x"]);
 
-        let findings = check_repo(
-            CheckRepoArgs {
-                repo: &repository,
+        let findings = check_package(
+            CheckPackageArgs {
+                package: &package,
                 spex_dir: &spex,
                 rules: &rules,
                 known_ids: &HashMap::new(),
@@ -112,9 +112,9 @@ mod tests {
         );
         assert!(findings.iter().any(|f| check_name(f) == "no-rs-files"));
 
-        let findings = check_repo(
-            CheckRepoArgs {
-                repo: &repository,
+        let findings = check_package(
+            CheckPackageArgs {
+                package: &package,
                 spex_dir: &spex,
                 rules: &rules,
                 known_ids: &HashMap::new(),
@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     #[serial(script_exec)]
-    fn workspace_check_runs_once_across_repos() {
+    fn workspace_check_runs_once_across_packages() {
         let workspace = tempdir().expect("workspace");
         let spex = workspace.path().join("spex");
         let api = workspace.path().join("api");
@@ -154,14 +154,14 @@ mod tests {
             ..rule_in(&spex, "x")
         }];
 
-        let api_repo = repository(&spex, "../api", vec!["x"]);
-        let web_repo = repository(&spex, "../web", vec!["x"]);
+        let api_package = package(&spex, "../api", vec!["x"]);
+        let web_package = package(&spex, "../web", vec!["x"]);
         let known_ids = HashMap::new();
 
         let mut collected = Vec::new();
-        let mut repo_findings = check_repo(
-            CheckRepoArgs {
-                repo: &api_repo,
+        let mut package_findings = check_package(
+            CheckPackageArgs {
+                package: &api_package,
                 spex_dir: &spex,
                 rules: &rules,
                 known_ids: &known_ids,
@@ -170,10 +170,10 @@ mod tests {
             &mut collected,
         )
         .expect("api");
-        repo_findings.extend(
-            check_repo(
-                CheckRepoArgs {
-                    repo: &web_repo,
+        package_findings.extend(
+            check_package(
+                CheckPackageArgs {
+                    package: &web_package,
                     spex_dir: &spex,
                     rules: &rules,
                     known_ids: &known_ids,
@@ -184,7 +184,7 @@ mod tests {
             .expect("web"),
         );
 
-        assert!(repo_findings.is_empty());
+        assert!(package_findings.is_empty());
         assert_eq!(collected.len(), 1);
 
         let findings = run_workspace_checks(&spex, &collected);

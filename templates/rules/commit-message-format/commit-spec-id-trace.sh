@@ -9,7 +9,7 @@
 # (fix, refactor, docs, ...) may touch spec-related code (e.g. mechanical
 # spex update reformatting) without being new spec work.
 #
-# Runs once in the repository directory and inspects the last 10 commits'
+# Runs once in the package directory and inspects the last 10 commits'
 # diffs, not the working tree.
 #
 # Findings are file-less (git history has no working-tree path): one line per
