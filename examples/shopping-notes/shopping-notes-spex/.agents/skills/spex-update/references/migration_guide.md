@@ -4,7 +4,7 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 ## 0.20.0
 
-"Workspace" is no longer a spex term: the whole is the project, and its top-level folder is the project root (formerly the workspace root). A script check's `run: workspace` is now `run: project`, and `schemas/check.schema.json` lists `project` instead of `workspace`. Until every rule is renamed, every command that loads rules fails on `run: workspace`. In `<spex-dir>`:
+"Workspace" is no longer a spex term: the whole is the project, and its top-level folder is the project root (formerly the workspace root). A script check's `run: workspace` is now `run: project`, and `schemas/check.schema.json` lists `project` instead of `workspace`. Until every rule is renamed, `spex check` fails on `run: workspace`. In `<spex-dir>`:
 
 - In every rule under `rules/**/*.yaml`, replace `run: workspace` with `run: project`. Rules with `sync_with_upstream: true` and their scripts are rewritten by `spex update` and need no change.
 - `spex check` now reports the findings of a `run: project` script under a `project` heading instead of `workspace`. In every CI job or script that reads the `spex check` output for that heading, look for `project`.
@@ -22,37 +22,3 @@ A workspace repository is now called a package: one word for a separate git repo
 - In every rule under `rules/**/*.yaml`, replace `run: per-repo` with `run: per-package`. In every script, skill, or doc of the project that runs `spex info --repo` or `spex check --repo`, replace `--repo` with `--package`. Rules with `sync_with_upstream: true` and their scripts are rewritten by `spex update` and need no change.
 - In every `ignored_errors` entry of `spex.yaml` or a `spex.package.yaml` that names the `naming-convention` rule's check `repo-dir`, rename the check to `package-dir`.
 - Delete the files `spex update` leaves behind after their renames: `rules/naming-convention/repo-dir.sh` (now `package-dir.sh`), and `.agents/skills/spex-setup/references/GENERIC-REPO-SKILL-TEMPLATE.md` (now `GENERIC-PACKAGE-SKILL-TEMPLATE.md`) under the agent root.
-
-## 0.13.0
-
-Rule scripts moved from `scripts/<rule-id>/` to a folder named after the rule file, beside it: the scripts of `rules/<rule-id>.yaml` now live in `rules/<rule-id>/`, and those of a nested `rules/<group>/<rule-id>.yaml` in `rules/<group>/<rule-id>/`. `spex check` reports a script missing from the new location. In `<project-root>/<project-name>-spex/`:
-
-- For every rule without `sync_with_upstream: true`, move `scripts/<rule-id>/` to the folder beside its rule file, and update any path inside a moved script that still points under `scripts/`.
-- For every rule with `sync_with_upstream: true`, `spex update` writes its scripts at the new location, so delete its old `scripts/<rule-id>/` folder, which `spex update` leaves behind.
-- Delete the `scripts/` folder once it is empty.
-
-## 0.12.0
-
-`spex info --print <field>` was removed. In every script under `<project-root>/<project-name>-spex/scripts/**` that calls `spex info --print <field>`, replace it with `spex info | spex jq -r .<field>` (e.g. `spex info --print project_name` becomes `spex info | spex jq -r .project_name`). Scripts bundled with rules that set `sync_with_upstream: true` are rewritten by `spex update` and need no change.
-
-## 0.10.4
-
-The spex repository skill is now the bundled `spex` skill, which replaces the per-project `<project-name>-spex` skill, and `spex update` doesn't delete files, so the old skill lingers. Delete the folder `<project-root>/<project-name>-spex/.agents/skills/<project-name>-spex/`.
-
-## 0.10.3
-
-`docs/cli.md` and `docs/framework-principles.md` are no longer bundled into projects (only `docs/glossary.md` still is), and `spex update` doesn't delete files, so the old copies linger. Delete `<project-root>/<project-name>-spex/docs/cli.md` and `<project-root>/<project-name>-spex/docs/framework-principles.md`.
-
-## 0.10.2
-
-The spex repository folder icon in the editor workspace file changed from 🧰 to 🦉. In `<project-root>/<project-name>-spex/<project-name>.code-workspace`, rename the folder `🧰 spex` (with `path` `.`) to `🦉 spex`.
-
-## 0.10.0
-
-The spec format gained a required `contract` field (`none`, `single`, or `for-each-ac`) that sets the contract coverage granularity. Add `contract: single` to every spec in `<project-root>/<project-name>-spex/specs/**/*.yaml` (its current default behavior — one contract annotation per spec), or choose `none` (no contract coverage) or `for-each-ac` (one contract annotation per acceptance criterion) where they fit better.
-
-`coverage_ignore` contract-layer entries changed meaning: a per-criterion entry (`ac` set) is now only valid under `contract: for-each-ac`, and any contract-layer entry is pointless under `contract: none` — `spex check` errors on both mismatches, so remove or fix such entries.
-
-## 0.9.0
-
-The `x-spec` annotation grammar changed: an `x-spec` (or any other `x-*` vendor extension) value that is a bare Spec ID no longer counts toward contract coverage. Rewrite every `x-spec: <spec-id>` into `x-spec: "@spec contract <spec-id>"` (or any other `x-*` key) across `<project-root>/<repository-name>/**` contract files.
