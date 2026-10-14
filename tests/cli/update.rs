@@ -21,8 +21,8 @@ struct Project {
 }
 
 impl Project {
-    fn init(workspace: &Path) -> Self {
-        let root = workspace.join("proj");
+    fn init(temp_dir: &Path) -> Self {
+        let root = temp_dir.join("proj");
         fs::create_dir_all(&root).expect("create project root");
         let init = run_spex(&root, &["init"], "\n");
         assert!(
@@ -137,8 +137,8 @@ fn changed_paths(
 
 #[test]
 fn update_upgrades_project_written_by_older_cli() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     let spex = project.join("dummy-project-spex");
 
@@ -239,8 +239,8 @@ fn update_upgrades_project_written_by_older_cli() {
 
 #[test]
 fn update_changes_nothing_when_project_is_current() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let before = read_tree(&project.spex);
 
     let update = project.update();
@@ -258,8 +258,8 @@ fn update_changes_nothing_when_project_is_current() {
 
 #[test]
 fn update_prints_every_changelog_entry_when_previous_version_is_unknown() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let config = project.read("spex.yaml");
     let patched = config.replace(&format!("cli_version: {CLI_VERSION}"), "cli_version: 0.0.1");
     assert_ne!(patched, config, "cli_version not found in spex.yaml");
@@ -275,8 +275,8 @@ fn update_prints_every_changelog_entry_when_previous_version_is_unknown() {
 
 #[test]
 fn update_restores_synced_rule_and_script_and_redeploys_deleted_rule() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let deleted_rule = "rules/dependencies-rules.yaml";
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
@@ -297,8 +297,8 @@ fn update_restores_synced_rule_and_script_and_redeploys_deleted_rule() {
 
 #[test]
 fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
 
@@ -318,8 +318,8 @@ fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
 
 #[test]
 fn update_does_not_redeploy_rule_listed_in_rules_unused() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let config = project.read("spex.yaml");
     project.write(
         "spex.yaml",
@@ -341,8 +341,8 @@ fn update_does_not_redeploy_rule_listed_in_rules_unused() {
 
 #[test]
 fn update_leaves_files_added_to_the_spex_repository_untouched() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let added = [
         ("rules/local-rule.yaml", "id: local-rule\n"),
         ("rules/local-rule/run.sh", "#!/bin/sh\nexit 0\n"),
@@ -371,8 +371,8 @@ fn update_leaves_files_added_to_the_spex_repository_untouched() {
 
 #[test]
 fn update_rewrites_skill_above_project_section_and_keeps_the_rest() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let (pristine, tampered) = project.with_tampered_managed_section(SYNCED_SKILL);
     project.write(SYNCED_SKILL, &format!("{tampered}\nLocal note.\n"));
     project.write(
@@ -394,8 +394,8 @@ fn update_rewrites_skill_above_project_section_and_keeps_the_rest() {
 
 #[test]
 fn update_keeps_skill_that_opted_out_of_upstream_sync() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let (_, tampered) = project.with_tampered_managed_section(SYNCED_SKILL);
     let opted_out = tampered.replacen(
         "\n---\n",
@@ -411,8 +411,8 @@ fn update_keeps_skill_that_opted_out_of_upstream_sync() {
 
 #[test]
 fn update_rewrites_agents_md_above_project_section_and_keeps_the_rest() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let (pristine, tampered) = project.with_tampered_managed_section("AGENTS.md");
     project.write("AGENTS.md", &format!("{tampered}\nProject note.\n"));
 
@@ -426,8 +426,8 @@ fn update_rewrites_agents_md_above_project_section_and_keeps_the_rest() {
 
 #[test]
 fn update_fully_overwrites_agents_md_that_predates_the_project_section() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let pristine = project.read("AGENTS.md");
     project.write(
         "AGENTS.md",
@@ -440,10 +440,10 @@ fn update_fully_overwrites_agents_md_that_predates_the_project_section() {
 }
 
 #[test]
-fn update_fails_outside_a_spex_workspace() {
-    let workspace = tempdir().expect("create temp workspace");
+fn update_fails_outside_a_spex_project() {
+    let temp_dir = tempdir().expect("create temp dir");
 
-    let update = run_spex(workspace.path(), &["update"], "");
+    let update = run_spex(temp_dir.path(), &["update"], "");
 
     assert!(
         !update.status.success(),
@@ -457,8 +457,8 @@ fn update_fails_outside_a_spex_workspace() {
 
 #[test]
 fn update_in_single_repo_rewrites_the_agent_files_in_the_package_root() {
-    let workspace = tempdir().expect("create temp workspace");
-    let root = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let root = temp_dir.path().join("snake");
     fs::create_dir_all(root.join("src")).expect("create package");
     let init = run_spex(&root, &["init"], "single-repo\n\n");
     assert!(init.status.success(), "init failed");
@@ -507,8 +507,8 @@ fn update_in_single_repo_rewrites_the_agent_files_in_the_package_root() {
 
 #[test]
 fn update_still_runs_on_a_project_that_predates_agent_root() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = Project::init(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
     let config = project.read("spex.yaml");
     project.write("spex.yaml", &config.replace("agent_root: .\n", ""));
     project.write(SYNCED_SKILL, "tampered");

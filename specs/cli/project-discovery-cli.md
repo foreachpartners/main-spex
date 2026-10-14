@@ -1,6 +1,6 @@
-# Workspace discovery
+# Project discovery
 
-Every command that works on a workspace finds its spex directory itself, so it runs from anywhere inside the workspace.
+Every command that works on a project finds its spex directory itself, so it runs from anywhere inside the project.
 
 ## Acceptance criteria
 

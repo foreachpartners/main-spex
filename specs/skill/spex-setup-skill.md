@@ -12,7 +12,7 @@ Configures one or several new packages for the spex framework: defines each in `
 ### Step 1: define the packages in spex.yaml
 
 - MUST read `spex.yaml`.
-- MUST find the new packages by layout: in `multi-repo`, the non-hidden directories directly under the workspace root (the parent of `<spex-dir>`), or the ones the user named; in `single-repo`, none, since `spex init` already listed the project's one package and only its entry is completed; in `monorepo`, the packages from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
+- MUST find the new packages by layout: in `multi-repo`, the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named; in `single-repo`, none, since `spex init` already listed the project's one package and only its entry is completed; in `monorepo`, the packages from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
 - MUST confirm the list with the user, and drop anything that is not a package or that `packages` already lists.
 - MUST inspect each package: its `README`, manifest files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`), top-level layout and entry points.
 - MUST propose a description from `project_name` and what the packages do when the project `description`, or a package `description`, is `unknown`, and ask the user one short question instead of guessing when the purpose is unclear.

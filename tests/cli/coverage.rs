@@ -64,8 +64,8 @@ contract: single
 
 #[test]
 fn coverage_report_matches_expected() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage"], "");
@@ -84,8 +84,8 @@ fn coverage_report_matches_expected() {
 
 #[test]
 fn coverage_verbose_report_matches_expected() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--verbose"], "");
@@ -104,8 +104,8 @@ fn coverage_verbose_report_matches_expected() {
 
 #[test]
 fn coverage_scope_limits_the_report_to_specs_in_that_scope() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--scope", "frontend"], "");
@@ -124,8 +124,8 @@ fn coverage_scope_limits_the_report_to_specs_in_that_scope() {
 
 #[test]
 fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let everything = report_text(&run_spex(&project, &["coverage"], "").stdout);
@@ -147,8 +147,8 @@ fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
 
 #[test]
 fn coverage_scope_rejects_an_unknown_package() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let coverage = run_spex(&project, &["coverage", "--scope", "bogus"], "");
@@ -159,8 +159,8 @@ fn coverage_scope_rejects_an_unknown_package() {
 
 #[test]
 fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     let specs = project.join("dummy-project-spex/specs");
     fs::remove_dir_all(&specs).expect("clear specs");
@@ -217,8 +217,8 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
 
 #[test]
 fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     append(
         &project.join("dummy-project-spex/spex.yaml"),
@@ -240,8 +240,8 @@ fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {
 
 #[test]
 fn coverage_honors_a_package_spex_repo_yaml_coverage_ignore() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),
@@ -264,8 +264,8 @@ fn coverage_honors_a_package_spex_repo_yaml_coverage_ignore() {
 
 #[test]
 fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     append(
@@ -296,8 +296,8 @@ fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
 
 #[test]
 fn coverage_fails_on_an_invalid_spex_repo_yaml() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),

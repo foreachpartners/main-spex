@@ -18,7 +18,7 @@ mod report_test;
 
 pub(super) enum ReportTarget<'a> {
     Package(&'a Package),
-    Workspace { spex_dir: &'a Path },
+    Project { spex_dir: &'a Path },
     Spex { spex_dir: &'a Path },
 }
 
@@ -26,7 +26,7 @@ impl ReportTarget<'_> {
     pub(super) fn name(&self) -> &str {
         match self {
             Self::Package(package) => &package.package_name,
-            Self::Workspace { .. } => "workspace",
+            Self::Project { .. } => "project",
             Self::Spex { .. } => "spex",
         }
     }
@@ -34,7 +34,7 @@ impl ReportTarget<'_> {
     pub(super) fn base_dir(&self) -> &Path {
         match self {
             Self::Package(package) => &package.path,
-            Self::Workspace { spex_dir } | Self::Spex { spex_dir } => spex_dir,
+            Self::Project { spex_dir } | Self::Spex { spex_dir } => spex_dir,
         }
     }
 

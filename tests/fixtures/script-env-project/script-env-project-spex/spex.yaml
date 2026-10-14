@@ -4,7 +4,7 @@ layout: multi-repo
 agent_root: .
 description: >-
   Fixture for the environment a script check runs in, at each run scope
-  (per-file, per-package, workspace).
+  (per-file, per-package, project).
 packages:
   - package_name: script-env-project-api
     package_short_name: api

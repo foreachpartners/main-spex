@@ -4,7 +4,7 @@ layout: multi-repo
 agent_root: .
 description: >-
   Minimal dummy project used by spex's own test suite to exercise `spex check`
-  and `spex coverage` on a workspace whose specs cover every lifecycle state.
+  and `spex coverage` on a project whose specs cover every lifecycle state.
 packages:
   - package_name: dummy-project-api
     package_short_name: api

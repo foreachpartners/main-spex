@@ -6,9 +6,9 @@ use tempfile::TempDir;
 use crate::common::{assert_fails_mentioning, dummy_project_fixture, run_spex, temp_project};
 
 fn spex_dir() -> (TempDir, PathBuf) {
-    let (workspace, project) = temp_project(&dummy_project_fixture());
+    let (temp_dir, project) = temp_project(&dummy_project_fixture());
     let spex = project.join("dummy-project-spex");
-    (workspace, spex)
+    (temp_dir, spex)
 }
 
 const BAD_ID_SPEC: &str = "id: Bad_ID
@@ -26,7 +26,7 @@ const INCOMPLETE_JSON_RULE: &str = r#"{"id":"json-rule"}"#;
 
 #[test]
 fn check_schema_accepts_valid_files_without_output() {
-    let (_workspace, spex) = spex_dir();
+    let (_temp_dir, spex) = spex_dir();
 
     let check = run_spex(
         &spex,
@@ -52,7 +52,7 @@ fn check_schema_accepts_valid_files_without_output() {
 
 #[test]
 fn check_schema_reports_each_violation_per_file_and_exits_non_zero() {
-    let (_workspace, spex) = spex_dir();
+    let (_temp_dir, spex) = spex_dir();
     fs::write(spex.join("bad-id.yaml"), BAD_ID_SPEC).expect("write bad-id spec");
     fs::write(spex.join("missing-fields.yaml"), TITLE_ONLY_SPEC).expect("write title-only spec");
 
@@ -86,7 +86,7 @@ fn check_schema_reports_each_violation_per_file_and_exits_non_zero() {
 
 #[test]
 fn check_schema_validates_json_files() {
-    let (_workspace, spex) = spex_dir();
+    let (_temp_dir, spex) = spex_dir();
     fs::write(spex.join("valid-rule.json"), VALID_JSON_RULE).expect("write valid json");
     fs::write(spex.join("incomplete-rule.json"), INCOMPLETE_JSON_RULE).expect("write invalid json");
 
@@ -128,7 +128,7 @@ fn check_schema_validates_json_files() {
 
 #[test]
 fn check_schema_fails_when_a_file_or_the_schema_cannot_be_read() {
-    let (_workspace, spex) = spex_dir();
+    let (_temp_dir, spex) = spex_dir();
 
     let missing_file = run_spex(
         &spex,
@@ -159,7 +159,7 @@ fn check_schema_fails_when_a_file_or_the_schema_cannot_be_read() {
 
 #[test]
 fn check_schema_requires_a_schema_and_files() {
-    let (_workspace, spex) = spex_dir();
+    let (_temp_dir, spex) = spex_dir();
 
     let check = run_spex(&spex, &["check-schema"], "");
 

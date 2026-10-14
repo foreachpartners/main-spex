@@ -7,45 +7,45 @@ mod tests {
 
     const SPEX_REPO_DIR: &str = "demo-spex";
 
-    fn workspace() -> tempfile::TempDir {
-        let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join(SPEX_REPO_DIR);
-        std::fs::create_dir_all(workspace.path().join("demo-api/src")).expect("package");
+    fn project() -> tempfile::TempDir {
+        let project = tempdir().expect("project");
+        let spex = project.path().join(SPEX_REPO_DIR);
+        std::fs::create_dir_all(project.path().join("demo-api/src")).expect("package");
         std::fs::create_dir_all(&spex).expect("spex dir");
         std::fs::write(spex.join(SPEX_CONFIG_FILE), "project_name: demo\n").expect("config");
-        workspace
+        project
     }
 
     #[test]
-    fn finds_from_workspace_root() {
-        let workspace = workspace();
-        let found = SpexConfig::find_file(workspace.path()).expect("found");
+    fn finds_from_project_root() {
+        let project = project();
+        let found = SpexConfig::find_file(project.path()).expect("found");
         assert_eq!(
             found,
-            workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
+            project.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
         );
     }
 
     #[test]
     fn finds_from_spex_dir() {
-        let workspace = workspace();
-        let spex = workspace.path().join(SPEX_REPO_DIR);
+        let project = project();
+        let spex = project.path().join(SPEX_REPO_DIR);
         let found = SpexConfig::find_file(&spex).expect("found");
         assert_eq!(found, spex.join(SPEX_CONFIG_FILE));
     }
 
     #[test]
     fn finds_from_nested_package_subdirectory() {
-        let workspace = workspace();
-        let found = SpexConfig::find_file(&workspace.path().join("demo-api/src")).expect("found");
+        let project = project();
+        let found = SpexConfig::find_file(&project.path().join("demo-api/src")).expect("found");
         assert_eq!(
             found,
-            workspace.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
+            project.path().join(SPEX_REPO_DIR).join(SPEX_CONFIG_FILE)
         );
     }
 
     #[test]
-    fn errors_when_not_in_a_workspace() {
+    fn errors_when_not_in_a_project() {
         let dir = tempdir().expect("dir");
         assert!(SpexConfig::find_file(dir.path()).is_err());
     }

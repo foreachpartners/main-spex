@@ -81,7 +81,7 @@ mod tests {
     }
 
     #[test]
-    fn skips_markdown_and_spex_workspace_dirs() {
+    fn skips_markdown_and_spex_project_dirs() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![
             write_candidate(dir.path(), "docs/notes.md", "@spec bogus\n"),

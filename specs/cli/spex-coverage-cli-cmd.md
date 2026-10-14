@@ -1,12 +1,12 @@
 # `spex coverage`
 
-Reports how well the active and in-progress specs are covered by `@spec` annotations across the workspace, per acceptance criterion.
+Reports how well the active and in-progress specs are covered by `@spec` annotations across the project, per acceptance criterion.
 
 ## Acceptance criteria
 
 ### Coverage
 
-- MUST report, for every spec whose `status` is `active` or `in-progress`, its coverage across the workspace per acceptance criterion.
+- MUST report, for every spec whose `status` is `active` or `in-progress`, its coverage across the project per acceptance criterion.
 - MUST open the report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - MUST exit non-zero when an `active` or `in-progress` spec has a gap.
 - MUST require a contract per the spec's `contract` field: `single` needs one spec-level `@spec contract <spec-id>` anywhere in any package's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`; `for-each-ac` needs a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` needs none.

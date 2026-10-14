@@ -1,6 +1,6 @@
 # Command set
 
-The `spex` command-line tool manages a spex workspace. `spex --help` lists its commands.
+The `spex` command-line tool manages a spex project. `spex --help` lists its commands.
 
 ## Acceptance criteria
 
@@ -12,5 +12,5 @@ The `spex` command-line tool manages a spex workspace. `spex --help` lists its c
 - MUST provide `spex info`: print the resolved `spex.yaml` as JSON, for scripts ([spex-info-cli-cmd.md](spex-info-cli-cmd.md)).
 - MUST provide `spex jq`: run a jq filter on JSON or YAML, for scripts and agents ([spex-jq-cli-cmd.md](spex-jq-cli-cmd.md)).
 - MUST provide `spex rules`: print the rules governing the selected packages ([spex-rules-cli-cmd.md](spex-rules-cli-cmd.md)).
-- MUST provide `spex specs`: print the workspace specs ([spex-specs-cli-cmd.md](spex-specs-cli-cmd.md)).
+- MUST provide `spex specs`: print the project specs ([spex-specs-cli-cmd.md](spex-specs-cli-cmd.md)).
 - MUST list every command in `spex --help`.

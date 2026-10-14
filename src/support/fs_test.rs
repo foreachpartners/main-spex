@@ -14,40 +14,40 @@ mod tests {
     #[test]
     fn file_url_prefixes_an_absolute_path() {
         assert_eq!(
-            file_url(PathBuf::from("/workspace/foo.yaml").as_path()),
-            "file:///workspace/foo.yaml"
+            file_url(PathBuf::from("/project/foo.yaml").as_path()),
+            "file:///project/foo.yaml"
         );
     }
 
     #[test]
     fn file_url_encodes_spaces() {
         assert_eq!(
-            file_url(PathBuf::from("/workspace/my package/foo.yaml").as_path()),
-            "file:///workspace/my%20package/foo.yaml"
+            file_url(PathBuf::from("/project/my package/foo.yaml").as_path()),
+            "file:///project/my%20package/foo.yaml"
         );
     }
 
     #[test]
     fn file_url_encodes_characters_that_would_break_the_url() {
         assert_eq!(
-            file_url(PathBuf::from("/workspace/proj#2/50%/a?.yaml").as_path()),
-            "file:///workspace/proj%232/50%25/a%3F.yaml"
+            file_url(PathBuf::from("/project/proj#2/50%/a?.yaml").as_path()),
+            "file:///project/proj%232/50%25/a%3F.yaml"
         );
     }
 
     #[test]
     fn normalize_resolves_parent_and_current_components() {
         assert_eq!(
-            normalize(Path::new("/workspace/snake/spex/..")),
-            Path::new("/workspace/snake")
+            normalize(Path::new("/project/snake/spex/..")),
+            Path::new("/project/snake")
         );
         assert_eq!(
-            normalize(Path::new("/workspace/demo-spex/./../demo-api")),
-            Path::new("/workspace/demo-api")
+            normalize(Path::new("/project/demo-spex/./../demo-api")),
+            Path::new("/project/demo-api")
         );
         assert_eq!(
-            normalize(Path::new("/workspace/demo-spex/.")),
-            Path::new("/workspace/demo-spex")
+            normalize(Path::new("/project/demo-spex/.")),
+            Path::new("/project/demo-spex")
         );
     }
 
@@ -60,8 +60,8 @@ mod tests {
     fn relative_to_drops_the_base_prefix() {
         assert_eq!(
             relative_to(
-                Path::new("/workspace/spex/specs/a.yaml"),
-                Path::new("/workspace/spex")
+                Path::new("/project/spex/specs/a.yaml"),
+                Path::new("/project/spex")
             ),
             Path::new("specs/a.yaml")
         );
@@ -70,7 +70,7 @@ mod tests {
     #[test]
     fn relative_to_keeps_a_path_outside_the_base() {
         assert_eq!(
-            relative_to(Path::new("/elsewhere/a.yaml"), Path::new("/workspace/spex")),
+            relative_to(Path::new("/elsewhere/a.yaml"), Path::new("/project/spex")),
             Path::new("/elsewhere/a.yaml")
         );
     }

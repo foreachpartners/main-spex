@@ -1,15 +1,15 @@
 # `spex init`
 
-Initializes a spex project in one of the three [layouts](../workspace/layout-workspace.md): `multi-repo`, `single-repo`, or `monorepo`. It sets up a fresh project only, and leaves finishing the setup to the [`spex-setup` skill](../skill/spex-setup-skill.md).
+Initializes a spex project in one of the three [layouts](../project/layout-project.md): `multi-repo`, `single-repo`, or `monorepo`. It sets up a fresh project only, and leaves finishing the setup to the [`spex-setup` skill](../skill/spex-setup-skill.md).
 
 ## Acceptance criteria
 
-- MUST run from the workspace root, the folder holding the packages in `multi-repo` and the repository root otherwise, or from inside an empty spex directory (`<project-name>-spex` in `multi-repo`, `spex` otherwise), which is reused instead of created.
-- MUST take a folder for the spex directory only when its name fits and it is empty or already holds a `spex.yaml`; any other folder is the workspace root, so a repository that happens to be named `spex` initializes like any other and its folder name is the default project name.
+- MUST run from the project root, the folder holding the packages in `multi-repo` and the repository root otherwise, or from inside an empty spex directory (`<project-name>-spex` in `multi-repo`, `spex` otherwise), which is reused instead of created.
+- MUST take a folder for the spex directory only when its name fits and it is empty or already holds a `spex.yaml`; any other folder is the project root, so a repository that happens to be named `spex` initializes like any other and its folder name is the default project name.
 - MUST fail when the spex directory is not empty, so it sets up a fresh project only and never overwrites; `spex update` is for an initialized project.
 - MUST prompt for the layout, as a numbered list answered with the number or the name and defaulting to `multi-repo`.
-- MUST prompt to confirm the project name, defaulting to the workspace root folder name.
-- MUST create the spex directory in the workspace root: `<project-name>-spex` in `multi-repo`, `spex` otherwise.
+- MUST prompt to confirm the project name, defaulting to the project root folder name.
+- MUST create the spex directory in the project root: `<project-name>-spex` in `multi-repo`, `spex` otherwise.
 - MUST write `spex.yaml` in the spex directory, seeded from the bundled template with the project name filled in, the installed CLI's version as `cli_version`, the chosen `layout`, and `agent_root` (`.` in `multi-repo`, `..` otherwise).
 - MUST list in `spex.yaml`, in `multi-repo`, only the spex repository (`<project-name>-spex`, at `path: .`) as a package, with the rules that apply to it.
 - MUST list in `spex.yaml`, in `single-repo`, only the single package, named after the project (its `package_name` and `package_short_name`), at `path: ..`, with the rules that apply to it.

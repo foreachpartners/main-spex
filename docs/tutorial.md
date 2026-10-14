@@ -18,7 +18,7 @@ cargo install main-spex
 ## Copy the example project
 
 Copy `examples/shopping-notes-no-spex` somewhere on your machine and rename the
-copy to `shopping-notes`. This folder becomes your **workspace root**, containing the
+copy to `shopping-notes`. This folder becomes your **project root**, containing the
 `shopping-notes-api` and `shopping-notes-frontend` packages side by side.
 
 ### Get familiar with project
@@ -31,7 +31,7 @@ Ask AI to init git repositories for api and frontend and commit existing files.
 
 ## Set up spex and workspace
 
-Run `spex init` to generate `shopping-notes-spex` in terminal while in `shopping-notes` workspace root, and pick the `multi-repo` layout when asked.
+Run `spex init` to generate `shopping-notes-spex` in terminal while in the `shopping-notes` project root, and pick the `multi-repo` layout when asked.
 
 ### Get familiar with spex
 
@@ -83,7 +83,7 @@ Run your first skill `/spex-setup` in AI chat window or agent CLI to complete se
 
 ## Rules
 
-Run `spex check` in terminal from anywhere in the workspace, you will see `dependencies-rules/npm-floating-version` errors in api.
+Run `spex check` in terminal from anywhere in the project, you will see `dependencies-rules/npm-floating-version` errors in api.
 
 **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies across whole packages.
 

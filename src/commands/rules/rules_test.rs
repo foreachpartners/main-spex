@@ -58,7 +58,7 @@ mod tests {
         assert_eq!(filtered_ids, vec!["a"]);
     }
 
-    fn write_workspace(dir: &std::path::Path) {
+    fn write_project(dir: &std::path::Path) {
         std::fs::write(
             dir.join("spex.yaml"),
             indoc! {"
@@ -108,7 +108,7 @@ mod tests {
         .expect("write rule");
     }
 
-    fn workspace(dir: &std::path::Path) -> Spex {
+    fn project(dir: &std::path::Path) -> Spex {
         let config = crate::config::SpexConfig::load(&dir.join(crate::config::SPEX_CONFIG_FILE))
             .expect("load config");
         Spex::from_config(dir.to_path_buf(), config)
@@ -126,10 +126,10 @@ mod tests {
     #[test]
     fn render_with_no_flags_prints_every_assigned_rule() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(false, &[], &[])).expect("render");
+        let yaml = render(&project, &args(false, &[], &[])).expect("render");
 
         assert_eq!(
             yaml,
@@ -157,10 +157,10 @@ mod tests {
     #[test]
     fn render_with_ai_flag_strips_sync_with_upstream_and_checks() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(true, &["secret-handling"], &[])).expect("render");
+        let yaml = render(&project, &args(true, &["secret-handling"], &[])).expect("render");
 
         assert_eq!(
             yaml,
@@ -212,9 +212,9 @@ mod tests {
             "#},
         )
         .expect("write rule");
-        let workspace = workspace(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(true, &[], &[])).expect("render");
+        let yaml = render(&project, &args(true, &[], &[])).expect("render");
 
         assert_eq!(
             yaml,
@@ -234,10 +234,10 @@ mod tests {
     #[test]
     fn render_with_single_id_returns_only_that_rule() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(false, &["writing-style"], &[])).expect("render");
+        let yaml = render(&project, &args(false, &["writing-style"], &[])).expect("render");
 
         assert_eq!(
             yaml,
@@ -254,11 +254,11 @@ mod tests {
     #[test]
     fn render_with_multiple_ids_returns_matching_rules_only() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
         let yaml = render(
-            &workspace,
+            &project,
             &args(true, &["secret-handling", "writing-style"], &[]),
         )
         .expect("render");
@@ -286,10 +286,10 @@ mod tests {
     #[test]
     fn render_with_single_repo_returns_only_that_packages_rule() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(true, &[], &["demo-frontend"])).expect("render");
+        let yaml = render(&project, &args(true, &[], &["demo-frontend"])).expect("render");
 
         assert_eq!(
             yaml,
@@ -307,11 +307,11 @@ mod tests {
     #[test]
     fn render_with_multiple_packages_returns_union_of_their_rules() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
         let yaml =
-            render(&workspace, &args(true, &[], &["demo-api", "demo-frontend"])).expect("render");
+            render(&project, &args(true, &[], &["demo-api", "demo-frontend"])).expect("render");
 
         assert_eq!(
             yaml,
@@ -336,10 +336,10 @@ mod tests {
     #[test]
     fn render_with_package_short_name_matches_same_as_full_name() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let yaml = render(&workspace, &args(true, &[], &["api"])).expect("render");
+        let yaml = render(&project, &args(true, &[], &["api"])).expect("render");
 
         assert_eq!(
             yaml,
@@ -357,10 +357,10 @@ mod tests {
     #[test]
     fn render_errors_on_unknown_package() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let result = render(&workspace, &args(false, &[], &["missing"]));
+        let result = render(&project, &args(false, &[], &["missing"]));
 
         assert!(result.is_err());
     }
@@ -368,10 +368,10 @@ mod tests {
     #[test]
     fn render_errors_on_unknown_id() {
         let dir = tempdir().expect("temp dir");
-        write_workspace(dir.path());
-        let workspace = workspace(dir.path());
+        write_project(dir.path());
+        let project = project(dir.path());
 
-        let result = render(&workspace, &args(false, &["missing"], &[]));
+        let result = render(&project, &args(false, &["missing"], &[]));
 
         assert!(result.is_err());
     }

@@ -27,7 +27,7 @@ A rule captures exactly one coherent cross-cutting convention; its individual ru
 
 Not every convention earns its own file. If the requested convention is small — a single terse acceptance criterion (for example "no console.log", "always run gofmt before commit") — and doesn't share a theme with any existing rule, don't create a dedicated spec for it. Instead propose adding it as one more acceptance criterion (with its check) to the catch-all bucket for the packages it applies to:
 
-- `rules/general-rules.yaml` (`id: general-rules`) when it applies workspace-wide or to every package the user names.
+- `rules/general-rules.yaml` (`id: general-rules`) when it applies project-wide or to every package the user names.
 - `rules/general-rules-<package-short-name>.yaml` (`id: general-rules-<package-short-name>`) when it applies to one specific package only.
 
 If the matching bucket file already exists, treat this as an edit to it (see Step 0): read it in full and append the new acceptance criterion and check, preserving everything else untouched. If it doesn't exist yet, create it fresh with this single criterion — it will grow as more small, unrelated conventions come in.
@@ -76,7 +76,7 @@ For each acceptance criterion, propose how it can be verified automatically, the
 
 - `regexp` — match file contents. Use `negate: false` (default) when a match is a violation (forbidden pattern); use `negate: true` when a file with no match is a violation (required pattern). Narrow with `include`/`exclude` globs.
 - `glob` — match file paths. Use it to forbid or require the presence of files (for example `**/*.bak`).
-- `script` — run an external script named by `script:` (a bare filename, resolved in the rule's script folder `rules/<rule-id>/<script>`, beside the rule file). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments. Set `run: per-package` to invoke it once per package, in that package's directory, with no arguments. Set `run: workspace` to invoke it exactly once, with no arguments.
+- `script` — run an external script named by `script:` (a bare filename, resolved in the rule's script folder `rules/<rule-id>/<script>`, beside the rule file). Use it when a rule needs logic a regex can't express. Set `run: per-file` (default) to invoke it with the matched files as arguments. Set `run: per-package` to invoke it once per package, in that package's directory, with no arguments. Set `run: project` to invoke it exactly once, with no arguments.
 
 Guidance:
 

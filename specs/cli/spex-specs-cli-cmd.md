@@ -1,10 +1,10 @@
 # `spex specs`
 
-Prints the workspace specs as a YAML list, to stdout or to `--output`.
+Prints the project specs as a YAML list, to stdout or to `--output`.
 
 ## Acceptance criteria
 
-- MUST print the workspace specs as a YAML list (`- id: place-pizza-order`, `title: Place a pizza order`, ...).
+- MUST print the project specs as a YAML list (`- id: place-pizza-order`, `title: Place a pizza order`, ...).
 - MUST add a `path` field after `id` with the spec file's absolute path with `--ai` (e.g. `/work/shop/shop-spex/specs/place-pizza-order.yaml`).
 - MUST limit the output to the spec IDs given in `--id <id>...`; it defaults to all specs.
 - MUST error on an unrecognized ID given to `--id`.

@@ -108,18 +108,18 @@ mod tests {
         assert!(!is_baselined_in(&unknown_rule, baseline, None));
     }
 
-    fn workspace_owner(
+    fn project_owner(
         finding: &Finding,
         packages: &[&Package],
     ) -> Option<(String, Option<PathBuf>)> {
-        let target = ReportTarget::Workspace {
+        let target = ReportTarget::Project {
             spex_dir: testing::spex_dir(),
         };
         owner(&target, finding, packages)
             .map(|owner| (owner.package.package_name.clone(), owner.file))
     }
 
-    fn workspace_finding(location: Option<Location>) -> Finding {
+    fn project_finding(location: Option<Location>) -> Finding {
         finding(Severity::Error, "check", location)
     }
 
@@ -139,49 +139,49 @@ mod tests {
     }
 
     #[test]
-    fn a_workspace_location_resolves_to_the_package_containing_it() {
+    fn a_project_location_resolves_to_the_package_containing_it() {
         let api = package_at("../api", vec![]);
         let web = package_at("../web", vec![]);
-        let located = workspace_finding(Some(Location::at_line("../web/src/main.ts", 4)));
+        let located = project_finding(Some(Location::at_line("../web/src/main.ts", 4)));
 
         assert_eq!(
-            workspace_owner(&located, &[&api, &web]),
+            project_owner(&located, &[&api, &web]),
             Some(("../web".to_string(), Some(PathBuf::from("src/main.ts"))))
         );
     }
 
     #[test]
-    fn a_workspace_sibling_location_does_not_belong_to_the_spex_repository() {
+    fn a_project_sibling_location_does_not_belong_to_the_spex_repository() {
         let spex = package_at(".", vec![]);
         let api = package_at("../api", vec![]);
-        let located = workspace_finding(Some(Location::in_file("../api/src/main.rs")));
+        let located = project_finding(Some(Location::in_file("../api/src/main.rs")));
 
         assert_eq!(
-            workspace_owner(&located, &[&spex, &api]),
+            project_owner(&located, &[&spex, &api]),
             Some(("../api".to_string(), Some(PathBuf::from("src/main.rs"))))
         );
     }
 
     #[test]
-    fn a_workspace_spex_dir_location_belongs_to_the_spex_repository() {
+    fn a_project_spex_dir_location_belongs_to_the_spex_repository() {
         let spex = package_at(".", vec![]);
         let api = package_at("../api", vec![]);
-        let located = workspace_finding(Some(Location::at_line("specs/a.yaml", 2)));
+        let located = project_finding(Some(Location::at_line("specs/a.yaml", 2)));
 
         assert_eq!(
-            workspace_owner(&located, &[&api, &spex]),
+            project_owner(&located, &[&api, &spex]),
             Some((".".to_string(), Some(PathBuf::from("specs/a.yaml"))))
         );
     }
 
     #[test]
-    fn a_workspace_finding_without_a_location_or_containing_package_has_no_owner() {
+    fn a_project_finding_without_a_location_or_containing_package_has_no_owner() {
         let api = package_at("../api", vec![]);
 
-        assert_eq!(workspace_owner(&workspace_finding(None), &[&api]), None);
+        assert_eq!(project_owner(&project_finding(None), &[&api]), None);
         assert_eq!(
-            workspace_owner(
-                &workspace_finding(Some(Location::in_file("../web/x.ts"))),
+            project_owner(
+                &project_finding(Some(Location::in_file("../web/x.ts"))),
                 &[&api]
             ),
             None
@@ -207,7 +207,7 @@ mod tests {
                 findings: vec![error_in("src/old.rs"), error_in("src/new.rs")],
             },
             CheckReport {
-                target: ReportTarget::Workspace {
+                target: ReportTarget::Project {
                     spex_dir: testing::spex_dir(),
                 },
                 findings: vec![

@@ -84,7 +84,7 @@ mod tests {
     }
 
     #[test]
-    fn specs_adds_the_workspace_coverage_ignore_of_each_spec_to_its_own() {
+    fn specs_adds_the_project_coverage_ignore_of_each_spec_to_its_own() {
         let dir = tempdir().expect("spex dir");
         write_spec(dir.path(), "place-order");
         write_spec(dir.path(), "list-menu");
@@ -114,11 +114,11 @@ mod tests {
     }
 
     #[test]
-    fn with_package_configs_merges_every_package_file_into_the_workspace() {
-        let workspace = tempdir().expect("workspace");
-        let api = workspace.path().join("api");
-        let web = workspace.path().join("web");
-        let bare = workspace.path().join("bare");
+    fn with_package_configs_merges_every_package_file_into_the_project() {
+        let project = tempdir().expect("project");
+        let api = project.path().join("api");
+        let web = project.path().join("web");
+        let bare = project.path().join("bare");
         for dir in [&api, &web, &bare] {
             std::fs::create_dir_all(dir).expect("package dir");
         }

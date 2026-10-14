@@ -33,7 +33,7 @@ A change isn't finished until:
 
 ## CLI commands
 
-Run from anywhere inside the workspace; `spex <command> --help` lists every option.
+Run from anywhere inside the project; `spex <command> --help` lists every option.
 
 - `spex info [--package <name>...]` — print `spex.yaml`: project and per-package configuration, including paths.
 - `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.

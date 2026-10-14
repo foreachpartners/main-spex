@@ -32,7 +32,7 @@ struct UpdateConfig {
 pub fn run() -> Result<ExitCode> {
     let config_path = Spex::locate_spex_config().with_context(|| {
         format!(
-            "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex workspace"
+            "`{SPEX_CONFIG_FILE}` not found — run `spex update` inside an initialized spex project"
         )
     })?;
 

@@ -68,10 +68,10 @@ pub fn script_env_project_fixture() -> std::path::PathBuf {
 }
 
 pub fn temp_project(fixture: &Path) -> (tempfile::TempDir, std::path::PathBuf) {
-    let workspace = tempfile::tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempfile::tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(fixture, &project);
-    (workspace, project)
+    (temp_dir, project)
 }
 
 pub fn copy_project(fixture: &Path, project: &Path) {

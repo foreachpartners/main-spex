@@ -12,11 +12,11 @@ mod tests {
 
     #[test]
     fn from_config_resolves_package_and_contract_paths_against_the_spex_dir() {
-        let spex_dir = Path::new("/workspace/demo-spex");
+        let spex_dir = Path::new("/project/demo-spex");
 
         let package = Package::from_config(config("../demo-api"), spex_dir);
 
-        assert_eq!(package.path, Path::new("/workspace/demo-api"));
+        assert_eq!(package.path, Path::new("/project/demo-api"));
         assert_eq!(package.contracts, vec![spex_dir.join("contracts/api.yaml")]);
         assert_eq!(package.package_name, "demo-api");
         assert_eq!(package.package_short_name, "api");
@@ -24,11 +24,11 @@ mod tests {
 
     #[test]
     fn from_config_resolves_a_parent_path_to_the_directory_holding_the_spex_dir() {
-        let spex_dir = Path::new("/workspace/snake/spex");
+        let spex_dir = Path::new("/project/snake/spex");
 
         let package = Package::from_config(config(".."), spex_dir);
 
-        assert_eq!(package.path, Path::new("/workspace/snake"));
+        assert_eq!(package.path, Path::new("/project/snake"));
         assert!(!package.is_spex_dir);
     }
 

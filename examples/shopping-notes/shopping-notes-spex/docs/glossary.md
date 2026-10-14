@@ -79,20 +79,18 @@
   Status: not-started
   ```
 
-- **Project** — the whole product being built, named after its workspace root folder (e.g. `shopping-notes`). One project spans one or several packages that share a single set of specs.
+- **Project** — the whole product being built, named after its project root folder (e.g. `shopping-notes`). One project spans one or several packages, declared in `spex.yaml`, that share a single set of specs.
 
-- **Project name** — the identifier of the project, taken from the name of its workspace root folder.
+- **Project name** — the identifier of the project, taken from the name of its project root folder.
 
   ```text
   shopping-notes
   ```
 
-- **Workspace** — the set of packages that spex manages together for one project, declared in `spex.yaml`.
-
-- **Workspace root** — the top-level folder that holds a project. In a multi-repo project it groups the packages that spex manages, each a git repository; in a single-repo or monorepo project it is the root of the git repository.
+- **Project root** — the top-level folder that holds a project. In a multi-repo project it groups the packages that spex manages, each a git repository; in a single-repo or monorepo project it is the root of the git repository.
 
   ```text
-  shopping-notes/             <- workspace root
+  shopping-notes/             <- project root
     shopping-notes-spex/      <- package
     shopping-notes-api/       <- package
     shopping-notes-frontend/  <- package
@@ -100,9 +98,9 @@
 
 - **Spex directory** (spex dir) — the directory holding `spex.yaml`, the specs, rules, schemas, docs, plans, and the contracts shared across packages. It is the spex repository in a multi-repo project, and the `spex/` folder at the repository root in a single-repo or monorepo project.
 
-- **Package** — one deliverable part of the project that spex manages (`spex`, `api`, `frontend`, `mobile`, `infra`, `docs`, and so on), with its own code, tests, contracts, and rules. In a multi-repo project each package is its own git repository inside the workspace root, so access can be granted per repository and one Spec ID can trace across many of them. In a monorepo each package is a folder of the repository, listed in `spex.yaml` without being a git repository of its own; in a single-repo project the one repository is the single package. Not a dependency or a package published to a registry. Always call these packages, or by a more specific role (service, mobile, infra, docs).
+- **Package** — one deliverable part of the project that spex manages (`spex`, `api`, `frontend`, `mobile`, `infra`, `docs`, and so on), with its own code, tests, contracts, and rules. In a multi-repo project each package is its own git repository inside the project root, so access can be granted per repository and one Spec ID can trace across many of them. In a monorepo each package is a folder of the repository, listed in `spex.yaml` without being a git repository of its own; in a single-repo project the one repository is the single package. Not a dependency or a package published to a registry. Always call these packages, or by a more specific role (service, mobile, infra, docs).
 
-- **Package name** — the identifier of a package, taken from the name of its folder inside the workspace root; in a single-repo project, the project name.
+- **Package name** — the identifier of a package, taken from the name of its folder inside the project root; in a single-repo project, the project name.
 
   ```text
   shopping-notes-spex

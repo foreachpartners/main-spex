@@ -1,6 +1,6 @@
 # shopping-notes-no-spex
 
-An example workspace used to test the spex framework. It is a small shopping
+An example project used to test the spex framework. It is a small shopping
 notes application that let's user note down shoping items to not forget to buy them when visiting a store
 split into the kind of sibling packages spex expects to
 manage, but **without** `spex` initialized.
@@ -11,7 +11,7 @@ against a realistic, multi-repo project.
 ## Layout
 
 ```text
-shopping-notes-no-spex/      <- workspace root folder
+shopping-notes-no-spex/      <- project root folder
   shopping-notes-api/        <- node fastify api
   shopping-notes-frontend/   <- react SPA
 ```

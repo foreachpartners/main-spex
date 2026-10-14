@@ -24,8 +24,8 @@ const BASELINE_TODO_FILE: &str = r#"ignored_errors:
 "#;
 
 fn project_with_todo_errors() -> (tempfile::TempDir, std::path::PathBuf) {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     for file in [TODO_FILE, OTHER_TODO_FILE] {
         fs::write(
@@ -34,7 +34,7 @@ fn project_with_todo_errors() -> (tempfile::TempDir, std::path::PathBuf) {
         )
         .expect("write file with a TODO");
     }
-    (workspace, project)
+    (temp_dir, project)
 }
 
 fn write_api_package_config(project: &Path, text: &str) {
@@ -52,7 +52,7 @@ fn expected_report(sections: &[&str], summary: &str) -> String {
 }
 
 fn project_with_rules(rules: &[&str]) -> (tempfile::TempDir, std::path::PathBuf) {
-    let (workspace, project) = temp_project(&runners_project_fixture());
+    let (temp_dir, project) = temp_project(&runners_project_fixture());
     let config_path = project.join("runners-project-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let kept: Vec<&str> = config
@@ -63,7 +63,7 @@ fn project_with_rules(rules: &[&str]) -> (tempfile::TempDir, std::path::PathBuf)
         })
         .collect();
     fs::write(&config_path, format!("{}\n", kept.join("\n"))).expect("write spex.yaml");
-    (workspace, project)
+    (temp_dir, project)
 }
 
 const EXPECTED_DUMMY_CHECK_REPORT: &str = r#"dummy-project-api
@@ -80,8 +80,8 @@ dummy-project: 0 errors, 0 warnings
 
 #[test]
 fn check_package_rejects_an_unknown_package() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check", "--package", "bogus"], "");
@@ -95,8 +95,8 @@ fn check_package_rejects_an_unknown_package() {
 
 #[test]
 fn check_package_matches_a_package_by_short_or_full_name() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
     let by_short_name = run_spex(&project, &["check", "--package", "frontend"], "");
@@ -116,7 +116,7 @@ fn check_package_matches_a_package_by_short_or_full_name() {
 
 #[test]
 fn check_honors_a_package_spex_repo_yaml_baseline_for_its_own_files_only() {
-    let (_workspace, project) = project_with_todo_errors();
+    let (_temp_dir, project) = project_with_todo_errors();
     let unbaselined = run_spex(&project, &["check"], "");
     let report = report_text(&unbaselined.stdout);
     assert!(
@@ -141,7 +141,7 @@ fn check_honors_a_package_spex_repo_yaml_baseline_for_its_own_files_only() {
 
 #[test]
 fn check_merges_the_spex_yaml_baseline_with_the_package_spex_repo_yaml() {
-    let (_workspace, project) = project_with_todo_errors();
+    let (_temp_dir, project) = project_with_todo_errors();
     write_api_package_config(&project, BASELINE_TODO_FILE);
     let spex_yaml = project.join("dummy-project-spex/spex.yaml");
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
@@ -165,8 +165,8 @@ fn check_merges_the_spex_yaml_baseline_with_the_package_spex_repo_yaml() {
 
 #[test]
 fn check_flags_an_unknown_key_in_a_package_spex_repo_yaml() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     write_api_package_config(&project, "ignored_error:\n  - rule_id: a\n    check: b\n");
 
@@ -180,8 +180,8 @@ fn check_flags_an_unknown_key_in_a_package_spex_repo_yaml() {
 
 #[test]
 fn check_accepts_a_valid_package_spex_repo_yaml() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     write_api_package_config(
         &project,
@@ -199,8 +199,8 @@ fn check_accepts_a_valid_package_spex_repo_yaml() {
 
 #[test]
 fn check_fails_on_an_unparsable_package_spex_repo_yaml() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     write_api_package_config(&project, "coverage_ignore: [unclosed\n");
 
@@ -211,8 +211,8 @@ fn check_fails_on_an_unparsable_package_spex_repo_yaml() {
 
 #[test]
 fn check_flags_a_spex_yaml_coverage_ignore_that_mismatches_the_spec_contract() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     let spex_yaml = project.join("dummy-project-spex/spex.yaml");
     let mut config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
@@ -228,7 +228,7 @@ fn check_flags_a_spex_yaml_coverage_ignore_that_mismatches_the_spec_contract() {
 
 #[test]
 fn fill_preexisting_errors_writes_spex_yaml_and_leaves_spex_repo_yaml_untouched() {
-    let (_workspace, project) = project_with_todo_errors();
+    let (_temp_dir, project) = project_with_todo_errors();
     write_api_package_config(&project, BASELINE_TODO_FILE);
 
     let fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
@@ -251,8 +251,8 @@ fn fill_preexisting_errors_writes_spex_yaml_and_leaves_spex_repo_yaml_untouched(
 
 #[test]
 fn preexisting_errors_baseline_suppresses_matching_error() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_no_spex(&project);
 
@@ -289,8 +289,8 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
 
 #[test]
 fn fill_preexisting_errors_baselines_then_suppresses() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_no_spex(&project);
 
@@ -336,8 +336,8 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
 #[test]
 fn fill_preexisting_errors_baselines_spec_conformance_errors() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_project(&dummy_project_fixture(), &project);
     let spec_path = project.join("dummy-project-spex/specs/active-full-coverage.yaml");
@@ -373,8 +373,8 @@ fn fill_preexisting_errors_baselines_spec_conformance_errors() {
 
 #[test]
 fn check_dummy_project_matches_expected() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_project(&dummy_project_fixture(), &project);
 
@@ -394,8 +394,8 @@ fn check_dummy_project_matches_expected() {
 
 #[test]
 fn check_flags_annotation_referencing_rule_id_as_orphan() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_project(&dummy_project_fixture(), &project);
     fs::write(

@@ -6,7 +6,7 @@ description: >-
 acceptance_criteria:
   - "MUST expose SPEX_DIR to a per-file script"
   - "MUST expose SPEX_DIR to a per-package script"
-  - "MUST expose SPEX_DIR to a workspace script"
+  - "MUST expose SPEX_DIR to a project script"
 checks:
   - name: per-file
     description: Reports the SPEX_DIR a per-file script received
@@ -22,9 +22,9 @@ checks:
     run: per-package
     script: report-spex-dir.sh
     severity: warn
-  - name: workspace
-    description: Reports the SPEX_DIR a workspace script received
+  - name: project
+    description: Reports the SPEX_DIR a project script received
     type: script
-    run: workspace
+    run: project
     script: report-spex-dir.sh
     severity: warn

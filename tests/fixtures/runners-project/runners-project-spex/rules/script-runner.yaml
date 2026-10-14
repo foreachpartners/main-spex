@@ -2,7 +2,7 @@ id: script-runner
 title: Script runner
 description: >-
   Exercises the script runner at each run scope: per-file receives the matched
-  files, per-package runs once in each package, workspace runs once overall.
+  files, per-package runs once in each package, project runs once overall.
 acceptance_criteria:
   - "MUST keep a CHANGELOG.md in every package"
   - "MUST keep the api and frontend versions identical"
@@ -24,9 +24,9 @@ checks:
     run: per-package
     script: per-package-changelog.sh
     severity: error
-  - name: workspace-versions
+  - name: project-versions
     description: Flags api and frontend versions that differ
     type: script
-    run: workspace
-    script: workspace-versions.sh
+    run: project
+    script: project-versions.sh
     severity: error

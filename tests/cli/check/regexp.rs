@@ -32,7 +32,7 @@ const FRONTEND_INDEX_REPORT: &str = r#"runners-project-frontend
 
 #[test]
 fn check_reports_every_regexp_finding() {
-    let (_workspace, project) = project_with_rules(&["regexp-runner"]);
+    let (_temp_dir, project) = project_with_rules(&["regexp-runner"]);
 
     let check = run_spex(&project, &["check"], "");
 
@@ -54,7 +54,7 @@ fn check_reports_every_regexp_finding() {
 
 #[test]
 fn check_files_narrows_regexp_findings_and_skips_negated_checks() {
-    let (_workspace, project) = project_with_rules(&["regexp-runner"]);
+    let (_temp_dir, project) = project_with_rules(&["regexp-runner"]);
 
     let check = run_spex(&project, &["check", "--files", "src/index.ts"], "");
 
@@ -76,7 +76,7 @@ fn check_files_narrows_regexp_findings_and_skips_negated_checks() {
 
 #[test]
 fn check_package_limits_regexp_findings_to_the_named_package() {
-    let (_workspace, project) = project_with_rules(&["regexp-runner"]);
+    let (_temp_dir, project) = project_with_rules(&["regexp-runner"]);
 
     let check = run_spex(&project, &["check", "--package", "frontend"], "");
 

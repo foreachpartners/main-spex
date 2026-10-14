@@ -7,8 +7,8 @@ mod tests {
 
     #[test]
     fn resolve_script_joins_script_dir_and_reference() {
-        let workspace = tempdir().expect("workspace");
-        let script_dir = workspace.path().join("spex/rules/x");
+        let project = tempdir().expect("project");
+        let script_dir = project.path().join("spex/rules/x");
         std::fs::create_dir_all(&script_dir).expect("rule script dir");
         std::fs::write(script_dir.join("lint.sh"), "").expect("rule script");
 
@@ -18,8 +18,8 @@ mod tests {
 
     #[test]
     fn resolve_script_returns_none_when_missing() {
-        let workspace = tempdir().expect("workspace");
-        let script_dir = workspace.path().join("spex/rules/x");
+        let project = tempdir().expect("project");
+        let script_dir = project.path().join("spex/rules/x");
         std::fs::create_dir_all(&script_dir).expect("rule script dir");
 
         assert!(resolve_script(&script_dir, "lint.sh").is_none());
@@ -28,9 +28,9 @@ mod tests {
     #[test]
     #[serial(script_exec)]
     fn script_run_once_reports_a_hit_on_failure() {
-        let workspace = tempdir().expect("workspace");
-        let package = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
+        let project = tempdir().expect("project");
+        let package = project.path().join("api");
+        let spex = project.path().join("spex");
         std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/commit-message-format/sample.sh");
         write_script(&program, "#!/bin/sh\necho boom\nexit 1\n");
@@ -44,9 +44,9 @@ mod tests {
     #[test]
     #[serial(script_exec)]
     fn per_file_script_passes_files_as_arguments() {
-        let workspace = tempdir().expect("workspace");
-        let package = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
+        let project = tempdir().expect("project");
+        let package = project.path().join("api");
+        let spex = project.path().join("spex");
         std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/writing-style/echo-args.sh");
         write_script(
@@ -69,9 +69,9 @@ mod tests {
     #[test]
     #[serial(script_exec)]
     fn script_emits_one_hit_per_location_line() {
-        let workspace = tempdir().expect("workspace");
-        let package = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
+        let project = tempdir().expect("project");
+        let package = project.path().join("api");
+        let spex = project.path().join("spex");
         std::fs::create_dir_all(&package).expect("package");
         let program = spex.join("rules/writing-style/locations.sh");
         write_script(

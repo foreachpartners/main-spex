@@ -125,11 +125,11 @@ impl CheckKind {
         }
     }
 
-    pub fn is_workspace_scoped(&self) -> bool {
+    pub fn is_project_scoped(&self) -> bool {
         matches!(
             self,
             CheckKind::Script {
-                run: RunScope::Workspace,
+                run: RunScope::Project,
                 ..
             }
         )
@@ -142,7 +142,7 @@ pub enum RunScope {
     #[default]
     PerFile,
     PerPackage,
-    Workspace,
+    Project,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, IntoStaticStr)]

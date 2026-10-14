@@ -42,7 +42,7 @@ The `spex` CLI runs and automates all of it. Specs, contracts, and checks are pl
 We will create the following structure:
 
 ```
-shopping-notes/                       # workspace root
+shopping-notes/                       # project root
 ├── shopping-notes-api/                # existing api package
 ├── shopping-notes-frontend/           # existing frontend package
 ├── ...                                # repeat for other packages
@@ -51,8 +51,8 @@ shopping-notes/                       # workspace root
 
 Package directories follow `<project-name>-<package-short-name>` (naming-convention), so rename existing packages to match before running `/spex-setup`.
 
-1. Put all project packages (each a git repository) in one shared folder (workspace root folder)
-2. Run terminal command `spex init` in workspace root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
+1. Put all project packages (each a git repository) in one shared folder (project root folder)
+2. Run terminal command `spex init` in the project root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
 3. Open workspace to work across all packages at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
    - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
@@ -157,4 +157,4 @@ Example [project](examples/shopping-notes/README.md) with spex implemented.
 
 Ready to try it yourself? Follow the [Tutorial](docs/tutorial.md) to take the
 `shopping-notes` example from a plain multi-repo project to a fully spec-driven
-workspace, end to end.
+project, end to end.

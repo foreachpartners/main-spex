@@ -15,7 +15,7 @@ Creates a new rule or edits an existing one by interviewing the user. Loaded whe
 ### Small conventions
 
 - MUST propose adding a small convention, a single terse acceptance criterion (e.g. "no console.log", "always run gofmt before commit") that does not share a theme with any existing rule, as one more acceptance criterion (with its check) to a catch-all bucket for the packages it applies to, instead of creating a dedicated rule file.
-- MUST use `rules/general-rules.yaml` (`id: general-rules`) as the bucket when the convention applies workspace-wide or to every package the user names, and `rules/general-rules-<package-short-name>.yaml` (`id: general-rules-<package-short-name>`) when it applies to one specific package only.
+- MUST use `rules/general-rules.yaml` (`id: general-rules`) as the bucket when the convention applies project-wide or to every package the user names, and `rules/general-rules-<package-short-name>.yaml` (`id: general-rules-<package-short-name>`) when it applies to one specific package only.
 - MUST treat adding to an existing bucket file as an edit: read it in full and append the new acceptance criterion and check, preserving everything else untouched.
 - MUST create the bucket fresh with the single criterion when it does not exist yet.
 - MUST still give a convention its own dedicated file when it has multiple related acceptance criteria, a clear theme of its own, or the user asks for a separate file.
@@ -58,7 +58,7 @@ Creates a new rule or edits an existing one by interviewing the user. Loaded whe
 - MUST pick the simplest check `type` that proves the criterion: `regexp` (match file contents), `glob` (match file paths), or `script` (an external script, when a rule needs logic a regex cannot express).
 - MUST use `negate: false` (default) on a `regexp` check when a match is a violation (a forbidden pattern), and `negate: true` when a file with no match is a violation (a required pattern), narrowing with `include`/`exclude` globs.
 - MUST use a `glob` check to forbid or require the presence of files (e.g. `**/*.bak`).
-- MUST name a `script` check's program with `script:`, a bare filename resolved in the rule's script folder `rules/<rule-id>/<script>` beside the rule file, so checks from different rules never share a path, and set `run: per-file` (default; matched files as arguments), `run: per-package` (once per package, in that package's directory, no arguments), or `run: workspace` (exactly once, no arguments).
+- MUST name a `script` check's program with `script:`, a bare filename resolved in the rule's script folder `rules/<rule-id>/<script>` beside the rule file, so checks from different rules never share a path, and set `run: per-file` (default; matched files as arguments), `run: per-package` (once per package, in that package's directory, no arguments), or `run: project` (exactly once, no arguments).
 - MUST name each check in kebab-case, unique within the rule.
 - MUST set `severity: warn` for advisory checks and `error` (default) for enforced ones.
 - MUST leave a criterion that can only be judged by AI or human review without a check, and say so, rather than invent a brittle one.

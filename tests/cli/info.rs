@@ -10,7 +10,7 @@ const EXPECTED_INFO: &str = r#"{
   "cli_version": "0.8.8",
   "layout": "multi-repo",
   "agent_root": {spex_dir},
-  "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a workspace whose specs cover every lifecycle state.",
+  "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
   "rules_unused": [],
   "packages": [
     {
@@ -49,7 +49,7 @@ const EXPECTED_INFO: &str = r#"{
 }
 "#;
 
-fn with_workspace_dirs(template: &str, project: &Path) -> String {
+fn with_project_dirs(template: &str, project: &Path) -> String {
     let as_json = |package_dir: &str| {
         let dir = project
             .join(package_dir)
@@ -69,7 +69,7 @@ const EXPECTED_INFO_API: &str = r#"{
   "cli_version": "0.8.8",
   "layout": "multi-repo",
   "agent_root": {spex_dir},
-  "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a workspace whose specs cover every lifecycle state.",
+  "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
   "rules_unused": [],
   "packages": [
     {
@@ -109,39 +109,39 @@ fn listed_short_names(stdout: &[u8]) -> Vec<String> {
 
 #[test]
 fn info_prints_the_resolved_configuration_as_json() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let info = run_spex(&project, &["info"], "");
 
     assert!(info.status.success(), "info should exit 0");
     assert_eq!(
         String::from_utf8_lossy(&info.stdout),
-        with_workspace_dirs(EXPECTED_INFO, &project)
+        with_project_dirs(EXPECTED_INFO, &project)
     );
 }
 
 #[test]
-fn info_reports_the_spex_dir_from_any_workspace_package() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+fn info_reports_the_spex_dir_from_any_project_package() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let info = run_spex(&project.join("dummy-project-api"), &["info"], "");
 
     assert!(info.status.success(), "info should exit 0");
     assert_eq!(
         String::from_utf8_lossy(&info.stdout),
-        with_workspace_dirs(EXPECTED_INFO, &project)
+        with_project_dirs(EXPECTED_INFO, &project)
     );
 }
 
 #[test]
 fn info_package_filters_only_the_packages_list() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let by_short_name = run_spex(&project, &["info", "--package", "api"], "");
     let by_full_name = run_spex(&project, &["info", "--package", "dummy-project-api"], "");
     let several = run_spex(&project, &["info", "--package", "frontend", "api"], "");
 
-    let expected = with_workspace_dirs(EXPECTED_INFO_API, &project);
+    let expected = with_project_dirs(EXPECTED_INFO_API, &project);
 
     assert!(by_short_name.status.success());
     assert_eq!(String::from_utf8_lossy(&by_short_name.stdout), expected);
@@ -155,7 +155,7 @@ fn info_package_filters_only_the_packages_list() {
 
 #[test]
 fn info_package_rejects_an_unknown_package() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let info = run_spex(&project, &["info", "--package", "api", "bogus"], "");
 
@@ -165,7 +165,7 @@ fn info_package_rejects_an_unknown_package() {
 
 #[test]
 fn tool_failure_prints_one_plain_line_and_exits_two() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let info = run_spex(&project, &["info", "--package", "bogus"], "");
 
@@ -183,7 +183,7 @@ fn tool_failure_prints_one_plain_line_and_exits_two() {
 
 #[test]
 fn tool_failure_with_rust_backtrace_follows_the_error_line_with_a_detailed_report() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let info = run_spex_with_env(
         &project,

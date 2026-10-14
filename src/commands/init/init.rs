@@ -35,15 +35,15 @@ const CODE_WORKSPACE_TEMPLATE: &str =
 pub fn run() -> Result<ExitCode> {
     let current_dir = current_dir()?;
 
-    let workspace_root = workspace_root(&current_dir)?;
+    let project_root = project_root(&current_dir)?;
 
-    let default_name = dir_name(&workspace_root)
-        .ok_or_else(|| eros::error!("could not read the workspace root name"))?;
+    let default_name = dir_name(&project_root)
+        .ok_or_else(|| eros::error!("could not read the project root name"))?;
 
     let layout = confirm_layout()?;
     let project_name = confirm_project_name(default_name)?;
 
-    let spex_dir = locate_spex_dir(&current_dir, &workspace_root, layout, &project_name)?;
+    let spex_dir = locate_spex_dir(&current_dir, &project_root, layout, &project_name)?;
     verify_empty(&spex_dir)?;
     let agent_root = normalize(&spex_dir.join(layout.agent_root()));
     verify_agent_files(&agent_root)?;
@@ -134,10 +134,10 @@ fn is_inside_spex_dir(current_dir: &Path) -> Result<bool> {
         && (current_dir.join(SPEX_CONFIG_FILE).is_file() || is_empty_dir(current_dir)?))
 }
 
-fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
+fn project_root(current_dir: &Path) -> Result<PathBuf> {
     if is_inside_spex_dir(current_dir)? {
         let parent = current_dir.parent().ok_or_else(|| {
-            eros::error!("expected the spex directory to live inside a workspace root")
+            eros::error!("expected the spex directory to live inside a project root")
         })?;
         return Ok(parent.to_path_buf());
     }
@@ -146,7 +146,7 @@ fn workspace_root(current_dir: &Path) -> Result<PathBuf> {
 
 fn locate_spex_dir(
     current_dir: &Path,
-    workspace_root: &Path,
+    project_root: &Path,
     layout: Layout,
     project_name: &str,
 ) -> Result<PathBuf> {
@@ -154,7 +154,7 @@ fn locate_spex_dir(
         return Ok(current_dir.to_path_buf());
     }
 
-    Ok(workspace_root.join(layout.spex_dir_name(project_name)))
+    Ok(project_root.join(layout.spex_dir_name(project_name)))
 }
 
 fn is_empty_dir(dir: &Path) -> Result<bool> {

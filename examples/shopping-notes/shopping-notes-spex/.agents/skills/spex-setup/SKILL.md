@@ -13,7 +13,7 @@ Replace `<spex-dir>` and `<agent-root>` with the spex directory and the agent ro
 
 | What                  | Path                                                         |
 | --------------------- | ------------------------------------------------------------ |
-| Workspace config      | `<spex-dir>/spex.yaml`                                       |
+| Project config        | `<spex-dir>/spex.yaml`                                       |
 | Config schema         | `<spex-dir>/schemas/spex.schema.json`                        |
 | Rules                 | `<spex-dir>/rules/`                                          |
 | Package skills        | `<agent-root>/.agents/skills/`                               |
@@ -25,7 +25,7 @@ The schema is authoritative for field rules and contains a worked example. Read 
 
 1. Read `spex.yaml`.
 2. Find the new packages, by layout. Confirm the list with the user and drop anything that is not a package, or that `packages` already lists.
-   - `multi-repo`: the non-hidden directories directly under the workspace root (the parent of `<spex-dir>`), or the ones the user named.
+   - `multi-repo`: the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named.
    - `single-repo`: none. `spex init` already listed the project's one package; only complete its entry.
    - `monorepo`: the packages, from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
 3. Inspect each package: its `README`, manifest files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`), top-level layout and entry points.

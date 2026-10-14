@@ -56,7 +56,7 @@ fn owner<'a>(
             file: file.map(Path::to_path_buf),
         }),
         ReportTarget::Spex { .. } => None,
-        ReportTarget::Workspace { spex_dir } => {
+        ReportTarget::Project { spex_dir } => {
             let located = spex_dir.join(file?);
             selected.iter().find_map(|package| {
                 let relative = located.strip_prefix(&package.path).ok()?;

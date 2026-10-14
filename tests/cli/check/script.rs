@@ -28,8 +28,8 @@ const FRONTEND_REPORT: &str = r#"runners-project-frontend
   1 error, 1 warning
 
 "#;
-const WORKSPACE_REPORT: &str = r#"workspace
-  error  script-runner/workspace-versions  (../runners-project-frontend/VERSION)
+const PROJECT_REPORT: &str = r#"project
+  error  script-runner/project-versions  (../runners-project-frontend/VERSION)
       frontend version 1.3.0 differs from api version 1.2.0
   1 error, 0 warnings
 
@@ -44,8 +44,8 @@ const SCRIPT_ENV_REPORT: &str = r#"script-env-project-api
 script-env-project-spex
   no issues
 
-workspace
-  warn  spex-dir-env/workspace
+project
+  warn  spex-dir-env/project
       SPEX_DIR is the spex directory
   0 errors, 1 warning
 
@@ -54,14 +54,14 @@ script-env-project: 0 errors, 3 warnings
 
 #[test]
 fn check_reports_every_script_finding_at_each_run_scope() {
-    let (_workspace, project) = project_with_rules(&["script-runner", "script-failures"]);
+    let (_temp_dir, project) = project_with_rules(&["script-runner", "script-failures"]);
 
     let check = run_spex(&project, &["check"], "");
 
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[API_REPORT, FRONTEND_REPORT, SPEX_REPORT, WORKSPACE_REPORT],
+            &[API_REPORT, FRONTEND_REPORT, SPEX_REPORT, PROJECT_REPORT],
             "runners-project: 3 errors, 5 warnings"
         ),
         "check report did not match\nstderr:\n{}",
@@ -76,14 +76,14 @@ fn check_reports_every_script_finding_at_each_run_scope() {
 
 #[test]
 fn check_files_narrows_script_findings_at_each_run_scope() {
-    let (_workspace, project) = project_with_rules(&["script-runner", "script-failures"]);
+    let (_temp_dir, project) = project_with_rules(&["script-runner", "script-failures"]);
 
     let check = run_spex(&project, &["check", "--files", "src/index.ts"], "");
 
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_REPORT, WORKSPACE_REPORT],
+            &[FRONTEND_REPORT, PROJECT_REPORT],
             "runners-project: 2 errors, 1 warning"
         ),
         "check --files report did not match\nstderr:\n{}",
@@ -98,14 +98,14 @@ fn check_files_narrows_script_findings_at_each_run_scope() {
 
 #[test]
 fn check_package_limits_script_findings_to_the_named_package() {
-    let (_workspace, project) = project_with_rules(&["script-runner", "script-failures"]);
+    let (_temp_dir, project) = project_with_rules(&["script-runner", "script-failures"]);
 
     let check = run_spex(&project, &["check", "--package", "frontend"], "");
 
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_REPORT, WORKSPACE_REPORT],
+            &[FRONTEND_REPORT, PROJECT_REPORT],
             "runners-project: 2 errors, 1 warning"
         ),
         "check --package report did not match\nstderr:\n{}",
@@ -119,9 +119,9 @@ fn check_package_limits_script_findings_to_the_named_package() {
 }
 
 #[test]
-fn check_package_runs_a_workspace_script_only_when_a_package_using_it_is_selected() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+fn check_package_runs_a_project_script_only_when_a_package_using_it_is_selected() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&runners_project_fixture(), &project);
 
     let check = run_spex(&project, &["check", "--package", "spex"], "");
@@ -140,8 +140,8 @@ fn check_package_runs_a_workspace_script_only_when_a_package_using_it_is_selecte
 
 #[test]
 fn check_exposes_the_spex_dir_to_a_script_at_every_run_scope() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     copy_project(&script_env_project_fixture(), &project);
 
     let check = run_spex(&project, &["check"], "");

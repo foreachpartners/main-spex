@@ -44,7 +44,7 @@ impl AnnotationIndex {
         index
     }
 
-    pub fn scan_workspace(spex: &Spex) -> Result<Self> {
+    pub fn scan_project(spex: &Spex) -> Result<Self> {
         let mut index = Self::new();
 
         for package in &spex.packages {

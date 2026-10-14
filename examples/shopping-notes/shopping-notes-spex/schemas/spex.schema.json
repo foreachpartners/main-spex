@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/spex.schema.json",
-  "title": "Spex Workspace Config",
-  "description": "Workspace configuration (spex.yaml): the project and the packages that spex manages together.",
+  "title": "Spex Project Config",
+  "description": "Project configuration (spex.yaml): the project and the packages that spex manages together.",
   "type": "object",
   "properties": {
     "project_name": {
@@ -12,12 +12,12 @@
     },
     "cli_version": {
       "type": "string",
-      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the workspace finds a mismatch with the installed CLI; run `spex update` to sync.",
+      "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the project finds a mismatch with the installed CLI; run `spex update` to sync.",
       "pattern": "^\\d+\\.\\d+\\.\\d+$"
     },
     "layout": {
       "type": "string",
-      "description": "How the project is arranged on disk. `multi-repo`: every package is its own git repository under the workspace root and the spex repository is the spex directory. `single-repo`: the project is one git repository and the spex directory is its `spex/` folder. `monorepo`: one git repository holds several packages and the spex directory is its `spex/` folder.",
+      "description": "How the project is arranged on disk. `multi-repo`: every package is its own git repository under the project root and the spex repository is the spex directory. `single-repo`: the project is one git repository and the spex directory is its `spex/` folder. `monorepo`: one git repository holds several packages and the spex directory is its `spex/` folder.",
       "enum": ["multi-repo", "single-repo", "monorepo"]
     },
     "agent_root": {
@@ -32,7 +32,7 @@
     },
     "rules_unused": {
       "type": "array",
-      "description": "Rule IDs deliberately removed from this workspace's `rules/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rule missing locally but not listed here is treated as newly available upstream and gets deployed.",
+      "description": "Rule IDs deliberately removed from this project's `rules/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rule missing locally but not listed here is treated as newly available upstream and gets deployed.",
       "items": {
         "$ref": "rule-id.schema.json"
       }

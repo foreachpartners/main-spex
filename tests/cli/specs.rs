@@ -41,7 +41,7 @@ const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
 
 #[test]
 fn specs_id_limits_output_to_the_named_specs() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(
         &project,
@@ -62,7 +62,7 @@ fn specs_id_limits_output_to_the_named_specs() {
 
 #[test]
 fn specs_ai_adds_the_spec_path_after_the_id() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(
         &project,
@@ -80,7 +80,7 @@ fn specs_ai_adds_the_spec_path_after_the_id() {
 
 #[test]
 fn specs_scope_limits_output_to_specs_in_that_scope() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(&project, &["specs", "--scope", "frontend"], "");
 
@@ -98,7 +98,7 @@ fn specs_scope_limits_output_to_specs_in_that_scope() {
 
 #[test]
 fn specs_scope_lists_a_spec_in_several_scopes_once_and_skips_unscoped_specs() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let everything = run_spex(&project, &["specs"], "");
     let scoped = run_spex(&project, &["specs", "--scope", "api", "frontend"], "");
@@ -124,7 +124,7 @@ fn specs_scope_lists_a_spec_in_several_scopes_once_and_skips_unscoped_specs() {
 
 #[test]
 fn specs_rejects_an_unknown_spec_id() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(&project, &["specs", "--id", "planned-one", "bogus"], "");
 
@@ -134,7 +134,7 @@ fn specs_rejects_an_unknown_spec_id() {
 
 #[test]
 fn specs_rejects_an_unknown_scope() {
-    let (_workspace, project) = temp_project(&dummy_project_fixture());
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(&project, &["specs", "--scope", "bogus"], "");
 
@@ -144,8 +144,8 @@ fn specs_rejects_an_unknown_scope() {
 
 #[test]
 fn specs_output_flag_writes_file_matching_stdout() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_project(&dummy_project_fixture(), &project);
 
@@ -159,7 +159,7 @@ fn specs_output_flag_writes_file_matching_stdout() {
     let stdout_yaml = String::from_utf8_lossy(&stdout_run.stdout).into_owned();
     assert!(!stdout_yaml.is_empty(), "expected specs on stdout");
 
-    let output_path = workspace.path().join("specs.yaml");
+    let output_path = temp_dir.path().join("specs.yaml");
     let file_run = run_spex(
         &project,
         &[

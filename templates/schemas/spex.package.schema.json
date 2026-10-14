@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/spex.package.schema.json",
   "title": "Spex Package Config",
-  "description": "Optional config (spex.package.yaml) at the root of a package. Lets the package own the coverage waivers and the pre-existing error baseline that concern it. spex merges it into the workspace config of spex.yaml.",
+  "description": "Optional config (spex.package.yaml) at the root of a package. Lets the package own the coverage waivers and the pre-existing error baseline that concern it. spex merges it into the project config of spex.yaml.",
   "type": "object",
   "properties": {
     "coverage_ignore": {

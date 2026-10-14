@@ -37,7 +37,7 @@ pub fn run(args: CoverageArgs) -> Result<ExitCode> {
         .into_iter()
         .filter(|spec| spec.scope_selected(&args.scope))
         .collect();
-    let index = AnnotationIndex::scan_workspace(&spex)?;
+    let index = AnnotationIndex::scan_project(&spex)?;
 
     let report = CoverageReport::new(&specs, &index);
     print!("{}", render(&report, terminal_width(), args.verbose));

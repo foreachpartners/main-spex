@@ -105,7 +105,7 @@ mod tests {
     }
 
     #[test]
-    fn scan_workspace_reads_contract_files_inside_spex_dir() {
+    fn scan_project_reads_contract_files_inside_spex_dir() {
         let dir = tempfile::tempdir().expect("tempdir");
         let spex_dir = dir.path();
         std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
@@ -121,12 +121,12 @@ mod tests {
         .expect("parse config");
 
         let spex = crate::config::spex::Spex::from_config(spex_dir.to_path_buf(), config);
-        let index = AnnotationIndex::scan_workspace(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex).expect("scan");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
     }
 
     #[test]
-    fn scan_workspace_skips_the_spex_dir_nested_in_a_package() {
+    fn scan_project_skips_the_spex_dir_nested_in_a_package() {
         let dir = tempfile::tempdir().expect("tempdir");
         let spex_dir = dir.path().join("spex");
         std::fs::create_dir_all(spex_dir.join("specs")).expect("specs dir");
@@ -142,7 +142,7 @@ mod tests {
         .expect("parse config");
 
         let spex = crate::config::spex::Spex::from_config(spex_dir, config);
-        let index = AnnotationIndex::scan_workspace(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex).expect("scan");
 
         assert!(!index.has_ac(
             &testing::spec_id("a"),

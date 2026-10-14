@@ -20,7 +20,7 @@ Runs the checks declared in `spex.yaml` against each package, reporting findings
 - MUST error on a name given to `--package` that matches no package.
 - MUST limit the run to the files given in `--files <path>...`, relative to each package; it defaults to all non-ignored files.
 - MUST run a `per-package` script, with `--files`, only in the packages that contain a listed file, unioned with any `--package` named.
-- MUST run a `workspace` script exactly once, whatever `--files` selects.
+- MUST run a `project` script exactly once, whatever `--files` selects.
 - MUST error when a file given to `--files` does not exist in any package.
 - MUST skip negated `regexp`, `glob`, and `ast-grep` checks with `--files`, because a negated check needs the full file set to prove a forbidden pattern is absent; a subset would only produce false positives.
 - MUST record, with `--fill-preexisting-errors`, the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating, so a check can be adopted on a package that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
@@ -37,7 +37,7 @@ Runs the checks declared in `spex.yaml` against each package, reporting findings
 - MUST run the program named by a `script` check's `script:` filename (e.g. `writing-style.sh`), resolved in the rule's script folder: a folder named after the rule file, beside it (`rules/<rule-id>.yaml` has its scripts at `rules/<rule-id>/<script>`, and a nested `rules/backend/<rule-id>.yaml` at `rules/backend/<rule-id>/<script>`).
 - MUST pass the matched files as arguments with `run: per-file` (the default).
 - MUST run once per package, in that package's directory, with no arguments, with `run: per-package`.
-- MUST run exactly once, with no arguments, with `run: workspace`.
+- MUST run exactly once, with no arguments, with `run: project`.
 - MUST run every script with the environment variable `SPEX_DIR` set to the absolute path of the spex directory, so it finds `spex.yaml` and the other spex files whatever its working directory; to read data from them it uses [`spex jq`](spex-jq-cli-cmd.md), e.g. `spex jq -r .project_name "$SPEX_DIR/spex.yaml"`.
 - MUST read violations from a script's stdout, one per line, as `<location><TAB><message>`: `<location>` is a package-relative file, optionally `<file>:<line>`; `<message>` describes the violation.
 - MUST parse each such line into a separate finding, so a script gets the same per-file precision as a `regexp` or `glob` check.

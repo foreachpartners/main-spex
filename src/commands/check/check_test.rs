@@ -56,9 +56,9 @@ mod tests {
 
     #[test]
     fn run_check_reports_config_error_when_script_missing() {
-        let workspace = tempdir().expect("workspace");
-        let package_dir = workspace.path().join("api");
-        let spex = workspace.path().join("spex");
+        let project = tempdir().expect("project");
+        let package_dir = project.path().join("api");
+        let spex = project.path().join("spex");
         std::fs::create_dir_all(&package_dir).expect("package");
         std::fs::create_dir_all(&spex).expect("spex");
 
@@ -78,9 +78,9 @@ mod tests {
 
     #[test]
     fn check_package_skips_negated_checks_when_files_provided() {
-        let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join("spex");
-        let package_dir = workspace.path().join("api");
+        let project = tempdir().expect("project");
+        let spex = project.path().join("spex");
+        let package_dir = project.path().join("api");
         std::fs::create_dir_all(&spex).expect("spex");
         std::fs::create_dir_all(&package_dir).expect("package");
         std::fs::create_dir_all(package_dir.join("src")).expect("src");
@@ -134,11 +134,11 @@ mod tests {
 
     #[test]
     #[serial(script_exec)]
-    fn workspace_check_runs_once_across_packages() {
-        let workspace = tempdir().expect("workspace");
-        let spex = workspace.path().join("spex");
-        let api = workspace.path().join("api");
-        let web = workspace.path().join("web");
+    fn project_check_runs_once_across_packages() {
+        let project = tempdir().expect("project");
+        let spex = project.path().join("spex");
+        let api = project.path().join("api");
+        let web = project.path().join("web");
         std::fs::create_dir_all(&api).expect("api");
         std::fs::create_dir_all(&web).expect("web");
 
@@ -148,7 +148,7 @@ mod tests {
             "#!/bin/sh\n[ \"$#\" -eq 0 ] || { echo \"unexpected args: $*\"; exit 1; }\necho run >> runs.log\nprintf 'api/a.txt\\tflagged\\n'\nprintf 'web/b.txt\\tflagged\\n'\nexit 1\n",
         );
 
-        let listing = script_check("list", "list.sh", RunScope::Workspace);
+        let listing = script_check("list", "list.sh", RunScope::Project);
         let rules = [Rule {
             checks: vec![listing],
             ..rule_in(&spex, "x")
@@ -187,7 +187,7 @@ mod tests {
         assert!(package_findings.is_empty());
         assert_eq!(collected.len(), 1);
 
-        let findings = run_workspace_checks(&spex, &collected);
+        let findings = run_project_checks(&spex, &collected);
 
         let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
         assert_eq!(runs.lines().count(), 1);

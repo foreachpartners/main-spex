@@ -37,7 +37,7 @@ const EXPECTED_GLOB_RULE_FOR_AI: &str = r#"- id: glob-runner
 
 #[test]
 fn rules_lists_each_rule_once_however_many_packages_use_it() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules"], "");
 
@@ -56,7 +56,7 @@ fn rules_lists_each_rule_once_however_many_packages_use_it() {
 
 #[test]
 fn rules_package_limits_output_to_the_rules_of_named_packages() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let frontend = run_spex(&project, &["rules", "--package", "frontend"], "");
     let api = run_spex(&project, &["rules", "--package", "api"], "");
@@ -87,7 +87,7 @@ fn rules_package_limits_output_to_the_rules_of_named_packages() {
 
 #[test]
 fn rules_package_matches_a_package_by_short_or_full_name() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let by_short_name = run_spex(&project, &["rules", "--package", "frontend"], "");
     let by_full_name = run_spex(
@@ -102,7 +102,7 @@ fn rules_package_matches_a_package_by_short_or_full_name() {
 
 #[test]
 fn rules_id_limits_output_to_the_named_rules() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(
         &project,
@@ -119,7 +119,7 @@ fn rules_id_limits_output_to_the_named_rules() {
 
 #[test]
 fn rules_prints_the_full_rule_content_by_default() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules", "--id", "glob-runner"], "");
 
@@ -129,7 +129,7 @@ fn rules_prints_the_full_rule_content_by_default() {
 
 #[test]
 fn rules_ai_drops_checks_and_the_sync_flag_and_adds_the_rule_path() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules", "--ai", "--id", "glob-runner"], "");
 
@@ -143,7 +143,7 @@ fn rules_ai_drops_checks_and_the_sync_flag_and_adds_the_rule_path() {
 
 #[test]
 fn rules_rejects_an_unknown_rule_id() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules", "--id", "glob-runner", "bogus"], "");
 
@@ -153,7 +153,7 @@ fn rules_rejects_an_unknown_rule_id() {
 
 #[test]
 fn rules_rejects_an_unknown_package() {
-    let (_workspace, project) = temp_project(&runners_project_fixture());
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules", "--package", "bogus"], "");
 
@@ -163,8 +163,8 @@ fn rules_rejects_an_unknown_package() {
 
 #[test]
 fn rules_output_flag_writes_file_matching_stdout() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_project(&dummy_project_fixture(), &project);
 
@@ -178,7 +178,7 @@ fn rules_output_flag_writes_file_matching_stdout() {
     let stdout_yaml = String::from_utf8_lossy(&stdout_run.stdout).into_owned();
     assert!(!stdout_yaml.is_empty(), "expected rules on stdout");
 
-    let output_path = workspace.path().join("rules.yaml");
+    let output_path = temp_dir.path().join("rules.yaml");
     let file_run = run_spex(
         &project,
         &[

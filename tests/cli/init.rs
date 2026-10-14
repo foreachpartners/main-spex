@@ -34,8 +34,8 @@ planned (0), in-progress (0), active (0), gaps (0)
 
 #[test]
 fn init_then_check_no_spex_project() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
 
     copy_no_spex(&project);
 
@@ -85,8 +85,8 @@ fn init_then_check_no_spex_project() {
     );
 }
 
-fn package_with_existing_agent_files(workspace: &Path) -> std::path::PathBuf {
-    let project = workspace.join("snake");
+fn package_with_existing_agent_files(temp_dir: &Path) -> std::path::PathBuf {
+    let project = temp_dir.join("snake");
     fs::create_dir_all(project.join("src")).expect("create src");
     fs::write(project.join("src/main.rs"), "fn main() {}\n").expect("write source");
     fs::write(project.join("AGENTS.md"), "# Snake notes\n\nuse tabs\n").expect("write AGENTS.md");
@@ -102,8 +102,8 @@ fn init_with(project: &Path, answers: &str) -> std::process::Output {
 
 #[test]
 fn init_single_repo_keeps_the_package_files_and_checks_clean() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = package_with_existing_agent_files(workspace.path());
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = package_with_existing_agent_files(temp_dir.path());
 
     let init = init_with(&project, "2\n\n");
     assert!(
@@ -176,8 +176,8 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
 
 #[test]
 fn init_monorepo_lists_no_package_and_puts_agent_files_in_the_root() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("shop");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("shop");
     fs::create_dir_all(project.join("apps/api")).expect("create package");
 
     let init = init_with(&project, "3\n\n");
@@ -197,10 +197,10 @@ fn init_monorepo_lists_no_package_and_puts_agent_files_in_the_root() {
 }
 
 #[test]
-fn init_in_a_non_empty_repository_named_spex_uses_it_as_the_workspace_root() {
+fn init_in_a_non_empty_repository_named_spex_uses_it_as_the_project_root() {
     for (layout_answer, layout) in [("2", "single-repo"), ("3", "monorepo")] {
-        let workspace = tempdir().expect("create temp workspace");
-        let project = workspace.path().join("spex");
+        let temp_dir = tempdir().expect("create temp dir");
+        let project = temp_dir.path().join("spex");
         fs::create_dir_all(project.join("src")).expect("create src");
         fs::write(project.join("src/main.rs"), "fn main() {}\n").expect("write source");
 
@@ -217,14 +217,14 @@ fn init_in_a_non_empty_repository_named_spex_uses_it_as_the_workspace_root() {
         assert!(project.join("AGENTS.md").is_file(), "{layout}");
         assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
         assert!(project.join("src/main.rs").is_file());
-        assert!(!workspace.path().join("AGENTS.md").exists());
+        assert!(!temp_dir.path().join("AGENTS.md").exists());
     }
 }
 
 #[test]
 fn init_inside_an_initialized_spex_directory_fails_without_nesting_a_project() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
     assert!(init_with(&project, "2\n\n").status.success());
 
@@ -237,8 +237,8 @@ fn init_inside_an_initialized_spex_directory_fails_without_nesting_a_project() {
 
 #[test]
 fn init_multi_repo_keeps_everything_in_the_spex_repository() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("proj");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
     fs::create_dir_all(&project).expect("create project");
 
     let init = init_with(&project, "\n\n");
@@ -256,8 +256,8 @@ fn init_multi_repo_keeps_everything_in_the_spex_repository() {
 
 #[test]
 fn init_fails_without_writing_when_agents_md_and_claude_md_both_exist() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
     fs::write(project.join("AGENTS.md"), "agents\n").expect("write AGENTS.md");
     fs::write(project.join("CLAUDE.md"), "claude\n").expect("write CLAUDE.md");
@@ -275,8 +275,8 @@ fn init_fails_without_writing_when_agents_md_and_claude_md_both_exist() {
 
 #[test]
 fn init_fails_without_writing_when_a_claude_skill_clashes_with_a_bundled_skill() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(project.join(".claude/skills/spex-spec")).expect("create skill");
     fs::write(project.join(".claude/skills/spex-spec/SKILL.md"), "mine\n").expect("write skill");
 
@@ -289,8 +289,8 @@ fn init_fails_without_writing_when_a_claude_skill_clashes_with_a_bundled_skill()
 
 #[test]
 fn init_rejects_an_unknown_layout() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
 
     let init = init_with(&project, "polyrepo\n");
@@ -301,8 +301,8 @@ fn init_rejects_an_unknown_layout() {
 
 #[test]
 fn check_validates_the_spex_dir_in_single_repo_even_for_a_selected_package() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
     assert!(init_with(&project, "2\n\n").status.success());
     fs::write(
@@ -324,8 +324,8 @@ fn check_validates_the_spex_dir_in_single_repo_even_for_a_selected_package() {
 
 #[test]
 fn init_accepts_the_layout_name_as_well_as_its_number() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
 
     let init = init_with(&project, "single-repo\n\n");
@@ -337,8 +337,8 @@ fn init_accepts_the_layout_name_as_well_as_its_number() {
 
 #[test]
 fn init_lists_the_layouts_with_numbers() {
-    let workspace = tempdir().expect("create temp workspace");
-    let project = workspace.path().join("snake");
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
 
     let init = init_with(&project, "\n\n");

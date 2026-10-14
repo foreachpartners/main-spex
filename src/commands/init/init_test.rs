@@ -5,8 +5,8 @@ mod tests_unit {
     use std::fs;
     use tempfile::{TempDir, tempdir};
 
-    fn workspace_with(dirs: &[&str], files: &[&str]) -> TempDir {
-        let root = tempdir().expect("create temp workspace");
+    fn project_with(dirs: &[&str], files: &[&str]) -> TempDir {
+        let root = tempdir().expect("create temp project");
         for dir in dirs {
             fs::create_dir(root.path().join(dir)).expect("create dir");
         }
@@ -180,57 +180,54 @@ mod tests_unit {
     }
 
     #[test]
-    fn workspace_root_defaults_to_current_directory() {
-        let workspace = workspace_with(&["server"], &[]);
+    fn project_root_defaults_to_current_directory() {
+        let project = project_with(&["server"], &[]);
 
         assert_eq!(
-            workspace_root(workspace.path()).expect("workspace root"),
-            workspace.path()
+            project_root(project.path()).expect("project root"),
+            project.path()
         );
     }
 
     #[test]
-    fn workspace_root_from_inside_spex_directory() {
-        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
-        let spex_dir = workspace.path().join("pizza-shop-spex");
+    fn project_root_from_inside_spex_directory() {
+        let project = project_with(&["pizza-shop-spex"], &[]);
+        let spex_dir = project.path().join("pizza-shop-spex");
 
         assert_eq!(
-            workspace_root(&spex_dir).expect("workspace root"),
-            workspace.path()
+            project_root(&spex_dir).expect("project root"),
+            project.path()
         );
     }
 
     #[test]
-    fn workspace_root_of_a_non_empty_folder_named_like_a_spex_directory_is_the_folder() {
-        let workspace = workspace_with(&["spex", "pizza-shop-spex"], &[]);
+    fn project_root_of_a_non_empty_folder_named_like_a_spex_directory_is_the_folder() {
+        let project = project_with(&["spex", "pizza-shop-spex"], &[]);
 
         for name in ["spex", "pizza-shop-spex"] {
-            let repository = workspace.path().join(name);
+            let repository = project.path().join(name);
             fs::write(repository.join("README.md"), "").expect("create file");
 
-            assert_eq!(
-                workspace_root(&repository).expect("workspace root"),
-                repository
-            );
+            assert_eq!(project_root(&repository).expect("project root"), repository);
         }
     }
 
     #[test]
-    fn workspace_root_from_inside_an_initialized_spex_directory() {
-        let workspace = workspace_with(&["spex"], &[]);
-        let spex_dir = workspace.path().join("spex");
+    fn project_root_from_inside_an_initialized_spex_directory() {
+        let project = project_with(&["spex"], &[]);
+        let spex_dir = project.path().join("spex");
         fs::write(spex_dir.join(SPEX_CONFIG_FILE), "").expect("create config");
 
         assert_eq!(
-            workspace_root(&spex_dir).expect("workspace root"),
-            workspace.path()
+            project_root(&spex_dir).expect("project root"),
+            project.path()
         );
     }
 
     #[test]
     fn locate_spex_dir_puts_the_directory_inside_a_non_empty_folder_named_spex() {
-        let workspace = workspace_with(&["spex"], &[]);
-        let repository = workspace.path().join("spex");
+        let project = project_with(&["spex"], &[]);
+        let repository = project.path().join("spex");
         fs::write(repository.join("README.md"), "").expect("create file");
 
         for layout in [Layout::SingleRepo, Layout::Monorepo] {
@@ -243,10 +240,10 @@ mod tests_unit {
 
     #[test]
     fn locate_spex_dir_reuses_current_when_inside_spex_directory() {
-        let workspace = workspace_with(&["pizza-shop-spex"], &[]);
-        let spex_dir = workspace.path().join("pizza-shop-spex");
+        let project = project_with(&["pizza-shop-spex"], &[]);
+        let spex_dir = project.path().join("pizza-shop-spex");
 
-        let located = locate_spex_dir(&spex_dir, workspace.path(), Layout::MultiRepo, "pizza-shop")
+        let located = locate_spex_dir(&spex_dir, project.path(), Layout::MultiRepo, "pizza-shop")
             .expect("locate spex dir");
 
         assert_eq!(located, spex_dir);
@@ -254,38 +251,38 @@ mod tests_unit {
 
     #[test]
     fn locate_spex_dir_names_the_multi_repo_directory_after_the_project() {
-        let workspace = workspace_with(&["server"], &[]);
+        let project = project_with(&["server"], &[]);
 
         let located = locate_spex_dir(
-            workspace.path(),
-            workspace.path(),
+            project.path(),
+            project.path(),
             Layout::MultiRepo,
             "pizza-shop",
         )
         .expect("locate spex dir");
 
-        assert_eq!(located, workspace.path().join("pizza-shop-spex"));
+        assert_eq!(located, project.path().join("pizza-shop-spex"));
     }
 
     #[test]
     fn locate_spex_dir_names_the_other_layouts_directory_spex() {
-        let workspace = workspace_with(&["server"], &[]);
+        let project = project_with(&["server"], &[]);
 
         for layout in [Layout::SingleRepo, Layout::Monorepo] {
-            let located = locate_spex_dir(workspace.path(), workspace.path(), layout, "pizza-shop")
+            let located = locate_spex_dir(project.path(), project.path(), layout, "pizza-shop")
                 .expect("locate spex dir");
 
-            assert_eq!(located, workspace.path().join("spex"));
+            assert_eq!(located, project.path().join("spex"));
         }
     }
 
     #[test]
     fn locate_spex_dir_does_not_create_the_directory() {
-        let workspace = workspace_with(&[], &[]);
+        let project = project_with(&[], &[]);
 
         let located = locate_spex_dir(
-            workspace.path(),
-            workspace.path(),
+            project.path(),
+            project.path(),
             Layout::SingleRepo,
             "pizza-shop",
         )
@@ -296,9 +293,9 @@ mod tests_unit {
 
     #[test]
     fn verify_empty_passes_on_a_directory_that_does_not_exist() {
-        let workspace = workspace_with(&[], &[]);
+        let project = project_with(&[], &[]);
 
-        assert!(verify_empty(&workspace.path().join("spex")).is_ok());
+        assert!(verify_empty(&project.path().join("spex")).is_ok());
     }
 
     #[test]

@@ -1,11 +1,11 @@
 # Layout
 
-A project uses one of three layouts, chosen at `spex init` and recorded as `layout` in `spex.yaml`. [glossary.md](../../docs/glossary.md) defines the layouts, the workspace, its packages, and their naming.
+A project uses one of three layouts, chosen at `spex init` and recorded as `layout` in `spex.yaml`. [glossary.md](../../docs/glossary.md) defines the layouts, the project, its packages, and their naming.
 
 ## Acceptance criteria
 
 - MUST use exactly one layout per project: `multi-repo`, `single-repo`, or `monorepo`, chosen at `spex init` and recorded as `layout` in `spex.yaml`.
-- MUST make every package its own git repository under the workspace root folder in `multi-repo`.
+- MUST make every package its own git repository under the project root folder in `multi-repo`.
 - MUST make the spex repository (`<project-name>-spex`) one of the packages in `multi-repo`, serving as both the spex directory and the agent root.
 - MUST provide an editor workspace file (`<project-name>.code-workspace`) in the spex repository in `multi-repo`, opening every package together.
 - MUST make the project one git repository in `single-repo`, whose root is the agent root and whose spex directory is its `spex/` folder.
@@ -23,7 +23,7 @@ A project uses one of three layouts, chosen at `spex init` and recorded as `layo
 ### multi-repo
 
 ```text
-shopping-notes/                  workspace root
+shopping-notes/                  project root
   shopping-notes-api/
   shopping-notes-frontend/
   shopping-notes-spex/           spex directory and agent root
@@ -39,7 +39,7 @@ shopping-notes/                  workspace root
 ### single-repo
 
 ```text
-snake/                           workspace root, agent root
+snake/                           project root, agent root
   AGENTS.md
   CLAUDE.md -> AGENTS.md
   .agents/skills/
@@ -53,7 +53,7 @@ snake/                           workspace root, agent root
 ### monorepo
 
 ```text
-shopping-notes/                  workspace root, agent root
+shopping-notes/                  project root, agent root
   AGENTS.md
   CLAUDE.md -> AGENTS.md
   .agents/skills/

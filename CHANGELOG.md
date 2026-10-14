@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.20.0] - 2026-10-14
+
+- **Breaking**: "workspace" is no longer a spex term. Since `single-repo` and `monorepo` joined `multi-repo` in 0.19.0, a workspace of several repositories exists in only one of the three layouts, so the word no longer fits. The whole is now the **project**, and its top-level folder is the **project root** (formerly the workspace root): the folder grouping the packages in `multi-repo`, the repository root otherwise. A script check's `run: workspace` is now `run: project`, validated by `schemas/check.schema.json`, and `spex check` reports the findings of those scripts under a `project` heading instead of `workspace`. The error and schema texts, the bundled glossary, skills, and the managed section of `AGENTS.md` follow; `spex update` rewrites them. The editor's `<project-name>.code-workspace` file keeps its name. See the migration guide.
+
 ## [0.19.1] - 2026-10-14
 
 - The artifact chain no longer has a BRD: the PRD is now the root artifact and covers both why something is built and what the product should do. `spex update` rewrites the bundled glossary and the managed section of `AGENTS.md` accordingly; no migration steps.

@@ -45,7 +45,7 @@ pub(super) struct PackageCtx<'a> {
     pub(super) candidates: &'a [ScopedFile],
 }
 
-type WorkspaceChecks<'a> = Vec<(&'a Rule, &'a Check)>;
+type ProjectChecks<'a> = Vec<(&'a Rule, &'a Check)>;
 
 impl PackageCtx<'_> {
     fn run_check(&self, rule: &Rule, check: &Check) -> Vec<Finding> {
@@ -77,7 +77,7 @@ impl PackageCtx<'_> {
                     RunScope::PerFile => {
                         run_per_file_script(&program, self.package_path, self.spex_dir, &files)
                     }
-                    RunScope::PerPackage | RunScope::Workspace => {
+                    RunScope::PerPackage | RunScope::Project => {
                         run_script_once(&program, self.package_path, self.spex_dir)
                     }
                 }
@@ -94,26 +94,26 @@ struct CheckPackageArgs<'a> {
     files: &'a [String],
 }
 
-fn defer_workspace_check<'a>(
-    workspace_checks: &mut WorkspaceChecks<'a>,
+fn defer_project_check<'a>(
+    project_checks: &mut ProjectChecks<'a>,
     rule: &'a Rule,
     check: &'a Check,
 ) {
-    let already_deferred = workspace_checks.iter().any(|(deferred_rule, deferred)| {
+    let already_deferred = project_checks.iter().any(|(deferred_rule, deferred)| {
         deferred_rule.id == rule.id && deferred.name == check.name
     });
     if !already_deferred {
-        workspace_checks.push((rule, check));
+        project_checks.push((rule, check));
     }
 }
 
-fn run_workspace_checks(spex_dir: &Path, workspace_checks: &WorkspaceChecks) -> Vec<Finding> {
+fn run_project_checks(spex_dir: &Path, project_checks: &ProjectChecks) -> Vec<Finding> {
     let ctx = PackageCtx {
         package_path: spex_dir,
         spex_dir,
         candidates: &[],
     };
-    workspace_checks
+    project_checks
         .iter()
         .flat_map(|(rule, check)| ctx.run_check(rule, check))
         .collect()
@@ -138,7 +138,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     let selected = select_packages(&spex, &args.package, &args.files)?;
 
     let mut reports = Vec::with_capacity(selected.len());
-    let mut workspace_checks = WorkspaceChecks::new();
+    let mut project_checks = ProjectChecks::new();
     for &package in &selected {
         let findings = check_package(
             CheckPackageArgs {
@@ -148,7 +148,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
                 known_ids: &known_ids,
                 files: &args.files,
             },
-            &mut workspace_checks,
+            &mut project_checks,
         )?;
         reports.push(CheckReport {
             target: ReportTarget::Package(package),
@@ -156,12 +156,12 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         });
     }
 
-    if !workspace_checks.is_empty() {
+    if !project_checks.is_empty() {
         reports.push(CheckReport {
-            target: ReportTarget::Workspace {
+            target: ReportTarget::Project {
                 spex_dir: &spex.dir,
             },
-            findings: run_workspace_checks(&spex.dir, &workspace_checks),
+            findings: run_project_checks(&spex.dir, &project_checks),
         });
     }
 
@@ -177,7 +177,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
 
 fn check_package<'a>(
     args: CheckPackageArgs<'a>,
-    workspace_checks: &mut WorkspaceChecks<'a>,
+    project_checks: &mut ProjectChecks<'a>,
 ) -> Result<Vec<Finding>> {
     let CheckPackageArgs {
         package,
@@ -230,8 +230,8 @@ fn check_package<'a>(
             if skip_negated_checks && check.kind.negate() {
                 continue;
             }
-            if check.kind.is_workspace_scoped() {
-                defer_workspace_check(workspace_checks, rule, check);
+            if check.kind.is_project_scoped() {
+                defer_project_check(project_checks, rule, check);
             } else {
                 findings.extend(ctx.run_check(rule, check));
             }

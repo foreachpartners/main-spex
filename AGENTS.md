@@ -65,18 +65,18 @@ src/                CLI source
     text.rs         Text helpers (word wrapping, pluralize)
     yaml_dir.rs     Yaml file walking and loading of a directory (YamlFile: parsed item, path, raw text)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
-    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude`, `AGENTS.md` and `CLAUDE.md`: conflict checks, adoption, links; coverage also holds annotation_index, the workspace scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
+    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude`, `AGENTS.md` and `CLAUDE.md`: conflict checks, adoption, links; coverage also holds annotation_index, the project scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, package selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
       conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 specs/                         Single source of truth for behavior, one md file per spec (description + acceptance criteria), named `<name>-<group>`
   framework/               Artifact chain, traceability, managed section
-  workspace/               Layout
+  project/                 Layout
   config/                  spex.yaml, spex.package.yaml, CLI version
   spec/                    Spec file, spec annotations, coverage states
   rule/                    Rule file, rule checks
-  cli/                     Shared behavior (command set, workspace discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
+  cli/                     Shared behavior (command set, project discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
   skill/                   Bundled skills (one `<skill-name>-skill` file per skill), package skill, review target
 docs/                          Framework reference docs; only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
@@ -90,9 +90,9 @@ templates/                     Assets scaffolded into projects
   docs/                        Framework docs shipped to projects (symlinks into docs/)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
   README.md                    Contributor notes on scaffolding rules; never scaffolded
-  spex.yaml                    Multi-repo workspace config seeded by init (project name, layout, agent root filled in)
-  spex.single-repo.yaml        Single-repo workspace config seeded by init
-  spex.monorepo.yaml           Monorepo workspace config seeded by init
+  spex.yaml                    Multi-repo project config seeded by init (project name, layout, agent root filled in)
+  spex.single-repo.yaml        Single-repo project config seeded by init
+  spex.monorepo.yaml           Monorepo project config seeded by init
   project-name.code-workspace  Editor workspace file seeded by init (multi-repo only)
 examples/                      Sample example projects with/without spex(shopping-notes, shopping-notes-no-spex)
 tests/                         Integration tests that build and run the spex binary
