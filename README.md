@@ -4,6 +4,14 @@ The AI-first development framework that turns natural specifications into determ
 
 _The name `spex` comes from a casual shorthand for specifications._
 
+## Why spex
+
+Ask an AI to write you a snake game and it will. But will the snake have big blue eyes and eat donuts, as you wanted? Unlikely — the AI fills every detail you left out with its own guesses, so you get the game it imagined, not the one you wanted.
+
+AI writes code fast, but fast is not the same as right: it can add changes nobody asked for, forget requirements, do the same thing differently each time, or hallucinate. Every unreviewed decision and unverified result adds slop that compounds. Reviewing everything by hand throws away the speed; accepting everything ships the slop.
+
+spex helps to produce slop-free, verifiable results fast, with minimal human intervention. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and reviews, tests, and deterministic checks prove the result.
+
 ## Core Concepts
 
 Main spex, or spex for short, is built on four simple pieces:
@@ -14,6 +22,8 @@ Main spex, or spex for short, is built on four simple pieces:
 - **Traceability** is the thread that stitches together spec, contract, implementations, and tests — letting humans and agents find everything related to a spec at once, and ensuring full coverage so no acceptance criterion is forgotten.
 
 spex provides the core flow plus skills and rules you can extend, adapt, or replace for your project needs. Whatever you don't customize updates with each new version, bringing you the latest improvements contributed by the community.
+
+The `spex` CLI runs and automates all of it. Specs, contracts, and checks are plain files and deterministic commands, so spex works with any AI model, AI coding agent, CLI, and IDE.
 
 ## Quickstart
 
@@ -82,14 +92,15 @@ Say you want to add a rule to ensure we don't commit sensitive information. Here
 
 ## Framework Principles
 
-- **AI over Manual Coding**: used right, AI writes code faster than a developer while keeping quality high.
-- **Specs over Guesswork**: clear, well-defined specs eliminate guesswork, giving explicit acceptance criteria for both AI and developer.
-- **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules instead of living as tribal knowledge.
-- **Human in control**: AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything.
-- **Deterministic enforcement**: every check that can be a script must be a script, proving the change does what the spec demands.
-- **Traceability**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back — so related parts are found fast and no acceptance criterion is forgotten.
+- **AI over Manual Coding**: used right, AI writes code faster than a developer while keeping quality high, so the agent writes every artifact — specs, contracts, plans, code, and tests.
+- **Specs over Guesswork**: clear, well-defined specs eliminate guesswork, giving explicit acceptance criteria for the AI to follow and the developer to verify.
+- **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules, proven by automated checks, instead of living as tribal knowledge.
+- **Skills over Ad Hoc Prompting**: each workflow step is a written, repeatable skill instead of an improvised prompt, loaded progressively to keep the context small.
+- **Human Approval over Vibe Coding**: the AI writes everything and the human decides, approving each artifact before the next is generated.
+- **Deterministic Checks over Judgment**: every check that can be a script must be a script, proving the change does what the spec demands and nothing else broke.
+- **Traceability over Assumption**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back — so related parts are found fast and no acceptance criterion is forgotten.
 
-See full principles in [prd.md](docs/prd.md#principles).
+See full principles, along with the values that support them, in [prd.md](docs/prd.md#principles).
 
 ## Description
 

@@ -10,7 +10,7 @@ AI writes code fast, but fast is not the same as right. Given a request, AI can 
 
 ## Goal
 
-Produce slop-free, verifiable results fast, with minimal human intervention — unleashing AI's full speed. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and verification layers of reviews, tests, and deterministic checks prove the result.
+spex helps to produce slop-free, verifiable results fast, with minimal human intervention — unleashing AI's full speed. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and verification layers of reviews, tests, and deterministic checks prove the result.
 
 ## Success
 
