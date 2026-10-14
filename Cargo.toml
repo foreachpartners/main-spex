@@ -4,6 +4,11 @@ version = "0.19.1"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT"
+description = "AI-first development framework that turns specifications into deterministic, verifiable code"
+repository = "https://github.com/foreachpartners/main-spex"
+readme = "README.md"
+keywords = ["ai", "spec", "specification", "development"]
+categories = ["command-line-utilities", "development-tools", "development-tools::testing"]
 
 [[bin]]
 name = "spex"

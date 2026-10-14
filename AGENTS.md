@@ -1,6 +1,6 @@
 # Main spex
 
-The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
+The AI-first development framework that turns specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
 
 ## Core Concepts
 
@@ -74,7 +74,7 @@ docs/                          Framework reference docs (single source of truth)
   glossary.md              Terms used across code, messages, schemas, and docs
   prd.md                   Product requirements: problem, goal, success, capabilities, principles, values, non-goals
   specification.md         Framework behavior, minus the CLI
-  cli/                     Single source of truth for CLI behavior: README.md (overview and shared behavior), install.md, development.md, one file per command
+  cli/                     Single source of truth for CLI behavior: README.md (overview and shared behavior), install.md, publishing.md, one file per command
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
 templates/                     Assets scaffolded into projects
@@ -117,9 +117,9 @@ Keep this section in sync when the structure changes.
 - **Stop on major findings**: When investigation reveals a major problem — a bug, a spec/code mismatch, a failing check, a design flaw — related to the task or not, stop. Report it with evidence and ask the user how to proceed. Never fix it silently, work around it, or ignore it. Report minor problems at the end of the task.
 - **Propose major improvements**: When, at any step, a substantially simpler or better approach than the requested one emerges, stop, propose it, and wait for the user's decision before continuing. Propose a behavior change as a spec change first, since the spec is the source of truth. Report minor improvements at the end of the task.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.
-- **Use changelog**: On version change fill `CHANGELOG.md`
+- **Use changelog**: On version change fill `CHANGELOG.md`; a change that doesn't bump the version gets no entry
 - **Keep CLI commands in sync with template**: On CLI command or option changes, sync the CLI commands list in `templates/AGENTS.md`
 - **Migrations for agent**: When a change requires migration steps in a spex project, fill `templates/skills/spex-update/references/migration_guide.md` and update `templates/spex.yaml`
 - **Specification is single source of truth**: `docs/specification.md` defines how the framework behaves and `docs/cli/` how the CLI behaves. Treat both as authoritative, and update them whenever behavior changes.
-- **Bump the CLI version**: Whenever you change the CLI's behavior, bump `version` in `Cargo.toml`. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
+- **Bump the CLI version**: Bump `version` in `Cargo.toml` only for a public-facing change (one a user of the CLI or of a spex project can observe: commands, options, output, file formats and schemas, the templates `spex update` writes) or a major one (breaking, or needing migration steps). Never for internal refactors, tests, CI, examples, typos, or wording-only edits. Scaffolded `spex.yaml` records this as `cli_version`, and spex warns the user to run `spex update` when the installed CLI differs from the version that wrote their config.
 - **Never use a destructive command**: (`rm -rf`, force push, hard reset, branch delete) to route around an obstacle — investigate first, ask if unsure.

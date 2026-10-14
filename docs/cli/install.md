@@ -13,10 +13,10 @@ Linux and macOS, both built and tested in CI. On Windows, run spex inside [WSL](
 
 A project that adopts a bundled rule needs the external tools its checks run. `spex check` reports an error naming the missing tool.
 
-## Install the `spex` binary from source.
+## Install the `spex` binary
 
 ```sh
-git clone https://github.com/foreachpartners/main-spex
-cd main-spex
-cargo install --path . --force
+cargo install main-spex
 ```
+
+This installs the latest release from [crates.io](https://crates.io/crates/main-spex); run it again to upgrade.

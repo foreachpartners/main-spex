@@ -6,7 +6,17 @@ The `spex` command-line tool manages a spex workspace.
 spex --help
 ```
 
-[Install](install.md) the binary from source, or see [Development](development.md) for building the `spex` checkout itself.
+[Install](install.md) the binary, or see [Publishing](publishing.md) for releasing `spex` itself.
+
+## Install from source
+
+To try unreleased changes, install from a checkout:
+
+```sh
+git clone https://github.com/foreachpartners/main-spex
+cd main-spex
+cargo install --path . --force
+```
 
 ## Command overview
 

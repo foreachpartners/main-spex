@@ -1,6 +1,6 @@
 # 🦉 Main spex
 
-The AI-first development framework that turns natural specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
+The AI-first development framework that turns specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
@@ -32,11 +32,9 @@ The `spex` CLI runs and automates all of it. Specs, contracts, and checks are pl
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
 - **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](docs/cli/install.md#supported-platforms)
-- **spex CLI**: Clone the Main spex repository and install the `spex` CLI tool:
+- **spex CLI**: Install the `spex` CLI tool from [crates.io](https://crates.io/crates/main-spex):
   ```sh
-  git clone https://github.com/foreachpartners/main-spex
-  cd main-spex
-  cargo install --path . --force
+  cargo install main-spex
   ```
 
 #### Setup
