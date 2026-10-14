@@ -15,16 +15,7 @@ use crate::templates::{
 #[path = "agent_files_test.rs"]
 mod agent_files_test;
 
-pub fn verify_agent_files(agent_root: &Path) -> Result<()> {
-    if is_regular_file(&agent_root.join(AGENTS_FILENAME))
-        && is_regular_file(&agent_root.join(CLAUDE_FILENAME))
-    {
-        bail!(
-            "`{AGENTS_FILENAME}` and `{CLAUDE_FILENAME}` both exist in `{}` — merge them into `{AGENTS_FILENAME}` and remove `{CLAUDE_FILENAME}`, then run `spex init` again",
-            agent_root.display()
-        );
-    }
-
+pub fn verify_claude_skills(agent_root: &Path) -> Result<()> {
     let bundled = bundled_skill_names();
     let agents_skills = agent_root.join(AGENTS_DIRNAME).join(SKILLS_DIRNAME);
     for name in claude_skill_names(agent_root)? {
@@ -64,11 +55,11 @@ pub fn write_agents_md(agent_root: &Path) -> Result<()> {
     let agents = agent_root.join(AGENTS_FILENAME);
     let claude = agent_root.join(CLAUDE_FILENAME);
 
-    let adopted_claude = !agents.exists() && is_regular_file(&claude);
-    let existing_path = if agents.exists() {
-        Some(&agents)
-    } else if adopted_claude {
+    let adopted_claude = is_regular_file(&claude) && (!agents.exists() || is_regular_file(&agents));
+    let existing_path = if adopted_claude {
         Some(&claude)
+    } else if agents.exists() {
+        Some(&agents)
     } else {
         None
     };

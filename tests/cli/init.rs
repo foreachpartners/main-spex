@@ -116,9 +116,9 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
     assert!(config.contains("project_name: snake\n"), "{config}");
     assert!(config.contains("layout: single-repo\n"), "{config}");
     assert!(config.contains("agent_root: ..\n"), "{config}");
-    assert!(config.contains("package_name: snake\n"), "{config}");
-    assert!(config.contains("package_short_name: snake\n"), "{config}");
-    assert!(config.contains("path: ..\n"), "{config}");
+    assert!(config.contains("package_name: snake-spex\n"), "{config}");
+    assert!(config.contains("package_short_name: spex\n"), "{config}");
+    assert!(config.contains("path: .\n"), "{config}");
 
     for folder in ["rules", "schemas", "docs", "specs", "plans", "contracts"] {
         assert!(
@@ -159,9 +159,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header(
-            "snake\n  no issues\n\nspex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"
-        ),
+        with_version_header("snake-spex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"),
         "stderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -175,7 +173,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
 }
 
 #[test]
-fn init_monorepo_lists_no_package_and_puts_agent_files_in_the_root() {
+fn init_monorepo_lists_only_the_spex_package_and_puts_agent_files_in_the_root() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("shop");
     fs::create_dir_all(project.join("apps/api")).expect("create package");
@@ -190,49 +188,11 @@ fn init_monorepo_lists_no_package_and_puts_agent_files_in_the_root() {
     let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
     assert!(config.contains("layout: monorepo\n"), "{config}");
     assert!(config.contains("agent_root: ..\n"), "{config}");
-    assert!(config.contains("packages: []\n"), "{config}");
+    assert!(config.contains("package_name: shop-spex\n"), "{config}");
+    assert!(config.contains("path: .\n"), "{config}");
     assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
     assert!(project.join("AGENTS.md").is_file());
     assert!(!project.join("spex/.agents").exists());
-}
-
-#[test]
-fn init_in_a_non_empty_repository_named_spex_uses_it_as_the_project_root() {
-    for (layout_answer, layout) in [("2", "single-repo"), ("3", "monorepo")] {
-        let temp_dir = tempdir().expect("create temp dir");
-        let project = temp_dir.path().join("spex");
-        fs::create_dir_all(project.join("src")).expect("create src");
-        fs::write(project.join("src/main.rs"), "fn main() {}\n").expect("write source");
-
-        let init = init_with(&project, &format!("{layout_answer}\n\n"));
-        assert!(
-            init.status.success(),
-            "{layout} init failed\nstderr:\n{}",
-            String::from_utf8_lossy(&init.stderr)
-        );
-
-        let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
-        assert!(config.contains("project_name: spex\n"), "{config}");
-        assert!(config.contains(&format!("layout: {layout}\n")), "{config}");
-        assert!(project.join("AGENTS.md").is_file(), "{layout}");
-        assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
-        assert!(project.join("src/main.rs").is_file());
-        assert!(!temp_dir.path().join("AGENTS.md").exists());
-    }
-}
-
-#[test]
-fn init_inside_an_initialized_spex_directory_fails_without_nesting_a_project() {
-    let temp_dir = tempdir().expect("create temp dir");
-    let project = temp_dir.path().join("snake");
-    fs::create_dir_all(&project).expect("create project");
-    assert!(init_with(&project, "2\n\n").status.success());
-
-    let spex_dir = project.join("spex");
-    let again = init_with(&spex_dir, "2\n\n");
-
-    assert_fails_mentioning(&again, "not empty");
-    assert!(!spex_dir.join("spex").exists(), "nothing may be nested");
 }
 
 #[test]
@@ -255,7 +215,7 @@ fn init_multi_repo_keeps_everything_in_the_spex_repository() {
 }
 
 #[test]
-fn init_fails_without_writing_when_agents_md_and_claude_md_both_exist() {
+fn init_prefers_claude_md_over_agents_md_when_both_exist() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
@@ -264,12 +224,20 @@ fn init_fails_without_writing_when_agents_md_and_claude_md_both_exist() {
 
     let init = init_with(&project, "2\n\n");
 
-    assert_fails_mentioning(&init, "both exist");
-    assert!(!project.join("spex").exists(), "nothing may be written");
-    assert!(!project.join(".agents").exists());
+    assert!(
+        init.status.success(),
+        "init failed\nstderr:\n{}",
+        String::from_utf8_lossy(&init.stderr)
+    );
+    let agents = fs::read_to_string(project.join("AGENTS.md")).expect("read AGENTS.md");
+    assert!(agents.ends_with("claude\n"), "CLAUDE.md content is kept");
+    assert!(
+        !agents.contains("agents\n"),
+        "AGENTS.md content is replaced"
+    );
     assert_eq!(
-        fs::read_to_string(project.join("AGENTS.md")).expect("read"),
-        "agents\n"
+        fs::read_link(project.join("CLAUDE.md")).expect("CLAUDE.md symlink"),
+        Path::new("AGENTS.md")
     );
 }
 
@@ -305,6 +273,12 @@ fn check_validates_the_spex_dir_in_single_repo_even_for_a_selected_package() {
     let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
     assert!(init_with(&project, "2\n\n").status.success());
+    let config_path = project.join("spex/spex.yaml");
+    let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");
+    config.push_str(
+        "  - package_name: snake\n    package_short_name: snake\n    description: Snake game.\n    path: ..\n    rules:\n      - commit-message-format\n",
+    );
+    fs::write(&config_path, config).expect("add the project package");
     fs::write(
         project.join("spex/specs/bad.yaml"),
         "id: other\ntitle: Other\ndescription: A spec in a file named after another id.\nacceptance_criteria:\n  - id: works\n    must: work\ncontract: none\n",

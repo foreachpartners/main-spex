@@ -12,14 +12,14 @@ Configures one or several new packages for the spex framework: defines each in `
 ### Step 1: define the packages in spex.yaml
 
 - MUST read `spex.yaml`.
-- MUST find the new packages by layout: in `multi-repo`, the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named; in `single-repo`, none, since `spex init` already listed the project's one package and only its entry is completed; in `monorepo`, the packages from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
+- MUST find the new packages by layout: in `multi-repo`, the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named; in `single-repo`, the repository itself as the project's one package; in `monorepo`, the packages from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
 - MUST confirm the list with the user, and drop anything that is not a package or that `packages` already lists.
 - MUST inspect each package: its `README`, manifest files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`), top-level layout and entry points.
 - MUST propose a description from `project_name` and what the packages do when the project `description`, or a package `description`, is `unknown`, and ask the user one short question instead of guessing when the purpose is unclear.
-- MUST propose, for each package, a `package_name` (the directory name in `multi-repo`, `<project-name>-<package-short-name>` in `monorepo`).
-- MUST propose, for each package, a `package_short_name` (in `multi-repo` the `package_name` without its `<project-name>-` prefix, in `monorepo` the package's folder name).
+- MUST propose, for each package, a `package_name` (the directory name in `multi-repo`, `<project-name>-<package-short-name>` in `monorepo`, the project name in `single-repo`).
+- MUST propose, for each package, a `package_short_name` (in `multi-repo` the `package_name` without its `<project-name>-` prefix, in `monorepo` the package's folder name, in `single-repo` the project name).
 - MUST propose, for each package, a `description`: one concrete sentence stating the package's role in the project (e.g. backend service, web client, shared library), without restating its name.
-- MUST propose, for each package, a `path` relative to `<spex-dir>`: `../<directory-name>` in `multi-repo`, `../<package-path>` (e.g. `../apps/api`) in `monorepo`.
+- MUST propose, for each package, a `path` relative to `<spex-dir>`: `../<directory-name>` in `multi-repo`, `../<package-path>` (e.g. `../apps/api`) in `monorepo`, `..` in `single-repo`.
 - MUST propose, for each package, `contracts`: one entry per interface contract file the package ships (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI), each with a `path` relative to the spex directory and a one-line `description`, leaving the file where it is; omit `contracts` when the package ships none.
 - MUST propose, for each package, `rules`: read every file in `rules/` and list only the rule IDs that genuinely apply given the package's stack and role (e.g. `openapi-conventions` only for a package that exposes a REST API), with a one-line reason for each.
 - MUST show the proposal to the user, confirm it, and write only what the user confirms.

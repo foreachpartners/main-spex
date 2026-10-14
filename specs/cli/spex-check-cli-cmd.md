@@ -1,6 +1,6 @@
 # `spex check`
 
-Runs the checks declared in `spex.yaml` against each package, reporting findings per package. It also validates the spex directory itself, without a rule (self-validation).
+Runs the rule checks declared in `spex.yaml` against each package, reporting findings per package, and the framework checks that validate the spex directory itself, without a rule (self-validation).
 
 ## Acceptance criteria
 

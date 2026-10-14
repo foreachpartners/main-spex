@@ -31,7 +31,7 @@ Ask AI to init git repositories for api and frontend and commit existing files.
 
 ## Set up spex and workspace
 
-Run `spex init` to generate `shopping-notes-spex` in terminal while in the `shopping-notes` project root, and pick the `multi-repo` layout when asked.
+Run `spex init` in terminal from the `shopping-notes` project root and pick the `multi-repo` layout when asked. It generates `shopping-notes-spex` next to the packages.
 
 ### Get familiar with spex
 

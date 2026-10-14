@@ -1,6 +1,6 @@
 # `spex update`
 
-Rewrites the bundled templates, schemas, docs, and rules (including their checks and scripts) in the spex directory, skills and `AGENTS.md` in the agent root, with the versions shipped in the installed `spex` binary. The [`spex-update` skill](../skill/spex-update-skill.md) drives it together with the migration steps an upgrade requires.
+Syncs the project's spex files with the latest versions shipped in the installed `spex` binary: the bundled templates, schemas, docs, and rules (including their checks and scripts) in the spex directory, skills and `AGENTS.md` in the agent root. The [`spex-update` skill](../skill/spex-update-skill.md) drives it together with the migration steps an upgrade requires.
 
 ## Acceptance criteria
 

@@ -6,9 +6,7 @@ description: >-
 packages:
   - package_name: unknown
     package_short_name: spex
-    description: >-
-      Spex repository. Holds the specs, rules, skills
-      and config that govern the project.
+    description: Spex framework. Holds the specs, rules, skills and config that govern the project.
     path: .
     rules:
       - commit-message-format

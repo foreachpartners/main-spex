@@ -39,11 +39,7 @@ packages:
       - writing-style
   - package_name: shopping-notes-spex
     package_short_name: spex
-    description: >-
-      Spex repository. Holds the specs and config that govern the
-      project: schemas/ (JSON Schemas for spex.yaml and the spec files),
-      rules/ (cross-cutting conventions and rules), specs/ (the
-      functionality the system provides) and docs/ (framework reference).
+    description: Spex framework. Holds the specs, rules, skills and config that govern the project.
     path: .
     rules:
       - commit-message-format

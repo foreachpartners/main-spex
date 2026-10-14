@@ -1,6 +1,6 @@
 # `spex coverage`
 
-Reports how well the active and in-progress specs are covered by `@spec` annotations across the project, per acceptance criterion.
+Reports specs coverage for a project: how well the active and in-progress specs are covered by `@spec` annotations across the project, per acceptance criterion.
 
 ## Acceptance criteria
 

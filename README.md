@@ -52,7 +52,7 @@ shopping-notes/                       # project root
 Package directories follow `<project-name>-<package-short-name>` (naming-convention), so rename existing packages to match before running `/spex-setup`.
 
 1. Put all project packages (each a git repository) in one shared folder (project root folder)
-2. Run terminal command `spex init` in the project root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
+2. Run terminal command `spex init` from the project root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
 3. Open workspace to work across all packages at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
    - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
    - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
@@ -60,7 +60,7 @@ Package directories follow `<project-name>-<package-short-name>` (naming-convent
    - Zed: add project, pick all packages (folders)
 4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to add the packages and complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
 
-Prefer one git repository? Run `spex init` in its root and pick `single-repo` (the project is the repository) or `monorepo` (one repository, several packages). Either way it creates a `spex/` folder and puts `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root, keeping any you already have.
+Prefer one git repository? Run `spex init` from its root, which is the project root, and pick `single-repo` (the project is the repository) or `monorepo` (one repository, several packages). Either way it creates a `spex/` folder and puts `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root, keeping any you already have. `/spex-setup` then adds the project's packages.
 
 ### Adoption
 

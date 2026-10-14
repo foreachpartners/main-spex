@@ -23,16 +23,7 @@ mod tests {
     fn verify_passes_in_an_empty_agent_root() {
         let root = tempdir().expect("create agent root");
 
-        assert!(verify_agent_files(root.path()).is_ok());
-    }
-
-    #[test]
-    fn verify_fails_when_agents_md_and_claude_md_are_both_regular_files() {
-        let root = tempdir().expect("create agent root");
-        write(root.path(), "AGENTS.md", "agents");
-        write(root.path(), "CLAUDE.md", "claude");
-
-        assert!(verify_agent_files(root.path()).is_err());
+        assert!(verify_claude_skills(root.path()).is_ok());
     }
 
     #[test]
@@ -40,7 +31,7 @@ mod tests {
         let root = tempdir().expect("create agent root");
         write(root.path(), ".claude/skills/spex-spec/SKILL.md", "mine");
 
-        assert!(verify_agent_files(root.path()).is_err());
+        assert!(verify_claude_skills(root.path()).is_err());
     }
 
     #[test]
@@ -53,7 +44,7 @@ mod tests {
             "from agents",
         );
 
-        assert!(verify_agent_files(root.path()).is_err());
+        assert!(verify_claude_skills(root.path()).is_err());
     }
 
     #[test]
@@ -111,6 +102,24 @@ mod tests {
 
         let written = fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read");
         assert!(written.ends_with("# Claude notes\n"));
+        assert_eq!(
+            fs::read_link(root.path().join(CLAUDE_FILENAME)).expect("read symlink"),
+            Path::new(AGENTS_FILENAME)
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn write_agents_md_prefers_claude_md_over_agents_md_when_both_exist() {
+        let root = tempdir().expect("create agent root");
+        write(root.path(), "AGENTS.md", "# Agents notes\n");
+        write(root.path(), "CLAUDE.md", "# Claude notes\n");
+
+        write_agents_md(root.path()).expect("write AGENTS.md");
+
+        let written = fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read");
+        assert!(written.ends_with("# Claude notes\n"));
+        assert!(!written.contains("# Agents notes"));
         assert_eq!(
             fs::read_link(root.path().join(CLAUDE_FILENAME)).expect("read symlink"),
             Path::new(AGENTS_FILENAME)

@@ -1,6 +1,6 @@
 # `spex info`
 
-Prints the resolved `spex.yaml` configuration as pretty JSON. It is the general-purpose form scripts pipe into [`spex jq`](spex-jq-cli-cmd.md) for whatever field they need.
+Prints project information: the resolved `spex.yaml` configuration as pretty JSON. It is the general-purpose form scripts pipe into [`spex jq`](spex-jq-cli-cmd.md) for whatever field they need.
 
 ## Acceptance criteria
 

@@ -1,6 +1,6 @@
 use std::fs;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::ValueEnum;
@@ -9,12 +9,12 @@ use anstream::println;
 use eros::{Context, bail};
 use owo_colors::OwoColorize;
 
-use crate::config::{CLI_VERSION, Layout, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
+use crate::config::{CLI_VERSION, Layout, SPEX_CONFIG_FILE, spex_yaml_edit};
 use crate::error::{Result, could_not_read_dir};
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, normalize, write_file};
 
-use super::agent_files::verify_agent_files;
+use super::agent_files::verify_claude_skills;
 use super::scaffold::scaffold;
 
 #[cfg(test)]
@@ -25,17 +25,12 @@ const PLANS_DIR_NAME: &str = "plans";
 const CONTRACTS_DIR_NAME: &str = "contracts";
 
 const CODE_WORKSPACE_EXTENSION: &str = "code-workspace";
-const MULTI_PACKAGE_CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.yaml");
-const SINGLE_PACKAGE_CONFIG_TEMPLATE: &str =
-    include_str!("../../../templates/spex.single-repo.yaml");
-const MONOPACKAGE_CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.monorepo.yaml");
+const CONFIG_TEMPLATE: &str = include_str!("../../../templates/spex.yaml");
 const CODE_WORKSPACE_TEMPLATE: &str =
     include_str!("../../../templates/project-name.code-workspace");
 
 pub fn run() -> Result<ExitCode> {
-    let current_dir = current_dir()?;
-
-    let project_root = project_root(&current_dir)?;
+    let project_root = current_dir()?;
 
     let default_name = dir_name(&project_root)
         .ok_or_else(|| eros::error!("could not read the project root name"))?;
@@ -43,10 +38,10 @@ pub fn run() -> Result<ExitCode> {
     let layout = confirm_layout()?;
     let project_name = confirm_project_name(default_name)?;
 
-    let spex_dir = locate_spex_dir(&current_dir, &project_root, layout, &project_name)?;
+    let spex_dir = project_root.join(layout.spex_dir_name(&project_name));
     verify_empty(&spex_dir)?;
     let agent_root = normalize(&spex_dir.join(layout.agent_root()));
-    verify_agent_files(&agent_root)?;
+    verify_claude_skills(&agent_root)?;
 
     create_dir_all(&spex_dir)?;
     write_config(&spex_dir, layout, &project_name)?;
@@ -84,23 +79,12 @@ fn write_config(spex_dir: &Path, layout: Layout, project_name: &str) -> Result<(
     Ok(())
 }
 
-fn config_template(layout: Layout) -> &'static str {
-    match layout {
-        Layout::MultiRepo => MULTI_PACKAGE_CONFIG_TEMPLATE,
-        Layout::SingleRepo => SINGLE_PACKAGE_CONFIG_TEMPLATE,
-        Layout::Monorepo => MONOPACKAGE_CONFIG_TEMPLATE,
-    }
-}
-
-fn package_name(layout: Layout, project_name: &str) -> String {
-    match layout {
-        Layout::MultiRepo => layout.spex_dir_name(project_name),
-        Layout::SingleRepo | Layout::Monorepo => project_name.to_string(),
-    }
+fn spex_package_name(project_name: &str) -> String {
+    Layout::MultiRepo.spex_dir_name(project_name)
 }
 
 fn config_from_template(layout: Layout, project_name: &str) -> String {
-    let named = config_template(layout)
+    let named = CONFIG_TEMPLATE
         .replace(
             "project_name: unknown",
             &format!("project_name: {project_name}"),
@@ -112,11 +96,7 @@ fn config_from_template(layout: Layout, project_name: &str) -> String {
         )
         .replace(
             "package_name: unknown",
-            &format!("package_name: {}", package_name(layout, project_name)),
-        )
-        .replace(
-            "package_short_name: unknown",
-            &format!("package_short_name: {project_name}"),
+            &format!("package_name: {}", spex_package_name(project_name)),
         );
     spex_yaml_edit::set_cli_version(&named, CLI_VERSION)
 }
@@ -126,35 +106,6 @@ fn write_code_workspace(spex_dir: &Path, project_name: &str) -> Result<()> {
     let path = spex_dir.join(&file_name);
     write_file(&path, CODE_WORKSPACE_TEMPLATE)?;
     Ok(())
-}
-
-fn is_inside_spex_dir(current_dir: &Path) -> Result<bool> {
-    let is_named_like_spex_dir = dir_name(current_dir).is_some_and(SpexConfig::is_spex_dir_name);
-    Ok(is_named_like_spex_dir
-        && (current_dir.join(SPEX_CONFIG_FILE).is_file() || is_empty_dir(current_dir)?))
-}
-
-fn project_root(current_dir: &Path) -> Result<PathBuf> {
-    if is_inside_spex_dir(current_dir)? {
-        let parent = current_dir.parent().ok_or_else(|| {
-            eros::error!("expected the spex directory to live inside a project root")
-        })?;
-        return Ok(parent.to_path_buf());
-    }
-    Ok(current_dir.to_path_buf())
-}
-
-fn locate_spex_dir(
-    current_dir: &Path,
-    project_root: &Path,
-    layout: Layout,
-    project_name: &str,
-) -> Result<PathBuf> {
-    if is_inside_spex_dir(current_dir)? {
-        return Ok(current_dir.to_path_buf());
-    }
-
-    Ok(project_root.join(layout.spex_dir_name(project_name)))
 }
 
 fn is_empty_dir(dir: &Path) -> Result<bool> {

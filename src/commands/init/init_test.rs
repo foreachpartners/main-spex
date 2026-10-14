@@ -1,20 +1,10 @@
 #[cfg(test)]
 mod tests_unit {
     use super::super::*;
+    use crate::config::SpexConfig;
     use crate::error::describe;
     use std::fs;
-    use tempfile::{TempDir, tempdir};
-
-    fn project_with(dirs: &[&str], files: &[&str]) -> TempDir {
-        let root = tempdir().expect("create temp project");
-        for dir in dirs {
-            fs::create_dir(root.path().join(dir)).expect("create dir");
-        }
-        for file in files {
-            fs::write(root.path().join(file), "").expect("create file");
-        }
-        root
-    }
+    use tempfile::tempdir;
 
     #[test]
     fn parse_layout_defaults_to_multi_repo_on_an_empty_answer() {
@@ -75,45 +65,19 @@ mod tests_unit {
     }
 
     #[test]
-    fn multi_repo_config_names_project_and_lists_the_spex_repository() {
-        let config = parsed_config(Layout::MultiRepo);
+    fn config_lists_only_the_spex_package_in_every_layout() {
+        for layout in [Layout::MultiRepo, Layout::SingleRepo, Layout::Monorepo] {
+            let config = parsed_config(layout);
 
-        assert_eq!(config.project_name, "pizza-shop");
-        assert_eq!(config.layout, Layout::MultiRepo);
-        assert_eq!(config.agent_root, ".");
-        assert_eq!(config.packages.len(), 1);
-        let spex = &config.packages[0];
-        assert_eq!(spex.package_name, "pizza-shop-spex");
-        assert_eq!(spex.package_short_name, "spex");
-        assert_eq!(spex.path, ".");
-    }
-
-    #[test]
-    fn single_repo_config_lists_the_package_named_after_the_project() {
-        let config = parsed_config(Layout::SingleRepo);
-
-        assert_eq!(config.layout, Layout::SingleRepo);
-        assert_eq!(config.agent_root, "..");
-        assert_eq!(config.packages.len(), 1);
-        let package = &config.packages[0];
-        assert_eq!(package.package_name, "pizza-shop");
-        assert_eq!(package.package_short_name, "pizza-shop");
-        assert_eq!(package.path, "..");
-        assert!(
-            package
-                .rules
-                .iter()
-                .all(|rule| rule.as_str() != "naming-convention")
-        );
-    }
-
-    #[test]
-    fn monorepo_config_lists_no_package() {
-        let config = parsed_config(Layout::Monorepo);
-
-        assert_eq!(config.layout, Layout::Monorepo);
-        assert_eq!(config.agent_root, "..");
-        assert!(config.packages.is_empty());
+            assert_eq!(config.project_name, "pizza-shop");
+            assert_eq!(config.layout, layout);
+            assert_eq!(config.agent_root, layout.agent_root());
+            assert_eq!(config.packages.len(), 1, "{layout}");
+            let spex = &config.packages[0];
+            assert_eq!(spex.package_name, "pizza-shop-spex", "{layout}");
+            assert_eq!(spex.package_short_name, "spex", "{layout}");
+            assert_eq!(spex.path, ".", "{layout}");
+        }
     }
 
     #[test]
@@ -180,120 +144,8 @@ mod tests_unit {
     }
 
     #[test]
-    fn project_root_defaults_to_current_directory() {
-        let project = project_with(&["server"], &[]);
-
-        assert_eq!(
-            project_root(project.path()).expect("project root"),
-            project.path()
-        );
-    }
-
-    #[test]
-    fn project_root_from_inside_spex_directory() {
-        let project = project_with(&["pizza-shop-spex"], &[]);
-        let spex_dir = project.path().join("pizza-shop-spex");
-
-        assert_eq!(
-            project_root(&spex_dir).expect("project root"),
-            project.path()
-        );
-    }
-
-    #[test]
-    fn project_root_of_a_non_empty_folder_named_like_a_spex_directory_is_the_folder() {
-        let project = project_with(&["spex", "pizza-shop-spex"], &[]);
-
-        for name in ["spex", "pizza-shop-spex"] {
-            let repository = project.path().join(name);
-            fs::write(repository.join("README.md"), "").expect("create file");
-
-            assert_eq!(project_root(&repository).expect("project root"), repository);
-        }
-    }
-
-    #[test]
-    fn project_root_from_inside_an_initialized_spex_directory() {
-        let project = project_with(&["spex"], &[]);
-        let spex_dir = project.path().join("spex");
-        fs::write(spex_dir.join(SPEX_CONFIG_FILE), "").expect("create config");
-
-        assert_eq!(
-            project_root(&spex_dir).expect("project root"),
-            project.path()
-        );
-    }
-
-    #[test]
-    fn locate_spex_dir_puts_the_directory_inside_a_non_empty_folder_named_spex() {
-        let project = project_with(&["spex"], &[]);
-        let repository = project.path().join("spex");
-        fs::write(repository.join("README.md"), "").expect("create file");
-
-        for layout in [Layout::SingleRepo, Layout::Monorepo] {
-            let located =
-                locate_spex_dir(&repository, &repository, layout, "spex").expect("locate");
-
-            assert_eq!(located, repository.join("spex"));
-        }
-    }
-
-    #[test]
-    fn locate_spex_dir_reuses_current_when_inside_spex_directory() {
-        let project = project_with(&["pizza-shop-spex"], &[]);
-        let spex_dir = project.path().join("pizza-shop-spex");
-
-        let located = locate_spex_dir(&spex_dir, project.path(), Layout::MultiRepo, "pizza-shop")
-            .expect("locate spex dir");
-
-        assert_eq!(located, spex_dir);
-    }
-
-    #[test]
-    fn locate_spex_dir_names_the_multi_repo_directory_after_the_project() {
-        let project = project_with(&["server"], &[]);
-
-        let located = locate_spex_dir(
-            project.path(),
-            project.path(),
-            Layout::MultiRepo,
-            "pizza-shop",
-        )
-        .expect("locate spex dir");
-
-        assert_eq!(located, project.path().join("pizza-shop-spex"));
-    }
-
-    #[test]
-    fn locate_spex_dir_names_the_other_layouts_directory_spex() {
-        let project = project_with(&["server"], &[]);
-
-        for layout in [Layout::SingleRepo, Layout::Monorepo] {
-            let located = locate_spex_dir(project.path(), project.path(), layout, "pizza-shop")
-                .expect("locate spex dir");
-
-            assert_eq!(located, project.path().join("spex"));
-        }
-    }
-
-    #[test]
-    fn locate_spex_dir_does_not_create_the_directory() {
-        let project = project_with(&[], &[]);
-
-        let located = locate_spex_dir(
-            project.path(),
-            project.path(),
-            Layout::SingleRepo,
-            "pizza-shop",
-        )
-        .expect("locate spex dir");
-
-        assert!(!located.exists());
-    }
-
-    #[test]
     fn verify_empty_passes_on_a_directory_that_does_not_exist() {
-        let project = project_with(&[], &[]);
+        let project = tempdir().expect("create project");
 
         assert!(verify_empty(&project.path().join("spex")).is_ok());
     }

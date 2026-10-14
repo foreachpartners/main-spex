@@ -90,9 +90,7 @@ templates/                     Assets scaffolded into projects
   docs/                        Framework docs shipped to projects (symlinks into docs/)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
   README.md                    Contributor notes on scaffolding rules; never scaffolded
-  spex.yaml                    Multi-repo project config seeded by init (project name, layout, agent root filled in)
-  spex.single-repo.yaml        Single-repo project config seeded by init
-  spex.monorepo.yaml           Monorepo project config seeded by init
+  spex.yaml                    Project config seeded by init for every layout, listing only the spex package (project name, layout, agent root, package name filled in)
   project-name.code-workspace  Editor workspace file seeded by init (multi-repo only)
 examples/                      Sample example projects with/without spex(shopping-notes, shopping-notes-no-spex)
 tests/                         Integration tests that build and run the spex binary
