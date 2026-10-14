@@ -17,8 +17,8 @@ Read the plan. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the plan's
 
 ### Without a plan (ad-hoc user request)
 
-1. Determine packages we will work on (e.g. scope: frontend, backend).
-2. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected scope from step 1, then read `<tmp-path>` for the governing rules.
+1. Determine packages we will work on (e.g. frontend, backend).
+2. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages from step 1, then read `<tmp-path>` for the governing rules.
 3. Determine all governing spec IDs related to the request.
 4. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
 5. Produce a note in response with a list of governing rules and specs.

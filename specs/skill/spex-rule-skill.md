@@ -34,7 +34,7 @@ Creates a new rule or edits an existing one by interviewing the user. Loaded whe
 
 - MUST read, before asking the user anything, `<spex-dir>/spex.yaml` for the project overview, the packages, and which rules they already list, and each package's `description` to learn its role.
 - MUST read `<spex-dir>/rules/` for related rules and to match their style, reusing an existing rule rather than duplicating its convention.
-- MUST note whether `general-rules.yaml` or a package-scoped `general-rules-<package-short-name>.yaml` already exists.
+- MUST note whether `general-rules.yaml` or a per-package `general-rules-<package-short-name>.yaml` already exists.
 
 ### Step 2: clarify missing details with the user
 

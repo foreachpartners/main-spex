@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "return every item with its `id`, `name`, and `bought` status from `GET /items`"
   - id: empty-list-when-no-items
     must: "return an empty list from `GET /items` when no items exist"
-scope:
+packages:
   - api
 status: active
 contract: single

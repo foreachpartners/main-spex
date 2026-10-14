@@ -10,7 +10,7 @@ acceptance_criteria:
     must: persist the updated `bought` status to the JSON file store so it survives an API restart
   - id: unknown-item-not-found
     must: "return a 404 response from `PATCH /items/{id}` when no item matches `id`"
-scope:
+packages:
   - api
 status: active
 contract: single

@@ -53,7 +53,7 @@ Determine what the spec is based on before doing anything else:
 Before asking the user anything, read what already exists so you don't ask for known answers or create duplicates:
 
 - Read `<spex-dir>/spex.yaml` for the project overview, the packages, and which rules they already list. Package names are arbitrary, so read each package's `description` to learn its role.
-- Read `<spex-dir>/rules/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention. Note whether `general-rules.yaml` or a package-scoped `general-rules-<package-short-name>.yaml` already exists — see "Small conventions" below.
+- Read `<spex-dir>/rules/` for related specs and to match their style. Reuse an existing spec rather than duplicating its convention. Note whether `general-rules.yaml` or a per-package `general-rules-<package-short-name>.yaml` already exists — see "Small conventions" below.
 
 ## Step 2 — Clarify missing details with the user
 

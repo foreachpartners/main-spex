@@ -25,7 +25,7 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 - MUST have a `coverage_ignore` entry with `ac` waive just that acceptance criterion's impl or test requirement, or, under `contract: for-each-ac`, its contract requirement.
 - MUST match each `coverage_ignore` entry to the spec's `contract` setting: a whole-spec contract waiver works under `single` and `for-each-ac`, a per-criterion contract waiver only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch.
 - MUST NOT list an already shipped or established spec in `blocked_by`.
-- MAY set `scope`, the `package_short_name`s of the packages that implement the capability.
+- MAY set `packages`, the `package_short_name`s of the packages that implement the capability.
 - MAY set `status` to `in-progress` for a spec being implemented but not yet complete, and to `blocked` or `deprecated` where they apply.
 - MAY set `examples`: named illustrative snippets showing the spec applied in context, for placement and usage that prose cannot carry.
 - MAY declare a waiver outside the spec file, in [`spex.yaml`](../config/spex-yaml-config.md) or a package's [`spex.package.yaml`](../config/spex-package-yaml-config.md), so the package that cannot satisfy a layer owns the waiver without editing the spec.

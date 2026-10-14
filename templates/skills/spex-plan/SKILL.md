@@ -17,11 +17,11 @@ Your output must be machine and human-readable, deterministic, and structured fo
 
 Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for every planned spec. Confirm with the user how to handle any unresolved blocker.
 
-Resolve a `Packages scope` for requested changes.
+Resolve the `Packages` for requested changes.
 
-Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages scope`, then read `<tmp-path>` for the governing rules.
+Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages`, then read `<tmp-path>` for the governing rules.
 
-Read each affected package's information in `Packages scope` from `spex.yaml`.
+Read each affected package's information in `Packages` from `spex.yaml`.
 
 Read related contracts in `<spex-dir>/contracts/`.
 
@@ -39,7 +39,7 @@ If more than one spec is provided, pick a leading one for `<spec-id>` and genera
 
 Write `Specs` that the user provided.
 
-Write `Packages scope` based on changes we need to implement (don't include spex itself).
+Write `Packages` based on changes we need to implement (don't include spex itself).
 
 Write `Rules` in the plan from the governing rules already read in `<tmp-path>` that are applicable to changes.
 

@@ -52,7 +52,7 @@ src/                CLI source
     package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (coverage_ignore, ignored_errors), loaded 1 to 1
     spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, ignored_errors blocks)
     package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths
-    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages, coverage_ignore), with each package's spex.package.yaml merged in on discovery, spec (adding the coverage_ignore by spec id) and rule loaders, package selection by name, and scope validation (shared by commands)
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages, coverage_ignore), with each package's spex.package.yaml merged in on discovery, spec (adding the coverage_ignore by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
     ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)
@@ -65,10 +65,10 @@ src/                CLI source
     text.rs         Text helpers (word wrapping, pluralize)
     yaml_dir.rs     Yaml file walking and loading of a directory (YamlFile: parsed item, path, raw text)
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
-    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude`, `AGENTS.md` and `CLAUDE.md`: conflict checks, adoption, links; coverage also holds annotation_index, the project scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-scope grouping of spec coverage and the exit code; render, the report text)
+    init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude`, `AGENTS.md` and `CLAUDE.md`: conflict checks, adoption, links; coverage also holds annotation_index, the project scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-package grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, package selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
-      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, scope, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
+      conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, schema, script refs, status, blocked_by, packages, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 specs/                         Single source of truth for behavior, one md file per spec (description + acceptance criteria), named `<name>-<group>`
   framework/               Artifact chain, traceability, managed section

@@ -15,14 +15,14 @@ Creates new specs, or extends and changes existing ones, by interviewing the use
 ### Step 0: establish create vs edit
 
 - MUST treat the request as an edit when the user names an existing spec ID (e.g. `place-pizza-order`) or asks to update, extend, fix, or change a spec.
-- MUST read `<spex-dir>/specs/<spec-id>.yaml` in full before doing anything else, for an edit, confirm with the user what should change (new or revised acceptance criteria, a scope change, a status change), and skip straight to Step 4, editing the existing file in place and preserving every untouched field.
+- MUST read `<spex-dir>/specs/<spec-id>.yaml` in full before doing anything else, for an edit, confirm with the user what should change (new or revised acceptance criteria, a `packages` change, a status change), and skip straight to Step 4, editing the existing file in place and preserving every untouched field.
 - MUST treat the request otherwise as a new spec and continue with Step 1.
 
 ### Step 1: gather context
 
 - MUST treat a source the user attached or pasted (a PRD, an RFD, or a feature description), as text or as a file path or link, as the primary input: read it in full and pre-fill every answer it supports before asking anything.
 - MUST ask first what the user wants to spec when they provided no source and nothing to spec.
-- MUST read `<spex-dir>/spex.yaml` for the project overview, and each package's `description` to learn its role and determine the spec's implementation `scope`.
+- MUST read `<spex-dir>/spex.yaml` for the project overview, and each package's `description` to learn its role and determine the spec's `packages`.
 - MUST run `spex specs --ai --output <tmp-path>`, then read `<tmp-path>` for related specs.
 - MUST read the interface contracts listed per package under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
 - MUST run `spex rules --id writing-style --ai` for the writing conventions the spec's prose follows.
@@ -44,9 +44,9 @@ Creates new specs, or extends and changes existing ones, by interviewing the use
 - MUST capture, verbatim and as its own verifiable criterion, a concrete decision the user gave (a constant, default, threshold, rate, or rule, e.g. each pizza takes one minute to make, two workers are on shift, the estimate is rounded to whole minutes).
 - MUST ask for a detail needed to make a criterion verifiable when it is missing (Step 2).
 - MUST describe end behavior, verifiable from outside (what the system does or exposes), not the implementation steps taken to build it.
-- MUST set `scope` to the packages that implement the capability, each matching a `package_short_name` in `spex.yaml`.
-- MUST name, when `scope` lists more than one package, the package that owns each acceptance criterion at the start of its text, so the boundary between packages is unambiguous and no shared behavior is left unassigned, splitting a behavior that crosses the boundary into separate per-package criteria (e.g. the API owns producing a value and the frontend owns presenting it).
-- MUST omit the package name from the acceptance criteria of a single-scoped spec, since it is already redundant with `scope`.
+- MUST set `packages` to the packages that implement the capability, each matching a `package_short_name` in `spex.yaml`.
+- MUST name, when `packages` lists more than one package, the package that owns each acceptance criterion at the start of its text, so the boundary between packages is unambiguous and no shared behavior is left unassigned, splitting a behavior that crosses the boundary into separate per-package criteria (e.g. the API owns producing a value and the frontend owns presenting it).
+- MUST omit the package name from the acceptance criteria of a single-package spec, since it is already redundant with `packages`.
 - MUST set `blocked_by` only for specs that must be in place before this one can be implemented and whose status is not `active`, and leave it absent when nothing genuinely blocks the work.
 - MUST set `contract`, a required field, to `single` (the migration default; one `@spec contract <spec-id>` annotation for the whole spec, usual for a normal API spec), `for-each-ac` (a `@spec contract <spec-id>#<ac-id>` annotation per criterion, when each criterion exposes its own contract surface that must be traced individually), or `none` (no contract coverage, when the spec has no interface contract at all).
 - MUST keep `description` short, simple, and concrete: a general summary of the capability and who or what is affected.

@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer mark an item to track its price"
   - id: notifies-on-price-drop
     must: "email the customer when a tracked item's price drops"
-scope:
+packages:
   - api
 status: active
 contract: none

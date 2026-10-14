@@ -17,9 +17,9 @@ pub struct CoverageArgs {
     #[arg(
         long,
         num_args = 1..,
-        help = "Filter by package short names"
+        help = "Filter by package names or short names"
     )]
-    scope: Vec<String>,
+    package: Vec<String>,
     #[arg(
         long,
         short,
@@ -30,12 +30,12 @@ pub struct CoverageArgs {
 
 pub fn run(args: CoverageArgs) -> Result<ExitCode> {
     let spex = Spex::discover()?;
-    spex.validate_scopes(&args.scope)?;
+    let short_names = spex.package_short_names(&args.package)?;
 
     let specs: Vec<Spec> = spex
         .specs()?
         .into_iter()
-        .filter(|spec| spec.scope_selected(&args.scope))
+        .filter(|spec| spec.package_selected(&short_names))
         .collect();
     let index = AnnotationIndex::scan_project(&spex)?;
 

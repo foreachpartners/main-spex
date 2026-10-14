@@ -20,12 +20,12 @@ Derives or updates the interface contract from one or more specs: OpenAPI for HT
 
 ### Step 1: gather context
 
-- MUST run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs, and capture each spec's `title`, `description`, every `acceptance_criteria`, and its `scope`.
+- MUST run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs, and capture each spec's `title`, `description`, every `acceptance_criteria`, and its `packages`.
 - MUST identify which acceptance criteria cross a package boundary and therefore need an interface.
 
-### Step 2: resolve scope, existing contracts, and conventions
+### Step 2: resolve packages, existing contracts, and conventions
 
-- MUST collect the union of every targeted spec's `scope` as the affected packages, reading each package's `description` to learn its role, since package names are arbitrary.
+- MUST collect the union of every targeted spec's `packages` as the affected packages, reading each package's `description` to learn its role, since package names are arbitrary.
 - MUST read, for each affected package, its `contracts` list and open every contract file already recorded there, at its declared `path`, so it extends the real document instead of starting over, noting its format.
 - MUST run `spex info --package <package-name>` for each affected package to read its `rules` list, then `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions, at minimum `openapi-conventions` (for OpenAPI) or `graphql-conventions` (for GraphQL SDL), so the contract respects naming, casing, error responses, and secret handling.
 

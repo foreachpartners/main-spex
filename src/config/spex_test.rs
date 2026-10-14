@@ -15,24 +15,40 @@ mod tests {
         ])
     }
 
-    #[test]
-    fn validate_scopes_accepts_no_scopes() {
-        assert!(spex().validate_scopes(&[]).is_ok());
+    fn names(names: &[&str]) -> Vec<String> {
+        names.iter().map(|name| name.to_string()).collect()
     }
 
     #[test]
-    fn validate_scopes_accepts_known_package_short_names() {
-        let scopes = ["api".to_string(), "web".to_string()];
-        assert!(spex().validate_scopes(&scopes).is_ok());
+    fn package_short_names_without_names_is_empty() {
+        assert!(spex().package_short_names(&[]).expect("names").is_empty());
     }
 
     #[test]
-    fn validate_scopes_rejects_the_first_unknown_short_name() {
-        let scopes = ["api".to_string(), "nope".to_string(), "other".to_string()];
-        let error = spex().validate_scopes(&scopes).expect_err("unknown scope");
+    fn package_short_names_resolves_a_full_name_and_a_short_name_to_the_short_name() {
+        let spex = testing::spex(vec![
+            Package {
+                package_name: "demo-api".to_string(),
+                ..testing::package("api", "../api")
+            },
+            testing::package("web", "../web"),
+        ]);
+
+        let short_names = spex
+            .package_short_names(&names(&["web", "demo-api"]))
+            .expect("names");
+
+        assert_eq!(short_names, vec!["api", "web"]);
+    }
+
+    #[test]
+    fn package_short_names_rejects_the_first_unknown_name() {
+        let error = spex()
+            .package_short_names(&names(&["api", "nope", "other"]))
+            .expect_err("unknown package");
         assert_eq!(
             describe(&error),
-            "unknown package short name `nope` — not listed in spex.yaml"
+            "unknown package `nope` — not listed in spex.yaml"
         );
     }
 

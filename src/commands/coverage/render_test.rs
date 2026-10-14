@@ -202,7 +202,7 @@ mod tests {
     fn gapped_spec() -> Spec {
         let mut spec = spec("api-thing", Status::Active);
         spec.description = "Does the thing.".to_string();
-        spec.scope = vec!["api".to_string()];
+        spec.packages = vec!["api".to_string()];
         spec.acceptance_criteria = vec![AcceptanceCriterion {
             statement: Statement::Must(
                 "do the first thing in a sentence long enough to wrap".to_string(),
@@ -222,6 +222,19 @@ mod tests {
                 "spex {}\n\nSpecs (1)\n  active (1)\n\nGaps (1)\n  api\n    ✗  api-thing  0/1 AC  missing: contract, impl(ac-a), test(ac-a)\n\nplanned (0), in-progress (0), active (1), gaps (1)\n",
                 env!("CARGO_PKG_VERSION")
             )
+        );
+    }
+
+    #[test]
+    fn render_lists_a_gapped_spec_without_packages_under_no_package() {
+        let mut spec = gapped_spec();
+        spec.packages = Vec::new();
+
+        let text = rendered(100, false, &[spec]);
+
+        assert!(
+            text.contains("Gaps (1)\n  no package\n    ✗  api-thing"),
+            "got:\n{text}"
         );
     }
 

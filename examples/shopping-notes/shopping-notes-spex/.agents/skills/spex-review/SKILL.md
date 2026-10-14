@@ -11,7 +11,7 @@ The spec should have been provided to you, ask user if not.
 
 ### 1. Pin the fixed point
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages the spec is scoped to.
+If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages listed in the spec's `packages`.
 
 **Committed diff** (user gave a fixed point):
 

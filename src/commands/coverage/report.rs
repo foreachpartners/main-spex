@@ -57,32 +57,32 @@ impl<'a> CoverageReport<'a> {
             .collect()
     }
 
-    pub fn gapped_by_scope(&self) -> Vec<(Option<&str>, Vec<&SpecCoverage<'a>>)> {
+    pub fn gapped_by_package(&self) -> Vec<(Option<&str>, Vec<&SpecCoverage<'a>>)> {
         let gapped = self.gapped();
-        let scopes: BTreeSet<&str> = gapped
+        let packages: BTreeSet<&str> = gapped
             .iter()
-            .flat_map(|coverage| coverage.spec.scope.iter().map(String::as_str))
+            .flat_map(|coverage| coverage.spec.packages.iter().map(String::as_str))
             .collect();
 
-        let mut groups: Vec<(Option<&str>, Vec<&SpecCoverage>)> = scopes
+        let mut groups: Vec<(Option<&str>, Vec<&SpecCoverage>)> = packages
             .into_iter()
-            .map(|scope| {
-                let in_scope = gapped
+            .map(|package| {
+                let in_package = gapped
                     .iter()
-                    .filter(|coverage| coverage.spec.scope.iter().any(|name| name == scope))
+                    .filter(|coverage| coverage.spec.packages.iter().any(|name| name == package))
                     .copied()
                     .collect();
-                (Some(scope), in_scope)
+                (Some(package), in_package)
             })
             .collect();
 
-        let unscoped: Vec<&SpecCoverage> = gapped
+        let without_package: Vec<&SpecCoverage> = gapped
             .iter()
-            .filter(|coverage| coverage.spec.scope.is_empty())
+            .filter(|coverage| coverage.spec.packages.is_empty())
             .copied()
             .collect();
-        if !unscoped.is_empty() {
-            groups.push((None, unscoped));
+        if !without_package.is_empty() {
+            groups.push((None, without_package));
         }
 
         groups

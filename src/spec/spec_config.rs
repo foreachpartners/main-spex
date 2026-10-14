@@ -17,7 +17,7 @@ pub struct SpecConfig {
     #[serde(default)]
     pub blocked_by: Vec<SpecId>,
     #[serde(default)]
-    pub scope: Vec<String>,
+    pub packages: Vec<String>,
     #[serde(default)]
     pub status: Status,
     pub contract: ContractLevel,

@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer schedule a reorder on a chosen day"
   - id: cancels-scheduled-reorder
     must: "let a customer cancel a scheduled reorder"
-scope:
+packages:
   - api
 status: active
 contract: none

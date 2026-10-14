@@ -2,6 +2,14 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.21.0] - 2026-10-14
+
+- Naming is aligned: a package is now called a package everywhere, where `scope` was a second name for the same thing in a spec's field, in the flag of `spex coverage` and `spex specs`, and in the skills.
+- **Breaking**: a spec's `scope` is now `packages`, since it always listed packages: the `package_short_name`s of the packages that implement the capability. `schemas/spec.schema.json` and the `spex check` finding that requires each entry to match a package follow. See the migration guide.
+- **Breaking**: `spex coverage` and `spex specs` filter by `--package <name>...` instead of `--scope <package-short-name>...`. It takes a full `package_name` or a `package_short_name`, like `--package` of `spex check`, `spex info` and `spex rules`, and an unknown name errors with `unknown package`. The "Gaps" section of `spex coverage` lists a spec that sets no `packages` under `no package` instead of `unscoped`.
+- The plan written by the `spex-plan` skill lists its packages under `Packages` instead of `Packages scope`; the skills no longer call a set of packages a scope.
+- `spex update` rewrites the bundled schema, skills, and the CLI commands list in the managed section of `AGENTS.md` accordingly. No migration steps for the skill wording.
+
 ## [0.20.0] - 2026-10-14
 
 - **Breaking**: "workspace" is no longer a spex term. Since `single-repo` and `monorepo` joined `multi-repo` in 0.19.0, a workspace of several repositories exists in only one of the three layouts, so the word no longer fits. The whole is now the **project**, and its top-level folder is the **project root** (formerly the workspace root): the folder grouping the packages in `multi-repo`, the repository root otherwise. A script check's `run: workspace` is now `run: project`, validated by `schemas/check.schema.json`, and `spex check` reports the findings of those scripts under a `project` heading instead of `workspace`. The error and schema texts, the bundled glossary, skills, and the managed section of `AGENTS.md` follow; `spex update` rewrites them. The editor's `<project-name>.code-workspace` file keeps its name. See the migration guide.

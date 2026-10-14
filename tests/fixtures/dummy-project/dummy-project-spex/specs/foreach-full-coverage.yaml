@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer retry a failed payment with a new card"
   - id: retries-once-only
     must: "let a customer retry a failed payment only once before support is involved"
-scope:
+packages:
   - api
 status: active
 contract: for-each-ac

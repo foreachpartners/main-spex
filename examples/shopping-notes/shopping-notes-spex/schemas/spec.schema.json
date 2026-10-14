@@ -70,7 +70,7 @@
       },
       "minItems": 1
     },
-    "scope": {
+    "packages": {
       "type": "array",
       "description": "Package short names targeted for implementing this spec. Each must match a package_short_name in spex.yaml.",
       "items": {
@@ -151,7 +151,7 @@
           "should": "display an order confirmation with a unique order number"
         }
       ],
-      "scope": ["api", "frontend"],
+      "packages": ["api", "frontend"],
       "blocked_by": ["cart-add-item", "payment-gateway"],
       "status": "planned",
       "contract": "single",

@@ -6,7 +6,7 @@ Lets a package own the waivers and the baseline that concern it. Validated again
 
 - MUST treat a package without a `spex.package.yaml` as having nothing to merge.
 - MUST merge everything by union; MUST NOT let one source override another.
-- MUST compute a spec's coverage waivers as the union of its own `coverage_ignore`, the `coverage_ignore` entries of `spex.yaml` naming its id, and those of every package's `spex.package.yaml` naming its id, whichever packages the spec is `scope`d to.
+- MUST compute a spec's coverage waivers as the union of its own `coverage_ignore`, the `coverage_ignore` entries of `spex.yaml` naming its id, and those of every package's `spex.package.yaml` naming its id, whichever `packages` the spec lists.
 - MUST compute a package's `ignored_errors` baseline as its entry's in `spex.yaml` plus its own `spex.package.yaml`'s.
 - MUST validate `spex.package.yaml` against `schemas/spex.package.schema.json`.
 - MAY place `spex.package.yaml` at the root of a package.

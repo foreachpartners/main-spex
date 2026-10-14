@@ -9,7 +9,7 @@ acceptance_criteria:
     must: "render the not-found page when the requested URL matches no defined route"
   - id: not-found-page-links-to-main-page
     must: "show a link back to the main page on the not-found page"
-scope:
+packages:
   - frontend
 status: active
 contract: single

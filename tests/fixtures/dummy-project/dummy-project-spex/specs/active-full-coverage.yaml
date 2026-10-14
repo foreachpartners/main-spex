@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "show the subtotal of all items in the cart"
   - id: shows-tax
     must: "show the tax computed on the subtotal"
-scope:
+packages:
   - api
 status: active
 contract: single

@@ -21,8 +21,8 @@ pub struct SpecsArgs {
     ai: bool,
     #[arg(long, num_args = 1.., help = "Filter by spec ids")]
     id: Vec<String>,
-    #[arg(long, num_args = 1.., help = "Filter by package short name")]
-    scope: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Filter by package name or short name")]
+    package: Vec<String>,
     #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
@@ -40,7 +40,7 @@ pub fn run(args: SpecsArgs) -> Result<ExitCode> {
 }
 
 fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
-    spex.validate_scopes(&args.scope)?;
+    let short_names = spex.package_short_names(&args.package)?;
 
     let specs: Vec<serde_json::Value> =
         load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?
@@ -65,7 +65,7 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
 
     let output: Vec<&serde_json::Value> = specs
         .iter()
-        .filter(|spec| scope_selected(spec, &args.scope))
+        .filter(|spec| package_selected(spec, &short_names))
         .filter(|spec| id_selected(spec, &args.id))
         .collect();
 
@@ -86,17 +86,17 @@ fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
         .map(|docs| docs.join("\n"))
 }
 
-fn scope_selected(spec: &serde_json::Value, scopes: &[String]) -> bool {
-    if scopes.is_empty() {
+fn package_selected(spec: &serde_json::Value, short_names: &[&str]) -> bool {
+    if short_names.is_empty() {
         return true;
     }
-    let spec_scope = spec
-        .get("scope")
+    let spec_packages = spec
+        .get("packages")
         .and_then(|v| v.as_array())
         .map(Vec::as_slice)
         .unwrap_or_default();
-    scopes.iter().any(|short_name| {
-        spec_scope
+    short_names.iter().any(|short_name| {
+        spec_packages
             .iter()
             .any(|name| name.as_str() == Some(short_name))
     })

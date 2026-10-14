@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer split an order's payment across two cards"
   - id: splits-across-accounts
     must: "let a customer split an order's payment across two accounts"
-scope:
+packages:
   - api
 status: active
 contract: for-each-ac

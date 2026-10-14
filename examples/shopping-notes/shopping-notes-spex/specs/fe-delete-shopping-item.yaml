@@ -10,7 +10,7 @@ acceptance_criteria:
     must: call the delete-item endpoint when the user deletes an item
   - id: remove-item-from-view
     should: remove the item from the displayed list immediately after it is deleted
-scope:
+packages:
   - frontend
 status: active
 contract: single

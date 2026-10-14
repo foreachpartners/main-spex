@@ -15,9 +15,9 @@ Creates an implementation plan markdown file for large-scale, complex features o
 ### Gather context
 
 - MUST run `spex specs --ai --id <spec-id-a> <spec-id-b>` for every planned spec, and confirm with the user how to handle any unresolved blocker.
-- MUST resolve a `Packages scope` for the requested changes.
-- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages scope`, then read `<tmp-path>` for the governing rules.
-- MUST read each affected package's information in `Packages scope` from `spex.yaml`.
+- MUST resolve the `Packages` for the requested changes.
+- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages`, then read `<tmp-path>` for the governing rules.
+- MUST read each affected package's information in `Packages` from `spex.yaml`.
 - MUST read the related contracts in `<spex-dir>/contracts/`.
 - MUST read all existing code related to the changes: domain models, database schema, repositories, handlers, endpoints, components.
 - MUST ground every interface it plans to change, extend, or create.
@@ -31,7 +31,7 @@ Creates an implementation plan markdown file for large-scale, complex features o
 ### Write plan metadata
 
 - MUST write `Specs`, the specs the user provided.
-- MUST write `Packages scope` based on the changes to implement, without spex itself.
+- MUST write `Packages` based on the changes to implement, without spex itself.
 - MUST write `Rules` from the governing rules already read in `<tmp-path>` that are applicable to the changes.
 
 ### Write the steps and tasks

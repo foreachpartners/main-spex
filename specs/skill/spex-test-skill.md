@@ -14,7 +14,7 @@ Adds or updates tests for an already-implemented change, from a plan, a diff, or
 
 - MUST finish this step before writing any test file.
 - MUST, with a plan, read the plan and run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the plan's `Specs` to read the governing specs.
-- MUST, without a plan (ad-hoc request, or testing an existing diff), determine the packages to work on (e.g. scope: frontend, backend), run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for that scope and read `<tmp-path>` for the governing rules, determine all governing spec IDs related to the change, from the request or from `@spec` annotations already in the changed code, and run `spex specs --ai --id ...` for them.
+- MUST, without a plan (ad-hoc request, or testing an existing diff), determine the packages to work on (e.g. frontend, backend), run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for those packages and read `<tmp-path>` for the governing rules, determine all governing spec IDs related to the change, from the request or from `@spec` annotations already in the changed code, and run `spex specs --ai --id ...` for them.
 - MUST, without a plan, produce a note in its response with a list of the governing rules and specs.
 - MUST read all the specs and the governing rules.
 - MUST inspect the actual implementation under test.

@@ -19,20 +19,20 @@ mod tests {
     }
 
     #[test]
-    fn scope_selected_matches_any_requested_scope() {
+    fn package_selected_matches_any_requested_package() {
         let api_and_web = Spec {
-            scope: vec!["api".to_string(), "web".to_string()],
+            packages: vec!["api".to_string(), "web".to_string()],
             ..testing::spec("a")
         };
         let web = Spec {
-            scope: vec!["web".to_string()],
+            packages: vec!["web".to_string()],
             ..testing::spec("b")
         };
-        let unscoped = testing::spec("c");
+        let without_packages = testing::spec("c");
 
-        assert!(api_and_web.scope_selected(&["api".to_string()]));
-        assert!(!web.scope_selected(&["api".to_string()]));
-        assert!(unscoped.scope_selected(&[]));
+        assert!(api_and_web.package_selected(&["api"]));
+        assert!(!web.package_selected(&["api"]));
+        assert!(without_packages.package_selected(&[]));
     }
 
     #[test]

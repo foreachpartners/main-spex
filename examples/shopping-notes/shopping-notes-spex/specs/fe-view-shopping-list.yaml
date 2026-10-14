@@ -10,7 +10,7 @@ acceptance_criteria:
     must: load the shopping list from the list-items endpoint when the view is opened
   - id: empty-state
     should: show an empty state when the shopping list has no items
-scope:
+packages:
   - frontend
 status: active
 contract: single

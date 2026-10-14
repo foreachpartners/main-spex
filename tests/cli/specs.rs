@@ -20,7 +20,7 @@ const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
     must: reject a registration request for an email already registered
   - id: logs-attempt
     must: log every registration attempt, successful or not
-  scope:
+  packages:
   - frontend
   status: active
   contract: single
@@ -33,7 +33,7 @@ const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
   - id: save-as-favorite
     must: let a customer save a completed order as a favorite
     is_done: false
-  scope:
+  packages:
   - frontend
   status: planned
   contract: single
@@ -79,10 +79,10 @@ fn specs_ai_adds_the_spec_path_after_the_id() {
 }
 
 #[test]
-fn specs_scope_limits_output_to_specs_in_that_scope() {
+fn specs_package_limits_output_to_specs_of_that_package() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
-    let specs = run_spex(&project, &["specs", "--scope", "frontend"], "");
+    let specs = run_spex(&project, &["specs", "--package", "frontend"], "");
 
     assert!(specs.status.success());
     assert_eq!(
@@ -97,28 +97,46 @@ fn specs_scope_limits_output_to_specs_in_that_scope() {
 }
 
 #[test]
-fn specs_scope_lists_a_spec_in_several_scopes_once_and_skips_unscoped_specs() {
+fn specs_package_accepts_a_full_package_name() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let by_short_name = run_spex(&project, &["specs", "--package", "frontend"], "");
+    let by_full_name = run_spex(
+        &project,
+        &["specs", "--package", "dummy-project-frontend"],
+        "",
+    );
+
+    assert!(by_full_name.status.success());
+    assert_eq!(
+        listed_ids(&by_full_name.stdout),
+        listed_ids(&by_short_name.stdout)
+    );
+}
+
+#[test]
+fn specs_package_lists_a_spec_in_several_packages_once_and_skips_specs_without_packages() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let everything = run_spex(&project, &["specs"], "");
-    let scoped = run_spex(&project, &["specs", "--scope", "api", "frontend"], "");
+    let packaged = run_spex(&project, &["specs", "--package", "api", "frontend"], "");
 
     let all_ids = listed_ids(&everything.stdout);
-    let scoped_ids = listed_ids(&scoped.stdout);
-    let mut distinct = scoped_ids.clone();
+    let packaged_ids = listed_ids(&packaged.stdout);
+    let mut distinct = packaged_ids.clone();
     distinct.dedup();
     assert_eq!(
-        scoped_ids, distinct,
-        "a spec in both scopes was listed twice"
+        packaged_ids, distinct,
+        "a spec in both packages was listed twice"
     );
-    assert!(scoped_ids.contains(&"in-progress-mixed".to_string()));
+    assert!(packaged_ids.contains(&"in-progress-mixed".to_string()));
     assert_eq!(
         all_ids
             .iter()
-            .filter(|id| !scoped_ids.contains(id))
+            .filter(|id| !packaged_ids.contains(id))
             .collect::<Vec<_>>(),
         ["in-progress-pending"],
-        "only the unscoped spec should be left out",
+        "only the spec without packages should be left out",
     );
 }
 
@@ -133,12 +151,12 @@ fn specs_rejects_an_unknown_spec_id() {
 }
 
 #[test]
-fn specs_rejects_an_unknown_scope() {
+fn specs_rejects_an_unknown_package() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
-    let specs = run_spex(&project, &["specs", "--scope", "bogus"], "");
+    let specs = run_spex(&project, &["specs", "--package", "bogus"], "");
 
-    assert_fails_mentioning(&specs, "unknown package short name `bogus`");
+    assert_fails_mentioning(&specs, "unknown package `bogus`");
     assert!(specs.stdout.is_empty());
 }
 

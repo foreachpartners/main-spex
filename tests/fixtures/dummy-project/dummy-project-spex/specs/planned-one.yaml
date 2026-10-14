@@ -7,7 +7,7 @@ acceptance_criteria:
   - id: save-as-favorite
     must: "let a customer save a completed order as a favorite"
     is_done: false
-scope:
+packages:
   - frontend
 status: planned
 contract: single

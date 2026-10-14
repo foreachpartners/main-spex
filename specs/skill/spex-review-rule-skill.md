@@ -7,8 +7,8 @@ Rule-axis review of a diff, committed changes since a fixed point or uncommitted
 ### Pin and gather
 
 - MUST pin the diff to review as specified in [review-target-skill.md](review-target-skill.md).
-- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
-- MUST run `spex check --package <package-a> <package-b>` for the affected scope, and treat every reported violation as a hard finding, since the check already proved it.
+- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages, then read `<tmp-path>` for the governing rules.
+- MUST run `spex check --package <package-a> <package-b>` for the affected packages, and treat every reported violation as a hard finding, since the check already proved it.
 
 ### Smell baseline
 

@@ -215,8 +215,8 @@ impl ReportWriter {
         } else if report.gapped().is_empty() {
             self.line(format!("  {}", "none".dimmed()));
         } else {
-            for (scope, group) in report.gapped_by_scope() {
-                self.line(format!("  {}", scope.unwrap_or("unscoped").bold()));
+            for (package, group) in report.gapped_by_package() {
+                self.line(format!("  {}", package.unwrap_or("no package").bold()));
                 for coverage in group {
                     self.spec_progress(coverage);
                 }

@@ -10,7 +10,7 @@ acceptance_criteria:
     must: persist the deletion so the item does not reappear after an API restart
   - id: unknown-item-not-found
     must: "return a 404 response from `DELETE /items/{id}` when no item matches `id`"
-scope:
+packages:
   - api
 status: active
 contract: single

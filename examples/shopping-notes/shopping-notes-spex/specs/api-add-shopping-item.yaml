@@ -12,7 +12,7 @@ acceptance_criteria:
     must: persist the created item to the JSON file store so it survives an API restart
   - id: reject-empty-name
     must_not: create an item when `name` is missing or empty
-scope:
+packages:
   - api
 status: active
 contract: single

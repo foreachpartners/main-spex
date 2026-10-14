@@ -12,7 +12,7 @@ acceptance_criteria:
     must_not: submit an add when the input is empty
   - id: clear-input-after-add
     should: clear the input field after the item is added
-scope:
+packages:
   - frontend
 status: active
 contract: single

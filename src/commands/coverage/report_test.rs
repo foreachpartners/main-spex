@@ -10,9 +10,9 @@ mod tests {
         }
     }
 
-    fn scoped(id: &str, scope: &[&str]) -> Spec {
+    fn in_packages(id: &str, packages: &[&str]) -> Spec {
         Spec {
-            scope: scope.iter().map(|name| name.to_string()).collect(),
+            packages: packages.iter().map(|name| name.to_string()).collect(),
             ..spec(id, Status::Active)
         }
     }
@@ -117,17 +117,17 @@ mod tests {
     }
 
     #[test]
-    fn gapped_by_scope_duplicates_multi_scope_specs_and_lists_unscoped_last() {
+    fn gapped_by_package_duplicates_multi_package_specs_and_lists_specs_without_packages_last() {
         let specs = vec![
-            scoped("a", &["web", "api"]),
-            scoped("b", &["web"]),
-            scoped("c", &[]),
+            in_packages("a", &["web", "api"]),
+            in_packages("b", &["web"]),
+            in_packages("c", &[]),
         ];
         let report = report(&specs);
-        let groups = report.gapped_by_scope();
+        let groups = report.gapped_by_package();
 
-        let scopes: Vec<Option<&str>> = groups.iter().map(|(scope, _)| *scope).collect();
-        assert_eq!(scopes, vec![Some("api"), Some("web"), None]);
+        let packages: Vec<Option<&str>> = groups.iter().map(|(package, _)| *package).collect();
+        assert_eq!(packages, vec![Some("api"), Some("web"), None]);
 
         let grouped_ids: Vec<Vec<&str>> = groups.iter().map(|(_, group)| ids(group)).collect();
         assert_eq!(grouped_ids, vec![vec!["a"], vec!["a", "b"], vec!["c"]]);

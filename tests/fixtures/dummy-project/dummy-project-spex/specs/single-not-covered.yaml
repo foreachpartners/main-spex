@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer archive a completed order"
   - id: hides-archived-default
     must: "hide archived orders from the default order list"
-scope:
+packages:
   - api
 status: active
 contract: single

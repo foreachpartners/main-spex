@@ -56,7 +56,7 @@ Runs the checks declared in `spex.yaml` against each package, reporting findings
 
 ### Self-validation
 
-- MUST validate the spex directory directly, without a rule: in `multi-repo` it is reported with the spex repository, whenever it is in scope.
+- MUST validate the spex directory directly, without a rule: in `multi-repo` it is reported with the spex repository, whenever it is selected.
 - MUST run self-validation on every `spex check` in `single-repo` and `monorepo`, whatever `--package` or `--files` select, and report it last under its own `spex` heading, since no package is the spex directory there.
 - MUST validate `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.package.yaml` of every package that has one against their JSON Schema.
 - MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id grammar (lowercase letters, digits and hyphens only, at most 40 characters).
@@ -68,7 +68,7 @@ Runs the checks declared in `spex.yaml` against each package, reporting findings
 - MUST skip markdown files for annotation validation, as well as the spex directory's `schemas/`, `specs/` and `rules/` (with each rule's script folder), which hold illustrative example annotations rather than real references.
 - MUST require a `blocked_by` reference to name an existing spec, and error on a rule id.
 - MUST warn when a `blocked_by` reference names an already-`active` spec, since a satisfied blocker is dropped.
-- MUST require a `scope` entry to match a package's `package_short_name` in `spex.yaml`.
+- MUST require a `packages` entry to match a package's `package_short_name` in `spex.yaml`.
 - MUST require a `coverage_ignore` entry, whether in the spec, in `spex.yaml`, or in a package's `spex.package.yaml`, to match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
 - MUST warn on a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is neither `active` nor `deprecated`.
 - MUST error on a spec whose `status` is `active` with any acceptance criterion still `is_done: false`, since `active` means fully implemented (`in-progress` applies until then).

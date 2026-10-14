@@ -9,7 +9,7 @@ Rule-axis review of a diff — committed changes since a fixed point, or uncommi
 
 ### 1. Pin the fixed point
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages the spec is scoped to.
+If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages listed in the spec's `packages`.
 
 **Committed diff** (user gave a fixed point):
 
@@ -27,7 +27,7 @@ A bad ref or empty diff should fail here rather than partway through the review.
 
 ### 2. Identify the rules source
 
-Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected scope, then read `<tmp-path>` for the governing rules.
+Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages, then read `<tmp-path>` for the governing rules.
 
 On top of whatever the package documents, the review always carries the **smell baseline** below — a fixed set of Fowler code smells that applies even when a package documents nothing. Two rules bind it:
 
@@ -51,7 +51,7 @@ Each smell reads _what it is_ -> _how to fix_; match it against the diff:
 
 ### 3. Run automated checks
 
-Run `spex check --package <package-a> <package-b>` for the affected scope. Every reported violation is a hard finding — the check already proved it, not a judgement call.
+Run `spex check --package <package-a> <package-b>` for the affected packages. Every reported violation is a hard finding — the check already proved it, not a judgement call.
 
 ### 4. Review
 

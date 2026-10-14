@@ -109,19 +109,15 @@ impl Spex {
             .collect())
     }
 
-    pub fn validate_scopes(&self, scopes: &[String]) -> Result<()> {
-        for short_name in scopes {
-            if !self
-                .packages
-                .iter()
-                .any(|package| &package.package_short_name == short_name)
-            {
-                bail!(
-                    "unknown package short name `{short_name}` — not listed in {SPEX_CONFIG_FILE}"
-                );
-            }
+    pub fn package_short_names(&self, names: &[String]) -> Result<Vec<&str>> {
+        if names.is_empty() {
+            return Ok(Vec::new());
         }
-        Ok(())
+        Ok(self
+            .select_packages(names)?
+            .into_iter()
+            .map(|package| package.package_short_name.as_str())
+            .collect())
     }
 }
 

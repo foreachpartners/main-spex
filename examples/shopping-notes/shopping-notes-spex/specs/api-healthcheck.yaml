@@ -10,7 +10,7 @@ acceptance_criteria:
     must_not: "require authentication or authorization to access `GET /health`"
   - id: health-endpoint-no-dependency-checks
     must_not: "check the status of any downstream dependency (e.g. database) when responding to `GET /health`"
-scope:
+packages:
   - api
 status: active
 contract: single

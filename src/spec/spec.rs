@@ -23,7 +23,7 @@ pub struct Spec {
     pub description: String,
     pub acceptance_criteria: Vec<AcceptanceCriterion>,
     pub blocked_by: Vec<SpecId>,
-    pub scope: Vec<String>,
+    pub packages: Vec<String>,
     pub status: Status,
     pub contract: ContractLevel,
     pub coverage_ignore: Vec<CoverageIgnore>,
@@ -39,11 +39,11 @@ impl Spec {
         (done, self.acceptance_criteria.len())
     }
 
-    pub fn scope_selected(&self, scopes: &[String]) -> bool {
-        scopes.is_empty()
-            || scopes
+    pub fn package_selected(&self, short_names: &[&str]) -> bool {
+        short_names.is_empty()
+            || short_names
                 .iter()
-                .any(|short_name| self.scope.contains(short_name))
+                .any(|short_name| self.packages.iter().any(|name| name == short_name))
     }
 
     pub fn ac_contract_required(&self, ac_id: &AcId) -> bool {
@@ -85,7 +85,7 @@ impl Spec {
                 AcceptanceCriterion::from_config,
             ),
             blocked_by: config.blocked_by,
-            scope: config.scope,
+            packages: config.packages,
             status: config.status,
             contract: config.contract,
             coverage_ignore: config.coverage_ignore,

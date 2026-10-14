@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "delete every item from the JSON file store when `DELETE /items` is called"
   - id: persist-cleared-list
     must: persist the empty list so cleared items do not reappear after an API restart
-scope:
+packages:
   - api
 status: active
 contract: single

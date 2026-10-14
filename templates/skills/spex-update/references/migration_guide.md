@@ -2,6 +2,15 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+## 0.21.0
+
+A spec's `scope` field is now `packages`, and `spex coverage` and `spex specs` filter with `--package` instead of `--scope`. `schemas/spec.schema.json` lists `packages` instead of `scope`. Until every spec is renamed, `spex check` fails on `scope`. In `<spex-dir>`:
+
+- In every spec under `specs/**/*.yaml`, rename the `scope` key to `packages`, keeping its list and its position.
+- In every CI job, script, skill, or doc of the project that runs `spex coverage --scope` or `spex specs --scope`, replace `--scope` with `--package`. It now accepts a full package name as well as a short name, like `--package` of `spex check`, `spex info` and `spex rules`.
+- The "Gaps" section of `spex coverage` now lists a spec that sets no `packages` under `no package` instead of `unscoped`. In every CI job or script that reads the report for that heading, look for `no package`.
+- Wherever your own text (`AGENTS.md` below the managed section, specs, rules, skills, docs) calls a spec's packages its `scope`, say `packages`.
+
 ## 0.20.0
 
 "Workspace" is no longer a spex term: the whole is the project, and its top-level folder is the project root (formerly the workspace root). A script check's `run: workspace` is now `run: project`, and `schemas/check.schema.json` lists `project` instead of `workspace`. Until every rule is renamed, `spex check` fails on `run: workspace`. In `<spex-dir>`:

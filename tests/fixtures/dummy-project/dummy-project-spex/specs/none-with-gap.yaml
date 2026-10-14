@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer pause a saved favorite order"
   - id: resumes-favorite
     must: "let a customer resume a paused favorite order"
-scope:
+packages:
   - api
 status: active
 contract: none

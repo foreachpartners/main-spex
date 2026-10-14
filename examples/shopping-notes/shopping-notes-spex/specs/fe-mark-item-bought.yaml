@@ -10,7 +10,7 @@ acceptance_criteria:
     must: call the mark-item-bought endpoint when the user marks an item as bought
   - id: distinguish-bought-items
     should: visually distinguish bought items from unbought items in the list
-scope:
+packages:
   - frontend
 status: active
 contract: single

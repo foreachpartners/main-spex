@@ -1,7 +1,7 @@
 # Plan: Let users reset a forgotten password
 
 - Specs: reset-password
-- Packages scope: api, frontend
+- Packages: api, frontend
 - Rules: naming-convention, secret-handling
 
 ## Step 1 — Store reset tokens and expose the reset endpoints

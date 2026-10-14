@@ -8,7 +8,7 @@ acceptance_criteria:
     must: "let a customer reorder every item of a past order"
   - id: edits-reorder-before-submit
     must: "let a customer edit a reorder before submitting it"
-scope:
+packages:
   - frontend
 status: active
 contract: for-each-ac

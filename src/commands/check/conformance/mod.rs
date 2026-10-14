@@ -4,9 +4,9 @@ mod conformance;
 mod coverage_ignore;
 mod duplicate_ac_ids;
 mod duplicate_ids;
+mod packages;
 mod property_order;
 mod schema;
-mod scope;
 mod script_references;
 mod status;
 

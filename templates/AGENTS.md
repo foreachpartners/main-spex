@@ -37,8 +37,8 @@ Run from anywhere inside the project; `spex <command> --help` lists every option
 
 - `spex info [--package <name>...]` — print `spex.yaml`: project and per-package configuration, including paths.
 - `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
-- `spex coverage [--scope <package-short-name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
-- `spex specs [--id <spec-id>...] [--ai] [--output <file>]` — print specs.
+- `spex coverage [--package <name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
+- `spex specs [--id <spec-id>...] [--package <name>...] [--ai] [--output <file>]` — print specs.
 - `spex rules [--id <rule-id>...] [--package <name>...] [--ai] [--output <file>]` — print the active rules per package.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.

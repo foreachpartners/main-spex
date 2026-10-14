@@ -9,19 +9,25 @@ mod tests {
     }
 
     #[test]
-    fn scope_selected_defaults_to_true_when_empty() {
-        assert!(scope_selected(&spec("a", r#", "scope": ["api"]"#), &[]));
+    fn package_selected_defaults_to_true_when_empty() {
+        assert!(package_selected(
+            &spec("a", r#", "packages": ["api"]"#),
+            &[]
+        ));
     }
 
     #[test]
-    fn scope_selected_matches_short_name_in_spec_scope() {
-        let api = ["api".to_string()];
-        assert!(scope_selected(&spec("a", r#", "scope": ["api"]"#), &api));
-        assert!(!scope_selected(
-            &spec("a", r#", "scope": ["frontend"]"#),
+    fn package_selected_matches_short_name_in_spec_packages() {
+        let api = ["api"];
+        assert!(package_selected(
+            &spec("a", r#", "packages": ["api"]"#),
             &api
         ));
-        assert!(!scope_selected(&spec("a", ""), &api));
+        assert!(!package_selected(
+            &spec("a", r#", "packages": ["frontend"]"#),
+            &api
+        ));
+        assert!(!package_selected(&spec("a", ""), &api));
     }
 
     #[test]
@@ -63,7 +69,7 @@ mod tests {
                 description: Lets a customer place an order.
                 acceptance_criteria:
                   - "[ ] MUST accept a cart"
-                scope: [api]
+                packages: [api]
             "#},
         )
         .expect("write spec");
@@ -75,7 +81,7 @@ mod tests {
                 description: Lets a customer browse the menu.
                 acceptance_criteria:
                   - "[ ] MUST list every active pizza"
-                scope: [frontend]
+                packages: [frontend]
             "#},
         )
         .expect("write spec");
@@ -87,11 +93,11 @@ mod tests {
         Spex::from_config(dir.to_path_buf(), config)
     }
 
-    fn args(ai: bool, id: &[&str], scope: &[&str]) -> SpecsArgs {
+    fn args(ai: bool, id: &[&str], package: &[&str]) -> SpecsArgs {
         SpecsArgs {
             ai,
             id: id.iter().map(|s| s.to_string()).collect(),
-            scope: scope.iter().map(|s| s.to_string()).collect(),
+            package: package.iter().map(|s| s.to_string()).collect(),
             output: None,
         }
     }
@@ -112,7 +118,7 @@ mod tests {
                   description: Lets a customer browse the menu.
                   acceptance_criteria:
                   - '[ ] MUST list every active pizza'
-                  scope:
+                  packages:
                   - frontend
 
                 - id: place-pizza-order
@@ -120,7 +126,7 @@ mod tests {
                   description: Lets a customer place an order.
                   acceptance_criteria:
                   - '[ ] MUST accept a cart'
-                  scope:
+                  packages:
                   - api
             "}
         );
@@ -143,14 +149,14 @@ mod tests {
                   description: Lets a customer place an order.
                   acceptance_criteria:
                   - '[ ] MUST accept a cart'
-                  scope:
+                  packages:
                   - api
             ", dir = dir.path().display()}
         );
     }
 
     #[test]
-    fn render_with_single_scope_returns_only_matching_specs() {
+    fn render_with_single_package_returns_only_matching_specs() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());
@@ -165,25 +171,27 @@ mod tests {
                   description: Lets a customer browse the menu.
                   acceptance_criteria:
                   - '[ ] MUST list every active pizza'
-                  scope:
+                  packages:
                   - frontend
             "}
         );
     }
 
     #[test]
-    fn render_with_full_package_name_does_not_match_scope() {
+    fn render_with_full_package_name_returns_the_specs_of_that_package() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());
 
-        let result = render(&project, &args(false, &[], &["demo-api"]));
+        let by_full_name = render(&project, &args(false, &[], &["demo-frontend"])).expect("render");
+        let by_short_name = render(&project, &args(false, &[], &["frontend"])).expect("render");
 
-        assert!(result.is_err());
+        assert_eq!(by_full_name, by_short_name);
+        assert!(by_full_name.contains("list-pizza-menu"));
     }
 
     #[test]
-    fn render_errors_on_unknown_scope() {
+    fn render_errors_on_unknown_package() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());

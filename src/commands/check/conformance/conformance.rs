@@ -11,9 +11,9 @@ use super::blocked_by::{status_by_id, validate_blocked_by};
 use super::coverage_ignore::validate_coverage_ignore;
 use super::duplicate_ac_ids::validate_no_duplicate_ac_ids;
 use super::duplicate_ids::validate_no_duplicate_ids;
+use super::packages::validate_packages;
 use super::property_order::validate_property_order;
 use super::schema::validate_schema;
-use super::scope::validate_scope;
 use super::script_references::validate_script_references;
 use super::status::{active_incomplete_finding, status_finding};
 
@@ -40,7 +40,7 @@ pub(in crate::commands::check) fn validate_conformance(
 
     for spec in specs {
         findings.extend(validate_blocked_by(spec, &status_by_id));
-        findings.extend(validate_scope(spec, packages));
+        findings.extend(validate_packages(spec, packages));
         findings.extend(validate_coverage_ignore(spec));
     }
 

@@ -32,7 +32,7 @@ pub fn spec(id: &str) -> Spec {
         description: String::new(),
         acceptance_criteria: Vec::new(),
         blocked_by: Vec::new(),
-        scope: Vec::new(),
+        packages: Vec::new(),
         status: Status::Planned,
         contract: ContractLevel::Single,
         coverage_ignore: Vec::new(),

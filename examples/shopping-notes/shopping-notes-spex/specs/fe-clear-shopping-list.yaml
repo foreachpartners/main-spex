@@ -10,7 +10,7 @@ acceptance_criteria:
     must: call the clear-list endpoint when the user clears the shopping list
   - id: confirm-before-clearing
     should: ask the user to confirm before clearing all items
-scope:
+packages:
   - frontend
 status: active
 contract: single

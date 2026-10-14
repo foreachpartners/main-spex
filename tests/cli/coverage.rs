@@ -31,8 +31,8 @@ const EXPECTED_COVERAGE: &str = include_str!("../fixtures/dummy-project/expected
 const EXPECTED_COVERAGE_VERBOSE: &str =
     include_str!("../fixtures/dummy-project/expected_coverage_verbose.txt");
 
-const EXPECTED_COVERAGE_SCOPE_FRONTEND: &str =
-    include_str!("../fixtures/dummy-project/expected_coverage_scope_frontend.txt");
+const EXPECTED_COVERAGE_PACKAGE_FRONTEND: &str =
+    include_str!("../fixtures/dummy-project/expected_coverage_package_frontend.txt");
 
 const NONE_WITH_GAP_IMPL_WAIVER: &str = r#"
 coverage_ignore:
@@ -56,7 +56,7 @@ acceptance_criteria:
   - id: rejects-empty-cart
     must: "reject checkout of an empty cart"
     is_done: false
-scope:
+packages:
   - api
 status: in-progress
 contract: single
@@ -103,57 +103,76 @@ fn coverage_verbose_report_matches_expected() {
 }
 
 #[test]
-fn coverage_scope_limits_the_report_to_specs_in_that_scope() {
+fn coverage_package_limits_the_report_to_specs_of_that_package() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
-    let coverage = run_spex(&project, &["coverage", "--scope", "frontend"], "");
+    let coverage = run_spex(&project, &["coverage", "--package", "frontend"], "");
     assert_eq!(
         report_text(&coverage.stdout),
-        with_version_header(EXPECTED_COVERAGE_SCOPE_FRONTEND),
-        "coverage --scope report did not match\nstderr:\n{}",
+        with_version_header(EXPECTED_COVERAGE_PACKAGE_FRONTEND),
+        "coverage --package report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&coverage.stderr),
     );
     assert_eq!(
         coverage.status.code(),
         Some(1),
-        "coverage should exit 1 when an in-scope active spec has a gap"
+        "coverage should exit 1 when an active spec of the package has a gap"
     );
 }
 
 #[test]
-fn coverage_scope_with_several_scopes_leaves_out_only_unscoped_specs() {
+fn coverage_package_accepts_a_full_package_name() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+
+    let by_short_name = run_spex(&project, &["coverage", "--package", "frontend"], "");
+    let by_full_name = run_spex(
+        &project,
+        &["coverage", "--package", "dummy-project-frontend"],
+        "",
+    );
+
+    assert_eq!(
+        report_text(&by_full_name.stdout),
+        report_text(&by_short_name.stdout)
+    );
+}
+
+#[test]
+fn coverage_package_with_several_packages_leaves_out_only_specs_without_packages() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
     let everything = report_text(&run_spex(&project, &["coverage"], "").stdout);
-    let scoped =
-        report_text(&run_spex(&project, &["coverage", "--scope", "api", "frontend"], "").stdout);
+    let packaged =
+        report_text(&run_spex(&project, &["coverage", "--package", "api", "frontend"], "").stdout);
 
     assert!(everything.contains("Specs (13)"), "{everything}");
     assert!(everything.contains("in-progress-pending"), "{everything}");
-    assert!(scoped.contains("Specs (12)"), "{scoped}");
+    assert!(packaged.contains("Specs (12)"), "{packaged}");
     assert!(
-        !scoped.contains("in-progress-pending"),
-        "the unscoped spec should be left out\n{scoped}"
+        !packaged.contains("in-progress-pending"),
+        "the spec without packages should be left out\n{packaged}"
     );
     assert!(
-        scoped.ends_with("planned (2), in-progress (1), active (9), gaps (7)\n"),
-        "{scoped}"
+        packaged.ends_with("planned (2), in-progress (1), active (9), gaps (7)\n"),
+        "{packaged}"
     );
 }
 
 #[test]
-fn coverage_scope_rejects_an_unknown_package() {
+fn coverage_package_rejects_an_unknown_package() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
-    let coverage = run_spex(&project, &["coverage", "--scope", "bogus"], "");
+    let coverage = run_spex(&project, &["coverage", "--package", "bogus"], "");
 
-    assert_fails_mentioning(&coverage, "unknown package short name `bogus`");
+    assert_fails_mentioning(&coverage, "unknown package `bogus`");
     assert!(coverage.stdout.is_empty());
 }
 
