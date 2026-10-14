@@ -1,14 +1,22 @@
 #!/bin/sh
 # naming-convention / package-dir
 #
-# The package directory name is a derived identifier and must equal
-# <project-name>-<package-short-name>, e.g.
+# In the multi-repo layout the package directory name is a derived identifier
+# and must equal <project-name>-<package-short-name>, e.g.
 #   shopping-notes-api
 # where <project-name> comes from spex.yaml and <package-short-name> is the
 # package's short name (kebab-case).
 #
-# Runs once per package from that package's directory.
+# Runs once per package from that package's directory. The other layouts name
+# package directories after the repository or the folder structure, so they pass.
 set -eu
+
+layout=$(spex jq -r .layout "$SPEX_DIR/spex.yaml") || {
+  echo "Could not read the layout from $SPEX_DIR/spex.yaml"
+  exit 1
+}
+
+[ "$layout" = multi-repo ] || exit 0
 
 dir=$(basename "$(pwd -P)")
 

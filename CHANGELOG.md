@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.21.1] - 2026-10-14
+
+- The `package-dir` check of the bundled `naming-convention` rule now runs only in the `multi-repo` layout, read from `layout` in `spex.yaml`. In `single-repo` and `monorepo` the package directory is named after the repository or the folder structure, so the check passes there. `spex update` rewrites the rule and its script; no migration steps.
+
 ## [0.21.0] - 2026-10-14
 
 - Naming is aligned: a package is now called a package everywhere, where `scope` was a second name for the same thing in a spec's field, in the flag of `spex coverage` and `spex specs`, and in the skills.
