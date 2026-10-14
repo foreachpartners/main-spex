@@ -2,6 +2,11 @@
 
 Notable changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.19.1] - 2026-10-14
+
+- The artifact chain no longer has a BRD: the PRD is now the root artifact and covers both why something is built and what the product should do. `spex update` rewrites the bundled glossary and the managed section of `AGENTS.md` accordingly; no migration steps.
+- The single-source-of-truth rule in the managed section of `AGENTS.md` now covers business rules, behavior, contracts, and configuration values, and states that repeating wording or an idea for readability is not duplication. `spex update` rewrites it; no migration steps.
+
 ## [0.19.0] - 2026-10-12
 
 - `spex init` supports `single-repo` and `monorepo` layouts besides `multi-repo`: it asks for the layout, records it as `layout` with `agent_root` in `spex.yaml`, puts the spex directory in `spex/` and the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills`, `.claude`) in the repository root. Both are required, so existing projects must add `layout: multi-repo` and `agent_root: .` to `spex.yaml` (see the migration guide).

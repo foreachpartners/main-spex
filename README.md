@@ -11,7 +11,7 @@ Main spex, or spex for short, is built on four simple pieces:
 - **Specs** define _what_ a feature does — a capability with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each package must adhere to a list of rules applicable to it.
 - **Skills** are the instructions an AI agent follows to do the job consistently and correctly.
-- **Traceability** is the thread that stitches together spec, contract, implementations, and tests — ensuring full coverage and tracing for spec and every acceptance criterion.
+- **Traceability** is the thread that stitches together spec, contract, implementations, and tests — letting humans and agents find everything related to a spec at once, and ensuring full coverage so no acceptance criterion is forgotten.
 
 spex provides the core flow plus skills and rules you can extend, adapt, or replace for your project needs. Whatever you don't customize updates with each new version, bringing you the latest improvements contributed by the community.
 
@@ -87,9 +87,9 @@ Say you want to add a rule to ensure we don't commit sensitive information. Here
 - **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules instead of living as tribal knowledge.
 - **Human in control**: AI writes everything — specs, contracts, plans, code, and tests — and the human validates everything.
 - **Deterministic enforcement**: every check that can be a script must be a script, proving the change does what the spec demands.
-- **Traceability**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back.
+- **Traceability**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back — so related parts are found fast and no acceptance criterion is forgotten.
 
-See full principles in [framework-principles.md](docs/framework-principles.md).
+See full principles in [prd.md](docs/prd.md#principles).
 
 ## Description
 
@@ -97,9 +97,8 @@ See full principles in [framework-principles.md](docs/framework-principles.md).
 
 For example, the shopping item feature of the [shopping-notes example](examples/shopping-notes/README.md) moves through the flow like this:
 
-1. **BRD** — let users note down shopping items so they don't forget to buy them when visiting a store
-2. **PRD** — users manage a shopping list in the web app: add, view, mark as bought, delete, and clear items
-3. **Spec** — [`api-add-shopping-item`](examples/shopping-notes/shopping-notes-spex/specs/api-add-shopping-item.yaml): Create a shopping item.
+1. **PRD** — let users note down shopping items so they don't forget to buy them when visiting a store, by managing a shopping list in the web app: add, view, mark as bought, delete, and clear items
+2. **Spec** — [`api-add-shopping-item`](examples/shopping-notes/shopping-notes-spex/specs/api-add-shopping-item.yaml): Create a shopping item.
 
    Acceptance criteria:
    - MUST create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`
@@ -107,14 +106,13 @@ For example, the shopping item feature of the [shopping-notes example](examples/
    - MUST persist the created item to the JSON file store so it survives an API restart
    - MUST NOT create an item when `name` is missing or empty
 
-4. **Contract** — [OpenAPI definition](examples/shopping-notes/shopping-notes-spex/contracts/api.openapi.yaml) of `createItem` returning `201`, tagged `@spec contract api-add-shopping-item`. The frontend counterpart `fe-add-shopping-item` uses a [Figma reference](examples/shopping-notes/shopping-notes-frontend/contracts/figma.md) as its contract instead
-5. **Implementation** — the `POST /items` handler in [`app.ts`](examples/shopping-notes/shopping-notes-api/src/app.ts), tagged `@spec impl api-add-shopping-item#create-item-with-name`
-6. **Test** — [`app.test.ts`](examples/shopping-notes/shopping-notes-api/src/app.test.ts) verifies that an item is created with the given name and `bought: false`, tagged `@spec test api-add-shopping-item#create-item-with-name`
+3. **Contract** — [OpenAPI definition](examples/shopping-notes/shopping-notes-spex/contracts/api.openapi.yaml) of `createItem` returning `201`, tagged `@spec contract api-add-shopping-item`. The frontend counterpart `fe-add-shopping-item` uses a [Figma reference](examples/shopping-notes/shopping-notes-frontend/contracts/figma.md) as its contract instead
+4. **Implementation** — the `POST /items` handler in [`app.ts`](examples/shopping-notes/shopping-notes-api/src/app.ts), tagged `@spec impl api-add-shopping-item#create-item-with-name`
+5. **Test** — [`app.test.ts`](examples/shopping-notes/shopping-notes-api/src/app.test.ts) verifies that an item is created with the given name and `bought: false`, tagged `@spec test api-add-shopping-item#create-item-with-name`
 
 ```mermaid
 flowchart TD
-    BRD["BRD (optional) — why"] --> PRD["PRD (optional) — what"]
-    PRD --> Func
+    PRD["PRD (optional) — why and what"] --> Func
 
     subgraph Traced ["traced by spec ID"]
         Func["Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]

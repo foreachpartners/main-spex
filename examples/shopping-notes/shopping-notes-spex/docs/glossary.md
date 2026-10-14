@@ -1,15 +1,11 @@
 # Glossary
 
-- **BRD** (Business Requirements Document) — the root source. Describes _why_ something is being built: business goals and stakeholder needs. Written by/for business stakeholders.
+- **PRD** (Product Requirements Document) — the root source. Describes _why_ something is being built and _what_ the product should do: goals, success, features, and user-facing behavior. Written by/for product, design, and engineering.
 
   ```md
   Goal: let customers order pizza online to increase sales.
   Success: 100 online orders per week.
-  ```
 
-- **PRD** (Product Requirements Document) — extracted from the BRD. Describes _what_ the product should do: features and user-facing behavior. Written by/for product, design, and engineering.
-
-  ```md
   Customers can pick a pizza on the website, place an order, and pay online with a credit card.
   The daily order count should be tracked.
   ```

@@ -1,6 +1,6 @@
 # Specification
 
-How the spex framework behaves, written as specs: each section states one behavior with its acceptance criteria. [framework-principles.md](framework-principles.md) is the non-negotiable foundation, [conventions.md](conventions.md) the engineering values it follows, [glossary.md](glossary.md) the terms, [cli/](cli/README.md) the command behavior, and the bundled `schemas/` the field rules.
+How the spex framework behaves, written as specs: each section states one behavior with its acceptance criteria. [prd.md](prd.md) holds the product requirements these specs realize, [glossary.md](glossary.md) the terms, [cli/](cli/README.md) the command behavior, and the bundled `schemas/` the field rules.
 
 # Framework
 
@@ -8,12 +8,12 @@ How the spex framework behaves, written as specs: each section states one behavi
 
 Turn business goals into verified code through a chain of artifacts, each traceable by a shared Spec ID; [glossary.md](glossary.md) defines every artifact in it and its lifecycle.
 
-`BRD` (why, optional) -> `PRD` (what, optional) -> spec (capability) -> contract (interface, if applicable) -> implementation (code) -> test (proof)
+`PRD` (why and what, optional) -> spec (capability) -> contract (interface, if applicable) -> implementation (code) -> test (proof)
 
-- The product owner extracts each artifact from the one before it: the PRD from the BRD, and a spec from the PRD — or from the BRD or a feature idea directly when there is no PRD.
+- The product owner extracts a spec from the PRD, or from a feature idea directly when there is no PRD.
 - A contract is derived from a spec when applicable, and stays small next to the implementation, so it is cheap to create, review, and reason about first.
 - A plan is optional for small, self-contained changes: an ordered set of steps turning approved specs and their contracts into implementation instructions.
-- Each artifact is approved before the next is generated ([framework-principles.md](framework-principles.md#4-human-in-control) §4).
+- Each artifact is approved before the next is generated ([prd.md](prd.md#4-human-in-control) §4).
 
 # Workspace
 
@@ -68,11 +68,11 @@ A project uses one of three layouts, chosen at `spex init` and recorded as `layo
 
 - The spex directory holds `spex.yaml`, the specs, rules (with their scripts), schemas, docs, plans, and the contracts shared across packages. The agent root holds `AGENTS.md`, `CLAUDE.md` (a symlink to `AGENTS.md`), and the skills in `.agents/skills/`, which `.claude` links to so different agent tools detect the same skills: `.claude` is a symlink to `.agents`, or, when the repository already has a `.claude` directory, only `.claude/skills` is a symlink to `../.agents/skills`.
 - Once `spex.yaml` is found, every command resolves the other locations from it, never from folder names: the spex directory is the directory holding it, and the agent root is its `agent_root`.
-- The layout follows [conventions.md](conventions.md): tool-agnostic (specs, contracts, and checks are plain files and deterministic commands) and single-source-of-truth (every fact one authoritative source, referenced rather than copied).
+- The layout follows the [values in prd.md](prd.md#values): tool-agnostic (specs, contracts, and checks are plain files and deterministic commands) and single-source-of-truth (every load-bearing fact one authoritative source, referenced rather than copied).
 
 ## Traceability
 
-Every behavioral change traces to a spec, and one Spec ID traces across the packages that satisfy it. The principle, including the bidirectional trace and commit-level provenance, is [framework-principles.md](framework-principles.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
+Every behavioral change traces to a spec, and one Spec ID traces across the packages that satisfy it. The principle, including the bidirectional trace and commit-level provenance, is [prd.md](prd.md#6-traceability) §6; the annotation grammar that carries it is [below](#spec-id-annotations).
 
 # CLI
 

@@ -72,8 +72,7 @@ src/                CLI source
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 docs/                          Framework reference docs (single source of truth); only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
-  framework-principles.md  Non-negotiable foundation spex is built on
-  conventions.md           Engineering values spex follows but didn't invent
+  prd.md                   Product requirements: problem, goal, success, capabilities, principles, values, non-goals
   specification.md         Framework behavior, minus the CLI
   cli/                     Single source of truth for CLI behavior: README.md (overview and shared behavior), install.md, development.md, one file per command
   tutorial.md              Hands-on walkthrough of adopting spex
@@ -108,7 +107,7 @@ Keep this section in sync when the structure changes.
 ## Rules
 
 - **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
-- **Single source of truth**: every piece of data, logic, or business rule must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it.
+- **Single source of truth**: every business rule, behavior, contract, and configuration value must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it. Repeating wording or an idea for readability is not duplication.
 - **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works. Avoid unnecessary abstraction, comments, indirection, and premature generalization.
 - **DRY** (Don't Repeat Yourself): Extract shared logic into a single source of truth instead of duplicating it. Reuse existing code, types, and systems before adding new ones.
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables instead of comments. Never add a comment — not for WHAT the code does, not for WHY it exists, not to note an extraction, refactor, or design rationale. Write no comments at all unless the user explicitly asks for one in that exact request.
