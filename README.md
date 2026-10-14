@@ -31,7 +31,7 @@ The `spex` CLI runs and automates all of it. Specs, contracts, and checks are pl
 
 - **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
 - **Git**: [Install Git](https://git-scm.com/install/)
-- **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](docs/cli/install.md#supported-platforms)
+- **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](specs/cli/install-cli.md)
 - **spex CLI**: Install the `spex` CLI tool from [crates.io](https://crates.io/crates/main-spex):
   ```sh
   cargo install main-spex
@@ -149,7 +149,7 @@ flowchart TD
 
 ## Learn more
 
-Framework [specification](docs/specification.md).
+Framework, CLI, and skill [specs](specs).
 
 Example [project](examples/shopping-notes/README.md) with spex implemented.
 

@@ -9,7 +9,11 @@ By the end you will have recreated a project similar to `examples/shopping-notes
 
 ## Install spex
 
-Follow the installation process in [install.md](cli/install.md).
+Install [Rust](https://rust-lang.org/tools/install/)
+
+```sh
+cargo install main-spex
+```
 
 ## Copy the example project
 
