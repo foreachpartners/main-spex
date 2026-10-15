@@ -8,7 +8,7 @@ Validates JSON or YAML files against a JSON Schema.
 - MUST resolve cross-file `$ref`s against sibling schema files in the schema's own directory, fully offline.
 - MUST print violations to stderr as `<file>: <message>`.
 - MUST exit non-zero when any file fails.
-- MUST use the same validation as `spex check`, built in, to keep the spex repository's own files (`spex.yaml`, `specs/<spec-id>.yaml`, `rules/<rule-id>.yaml`) valid against the bundled schemas.
+- MUST use the same validation as the schema validation in `spex check`, so no external JSON Schema tool is needed.
 - MUST NOT use the network.
 
 ## Examples
