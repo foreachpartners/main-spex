@@ -6,7 +6,7 @@ A project uses one of three layouts, chosen at `spex init` and recorded as `layo
 
 - MUST use exactly one layout per project: `multi-repo`, `single-repo`, or `monorepo`, chosen at `spex init` and recorded as `layout` in `spex.yaml`.
 - MUST make every package its own git repository under the project root folder in `multi-repo`.
-- MUST make the spex repository (`<project-name>-spex`) one of the packages in `multi-repo`, serving as both the spex directory and the agent root.
+- MUST make the spex directory one of the packages in every layout, listed in `packages`: in `multi-repo` it is the spex repository (`<project-name>-spex`), serving as both the spex directory and the agent root.
 - MUST provide an editor workspace file (`<project-name>.code-workspace`) in the spex repository in `multi-repo`, opening every package together.
 - MUST make the project one git repository in `single-repo`, whose root is the agent root and whose spex directory is its `spex/` folder.
 - MUST list in `packages` the single package in `single-repo`, named after the project, at `path: ..`.

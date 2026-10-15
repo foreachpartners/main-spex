@@ -8,7 +8,7 @@ use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope};
-use crate::spec::{AcId, Spec, SpecId};
+use crate::spec::{AcId, SpecId};
 
 use super::baseline::{drop_baselined_findings, fill_preexisting_errors};
 use super::conformance::validate_conformance;
@@ -136,11 +136,12 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         .collect();
 
     let selected = select_packages(&spex, &args.package, &args.files)?;
+    let mut conformance = validate_conformance(&spex.dir, &spex.packages, &specs, &rules)?;
 
     let mut reports = Vec::with_capacity(selected.len());
     let mut project_checks = ProjectChecks::new();
     for &package in &selected {
-        let findings = check_package(
+        let mut findings = check_package(
             CheckPackageArgs {
                 package,
                 spex_dir: &spex.dir,
@@ -150,9 +151,21 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             },
             &mut project_checks,
         )?;
+        if package.is_spex_dir {
+            findings.append(&mut conformance);
+        }
         reports.push(CheckReport {
             target: ReportTarget::Package(package),
             findings,
+        });
+    }
+
+    if !selected.iter().any(|package| package.is_spex_dir)
+        && let Some(spex_package) = spex.packages.iter().find(|package| package.is_spex_dir)
+    {
+        reports.push(CheckReport {
+            target: ReportTarget::Package(spex_package),
+            findings: conformance,
         });
     }
 
@@ -164,8 +177,6 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             findings: run_project_checks(&spex.dir, &project_checks),
         });
     }
-
-    validate_spex_dir(&spex, &specs, &rules, &mut reports)?;
 
     if args.fill_preexisting_errors {
         return fill_preexisting_errors(&spex.dir, &selected, &reports);
@@ -239,30 +250,4 @@ fn check_package<'a>(
     }
 
     Ok(findings)
-}
-
-fn validate_spex_dir<'a>(
-    spex: &'a Spex,
-    specs: &[Spec],
-    rules: &[Rule],
-    reports: &mut Vec<CheckReport<'a>>,
-) -> Result<()> {
-    let spex_report = reports
-        .iter_mut()
-        .find(|report| report.target.is_spex_dir());
-    if spex_report.is_none() && spex.layout.is_multi_repo() {
-        return Ok(());
-    }
-
-    let findings = validate_conformance(&spex.dir, &spex.packages, specs, rules)?;
-    match spex_report {
-        Some(report) => report.findings.extend(findings),
-        None => reports.push(CheckReport {
-            target: ReportTarget::Spex {
-                spex_dir: &spex.dir,
-            },
-            findings,
-        }),
-    }
-    Ok(())
 }

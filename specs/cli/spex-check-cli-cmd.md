@@ -56,8 +56,8 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 
 ### Self-validation
 
-- MUST validate the spex directory directly, without a rule: in `multi-repo` it is reported with the spex repository, whenever it is selected.
-- MUST run self-validation on every `spex check` in `single-repo` and `monorepo`, whatever `--package` or `--files` select, and report it last under its own `spex` heading, since no package is the spex directory there.
+- MUST run `spex-internal-conformance` and the spec-scoped checks (reported as `<spec-id>/<check>`) on every `spex check`, whatever `--package` or `--files` select, since they validate the spex directory as a whole, and report them under the spex package's heading, which is added when that package is not selected.
+- MUST run the `@spec` annotation checks (`annotation-format`, `no-orphan-annotations`) only on the files of the selected packages: `--package api` checks the annotations in `api`, and `--package spex` does not check them in `api`.
 - MUST validate `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.package.yaml` of every package that has one against their JSON Schema.
 - MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id grammar (lowercase letters, digits and hyphens only, at most 40 characters).
 - MUST require each spec file to be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.

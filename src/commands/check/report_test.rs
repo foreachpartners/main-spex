@@ -23,24 +23,6 @@ mod report_target_tests {
         assert_eq!(target.name(), "project");
         assert_eq!(target.base_dir(), spex_dir());
     }
-
-    #[test]
-    fn only_the_spex_repository_target_is_the_spex_repo() {
-        let api = package("api", "services/api");
-        let spex_repo = Package {
-            is_spex_dir: true,
-            ..package("demo-spex", ".")
-        };
-
-        assert!(ReportTarget::Package(&spex_repo).is_spex_dir());
-        assert!(!ReportTarget::Package(&api).is_spex_dir());
-        assert!(
-            !ReportTarget::Project {
-                spex_dir: spex_dir()
-            }
-            .is_spex_dir()
-        );
-    }
 }
 
 mod location_url_tests {

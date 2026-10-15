@@ -4,7 +4,7 @@ use anstream::eprintln;
 use eros::bail;
 use owo_colors::OwoColorize;
 
-use crate::config::{Layout, Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
+use crate::config::{Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
 use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, Spec, SpecCoverageIgnore};
@@ -17,7 +17,6 @@ mod spex_test;
 pub struct Spex {
     pub dir: PathBuf,
     pub project_name: String,
-    pub layout: Layout,
     pub agent_root: PathBuf,
     pub packages: Vec<Package>,
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
@@ -50,7 +49,6 @@ impl Spex {
             agent_root: normalize(&dir.join(&config.agent_root)),
             dir,
             project_name: config.project_name,
-            layout: config.layout,
             packages,
             coverage_ignore: config.coverage_ignore,
         }

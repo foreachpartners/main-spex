@@ -279,8 +279,7 @@ fn init_rejects_an_unknown_layout() {
     assert!(!project.join("spex").exists());
 }
 
-#[test]
-fn check_validates_the_spex_dir_in_single_repo_even_for_a_selected_package() {
+fn single_repo_with_a_mismatched_spec() -> (tempfile::TempDir, std::path::PathBuf) {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
@@ -296,10 +295,36 @@ fn check_validates_the_spex_dir_in_single_repo_even_for_a_selected_package() {
         "id: other\ntitle: Other\ndescription: A spec in a file named after another id.\nacceptance_criteria:\n  - id: works\n    must: work\ncontract: none\n",
     )
     .expect("write mismatched spec");
+    (temp_dir, project)
+}
+
+#[test]
+fn check_validates_the_spex_dir_in_single_repo_under_its_package_heading() {
+    let (_temp_dir, project) = single_repo_with_a_mismatched_spec();
+
+    let check = run_spex(&project, &["check", "--package", "spex"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(report.contains("\nspex\n"), "no spex heading in:\n{report}");
+    assert!(
+        report.contains("filename stem `bad` does not match id `other`"),
+        "{report}"
+    );
+    assert!(!report.contains("\nsnake\n"), "{report}");
+    assert_eq!(check.status.code(), Some(1));
+}
+
+#[test]
+fn check_validates_the_spex_dir_in_single_repo_when_its_package_is_not_selected() {
+    let (_temp_dir, project) = single_repo_with_a_mismatched_spec();
 
     let check = run_spex(&project, &["check", "--package", "snake"], "");
 
     let report = report_text(&check.stdout);
+    assert!(
+        report.contains("\nsnake\n"),
+        "no snake heading in:\n{report}"
+    );
     assert!(report.contains("\nspex\n"), "no spex heading in:\n{report}");
     assert!(
         report.contains("filename stem `bad` does not match id `other`"),

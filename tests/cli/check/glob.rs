@@ -53,7 +53,7 @@ fn check_files_narrows_glob_findings_and_skips_negated_checks() {
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_NO_ISSUES_REPORT],
+            &[FRONTEND_NO_ISSUES_REPORT, SPEX_REPORT],
             "runners-project: 0 errors, 0 warnings"
         ),
         "check --files report did not match\nstderr:\n{}",
@@ -70,7 +70,10 @@ fn check_package_limits_glob_findings_to_the_named_package() {
 
     assert_eq!(
         report_text(&check.stdout),
-        expected_report(&[FRONTEND_REPORT], "runners-project: 1 error, 0 warnings"),
+        expected_report(
+            &[FRONTEND_REPORT, SPEX_REPORT],
+            "runners-project: 1 error, 0 warnings"
+        ),
         "check --package report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );

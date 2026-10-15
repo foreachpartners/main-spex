@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.23.1] - 2026-10-15
+
+- `spex check` treats the spex directory as the package it is in every layout: `spex-internal-conformance` and the spec-scoped checks run on every `spex check`, whatever `--package` or `--files` select, and are reported under the spex package's heading, which is added when that package is not selected. In `multi-repo` they no longer wait for the spex package to be selected, and in `single-repo` and `monorepo` they no longer get a separate last `spex` heading. The `@spec` annotation checks still run only on the selected packages' files. No migration steps.
+
 ## [0.23.0] - 2026-10-15
 
 - `spex init` no longer links `.claude` to `.agents`: it creates `.claude` as a real directory and links only `.claude/skills` to `../.agents/skills`, so Claude Code's settings and other files no longer end up in `.agents`. Only new projects are affected; the `spex-update` skill fixes an existing project's `.claude` link, see the migration guide.

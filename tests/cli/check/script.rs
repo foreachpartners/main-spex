@@ -83,7 +83,7 @@ fn check_files_narrows_script_findings_at_each_run_scope() {
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_REPORT, PROJECT_REPORT],
+            &[FRONTEND_REPORT, SPEX_REPORT, PROJECT_REPORT],
             "runners-project: 2 errors, 1 warning"
         ),
         "check --files report did not match\nstderr:\n{}",
@@ -105,7 +105,7 @@ fn check_package_limits_script_findings_to_the_named_package() {
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_REPORT, PROJECT_REPORT],
+            &[FRONTEND_REPORT, SPEX_REPORT, PROJECT_REPORT],
             "runners-project: 2 errors, 1 warning"
         ),
         "check --package report did not match\nstderr:\n{}",

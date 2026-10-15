@@ -61,7 +61,7 @@ fn check_files_narrows_regexp_findings_and_skips_negated_checks() {
     assert_eq!(
         report_text(&check.stdout),
         expected_report(
-            &[FRONTEND_INDEX_REPORT],
+            &[FRONTEND_INDEX_REPORT, SPEX_REPORT],
             "runners-project: 1 error, 0 warnings"
         ),
         "check --files report did not match\nstderr:\n{}",
@@ -82,7 +82,10 @@ fn check_package_limits_regexp_findings_to_the_named_package() {
 
     assert_eq!(
         report_text(&check.stdout),
-        expected_report(&[FRONTEND_REPORT], "runners-project: 1 error, 1 warning"),
+        expected_report(
+            &[FRONTEND_REPORT, SPEX_REPORT],
+            "runners-project: 1 error, 1 warning"
+        ),
         "check --package report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );

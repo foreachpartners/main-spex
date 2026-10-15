@@ -392,6 +392,88 @@ fn check_dummy_project_matches_expected() {
     );
 }
 
+const EXPECTED_API_ONLY_CHECK_REPORT: &str = r#"dummy-project-api
+  no issues
+
+dummy-project-spex
+  no issues
+
+dummy-project: 0 errors, 0 warnings
+"#;
+
+#[test]
+fn check_reports_the_spex_package_even_when_it_is_not_selected() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+
+    let check = run_spex(&project, &["check", "--package", "api"], "");
+
+    assert_eq!(
+        report_text(&check.stdout),
+        with_version_header(EXPECTED_API_ONLY_CHECK_REPORT),
+    );
+    assert!(check.status.success());
+}
+
+#[test]
+fn check_runs_conformance_whatever_package_or_files_are_selected() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    let spec_path = project.join("dummy-project-spex/specs/active-full-coverage.yaml");
+    let spec = fs::read_to_string(&spec_path).expect("read spec");
+    fs::write(
+        &spec_path,
+        spec.replace("id: shows-tax", "id: shows-subtotal"),
+    )
+    .expect("write spec with a duplicate acceptance criterion id");
+
+    for args in [
+        vec!["check", "--package", "api"],
+        vec!["check", "--package", "frontend"],
+        vec!["check", "--files", "src/todo.rs"],
+    ] {
+        fs::write(
+            project.join("dummy-project-api/src/todo.rs"),
+            "fn todo() {}\n",
+        )
+        .expect("write file");
+        let check = run_spex(&project, &args, "");
+        let report = report_text(&check.stdout);
+        assert!(
+            report.contains("\ndummy-project-spex\n")
+                && report.contains("spex-internal-conformance/no-duplicate-ac-ids"),
+            "conformance was not reported for {args:?}\n{report}",
+        );
+        assert_eq!(check.status.code(), Some(1), "{args:?}");
+    }
+}
+
+#[test]
+fn check_runs_annotation_checks_only_on_selected_packages() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/src/rule_reference.rs"),
+        "// @spec impl no-todo-comments\n",
+    )
+    .expect("write rule reference");
+    let orphan = "orphan annotation references unknown spec `no-todo-comments`";
+
+    let api = run_spex(&project, &["check", "--package", "api"], "");
+    assert!(report_text(&api.stdout).contains(orphan));
+    assert_eq!(api.status.code(), Some(1));
+
+    for other in ["spex", "frontend"] {
+        let check = run_spex(&project, &["check", "--package", other], "");
+        let report = report_text(&check.stdout);
+        assert!(!report.contains(orphan), "--package {other}\n{report}");
+        assert!(check.status.success(), "--package {other}\n{report}");
+    }
+}
+
 #[test]
 fn check_flags_annotation_referencing_rule_id_as_orphan() {
     let temp_dir = tempdir().expect("create temp dir");
