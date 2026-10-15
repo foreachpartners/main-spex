@@ -1,14 +1,16 @@
 # `spex-review-rule` skill
 
-Rule-axis review of a diff, committed changes since a fixed point or uncommitted working-tree changes, against the governing cross-cutting conventions and rules. Loaded when the user wants to check a diff, branch, or PR against the package's rules, or asks to "review rules since X".
+Rule-axis review of the changes since a starting point against the governing cross-cutting conventions and rules. Loaded when the user wants to check a diff, branch, or PR against the package's rules, or asks to "review rules since X".
 
 ## Acceptance criteria
 
-### Pin and gather
+### Resolve and gather
 
-- MUST pin the diff to review as specified in [review-target-skill.md](review-target-skill.md).
-- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages, then read `<tmp-path>` for the governing rules.
-- MUST run `spex check --package <package-a> <package-b>` for the affected packages, and treat every reported violation as a hard finding, since the check already proved it.
+- MUST resolve the starting point: the one the user gave (a commit, branch, tag, or PR), otherwise `HEAD` for uncommitted changes or the merge-base with the base branch for a feature branch.
+- MUST ask the user when the starting point is unclear.
+- MUST use the packages the user provided, otherwise the packages affected by the changes.
+- MUST run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for those packages, then read `<tmp-path>` for the governing rules.
+- MUST run `spex check --package <package-a> <package-b>` for those packages, and treat every reported violation as a hard finding, since the check already proved it.
 
 ### Smell baseline
 

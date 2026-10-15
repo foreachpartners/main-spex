@@ -1,45 +1,30 @@
 ---
 name: spex-review-spec
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) against a spec — does the code match what the spec asked for? Use when the user wants to check a diff, branch, or PR against a spec, or asks to "review spec since X".
+description: Review the current implementation of a spec — is what is implemented of the spec's acceptance criteria correct? Use when the user wants to review implementation of a spec.
 ---
 
-Spec-axis review of a diff — committed changes since a fixed point, or uncommitted working-tree changes — against a spec.
-
-The spec should have been provided to you, ask user if not.
+Spec-axis review of the current branch against a spec — is what is implemented of the spec's acceptance criteria correct?
 
 ## Process
 
-### 1. Pin the fixed point
+### 1. Resolve the spec
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages listed in the spec's `packages`.
-
-**Committed diff** (user gave a fixed point):
-
-- Capture: `git diff <fixed-point>...HEAD` (three-dot, merge-base diff).
-- Commit list: `git log <fixed-point>..HEAD --oneline`.
-- Confirm the ref resolves: `git rev-parse <fixed-point>`.
-
-**Uncommitted diff** (no fixed point):
-
-- Capture: `git diff HEAD` (staged + unstaged vs `HEAD`).
-- Commit list: "working tree (uncommitted)".
-- If the working tree is clean, fail — nothing to review.
-
-A bad ref or empty diff should fail here rather than partway through the review.
+Use the spec the user provided. Otherwise resolve it from the current work: the feature branch diff against its base branch (`git diff <base-branch>...HEAD`) and the uncommitted changes (`git diff HEAD`). Take the specs changed in them and the specs named by `@spec` annotations in the changed code. Ask the user when no spec resolves.
 
 ### 2. Fetch the spec
 
-Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the provided spec(s).
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the resolved spec(s).
 
-### 3. Review
+### 3. Find the implementation
 
-Against the diff and spec contents, report:
+Search the packages listed in the spec's `packages` for code annotated `@spec impl <spec-id>`. Review it as it stands on the current branch.
 
-- Requirements the spec asked for that are missing or partial.
-- Behaviour in the diff that wasn't asked for (scope creep).
-- Requirements that look implemented but where the implementation looks wrong.
+### 4. Review
 
-Quote the spec line for each finding.
+Against the implementation, contract and the spec contents, report the acceptance criteria whose implementation looks wrong. Quote the acceptance criterion for each finding.
+
+- A spec may be only partly implemented. An acceptance criterion with no implementation yet or implemented partially (no `@spec impl <spec-id>#<ac-id>`) is not a finding, as long as what is implemented is correct. List these in one "Not yet done" line.
+- Tests come in later steps as the last verification layer, so missing tests are not a finding.
 
 End with a one-line summary: total findings, and the worst issue (if any).
 

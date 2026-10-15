@@ -33,7 +33,7 @@ For pass 1 through 3:
 
 Same structure as the Rule loop, using `spex-review-spec` for Review and the spec(s) it read for the Fix agent's brief:
 
-1. **Review** — run the `spex-review-spec` skill's process yourself against the current uncommitted diff.
+1. **Review** — run the `spex-review-spec` skill's process yourself for the spec(s) the change implements.
 2. If the Spec agent's review reports zero findings, the spec axis is clean — stop this loop and move to Test.
 3. Otherwise, spawn one **Fix agent** with the findings and spec contents, instructing it to fix every finding and re-run formatters, linters, and tests. Wait for it to finish.
 4. If this was pass 3 and findings remain unresolved, stop this loop, note the residual findings, and move to Test anyway. Otherwise continue to the next pass.

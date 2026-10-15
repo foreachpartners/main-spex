@@ -1,33 +1,19 @@
 ---
 name: spex-review-rule
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) against governing cross-cutting rules and coding standards. Use when the user wants to check a diff, branch, or PR against the package's rules, or asks to "review rules since X".
+description: Review the changes since a starting point (commit, branch, tag, or PR) against governing cross-cutting rules and coding standards. Use when the user wants to check a diff, branch, or PR against the package's rules, or asks to "review rules since X".
 ---
 
-Rule-axis review of a diff — committed changes since a fixed point, or uncommitted working-tree changes — against governing cross-cutting conventions and rules.
+Rule-axis review of the changes since a starting point against governing cross-cutting conventions and rules.
 
 ## Process
 
-### 1. Pin the fixed point
+### 1. Resolve the starting point
 
-If the user specified a fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. — use the committed diff. Otherwise, review **uncommitted changes** (staged and unstaged) against `HEAD`. Review the packages listed in the spec's `packages`.
-
-**Committed diff** (user gave a fixed point):
-
-- Capture: `git diff <fixed-point>...HEAD` (three-dot, merge-base diff).
-- Commit list: `git log <fixed-point>..HEAD --oneline`.
-- Confirm the ref resolves: `git rev-parse <fixed-point>`.
-
-**Uncommitted diff** (no fixed point):
-
-- Capture: `git diff HEAD` (staged + unstaged vs `HEAD`).
-- Commit list: "working tree (uncommitted)".
-- If the working tree is clean, fail — nothing to review.
-
-A bad ref or empty diff should fail here rather than partway through the review.
+Use the starting point the user gave (a commit, branch, tag, or PR), otherwise `HEAD` for uncommitted changes or the merge-base with the base branch for a feature branch, and ask the user when unclear.
 
 ### 2. Identify the rules source
 
-Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages, then read `<tmp-path>` for the governing rules.
+Use the packages the user provided, otherwise the packages affected by the changes. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for them, then read `<tmp-path>` for the governing rules.
 
 On top of whatever the package documents, the review always carries the **smell baseline** below — a fixed set of Fowler code smells that applies even when a package documents nothing. Two rules bind it:
 
@@ -51,13 +37,13 @@ Each smell reads _what it is_ -> _how to fix_; match it against the diff:
 
 ### 3. Run automated checks
 
-Run `spex check --package <package-a> <package-b>` for the affected packages. Every reported violation is a hard finding — the check already proved it, not a judgement call.
+Run `spex check --package <package-a> <package-b>` for the same packages. Every reported violation is a hard finding — the check already proved it, not a judgement call.
 
 ### 4. Review
 
 The primary objective of a review is to enforce coding rules and ensure simplicity. Code should be self-contained and locally clear, allowing anyone to fully understand the logic and impact of functions and methods strictly within their immediate context.
 
-Against the diff captured in step 1, report — per file/hunk where relevant:
+Against the changes since the starting point, report — per file/hunk where relevant:
 
 - Every `spex check` violation from step 3: cite it as reported.
 - Every place the diff violates a documented rule: cite the rule (file + the rule).

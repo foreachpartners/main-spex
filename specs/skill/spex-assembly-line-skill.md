@@ -33,7 +33,7 @@ The roles are:
 
 ### Step 3: Spec loop, up to 3 passes
 
-- MUST review, in each pass, by running the `spex-review-spec` skill's process as Orchestrator against the current uncommitted diff.
+- MUST review, in each pass, by running the `spex-review-spec` skill's process as Orchestrator for the spec(s) the change implements.
 - MUST stop the loop and move to Test when a review reports zero findings, because the spec axis is clean.
 - MUST otherwise spawn one Fix agent with the findings and the spec contents, instructing it to fix every finding and re-run formatters, linters, and tests, and wait for it to finish.
 - MUST stop the loop after pass 3 with findings unresolved, note the residual findings, and move to Test anyway.

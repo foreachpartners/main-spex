@@ -96,7 +96,7 @@
     shopping-notes-frontend/  <- package
   ```
 
-- **Spex directory** (spex dir) — the directory holding `spex.yaml`, the specs, rules, schemas, docs, plans, and the contracts shared across packages. It is the spex repository in a multi-repo project, and the `spex/` folder at the repository root in a single-repo or monorepo project.
+- **Spex directory** (spex dir) — the directory holding `spex.yaml`, the specs, rules, schemas, docs, plans, and the contracts shared across packages. It is the spex repository in a multi-repo project, and the `spex/` folder at the repository root in a single-repo or monorepo project. It is itself a package of the project in every layout.
 
 - **Package** — one deliverable part of the project that spex manages (`spex`, `api`, `frontend`, `mobile`, `infra`, `docs`, and so on), with its own code, tests, contracts, and rules. In a multi-repo project each package is its own git repository inside the project root, so access can be granted per repository and one Spec ID can trace across many of them. In a monorepo each package is a folder of the repository, listed in `spex.yaml` without being a git repository of its own; in a single-repo project the one repository is the single package. Not a dependency or a package published to a registry. Always call these packages, or by a more specific role (service, mobile, infra, docs).
 
