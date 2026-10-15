@@ -1,6 +1,6 @@
 [package]
 name = "main-spex"
-version = "0.21.3"
+version = "0.21.4"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT"

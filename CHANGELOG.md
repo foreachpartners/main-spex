@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.21.4] - 2026-10-15
+
+- `spex update --migration-guide <from_version>` prints the migration steps of the installed `spex` for every version after `<from_version>`, oldest first, without reading `spex.yaml` or changing any file. The `spex-update` skill now runs it and applies the steps before `spex update`, so a breaking change no longer meets an update that cannot handle the project. `spex update` rewrites the skill; no migration steps.
+
 ## [0.21.3] - 2026-10-15
 
 - `spex info` merges every package's `spex.package.yaml` into its output: the `coverage_ignore` entries join the root `coverage_ignore`, and the `ignored_errors` entries join the `ignored_errors` of their package, the same union `spex check` and `spex coverage` use. No migration steps.

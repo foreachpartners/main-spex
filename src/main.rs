@@ -18,6 +18,7 @@ use commands::info::InfoArgs;
 use commands::jq::JqArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
+use commands::update::UpdateArgs;
 use error::{Result, failure_report};
 
 #[derive(Parser)]
@@ -36,7 +37,7 @@ enum Commands {
     #[command(about = "Initialize a spex project")]
     Init,
     #[command(about = "Update spex to the latest version (skills, rules, docs, etc.)")]
-    Update,
+    Update(UpdateArgs),
     #[command(about = "Run spex and rule checks")]
     Check(CheckArgs),
     #[command(about = "Report coverage")]
@@ -65,7 +66,7 @@ fn main() -> ExitCode {
 fn run(command: Commands) -> Result<ExitCode> {
     match command {
         Commands::Init => commands::init::run(),
-        Commands::Update => commands::update::run(),
+        Commands::Update(args) => commands::update::run(args),
         Commands::Check(args) => commands::check::run(args),
         Commands::CheckSchema(args) => commands::check_schema::run(args),
         Commands::Coverage(args) => commands::coverage::run(args),

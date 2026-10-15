@@ -2,6 +2,8 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
+`spex update --migration-guide <from_version>` prints the sections after a version, oldest first, and the `spex-update` skill applies them before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
+
 ## 0.21.0
 
 A spec's `scope` field is now `packages`, and `spex coverage` and `spex specs` filter with `--package` instead of `--scope`. `schemas/spec.schema.json` lists `packages` instead of `scope`. Until every spec is renamed, `spex check` fails on `scope`. In `<spex-dir>`:

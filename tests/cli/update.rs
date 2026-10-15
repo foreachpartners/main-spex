@@ -96,6 +96,14 @@ fn printed_headers(stdout: &[u8]) -> Vec<String> {
         .collect()
 }
 
+fn printed_version_headers(stdout: &[u8]) -> Vec<String> {
+    String::from_utf8_lossy(stdout)
+        .lines()
+        .filter(|line| line.starts_with("## "))
+        .map(str::to_string)
+        .collect()
+}
+
 fn read_tree(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
     let mut tree = BTreeMap::new();
     collect_tree(root, root, &mut tree);
@@ -453,6 +461,79 @@ fn update_fails_outside_a_spex_project() {
         !update.stderr.is_empty(),
         "update should explain why it failed",
     );
+}
+
+#[test]
+fn update_migration_guide_prints_steps_after_the_version_oldest_first() {
+    let temp_dir = tempdir().expect("create temp dir");
+
+    let guide = run_spex(
+        temp_dir.path(),
+        &["update", "--migration-guide", "0.18.0"],
+        "",
+    );
+
+    assert!(
+        guide.status.success(),
+        "update --migration-guide failed (exit {:?})\nstderr:\n{}",
+        guide.status.code(),
+        String::from_utf8_lossy(&guide.stderr),
+    );
+    assert_eq!(
+        printed_version_headers(&guide.stdout)[..3],
+        ["## 0.19.0", "## 0.20.0", "## 0.21.0"],
+    );
+    let none_after_latest = run_spex(
+        temp_dir.path(),
+        &["update", "--migration-guide", CLI_VERSION],
+        "",
+    );
+    assert!(none_after_latest.status.success());
+    assert!(
+        none_after_latest.stdout.is_empty(),
+        "no step follows the installed version",
+    );
+}
+
+#[test]
+fn update_migration_guide_changes_nothing_and_ignores_an_unloadable_spex_yaml() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
+    project.write("spex.yaml", "cli_version: 0.0.1\n");
+    let before = read_tree(&project.root);
+
+    let guide = run_spex(&project.spex, &["update", "--migration-guide", "0.0.1"], "");
+
+    assert!(
+        guide.status.success(),
+        "update --migration-guide failed (exit {:?})\nstderr:\n{}",
+        guide.status.code(),
+        String::from_utf8_lossy(&guide.stderr),
+    );
+    assert!(!guide.stdout.is_empty(), "expected the migration steps");
+    assert_eq!(
+        changed_paths(&before, &read_tree(&project.root)),
+        Vec::<PathBuf>::new(),
+        "update --migration-guide must not change any file",
+    );
+}
+
+#[test]
+fn update_migration_guide_fails_on_a_version_that_is_not_major_minor_patch() {
+    let temp_dir = tempdir().expect("create temp dir");
+
+    let guide = run_spex(
+        temp_dir.path(),
+        &["update", "--migration-guide", "0.19"],
+        "",
+    );
+
+    assert_eq!(guide.status.code(), Some(2));
+    assert_eq!(
+        String::from_utf8_lossy(&guide.stderr).trim_end(),
+        "error: invalid version `0.19` — expected MAJOR.MINOR.PATCH",
+    );
+    assert!(guide.stdout.is_empty());
 }
 
 #[test]

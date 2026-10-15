@@ -29,3 +29,17 @@ pub fn wrap_text(text: &str, width: usize) -> Vec<String> {
     }
     lines
 }
+
+pub fn level_two_sections(markdown: &str) -> Vec<String> {
+    let mut sections: Vec<String> = Vec::new();
+    for line in markdown.lines() {
+        if line.starts_with("## ") {
+            sections.push(String::new());
+        }
+        if let Some(section) = sections.last_mut() {
+            section.push_str(line);
+            section.push('\n');
+        }
+    }
+    sections
+}
