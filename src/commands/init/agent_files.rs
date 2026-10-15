@@ -79,13 +79,11 @@ pub fn write_agents_md(agent_root: &Path) -> Result<()> {
     symlink_if_absent(&claude, AGENTS_FILENAME)
 }
 
-pub fn link_claude_dir(agent_root: &Path) -> Result<()> {
+pub fn link_claude_skills(agent_root: &Path) -> Result<()> {
     let claude = agent_root.join(CLAUDE_DIRNAME);
-    if is_real_dir(&claude) {
-        let skills_target = format!("../{AGENTS_DIRNAME}/{SKILLS_DIRNAME}");
-        return symlink_if_absent(&claude.join(SKILLS_DIRNAME), &skills_target);
-    }
-    symlink_if_absent(&claude, AGENTS_DIRNAME)
+    create_dir_all(&claude)?;
+    let skills_target = format!("../{AGENTS_DIRNAME}/{SKILLS_DIRNAME}");
+    symlink_if_absent(&claude.join(SKILLS_DIRNAME), &skills_target)
 }
 
 fn bundled_skill_names() -> Vec<std::ffi::OsString> {

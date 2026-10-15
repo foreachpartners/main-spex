@@ -11,7 +11,7 @@ use crate::templates::{
     AGENTS_DIRNAME, BUNDLED_TEMPLATES_DIR, DOCS_DIRNAME, SCHEMAS_DIRNAME, SKILLS_DIRNAME,
 };
 
-use super::agent_files::{link_claude_dir, move_claude_skills, write_agents_md};
+use super::agent_files::{link_claude_skills, move_claude_skills, write_agents_md};
 
 #[cfg(test)]
 #[path = "scaffold_test.rs"]
@@ -23,7 +23,7 @@ pub fn scaffold(spex_dir: &Path, agent_root: &Path) -> Result<()> {
     move_claude_skills(agent_root)?;
     copy_skills(agent_root)?;
     write_agents_md(agent_root)?;
-    link_claude_dir(agent_root)
+    link_claude_skills(agent_root)
 }
 
 pub fn copy_docs_and_schemas(spex_dir: &Path) -> Result<()> {

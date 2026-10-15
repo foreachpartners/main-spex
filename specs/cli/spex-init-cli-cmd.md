@@ -13,8 +13,8 @@ Initializes the spex directory for a project in one of the three [layouts](../pr
 - MUST create empty `specs/`, `plans/`, and `contracts/` folders in spex dir.
 - MUST write, in the agent root, an `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink.
 - MUST write `<project-name>.code-workspace` in `multi-repo` only, seeded from the bundled template with a folder for the spex repository only.
-- MUST write, in the agent root, `.agents/skills/` with the bundled skills, and a `.claude` -> `.agents` symlink, so different agent tools detect the same skills.
-- MUST, if a `.claude` directory already exists in `agent_root`, move its `skills/` into `.agents/skills/` and make `.claude/skills` a symlink to `../.agents/skills`, leaving the rest of `.claude` (such as its settings) in place.
+- MUST write, in the agent root, `.agents/skills/` with the bundled skills, and a `.claude/skills` -> `../.agents/skills` symlink inside a real `.claude` directory, so different agent tools detect the same skills while the rest of `.claude` (such as its settings) stays out of `.agents`.
+- MUST, if a `.claude` directory already exists in `agent_root`, move its `skills/` into `.agents/skills/` before making `.claude/skills` that symlink, leaving the rest of `.claude` in place.
 - MUST keep an existing `AGENTS.md` content as the user's own section below the `# Project` marker.
 - MUST handle an existing regular `CLAUDE.md` the same way as `AGENTS.md`, then replace it with the symlink; when both exist, `CLAUDE.md` wins and overwrites `AGENTS.md`.
 - MUST NOT look for, ask about, or configure the other packages.
@@ -34,7 +34,7 @@ shopping-notes/                  project root
     AGENTS.md
     CLAUDE.md -> AGENTS.md
     .agents/skills/
-    .claude -> .agents
+    .claude/skills -> ../.agents/skills
     docs/  schemas/  rules/  specs/  plans/  contracts/
 ```
 
@@ -45,7 +45,7 @@ snake-game/                           project root, agent root
   AGENTS.md
   CLAUDE.md -> AGENTS.md
   .agents/skills/
-  .claude -> .agents
+  .claude/skills -> ../.agents/skills
   src/
   spex/                          spex directory
     spex.yaml
@@ -59,7 +59,7 @@ shopping-notes/                  project root, agent root
   AGENTS.md
   CLAUDE.md -> AGENTS.md
   .agents/skills/
-  .claude -> .agents
+  .claude/skills -> ../.agents/skills
   apps/api/
   apps/frontend/
   spex/                          spex directory

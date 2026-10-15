@@ -219,14 +219,20 @@ mod tests_unit {
 
     #[cfg(unix)]
     #[test]
-    fn copy_templates_links_claude_to_agents() {
+    fn copy_templates_links_claude_skills_to_agents_skills() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
         let claude = spex_dir.path().join(".claude");
-        let target = fs::read_link(&claude).expect("read .claude symlink");
-        assert_eq!(target, std::path::Path::new(".agents"));
+        assert!(
+            fs::symlink_metadata(&claude)
+                .expect("read .claude metadata")
+                .is_dir(),
+            ".claude should be a real directory"
+        );
+        let target = fs::read_link(claude.join("skills")).expect("read .claude/skills symlink");
+        assert_eq!(target, std::path::Path::new("../.agents/skills"));
         assert!(
             claude.join("skills/spex-spec/SKILL.md").is_file(),
             ".claude/skills should resolve through the symlink"

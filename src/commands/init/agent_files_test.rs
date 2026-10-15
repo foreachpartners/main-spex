@@ -128,26 +128,28 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn link_claude_dir_links_the_whole_directory_when_absent() {
+    fn link_claude_skills_creates_a_real_claude_directory_linking_only_skills() {
         let root = tempdir().expect("create agent root");
         fs::create_dir_all(root.path().join(".agents/skills")).expect("create skills");
 
-        link_claude_dir(root.path()).expect("link");
+        link_claude_skills(root.path()).expect("link");
 
+        let claude = root.path().join(CLAUDE_DIRNAME);
+        assert!(is_real_dir(&claude), "`.claude` should be a real directory");
         assert_eq!(
-            fs::read_link(root.path().join(CLAUDE_DIRNAME)).expect("read symlink"),
-            Path::new(AGENTS_DIRNAME)
+            fs::read_link(claude.join(SKILLS_DIRNAME)).expect("read symlink"),
+            Path::new("../.agents/skills")
         );
     }
 
     #[cfg(unix)]
     #[test]
-    fn link_claude_dir_links_only_skills_into_an_existing_claude_directory() {
+    fn link_claude_skills_links_only_skills_into_an_existing_claude_directory() {
         let root = tempdir().expect("create agent root");
         write(root.path(), ".claude/settings.json", "{}");
         fs::create_dir_all(root.path().join(".agents/skills")).expect("create skills");
 
-        link_claude_dir(root.path()).expect("link");
+        link_claude_skills(root.path()).expect("link");
 
         assert!(root.path().join(".claude/settings.json").is_file());
         assert_eq!(
@@ -158,17 +160,22 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
-    fn link_claude_dir_leaves_an_existing_link_alone() {
+    fn link_claude_skills_leaves_an_existing_skills_link_alone() {
         let root = tempdir().expect("create agent root");
         fs::create_dir_all(root.path().join("elsewhere")).expect("create target");
-        std::os::unix::fs::symlink("elsewhere", root.path().join(CLAUDE_DIRNAME))
-            .expect("create symlink");
+        fs::create_dir_all(root.path().join(CLAUDE_DIRNAME)).expect("create .claude");
+        std::os::unix::fs::symlink(
+            "../elsewhere",
+            root.path().join(CLAUDE_DIRNAME).join(SKILLS_DIRNAME),
+        )
+        .expect("create symlink");
 
-        link_claude_dir(root.path()).expect("link");
+        link_claude_skills(root.path()).expect("link");
 
         assert_eq!(
-            fs::read_link(root.path().join(CLAUDE_DIRNAME)).expect("read symlink"),
-            Path::new("elsewhere")
+            fs::read_link(root.path().join(CLAUDE_DIRNAME).join(SKILLS_DIRNAME))
+                .expect("read symlink"),
+            Path::new("../elsewhere")
         );
     }
 
@@ -180,7 +187,7 @@ mod tests {
         write(root.path(), ".claude/settings.json", "{}");
 
         move_claude_skills(root.path()).expect("move");
-        link_claude_dir(root.path()).expect("link");
+        link_claude_skills(root.path()).expect("link");
 
         assert_eq!(
             fs::read_to_string(root.path().join(".agents/skills/my-skill/SKILL.md"))

@@ -4,6 +4,14 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.23.0
+
+`.claude` is no longer a symlink to `.agents`: it is a real directory that keeps its own files, such as `settings.json`, and only `.claude/skills` is a symlink to `../.agents/skills`. A project made by an earlier version has the whole `.claude` linked to `.agents`, so Claude Code's own files were written into `.agents`. In `<agent-root>`:
+
+- If `.claude` is a symlink to `.agents` (check with `ls -l .claude`), remove the symlink with `rm .claude`, without a trailing slash, then create the `.claude` directory and link `.claude/skills` to `../.agents/skills`.
+- List the entries of `.agents` other than `skills`. Move the ones Claude Code wrote, such as `settings.json`, `settings.local.json`, `commands`, `agents` or `hooks`, into `.claude`. Ask the user about any other entry before moving it.
+- If `.claude` is already a real directory, change nothing: only its `skills` link is needed, and `spex init` already made it.
+
 ## 0.22.0
 
 A bundled rule that sets no `sync_with_upstream` is now synced from upstream: `spex update` overwrites it, and its scripts, with the bundled version. Before, a rule without the field was kept as a local customization. `sync_with_upstream: false` now opts a rule out, and `schemas/rule.schema.json` defaults the field to `true`. `spex update` also needs `agent_root` in `spex.yaml` and fails without it, where it used to assume the spex directory. In `<spex-dir>`:

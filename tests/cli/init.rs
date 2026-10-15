@@ -193,6 +193,18 @@ fn init_monorepo_lists_only_the_spex_package_and_puts_agent_files_in_the_root() 
     assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
     assert!(project.join("AGENTS.md").is_file());
     assert!(!project.join("spex/.agents").exists());
+
+    let claude = project.join(".claude");
+    assert!(
+        fs::symlink_metadata(&claude)
+            .expect("read .claude metadata")
+            .is_dir(),
+        ".claude stays a real directory so its settings stay out of .agents"
+    );
+    assert_eq!(
+        fs::read_link(claude.join("skills")).expect("skills symlink"),
+        Path::new("../.agents/skills")
+    );
 }
 
 #[test]
