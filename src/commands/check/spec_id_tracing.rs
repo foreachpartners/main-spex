@@ -1,9 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::fs;
+use std::path::Path;
 
 use crate::rule::RULES_DIR;
 use crate::spec::{AcId, SPECS_DIR, SpecId};
-use crate::templates::SCHEMAS_DIRNAME;
+use crate::templates::{
+    AGENTS_DIRNAME, AGENTS_FILENAME, DOCS_DIRNAME, SCHEMAS_DIRNAME, SKILLS_DIRNAME,
+};
 use crate::tracing::annotations;
 
 use super::check::PackageCtx;
@@ -20,11 +23,12 @@ const ORPHAN_CHECK: &str = "no-orphan-annotations";
 
 pub(super) fn validate_annotations(
     ctx: &PackageCtx,
+    agent_root: &Path,
     known_ids: &HashMap<SpecId, HashSet<AcId>>,
 ) -> Vec<Finding> {
     let mut findings = Vec::new();
     for file in ctx.candidates {
-        if holds_illustrative_annotations(ctx, file) {
+        if holds_illustrative_annotations(ctx.spex_dir, agent_root, file) {
             continue;
         }
         let Ok(content) = fs::read_to_string(&file.abs) else {
@@ -36,13 +40,15 @@ pub(super) fn validate_annotations(
     findings
 }
 
-fn holds_illustrative_annotations(ctx: &PackageCtx, file: &ScopedFile) -> bool {
-    if file.rel.extension().is_some_and(|ext| ext == "md") {
-        return true;
-    }
-    [SCHEMAS_DIRNAME, SPECS_DIR, RULES_DIR]
-        .iter()
-        .any(|dir| file.abs.starts_with(ctx.spex_dir.join(dir)))
+fn holds_illustrative_annotations(spex_dir: &Path, agent_root: &Path, file: &ScopedFile) -> bool {
+    let skipped_spex_dirs = [SCHEMAS_DIRNAME, SPECS_DIR, RULES_DIR, DOCS_DIRNAME];
+    file.abs == agent_root.join(AGENTS_FILENAME)
+        || file
+            .abs
+            .starts_with(agent_root.join(AGENTS_DIRNAME).join(SKILLS_DIRNAME))
+        || skipped_spex_dirs
+            .iter()
+            .any(|dir| file.abs.starts_with(spex_dir.join(dir)))
 }
 
 fn check_format(file: &ScopedFile, content: &str) -> Vec<Finding> {

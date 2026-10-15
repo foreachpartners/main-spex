@@ -97,6 +97,7 @@ mod tests {
             CheckPackageArgs {
                 package: &package,
                 spex_dir: &spex,
+                agent_root: &spex,
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &[],
@@ -116,6 +117,7 @@ mod tests {
             CheckPackageArgs {
                 package: &package,
                 spex_dir: &spex,
+                agent_root: &spex,
                 rules: &rules,
                 known_ids: &HashMap::new(),
                 files: &["src/main.rs".to_string()],
@@ -163,6 +165,7 @@ mod tests {
             CheckPackageArgs {
                 package: &api_package,
                 spex_dir: &spex,
+                agent_root: &spex,
                 rules: &rules,
                 known_ids: &known_ids,
                 files: &[],
@@ -175,6 +178,7 @@ mod tests {
                 CheckPackageArgs {
                     package: &web_package,
                     spex_dir: &spex,
+                    agent_root: &spex,
                     rules: &rules,
                     known_ids: &known_ids,
                     files: &[],

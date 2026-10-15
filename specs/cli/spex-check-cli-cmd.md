@@ -59,13 +59,13 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run `spex-internal-conformance` and the spec-scoped checks (reported as `<spec-id>/<check>`) on every `spex check`, whatever `--package` or `--files` select, since they validate the spex directory as a whole, and report them under the spex package's heading, which is added when that package is not selected.
 - MUST run the `@spec` annotation checks (`annotation-format`, `no-orphan-annotations`) only on the files of the selected packages: `--package api` checks the annotations in `api`, and `--package spex` does not check them in `api`.
 - MUST validate `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.package.yaml` of every package that has one against their JSON Schema.
-- MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id grammar (lowercase letters, digits and hyphens only, at most 40 characters).
+- MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id allowed schema.
 - MUST require each spec file to be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - MUST require every script a rule check references to exist in the rule's script folder, beside the rule file.
 - MUST require declared properties to follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).
 - MUST require each spec's and rule's `acceptance_criteria` to be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` to be unique within its spec.
 - MUST require every `@spec` annotation to match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and to reference an existing Spec ID, and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
-- MUST skip markdown files for annotation validation, as well as the spex directory's `schemas/`, `specs/` and `rules/` (with each rule's script folder), which hold illustrative example annotations rather than real references.
+- MUST skip, for annotation validation, the spex directory's `schemas/`, `specs/`, `rules/` and `docs/` and the agent root's `.agents/skills/` with all their subfolders, and the agent root's `AGENTS.md`, since they hold illustrative example annotations rather than real references.
 - MUST require a `blocked_by` reference to name an existing spec, and error on a rule id.
 - MUST warn when a `blocked_by` reference names an already-`active` spec, since a satisfied blocker is dropped.
 - MUST require a `packages` entry to match a package's `package_short_name` in `spex.yaml`.

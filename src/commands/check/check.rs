@@ -89,6 +89,7 @@ impl PackageCtx<'_> {
 struct CheckPackageArgs<'a> {
     package: &'a Package,
     spex_dir: &'a Path,
+    agent_root: &'a Path,
     rules: &'a [Rule],
     known_ids: &'a HashMap<SpecId, HashSet<AcId>>,
     files: &'a [String],
@@ -145,6 +146,7 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
             CheckPackageArgs {
                 package,
                 spex_dir: &spex.dir,
+                agent_root: &spex.agent_root,
                 rules: &rules,
                 known_ids: &known_ids,
                 files: &args.files,
@@ -193,6 +195,7 @@ fn check_package<'a>(
     let CheckPackageArgs {
         package,
         spex_dir,
+        agent_root,
         rules,
         known_ids,
         files,
@@ -221,7 +224,7 @@ fn check_package<'a>(
         candidates: &candidates,
     };
 
-    let mut findings = validate_annotations(&ctx, known_ids);
+    let mut findings = validate_annotations(&ctx, agent_root, known_ids);
 
     let skip_negated_checks = !files.is_empty();
 

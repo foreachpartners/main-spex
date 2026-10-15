@@ -475,6 +475,27 @@ fn check_runs_annotation_checks_only_on_selected_packages() {
 }
 
 #[test]
+fn check_validates_annotations_in_markdown_files() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+
+    copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/contract.md"),
+        "<!-- @spec contract no-such-spec -->\n",
+    )
+    .expect("write markdown contract");
+
+    let check = run_spex(&project, &["check"], "");
+    let report = report_text(&check.stdout);
+    assert!(
+        report.contains("orphan annotation references unknown spec `no-such-spec`"),
+        "annotation in a markdown file was not flagged\n{report}",
+    );
+    assert_eq!(check.status.code(), Some(1));
+}
+
+#[test]
 fn check_flags_annotation_referencing_rule_id_as_orphan() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");

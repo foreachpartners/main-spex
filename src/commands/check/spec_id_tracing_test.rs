@@ -45,7 +45,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, &known(&["list-pizza-menu"]));
+        let findings = validate_annotations(&ctx, dir.path(), &known(&["list-pizza-menu"]));
 
         assert_eq!(findings.len(), 1);
         assert_eq!(check_of(&findings[0]), FORMAT_CHECK);
@@ -73,7 +73,7 @@ mod tests {
             testing::spec_id("list-pizza-menu"),
             HashSet::from([testing::ac_id("in-stock-only")]),
         );
-        let findings = validate_annotations(&ctx, &known_ids);
+        let findings = validate_annotations(&ctx, dir.path(), &known_ids);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(check_of(&findings[0]), ORPHAN_CHECK);
@@ -81,7 +81,37 @@ mod tests {
     }
 
     #[test]
-    fn skips_markdown_and_spex_project_dirs() {
+    fn validates_markdown_files_like_any_other_file() {
+        let dir = tempdir().expect("temp dir");
+        let candidates = vec![
+            write_candidate(
+                dir.path(),
+                "contracts/figma.md",
+                "<!-- @spec contract bogus -->\n",
+            ),
+            write_candidate(
+                dir.path(),
+                "contracts/design.md",
+                "<!-- @spec contract list-pizza-menu -->\n",
+            ),
+        ];
+        let ctx = PackageCtx {
+            package_path: dir.path(),
+            spex_dir: dir.path(),
+            candidates: &candidates,
+        };
+        let findings = validate_annotations(&ctx, dir.path(), &known(&["list-pizza-menu"]));
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(check_of(&findings[0]), ORPHAN_CHECK);
+        assert_eq!(
+            findings[0].location,
+            Some(Location::in_file("contracts/figma.md"))
+        );
+    }
+
+    #[test]
+    fn skips_spex_project_dirs() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![
             write_candidate(dir.path(), "docs/notes.md", "@spec bogus\n"),
@@ -92,7 +122,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, &HashMap::new());
+        let findings = validate_annotations(&ctx, dir.path(), &HashMap::new());
 
         assert!(findings.is_empty());
     }
@@ -104,6 +134,7 @@ mod tests {
             write_candidate(dir.path(), "spex/specs/example.yaml", "@spec bogus\n"),
             write_candidate(dir.path(), "spex/rules/example/check.sh", "@spec bogus\n"),
             write_candidate(dir.path(), "spex/schemas/spec.schema.json", "@spec bogus\n"),
+            write_candidate(dir.path(), "spex/docs/glossary.md", "@spec bogus\n"),
             write_candidate(dir.path(), "src/lib.rs", "// @spec impl bogus\n"),
         ];
         let spex_dir = dir.path().join("spex");
@@ -112,10 +143,40 @@ mod tests {
             spex_dir: &spex_dir,
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, &HashMap::new());
+        let findings = validate_annotations(&ctx, dir.path(), &HashMap::new());
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].location, Some(Location::in_file("src/lib.rs")));
+    }
+
+    #[test]
+    fn skips_the_agents_file_and_skills_of_the_agent_root_only() {
+        let dir = tempdir().expect("temp dir");
+        let candidates = vec![
+            write_candidate(dir.path(), "AGENTS.md", "@spec bogus\n"),
+            write_candidate(
+                dir.path(),
+                ".agents/skills/spex-spec/SKILL.md",
+                "@spec impl bogus\n",
+            ),
+            write_candidate(dir.path(), "api/AGENTS.md", "@spec impl bogus\n"),
+            write_candidate(
+                dir.path(),
+                "api/.agents/skills/SKILL.md",
+                "@spec impl bogus\n",
+            ),
+        ];
+        let ctx = PackageCtx {
+            package_path: dir.path(),
+            spex_dir: dir.path(),
+            candidates: &candidates,
+        };
+        let findings = validate_annotations(&ctx, dir.path(), &HashMap::new());
+
+        assert_eq!(
+            locations(&findings),
+            vec!["api/AGENTS.md", "api/.agents/skills/SKILL.md"]
+        );
     }
 
     #[test]
@@ -131,7 +192,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        let findings = validate_annotations(&ctx, &HashMap::new());
+        let findings = validate_annotations(&ctx, dir.path(), &HashMap::new());
 
         assert!(findings.is_empty());
     }
@@ -151,6 +212,7 @@ mod tests {
         };
         let findings = validate_annotations(
             &ctx,
+            dir.path(),
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
         );
 
@@ -175,6 +237,7 @@ mod tests {
         };
         let findings = validate_annotations(
             &ctx,
+            dir.path(),
             &known_with_acs("delivery-time", &["estimate-on-delivery"]),
         );
 
@@ -194,7 +257,7 @@ mod tests {
             spex_dir: dir.path(),
             candidates: &candidates,
         };
-        validate_annotations(&ctx, known_ids)
+        validate_annotations(&ctx, dir.path(), known_ids)
     }
 
     fn locations(findings: &[Finding]) -> Vec<String> {
