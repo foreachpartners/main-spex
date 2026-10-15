@@ -26,15 +26,15 @@ The schema is authoritative for field rules and contains a worked example. Read 
 1. Read `spex.yaml`.
 2. Find the new packages, by layout. Confirm the list with the user and drop anything that is not a package, or that `packages` already lists.
    - `multi-repo`: the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named.
-   - `single-repo`: none. `spex init` already listed the project's one package; only complete its entry.
+   - `single-repo`: the repository itself, as the project's one package.
    - `monorepo`: the packages, from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
 3. Inspect each package: its `README`, manifest files (`package.json`, `Cargo.toml`, `pyproject.toml`, `go.mod`, `pom.xml`), top-level layout and entry points.
 4. If the project `description`, or a package `description`, is `unknown`, propose one from `project_name` and what the packages do. If their purpose is unclear, ask the user one short question instead of guessing.
 5. Propose an entry for each package:
-   - `package_name`: the directory name in multi-repo, `<project-name>-<package-short-name>` in monorepo
-   - `package_short_name`: in multi-repo the `package_name` without its `<project-name>-` prefix, in monorepo the package's folder name
+   - `package_name`: the directory name in multi-repo, `<project-name>-<package-short-name>` in monorepo, the project name in single-repo
+   - `package_short_name`: in multi-repo the `package_name` without its `<project-name>-` prefix, in monorepo the package's folder name, in single-repo the project name
    - `description`: one concrete sentence stating the package's role in the project (for example backend service, web client, shared library), without restating its name
-   - `path`, relative to `<spex-dir>`: `../<directory-name>` in multi-repo, `../<package-path>` (for example `../apps/api`) in monorepo
+   - `path`, relative to `<spex-dir>`: `../<directory-name>` in multi-repo, `../<package-path>` (for example `../apps/api`) in monorepo, `..` in single-repo
    - `contracts`: one entry per interface contract file the package ships (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI), each with a `path` relative to the spex directory and a one-line `description`. Leave the file where it is; never move or copy it. Omit `contracts` when the package ships none.
    - `rules`: read every file in `rules/` and list only the rule IDs that genuinely apply given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API). Give a one-line reason for each.
 6. Show the proposal to the user and confirm it. Write only what the user confirms.

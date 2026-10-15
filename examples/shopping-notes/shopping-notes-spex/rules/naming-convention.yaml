@@ -9,7 +9,6 @@ acceptance_criteria:
   - "MUST use <project_name>_<package_short_name> for db (names both the database and its user)"
   - "MUST use <PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA> for config and env variables"
   - "MUST use <project_name>.<package_short_name>.<data> for proto_package"
-  - "MUST use lowercase for a Spec ID or Rule ID (e.g. `delivery-time`) everywhere it is referenced — prose, filename, script directory, and for a Spec ID also `@spec` annotations and `x-spec:` — so the id is always identical to the spec's filename and script directory (`specs/add-shopping-item.yaml` and `add-shopping-item`, `rules/secret-handling/` and `secret-handling`)"
   - "MUST extend this convention, not individual packages, when a new cross-cutting identifier is needed"
 checks:
   - name: package-dir
@@ -39,10 +38,3 @@ examples:
     format:   <project_name>.<package_short_name>.<data>
     example:  shopping_notes.api.v1
     example:  shopping_notes.frontend.v1
-
-    used by:  Spec ID / Rule ID (prose), Spec ID (`@spec` annotations, `x-spec:`), spec/rule filename, script directory
-    format:   <name>
-    example:  add-shopping-item
-    example:  specs/add-shopping-item.yaml
-    example:  secret-handling
-    example:  rules/secret-handling/
