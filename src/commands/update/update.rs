@@ -7,8 +7,8 @@ use eros::Context;
 use owo_colors::OwoColorize;
 
 use crate::config::spex::Spex;
-use crate::config::{CLI_VERSION, Layout, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
-use crate::error::{Result, could_not_read};
+use crate::config::{CLI_VERSION, SPEX_CONFIG_FILE, SpexConfig, spex_yaml_edit};
+use crate::error::{Result, could_not_parse, could_not_read};
 use crate::support::fs::{normalize, write_file};
 use crate::support::text::level_two_sections;
 use serde::Deserialize;
@@ -27,19 +27,18 @@ pub struct UpdateArgs {
     #[arg(
         long,
         value_name = "FROM_VERSION",
-        help = "Print the migration steps after FROM_VERSION, oldest first, instead of updating"
+        help = "Print the migration steps after FROM_VERSION, newest first, instead of updating"
     )]
     migration_guide: Option<String>,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize)]
 struct UpdateConfig {
     #[serde(default)]
     cli_version: String,
     #[serde(default)]
     rules_unused: Vec<String>,
-    #[serde(default)]
-    agent_root: Option<String>,
+    agent_root: String,
 }
 
 pub fn run(args: UpdateArgs) -> Result<ExitCode> {
@@ -58,17 +57,11 @@ fn update() -> Result<ExitCode> {
 
     let raw = fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
 
-    let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw).unwrap_or_default();
+    let previous = serde_yaml_ng::from_str::<UpdateConfig>(&raw)
+        .with_context(|| could_not_parse(&config_path))?;
 
     let spex_dir = SpexConfig::dir_of(&config_path);
-    let agent_root = normalize(
-        &spex_dir.join(
-            previous
-                .agent_root
-                .as_deref()
-                .unwrap_or(Layout::MultiRepo.agent_root()),
-        ),
-    );
+    let agent_root = normalize(&spex_dir.join(&previous.agent_root));
     sync_templates(spex_dir, &agent_root, &previous.rules_unused)
         .context("could not rewrite bundled templates")?;
 

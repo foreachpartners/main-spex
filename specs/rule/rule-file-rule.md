@@ -9,8 +9,8 @@ A rule, defined in [glossary.md](../../docs/glossary.md), lives at `rules/<rule-
 - MUST have the required fields `id`, `title`, `description`, and `acceptance_criteria`.
 - MUST hold the individual rules in `acceptance_criteria`, ordered `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`, each criterion a string starting with that commitment.
 - MUST apply a rule package-wide, not per feature, once a package opts into it by listing it in `rules` in `spex.yaml`.
-- MUST keep a rule with `sync_with_upstream: true` in sync from the bundled template, with its scripts, on `spex update`.
-- MUST keep local changes across updates to a rule whose `sync_with_upstream` is unset, which customizes it locally.
+- MUST keep a bundled rule in sync from the bundled template, with its scripts, on `spex update`, unless it sets `sync_with_upstream: false`; an unset `sync_with_upstream` defaults to `true`.
+- MUST keep local changes across updates to a rule with `sync_with_upstream: false`, which customizes it locally.
 - MUST recognize a deleted bundled rule as deliberate only once its id is added to `rules_unused` in `spex.yaml`.
 - MUST NOT give a rule a lifecycle status, or its acceptance criteria an implementation flag.
-- MAY have the optional fields `checks`, `examples`, and `sync_with_upstream`; `sync_with_upstream: true` marks a global framework rule.
+- MAY have the optional fields `checks`, `examples`, and `sync_with_upstream`; `sync_with_upstream` defaults to `true`, and `false` opts a bundled rule out of `spex update`.

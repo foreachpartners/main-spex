@@ -3,7 +3,6 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
-use crate::commands::init::agent_files::link_claude_dir;
 use crate::commands::init::scaffold::{copy_docs_and_schemas, write_rule};
 use crate::error::Result;
 use crate::rule::RULES_DIR;
@@ -22,8 +21,7 @@ pub fn sync_templates(spex_dir: &Path, agent_root: &Path, removed_rules: &[Strin
     copy_docs_and_schemas(spex_dir)?;
     sync_rules(spex_dir, removed_rules)?;
     sync_skills(agent_root)?;
-    sync_agents_md(agent_root)?;
-    link_claude_dir(agent_root)
+    sync_agents_md(agent_root)
 }
 
 fn sync_agents_md(agent_root: &Path) -> Result<()> {
@@ -48,7 +46,7 @@ fn is_synced_with_upstream(spec_path: &Path) -> bool {
         .ok()
         .and_then(|raw| serde_yaml_ng::from_str::<Value>(&raw).ok())
         .and_then(|spec| spec.get("sync_with_upstream")?.as_bool())
-        .unwrap_or(false)
+        .unwrap_or(true)
 }
 
 fn frontmatter(contents: &str) -> Option<&str> {

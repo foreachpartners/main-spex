@@ -17,9 +17,9 @@ Read `cli_version` from `<spex-dir>/spex.yaml`. This is the previous version —
 
 ## Step 3 — Migrate
 
-Run `spex update --migration-guide <previous version>`. It prints the installed binary's migration steps for every version after the previous version, oldest first, and neither reads `spex.yaml` nor changes any file.
+Run `spex update --migration-guide <previous version>`. It prints the installed binary's migration steps for every version after the previous version, newest first, and neither reads `spex.yaml` nor changes any file.
 
-Apply the printed steps in the printed order, before Step 4: a breaking change can leave the project in a state `spex update` does not handle. Empty output needs no migration; a listed step that doesn't apply to this project (e.g. it names a feature the project doesn't use) needs no action.
+Read all the printed steps, then apply them from the oldest version to the newest, the reverse of the printed order, before Step 4: a breaking change can leave the project in a state `spex update` does not handle. The output `no migration needed` needs no migration; a listed step that doesn't apply to this project (e.g. it names a feature the project doesn't use) needs no action.
 
 ## Step 4 — Update
 

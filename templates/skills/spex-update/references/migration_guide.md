@@ -2,7 +2,13 @@
 
 Steps required to move a project from one spex CLI version to a newer one, one section per version that needs them. A version not listed here needs no migration steps.
 
-`spex update --migration-guide <from_version>` prints the sections after a version, oldest first, and the `spex-update` skill applies them before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
+`spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
+
+## 0.22.0
+
+A bundled rule that sets no `sync_with_upstream` is now synced from upstream: `spex update` overwrites it, and its scripts, with the bundled version. Before, a rule without the field was kept as a local customization. `sync_with_upstream: false` now opts a rule out, and `schemas/rule.schema.json` defaults the field to `true`. `spex update` also needs `agent_root` in `spex.yaml` and fails without it, where it used to assume the spex directory. In `<spex-dir>`:
+
+- For every rule under `rules/**/*.yaml` named like a bundled rule (`commit-message-format`, `dependencies-rules`, `graphql-conventions`, `naming-convention`, `openapi-conventions`, `secret-handling`, `testing-rules`, `writing-style`) that sets no `sync_with_upstream`, ask the user whether it holds local customizations. If it does, add `sync_with_upstream: false` to it. If not, change nothing: it now syncs. Rules with `sync_with_upstream: true` or `false` need no change, and `spex update` never touches a rule that no bundled rule shares its name with.
 
 ## 0.21.0
 
@@ -23,7 +29,7 @@ A spec's `scope` field is now `packages`, and `spex coverage` and `spex specs` f
 
 ## 0.19.0
 
-`spex.yaml` gained two required fields: `layout`, how the project is arranged on disk (`multi-repo`, `single-repo`, or `monorepo`), and `agent_root`, the directory holding `AGENTS.md`, `CLAUDE.md` and `.agents/skills/`, relative to the spex directory. Every existing project is a `multi-repo` project, whose agent files live in the spex repository itself, so add `layout: multi-repo` and `agent_root: .` to `<project-root>/<project-name>-spex/spex.yaml`, in that order, right after `cli_version`. Until they are added, every command except `spex update` fails to load `spex.yaml`.
+`spex.yaml` gained two required fields: `layout`, how the project is arranged on disk (`multi-repo`, `single-repo`, or `monorepo`), and `agent_root`, the directory holding `AGENTS.md`, `CLAUDE.md` and `.agents/skills/`, relative to the spex directory. Every existing project is a `multi-repo` project, whose agent files live in the spex repository itself, so add `layout: multi-repo` and `agent_root: .` to `<project-root>/<project-name>-spex/spex.yaml`, in that order, right after `cli_version`. Until they are added, every command, `spex update` included, fails to load `spex.yaml`.
 
 A workspace repository is now called a package: one word for a separate git repository (multi-repo), a package folder (monorepo) and the single repository (single-repo). Rename the following. Until `spex.yaml` is renamed, every command except `spex update` fails to load it. In `<project-root>/<project-name>-spex/`:
 

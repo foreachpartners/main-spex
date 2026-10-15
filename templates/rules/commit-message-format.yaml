@@ -1,6 +1,5 @@
 id: commit-message-format
 title: Commit message format
-sync_with_upstream: true
 description: >-
   Commits are the unit of traceability between code and the specs that justify
   it. Scope names the affected area freely; the `@spec` tag and its attached ID

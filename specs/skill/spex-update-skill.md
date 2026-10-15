@@ -19,9 +19,9 @@ Updates a spex project's CLI version and applies the migration steps that upgrad
 
 ### Step 3: migrate
 
-- MUST run [`spex update --migration-guide <previous version>`](../cli/spex-update-cli-cmd.md) and read its output: the installed binary's migration steps for every version after the previous version, oldest first.
-- MUST apply the printed steps in the printed order before Step 4, because a breaking change can leave the project in a state `spex update` does not handle.
-- MUST treat empty output as needing no migration, and a listed step that does not apply to the project (e.g. it names a feature the project does not use) as needing no action.
+- MUST run [`spex update --migration-guide <previous version>`](../cli/spex-update-cli-cmd.md) and read all of its output: the installed binary's migration steps for every version after the previous version, newest first.
+- MUST apply the steps from the oldest version to the newest, the reverse of the printed order, before Step 4, because a breaking change can leave the project in a state `spex update` does not handle.
+- MUST treat the output `no migration needed` as needing no migration, and a listed step that does not apply to the project (e.g. it names a feature the project does not use) as needing no action.
 
 ### Step 4: update
 

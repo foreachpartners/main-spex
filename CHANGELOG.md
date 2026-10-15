@@ -2,6 +2,12 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.22.0] - 2026-10-15
+
+- **Breaking**: a bundled rule that sets no `sync_with_upstream` is now synced from upstream by `spex update`, which overwrites it and its scripts. The field defaults to `true`, and `sync_with_upstream: false` opts a rule out to keep local changes, where before an unset field kept the rule as a local customization. `schemas/rule.schema.json` follows, and the bundled rules no longer carry `sync_with_upstream: true`. See the migration guide.
+- `spex update --migration-guide <from_version>` prints the steps newest first, prints `no migration needed` when none follow, and accepts `MAJOR` and `MAJOR.MINOR` besides `MAJOR.MINOR.PATCH`, reading the missing parts as `0`. The `spex-update` skill reads all the steps and applies them from the oldest version to the newest.
+- `spex update` requires `agent_root` in `spex.yaml` and fails without it, instead of assuming the spex directory, and no longer re-creates a missing `.claude` symlink, which `spex init` still creates. `spex update` rewrites the bundled schema and skill.
+
 ## [0.21.4] - 2026-10-15
 
 - `spex update --migration-guide <from_version>` prints the migration steps of the installed `spex` for every version after `<from_version>`, oldest first, without reading `spex.yaml` or changing any file. The `spex-update` skill now runs it and applies the steps before `spex update`, so a breaking change no longer meets an update that cannot handle the project. `spex update` rewrites the skill; no migration steps.

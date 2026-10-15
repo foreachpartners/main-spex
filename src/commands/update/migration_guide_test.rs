@@ -19,11 +19,11 @@ First steps.
 ";
 
 #[test]
-fn returns_sections_after_from_version_oldest_first() {
+fn returns_sections_after_from_version_newest_first() {
     let sections = migration_guide_since(GUIDE, "0.9.0").unwrap();
     assert_eq!(
         sections,
-        vec!["## 0.20.0\n\nSecond steps.", "## 0.21.0\n\nThird steps."]
+        vec!["## 0.21.0\n\nThird steps.", "## 0.20.0\n\nSecond steps."]
     );
 }
 
@@ -45,8 +45,29 @@ fn returns_nothing_when_from_version_is_latest() {
 }
 
 #[test]
-fn rejects_a_from_version_that_is_not_major_minor_patch() {
-    for invalid in ["", "0.21", "0.21.0.1", "v0.21.0", "0.21.x", "0.21.0-beta"] {
+fn reads_a_short_from_version_as_zero_padded() {
+    assert_eq!(
+        migration_guide_since(GUIDE, "0.20").unwrap(),
+        migration_guide_since(GUIDE, "0.20.0").unwrap()
+    );
+    assert_eq!(
+        migration_guide_since(GUIDE, "0").unwrap(),
+        migration_guide_since(GUIDE, "0.0.0").unwrap()
+    );
+    assert!(migration_guide_since(GUIDE, "1").unwrap().is_empty());
+}
+
+#[test]
+fn rejects_a_from_version_that_is_not_major_minor_or_patch() {
+    for invalid in [
+        "",
+        "0.",
+        "0..1",
+        "0.21.0.1",
+        "v0.21.0",
+        "0.21.x",
+        "0.21.0-beta",
+    ] {
         assert!(
             migration_guide_since(GUIDE, invalid).is_err(),
             "{invalid:?} should be rejected"

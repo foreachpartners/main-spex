@@ -78,12 +78,33 @@ mod tests_unit {
     }
 
     #[test]
-    fn sync_preserves_unmanaged_rule() {
+    fn sync_overwrites_rule_without_sync_with_upstream() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::write(&spec, "id: commit-message-format\ncustomized: true\n").expect("customize spec");
+        fs::write(&spec, "id: commit-message-format\ntampered: true\n").expect("tamper spec");
+
+        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+
+        let expected_spec = BUNDLED_TEMPLATES_DIR
+            .get_file(MANAGED_SPEC)
+            .expect("bundled spec")
+            .contents();
+        assert_eq!(fs::read(&spec).expect("read spec"), expected_spec);
+    }
+
+    #[test]
+    fn sync_preserves_rule_opted_out_of_sync_with_upstream() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+
+        let spec = spex_dir.path().join(MANAGED_SPEC);
+        fs::write(
+            &spec,
+            "id: commit-message-format\nsync_with_upstream: false\ncustomized: true\n",
+        )
+        .expect("customize spec");
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
 
@@ -91,7 +112,7 @@ mod tests_unit {
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
-            "id: commit-message-format\ncustomized: true\n"
+            "id: commit-message-format\nsync_with_upstream: false\ncustomized: true\n"
         );
         assert_eq!(fs::read_to_string(&script).unwrap(), "customized");
     }

@@ -222,11 +222,6 @@ fn update_upgrades_project_written_by_older_cli() {
         0,
         "deployed script should be executable"
     );
-    assert_eq!(
-        fs::read_link(spex.join(".claude")).expect("read .claude symlink"),
-        Path::new(".agents"),
-        ".claude should link to .agents",
-    );
     assert!(
         !spex.join("AGENTS.md").exists(),
         "update must not seed AGENTS.md"
@@ -310,10 +305,12 @@ fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
 
-    let customized_rule = pristine_rule
-        .replace("sync_with_upstream: true\n", "")
+    let customized_rule = format!("sync_with_upstream: false\n{pristine_rule}")
         .replace("title: Writing style", "title: Local writing style");
-    assert_ne!(customized_rule, pristine_rule, "sync flag not found");
+    assert!(
+        customized_rule.contains("Local writing style"),
+        "title not found"
+    );
     let customized_script = format!("{pristine_script}\nexit 0\n");
     project.write(SYNCED_RULE, &customized_rule);
     project.write(SYNCED_RULE_SCRIPT, &customized_script);
@@ -464,7 +461,7 @@ fn update_fails_outside_a_spex_project() {
 }
 
 #[test]
-fn update_migration_guide_prints_steps_after_the_version_oldest_first() {
+fn update_migration_guide_prints_steps_after_the_version_newest_first() {
     let temp_dir = tempdir().expect("create temp dir");
 
     let guide = run_spex(
@@ -479,9 +476,10 @@ fn update_migration_guide_prints_steps_after_the_version_oldest_first() {
         guide.status.code(),
         String::from_utf8_lossy(&guide.stderr),
     );
+    let headers = printed_version_headers(&guide.stdout);
     assert_eq!(
-        printed_version_headers(&guide.stdout)[..3],
-        ["## 0.19.0", "## 0.20.0", "## 0.21.0"],
+        headers[headers.len() - 3..],
+        ["## 0.21.0", "## 0.20.0", "## 0.19.0"],
     );
     let none_after_latest = run_spex(
         temp_dir.path(),
@@ -489,8 +487,9 @@ fn update_migration_guide_prints_steps_after_the_version_oldest_first() {
         "",
     );
     assert!(none_after_latest.status.success());
-    assert!(
-        none_after_latest.stdout.is_empty(),
+    assert_eq!(
+        String::from_utf8_lossy(&none_after_latest.stdout),
+        "no migration needed\n",
         "no step follows the installed version",
     );
 }
@@ -519,19 +518,39 @@ fn update_migration_guide_changes_nothing_and_ignores_an_unloadable_spex_yaml() 
 }
 
 #[test]
-fn update_migration_guide_fails_on_a_version_that_is_not_major_minor_patch() {
+fn update_migration_guide_reads_a_short_version_as_zero_padded() {
+    let temp_dir = tempdir().expect("create temp dir");
+
+    let short = run_spex(
+        temp_dir.path(),
+        &["update", "--migration-guide", "0.19"],
+        "",
+    );
+    let padded = run_spex(
+        temp_dir.path(),
+        &["update", "--migration-guide", "0.19.0"],
+        "",
+    );
+
+    assert!(short.status.success());
+    assert!(!short.stdout.is_empty(), "expected the migration steps");
+    assert_eq!(short.stdout, padded.stdout);
+}
+
+#[test]
+fn update_migration_guide_fails_on_a_version_that_is_not_major_minor_or_patch() {
     let temp_dir = tempdir().expect("create temp dir");
 
     let guide = run_spex(
         temp_dir.path(),
-        &["update", "--migration-guide", "0.19"],
+        &["update", "--migration-guide", "0.19.x"],
         "",
     );
 
     assert_eq!(guide.status.code(), Some(2));
     assert_eq!(
         String::from_utf8_lossy(&guide.stderr).trim_end(),
-        "error: invalid version `0.19` — expected MAJOR.MINOR.PATCH",
+        "error: invalid version `0.19.x` — expected MAJOR, MAJOR.MINOR or MAJOR.MINOR.PATCH",
     );
     assert!(guide.stdout.is_empty());
 }
@@ -587,15 +606,25 @@ fn update_in_single_repo_rewrites_the_agent_files_in_the_package_root() {
 }
 
 #[test]
-fn update_still_runs_on_a_project_that_predates_agent_root() {
+fn update_fails_on_a_project_without_agent_root_and_changes_nothing() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = Project::init(temp_dir.path());
     let config = project.read("spex.yaml");
     project.write("spex.yaml", &config.replace("agent_root: .\n", ""));
     project.write(SYNCED_SKILL, "tampered");
+    let before = read_tree(&project.root);
 
-    project.update();
+    let update = run_spex(&project.root, &["update"], "");
 
-    assert_ne!(project.read(SYNCED_SKILL), "tampered");
-    assert!(!project.read("spex.yaml").contains("agent_root"));
+    assert_eq!(update.status.code(), Some(2));
+    assert!(
+        String::from_utf8_lossy(&update.stderr).contains("agent_root"),
+        "update should name the missing field\nstderr:\n{}",
+        String::from_utf8_lossy(&update.stderr),
+    );
+    assert_eq!(
+        changed_paths(&before, &read_tree(&project.root)),
+        Vec::<PathBuf>::new(),
+        "a failed update must not change any file",
+    );
 }

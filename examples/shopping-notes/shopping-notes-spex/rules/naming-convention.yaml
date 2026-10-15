@@ -1,6 +1,5 @@
 id: naming-convention
 title: Derived naming convention
-sync_with_upstream: true
 description: >-
   A package owns many cross-cutting identifiers: package directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the package short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
 acceptance_criteria:
