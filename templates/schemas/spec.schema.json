@@ -20,7 +20,7 @@
     },
     "acceptance_criteria": {
       "type": "array",
-      "description": "Verifiable acceptance criteria, each with a stable id and its commitment level as a key (`must`, `must_not`, `should`, `should_not`, or `may`) holding the criterion text. Order by commitment level: must, then must_not, then should, then should_not, then may. `spex coverage` requires every criterion of an active or in-progress spec to have its own impl and test annotation (`@spec impl|test <spec-id>#<ac-id>`), and counts a criterion as done once its impl annotation is present — a missing test annotation is reported separately, as a gap or as pending.",
+      "description": "At least one verifiable acceptance criterion, each with a stable id and its commitment level as a key (`must`, `must_not`, `should`, `should_not`, or `may`) holding the criterion text. Order by commitment level: must, then must_not, then should, then should_not, then may. `spex coverage` requires every criterion of an active or in-progress spec to have its own impl and test annotation (`@spec impl|test <spec-id>#<ac-id>`), and counts a criterion as done once its impl annotation is present — a missing test annotation is reported separately, as a gap or as pending.",
       "items": {
         "type": "object",
         "description": "A single verifiable acceptance criterion, exactly one of `must`/`must_not`/`should`/`should_not`/`may` present.",

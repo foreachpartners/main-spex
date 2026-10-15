@@ -66,15 +66,14 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST require each spec's and rule's `acceptance_criteria` to be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` to be unique within its spec.
 - MUST require every `@spec` annotation to match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and to reference an existing Spec ID, and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
 - MUST skip, for annotation validation, the spex directory's `schemas/`, `specs/`, `rules/` and `docs/` and the agent root's `.agents/skills/` with all their subfolders, and the agent root's `AGENTS.md`, since they hold illustrative example annotations rather than real references.
-- MUST require a `blocked_by` reference to name an existing spec, and error on a rule id.
+- MUST require every `blocked_by` entry to be the id of an existing spec, and error on anything else, such as a rule id or an unknown id.
 - MUST warn when a `blocked_by` reference names an already-`active` spec, since a satisfied blocker is dropped.
 - MUST require a `packages` entry to match a package's `package_short_name` in `spex.yaml`.
 - MUST require a `coverage_ignore` entry, whether in the spec, in `spex.yaml`, or in a package's `spex.package.yaml`, to match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
 - MUST warn on a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is neither `active` nor `deprecated`.
 - MUST error on a spec whose `status` is `active` with any acceptance criterion still `is_done: false`, since `active` means fully implemented (`in-progress` applies until then).
 - MUST read only each criterion's `is_done` field for status checks; whether it is backed by impl/test annotations is `spex coverage`'s job.
-- MUST NOT allow an id to repeat across `specs/` and `rules/`.
-- MUST NOT warn on a spec with no acceptance criteria for its status.
+- MUST NOT allow an spec-id to repeat across `specs/` and `rules/`.
 
 ## Examples
 

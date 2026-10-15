@@ -8,25 +8,22 @@ mod tests {
 
     #[derive(Debug, Clone, Copy, PartialEq)]
     enum Completeness {
-        AllDone,
-        SomeDone,
-        NoneDone,
-        NoCriteria,
+        Complete,
+        Partial,
+        NotStarted,
     }
 
-    const ALL_COMPLETENESS: [Completeness; 4] = [
-        Completeness::AllDone,
-        Completeness::SomeDone,
-        Completeness::NoneDone,
-        Completeness::NoCriteria,
+    const ALL_COMPLETENESS: [Completeness; 3] = [
+        Completeness::Complete,
+        Completeness::Partial,
+        Completeness::NotStarted,
     ];
 
     fn criteria_of(completeness: Completeness) -> Vec<AcceptanceCriterion> {
         match completeness {
-            Completeness::AllDone => criteria(&["a", "b"], &[]),
-            Completeness::SomeDone => criteria(&["a", "b"], &["b"]),
-            Completeness::NoneDone => criteria(&["a", "b"], &["a", "b"]),
-            Completeness::NoCriteria => Vec::new(),
+            Completeness::Complete => criteria(&["a", "b"], &[]),
+            Completeness::Partial => criteria(&["a", "b"], &["b"]),
+            Completeness::NotStarted => criteria(&["a", "b"], &["a", "b"]),
         }
     }
 
@@ -41,26 +38,21 @@ mod tests {
     fn expected_severities(status: Status, completeness: Completeness) -> Vec<Severity> {
         use Completeness::*;
         let table: &[(Status, Completeness, &[Severity])] = &[
-            (Status::Planned, AllDone, &[Severity::Warn]),
-            (Status::Planned, SomeDone, &[]),
-            (Status::Planned, NoneDone, &[]),
-            (Status::Planned, NoCriteria, &[]),
-            (Status::InProgress, AllDone, &[Severity::Warn]),
-            (Status::InProgress, SomeDone, &[]),
-            (Status::InProgress, NoneDone, &[]),
-            (Status::InProgress, NoCriteria, &[]),
-            (Status::Blocked, AllDone, &[Severity::Warn]),
-            (Status::Blocked, SomeDone, &[]),
-            (Status::Blocked, NoneDone, &[]),
-            (Status::Blocked, NoCriteria, &[]),
-            (Status::Active, AllDone, &[]),
-            (Status::Active, SomeDone, &[Severity::Error]),
-            (Status::Active, NoneDone, &[Severity::Error]),
-            (Status::Active, NoCriteria, &[]),
-            (Status::Deprecated, AllDone, &[]),
-            (Status::Deprecated, SomeDone, &[]),
-            (Status::Deprecated, NoneDone, &[]),
-            (Status::Deprecated, NoCriteria, &[]),
+            (Status::Planned, Complete, &[Severity::Warn]),
+            (Status::Planned, Partial, &[]),
+            (Status::Planned, NotStarted, &[]),
+            (Status::InProgress, Complete, &[Severity::Warn]),
+            (Status::InProgress, Partial, &[]),
+            (Status::InProgress, NotStarted, &[]),
+            (Status::Blocked, Complete, &[Severity::Warn]),
+            (Status::Blocked, Partial, &[]),
+            (Status::Blocked, NotStarted, &[]),
+            (Status::Active, Complete, &[]),
+            (Status::Active, Partial, &[Severity::Error]),
+            (Status::Active, NotStarted, &[Severity::Error]),
+            (Status::Deprecated, Complete, &[]),
+            (Status::Deprecated, Partial, &[]),
+            (Status::Deprecated, NotStarted, &[]),
         ];
         table
             .iter()
@@ -123,7 +115,6 @@ mod tests {
         assert!(status_finding(&spec("a", Status::Deprecated, full())).is_none());
         let partial = criteria(&["a", "b"], &["b"]);
         assert!(status_finding(&spec("a", Status::Planned, partial)).is_none());
-        assert!(status_finding(&spec("a", Status::Planned, Vec::new())).is_none());
     }
 
     #[test]

@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.23.3] - 2026-10-15
+
+- `schemas/spec.schema.json` now says in the `acceptance_criteria` description that a spec needs at least one criterion, which the schema already required. `spex check` also no longer treats a spec with no acceptance criteria as a special case for its `status` warning: such a spec, already a schema error, now also gets that warning. No migration steps.
+
 ## [0.23.2] - 2026-10-15
 
 - `spex check` validates `@spec` annotations in markdown files like in any other file, so a markdown contract (e.g. a design reference) is checked. It now skips only the spex directory's `schemas/`, `specs/`, `rules/` and `docs/`, and the agent root's `AGENTS.md` and `.agents/skills/`, which hold illustrative example annotations. Markdown files elsewhere that carry `@spec` examples now report findings. No migration steps.

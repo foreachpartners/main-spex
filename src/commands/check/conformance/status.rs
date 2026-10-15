@@ -8,7 +8,7 @@ mod status_test;
 
 pub(super) fn status_finding(spec: &Spec) -> Option<Finding> {
     let (done, total) = spec.ac_done_total();
-    if total == 0 || done != total || spec.status.is_implemented() {
+    if done != total || spec.status.is_implemented() {
         return None;
     }
     Some(Finding::warn(
