@@ -116,7 +116,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
     assert!(config.contains("project_name: snake\n"), "{config}");
     assert!(config.contains("layout: single-repo\n"), "{config}");
     assert!(config.contains("agent_root: ..\n"), "{config}");
-    assert!(config.contains("package_name: snake-spex\n"), "{config}");
+    assert!(config.contains("package_name: spex\n"), "{config}");
     assert!(config.contains("package_short_name: spex\n"), "{config}");
     assert!(config.contains("path: .\n"), "{config}");
 
@@ -159,7 +159,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header("snake-spex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"),
+        with_version_header("spex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"),
         "stderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -188,7 +188,7 @@ fn init_monorepo_lists_only_the_spex_package_and_puts_agent_files_in_the_root() 
     let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
     assert!(config.contains("layout: monorepo\n"), "{config}");
     assert!(config.contains("agent_root: ..\n"), "{config}");
-    assert!(config.contains("package_name: shop-spex\n"), "{config}");
+    assert!(config.contains("package_name: spex\n"), "{config}");
     assert!(config.contains("path: .\n"), "{config}");
     assert!(project.join(".agents/skills/spex-spec/SKILL.md").is_file());
     assert!(project.join("AGENTS.md").is_file());

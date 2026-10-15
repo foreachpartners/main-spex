@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.21.2] - 2026-10-15
+
+- `spex init` names the spex package `spex` in `single-repo` and `monorepo`, the same as its `spex/` folder, and keeps `<project-name>-spex` in `multi-repo` only, where the project name prefix tells the spex repository apart from the other packages. Only new projects are affected; no migration steps.
+
 ## [0.21.1] - 2026-10-14
 
 - The `package-dir` check of the bundled `naming-convention` rule now runs only in the `multi-repo` layout, read from `layout` in `spex.yaml`. In `single-repo` and `monorepo` the package directory is named after the repository or the folder structure, so the check passes there. `spex update` rewrites the rule and its script; no migration steps.

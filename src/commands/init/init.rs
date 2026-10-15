@@ -79,10 +79,6 @@ fn write_config(spex_dir: &Path, layout: Layout, project_name: &str) -> Result<(
     Ok(())
 }
 
-fn spex_package_name(project_name: &str) -> String {
-    Layout::MultiRepo.spex_dir_name(project_name)
-}
-
 fn config_from_template(layout: Layout, project_name: &str) -> String {
     let named = CONFIG_TEMPLATE
         .replace(
@@ -96,7 +92,7 @@ fn config_from_template(layout: Layout, project_name: &str) -> String {
         )
         .replace(
             "package_name: unknown",
-            &format!("package_name: {}", spex_package_name(project_name)),
+            &format!("package_name: {}", layout.spex_dir_name(project_name)),
         );
     spex_yaml_edit::set_cli_version(&named, CLI_VERSION)
 }

@@ -74,7 +74,12 @@ mod tests_unit {
             assert_eq!(config.agent_root, layout.agent_root());
             assert_eq!(config.packages.len(), 1, "{layout}");
             let spex = &config.packages[0];
-            assert_eq!(spex.package_name, "pizza-shop-spex", "{layout}");
+            let expected_name = if layout.is_multi_repo() {
+                "pizza-shop-spex"
+            } else {
+                "spex"
+            };
+            assert_eq!(spex.package_name, expected_name, "{layout}");
             assert_eq!(spex.package_short_name, "spex", "{layout}");
             assert_eq!(spex.path, ".", "{layout}");
         }
