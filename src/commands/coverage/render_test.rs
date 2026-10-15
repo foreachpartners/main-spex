@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::commands::coverage::annotation_index::AnnotationIndex;
-    use crate::spec::{AcceptanceCriterion, Statement};
+    use crate::spec::{AcceptanceCriterion, ContractLevel, CoverageIgnore, Statement};
     use crate::support::testing;
 
     fn spec(id: &str, status: Status) -> Spec {
@@ -135,7 +135,7 @@ mod tests {
             ],
         );
         assert_eq!(missing_summary(&coverage), "");
-        assert_eq!(pending_summary(&coverage), "impl(ac-b), test(ac-b)");
+        assert_eq!(pending_summary(&coverage), "impl(ac-b)");
     }
 
     #[test]
@@ -151,12 +151,12 @@ mod tests {
     }
 
     #[test]
-    fn pending_summary_names_a_pending_per_ac_contract() {
+    fn pending_summary_names_only_the_impl_layer_of_a_pending_criterion() {
         let spec = spec("a", Status::Active);
-        let mut criterion = contract_criterion("ac-a", false);
-        criterion.is_done = false;
+        let mut criterion = pending_criterion("ac-a", false, false, false);
+        criterion.missing.push(CoverageLayer::Contract);
         let coverage = coverage(&spec, false, vec![criterion]);
-        assert_eq!(pending_summary(&coverage), "contract(ac-a)");
+        assert_eq!(pending_summary(&coverage), "impl(ac-a)");
     }
 
     #[test]
@@ -167,11 +167,9 @@ mod tests {
             true,
             vec![pending_criterion("ac-a", false, false, false)],
         );
+        assert!(coverage.has_contract_pending());
         assert_eq!(missing_summary(&coverage), "");
-        assert_eq!(
-            pending_summary(&coverage),
-            "contract, impl(ac-a), test(ac-a)"
-        );
+        assert_eq!(pending_summary(&coverage), "impl(ac-a)");
     }
 
     #[test]
@@ -248,6 +246,101 @@ mod tests {
             text.contains(&format!(
                 "        ac-a (missing impl & test): do the first thing\n{pad}in a sentence long\n{pad}enough to wrap\n"
             )),
+            "got:\n{text}"
+        );
+    }
+
+    fn in_progress_spec_with_waived_impl() -> Spec {
+        let mut spec = spec("api-thing", Status::InProgress);
+        spec.contract = ContractLevel::None;
+        spec.acceptance_criteria = vec![AcceptanceCriterion {
+            is_done: false,
+            ..testing::criterion("ac-a")
+        }];
+        spec.coverage_ignore = vec![CoverageIgnore {
+            layer: CoverageLayer::Impl,
+            ac: Some(testing::ac_id("ac-a")),
+        }];
+        spec
+    }
+
+    #[test]
+    fn render_lists_an_in_progress_spec_with_its_unimplemented_criteria() {
+        let mut spec = spec("api-thing", Status::InProgress);
+        spec.contract = ContractLevel::None;
+        spec.acceptance_criteria = vec![
+            AcceptanceCriterion {
+                is_done: false,
+                ..testing::criterion("ac-a")
+            },
+            AcceptanceCriterion {
+                is_done: false,
+                ..testing::criterion("ac-b")
+            },
+        ];
+
+        let text = rendered(100, false, &[spec]);
+
+        assert!(
+            text.contains(
+                "  in-progress (1)\n    ●  api-thing  0/2 AC  in-progress: impl(ac-a, ac-b)\n"
+            ),
+            "got:\n{text}"
+        );
+    }
+
+    #[test]
+    fn render_omits_the_in_progress_line_when_no_impl_is_pending() {
+        let text = rendered(100, false, &[in_progress_spec_with_waived_impl()]);
+
+        assert!(
+            text.contains("  in-progress (1)\n    ●  api-thing  1/1 AC\n"),
+            "got:\n{text}"
+        );
+    }
+
+    fn in_progress_spec_with_gap_and_pending_work() -> Spec {
+        let mut spec = spec("api-thing", Status::InProgress);
+        spec.description = "Does the thing.".to_string();
+        spec.packages = vec!["api".to_string()];
+        spec.contract = ContractLevel::None;
+        spec.acceptance_criteria = vec![
+            testing::criterion("ac-a"),
+            AcceptanceCriterion {
+                is_done: false,
+                ..testing::criterion("ac-b")
+            },
+        ];
+        spec
+    }
+
+    #[test]
+    fn render_lists_a_gapped_in_progress_spec_in_both_blocks_with_pending_work_only_in_status() {
+        let text = rendered(100, false, &[in_progress_spec_with_gap_and_pending_work()]);
+
+        assert_eq!(
+            text,
+            format!(
+                "spex {}\n\nSpecs (1)\n  in-progress (1)\n    ✗  api-thing  0/2 AC  in-progress: impl(ac-b)\n\nGaps (1)\n  api\n    ✗  api-thing  0/2 AC  missing: impl(ac-a), test(ac-a)\n\nplanned (0), in-progress (1), active (0), gaps (1)\n",
+                env!("CARGO_PKG_VERSION")
+            )
+        );
+    }
+
+    #[test]
+    fn render_shows_verbose_detail_in_each_block_for_its_own_criteria() {
+        let text = rendered(100, true, &[in_progress_spec_with_gap_and_pending_work()]);
+
+        assert!(
+            text.contains(
+                "    ✗  api-thing  0/2 AC\n        Does the thing.\n        ac-b: ac-b\n\n"
+            ),
+            "got:\n{text}"
+        );
+        assert!(
+            text.contains(
+                "    ✗  api-thing  0/2 AC\n        Does the thing.\n        ac-a (missing impl & test): ac-a\n\n"
+            ),
             "got:\n{text}"
         );
     }

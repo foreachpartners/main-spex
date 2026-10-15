@@ -4,7 +4,8 @@ Specs (13)
     planned-one
     planned-two
   in-progress (2)
-    ●  in-progress-pending  1/2 AC  in-progress: impl(shows-tooltip), test(shows-tooltip)
+    ✗  in-progress-mixed    2/3 AC
+    ●  in-progress-pending  1/2 AC  in-progress: impl(shows-tooltip)
 
 Gaps (7)
   api

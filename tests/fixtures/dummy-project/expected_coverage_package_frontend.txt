@@ -3,6 +3,7 @@ Specs (4)
   planned (1)
     planned-one
   in-progress (1)
+    ✗  in-progress-mixed    2/3 AC
 
 Gaps (3)
   api

@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.23.4] - 2026-10-15
+
+- `spex coverage` lists every `in-progress` spec under its status group, marked `✗` when it has a gap and `●` otherwise, where before only specs with pending work and no gap were listed. Each shows the criteria not implemented yet as `in-progress: impl(<ac-id>, ...)`; the test and contract entries that used to follow are dropped, and a spec with no impl left to name shows no such line. "Gaps" no longer repeats that line and shows only what is missing. With `--verbose`, each `in-progress` spec shows its description and the text of the criteria not implemented yet. No migration steps.
+
 ## [0.23.3] - 2026-10-15
 
 - `schemas/spec.schema.json` now says in the `acceptance_criteria` description that a spec needs at least one criterion, which the schema already required. `spex check` also no longer treats a spec with no acceptance criteria as a special case for its `status` warning: such a spec, already a schema error, now also gets that warning. No migration steps.

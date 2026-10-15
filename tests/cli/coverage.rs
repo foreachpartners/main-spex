@@ -192,9 +192,8 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
 
     let nothing_started = run_spex(&project, &["coverage"], "");
     assert!(
-        report_text(&nothing_started.stdout).contains(
-            "●  ci-check  0/1 AC  in-progress: impl(rejects-empty-cart), test(rejects-empty-cart)"
-        ),
+        report_text(&nothing_started.stdout)
+            .contains("●  ci-check  0/1 AC  in-progress: impl(rejects-empty-cart)\n"),
         "{}",
         report_text(&nothing_started.stdout),
     );

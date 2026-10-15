@@ -35,7 +35,7 @@ fn id_width(report: &CoverageReport) -> usize {
     report
         .specs
         .iter()
-        .filter(|coverage| coverage.health() != SpecHealth::Complete)
+        .filter(|coverage| coverage.spec.status == Status::InProgress || coverage.has_gap())
         .map(|coverage| coverage.spec.id.as_str().len())
         .max()
         .unwrap_or(0)
@@ -94,33 +94,32 @@ fn missing_summary(coverage: &SpecCoverage) -> String {
     parts.join(", ")
 }
 
+fn unimplemented_criteria<'a>(coverage: &'a SpecCoverage<'_>) -> Vec<&'a CriterionCoverage> {
+    coverage
+        .pending_criteria()
+        .into_iter()
+        .filter(|criterion| criterion.is_missing(CoverageLayer::Impl))
+        .collect()
+}
+
 fn pending_summary(coverage: &SpecCoverage) -> String {
-    let mut parts = Vec::new();
-
-    if coverage.has_contract_pending() {
-        parts.push("contract".to_string());
-    }
-
-    let layers = layer_summary(&coverage.pending_criteria());
-    if !layers.is_empty() {
-        parts.push(layers);
-    }
-
-    parts.join(", ")
+    layer_entry(&unimplemented_criteria(coverage), CoverageLayer::Impl).unwrap_or_default()
 }
 
 fn layer_summary(criteria: &[&CriterionCoverage]) -> String {
     CoverageLayer::iter()
-        .filter_map(|layer| {
-            let ids: Vec<&str> = criteria
-                .iter()
-                .filter(|criterion| criterion.is_missing(layer))
-                .map(|criterion| criterion.id.as_str())
-                .collect();
-            (!ids.is_empty()).then(|| format!("{}({})", layer.label(), ids.join(", ")))
-        })
+        .filter_map(|layer| layer_entry(criteria, layer))
         .collect::<Vec<_>>()
         .join(", ")
+}
+
+fn layer_entry(criteria: &[&CriterionCoverage], layer: CoverageLayer) -> Option<String> {
+    let ids: Vec<&str> = criteria
+        .iter()
+        .filter(|criterion| criterion.is_missing(layer))
+        .map(|criterion| criterion.id.as_str())
+        .collect();
+    (!ids.is_empty()).then(|| format!("{}({})", layer.label(), ids.join(", ")))
 }
 
 fn missing_label(criterion: &CriterionCoverage) -> String {
@@ -183,11 +182,8 @@ impl ReportWriter {
             match status {
                 Status::Active => {}
                 Status::InProgress => {
-                    for coverage in group
-                        .into_iter()
-                        .filter(|coverage| coverage.health() == SpecHealth::Pending)
-                    {
-                        self.spec_progress(coverage);
+                    for coverage in group {
+                        self.in_progress_spec(coverage);
                     }
                 }
                 Status::Planned | Status::Blocked | Status::Deprecated => {
@@ -218,20 +214,11 @@ impl ReportWriter {
             for (package, group) in report.gapped_by_package() {
                 self.line(format!("  {}", package.unwrap_or("no package").bold()));
                 for coverage in group {
-                    self.spec_progress(coverage);
+                    self.gapped_spec(coverage);
                 }
             }
         }
         self.end_section();
-    }
-
-    fn spec_progress(&mut self, coverage: &SpecCoverage) {
-        let lead = self.progress_lead(coverage);
-        if self.verbose {
-            self.verbose_progress(coverage, &lead);
-        } else {
-            self.compact_progress(coverage, &lead);
-        }
     }
 
     fn progress_lead(&self, coverage: &SpecCoverage) -> String {
@@ -247,31 +234,43 @@ impl ReportWriter {
         )
     }
 
-    fn compact_progress(&mut self, coverage: &SpecCoverage, lead: &str) {
-        let in_progress = format!("in-progress: {}", pending_summary(coverage));
-        if !coverage.has_gap() {
-            self.wrapped_after(lead, &in_progress, DIM);
+    fn in_progress_spec(&mut self, coverage: &SpecCoverage) {
+        let lead = self.progress_lead(coverage);
+        if self.verbose {
+            self.line(lead.trim_end());
+            self.description(8, &coverage.spec.description);
+            for criterion in unimplemented_criteria(coverage) {
+                let prefix = format!("        {}: ", criterion.id.as_str().cyan());
+                self.wrapped_after(&prefix, &criterion.text, DIM);
+            }
+            self.blank();
             return;
         }
 
-        self.wrapped_after(
-            lead,
-            &format!("missing: {}", missing_summary(coverage)),
-            RED,
-        );
-        if coverage.has_pending() {
-            let continuation = " ".repeat(visible_width(lead));
-            self.wrapped_after(&continuation, &in_progress, DIM);
+        let unimplemented = pending_summary(coverage);
+        if unimplemented.is_empty() {
+            self.line(lead.trim_end());
+        } else {
+            self.wrapped_after(&lead, &format!("in-progress: {unimplemented}"), DIM);
         }
     }
 
-    fn verbose_progress(&mut self, coverage: &SpecCoverage, lead: &str) {
+    fn gapped_spec(&mut self, coverage: &SpecCoverage) {
+        let lead = self.progress_lead(coverage);
+        if !self.verbose {
+            self.wrapped_after(
+                &lead,
+                &format!("missing: {}", missing_summary(coverage)),
+                RED,
+            );
+            return;
+        }
+
         if coverage.has_contract_gap() {
-            self.wrapped_after(lead, "missing: contract", RED);
+            self.wrapped_after(&lead, "missing: contract", RED);
         } else {
             self.line(lead.trim_end());
         }
-
         self.description(8, &coverage.spec.description);
         for criterion in coverage.gapped_criteria() {
             let prefix = format!(
@@ -280,12 +279,6 @@ impl ReportWriter {
                 missing_label(criterion).red()
             );
             self.wrapped_after(&prefix, &criterion.text, DIM);
-        }
-        if !coverage.has_gap() {
-            for criterion in coverage.pending_criteria() {
-                let prefix = format!("        {}: ", criterion.id.as_str().cyan());
-                self.wrapped_after(&prefix, &criterion.text, DIM);
-            }
         }
         self.blank();
     }

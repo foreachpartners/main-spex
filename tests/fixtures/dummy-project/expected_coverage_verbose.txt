@@ -9,6 +9,10 @@ Specs (13)
       Lets an administrator export a date range of orders as a CSV file for offline reporting.
 
   in-progress (2)
+    ✗  in-progress-mixed    2/3 AC
+        Notifies a customer by email when their order ships, with a retry for transient delivery
+        failures and a follow-up reminder later.
+
     ●  in-progress-pending  1/2 AC
         Warns the customer when an item they're viewing is low in stock, so they know to order soon.
         shows-tooltip: show a tooltip on the banner explaining what low stock means
