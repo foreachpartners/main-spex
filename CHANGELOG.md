@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.21.3] - 2026-10-15
+
+- `spex info` merges every package's `spex.package.yaml` into its output: the `coverage_ignore` entries join the root `coverage_ignore`, and the `ignored_errors` entries join the `ignored_errors` of their package, the same union `spex check` and `spex coverage` use. No migration steps.
+
 ## [0.21.2] - 2026-10-15
 
 - `spex init` names the spex package `spex` in `single-repo` and `monorepo`, the same as its `spex/` folder, and keeps `<project-name>-spex` in `multi-repo` only, where the project name prefix tells the spex repository apart from the other packages. Only new projects are affected; no migration steps.

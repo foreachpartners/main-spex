@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 use crate::common::{
@@ -151,6 +152,55 @@ fn info_package_filters_only_the_packages_list() {
         "--package should match a package by full name as well as short name",
     );
     assert_eq!(listed_short_names(&several.stdout), ["api", "frontend"]);
+}
+
+fn write_api_package_config(project: &Path) {
+    fs::write(
+        project.join("dummy-project-api/spex.package.yaml"),
+        "coverage_ignore:\n  - spec_id: place-order\n    layer: impl\nignored_errors:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
+    )
+    .expect("write package config");
+}
+
+fn info_json(stdout: &[u8]) -> serde_json::Value {
+    serde_json::from_slice(stdout).expect("info prints JSON")
+}
+
+#[test]
+fn info_merges_every_package_config_into_the_configuration() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    write_api_package_config(&project);
+
+    let info = run_spex(&project, &["info"], "");
+
+    assert!(info.status.success(), "info should exit 0");
+    let info = info_json(&info.stdout);
+    assert_eq!(
+        info["coverage_ignore"],
+        serde_json::json!([{ "spec_id": "place-order", "layer": "impl" }]),
+    );
+    assert_eq!(
+        info["packages"][0]["ignored_errors"],
+        serde_json::json!([
+            { "rule_id": "writing-style", "check": "no-cyrillic", "files": ["README.md"] }
+        ]),
+    );
+    assert_eq!(info["packages"][1]["ignored_errors"], serde_json::json!([]));
+}
+
+#[test]
+fn info_package_still_merges_the_config_of_the_packages_it_filters_out() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    write_api_package_config(&project);
+
+    let info = run_spex(&project, &["info", "--package", "frontend"], "");
+
+    assert!(info.status.success(), "info should exit 0");
+    assert_eq!(listed_short_names(&info.stdout), ["frontend"]);
+    assert_eq!(
+        info_json(&info.stdout)["coverage_ignore"][0]["spec_id"],
+        "place-order",
+    );
 }
 
 #[test]

@@ -56,7 +56,7 @@ impl Spex {
         }
     }
 
-    fn with_package_configs(mut self) -> Result<Self> {
+    pub fn with_package_configs(mut self) -> Result<Self> {
         for package in &mut self.packages {
             let package_config = PackageConfig::load(&package.path)?;
             self.coverage_ignore.extend(package_config.coverage_ignore);

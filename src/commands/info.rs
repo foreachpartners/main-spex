@@ -35,7 +35,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
         .iter()
         .map(to_json)
         .collect::<Result<Vec<_>>>()?;
-    let spex = Spex::from_config(dir, config);
+    let spex = Spex::from_config(dir, config).with_package_configs()?;
     let selected = spex.select_packages(&args.package)?;
 
     config_json["packages"] = Value::Array(
@@ -47,9 +47,10 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
                     .iter()
                     .any(|picked| std::ptr::eq(*picked, *package))
             })
-            .map(|(json, package)| package_with_absolute_path(json, package))
-            .collect(),
+            .map(|(json, package)| merged_package(json, package))
+            .collect::<Result<_>>()?,
     );
+    config_json["coverage_ignore"] = to_json(&spex.coverage_ignore)?;
     config_json["agent_root"] =
         Value::String(canonical(&spex.agent_root).to_string_lossy().into_owned());
     let info = Info {
@@ -69,7 +70,8 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
         .any_union()
 }
 
-fn package_with_absolute_path(mut json: Value, package: &Package) -> Value {
+fn merged_package(mut json: Value, package: &Package) -> Result<Value> {
     json["path"] = Value::String(canonical(&package.path).to_string_lossy().into_owned());
-    json
+    json["ignored_errors"] = to_json(&package.ignored_errors)?;
+    Ok(json)
 }

@@ -35,7 +35,7 @@ A change isn't finished until:
 
 Run from anywhere inside the project; `spex <command> --help` lists every option.
 
-- `spex info [--package <name>...]` — print `spex.yaml`: project and per-package configuration, including paths.
+- `spex info [--package <name>...]` — print `spex.yaml` merged with each `spex.package.yaml`: project and per-package configuration, including paths.
 - `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
 - `spex coverage [--package <name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
 - `spex specs [--id <spec-id>...] [--package <name>...] [--ai] [--output <file>]` — print specs.
