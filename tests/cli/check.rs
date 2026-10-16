@@ -210,20 +210,61 @@ fn check_fails_on_an_unparsable_package_spex_repo_yaml() {
 }
 
 #[test]
-fn check_flags_a_spex_yaml_coverage_ignore_that_mismatches_the_spec_contract() {
+fn check_flags_a_spex_yaml_package_coverage_ignore_that_mismatches_the_spec_contract() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     copy_project(&dummy_project_fixture(), &project);
     let spex_yaml = project.join("dummy-project-spex/spex.yaml");
-    let mut config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
-    config.push_str("coverage_ignore:\n  - spec_id: none-with-gap\n    layer: contract\n");
-    fs::write(&spex_yaml, config).expect("write spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let patched = config.replace(
+        "    rules:\n      - no-todo-comments\n",
+        "    rules:\n      - no-todo-comments\n    coverage_ignore:\n      - spec_id: none-with-gap\n        layer: contract\n",
+    );
+    assert_ne!(patched, config, "api package not found in spex.yaml");
+    fs::write(&spex_yaml, patched).expect("write spex.yaml");
 
     let check = run_spex(&project, &["check"], "");
 
     let report = report_text(&check.stdout);
     assert_eq!(check.status.code(), Some(1), "{report}");
     assert!(report.contains("none-with-gap/coverage-ignore"), "{report}");
+}
+
+#[test]
+fn check_rejects_a_root_coverage_ignore_in_spex_yaml() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let mut config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    config.push_str("coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n");
+    fs::write(&spex_yaml, config).expect("write spex.yaml");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert_eq!(check.status.code(), Some(1), "{report}");
+    assert!(report.contains("spex.yaml"), "{report}");
+    assert!(report.contains("coverage_ignore"), "{report}");
+}
+
+#[test]
+fn check_flags_a_package_coverage_ignore_naming_a_spec_that_does_not_list_the_package() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-frontend/spex.package.yaml"),
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\n",
+    )
+    .expect("write spex.package.yaml");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert_eq!(check.status.code(), Some(1), "{report}");
+    assert!(report.contains("none-with-gap/coverage-ignore"), "{report}");
+    assert!(report.contains("package `frontend`"), "{report}");
 }
 
 #[test]
@@ -243,10 +284,204 @@ fn fill_preexisting_errors_writes_spex_yaml_and_leaves_spex_repo_yaml_untouched(
     let config =
         fs::read_to_string(project.join("dummy-project-spex/spex.yaml")).expect("read spex.yaml");
     assert!(
-        config.contains("src/todo.rs") && config.contains("src/other_todo.rs"),
-        "fill should baseline every current error in spex.yaml\n{config}"
+        config.contains("src/other_todo.rs") && !config.contains("src/todo.rs"),
+        "fill should baseline in spex.yaml the errors spex.package.yaml does not already baseline\n{config}"
     );
     assert!(run_spex(&project, &["check"], "").status.success());
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_writes_the_package_spex_yaml_only() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let spex_yaml_before = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+
+    let fill = run_spex(
+        &project,
+        &["check", "--package", "api", "--fill-preexisting-errors"],
+        "",
+    );
+
+    assert!(fill.status.success(), "fill should exit 0");
+    assert!(
+        report_text(&fill.stdout).contains("spex.package.yaml"),
+        "{}",
+        report_text(&fill.stdout)
+    );
+    assert_eq!(
+        fs::read_to_string(&spex_yaml).expect("read spex.yaml"),
+        spex_yaml_before,
+        "fill with --package must not touch spex.yaml"
+    );
+    let package_config = fs::read_to_string(project.join("dummy-project-api/spex.package.yaml"))
+        .expect("fill should create the package spex.package.yaml");
+    assert!(
+        package_config.contains("src/todo.rs") && package_config.contains("src/other_todo.rs"),
+        "fill should baseline every current error in spex.package.yaml\n{package_config}"
+    );
+    assert!(
+        !project
+            .join("dummy-project-frontend/spex.package.yaml")
+            .exists(),
+        "an unselected package must stay untouched"
+    );
+    assert!(run_spex(&project, &["check"], "").status.success());
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_regenerates_the_block_and_keeps_the_rest() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    write_api_package_config(
+        &project,
+        "# owned by the api team\ncheck_ignore:\n  - rule_id: no-todo-comments\n    check: no-todo\n    files: [src/gone.rs]\n",
+    );
+
+    let fill = run_spex(
+        &project,
+        &["check", "--package", "api", "--fill-preexisting-errors"],
+        "",
+    );
+
+    assert!(fill.status.success(), "fill should exit 0");
+    let package_config = fs::read_to_string(project.join("dummy-project-api/spex.package.yaml"))
+        .expect("read spex.package.yaml");
+    assert!(
+        package_config.starts_with("# owned by the api team\ncheck_ignore:\n"),
+        "{package_config}"
+    );
+    assert!(
+        !package_config.contains("src/gone.rs") && package_config.contains("src/todo.rs"),
+        "{package_config}"
+    );
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_empties_the_file_once_no_errors_are_left() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    let fill_api = || {
+        run_spex(
+            &project,
+            &["check", "--package", "api", "--fill-preexisting-errors"],
+            "",
+        )
+    };
+    fill_api();
+    for file in [TODO_FILE, OTHER_TODO_FILE] {
+        fs::remove_file(project.join("dummy-project-api").join(file)).expect("remove file");
+    }
+
+    let refill = fill_api();
+
+    assert!(refill.status.success(), "refill should exit 0");
+    assert_eq!(
+        fs::read_to_string(project.join("dummy-project-api/spex.package.yaml"))
+            .expect("read spex.package.yaml"),
+        ""
+    );
+    let check = run_spex(&project, &["check"], "");
+    assert!(
+        check.status.success(),
+        "check should still pass\n{}\n{}",
+        report_text(&check.stdout),
+        String::from_utf8_lossy(&check.stderr)
+    );
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_leaves_out_what_spex_yaml_already_baselines() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let patched = config.replace(
+        "    rules:\n      - no-todo-comments\n",
+        "    rules:\n      - no-todo-comments\n    check_ignore:\n      - rule_id: no-todo-comments\n        check: no-todo\n        files: [src/todo.rs]\n",
+    );
+    assert_ne!(patched, config, "api package not found in spex.yaml");
+    fs::write(&spex_yaml, &patched).expect("write spex.yaml");
+
+    let fill = run_spex(
+        &project,
+        &["check", "--package", "api", "--fill-preexisting-errors"],
+        "",
+    );
+
+    assert!(fill.status.success(), "fill should exit 0");
+    assert_eq!(
+        fs::read_to_string(&spex_yaml).expect("read spex.yaml"),
+        patched,
+        "fill with --package must not touch spex.yaml"
+    );
+    let package_config = fs::read_to_string(project.join("dummy-project-api/spex.package.yaml"))
+        .expect("read spex.package.yaml");
+    assert!(
+        package_config.contains("src/other_todo.rs") && !package_config.contains("src/todo.rs"),
+        "an error baselined in spex.yaml must not be filled again\n{package_config}"
+    );
+    assert!(run_spex(&project, &["check"], "").status.success());
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_creates_no_file_when_spex_yaml_baselines_every_error() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    let first_fill = run_spex(&project, &["check", "--fill-preexisting-errors"], "");
+    assert!(first_fill.status.success(), "fill should exit 0");
+
+    let fill = run_spex(
+        &project,
+        &["check", "--package", "api", "--fill-preexisting-errors"],
+        "",
+    );
+
+    assert!(fill.status.success(), "fill should exit 0");
+    assert!(
+        !project.join("dummy-project-api/spex.package.yaml").exists(),
+        "everything is already baselined in spex.yaml, so there is nothing to write"
+    );
+}
+
+#[test]
+fn check_accepts_an_empty_package_spex_yaml() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    for text in ["", "# nothing to ignore yet\n"] {
+        write_api_package_config(&project, text);
+
+        let check = run_spex(&project, &["check"], "");
+
+        assert!(
+            check.status.success(),
+            "{text:?}\n{}",
+            report_text(&check.stdout)
+        );
+    }
+}
+
+#[test]
+fn fill_preexisting_errors_with_package_creates_no_file_for_a_package_without_errors() {
+    let (_temp_dir, project) = project_with_todo_errors();
+
+    let fill = run_spex(
+        &project,
+        &[
+            "check",
+            "--package",
+            "frontend",
+            "--fill-preexisting-errors",
+        ],
+        "",
+    );
+
+    assert!(fill.status.success(), "fill should exit 0");
+    assert!(
+        !project
+            .join("dummy-project-frontend/spex.package.yaml")
+            .exists(),
+        "nothing to baseline, so no file"
+    );
+    assert!(
+        report_text(&fill.stdout).contains("spex.package.yaml unchanged"),
+        "{}",
+        report_text(&fill.stdout)
+    );
 }
 
 #[test]

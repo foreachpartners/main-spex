@@ -116,7 +116,7 @@
   frontend
   ```
 
-- **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the coverage waivers and the pre-existing error baseline concerning that package, merged by spex with the same fields of `spex.yaml`.
+- **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the coverage waivers and the pre-existing error baseline concerning that package, merged by spex into the same fields of that package's entry in `spex.yaml`, so they apply to that package only.
 
 - **AI coding agent** (AI agent, agent) — the tool a person picks to do the work: an autonomous assistant that reads, runs, and edits code on their behalf. Hosted inside an editor (Zed, VS Code, Cursor) or run from the terminal (Claude Code, Codex).
 

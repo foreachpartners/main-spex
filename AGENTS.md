@@ -51,8 +51,9 @@ src/                CLI source
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)
     package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (coverage_ignore, check_ignore), loaded 1 to 1
     spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, check_ignore blocks)
-    package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths
-    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages, coverage_ignore), with each package's spex.package.yaml merged in on discovery, spec (adding the coverage_ignore by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
+    package_yaml_edit.rs  Text edit to spex.package.yaml that keeps comments and field order (check_ignore block)
+    package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths and its own check_ignore and coverage_ignore
+    spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages), with each package's spex.package.yaml merged into its own package on discovery, spec (attaching each package's coverage_ignore to the spec under the package's short name, by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
     ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)

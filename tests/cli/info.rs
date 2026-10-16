@@ -27,7 +27,8 @@ const EXPECTED_INFO: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
-      "check_ignore": []
+      "check_ignore": [],
+      "coverage_ignore": []
     },
     {
       "package_name": "dummy-project-frontend",
@@ -35,7 +36,8 @@ const EXPECTED_INFO: &str = r#"{
       "path": {frontend_dir},
       "contracts": [],
       "rules": [],
-      "check_ignore": []
+      "check_ignore": [],
+      "coverage_ignore": []
     },
     {
       "package_name": "dummy-project-spex",
@@ -43,10 +45,10 @@ const EXPECTED_INFO: &str = r#"{
       "path": {spex_dir},
       "contracts": [],
       "rules": [],
-      "check_ignore": []
+      "check_ignore": [],
+      "coverage_ignore": []
     }
-  ],
-  "coverage_ignore": []
+  ]
 }
 "#;
 
@@ -86,10 +88,10 @@ const EXPECTED_INFO_API: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
-      "check_ignore": []
+      "check_ignore": [],
+      "coverage_ignore": []
     }
-  ],
-  "coverage_ignore": []
+  ]
 }
 "#;
 
@@ -167,7 +169,7 @@ fn info_json(stdout: &[u8]) -> serde_json::Value {
 }
 
 #[test]
-fn info_merges_every_package_config_into_the_configuration() {
+fn info_merges_every_package_config_into_its_own_package() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
     write_api_package_config(&project);
 
@@ -176,7 +178,7 @@ fn info_merges_every_package_config_into_the_configuration() {
     assert!(info.status.success(), "info should exit 0");
     let info = info_json(&info.stdout);
     assert_eq!(
-        info["coverage_ignore"],
+        info["packages"][0]["coverage_ignore"],
         serde_json::json!([{ "spec_id": "place-order", "layer": "impl" }]),
     );
     assert_eq!(
@@ -186,10 +188,38 @@ fn info_merges_every_package_config_into_the_configuration() {
         ]),
     );
     assert_eq!(info["packages"][1]["check_ignore"], serde_json::json!([]));
+    assert_eq!(
+        info["packages"][1]["coverage_ignore"],
+        serde_json::json!([])
+    );
 }
 
 #[test]
-fn info_package_still_merges_the_config_of_the_packages_it_filters_out() {
+fn info_unions_a_package_entry_with_its_package_file() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    write_api_package_config(&project);
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let patched = config.replace(
+        "    rules:\n      - no-todo-comments\n",
+        "    rules:\n      - no-todo-comments\n    coverage_ignore:\n      - spec_id: list-menu\n        layer: test\n",
+    );
+    assert_ne!(patched, config, "api package not found in spex.yaml");
+    fs::write(&spex_yaml, patched).expect("write spex.yaml");
+
+    let info = info_json(&run_spex(&project, &["info"], "").stdout);
+
+    assert_eq!(
+        info["packages"][0]["coverage_ignore"],
+        serde_json::json!([
+            { "spec_id": "list-menu", "layer": "test" },
+            { "spec_id": "place-order", "layer": "impl" },
+        ]),
+    );
+}
+
+#[test]
+fn info_package_omits_the_ignores_of_the_packages_it_filters_out() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
     write_api_package_config(&project);
 
@@ -197,9 +227,10 @@ fn info_package_still_merges_the_config_of_the_packages_it_filters_out() {
 
     assert!(info.status.success(), "info should exit 0");
     assert_eq!(listed_short_names(&info.stdout), ["frontend"]);
+    let info = info_json(&info.stdout);
     assert_eq!(
-        info_json(&info.stdout)["coverage_ignore"][0]["spec_id"],
-        "place-order",
+        info["packages"][0]["coverage_ignore"],
+        serde_json::json!([])
     );
 }
 

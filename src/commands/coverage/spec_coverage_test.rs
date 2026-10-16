@@ -369,4 +369,35 @@ mod tests {
         assert_eq!(ids(coverage.gapped_criteria()), vec!["ac-a"]);
         assert_eq!(ids(coverage.pending_criteria()), vec!["ac-b"]);
     }
+
+    fn waived_by_packages(package_names: &[&str], waiving: &[&str]) -> Spec {
+        Spec {
+            packages: package_names.iter().map(|name| name.to_string()).collect(),
+            package_coverage_ignore: waiving
+                .iter()
+                .map(|name| {
+                    (
+                        name.to_string(),
+                        vec![ignoring(CoverageLayer::Impl, Some("ac-a"))],
+                    )
+                })
+                .collect(),
+            ..spec(&["ac-a"])
+        }
+    }
+
+    #[test]
+    fn an_impl_waived_by_one_of_two_listed_packages_stays_required() {
+        let spec = waived_by_packages(&["api", "frontend"], &["api"]);
+        let coverage = coverage(&spec, "");
+        assert!(coverage.criteria[0].is_missing(CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn an_impl_waived_by_every_listed_package_is_not_required() {
+        let spec = waived_by_packages(&["api", "frontend"], &["api", "frontend"]);
+        let coverage = coverage(&spec, "");
+        assert!(!coverage.criteria[0].is_missing(CoverageLayer::Impl));
+        assert!(coverage.criteria[0].is_missing(CoverageLayer::Test));
+    }
 }

@@ -100,37 +100,61 @@ mod tests {
     }
 
     #[test]
-    fn specs_adds_the_project_coverage_ignore_of_each_spec_to_its_own() {
+    fn specs_attaches_each_package_coverage_ignore_to_the_spec_under_the_package() {
         let dir = tempdir().expect("spex dir");
         write_spec(dir.path(), "place-order");
         write_spec(dir.path(), "list-menu");
+        let api = Package {
+            coverage_ignore: vec![waiver("place-order", "impl")],
+            ..testing::package("api", "../api")
+        };
+        let web = Package {
+            coverage_ignore: vec![waiver("place-order", "test"), waiver("list-menu", "impl")],
+            ..testing::package("web", "../web")
+        };
         let spex = Spex {
             dir: dir.path().to_path_buf(),
-            coverage_ignore: vec![waiver("place-order", "impl")],
-            ..testing::spex(Vec::new())
+            ..testing::spex(vec![api, web])
         };
 
         let specs = spex.specs().expect("specs");
 
-        let layers = |id: &str| -> Vec<CoverageLayer> {
+        let spec = |id: &str| {
             specs
                 .iter()
                 .find(|spec| spec.id.as_str() == id)
                 .expect("spec")
-                .coverage_ignore
-                .iter()
-                .map(|ignore| ignore.layer)
-                .collect()
+        };
+        let package_layers = |id: &str, package: &str| -> Vec<CoverageLayer> {
+            spec(id)
+                .package_coverage_ignore
+                .get(package)
+                .map(|ignores| ignores.iter().map(|ignore| ignore.layer).collect())
+                .unwrap_or_default()
         };
         assert_eq!(
-            layers("place-order"),
-            vec![CoverageLayer::Test, CoverageLayer::Impl]
+            package_layers("place-order", "api"),
+            vec![CoverageLayer::Impl]
         );
-        assert_eq!(layers("list-menu"), vec![CoverageLayer::Test]);
+        assert_eq!(
+            package_layers("place-order", "web"),
+            vec![CoverageLayer::Test]
+        );
+        assert_eq!(
+            package_layers("list-menu", "web"),
+            vec![CoverageLayer::Impl]
+        );
+        assert!(package_layers("list-menu", "api").is_empty());
+        let own_layers: Vec<CoverageLayer> = spec("place-order")
+            .coverage_ignore
+            .iter()
+            .map(|ignore| ignore.layer)
+            .collect();
+        assert_eq!(own_layers, vec![CoverageLayer::Test]);
     }
 
     #[test]
-    fn with_package_configs_merges_every_package_file_into_the_project() {
+    fn with_package_configs_merges_every_package_file_into_its_own_package() {
         let project = tempdir().expect("project");
         let api = project.path().join("api");
         let web = project.path().join("web");
@@ -167,19 +191,23 @@ mod tests {
         web_package.path = web;
         let mut bare_package = testing::package("bare", "bare");
         bare_package.path = bare;
-        let spex = Spex {
-            coverage_ignore: vec![waiver("from-spex-yaml", "contract")],
-            ..testing::spex(vec![api_package, web_package, bare_package])
-        };
+        let spex = testing::spex(vec![api_package, web_package, bare_package]);
 
         let spex = spex.with_package_configs().expect("merge package configs");
 
-        let spec_ids: Vec<&str> = spex
-            .coverage_ignore
-            .iter()
-            .map(|waiver| waiver.spec_id.as_str())
-            .collect();
-        assert_eq!(spec_ids, vec!["from-spex-yaml", "from-api", "from-web"]);
+        let waived_spec_ids = |name: &str| -> Vec<String> {
+            spex.packages
+                .iter()
+                .find(|package| package.package_name == name)
+                .expect("package")
+                .coverage_ignore
+                .iter()
+                .map(|waiver| waiver.spec_id.as_str().to_string())
+                .collect()
+        };
+        assert_eq!(waived_spec_ids("api"), vec!["from-api"]);
+        assert_eq!(waived_spec_ids("web"), vec!["from-web"]);
+        assert!(waived_spec_ids("bare").is_empty());
         let checks = |name: &str| -> Vec<String> {
             spex.packages
                 .iter()

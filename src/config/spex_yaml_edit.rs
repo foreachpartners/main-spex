@@ -36,7 +36,7 @@ pub fn set_preexisting_errors(
             if let Some(entries) = by_package.get(name) {
                 in_scope = true;
                 if !entries.is_empty() {
-                    pending = Some(render_preexisting_block(entries));
+                    pending = Some(render_check_ignore(entries, 4));
                 }
             }
             out.push_str(line);
@@ -64,15 +64,16 @@ pub fn set_preexisting_errors(
     out
 }
 
-fn render_preexisting_block(entries: &[PreexistingError]) -> String {
-    let mut block = String::from("    check_ignore:\n");
+pub(super) fn render_check_ignore(entries: &[PreexistingError], indent: usize) -> String {
+    let pad = " ".repeat(indent);
+    let mut block = format!("{pad}check_ignore:\n");
     for entry in entries {
-        block.push_str(&format!("      - rule_id: {}\n", entry.rule_id));
-        block.push_str(&format!("        check: {}\n", entry.check));
+        block.push_str(&format!("{pad}  - rule_id: {}\n", entry.rule_id));
+        block.push_str(&format!("{pad}    check: {}\n", entry.check));
         if !entry.files.is_empty() {
-            block.push_str("        files:\n");
+            block.push_str(&format!("{pad}    files:\n"));
             for file in &entry.files {
-                block.push_str(&format!("          - {file}\n"));
+                block.push_str(&format!("{pad}      - {file}\n"));
             }
         }
     }
@@ -112,6 +113,6 @@ pub fn set_cli_version(raw: &str, version: &str) -> String {
     out
 }
 
-fn indent_of(line: &str) -> usize {
+pub(super) fn indent_of(line: &str) -> usize {
     line.chars().take_while(|ch| *ch == ' ').count()
 }

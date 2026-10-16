@@ -10,7 +10,7 @@ use crate::error::Result;
 use crate::rule::{self, Check, CheckKind, Rule, RunScope};
 use crate::spec::{AcId, SpecId};
 
-use super::baseline::{drop_baselined_findings, fill_preexisting_errors};
+use super::baseline::{BaselineFile, drop_baselined_findings, fill_preexisting_errors};
 use super::conformance::validate_conformance;
 use super::finding::{Finding, Source};
 use super::report::{CheckReport, ReportTarget, report};
@@ -34,7 +34,7 @@ pub struct CheckArgs {
     files: Vec<String>,
     #[arg(
         long,
-        help = "Record the current error findings as a per-package baseline in spex.yaml"
+        help = "Record the current error findings as a per-package baseline in spex.yaml, or in the spex.package.yaml of each selected package with --package"
     )]
     fill_preexisting_errors: bool,
 }
@@ -181,7 +181,12 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
     }
 
     if args.fill_preexisting_errors {
-        return fill_preexisting_errors(&spex.dir, &selected, &reports);
+        let file = if args.package.is_empty() {
+            BaselineFile::SpexYaml
+        } else {
+            BaselineFile::PackageYaml
+        };
+        return fill_preexisting_errors(&spex.dir, &selected, &reports, file);
     }
 
     drop_baselined_findings(&mut reports, &selected);

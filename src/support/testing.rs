@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use crate::config::spex::Spex;
@@ -36,6 +37,7 @@ pub fn spec(id: &str) -> Spec {
         status: Status::Planned,
         contract: ContractLevel::Single,
         coverage_ignore: Vec::new(),
+        package_coverage_ignore: BTreeMap::new(),
     }
 }
 
@@ -65,6 +67,7 @@ pub fn package(name: &str, path: &str) -> Package {
         contracts: Vec::new(),
         rules: Vec::new(),
         check_ignore: Vec::new(),
+        coverage_ignore: Vec::new(),
         is_spex_dir: false,
     }
 }
@@ -75,7 +78,6 @@ pub fn spex(packages: Vec<Package>) -> Spex {
         project_name: "demo".to_string(),
         agent_root: spex_dir().to_path_buf(),
         packages,
-        coverage_ignore: Vec::new(),
     }
 }
 
@@ -88,6 +90,5 @@ pub fn spex_config() -> SpexConfig {
         description: None,
         rules_unused: Vec::new(),
         packages: Vec::new(),
-        coverage_ignore: Vec::new(),
     }
 }

@@ -178,4 +178,41 @@ mod tests {
             "}
         );
     }
+
+    #[test]
+    fn set_preexisting_errors_leaves_package_coverage_ignore_untouched() {
+        let raw = indoc! {"
+            project_name: demo
+            packages:
+              - package_name: api
+                path: ../api
+                coverage_ignore:
+                  - spec_id: place-order
+                    layer: impl
+        "};
+        let by_package = HashMap::from([(
+            "api".to_string(),
+            vec![entry("X", "no-cyrillic", &["README.md"])],
+        )]);
+
+        let out = set_preexisting_errors(raw, &by_package);
+
+        assert_eq!(
+            out,
+            indoc! {"
+                project_name: demo
+                packages:
+                  - package_name: api
+                    path: ../api
+                    coverage_ignore:
+                      - spec_id: place-order
+                        layer: impl
+                    check_ignore:
+                      - rule_id: X
+                        check: no-cyrillic
+                        files:
+                          - README.md
+            "}
+        );
+    }
 }

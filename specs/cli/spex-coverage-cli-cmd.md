@@ -8,12 +8,14 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 - MUST require a contract per the spec's `contract` field: `single` needs one spec-level `@spec contract <spec-id>` anywhere in any package's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`; `for-each-ac` needs a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` needs none.
 - MUST require, for every acceptance criterion, `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`.
 - MUST decide whether a missing requirement is a gap or only pending from the criterion's `is_done` flag and its impl annotation, as laid out in [coverage-states-spec.md](../spec/coverage-states-spec.md).
-- MUST apply every waiver naming a spec, from the spec's own `coverage_ignore`, from `spex.yaml`, and from each package's `spex.package.yaml`, regardless of its `packages` ([spec-file-spec.md](../spec/spec-file-spec.md), [spex-package-yaml-config.md](../config/spex-package-yaml-config.md)).
+- MUST waive a requirement of a spec when the spec's own `coverage_ignore` waives it, or when every package listed in the spec's `packages` waives it in its own `coverage_ignore`, declared in its `spex.yaml` entry or its `spex.package.yaml` ([spec-file-spec.md](../spec/spec-file-spec.md), [spex-yaml-config.md](../config/spex-yaml-config.md), [spex-package-yaml-config.md](../config/spex-package-yaml-config.md)).
 - MUST skip the spex directory's own files in every layout, except the contract files declared in `spex.yaml`, and files ignored by `.gitignore`, as well as well-known dependency lock files.
 - MUST exit non-zero when an `active` or `in-progress` spec has a gap.
 - MUST NOT let a bare, unqualified `@spec impl|test <spec-id>` satisfy a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec.
 - MUST NOT limit the annotation search to the spec's `packages`: a spec kept in the report by `--package` is still traced across every package.
 - MUST NOT waive anything for a `coverage_ignore` entry naming a spec that does not exist.
+- MUST NOT waive a requirement of a spec because of the `coverage_ignore` of a package the spec does not list in `packages`.
+- MUST NOT waive a requirement of a spec that lists several packages until each of them waives it: a waiver in `api` alone changes nothing for a spec that lists `api` and `frontend`.
 
 ### Info
 

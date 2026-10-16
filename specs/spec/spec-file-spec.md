@@ -29,7 +29,7 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 - MAY set `packages`, the `package_short_name`s of the packages that implement the capability.
 - MAY set `status` to `in-progress` for a spec being implemented but not yet complete, and to `blocked` or `deprecated` where they apply.
 - MAY set `examples`: named illustrative snippets showing the spec applied in context, for placement and usage that prose cannot carry.
-- MAY declare a waiver outside the spec file, in [`spex.yaml`](../config/spex-yaml-config.md) or a package's [`spex.package.yaml`](../config/spex-package-yaml-config.md), so the package that cannot satisfy a layer owns the waiver without editing the spec.
+- MAY declare a waiver outside the spec file, for one package in its [`spex.yaml`](../config/spex-yaml-config.md) entry or its [`spex.package.yaml`](../config/spex-package-yaml-config.md), so the package that cannot satisfy a layer owns the waiver without editing the spec; `spex coverage` takes a package's waiver into account once every package the spec lists waives it ([spex-coverage-cli-cmd.md](../cli/spex-coverage-cli-cmd.md)).
 
 ## Examples
 

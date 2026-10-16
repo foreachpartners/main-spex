@@ -17,6 +17,20 @@ mod tests {
     }
 
     #[test]
+    fn load_returns_an_empty_config_when_the_file_is_empty_or_only_comments() {
+        for text in ["", "\n", "# nothing to ignore yet\n"] {
+            let package = tempdir().expect("package dir");
+            fs::write(package.path().join(PACKAGE_CONFIG_FILE), text)
+                .expect("write package config");
+
+            let config = PackageConfig::load(package.path()).expect("load");
+
+            assert!(config.coverage_ignore.is_empty(), "{text:?}");
+            assert!(config.check_ignore.is_empty(), "{text:?}");
+        }
+    }
+
+    #[test]
     fn load_returns_an_empty_config_when_the_package_path_does_not_exist() {
         let config = PackageConfig::load(Path::new("/no/such/package")).expect("load");
 

@@ -50,7 +50,6 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
             .map(|(json, package)| merged_package(json, package))
             .collect::<Result<_>>()?,
     );
-    config_json["coverage_ignore"] = to_json(&spex.coverage_ignore)?;
     config_json["agent_root"] =
         Value::String(canonical(&spex.agent_root).to_string_lossy().into_owned());
     let info = Info {
@@ -73,5 +72,6 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
 fn merged_package(mut json: Value, package: &Package) -> Result<Value> {
     json["path"] = Value::String(canonical(&package.path).to_string_lossy().into_owned());
     json["check_ignore"] = to_json(&package.check_ignore)?;
+    json["coverage_ignore"] = to_json(&package.coverage_ignore)?;
     Ok(json)
 }

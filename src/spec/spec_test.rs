@@ -115,4 +115,73 @@ mod tests {
             .collect();
         assert_eq!(done, vec![true, false]);
     }
+
+    fn spec_listing(packages: &[&str], package_ignores: &[(&str, Vec<CoverageIgnore>)]) -> Spec {
+        Spec {
+            packages: packages.iter().map(|name| name.to_string()).collect(),
+            package_coverage_ignore: package_ignores
+                .iter()
+                .map(|(name, ignores)| (name.to_string(), ignores.clone()))
+                .collect(),
+            ..spec(Vec::new())
+        }
+    }
+
+    #[test]
+    fn a_waiver_of_the_only_listed_package_waives_the_spec() {
+        let spec = spec_listing(
+            &["api"],
+            &[("api", vec![ignore(CoverageLayer::Impl, Some("ac-a"))])],
+        );
+        assert!(spec.ac_ignored(&testing::ac_id("ac-a"), CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("ac-b"), CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn a_waiver_of_one_of_several_listed_packages_waives_nothing() {
+        let spec = spec_listing(
+            &["api", "frontend"],
+            &[("api", vec![ignore(CoverageLayer::Impl, None)])],
+        );
+        assert!(!spec.layer_ignored(CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("ac-a"), CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn a_requirement_is_waived_once_every_listed_package_waives_it() {
+        let spec = spec_listing(
+            &["api", "frontend"],
+            &[
+                ("api", vec![ignore(CoverageLayer::Impl, Some("ac-a"))]),
+                ("frontend", vec![ignore(CoverageLayer::Impl, None)]),
+            ],
+        );
+        assert!(spec.ac_ignored(&testing::ac_id("ac-a"), CoverageLayer::Impl));
+        assert!(!spec.ac_ignored(&testing::ac_id("ac-b"), CoverageLayer::Impl));
+        assert!(!spec.layer_ignored(CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn a_waiver_of_a_package_the_spec_does_not_list_waives_nothing() {
+        let spec = spec_listing(
+            &["frontend"],
+            &[("api", vec![ignore(CoverageLayer::Impl, None)])],
+        );
+        assert!(!spec.layer_ignored(CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn package_waivers_waive_nothing_for_a_spec_listing_no_packages() {
+        let spec = spec_listing(&[], &[("api", vec![ignore(CoverageLayer::Impl, None)])]);
+        assert!(!spec.layer_ignored(CoverageLayer::Impl));
+    }
+
+    #[test]
+    fn the_spec_and_root_waivers_waive_for_every_package_listed() {
+        let spec = Spec {
+            coverage_ignore: vec![ignore(CoverageLayer::Test, None)],
+            ..spec_listing(&["api", "frontend"], &[])
+        };
+        assert!(spec.layer_ignored(CoverageLayer::Test));
+    }
 }

@@ -6,10 +6,12 @@ use anstream::println;
 use eros::Context;
 use owo_colors::OwoColorize;
 
-use crate::config::{self, Package, PreexistingError, spex_yaml_edit};
+use crate::config::{
+    self, Package, PackageConfig, PreexistingError, SpexConfig, package_yaml_edit, spex_yaml_edit,
+};
 use crate::error::{Result, could_not_read};
 use crate::rule::Severity;
-use crate::support::fs::write_file;
+use crate::support::fs::{relative_to, write_file};
 use crate::support::text::plural;
 
 use super::finding::Finding;
@@ -69,16 +71,20 @@ fn owner<'a>(
 }
 
 fn is_baselined(finding: &Finding, owner: &Owner) -> bool {
+    is_listed(&owner.package.check_ignore, finding, owner.file.as_deref())
+}
+
+fn is_listed(check_ignore: &[PreexistingError], finding: &Finding, file: Option<&Path>) -> bool {
     finding.severity == Severity::Error
         && finding
             .source
             .baseline_key()
             .is_some_and(|(rule_id, check)| {
-                owner.package.check_ignore.iter().any(|entry| {
+                check_ignore.iter().any(|entry| {
                     entry.rule_id == rule_id
                         && entry.check == check
                         && (entry.files.is_empty()
-                            || owner.file.as_ref().is_some_and(|file| {
+                            || file.is_some_and(|file| {
                                 entry.files.iter().any(|listed| Path::new(listed) == file)
                             }))
                 })
@@ -97,11 +103,23 @@ pub(super) fn drop_baselined_findings<'a>(
     }
 }
 
+pub(super) enum BaselineFile {
+    SpexYaml,
+    PackageYaml,
+}
+
+struct Written {
+    path: PathBuf,
+    changed: bool,
+}
+
 pub(super) fn fill_preexisting_errors(
     spex_dir: &Path,
     selected: &[&Package],
     reports: &[CheckReport],
+    target: BaselineFile,
 ) -> Result<ExitCode> {
+    let other_check_ignore = other_check_ignore(spex_dir, selected, &target)?;
     let mut baselines_by_package: HashMap<String, BTreeMap<(String, String), Baseline>> = selected
         .iter()
         .map(|package| (package.package_name.clone(), BTreeMap::new()))
@@ -118,6 +136,12 @@ pub(super) fn fill_preexisting_errors(
             let Some(Owner { package, file }) = owner(&report.target, finding, selected) else {
                 continue;
             };
+            if other_check_ignore
+                .get(&package.package_name)
+                .is_some_and(|listed| is_listed(listed, finding, file.as_deref()))
+            {
+                continue;
+            }
             let Some(checks) = baselines_by_package.get_mut(&package.package_name) else {
                 continue;
             };
@@ -146,30 +170,89 @@ pub(super) fn fill_preexisting_errors(
         })
         .collect();
 
-    let config_path = spex_dir.join(config::SPEX_CONFIG_FILE);
-    let raw =
-        std::fs::read_to_string(&config_path).with_context(|| could_not_read(&config_path))?;
-    let updated = spex_yaml_edit::set_preexisting_errors(&raw, &by_package);
-    let changed = updated != raw;
-    if changed {
-        write_file(&config_path, &updated)?;
-    }
+    let written = match target {
+        BaselineFile::SpexYaml => vec![write_spex_yaml(spex_dir, &by_package)?],
+        BaselineFile::PackageYaml => selected
+            .iter()
+            .map(|package| write_package_yaml(package, &by_package))
+            .collect::<Result<_>>()?,
+    };
 
-    report_fill(selected, &by_package, changed);
+    report_fill(spex_dir, selected, &by_package, &written);
     Ok(ExitCode::SUCCESS)
 }
 
+fn other_check_ignore(
+    spex_dir: &Path,
+    selected: &[&Package],
+    target: &BaselineFile,
+) -> Result<HashMap<String, Vec<PreexistingError>>> {
+    match target {
+        BaselineFile::SpexYaml => selected
+            .iter()
+            .map(|package| -> Result<_> {
+                let package_config = PackageConfig::load(&package.path)?;
+                Ok((package.package_name.clone(), package_config.check_ignore))
+            })
+            .collect(),
+        BaselineFile::PackageYaml => {
+            let spex_config = SpexConfig::load(&spex_dir.join(config::SPEX_CONFIG_FILE))?;
+            Ok(spex_config
+                .packages
+                .into_iter()
+                .map(|entry| (entry.package_name, entry.check_ignore))
+                .collect())
+        }
+    }
+}
+
+fn write_spex_yaml(
+    spex_dir: &Path,
+    by_package: &HashMap<String, Vec<PreexistingError>>,
+) -> Result<Written> {
+    let path = spex_dir.join(config::SPEX_CONFIG_FILE);
+    let raw = std::fs::read_to_string(&path).with_context(|| could_not_read(&path))?;
+    let updated = spex_yaml_edit::set_preexisting_errors(&raw, by_package);
+    write_if_changed(path, &raw, &updated)
+}
+
+fn write_package_yaml(
+    package: &Package,
+    by_package: &HashMap<String, Vec<PreexistingError>>,
+) -> Result<Written> {
+    let path = package.path.join(config::PACKAGE_CONFIG_FILE);
+    let raw = if path.is_file() {
+        std::fs::read_to_string(&path).with_context(|| could_not_read(&path))?
+    } else {
+        String::new()
+    };
+    let entries = by_package
+        .get(&package.package_name)
+        .map_or(&[][..], Vec::as_slice);
+    let updated = package_yaml_edit::set_check_ignore(&raw, entries);
+    write_if_changed(path, &raw, &updated)
+}
+
+fn write_if_changed(path: PathBuf, raw: &str, updated: &str) -> Result<Written> {
+    let changed = updated != raw;
+    if changed {
+        write_file(&path, updated)?;
+    }
+    Ok(Written { path, changed })
+}
+
 fn report_fill(
+    spex_dir: &Path,
     selected: &[&Package],
     by_package: &HashMap<String, Vec<PreexistingError>>,
-    changed: bool,
+    written: &[Written],
 ) {
     println!("{}", "spex check --fill-preexisting-errors".bold());
     println!();
     for package in selected {
         let count = by_package.get(&package.package_name).map_or(0, Vec::len);
         let summary = if count == 0 {
-            "no pre-existing errors".green().to_string()
+            "nothing to baseline".green().to_string()
         } else {
             format!("baselined {}", plural(count, "check"))
                 .dimmed()
@@ -178,9 +261,12 @@ fn report_fill(
         println!("  {}  {summary}", package.package_name.bold());
     }
     println!();
-    if changed {
-        println!("Updated {}", config::SPEX_CONFIG_FILE);
-    } else {
-        println!("{} unchanged", config::SPEX_CONFIG_FILE);
+    for Written { path, changed } in written {
+        let shown = relative_to(path, spex_dir).display();
+        if *changed {
+            println!("Updated {shown}");
+        } else {
+            println!("{shown} unchanged");
+        }
     }
 }

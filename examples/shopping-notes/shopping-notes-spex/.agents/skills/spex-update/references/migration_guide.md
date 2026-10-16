@@ -13,6 +13,12 @@ The baseline of pre-existing errors, `ignored_errors`, is now `check_ignore`, li
 - In every CI job, script, skill, or doc of the project that reads the `ignored_errors` key of `spex info` output, read `check_ignore` instead.
 - Wherever your own text (`AGENTS.md` below the managed section, specs, rules, skills, docs) mentions `ignored_errors`, say `check_ignore`.
 
+The root `coverage_ignore` of `spex.yaml` is removed, since it only kept a spec's own `coverage_ignore` in another file, and a `coverage_ignore` of a `spex.package.yaml`, which used to waive a spec's requirement for the whole project, now waives it for its own package only. A spec's requirement is waived once every package the spec lists in `packages` waives it, or the spec's own `coverage_ignore` does. A package waiver naming a spec that does not list the package no longer waives anything, and `spex check` reports it as an error. Until the root `coverage_ignore` is removed, `spex.yaml` fails schema validation. In `<spex-dir>`:
+
+- For every entry of the root `coverage_ignore` of `spex.yaml`, add it, without its `spec_id`, to the `coverage_ignore` of the spec it names, skipping an entry the spec already has, then remove the root `coverage_ignore` key. This keeps the old effect.
+- For every entry of the `coverage_ignore` of a `spex.package.yaml`, look up the spec it names. If the spec's `packages` lists only that package, change nothing. Otherwise add the entry, without its `spec_id`, to the spec's own `coverage_ignore`, which keeps the old effect, unless the user says it should stay package-specific: then keep it in the package and add the same entry to each other package the spec lists.
+- In every CI job, script, skill, or doc of the project that reads the root `coverage_ignore` of `spex info` output, read the `coverage_ignore` of each entry of `packages` instead: the root key is gone.
+
 ## 0.23.0
 
 `.claude` is no longer a symlink to `.agents`: it is a real directory that keeps its own files, such as `settings.json`, and only `.claude/skills` is a symlink to `../.agents/skills`. A project made by an earlier version has the whole `.claude` linked to `.agents`, so Claude Code's own files were written into `.agents`. In `<agent-root>`:

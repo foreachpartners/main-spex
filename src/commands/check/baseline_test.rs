@@ -241,4 +241,32 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn drop_baselined_findings_keeps_a_package_baseline_to_its_own_package() {
+        let api = package_at("../api", vec![preexisting("no-cyrillic", vec![])]);
+        let web = package_at("../web", vec![]);
+        let error = || {
+            finding(
+                Severity::Error,
+                "no-cyrillic",
+                Some(Location::in_file("a.md")),
+            )
+        };
+        let mut reports = vec![
+            CheckReport {
+                target: ReportTarget::Package(&api),
+                findings: vec![error()],
+            },
+            CheckReport {
+                target: ReportTarget::Package(&web),
+                findings: vec![error()],
+            },
+        ];
+
+        drop_baselined_findings(&mut reports, &[&api, &web]);
+
+        let remaining: Vec<usize> = reports.iter().map(|report| report.findings.len()).collect();
+        assert_eq!(remaining, vec![0, 1]);
+    }
 }

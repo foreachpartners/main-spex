@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -27,6 +28,7 @@ pub struct Spec {
     pub status: Status,
     pub contract: ContractLevel,
     pub coverage_ignore: Vec<CoverageIgnore>,
+    pub package_coverage_ignore: BTreeMap<String, Vec<CoverageIgnore>>,
 }
 
 impl Spec {
@@ -52,17 +54,25 @@ impl Spec {
     }
 
     pub fn layer_ignored(&self, layer: CoverageLayer) -> bool {
-        self.coverage_ignore
-            .iter()
-            .any(|ignore| ignore.layer == layer && ignore.ac.is_none())
+        self.waived(layer, None)
     }
 
     pub fn ac_ignored(&self, ac_id: &AcId, layer: CoverageLayer) -> bool {
-        self.layer_ignored(layer)
-            || self
-                .coverage_ignore
-                .iter()
-                .any(|ignore| ignore.layer == layer && ignore.ac.as_ref() == Some(ac_id))
+        self.waived(layer, Some(ac_id))
+    }
+
+    fn waived(&self, layer: CoverageLayer, ac_id: Option<&AcId>) -> bool {
+        waives(&self.coverage_ignore, layer, ac_id)
+            || self.every_listed_package_waives(layer, ac_id)
+    }
+
+    fn every_listed_package_waives(&self, layer: CoverageLayer, ac_id: Option<&AcId>) -> bool {
+        !self.packages.is_empty()
+            && self.packages.iter().all(|short_name| {
+                self.package_coverage_ignore
+                    .get(short_name)
+                    .is_some_and(|ignores| waives(ignores, layer, ac_id))
+            })
     }
 
     pub fn load_all(specs_dir: &Path) -> Result<Vec<Self>> {
@@ -89,8 +99,15 @@ impl Spec {
             status: config.status,
             contract: config.contract,
             coverage_ignore: config.coverage_ignore,
+            package_coverage_ignore: BTreeMap::new(),
         }
     }
+}
+
+fn waives(ignores: &[CoverageIgnore], layer: CoverageLayer, ac_id: Option<&AcId>) -> bool {
+    ignores
+        .iter()
+        .any(|ignore| ignore.layer == layer && (ignore.ac.is_none() || ignore.ac.as_ref() == ac_id))
 }
 
 #[derive(Debug, Clone)]

@@ -43,14 +43,6 @@
       "items": {
         "$ref": "#/$defs/package"
       }
-    },
-    "coverage_ignore": {
-      "type": "array",
-      "description": "Coverage requirements to waive for specs, merged with each spec's own `coverage_ignore` and with the `coverage_ignore` of every package's `spex.package.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to.",
-      "items": {
-        "$ref": "#/$defs/spec_coverage_ignore"
-      },
-      "uniqueItems": true
     }
   },
   "$defs": {
@@ -94,10 +86,18 @@
         },
         "check_ignore": {
           "type": "array",
-          "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
+          "description": "Baseline of pre-existing `error`-severity findings to suppress for this package only, merged with the `check_ignore` of this package's `spex.package.yaml`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
           "items": {
             "$ref": "#/$defs/ignored_error"
           }
+        },
+        "coverage_ignore": {
+          "type": "array",
+          "description": "Coverage requirements this package waives for specs, merged with the `coverage_ignore` of this package's `spex.package.yaml`. Each entry is a spec's `coverage_ignore` entry plus the `spec_id` it applies to. A requirement of a spec is waived once every package the spec lists in `packages` waives it, or the spec's own `coverage_ignore` does, so a waiver of one package never affects another package's requirement.",
+          "items": {
+            "$ref": "#/$defs/spec_coverage_ignore"
+          },
+          "uniqueItems": true
         }
       },
       "required": ["package_name", "package_short_name", "path"],

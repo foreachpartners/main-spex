@@ -1,6 +1,7 @@
 mod layout;
 mod package;
 mod package_config;
+pub mod package_yaml_edit;
 pub mod spex;
 mod spex_config;
 pub mod spex_yaml_edit;

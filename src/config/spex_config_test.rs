@@ -158,25 +158,29 @@ mod tests {
     }
 
     #[test]
-    fn parses_coverage_ignore_entries_naming_a_spec() {
+    fn parses_package_coverage_ignore_entries_naming_a_spec() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
-            coverage_ignore:
-              - spec_id: place-order
-                layer: contract
-              - spec_id: place-order
-                layer: impl
-                ac: rejects-empty-cart
+            packages:
+              - package_name: demo-api
+                package_short_name: api
+                path: ../demo-api
+                coverage_ignore:
+                  - spec_id: place-order
+                    layer: contract
+                  - spec_id: place-order
+                    layer: impl
+                    ac: rejects-empty-cart
         "})
         .expect("parse config");
 
         let json = serde_json::to_value(&config).expect("serialize");
 
         assert_eq!(
-            json["coverage_ignore"],
+            json["packages"][0]["coverage_ignore"],
             serde_json::json!([
                 { "spec_id": "place-order", "layer": "contract" },
                 { "spec_id": "place-order", "layer": "impl", "ac": "rejects-empty-cart" },
@@ -196,17 +200,24 @@ mod tests {
     }
 
     #[test]
-    fn serialization_keeps_an_absent_coverage_ignore_as_an_empty_list() {
+    fn serialization_keeps_an_absent_package_coverage_ignore_as_an_empty_list() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
+            packages:
+              - package_name: demo-api
+                package_short_name: api
+                path: ../demo-api
         "})
         .expect("parse config");
 
         let json = serde_json::to_value(&config).expect("serialize");
 
-        assert_eq!(json["coverage_ignore"], serde_json::json!([]));
+        assert_eq!(
+            json["packages"][0]["coverage_ignore"],
+            serde_json::json!([])
+        );
     }
 }

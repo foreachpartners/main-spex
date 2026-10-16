@@ -8,6 +8,18 @@ use crate::common::{
     assert_fails_mentioning, dummy_project_fixture, report_text, run_spex, with_version_header,
 };
 
+fn waive_in_package_entry(project: &std::path::Path, entry_end: &str, waivers: &str) {
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let indented = waivers.replace('\n', "\n    ");
+    let patched = config.replace(
+        &format!("{entry_end}\n"),
+        &format!("{entry_end}{}", indented.trim_end_matches(' ')),
+    );
+    assert_ne!(patched, config, "package entry not found in spex.yaml");
+    fs::write(&spex_yaml, patched).expect("write spex.yaml");
+}
+
 fn append(path: &std::path::Path, text: &str) {
     let mut file = fs::OpenOptions::new()
         .append(true)
@@ -15,6 +27,10 @@ fn append(path: &std::path::Path, text: &str) {
         .expect("open file for append");
     file.write_all(text.as_bytes()).expect("append to file");
 }
+
+const API_ENTRY_END: &str = "    rules:\n      - no-todo-comments";
+
+const FRONTEND_ENTRY_END: &str = "    path: ../dummy-project-frontend\n    rules: []";
 
 const NONE_WITH_GAP_WAIVERS: &str = r#"
 coverage_ignore:
@@ -234,14 +250,11 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
 }
 
 #[test]
-fn coverage_honors_a_spex_yaml_coverage_ignore_for_a_spec() {
+fn coverage_honors_a_spex_yaml_package_entry_coverage_ignore_for_a_spec() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
-    append(
-        &project.join("dummy-project-spex/spex.yaml"),
-        NONE_WITH_GAP_WAIVERS,
-    );
+    waive_in_package_entry(&project, API_ENTRY_END, NONE_WITH_GAP_WAIVERS);
 
     let coverage = run_spex(&project, &["coverage"], "");
 
@@ -281,15 +294,13 @@ fn coverage_honors_a_package_spex_repo_yaml_coverage_ignore() {
 }
 
 #[test]
-fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
+fn coverage_merges_coverage_ignore_from_the_spex_yaml_entry_and_the_spex_package_yaml_of_a_package()
+{
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
 
-    append(
-        &project.join("dummy-project-spex/spex.yaml"),
-        NONE_WITH_GAP_IMPL_WAIVER,
-    );
+    waive_in_package_entry(&project, API_ENTRY_END, NONE_WITH_GAP_IMPL_WAIVER);
     let partly_waived = report_text(&run_spex(&project, &["coverage"], "").stdout);
     assert!(
         partly_waived.contains("missing: test(resumes-favorite)"),
@@ -301,7 +312,7 @@ fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
     );
 
     fs::write(
-        project.join("dummy-project-frontend/spex.package.yaml"),
+        project.join("dummy-project-api/spex.package.yaml"),
         NONE_WITH_GAP_TEST_WAIVER.trim_start(),
     )
     .expect("write spex.package.yaml");
@@ -309,6 +320,61 @@ fn coverage_merges_coverage_ignore_from_spex_yaml_and_every_package() {
     assert!(
         !fully_waived.contains("none-with-gap"),
         "the impl and test waivers should merge\n{fully_waived}"
+    );
+}
+
+#[test]
+fn coverage_ignores_a_package_waiver_of_a_package_the_spec_does_not_list() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-frontend/spex.package.yaml"),
+        NONE_WITH_GAP_WAIVERS.trim_start(),
+    )
+    .expect("write spex.package.yaml");
+
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    let report = report_text(&coverage.stdout);
+    assert!(
+        report.contains("none-with-gap"),
+        "a frontend waiver should not waive a spec that lists only api\n{report}"
+    );
+}
+
+#[test]
+fn coverage_waives_a_requirement_only_once_every_listed_package_waives_it() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    let spec_path = project.join("dummy-project-spex/specs/none-with-gap.yaml");
+    let spec = fs::read_to_string(&spec_path).expect("read spec");
+    let listing_two_packages =
+        spec.replace("packages:\n  - api\n", "packages:\n  - api\n  - frontend\n");
+    assert_ne!(listing_two_packages, spec, "packages not found in the spec");
+    fs::write(&spec_path, listing_two_packages).expect("write spec");
+
+    fs::write(
+        project.join("dummy-project-api/spex.package.yaml"),
+        NONE_WITH_GAP_WAIVERS.trim_start(),
+    )
+    .expect("write spex.package.yaml");
+    let waived_by_api_only = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(
+        waived_by_api_only.contains("none-with-gap"),
+        "a waiver of api alone should not waive a spec that lists api and frontend\n{waived_by_api_only}"
+    );
+
+    waive_in_package_entry(&project, FRONTEND_ENTRY_END, NONE_WITH_GAP_WAIVERS);
+    let waived_by_both = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(
+        !waived_by_both.contains("none-with-gap"),
+        "api and frontend both waive the requirement\n{waived_by_both}"
+    );
+    assert!(
+        waived_by_both.ends_with("planned (2), in-progress (2), active (9), gaps (6)\n"),
+        "{waived_by_both}"
     );
 }
 

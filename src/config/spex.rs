@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 use crate::config::{Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
 use crate::error::Result;
 use crate::rule::{self, Rule};
-use crate::spec::{self, Spec, SpecCoverageIgnore};
+use crate::spec::{self, CoverageIgnore, Spec, SpecCoverageIgnore, SpecId};
 use crate::support::fs::{current_dir, normalize};
 
 #[cfg(test)]
@@ -19,7 +19,6 @@ pub struct Spex {
     pub project_name: String,
     pub agent_root: PathBuf,
     pub packages: Vec<Package>,
-    pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 impl Spex {
@@ -50,15 +49,16 @@ impl Spex {
             dir,
             project_name: config.project_name,
             packages,
-            coverage_ignore: config.coverage_ignore,
         }
     }
 
     pub fn with_package_configs(mut self) -> Result<Self> {
         for package in &mut self.packages {
             let package_config = PackageConfig::load(&package.path)?;
-            self.coverage_ignore.extend(package_config.coverage_ignore);
             package.check_ignore.extend(package_config.check_ignore);
+            package
+                .coverage_ignore
+                .extend(package_config.coverage_ignore);
         }
         Ok(self)
     }
@@ -70,12 +70,14 @@ impl Spex {
     pub fn specs(&self) -> Result<Vec<Spec>> {
         let mut specs = Spec::load_all(&self.dir.join(spec::SPECS_DIR))?;
         for spec in &mut specs {
-            let waivers = self
-                .coverage_ignore
-                .iter()
-                .filter(|waiver| waiver.spec_id == spec.id)
-                .map(|waiver| waiver.ignore.clone());
-            spec.coverage_ignore.extend(waivers);
+            for package in &self.packages {
+                let waivers: Vec<CoverageIgnore> =
+                    waivers_for(&package.coverage_ignore, &spec.id).collect();
+                if !waivers.is_empty() {
+                    spec.package_coverage_ignore
+                        .insert(package.package_short_name.clone(), waivers);
+                }
+            }
         }
         Ok(specs)
     }
@@ -117,6 +119,16 @@ impl Spex {
             .map(|package| package.package_short_name.as_str())
             .collect())
     }
+}
+
+fn waivers_for<'a>(
+    waivers: &'a [SpecCoverageIgnore],
+    spec_id: &'a SpecId,
+) -> impl Iterator<Item = CoverageIgnore> + 'a {
+    waivers
+        .iter()
+        .filter(move |waiver| &waiver.spec_id == spec_id)
+        .map(|waiver| waiver.ignore.clone())
 }
 
 fn warn_if_cli_outdated(config: &SpexConfig) {

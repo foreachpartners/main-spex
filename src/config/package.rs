@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use super::spex_config::{PackageEntry, PreexistingError};
 use crate::rule::RuleId;
+use crate::spec::SpecCoverageIgnore;
 use crate::support::fs::{canonical, normalize};
 
 #[cfg(test)]
@@ -16,6 +17,7 @@ pub struct Package {
     pub contracts: Vec<PathBuf>,
     pub rules: Vec<RuleId>,
     pub check_ignore: Vec<PreexistingError>,
+    pub coverage_ignore: Vec<SpecCoverageIgnore>,
     pub is_spex_dir: bool,
 }
 
@@ -34,6 +36,7 @@ impl Package {
                 .collect(),
             rules: config.rules,
             check_ignore: config.check_ignore,
+            coverage_ignore: config.coverage_ignore,
         }
     }
 

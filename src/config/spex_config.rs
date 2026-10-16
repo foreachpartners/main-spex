@@ -30,8 +30,6 @@ pub struct SpexConfig {
     pub rules_unused: Vec<RuleId>,
     #[serde(default)]
     pub packages: Vec<PackageEntry>,
-    #[serde(default)]
-    pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -47,6 +45,8 @@ pub struct PackageEntry {
     pub rules: Vec<RuleId>,
     #[serde(default)]
     pub check_ignore: Vec<PreexistingError>,
+    #[serde(default)]
+    pub coverage_ignore: Vec<SpecCoverageIgnore>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

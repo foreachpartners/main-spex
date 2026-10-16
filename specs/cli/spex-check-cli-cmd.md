@@ -23,13 +23,13 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run a `project` script exactly once, whatever `--files` selects.
 - MUST error when a file given to `--files` does not exist in any package.
 - MUST skip negated `regexp`, `glob`, and `ast-grep` checks with `--files`, because a negated check needs the full file set to prove a forbidden pattern is absent; a subset would only produce false positives.
-- MUST record, with `--fill-preexisting-errors`, the current `error`-severity findings as a `check_ignore` baseline in `spex.yaml`, then exit without gating, so a check can be adopted on a package that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
-- MUST run, with `--fill-preexisting-errors`, every selected package's checks, group the resulting `error` findings by check and file, and write one `check_ignore` entry per check into that package's block.
+- MUST record, with `--fill-preexisting-errors`, the current `error`-severity findings as a `check_ignore` baseline in `spex.yaml`, or in the `spex.package.yaml` of each selected package when `--package` is given, then exit without gating, so a check can be adopted on a package that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
+- MUST run, with `--fill-preexisting-errors`, every selected package's checks, group the resulting `error` findings by check and file, and write one `check_ignore` entry per check into that package's block of `spex.yaml`, or, when `--package` is given, into the top-level `check_ignore` of that package's `spex.package.yaml`, creating the file when it is missing and there is something to write.
 - MUST baseline, with `--fill-preexisting-errors`, a finding tied to a file for that file, and a file-less error (e.g. a per-package script that inspects git history) as a whole-check entry that omits `files`.
-- MUST regenerate, with `--fill-preexisting-errors`, each selected package's baseline from the current findings, dropping entries whose errors are gone, while the rest of `spex.yaml` and any unselected package stay byte-stable.
-- MUST read and write only `spex.yaml` with `--fill-preexisting-errors`.
+- MUST regenerate, with `--fill-preexisting-errors`, each selected package's baseline from the current findings, dropping entries whose errors are gone, while the rest of the written file and any unselected package stay byte-stable.
+- MUST leave out of the generated baseline, with `--fill-preexisting-errors`, an error that the other file already baselines for that package, so no error is listed in both: its `spex.package.yaml` when `spex.yaml` is written, its entry in `spex.yaml` when `--package` is given.
+- MUST read and write only `spex.yaml` with `--fill-preexisting-errors`, or, when `--package` is given, only the `spex.package.yaml` of each selected package.
 - MUST always exit `0` with `--fill-preexisting-errors`.
-- MUST NOT modify a package's `spex.package.yaml` with `--fill-preexisting-errors`, nor subtract its entries from the generated baseline.
 - MUST NOT baseline, with `--fill-preexisting-errors`, package-level errors that belong to no named check (e.g. a misconfigured override); they are fixed directly.
 
 ### Script checks
@@ -52,6 +52,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST drop an `error` finding from that check when its location file is listed in `files`, or always when `files` is omitted.
 - MUST merge the `check_ignore` of a package's own [`spex.package.yaml`](../config/spex-package-yaml-config.md) with its `check_ignore` in `spex.yaml`, so an error is dropped when either lists it; the entries there are the same, without the surrounding `packages` block.
 - MUST NOT drop new errors in other files.
+- MUST NOT drop an error because of the `check_ignore` of another package.
 - MUST NOT affect `warn`-severity findings with a baseline.
 
 ### Self-validation
@@ -69,7 +70,8 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST require every `blocked_by` entry to be the id of an existing spec, and error on anything else, such as a rule id or an unknown id.
 - MUST warn when a `blocked_by` reference names an already-`active` spec, since a satisfied blocker is dropped.
 - MUST require a `packages` entry to match a package's `package_short_name` in `spex.yaml`.
-- MUST require a `coverage_ignore` entry, whether in the spec, in `spex.yaml`, or in a package's `spex.package.yaml`, to match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
+- MUST require a `coverage_ignore` entry, whether in the spec, in a package entry of `spex.yaml`, or in a package's `spex.package.yaml`, to match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
+- MUST error on a `coverage_ignore` entry of a package, in its `spex.yaml` entry or its `spex.package.yaml`, that names a spec whose `packages` does not list that package, since it could never waive anything.
 - MUST warn on a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is neither `active` nor `deprecated`.
 - MUST error on a spec whose `status` is `active` with any acceptance criterion still `is_done: false`, since `active` means fully implemented (`in-progress` applies until then).
 - MUST read only each criterion's `is_done` field for status checks; whether it is backed by impl/test annotations is `spex coverage`'s job.
@@ -103,5 +105,6 @@ check_ignore:
 ```sh
 spex check --package api frontend
 spex check --package api --files src/main.rs src/orders.rs
+spex check --fill-preexisting-errors
 spex check --package frontend --fill-preexisting-errors
 ```
