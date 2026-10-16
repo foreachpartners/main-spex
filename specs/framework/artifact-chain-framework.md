@@ -6,5 +6,5 @@ Turns business goals into verified code through a chain of artifacts, each trace
 
 - MUST order the artifacts as PRD (optional), spec, contract (if applicable), implementation, test.
 - MUST derive each spec from the PRD, or from a feature idea directly when there is no PRD; the product owner extracts it.
-- MUST derive a contract from a spec when applicable,  it's cheap to create, review, and reason about first.
+- MUST derive a contract from a spec when applicable, it's cheap to create, review, and reason about first.
 - MAY have a plan, an ordered set of steps turning approved specs and their contracts into implementation instructions.
