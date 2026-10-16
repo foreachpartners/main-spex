@@ -17,7 +17,57 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 
 ## Examples
 
+The full config of the `shopping-notes` example project:
+
 ```yaml
+project_name: shopping-notes
+cli_version: 0.23.4
+layout: multi-repo
+agent_root: .
+description: >-
+  Web application for managing shopping lists, letting users note items to
+  buy so they don't forget them at the store.
+rules_unused:
+  - graphql-conventions
+packages:
+  - package_name: shopping-notes-api
+    package_short_name: api
+    description: Fastify REST API backend for the shopping notes application.
+    path: ../shopping-notes-api
+    contracts:
+      - path: contracts/api.openapi.yaml
+        description: OpenAPI contract for the shopping notes API.
+    rules:
+      - commit-message-format
+      - dependencies-rules
+      - naming-convention
+      - openapi-conventions
+      - secret-handling
+      - testing-rules
+      - writing-style
+  - package_name: shopping-notes-frontend
+    package_short_name: frontend
+    description: React SPA that lets users create and manage shopping notes against the API.
+    path: ../shopping-notes-frontend
+    contracts:
+      - path: ../shopping-notes-frontend/contracts/figma.md
+        description: Figma design references for frontend UI specs.
+    rules:
+      - commit-message-format
+      - dependencies-rules
+      - naming-convention
+      - secret-handling
+      - testing-rules
+      - writing-style
+  - package_name: shopping-notes-spex
+    package_short_name: spex
+    description: Spex framework. Holds the specs, rules, skills and config that govern the project.
+    path: .
+    rules:
+      - commit-message-format
+      - naming-convention
+      - secret-handling
+      - writing-style
 coverage_ignore:
   - spec_id: place-pizza-order
     layer: contract

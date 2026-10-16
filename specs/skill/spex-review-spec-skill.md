@@ -10,7 +10,7 @@ Spec-axis review of the current branch against a spec: is what is implemented of
 - MUST fetch the spec or specs with `spex specs --ai --id <spec-id-a> <spec-id-b>`.
 - MUST review the implementation as it stands on the current branch, not the changes since a starting point.
 - MUST find the implementation by its `@spec impl <spec-id>` annotations in the packages listed in the spec's `packages`.
-- MUST report, against the implementation and the spec contents, the acceptance criteria whose implementation looks wrong.
+- MUST report, against the implementation, its contract, and the spec contents, the acceptance criteria whose implementation looks wrong.
 - MUST quote the acceptance criterion for each finding.
 - MUST list, as a note and not as a finding, the acceptance criteria not yet implemented or implemented partially, as long as what is implemented is correct.
 - MUST NOT report missing tests, since testing comes in later steps as the last verification layer.

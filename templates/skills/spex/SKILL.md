@@ -12,6 +12,7 @@ Run `spex info` for the project configuration. Its `spex_dir` is the directory t
 - `spex.yaml` - project and each package configuration, description, their paths, contracts, and applicable rules.
 - `specs/` - spec: a capability the system must provide, with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - `rules/` - rule: a cross-cutting convention or rule, with acceptance criteria. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`. A rule's `script` checks keep their scripts in a folder named after the rule beside its file (`rules/<rule-id>.yaml` and `rules/<rule-id>/`)
+- `schemas/` - schema: the JSON Schemas `spex check` validates `spex.yaml`, each package's `spex.package.yaml`, specs, rules, and plans against.
 - `contracts/` - contract: interface definitions (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI) shared across packages. A contract file's location is user-owned — most commonly inside the owning package itself — and recorded in `spex.yaml`; the spex directory's `contracts/` folder is only a convention for contracts genuinely shared across packages.
 - `plans/` - plan: temporary implementation plan derived from approved spec and contract to plan and track huge task split in multiple steps. Deleted after completion.
 

@@ -32,22 +32,15 @@ If the spec is missing, skip the spec sub-agent and note this in the final repor
 
 ### 4. Aggregate
 
-Present the two reports under `## Rules` and `## Specs` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
+Present the two reports under `## Rules` and `## Specs` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings.
+
+The two axes are deliberately separate because a change can pass one and fail the other: code that follows every rule but implements the wrong thing is a **Rule pass, Spec fail**; code that does exactly what the issue asked but breaks the project's conventions is a **Spec pass, Rule fail**. Reporting them separately stops one axis from masking the other.
 
 End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
 
 ### 5. Point to the next skill
 
 Once both axes are clean (or the user has resolved what they want to resolve), offer to add test coverage for the change with `spex-test`.
-
-## Why two axes
-
-A change can pass one axis and fail the other:
-
-- Code that follows every rule but implements the wrong thing -> **Rule pass, Spec fail.**
-- Code that does exactly what the issue asked but breaks the project's conventions -> **Spec pass, Rule fail.**
-
-Reporting them separately stops one axis from masking the other.
 
 ---
 
