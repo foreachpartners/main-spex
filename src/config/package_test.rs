@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::error::describe;
     use tempfile::tempdir;
 
     fn config(path: &str) -> PackageEntry {
@@ -47,5 +48,29 @@ mod tests {
         assert!(package.matches_any_package_name("demo-api"));
         assert!(package.matches_any_package_name("api"));
         assert!(!package.matches_any_package_name("web"));
+    }
+
+    #[test]
+    fn from_config_keeps_the_exclude_of_the_package_entry() {
+        let entry: PackageEntry = serde_yaml_ng::from_str(
+            "package_name: demo-api\npackage_short_name: api\npath: .\nexclude: [vendor]\n",
+        )
+        .expect("parse package entry");
+
+        let package = Package::from_config(entry, Path::new("/spex"));
+
+        assert_eq!(package.exclude, vec!["vendor"]);
+    }
+
+    #[test]
+    fn compile_exclude_names_the_package_when_a_pattern_is_not_a_valid_glob() {
+        let mut package = Package::from_config(config("."), Path::new("/spex"));
+        package.exclude = vec!["src/{a,b".to_string()];
+
+        let error = package.compile_exclude().expect_err("invalid exclude");
+
+        let message = describe(&error);
+        assert!(message.contains("`demo-api`"), "{message}");
+        assert!(message.contains("src/{a,b"), "{message}");
     }
 }

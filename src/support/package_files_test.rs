@@ -1,22 +1,40 @@
 #[cfg(test)]
 mod tests {
-    use super::super::PackageFiles;
+    use super::super::{Exclude, PackageFiles};
+    use crate::error::describe;
     use std::collections::HashSet;
     use std::path::{Path, PathBuf};
     use tempfile::tempdir;
 
+    fn exclude(root: &Path, patterns: &[&str]) -> Exclude {
+        let patterns: Vec<String> = patterns.iter().map(ToString::to_string).collect();
+        Exclude::new(root, &patterns).expect("valid exclude")
+    }
+
     fn walked_files(root: &Path) -> HashSet<PathBuf> {
-        PackageFiles::new(root)
+        walked_files_excluding(root, &[])
+    }
+
+    fn walked_files_excluding(root: &Path, patterns: &[&str]) -> HashSet<PathBuf> {
+        PackageFiles::new(root, &exclude(root, patterns))
             .filter_map(Result::ok)
             .map(|path| path.strip_prefix(root).unwrap_or(&path).to_path_buf())
             .collect()
     }
 
     fn walked_in_order(root: &Path) -> Vec<PathBuf> {
-        PackageFiles::new(root)
+        PackageFiles::new(root, &exclude(root, &[]))
             .filter_map(Result::ok)
             .map(|path| path.strip_prefix(root).unwrap_or(&path).to_path_buf())
             .collect()
+    }
+
+    fn write_files(root: &Path, files: &[&str]) {
+        for file in files {
+            let path = root.join(file);
+            std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
+            std::fs::write(path, "").expect("file");
+        }
     }
 
     #[test]
@@ -98,5 +116,106 @@ mod tests {
         let files = walked_files(dir.path());
 
         assert_eq!(files, HashSet::from([PathBuf::from("nested/file.txt")]));
+    }
+
+    #[test]
+    fn skips_a_folder_whose_path_matches_an_exclude_with_everything_inside_it() {
+        let dir = tempdir().expect("temp dir");
+        write_files(
+            dir.path(),
+            &["vendor/lib.js", "vendor/deep/more.js", "src/vendor/b.js"],
+        );
+
+        let files = walked_files_excluding(dir.path(), &["vendor"]);
+
+        assert_eq!(files, HashSet::from([PathBuf::from("src/vendor/b.js")]));
+    }
+
+    #[test]
+    fn skips_the_files_inside_a_folder_matched_by_a_slash_double_star_exclude() {
+        let dir = tempdir().expect("temp dir");
+        write_files(
+            dir.path(),
+            &["vendor/lib.js", "vendor/deep/more.js", "src/vendor/b.js"],
+        );
+
+        let files = walked_files_excluding(dir.path(), &["vendor/**"]);
+
+        assert_eq!(files, HashSet::from([PathBuf::from("src/vendor/b.js")]));
+    }
+
+    #[test]
+    fn skips_a_folder_at_any_depth_with_a_leading_double_star_exclude() {
+        let dir = tempdir().expect("temp dir");
+        write_files(
+            dir.path(),
+            &["vendor/lib.js", "src/vendor/b.js", "src/main.rs"],
+        );
+
+        let files = walked_files_excluding(dir.path(), &["**/vendor"]);
+
+        assert_eq!(files, HashSet::from([PathBuf::from("src/main.rs")]));
+    }
+
+    #[test]
+    fn skips_files_matched_by_an_exclude_glob_at_any_depth() {
+        let dir = tempdir().expect("temp dir");
+        write_files(
+            dir.path(),
+            &[
+                "api.generated.ts",
+                "src/models.generated.ts",
+                "src/models.ts",
+            ],
+        );
+
+        let files = walked_files_excluding(dir.path(), &["**/*.generated.ts"]);
+
+        assert_eq!(files, HashSet::from([PathBuf::from("src/models.ts")]));
+    }
+
+    #[test]
+    fn skips_files_matched_by_any_of_several_exclude_patterns() {
+        let dir = tempdir().expect("temp dir");
+        write_files(dir.path(), &["a.md", "b.txt", "c.rs"]);
+
+        let files = walked_files_excluding(dir.path(), &["*.md", "*.txt"]);
+
+        assert_eq!(files, HashSet::from([PathBuf::from("c.rs")]));
+    }
+
+    #[test]
+    fn excludes_nothing_without_patterns() {
+        let dir = tempdir().expect("temp dir");
+        write_files(dir.path(), &["a.txt", "nested/b.txt"]);
+
+        let files = walked_files_excluding(dir.path(), &[]);
+
+        assert_eq!(files.len(), 2);
+    }
+
+    #[test]
+    fn matches_a_path_relative_to_the_package_or_under_its_root() {
+        let dir = tempdir().expect("temp dir");
+        let exclude = exclude(dir.path(), &["vendor/**", "**/*.generated.ts"]);
+
+        assert!(exclude.matches(Path::new("vendor/lib/deep.js")));
+        assert!(exclude.matches(&dir.path().join("vendor/lib/deep.js")));
+        assert!(exclude.matches(Path::new("src/api.generated.ts")));
+        assert!(!exclude.matches(Path::new("src/api.ts")));
+        assert!(!exclude.matches(&dir.path().join("src/api.ts")));
+    }
+
+    #[test]
+    fn rejects_an_exclude_pattern_that_is_not_a_valid_glob() {
+        let dir = tempdir().expect("temp dir");
+
+        let error = Exclude::new(dir.path(), &["src/{a,b".to_string()]).expect_err("invalid glob");
+
+        assert!(
+            describe(&error).contains("src/{a,b"),
+            "{}",
+            describe(&error)
+        );
     }
 }

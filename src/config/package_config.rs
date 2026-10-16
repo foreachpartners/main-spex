@@ -17,6 +17,8 @@ pub const PACKAGE_CONFIG_FILE: &str = "spex.package.yaml";
 #[derive(Debug, Default, Deserialize)]
 pub struct PackageConfig {
     #[serde(default)]
+    pub exclude: Vec<String>,
+    #[serde(default)]
     pub check_ignore: Vec<PreexistingError>,
     #[serde(default)]
     pub coverage_ignore: Vec<SpecCoverageIgnore>,

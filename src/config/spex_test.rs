@@ -224,6 +224,36 @@ mod tests {
     }
 
     #[test]
+    fn with_package_configs_merges_exclude_into_its_own_package_after_the_spex_yaml_entries() {
+        let project = tempdir().expect("project");
+        let api = project.path().join("api");
+        let web = project.path().join("web");
+        for dir in [&api, &web] {
+            std::fs::create_dir_all(dir).expect("package dir");
+        }
+        std::fs::write(
+            api.join(PACKAGE_CONFIG_FILE),
+            "exclude: [from-package-file]\n",
+        )
+        .expect("write api config");
+        let mut api_package = testing::package("api", "api");
+        api_package.path = api;
+        api_package.exclude = vec!["from-spex-yaml".to_string()];
+        let mut web_package = testing::package("web", "web");
+        web_package.path = web;
+
+        let spex = testing::spex(vec![api_package, web_package])
+            .with_package_configs()
+            .expect("merge package configs");
+
+        assert_eq!(
+            spex.packages[0].exclude,
+            vec!["from-spex-yaml", "from-package-file"]
+        );
+        assert!(spex.packages[1].exclude.is_empty());
+    }
+
+    #[test]
     fn with_package_configs_fails_when_a_package_file_is_invalid() {
         let package_dir = tempdir().expect("package dir");
         std::fs::write(

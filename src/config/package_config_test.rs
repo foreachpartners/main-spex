@@ -12,6 +12,7 @@ mod tests {
 
         let config = PackageConfig::load(package.path()).expect("load");
 
+        assert!(config.exclude.is_empty());
         assert!(config.coverage_ignore.is_empty());
         assert!(config.check_ignore.is_empty());
     }
@@ -78,6 +79,20 @@ mod tests {
         assert_eq!(config.check_ignore.len(), 1);
         assert_eq!(config.check_ignore[0].rule_id, "writing-style");
         assert_eq!(config.check_ignore[0].files, vec!["README.md"]);
+    }
+
+    #[test]
+    fn load_reads_exclude() {
+        let package = tempdir().expect("package dir");
+        fs::write(
+            package.path().join(PACKAGE_CONFIG_FILE),
+            "exclude:\n  - vendor\n  - \"**/*.generated.ts\"\n",
+        )
+        .expect("write package config");
+
+        let config = PackageConfig::load(package.path()).expect("load");
+
+        assert_eq!(config.exclude, vec!["vendor", "**/*.generated.ts"]);
     }
 
     #[test]

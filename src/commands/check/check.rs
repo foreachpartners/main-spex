@@ -218,9 +218,9 @@ fn check_package<'a>(
     }
 
     let candidates = if files.is_empty() {
-        ScopedFile::collect(package_path)?
+        ScopedFile::collect(package)?
     } else {
-        ScopedFile::provided(package_path, files)
+        ScopedFile::provided_not_excluded(package, files)?
     };
 
     let ctx = PackageCtx {

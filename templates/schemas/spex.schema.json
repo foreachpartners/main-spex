@@ -84,6 +84,15 @@
             "$ref": "rule-id.schema.json"
           }
         },
+        "exclude": {
+          "type": "array",
+          "description": "Glob patterns, the same globs a check's `include` and `exclude` use, matched against the path of every file and folder relative to this package's root, naming what `spex check` and `spex coverage` leave out of this package only, merged with the `exclude` of this package's `spex.package.yaml`. A folder that matches is skipped with everything inside it: `vendor` or `**/vendor` skips a folder, `vendor/**` the files inside it, and `**/*.generated.ts` such files at any depth. An excluded file is never checked, and its `@spec` annotations count for no spec; contract files declared in `contracts` are not affected.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
         "check_ignore": {
           "type": "array",
           "description": "Baseline of pre-existing `error`-severity findings to suppress for this package only, merged with the `check_ignore` of this package's `spex.package.yaml`, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",

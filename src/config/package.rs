@@ -1,9 +1,13 @@
 use std::path::{Path, PathBuf};
 
 use super::spex_config::{PackageEntry, PreexistingError};
+use eros::Context;
+
+use crate::error::Result;
 use crate::rule::RuleId;
 use crate::spec::SpecCoverageIgnore;
 use crate::support::fs::{canonical, normalize};
+use crate::support::package_files::Exclude;
 
 #[cfg(test)]
 #[path = "package_test.rs"]
@@ -16,6 +20,7 @@ pub struct Package {
     pub path: PathBuf,
     pub contracts: Vec<PathBuf>,
     pub rules: Vec<RuleId>,
+    pub exclude: Vec<String>,
     pub check_ignore: Vec<PreexistingError>,
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
     pub is_spex_dir: bool,
@@ -35,9 +40,15 @@ impl Package {
                 .map(|contract| spex_dir.join(contract.path))
                 .collect(),
             rules: config.rules,
+            exclude: config.exclude,
             check_ignore: config.check_ignore,
             coverage_ignore: config.coverage_ignore,
         }
+    }
+
+    pub fn compile_exclude(&self) -> Result<Exclude> {
+        Exclude::new(&self.path, &self.exclude)
+            .with_context(|| format!("invalid `exclude` of package `{}`", self.package_name))
     }
 
     pub fn matches_any_package_name(&self, name: &str) -> bool {

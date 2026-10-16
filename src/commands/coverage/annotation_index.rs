@@ -4,6 +4,7 @@ use std::path::Path;
 
 use eros::Context;
 
+use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::spec::{AcId, CoverageLayer, SpecId};
@@ -57,14 +58,14 @@ impl AnnotationIndex {
             if !package.path.is_dir() {
                 continue;
             }
-            index.scan_package(&package.path, &spex.dir)?;
+            index.scan_package(package, &spex.dir)?;
         }
 
         Ok(index)
     }
 
-    fn scan_package(&mut self, package_path: &Path, spex_dir: &Path) -> Result<()> {
-        for result in PackageFiles::new(package_path) {
+    fn scan_package(&mut self, package: &Package, spex_dir: &Path) -> Result<()> {
+        for result in PackageFiles::new(&package.path, &package.compile_exclude()?) {
             let path = result.context("could not walk package files")?;
             if path.starts_with(spex_dir) {
                 continue;

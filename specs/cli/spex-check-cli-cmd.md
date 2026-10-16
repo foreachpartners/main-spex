@@ -9,6 +9,10 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run the checks declared in `spex.yaml` against each package, reporting findings per package.
 - MUST open its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - MUST skip files ignored by `.gitignore`, even in a package without a `.git` directory, plus well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
+- MUST skip the files and folders matched by a package's `exclude` ([spex.yaml](../config/spex-yaml-config.md), merged with its [`spex.package.yaml`](../config/spex-package-yaml-config.md)) the same way, so no check, including the `@spec` annotation checks, reports a finding in them and no `per-file` script receives them.
+- MUST match each `exclude` pattern, a glob read as in a check's `exclude`, against the path of every file and folder relative to its package's root, and skip a folder that matches with everything inside it: `vendor` or `**/vendor` skips a folder, `vendor/**` the files inside it, and `**/*.generated.ts` such files at any depth.
+- MUST error on an `exclude` pattern that is not a valid glob, naming the package.
+- MUST NOT skip a file because of the `exclude` of another package.
 - MUST visit each package's files sorted by name within each directory, so a check's findings, and the files a `per-file` script receives, come out in the same order on every run and machine.
 - MUST render every finding with a location as a terminal hyperlink to the absolute file it points at, so it opens correctly whatever the shell's current working directory is; the displayed text stays the short package-relative path.
 - MUST exit non-zero when any `error`-severity finding is reported.
@@ -18,7 +22,8 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 
 - MUST limit the run to the packages named in `--package <name>...`, matched by either full `package_name` or `package_short_name`; it defaults to all packages in `spex.yaml`.
 - MUST error on a name given to `--package` that matches no package.
-- MUST limit the run to the files given in `--files <path>...`, relative to each package; it defaults to all non-ignored files.
+- MUST limit the run to the files given in `--files <path>...`, relative to each package; it defaults to all files that are neither ignored nor excluded.
+- MUST skip, with `--files`, a listed file that the `exclude` of its package matches, without an error, and MUST NOT select a package for such a file alone.
 - MUST run a `per-package` script, with `--files`, only in the packages that contain a listed file, unioned with any `--package` named.
 - MUST run a `project` script exactly once, whatever `--files` selects.
 - MUST error when a file given to `--files` does not exist in any package.

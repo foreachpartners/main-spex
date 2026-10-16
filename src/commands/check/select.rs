@@ -30,14 +30,14 @@ pub(super) fn select_packages<'a>(
         }
     }
 
-    Ok(spex
-        .packages
-        .iter()
-        .filter(|package| {
-            names
-                .iter()
-                .any(|name| package.matches_any_package_name(name))
-                || !ScopedFile::provided(&package.path, files).is_empty()
-        })
-        .collect())
+    let mut selected = Vec::new();
+    for package in &spex.packages {
+        let is_named = names
+            .iter()
+            .any(|name| package.matches_any_package_name(name));
+        if is_named || !ScopedFile::provided_not_excluded(package, files)?.is_empty() {
+            selected.push(package);
+        }
+    }
+    Ok(selected)
 }

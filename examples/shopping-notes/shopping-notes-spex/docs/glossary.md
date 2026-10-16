@@ -116,7 +116,15 @@
   frontend
   ```
 
-- **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the coverage waivers and the pre-existing error baseline concerning that package, merged by spex into the same fields of that package's entry in `spex.yaml`, so they apply to that package only.
+- **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the excluded files, the coverage waivers and the pre-existing error baseline concerning that package, merged by spex into the same fields of that package's entry in `spex.yaml`, so they apply to that package only.
+
+- **Exclude** (`exclude`) — glob patterns, in a package's entry in `spex.yaml` or in its `spex.package.yaml`, naming the files or folders that `spex check` and `spex coverage` leave out of that package. They are the same globs a check's `include` and `exclude` use, matched against paths relative to the package root.
+
+  ```yaml
+  exclude:
+    - vendor
+    - "**/*.generated.ts"
+  ```
 
 - **AI coding agent** (AI agent, agent) — the tool a person picks to do the work: an autonomous assistant that reads, runs, and edits code on their behalf. Hosted inside an editor (Zed, VS Code, Cursor) or run from the terminal (Claude Code, Codex).
 

@@ -139,6 +139,132 @@ fn check_honors_a_package_spex_repo_yaml_baseline_for_its_own_files_only() {
     assert_eq!(check.status.code(), Some(1), "{report}");
 }
 
+fn exclude_in_api_package_entry(project: &Path, patterns: &str) {
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let patched = config.replace(
+        "    rules:\n      - no-todo-comments\n",
+        &format!("    rules:\n      - no-todo-comments\n    exclude:\n{patterns}"),
+    );
+    assert_ne!(patched, config, "api package not found in spex.yaml");
+    fs::write(&spex_yaml, patched).expect("write spex.yaml");
+}
+
+#[test]
+fn check_skips_the_files_a_spex_yaml_package_exclude_matches() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    exclude_in_api_package_entry(&project, "      - src/todo.rs\n");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        !report.contains(TODO_FILE),
+        "excluded file still reported\n{report}"
+    );
+    assert!(
+        report.contains(OTHER_TODO_FILE),
+        "file outside the exclude hidden\n{report}"
+    );
+    assert_eq!(check.status.code(), Some(1), "{report}");
+}
+
+#[test]
+fn check_skips_the_folders_and_files_a_package_spex_package_yaml_excludes() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    write_api_package_config(&project, "exclude:\n  - src\n");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        check.status.success(),
+        "everything under the excluded folder should be skipped (exit {:?})\n{report}",
+        check.status.code()
+    );
+    assert!(report.contains("0 errors"), "{report}");
+}
+
+#[test]
+fn check_unions_the_exclude_of_the_spex_yaml_entry_and_the_package_spex_package_yaml() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    exclude_in_api_package_entry(&project, "      - src/todo.rs\n");
+    write_api_package_config(&project, "exclude:\n  - src/other_todo.rs\n");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        check.status.success(),
+        "both excludes should apply (exit {:?})\n{report}",
+        check.status.code()
+    );
+}
+
+#[test]
+fn check_does_not_apply_the_exclude_of_one_package_to_another() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    fs::write(
+        project.join("dummy-project-frontend/spex.package.yaml"),
+        "exclude:\n  - src\n",
+    )
+    .expect("write frontend spex.package.yaml");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        report.contains(TODO_FILE) && report.contains(OTHER_TODO_FILE),
+        "a frontend exclude hid api findings\n{report}"
+    );
+}
+
+#[test]
+fn check_with_files_skips_a_listed_file_its_package_excludes_without_an_error() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    write_api_package_config(&project, "exclude:\n  - src/todo.rs\n");
+
+    let check = run_spex(&project, &["check", "--files", TODO_FILE], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        check.status.success(),
+        "an excluded listed file should be skipped, not fail (exit {:?})\n{report}",
+        check.status.code()
+    );
+    assert!(!report.contains(TODO_FILE), "{report}");
+}
+
+#[test]
+fn check_with_files_still_checks_a_listed_file_its_package_does_not_exclude() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    write_api_package_config(&project, "exclude:\n  - src/todo.rs\n");
+
+    let check = run_spex(
+        &project,
+        &["check", "--files", TODO_FILE, OTHER_TODO_FILE],
+        "",
+    );
+
+    let report = report_text(&check.stdout);
+    assert!(
+        !report.contains(TODO_FILE) && report.contains(OTHER_TODO_FILE),
+        "{report}"
+    );
+    assert_eq!(check.status.code(), Some(1), "{report}");
+}
+
+#[test]
+fn check_fails_naming_the_package_on_an_exclude_that_is_not_a_valid_glob() {
+    let (_temp_dir, project) = project_with_todo_errors();
+    write_api_package_config(&project, "exclude:\n  - \"src/{a,b\"\n");
+
+    let check = run_spex(&project, &["check"], "");
+
+    assert_fails_mentioning(&check, "invalid `exclude` of package `dummy-project-api`");
+    assert_fails_mentioning(&check, "src/{a,b");
+}
+
 #[test]
 fn check_merges_the_spex_yaml_baseline_with_the_package_spex_repo_yaml() {
     let (_temp_dir, project) = project_with_todo_errors();

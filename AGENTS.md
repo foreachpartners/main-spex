@@ -49,18 +49,19 @@ src/                CLI source
   config/           Configuration topic (mod.rs is an index only)
     layout.rs       Layout (multi-repo, single-repo, monorepo): its spex dir name, agent root and choices
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)
-    package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (coverage_ignore, check_ignore), loaded 1 to 1
+    package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (exclude, coverage_ignore, check_ignore), loaded 1 to 1
     spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, check_ignore blocks)
     package_yaml_edit.rs  Text edit to spex.package.yaml that keeps comments and field order (check_ignore block)
-    package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths and its own check_ignore and coverage_ignore
+    package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths, its own exclude (compiled to the matcher the file walk uses), check_ignore and coverage_ignore
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages), with each package's spex.package.yaml merged into its own package on discovery, spec (attaching each package's coverage_ignore to the spec under the package's short name, by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
     ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, path normalizing, relative paths, file URLs, embedded dir extraction, symlinks, exec bits)
+    glob.rs         Glob set building from patterns (shared by a check's include and exclude and by a package's exclude)
     managed_section.rs  The `# Project` marker split of AGENTS.md and skills: replacing the managed section, keeping existing content below the marker (shared by init and update)
-    package_files.rs   Iterator over a package's files (gitignore, dotfiles, skipped names)
+    package_files.rs   Iterator over a package's files (gitignore, dotfiles, skipped names, the package's exclude) and the Exclude matcher
     style.rs        Terminal hyperlinks, version line, dim/red styles, terminal width and visible-width measuring (shared by commands)
     testing.rs      Shared unit-test builders for specs, rules, packages and config (test builds only)
     text.rs         Text helpers (word wrapping, pluralize, markdown level two sections)

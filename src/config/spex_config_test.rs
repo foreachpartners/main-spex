@@ -189,6 +189,35 @@ mod tests {
     }
 
     #[test]
+    fn parses_a_package_exclude_and_keeps_an_absent_one_as_an_empty_list() {
+        let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
+            project_name: demo
+            cli_version: 0.0.0
+            layout: multi-repo
+            agent_root: .
+            packages:
+              - package_name: demo-api
+                package_short_name: api
+                path: ../demo-api
+                exclude:
+                  - vendor
+                  - \"**/*.generated.ts\"
+              - package_name: demo-web
+                package_short_name: web
+                path: ../demo-web
+        "})
+        .expect("parse config");
+
+        let json = serde_json::to_value(&config).expect("serialize");
+
+        assert_eq!(
+            json["packages"][0]["exclude"],
+            serde_json::json!(["vendor", "**/*.generated.ts"])
+        );
+        assert_eq!(json["packages"][1]["exclude"], serde_json::json!([]));
+    }
+
+    #[test]
     fn rejects_a_config_without_a_layout() {
         let parsed = serde_yaml_ng::from_str::<SpexConfig>(indoc! {"
             project_name: demo

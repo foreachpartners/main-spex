@@ -44,6 +44,8 @@ pub struct PackageEntry {
     #[serde(default)]
     pub rules: Vec<RuleId>,
     #[serde(default)]
+    pub exclude: Vec<String>,
+    #[serde(default)]
     pub check_ignore: Vec<PreexistingError>,
     #[serde(default)]
     pub coverage_ignore: Vec<SpecCoverageIgnore>,

@@ -1,6 +1,5 @@
-use globset::{Glob, GlobSet, GlobSetBuilder};
-
 use crate::rule::Check;
+use crate::support::glob::build_globset;
 
 use super::finding::{Finding, Location, Source};
 use super::scoped_file::ScopedFile;
@@ -111,17 +110,4 @@ pub(super) fn scope_files<'a>(
             true
         })
         .collect())
-}
-
-pub(super) fn build_globset(
-    patterns: &[String],
-) -> core::result::Result<Option<GlobSet>, globset::Error> {
-    if patterns.is_empty() {
-        return Ok(None);
-    }
-    let mut builder = GlobSetBuilder::new();
-    for pattern in patterns {
-        builder.add(Glob::new(pattern)?);
-    }
-    Ok(Some(builder.build()?))
 }

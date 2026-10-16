@@ -1,7 +1,11 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
+use globset::GlobSet;
 use ignore::{Walk, WalkBuilder};
+
+use super::glob::build_globset;
+use crate::error;
 
 #[cfg(test)]
 #[path = "package_files_test.rs"]
@@ -24,10 +28,33 @@ const SKIPPED_NAMES: &[&str] = &[
     "yarn.lock",
 ];
 
+#[derive(Clone, Debug)]
+pub struct Exclude {
+    package_path: PathBuf,
+    globs: Option<GlobSet>,
+}
+
+impl Exclude {
+    pub fn new(package_path: &Path, patterns: &[String]) -> error::Result<Self> {
+        Ok(Self {
+            package_path: package_path.to_path_buf(),
+            globs: build_globset(patterns)?,
+        })
+    }
+
+    pub fn matches(&self, path: &Path) -> bool {
+        let relative = path.strip_prefix(&self.package_path).unwrap_or(path);
+        self.globs
+            .as_ref()
+            .is_some_and(|globs| globs.is_match(relative))
+    }
+}
+
 pub struct PackageFiles(Walk);
 
 impl PackageFiles {
-    pub fn new(root: &Path) -> Self {
+    pub fn new(root: &Path, exclude: &Exclude) -> Self {
+        let exclude = exclude.clone();
         Self(
             WalkBuilder::new(root)
                 .hidden(false)
@@ -35,7 +62,9 @@ impl PackageFiles {
                 .git_global(true)
                 .require_git(false)
                 .sort_by_file_name(|left, right| left.cmp(right))
-                .filter_entry(|entry| !is_skipped(entry.file_name()))
+                .filter_entry(move |entry| {
+                    !is_skipped(entry.file_name()) && !exclude.matches(entry.path())
+                })
                 .build(),
         )
     }

@@ -27,6 +27,7 @@ const EXPECTED_INFO: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
+      "exclude": [],
       "check_ignore": [],
       "coverage_ignore": []
     },
@@ -36,6 +37,7 @@ const EXPECTED_INFO: &str = r#"{
       "path": {frontend_dir},
       "contracts": [],
       "rules": [],
+      "exclude": [],
       "check_ignore": [],
       "coverage_ignore": []
     },
@@ -45,6 +47,7 @@ const EXPECTED_INFO: &str = r#"{
       "path": {spex_dir},
       "contracts": [],
       "rules": [],
+      "exclude": [],
       "check_ignore": [],
       "coverage_ignore": []
     }
@@ -88,6 +91,7 @@ const EXPECTED_INFO_API: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
+      "exclude": [],
       "check_ignore": [],
       "coverage_ignore": []
     }
@@ -159,7 +163,7 @@ fn info_package_filters_only_the_packages_list() {
 fn write_api_package_config(project: &Path) {
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),
-        "coverage_ignore:\n  - spec_id: place-order\n    layer: impl\ncheck_ignore:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
+        "exclude:\n  - vendor\ncoverage_ignore:\n  - spec_id: place-order\n    layer: impl\ncheck_ignore:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
     )
     .expect("write package config");
 }
@@ -187,6 +191,11 @@ fn info_merges_every_package_config_into_its_own_package() {
             { "rule_id": "writing-style", "check": "no-cyrillic", "files": ["README.md"] }
         ]),
     );
+    assert_eq!(
+        info["packages"][0]["exclude"],
+        serde_json::json!(["vendor"])
+    );
+    assert_eq!(info["packages"][1]["exclude"], serde_json::json!([]));
     assert_eq!(info["packages"][1]["check_ignore"], serde_json::json!([]));
     assert_eq!(
         info["packages"][1]["coverage_ignore"],
@@ -202,12 +211,17 @@ fn info_unions_a_package_entry_with_its_package_file() {
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
     let patched = config.replace(
         "    rules:\n      - no-todo-comments\n",
-        "    rules:\n      - no-todo-comments\n    coverage_ignore:\n      - spec_id: list-menu\n        layer: test\n",
+        "    rules:\n      - no-todo-comments\n    exclude:\n      - build\n    coverage_ignore:\n      - spec_id: list-menu\n        layer: test\n",
     );
     assert_ne!(patched, config, "api package not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
 
     let info = info_json(&run_spex(&project, &["info"], "").stdout);
+
+    assert_eq!(
+        info["packages"][0]["exclude"],
+        serde_json::json!(["build", "vendor"]),
+    );
 
     assert_eq!(
         info["packages"][0]["coverage_ignore"],

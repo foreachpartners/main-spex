@@ -155,4 +155,121 @@ mod tests {
             CoverageLayer::Test
         ));
     }
+
+    fn single_package_spex(
+        spex_dir: std::path::PathBuf,
+        package_entry: &str,
+    ) -> crate::config::spex::Spex {
+        let config: crate::config::SpexConfig = serde_yaml_ng::from_str(&format!(
+            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\npackages:\n{package_entry}"
+        ))
+        .expect("parse config");
+        crate::config::spex::Spex::from_config(spex_dir, config)
+    }
+
+    #[test]
+    fn scan_project_skips_files_and_folders_a_package_excludes() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path().join("spex");
+        std::fs::create_dir_all(&spex_dir).expect("spex dir");
+        for (file, annotation) in [
+            ("src/lib.rs", "// @spec impl kept#kept-ac\n"),
+            ("vendor/dep.rs", "// @spec impl folder#folder-ac\n"),
+            ("src/api.generated.ts", "// @spec impl glob#glob-ac\n"),
+        ] {
+            let path = dir.path().join(file);
+            std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
+            std::fs::write(path, annotation).expect("write source");
+        }
+
+        let spex = single_package_spex(
+            spex_dir,
+            "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    exclude:\n      - vendor\n      - \"**/*.generated.ts\"\n",
+        );
+        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+
+        for (spec, ac, expected) in [
+            ("kept", "kept-ac", true),
+            ("folder", "folder-ac", false),
+            ("glob", "glob-ac", false),
+        ] {
+            assert_eq!(
+                index.has_ac(
+                    &testing::spec_id(spec),
+                    &testing::ac_id(ac),
+                    CoverageLayer::Impl
+                ),
+                expected,
+                "{spec}"
+            );
+        }
+    }
+
+    #[test]
+    fn scan_project_still_reads_a_contract_file_the_package_excludes() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path().join("spex");
+        std::fs::create_dir_all(&spex_dir).expect("spex dir");
+        std::fs::create_dir_all(dir.path().join("contracts")).expect("contracts dir");
+        std::fs::write(
+            dir.path().join("contracts/api.openapi.yaml"),
+            "      x-spec: \"@spec contract a\"\n",
+        )
+        .expect("write contract");
+
+        let spex = single_package_spex(
+            spex_dir,
+            "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    contracts:\n      - path: ../contracts/api.openapi.yaml\n        description: REST API\n    exclude:\n      - contracts\n",
+        );
+        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+
+        assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
+    }
+
+    #[test]
+    fn scan_project_does_not_apply_the_exclude_of_one_package_to_another() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path().join("spex");
+        std::fs::create_dir_all(&spex_dir).expect("spex dir");
+        for package in ["api", "web"] {
+            let path = dir.path().join(package).join("vendor/dep.rs");
+            std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
+            std::fs::write(path, format!("// @spec impl {package}#vendored-ac\n"))
+                .expect("write source");
+        }
+
+        let spex = single_package_spex(
+            spex_dir,
+            "  - package_name: demo-api\n    package_short_name: api\n    path: ../api\n    exclude: [vendor]\n  - package_name: demo-web\n    package_short_name: web\n    path: ../web\n",
+        );
+        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+
+        assert!(!index.has_ac(
+            &testing::spec_id("api"),
+            &testing::ac_id("vendored-ac"),
+            CoverageLayer::Impl
+        ));
+        assert!(index.has_ac(
+            &testing::spec_id("web"),
+            &testing::ac_id("vendored-ac"),
+            CoverageLayer::Impl
+        ));
+    }
+
+    #[test]
+    fn scan_project_fails_naming_the_package_when_an_exclude_is_not_a_valid_glob() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let spex_dir = dir.path().join("spex");
+        std::fs::create_dir_all(&spex_dir).expect("spex dir");
+
+        let spex = single_package_spex(
+            spex_dir,
+            "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    exclude: [\"src/{a,b\"]\n",
+        );
+        let error = AnnotationIndex::scan_project(&spex).expect_err("invalid exclude");
+
+        let message = crate::error::describe(&error);
+        assert!(message.contains("`demo`"), "{message}");
+        assert!(message.contains("src/{a,b"), "{message}");
+    }
 }

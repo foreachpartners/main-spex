@@ -71,6 +71,7 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
 
 fn merged_package(mut json: Value, package: &Package) -> Result<Value> {
     json["path"] = Value::String(canonical(&package.path).to_string_lossy().into_owned());
+    json["exclude"] = to_json(&package.exclude)?;
     json["check_ignore"] = to_json(&package.check_ignore)?;
     json["coverage_ignore"] = to_json(&package.coverage_ignore)?;
     Ok(json)

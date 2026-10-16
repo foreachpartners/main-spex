@@ -324,6 +324,85 @@ fn coverage_merges_coverage_ignore_from_the_spex_yaml_entry_and_the_spex_package
 }
 
 #[test]
+fn coverage_skips_annotations_in_the_files_a_spex_yaml_package_exclude_matches() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    let before = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(!before.contains("active-full-coverage"), "{before}");
+
+    waive_in_package_entry(&project, API_ENTRY_END, "\nexclude:\n  - src/lib.rs\n");
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    let report = report_text(&coverage.stdout);
+    assert!(
+        report.contains("active-full-coverage"),
+        "the spec traced only from the excluded file should now have a gap\n{report}"
+    );
+    assert_eq!(coverage.status.code(), Some(1), "{report}");
+}
+
+#[test]
+fn coverage_skips_annotations_in_the_folders_a_package_spex_package_yaml_excludes() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/spex.package.yaml"),
+        "exclude:\n  - src\n",
+    )
+    .expect("write spex.package.yaml");
+
+    let report = report_text(&run_spex(&project, &["coverage"], "").stdout);
+
+    assert!(report.contains("active-full-coverage"), "{report}");
+}
+
+#[test]
+fn coverage_does_not_apply_the_exclude_of_one_package_to_another() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    let before = report_text(&run_spex(&project, &["coverage"], "").stdout);
+    assert!(before.contains("in-progress-pending  1/2 AC"), "{before}");
+    fs::write(
+        project.join("dummy-project-frontend/spex.package.yaml"),
+        "exclude:\n  - src\n",
+    )
+    .expect("write spex.package.yaml");
+
+    let report = report_text(&run_spex(&project, &["coverage"], "").stdout);
+
+    assert!(
+        report.contains("in-progress-pending  0/2 AC"),
+        "the frontend exclude should drop its own annotations\n{report}"
+    );
+    assert!(
+        !report.contains("active-full-coverage"),
+        "the frontend exclude should not hide the api annotations\n{report}"
+    );
+}
+
+#[test]
+fn coverage_fails_naming_the_package_on_an_exclude_that_is_not_a_valid_glob() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    common::copy_project(&dummy_project_fixture(), &project);
+    fs::write(
+        project.join("dummy-project-api/spex.package.yaml"),
+        "exclude:\n  - \"src/{a,b\"\n",
+    )
+    .expect("write spex.package.yaml");
+
+    let coverage = run_spex(&project, &["coverage"], "");
+
+    assert_fails_mentioning(
+        &coverage,
+        "invalid `exclude` of package `dummy-project-api`",
+    );
+}
+
+#[test]
 fn coverage_ignores_a_package_waiver_of_a_package_the_spec_does_not_list() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
