@@ -94,7 +94,7 @@ Say you want to add a rule to ensure we don't commit sensitive information. Here
 - **Specs over Guesswork**: clear, well-defined specs eliminate guesswork, giving explicit acceptance criteria for the AI to follow and the developer to verify.
 - **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules, proven by automated checks, instead of living as tribal knowledge.
 - **Skills over Ad Hoc Prompting**: each workflow step is a written, repeatable skill instead of an improvised prompt, loaded progressively to keep the context small.
-- **Human Approval over Vibe Coding**: the AI writes everything and the human decides, approving each artifact before the next is generated.
+- **Focused Human Review over Vibe Coding**: the AI writes everything and every change passes layers of validation, so the human focuses on reviewing and approving specs, contracts, and important changes.
 - **Deterministic Checks over Judgment**: every check that can be a script must be a script, proving the change does what the spec demands and nothing else broke.
 - **Traceability over Assumption**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back — so related parts are found fast and no acceptance criterion is forgotten.
 
