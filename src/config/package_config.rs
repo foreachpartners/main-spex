@@ -19,7 +19,7 @@ pub struct PackageConfig {
     #[serde(default)]
     pub coverage_ignore: Vec<SpecCoverageIgnore>,
     #[serde(default)]
-    pub ignored_errors: Vec<PreexistingError>,
+    pub check_ignore: Vec<PreexistingError>,
 }
 
 impl PackageConfig {

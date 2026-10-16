@@ -4,6 +4,15 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.24.0
+
+The baseline of pre-existing errors, `ignored_errors`, is now `check_ignore`, like `coverage_ignore` for `spex coverage`. Each entry keeps its `rule_id`, `check` and `files`. Until it is renamed, `spex.yaml` and every `spex.package.yaml` fail schema validation. In `<spex-dir>`:
+
+- In `spex.yaml`, rename every `ignored_errors` key, in the package entries, to `check_ignore`, keeping each entry and its position.
+- In every package that has a `spex.package.yaml`, rename its root `ignored_errors` key to `check_ignore`.
+- In every CI job, script, skill, or doc of the project that reads the `ignored_errors` key of `spex info` output, read `check_ignore` instead.
+- Wherever your own text (`AGENTS.md` below the managed section, specs, rules, skills, docs) mentions `ignored_errors`, say `check_ignore`.
+
 ## 0.23.0
 
 `.claude` is no longer a symlink to `.agents`: it is a real directory that keeps its own files, such as `settings.json`, and only `.claude/skills` is a symlink to `../.agents/skills`. A project made by an earlier version has the whole `.claude` linked to `.agents`, so Claude Code's own files were written into `.agents`. In `<agent-root>`:

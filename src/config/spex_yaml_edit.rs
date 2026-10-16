@@ -45,7 +45,7 @@ pub fn set_preexisting_errors(
             continue;
         }
 
-        if in_scope && indent == 4 && trimmed.starts_with("ignored_errors:") {
+        if in_scope && indent == 4 && trimmed.starts_with("check_ignore:") {
             i += 1;
             while i < lines.len() && indent_of(lines[i]) > 4 {
                 i += 1;
@@ -65,7 +65,7 @@ pub fn set_preexisting_errors(
 }
 
 fn render_preexisting_block(entries: &[PreexistingError]) -> String {
-    let mut block = String::from("    ignored_errors:\n");
+    let mut block = String::from("    check_ignore:\n");
     for entry in entries {
         block.push_str(&format!("      - rule_id: {}\n", entry.rule_id));
         block.push_str(&format!("        check: {}\n", entry.check));

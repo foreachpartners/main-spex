@@ -13,7 +13,7 @@ mod tests {
         let config = PackageConfig::load(package.path()).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
-        assert!(config.ignored_errors.is_empty());
+        assert!(config.check_ignore.is_empty());
     }
 
     #[test]
@@ -21,11 +21,11 @@ mod tests {
         let config = PackageConfig::load(Path::new("/no/such/package")).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
-        assert!(config.ignored_errors.is_empty());
+        assert!(config.check_ignore.is_empty());
     }
 
     #[test]
-    fn load_reads_coverage_ignore_and_ignored_errors() {
+    fn load_reads_coverage_ignore_and_check_ignore() {
         let package = tempdir().expect("package dir");
         fs::write(
             package.path().join(PACKAGE_CONFIG_FILE),
@@ -36,7 +36,7 @@ mod tests {
                   - spec_id: place-order
                     layer: impl
                     ac: rejects-empty-cart
-                ignored_errors:
+                check_ignore:
                   - rule_id: writing-style
                     check: no-cyrillic
                     files: [README.md]
@@ -61,9 +61,9 @@ mod tests {
                 .map(|ac| ac.as_str()),
             Some("rejects-empty-cart")
         );
-        assert_eq!(config.ignored_errors.len(), 1);
-        assert_eq!(config.ignored_errors[0].rule_id, "writing-style");
-        assert_eq!(config.ignored_errors[0].files, vec!["README.md"]);
+        assert_eq!(config.check_ignore.len(), 1);
+        assert_eq!(config.check_ignore[0].rule_id, "writing-style");
+        assert_eq!(config.check_ignore[0].files, vec!["README.md"]);
     }
 
     #[test]
@@ -78,7 +78,7 @@ mod tests {
         let config = PackageConfig::load(package.path()).expect("load");
 
         assert!(config.coverage_ignore.is_empty());
-        assert!(config.ignored_errors.is_empty());
+        assert!(config.check_ignore.is_empty());
     }
 
     #[test]

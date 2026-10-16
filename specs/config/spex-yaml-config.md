@@ -13,7 +13,7 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 - MUST declare `coverage_ignore` as one `{spec_id, layer, ac}` entry per waiver, with `spec_id` and `layer` required and `ac` optional; `layer` and `ac` mean what they do in a [spec's `coverage_ignore`](../spec/spec-file-spec.md).
 - MUST validate `spex.yaml` against `schemas/spex.schema.json`.
 - MAY declare the root fields `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), `packages`, and `coverage_ignore`.
-- MAY declare, in each package entry, a `description`, a `contracts` list, a `rules` list, and an `ignored_errors` baseline.
+- MAY declare, in each package entry, a `description`, a `contracts` list, a `rules` list, and a `check_ignore` baseline.
 
 ## Examples
 
@@ -21,7 +21,7 @@ The full config of the `shopping-notes` example project:
 
 ```yaml
 project_name: shopping-notes
-cli_version: 0.23.4
+cli_version: 0.24.0
 layout: multi-repo
 agent_root: .
 description: >-

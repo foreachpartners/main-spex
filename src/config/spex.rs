@@ -58,7 +58,7 @@ impl Spex {
         for package in &mut self.packages {
             let package_config = PackageConfig::load(&package.path)?;
             self.coverage_ignore.extend(package_config.coverage_ignore);
-            package.ignored_errors.extend(package_config.ignored_errors);
+            package.check_ignore.extend(package_config.check_ignore);
         }
         Ok(self)
     }

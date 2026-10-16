@@ -23,8 +23,8 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run a `project` script exactly once, whatever `--files` selects.
 - MUST error when a file given to `--files` does not exist in any package.
 - MUST skip negated `regexp`, `glob`, and `ast-grep` checks with `--files`, because a negated check needs the full file set to prove a forbidden pattern is absent; a subset would only produce false positives.
-- MUST record, with `--fill-preexisting-errors`, the current `error`-severity findings as an `ignored_errors` baseline in `spex.yaml`, then exit without gating, so a check can be adopted on a package that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
-- MUST run, with `--fill-preexisting-errors`, every selected package's checks, group the resulting `error` findings by check and file, and write one `ignored_errors` entry per check into that package's block.
+- MUST record, with `--fill-preexisting-errors`, the current `error`-severity findings as a `check_ignore` baseline in `spex.yaml`, then exit without gating, so a check can be adopted on a package that already has violations: existing errors are baselined so they stop failing the run, while any new error still does.
+- MUST run, with `--fill-preexisting-errors`, every selected package's checks, group the resulting `error` findings by check and file, and write one `check_ignore` entry per check into that package's block.
 - MUST baseline, with `--fill-preexisting-errors`, a finding tied to a file for that file, and a file-less error (e.g. a per-package script that inspects git history) as a whole-check entry that omits `files`.
 - MUST regenerate, with `--fill-preexisting-errors`, each selected package's baseline from the current findings, dropping entries whose errors are gone, while the rest of `spex.yaml` and any unselected package stay byte-stable.
 - MUST read and write only `spex.yaml` with `--fill-preexisting-errors`.
@@ -47,10 +47,10 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 
 ### Baselines
 
-- MUST let a package baseline pre-existing `error`-severity findings with `ignored_errors`, so a check can be enforced going forward without first fixing every existing violation.
-- MUST name the check in each `ignored_errors` entry by `rule_id` + `check`.
+- MUST let a package baseline pre-existing `error`-severity findings with `check_ignore`, so a check can be enforced going forward without first fixing every existing violation.
+- MUST name the check in each `check_ignore` entry by `rule_id` + `check`.
 - MUST drop an `error` finding from that check when its location file is listed in `files`, or always when `files` is omitted.
-- MUST merge the `ignored_errors` of a package's own [`spex.package.yaml`](../config/spex-package-yaml-config.md) with its `ignored_errors` in `spex.yaml`, so an error is dropped when either lists it; the entries there are the same, without the surrounding `packages` block.
+- MUST merge the `check_ignore` of a package's own [`spex.package.yaml`](../config/spex-package-yaml-config.md) with its `check_ignore` in `spex.yaml`, so an error is dropped when either lists it; the entries there are the same, without the surrounding `packages` block.
 - MUST NOT drop new errors in other files.
 - MUST NOT affect `warn`-severity findings with a baseline.
 
@@ -85,7 +85,7 @@ packages:
     package_short_name: frontend
     path: ../shopping-notes-frontend
     rules: [writing-style]
-    ignored_errors:
+    check_ignore:
       - rule_id: writing-style
         check: no-cyrillic
         files: [README.md, docs/intro.md]
@@ -94,7 +94,7 @@ packages:
 or in its own `spex.package.yaml`:
 
 ```yaml
-ignored_errors:
+check_ignore:
   - rule_id: writing-style
     check: no-cyrillic
     files: [README.md, docs/intro.md]

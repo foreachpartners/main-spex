@@ -15,7 +15,7 @@ pub struct Package {
     pub path: PathBuf,
     pub contracts: Vec<PathBuf>,
     pub rules: Vec<RuleId>,
-    pub ignored_errors: Vec<PreexistingError>,
+    pub check_ignore: Vec<PreexistingError>,
     pub is_spex_dir: bool,
 }
 
@@ -33,7 +33,7 @@ impl Package {
                 .map(|contract| spex_dir.join(contract.path))
                 .collect(),
             rules: config.rules,
-            ignored_errors: config.ignored_errors,
+            check_ignore: config.check_ignore,
         }
     }
 

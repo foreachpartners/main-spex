@@ -92,7 +92,7 @@
             "$ref": "rule-id.schema.json"
           }
         },
-        "ignored_errors": {
+        "check_ignore": {
           "type": "array",
           "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, so a check can be enforced going forward without first fixing every existing violation. Each entry names the check by `rule_id` + `check`; an `error` finding from that check is dropped when its location file is listed in `files` (or always, when `files` is omitted or empty). New errors in other files still surface, and `warn`-severity findings are never affected.",
           "items": {

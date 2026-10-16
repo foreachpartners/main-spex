@@ -49,8 +49,8 @@ src/                CLI source
   config/           Configuration topic (mod.rs is an index only)
     layout.rs       Layout (multi-repo, single-repo, monorepo): its spex dir name, agent root and choices
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)
-    package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (coverage_ignore, ignored_errors), loaded 1 to 1
-    spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, ignored_errors blocks)
+    package_config.rs  PackageConfig, the raw optional spex.package.yaml at a package root (coverage_ignore, check_ignore), loaded 1 to 1
+    spex_yaml_edit.rs  Text edits to spex.yaml that keep comments and field order (cli_version, check_ignore blocks)
     package.rs      Package model built from PackageEntry (the entry in spex.yaml), with absolute package and contract paths
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages, coverage_ignore), with each package's spex.package.yaml merged in on discovery, spec (adding the coverage_ignore by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers

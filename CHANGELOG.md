@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.24.0] - 2026-10-16
+
+- **Breaking**: `ignored_errors`, the baseline of pre-existing errors in a package entry of `spex.yaml` and in `spex.package.yaml`, is now `check_ignore`, named after `spex check` the way `coverage_ignore` is named after `spex coverage`. `spex check --fill-preexisting-errors` writes `check_ignore`, `spex info` reports it under that key, and `schemas/spex.schema.json` and `schemas/spex.package.schema.json` follow. Until the key is renamed, `spex.yaml` and `spex.package.yaml` fail schema validation. See the migration guide.
+
 ## [0.23.4] - 2026-10-15
 
 - `spex coverage` lists every `in-progress` spec under its status group, marked `✗` when it has a gap and `●` otherwise, where before only specs with pending work and no gap were listed. Each shows the criteria not implemented yet as `in-progress: impl(<ac-id>, ...)`; the test and contract entries that used to follow are dropped, and a spec with no impl left to name shows no such line. "Gaps" no longer repeats that line and shows only what is missing. With `--verbose`, each `in-progress` spec shows its description and the text of the criteria not implemented yet. No migration steps.

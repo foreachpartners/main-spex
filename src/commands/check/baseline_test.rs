@@ -22,9 +22,9 @@ mod tests {
         }
     }
 
-    fn package_at(path: &str, ignored_errors: Vec<PreexistingError>) -> Package {
+    fn package_at(path: &str, check_ignore: Vec<PreexistingError>) -> Package {
         Package {
-            ignored_errors,
+            check_ignore,
             is_spex_dir: path == ".",
             ..testing::package(path, path)
         }

@@ -144,7 +144,7 @@ mod tests {
                 coverage_ignore:
                   - spec_id: from-api
                     layer: impl
-                ignored_errors:
+                check_ignore:
                   - rule_id: writing-style
                     check: no-cyrillic
                     files: [api.md]
@@ -158,7 +158,7 @@ mod tests {
         .expect("write web config");
         let mut api_package = testing::package("api", "api");
         api_package.path = api;
-        api_package.ignored_errors = serde_yaml_ng::from_str(indoc! {"
+        api_package.check_ignore = serde_yaml_ng::from_str(indoc! {"
             - rule_id: writing-style
               check: no-todo
         "})
@@ -185,7 +185,7 @@ mod tests {
                 .iter()
                 .find(|package| package.package_name == name)
                 .expect("package")
-                .ignored_errors
+                .check_ignore
                 .iter()
                 .map(|entry| entry.check.clone())
                 .collect()

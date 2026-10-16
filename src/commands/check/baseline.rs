@@ -74,7 +74,7 @@ fn is_baselined(finding: &Finding, owner: &Owner) -> bool {
             .source
             .baseline_key()
             .is_some_and(|(rule_id, check)| {
-                owner.package.ignored_errors.iter().any(|entry| {
+                owner.package.check_ignore.iter().any(|entry| {
                     entry.rule_id == rule_id
                         && entry.check == check
                         && (entry.files.is_empty()

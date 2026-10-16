@@ -27,7 +27,7 @@ const EXPECTED_INFO: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
-      "ignored_errors": []
+      "check_ignore": []
     },
     {
       "package_name": "dummy-project-frontend",
@@ -35,7 +35,7 @@ const EXPECTED_INFO: &str = r#"{
       "path": {frontend_dir},
       "contracts": [],
       "rules": [],
-      "ignored_errors": []
+      "check_ignore": []
     },
     {
       "package_name": "dummy-project-spex",
@@ -43,7 +43,7 @@ const EXPECTED_INFO: &str = r#"{
       "path": {spex_dir},
       "contracts": [],
       "rules": [],
-      "ignored_errors": []
+      "check_ignore": []
     }
   ],
   "coverage_ignore": []
@@ -86,7 +86,7 @@ const EXPECTED_INFO_API: &str = r#"{
       "rules": [
         "no-todo-comments"
       ],
-      "ignored_errors": []
+      "check_ignore": []
     }
   ],
   "coverage_ignore": []
@@ -157,7 +157,7 @@ fn info_package_filters_only_the_packages_list() {
 fn write_api_package_config(project: &Path) {
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),
-        "coverage_ignore:\n  - spec_id: place-order\n    layer: impl\nignored_errors:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
+        "coverage_ignore:\n  - spec_id: place-order\n    layer: impl\ncheck_ignore:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
     )
     .expect("write package config");
 }
@@ -180,12 +180,12 @@ fn info_merges_every_package_config_into_the_configuration() {
         serde_json::json!([{ "spec_id": "place-order", "layer": "impl" }]),
     );
     assert_eq!(
-        info["packages"][0]["ignored_errors"],
+        info["packages"][0]["check_ignore"],
         serde_json::json!([
             { "rule_id": "writing-style", "check": "no-cyrillic", "files": ["README.md"] }
         ]),
     );
-    assert_eq!(info["packages"][1]["ignored_errors"], serde_json::json!([]));
+    assert_eq!(info["packages"][1]["check_ignore"], serde_json::json!([]));
 }
 
 #[test]

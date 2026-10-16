@@ -46,7 +46,7 @@ pub struct PackageEntry {
     #[serde(default)]
     pub rules: Vec<RuleId>,
     #[serde(default)]
-    pub ignored_errors: Vec<PreexistingError>,
+    pub check_ignore: Vec<PreexistingError>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

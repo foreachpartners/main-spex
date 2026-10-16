@@ -17,7 +17,7 @@ const TODO_FILE: &str = "src/todo.rs";
 
 const OTHER_TODO_FILE: &str = "src/other_todo.rs";
 
-const BASELINE_TODO_FILE: &str = r#"ignored_errors:
+const BASELINE_TODO_FILE: &str = r#"check_ignore:
   - rule_id: no-todo-comments
     check: no-todo
     files: [src/todo.rs]
@@ -147,7 +147,7 @@ fn check_merges_the_spex_yaml_baseline_with_the_package_spex_repo_yaml() {
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
     let patched = config.replace(
         "    rules:\n      - no-todo-comments\n",
-        "    rules:\n      - no-todo-comments\n    ignored_errors:\n      - rule_id: no-todo-comments\n        check: no-todo\n        files: [src/other_todo.rs]\n",
+        "    rules:\n      - no-todo-comments\n    check_ignore:\n      - rule_id: no-todo-comments\n        check: no-todo\n        files: [src/other_todo.rs]\n",
     );
     assert_ne!(patched, config, "api package not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
@@ -185,7 +185,7 @@ fn check_accepts_a_valid_package_spex_repo_yaml() {
     copy_project(&dummy_project_fixture(), &project);
     write_api_package_config(
         &project,
-        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\nignored_errors:\n  - rule_id: no-todo-comments\n    check: no-todo\n",
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\ncheck_ignore:\n  - rule_id: no-todo-comments\n    check: no-todo\n",
     );
 
     let check = run_spex(&project, &["check"], "");
@@ -265,7 +265,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let patched = config.replace(
         "  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n",
-        "  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n    ignored_errors:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
+        "  - package_name: proj-frontend\n    package_short_name: frontend\n    path: ../proj-frontend\n    rules:\n      - writing-style\n    check_ignore:\n      - rule_id: writing-style\n        check: no-cyrillic\n        files: [README.md]\n",
     );
     assert_ne!(patched, config, "frontend package not found in spex.yaml");
     fs::write(&config_path, patched).expect("write spex.yaml");
@@ -309,7 +309,7 @@ fn fill_preexisting_errors_baselines_then_suppresses() {
 
     let config = fs::read_to_string(project.join("proj-spex/spex.yaml")).expect("read spex.yaml");
     assert!(
-        config.contains("ignored_errors:")
+        config.contains("check_ignore:")
             && config.contains("check: no-cyrillic")
             && config.contains("- README.md"),
         "baseline was not written into spex.yaml:\n{config}",

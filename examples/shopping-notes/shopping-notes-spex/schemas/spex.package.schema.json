@@ -13,9 +13,9 @@
       },
       "uniqueItems": true
     },
-    "ignored_errors": {
+    "check_ignore": {
       "type": "array",
-      "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, merged with the `ignored_errors` of this package's entry in `spex.yaml`. Files are relative to this package's root.",
+      "description": "Baseline of pre-existing `error`-severity findings to suppress for this package, merged with the `check_ignore` of this package's entry in `spex.yaml`. Files are relative to this package's root.",
       "items": {
         "$ref": "spex.schema.json#/$defs/ignored_error"
       }
@@ -31,7 +31,7 @@
           "ac": "no-null-typed-string"
         }
       ],
-      "ignored_errors": [
+      "check_ignore": [
         {
           "rule_id": "writing-style",
           "check": "no-cyrillic",

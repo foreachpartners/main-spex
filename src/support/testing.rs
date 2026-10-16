@@ -64,7 +64,7 @@ pub fn package(name: &str, path: &str) -> Package {
         path: spex_dir().join(path),
         contracts: Vec::new(),
         rules: Vec::new(),
-        ignored_errors: Vec::new(),
+        check_ignore: Vec::new(),
         is_spex_dir: false,
     }
 }

@@ -1,5 +1,5 @@
 project_name: shopping-notes
-cli_version: 0.23.4
+cli_version: 0.24.0
 layout: multi-repo
 agent_root: .
 description: >-

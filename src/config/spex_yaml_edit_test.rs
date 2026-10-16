@@ -94,7 +94,7 @@ mod tests {
                     path: ../api
                     rules:
                       - X
-                    ignored_errors:
+                    check_ignore:
                       - rule_id: X
                         check: no-cyrillic
                         files:
@@ -118,13 +118,13 @@ mod tests {
     path: ../web
     rules:
       - X
-    ignored_errors:
+    check_ignore:
       - rule_id: Y
         check: commit-format
 "
         ));
         assert!(!out.contains("check: commit-format\n  - package_name: web"));
-        assert_eq!(out.matches("ignored_errors:").count(), 1);
+        assert_eq!(out.matches("check_ignore:").count(), 1);
     }
 
     #[test]
@@ -134,7 +134,7 @@ mod tests {
             packages:
               - package_name: api
                 path: ../api
-                ignored_errors:
+                check_ignore:
                   - rule_id: X
                     check: stale
                     files:
@@ -152,7 +152,7 @@ mod tests {
             out.contains("check: no-cyrillic"),
             "new block missing:\n{out}"
         );
-        assert_eq!(out.matches("ignored_errors:").count(), 1);
+        assert_eq!(out.matches("check_ignore:").count(), 1);
     }
 
     #[test]
@@ -162,7 +162,7 @@ mod tests {
             packages:
               - package_name: api
                 path: ../api
-                ignored_errors:
+                check_ignore:
                   - rule_id: X
                     check: gone
         "};
