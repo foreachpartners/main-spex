@@ -1,8 +1,19 @@
 # 🦉 Main spex
 
-The AI-first development framework that turns specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
+The AI-first development framework that turns specifications into predictable code — keeping AI running at full speed while ensuring slop-free, verified results.
 
 _The name `spex` comes from a casual shorthand for specifications._
+
+## At a glance
+
+- **Specs, not guesses** — acceptance criteria tell the AI exactly what to build.
+- **Rules, enforced** — conventions are given to the agent as context and proven by `spex check`.
+- **Skills, not prompts** — each workflow step is a written instruction, so the process is the same every time and the output predictable.
+- **Coverage, proven** — every acceptance criterion is traced to its contract, code, and test, and `spex coverage` shows the gaps.
+- **Human review where it counts** — you approve specs and contracts; checks, tests, and agent reviews cover the rest.
+- **Tool-agnostic** — any AI model, coding agent, CLI, or IDE, and any language or framework.
+- **Simple by design** — plain files and a small set of commands, easy to understand and use with minimal docs.
+- **Easy to adopt** — start in minutes, on a new or existing codebase, one package and spec at a time, from solo projects to multi-team repos.
 
 ## Why spex
 
@@ -12,18 +23,100 @@ AI writes code fast, but fast is not the same as right: it can add changes nobod
 
 spex helps to produce slop-free, verifiable results fast, with minimal human intervention. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and reviews, tests, and deterministic checks prove the result.
 
-## Core Concepts
+## Typical workflow
 
-Main spex, or spex for short, is built on four simple pieces:
+### Feature
 
-- **Specs** define _what_ a feature does — a capability with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
-- **Rules** govern _how_ everything is built — cross-cutting conventions like style, security, or testing. Each package must adhere to a list of rules applicable to it.
-- **Skills** are the instructions an AI agent follows to do the job consistently and correctly.
-- **Traceability** is the thread that stitches together spec, contract, implementations, and tests — letting humans and agents find everything related to a spec at once, and ensuring full coverage so no acceptance criterion is forgotten.
+Adding shopping item creation to the backend of the [shopping-notes example](examples/shopping-notes/README.md):
 
-spex provides the core flow plus skills and rules you can extend, adapt, or replace for your project needs. Whatever you don't customize updates with each new version, bringing you the latest improvements contributed by the community.
+```text
+You: /spex-spec backend add shopping item endpoint
+AI:  Should an item with an empty name be rejected?
+You: Yes.
+AI:  Created shopping-notes-spex/specs/api-add-shopping-item.yaml
+     ✓ MUST create an item with the given `name` and `bought: false`
+     ✓ MUST assign each created item a unique `id`
+     ✓ MUST persist the created item so it survives an API restart
+     ✓ MUST NOT create an item when `name` is missing or empty
+     Ready for your review!
 
-The `spex` CLI runs and automates all of it. Specs, contracts, and checks are plain files and deterministic commands, so spex works with any AI model, AI coding agent, CLI, and IDE.
+You: /spex-contract api-add-shopping-item
+AI:  Updated shopping-notes-spex/contracts/api.openapi.yaml
+     ✓ POST /items (createItem) — 201 Item, 422 ValidationError
+     Ready for your review!
+
+You: /spex-implement api-add-shopping-item
+AI:  Read 1 spec and 7 rules for the api package.
+     ✓ POST /items handler in shopping-notes-api/src/app.ts
+     ✓ @spec impl annotations on all 4 acceptance criteria
+     Spec status: in-progress
+
+You: /spex-review api-add-shopping-item
+AI:  Rules: 0 findings. Specs: 0 findings.
+
+You: /spex-test api-add-shopping-item
+AI:  Added shopping-notes-api/src/app.test.ts
+     ✓ 4/4 acceptance criteria traced to contract, impl and test
+     Spec status: active
+```
+
+<details>
+<summary><strong>What do the specs actually look like?</strong></summary>
+
+Plain YAML — a title and acceptance criteria stating what the system MUST, MUST NOT, SHOULD or MAY do, no special syntax to learn. Here's the file created above:
+
+```yaml
+id: api-add-shopping-item
+title: Create a shopping item
+description: >-
+  Lets a client add an item to the shopping list so the user doesn't forget
+  to buy it.
+acceptance_criteria:
+  - id: create-item-with-name
+    must: "create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`"
+  - id: reject-empty-name
+    must_not: create an item when `name` is missing or empty
+packages:
+  - api
+status: active
+contract: single
+```
+
+Your AI writes these; you review the spec and the contract before any code is written. Every criterion is then traced to its contract, code, and test by `@spec` annotations, and `spex coverage` shows what is still missing.
+
+Tip: combine skills like `/spex-spec /spex-contract`, or run `/spex-assembly-line` to implement, review and fix in a loop, and then test.
+
+</details>
+
+Every artifact is traced back to its spec by the spec ID:
+
+```mermaid
+flowchart TD
+    PRD["PRD (optional) — why and what"] --> Func
+
+    subgraph Traced ["traced by spec ID"]
+        Func["Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
+        Contract --> Plan["Plan (optional) — how to build it"]
+        Plan --> Impl["Implementation — code"]
+        Impl --> Test["Test — proof"]
+    end
+```
+
+### Rule
+
+Adding a rule to ensure sensitive information is never committed:
+
+```text
+You: /spex-rule secret handling
+AI:  Created shopping-notes-spex/rules/secret-handling.yaml
+     ✓ MUST NOT hardcode secrets in source
+     ✓ MUST NOT log secrets
+     ✓ check no-secret-in-console-log
+     ✓ check no-backup-files
+     Ready for your review!
+```
+
+Rules live outside the feature flow — they govern how every artifact is built.
 
 ## Quickstart
 
@@ -62,92 +155,9 @@ Package directories follow `<project-name>-<package-short-name>` (naming-convent
 
 Prefer one git repository? Run `spex init` from its root, which is the project root, and pick `single-repo` (the project is the repository) or `monorepo` (one repository, several packages). Either way it creates a `spex/` folder and puts `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root, keeping any you already have. `/spex-setup` then adds the project's packages.
 
-### Adoption
-
-After setup is completed you get basic skills and rules which you can customize for your project or leave them as is to be synced from upstream.
-
-For existing project you can generate all specs based on existing code or gradually add them based on features you are working on. For example if you want to limit the shopping item name length, ask AI to generate spec based on how adding a shopping item currently works, then do your changes.
-
-### Typical workflow
-
-#### Feature
-
-Say you want to add shopping item creation functionality to the backend. Here's what you will do:
-
-1. **Create spec** `/spex-spec backend add shopping item endpoint`. Will create `shopping-notes-spex/specs/api-add-shopping-item.yaml`
-2. **Derive the contract** for a spec `/spex-contract api-add-shopping-item`. Will add the `createItem` endpoint to `shopping-notes-spex/contracts/api.openapi.yaml`.
-3. **Implement it** `/spex-implement api-add-shopping-item`. Will implement a spec as written following applicable rules and skill instructions.
-4. **Review** review focused on implementation with `/spex-review api-add-shopping-item` to ensure conformance with spec and applicable rules.
-5. **Add tests** `/spex-test api-add-shopping-item`. Will add tests coverage for the implemented spec and at the same time work as last verification layer.
-
-Tip: you can combine skills `/spex-spec /spex-contract` or run `/spex-assembly-line` to implement, review and fix in loop and test.
-
-#### Rule
-
-Say you want to add a rule to ensure we don't commit sensitive information. Here's what you will do:
-
-**Create a rule**: `/spex-rule secret handling`. Will create `shopping-notes-spex/rules/secret-handling.yaml` with checks to verify it.
-
-## Framework Principles
-
-- **AI over Manual Coding**: used right, AI writes code faster than a developer while keeping quality high, so the agent writes every artifact — specs, contracts, plans, code, and tests.
-- **Specs over Guesswork**: clear, well-defined specs eliminate guesswork, giving explicit acceptance criteria for the AI to follow and the developer to verify.
-- **Rules over Tribal Knowledge**: cross-cutting conventions are captured as rules, proven by automated checks, instead of living as tribal knowledge.
-- **Skills over Ad Hoc Prompting**: each workflow step is a written, repeatable skill instead of an improvised prompt, loaded progressively to keep the context small.
-- **Focused Human Review over Vibe Coding**: the AI writes everything and every change passes layers of validation, so the human focuses on reviewing and approving specs, contracts, and important changes.
-- **Deterministic Checks over Judgment**: every check that can be a script must be a script, proving the change does what the spec demands and nothing else broke.
-- **Traceability over Assumption**: every behavioral change traces to a spec, bidirectionally — spec -> contract -> code -> test, and back — so related parts are found fast and no acceptance criterion is forgotten.
-
-See full principles, along with the values that support them, in [prd.md](docs/prd.md#principles).
-
-## Description
-
-### The flow from business goal to verified code:
-
-For example, the shopping item feature of the [shopping-notes example](examples/shopping-notes/README.md) moves through the flow like this:
-
-1. **PRD** — let users note down shopping items so they don't forget to buy them when visiting a store, by managing a shopping list in the web app: add, view, mark as bought, delete, and clear items
-2. **Spec** — [`api-add-shopping-item`](examples/shopping-notes/shopping-notes-spex/specs/api-add-shopping-item.yaml): Create a shopping item.
-
-   Acceptance criteria:
-   - MUST create an item with the given `name` and `bought: false` when `POST /items` is called with a non-empty `name`
-   - MUST assign each created item a unique `id`
-   - MUST persist the created item to the JSON file store so it survives an API restart
-   - MUST NOT create an item when `name` is missing or empty
-
-3. **Contract** — [OpenAPI definition](examples/shopping-notes/shopping-notes-spex/contracts/api.openapi.yaml) of `createItem` returning `201`, tagged `@spec contract api-add-shopping-item`. The frontend counterpart `fe-add-shopping-item` uses a [Figma reference](examples/shopping-notes/shopping-notes-frontend/contracts/figma.md) as its contract instead
-4. **Implementation** — the `POST /items` handler in [`app.ts`](examples/shopping-notes/shopping-notes-api/src/app.ts), tagged `@spec impl api-add-shopping-item#create-item-with-name`
-5. **Test** — [`app.test.ts`](examples/shopping-notes/shopping-notes-api/src/app.test.ts) verifies that an item is created with the given name and `bought: false`, tagged `@spec test api-add-shopping-item#create-item-with-name`
-
-```mermaid
-flowchart TD
-    PRD["PRD (optional) — why and what"] --> Func
-
-    subgraph Traced ["traced by spec ID"]
-        Func["Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
-        Contract --> Plan["Plan (optional) — how to build it"]
-        Plan --> Impl["Implementation — code"]
-        Impl --> Test["Test — proof"]
-    end
-```
-
-### Rules live outside the feature flow — they govern how every artifact is built:
-
-For example, the rule [`secret-handling`](examples/shopping-notes/shopping-notes-spex/rules/secret-handling.yaml) works like this:
-
-1. **Rule** — `secret-handling`: "Secret protection"
-2. **Governs** — every contract, file, and test in the package, regardless of feature
-3. **Proven by** — checks such as `no-secret-in-console-log` and `no-backup-files` running in CI or manually with `spex check`
-
-Even if a deterministic check is not possible, rules are read and followed by AI and can be used for a review by a human or another agent, which gives pretty good results.
-
-```mermaid
-flowchart TD
-    Eng["Rule — how it's built"] -.governs.-> Flow["Contracts, code, tests"]
-    Eng -.proven by.-> Checks["Automated checks, human and agent review"]
-```
-
 ## Learn more
+
+Product requirements, principles, and values in the [PRD](docs/prd.md).
 
 Framework, CLI, and skill [specs](specs).
 

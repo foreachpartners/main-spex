@@ -1,6 +1,6 @@
 # Main spex
 
-The AI-first development framework that turns specifications into deterministic code — keeping AI running at full speed while ensuring slop-free verifiable results.
+The AI-first development framework that turns specifications into predictable code — keeping AI running at full speed while ensuring slop-free, verified results.
 
 ## Core Concepts
 
