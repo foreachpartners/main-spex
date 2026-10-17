@@ -23,6 +23,22 @@ AI writes code fast, but fast is not the same as right: it can add changes nobod
 
 spex helps to produce slop-free, verifiable results fast, with minimal human intervention. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and reviews, tests, and deterministic checks prove the result.
 
+## Quickstart
+
+In your project root, the folder that holds your packages:
+
+```sh
+spex init
+```
+
+Then run the skill in your AI coding agent chat to add the packages and complete the setup:
+
+```text
+/spex-setup add api and frontend
+```
+
+First time? Follow the step-by-step [Setup guide](docs/setup.md): prerequisites, install, layouts, and workspace.
+
 ## Typical workflow
 
 Every artifact is traced back to its spec by the spec ID:
@@ -110,43 +126,6 @@ AI:  Created shopping-notes-spex/rules/secret-handling.yaml
 ```
 
 Rules live outside the feature flow — they govern how every artifact is built.
-
-## Quickstart
-
-### Prerequisites
-
-- **Rust**: [Install Rust](https://rust-lang.org/tools/install/) (required for building the spex CLI)
-- **Git**: [Install Git](https://git-scm.com/install/)
-- **Linux or macOS**: on Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install); see [supported platforms](specs/cli/install-cli.md)
-- **spex CLI**: Install the `spex` CLI tool from [crates.io](https://crates.io/crates/main-spex):
-  ```sh
-  cargo install main-spex
-  ```
-
-#### Setup
-
-We will create the following structure:
-
-```
-shopping-notes/                       # project root
-├── shopping-notes-api/                # existing api package
-├── shopping-notes-frontend/           # existing frontend package
-├── ...                                # repeat for other packages
-└── shopping-notes-spex/               # new spex repository (created by spex cli)
-```
-
-Package directories follow `<project-name>-<package-short-name>` (naming-convention), so rename existing packages to match before running `/spex-setup`.
-
-1. Put all project packages (each a git repository) in one shared folder (project root folder)
-2. Run terminal command `spex init` from the project root and pick the `multi-repo` layout to create the `shopping-notes-spex` repo
-3. Open workspace to work across all packages at once and integrate with AI coding agent (the workspace file lists only the spex repository until `/spex-setup` adds the others):
-   - Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
-   - Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-   - Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend ..` from `shopping-notes-spex` repo
-   - Zed: add project, pick all packages (folders)
-4. Run your first agent skill (skill) `/spex-setup` in the AI chat window to add the packages and complete setup. Skills will be detected by the AI coding agent (agent) if the setup is done right.
-
-Prefer one git repository? Run `spex init` from its root, which is the project root, and pick `single-repo` (the project is the repository) or `monorepo` (one repository, several packages). Either way it creates a `spex/` folder and puts `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root, keeping any you already have. `/spex-setup` then adds the project's packages.
 
 ## Learn more
 

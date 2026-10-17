@@ -9,11 +9,7 @@ By the end you will have recreated a project similar to `examples/shopping-notes
 
 ## Install spex
 
-Install [Rust](https://rust-lang.org/tools/install/)
-
-```sh
-cargo install main-spex
-```
+Follow the [prerequisites](setup.md#prerequisites) and [install](setup.md#1-install-spex) steps of the [Setup guide](setup.md).
 
 ## Copy the example project
 
@@ -31,7 +27,11 @@ Ask AI to init git repositories for api and frontend and commit existing files.
 
 ## Set up spex and workspace
 
-Run `spex init` in terminal from the `shopping-notes` project root and pick the `multi-repo` layout when asked. It generates `shopping-notes-spex` next to the packages.
+The steps below follow the [Setup guide](setup.md) on the `shopping-notes` project with the `multi-repo` layout.
+
+### Init spex
+
+[Run `spex init`](setup.md#4-run-spex-init) in terminal from the `shopping-notes` project root and pick the `multi-repo` layout when asked. It generates `shopping-notes-spex` next to the packages.
 
 ### Get familiar with spex
 
@@ -43,12 +43,7 @@ Ask AI to init git in `shopping-notes-spex` repository and commit existing files
 
 ### Setup workspace
 
-Open the workspace to work across all packages at once and integrate with an AI coding agent:
-
-- Cursor/VSCode: open workspace from file `shopping-notes-spex/shopping-notes.code-workspace`
-- Cursor agentic: open workspace file in editor mode first, then pick it in agentic mode.
-- Claude CLI: run `claude --add-dir ../shopping-notes-api ../shopping-notes-frontend` from `shopping-notes-spex` repo
-- Zed: add project, pick all packages (folders)
+[Open the workspace](setup.md#5-open-the-workspace) to work across all packages at once and integrate with an AI coding agent.
 
 The workspace file lists only `shopping-notes-spex` for now, the `/spex-setup` skill below adds the other packages to it.
 
@@ -79,7 +74,7 @@ update `spex.yaml` (which is main spex configuration file for your project) and:
 - pick rules from bundled with spex that applicable to each package and remove unused
 - generate main skills for each package with metadata that requires them to be loaded when AI works on any package. Skills will describe each package and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
 
-Run your first skill `/spex-setup` in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit.
+[Run your first skill `/spex-setup`](setup.md#6-run-spex-setup) in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit.
 
 ## Rules
 

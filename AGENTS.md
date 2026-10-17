@@ -83,6 +83,7 @@ specs/                         Single source of truth for behavior, one md file 
 docs/                          Framework reference docs; only those symlinked from templates/docs/ are bundled into projects by init/update
   glossary.md              Terms used across code, messages, schemas, and docs
   prd.md                   Product requirements: problem, goal, success, capabilities, principles, values, non-goals
+  setup.md                 Step-by-step setup of spex in a project (one header per step; the tutorial links to its steps)
   tutorial.md              Hands-on walkthrough of adopting spex
   faq.md                   Frequently asked questions
 templates/                     Assets scaffolded into projects
