@@ -6,8 +6,9 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 
 - MUST name the file `<spec-id>.yaml`, whatever its nesting under `specs/`.
 - MUST follow `schemas/spec-id.schema.json` for the `id`: lowercase letters, digits and hyphens only, at most 40 characters.
-- MUST have the required fields `id`, `title`, `description`, `acceptance_criteria`, and `contract`.
+- MUST have the required fields `id`, `title`, `description`, `acceptance_criteria`, `packages`, and `contract`.
 - MUST have at least one acceptance criterion; a spec with an empty `acceptance_criteria` is a schema error.
+- MUST set `packages` to the `package_short_name`s of the packages that implement the capability, at least one; a spec with no `packages`, or an empty one, is a schema error.
 - MUST hold the spec's specifics in `acceptance_criteria`, ordered by RFC 2119 commitment level: `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`.
 - MUST write each acceptance criterion as `{id, must|must_not|should|should_not|may, is_done}`, with exactly one of `must`, `must_not`, `should`, `should_not`, `may` present, its value the verifiable statement.
 - MUST follow `schemas/ac-id.schema.json` for a criterion's `id`: lowercase letters, digits and hyphens only, at most 40 characters.
@@ -26,7 +27,6 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 - MUST have a `coverage_ignore` entry with `ac` waive just that acceptance criterion's impl or test requirement, or, under `contract: for-each-ac`, its contract requirement.
 - MUST match each `coverage_ignore` entry to the spec's `contract` setting: a whole-spec contract waiver works under `single` and `for-each-ac`, a per-criterion contract waiver only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch.
 - MUST NOT list an already shipped or established spec in `blocked_by`.
-- MAY set `packages`, the `package_short_name`s of the packages that implement the capability.
 - MAY set `status` to `in-progress` for a spec being implemented but not yet complete, and to `blocked` or `deprecated` where they apply.
 - MAY set `examples`: named illustrative snippets showing the spec applied in context, for placement and usage that prose cannot carry.
 - MAY declare a waiver outside the spec file, for one package in its [`spex.yaml`](../config/spex-yaml-config.md) entry or its [`spex.package.yaml`](../config/spex-package-yaml-config.md), so the package that cannot satisfy a layer owns the waiver without editing the spec; `spex coverage` takes a package's waiver into account once every package the spec lists waives it ([spex-coverage-cli-cmd.md](../cli/spex-coverage-cli-cmd.md)).

@@ -4,6 +4,13 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.26.0
+
+A spec must now set `packages`, at least one: `schemas/spec.schema.json` requires it. A spec that sets none fails `spex check` with a schema error until it lists the packages that implement it, and the "Gaps" section of `spex coverage` no longer has a `no package` heading. In `<spex-dir>`:
+
+- For every spec under `specs/**/*.yaml` that sets no `packages`, find the packages that implement it from its description and acceptance criteria and from the package descriptions in `spex.yaml`. If it is unclear, ask the user. Add `packages`, listing each `package_short_name`, right after `acceptance_criteria`.
+- In every CI job or script that reads the `spex coverage` report for the `no package` heading, drop that check.
+
 ## 0.24.0
 
 The baseline of pre-existing errors, `ignored_errors`, is now `check_ignore`, like `coverage_ignore` for `spex coverage`. Each entry keeps its `rule_id`, `check` and `files`. Until it is renamed, `spex.yaml` and every `spex.package.yaml` fail schema validation. In `<spex-dir>`:

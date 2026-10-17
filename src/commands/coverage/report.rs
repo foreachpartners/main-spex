@@ -57,14 +57,14 @@ impl<'a> CoverageReport<'a> {
             .collect()
     }
 
-    pub fn gapped_by_package(&self) -> Vec<(Option<&str>, Vec<&SpecCoverage<'a>>)> {
+    pub fn gapped_by_package(&self) -> Vec<(&str, Vec<&SpecCoverage<'a>>)> {
         let gapped = self.gapped();
         let packages: BTreeSet<&str> = gapped
             .iter()
             .flat_map(|coverage| coverage.spec.packages.iter().map(String::as_str))
             .collect();
 
-        let mut groups: Vec<(Option<&str>, Vec<&SpecCoverage>)> = packages
+        packages
             .into_iter()
             .map(|package| {
                 let in_package = gapped
@@ -72,20 +72,9 @@ impl<'a> CoverageReport<'a> {
                     .filter(|coverage| coverage.spec.packages.iter().any(|name| name == package))
                     .copied()
                     .collect();
-                (Some(package), in_package)
+                (package, in_package)
             })
-            .collect();
-
-        let without_package: Vec<&SpecCoverage> = gapped
-            .iter()
-            .filter(|coverage| coverage.spec.packages.is_empty())
-            .copied()
-            .collect();
-        if !without_package.is_empty() {
-            groups.push((None, without_package));
-        }
-
-        groups
+            .collect()
     }
 
     pub fn exit_code(&self) -> ExitCode {

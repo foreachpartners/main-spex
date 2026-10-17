@@ -1,9 +1,10 @@
-Specs (4)
+Specs (5)
   active (2)
   planned (1)
     planned-one
-  in-progress (1)
+  in-progress (2)
     ✗  in-progress-mixed    2/3 AC
+    ●  in-progress-pending  1/2 AC  in-progress: impl(shows-tooltip)
 
 Gaps (3)
   api
@@ -19,4 +20,4 @@ Gaps (3)
     ✗  in-progress-mixed    2/3 AC  missing: impl(retries-on-failure), test(retries-on-failure,
                                     schedules-followup)
 
-planned (1), in-progress (1), active (2), gaps (3)
+planned (1), in-progress (2), active (2), gaps (3)

@@ -17,6 +17,8 @@ description: A spec whose id breaks the sibling spec-id schema.
 acceptance_criteria:
   - id: valid-criterion
     must: do something
+packages:
+  - api
 contract: none
 ";
 
@@ -80,6 +82,7 @@ fn check_schema_reports_each_violation_per_file_and_exits_non_zero() {
             "missing-fields.yaml: \"contract\" is a required property\n",
             "missing-fields.yaml: \"description\" is a required property\n",
             "missing-fields.yaml: \"id\" is a required property\n",
+            "missing-fields.yaml: \"packages\" is a required property\n",
         ),
     );
 }

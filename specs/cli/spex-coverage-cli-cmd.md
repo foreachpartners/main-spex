@@ -36,7 +36,7 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 ### Gaps
 
 - MUST head the section with `Gaps (<count>)`, counting only the gapped specs.
-- MUST list in it only the `active` or `in-progress` specs that have a gap (`✗`), grouped by `packages`, sorted alphabetically with specs that set no `packages` last under `no package`; a spec with several packages appears under each, and the header counts it once.
+- MUST list in it only the `active` or `in-progress` specs that have a gap (`✗`), grouped by `packages`, sorted alphabetically; a spec with several packages appears under each, and the header counts it once.
 - MUST show, for each gapped spec, its id, its progress as `done/total AC`, and only what is missing, naming the acceptance criterion ids involved, e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`.
 - MUST end the report with a one-line summary of spec counts per status and the gap count, e.g. `planned (5), in-progress (3), active (2), gaps (1)`.
 - MUST NOT show pending work in "Gaps"; it is shown under `in-progress` in the status report.

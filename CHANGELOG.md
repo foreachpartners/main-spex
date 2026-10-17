@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.26.0] - 2026-10-17
+
+- **Breaking**: a spec must set `packages`, at least one `package_short_name`: `schemas/spec.schema.json` now requires it, where it was optional before. A spec that sets none, or an empty list, fails `spex check` with a schema error. The "Gaps" section of `spex coverage` therefore no longer has a `no package` heading. Until every spec lists its packages, `spex check` fails. See the migration guide.
+
 ## [0.25.0] - 2026-10-16
 
 - Each package entry of `spex.yaml`, and the `spex.package.yaml` of a package, accepts `exclude`: glob patterns, the same globs a check's `include` and `exclude` use, matched against the path of every file and folder relative to the package's root. `spex check` and `spex coverage` skip what they match for that package only, a folder that matches with everything inside it, so vendored or generated code is no longer checked and its `@spec` annotations count for no spec; `vendor` or `**/vendor` skips a folder, `vendor/**` the files inside it, and `**/*.generated.ts` such files at any depth. The two sources are merged by union like the ignores, `spex check --files` skips a listed file its package excludes without an error, and contract files declared in `spex.yaml` are not affected. An `exclude` pattern that is not a valid glob stops the command naming the package. `spex info` lists each package's merged `exclude`, and `schemas/spex.schema.json` and `schemas/spex.package.schema.json` follow. No migration steps.

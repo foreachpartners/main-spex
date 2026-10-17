@@ -117,20 +117,19 @@ mod tests {
     }
 
     #[test]
-    fn gapped_by_package_duplicates_multi_package_specs_and_lists_specs_without_packages_last() {
+    fn gapped_by_package_lists_multi_package_specs_under_each_package_alphabetically() {
         let specs = vec![
             in_packages("a", &["web", "api"]),
             in_packages("b", &["web"]),
-            in_packages("c", &[]),
         ];
         let report = report(&specs);
         let groups = report.gapped_by_package();
 
-        let packages: Vec<Option<&str>> = groups.iter().map(|(package, _)| *package).collect();
-        assert_eq!(packages, vec![Some("api"), Some("web"), None]);
+        let packages: Vec<&str> = groups.iter().map(|(package, _)| *package).collect();
+        assert_eq!(packages, vec!["api", "web"]);
 
         let grouped_ids: Vec<Vec<&str>> = groups.iter().map(|(_, group)| ids(group)).collect();
-        assert_eq!(grouped_ids, vec![vec!["a"], vec!["a", "b"], vec!["c"]]);
+        assert_eq!(grouped_ids, vec![vec!["a"], vec!["a", "b"]]);
     }
 
     #[test]

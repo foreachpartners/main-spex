@@ -224,19 +224,6 @@ mod tests {
     }
 
     #[test]
-    fn render_lists_a_gapped_spec_without_packages_under_no_package() {
-        let mut spec = gapped_spec();
-        spec.packages = Vec::new();
-
-        let text = rendered(100, false, &[spec]);
-
-        assert!(
-            text.contains("Gaps (1)\n  no package\n    ✗  api-thing"),
-            "got:\n{text}"
-        );
-    }
-
-    #[test]
     fn render_wraps_verbose_detail_to_the_given_width() {
         let text = rendered(40, true, &[gapped_spec()]);
 

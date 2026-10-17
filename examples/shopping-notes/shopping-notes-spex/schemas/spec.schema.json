@@ -72,7 +72,7 @@
     },
     "packages": {
       "type": "array",
-      "description": "Package short names targeted for implementing this spec. Each must match a package_short_name in spex.yaml.",
+      "description": "Package short names targeted for implementing this spec, at least one. Each must match a package_short_name in spex.yaml.",
       "items": {
         "type": "string",
         "minLength": 1
@@ -126,7 +126,7 @@
       "minProperties": 1
     }
   },
-  "required": ["id", "title", "description", "acceptance_criteria", "contract"],
+  "required": ["id", "title", "description", "acceptance_criteria", "packages", "contract"],
   "additionalProperties": false,
   "examples": [
     {

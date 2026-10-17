@@ -91,6 +91,7 @@ fn specs_package_limits_output_to_specs_of_that_package() {
             "active-with-gap",
             "foreach-not-covered",
             "in-progress-mixed",
+            "in-progress-pending",
             "planned-one"
         ]
     );
@@ -115,13 +116,12 @@ fn specs_package_accepts_a_full_package_name() {
 }
 
 #[test]
-fn specs_package_lists_a_spec_in_several_packages_once_and_skips_specs_without_packages() {
+fn specs_package_lists_a_spec_in_several_packages_once() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let everything = run_spex(&project, &["specs"], "");
     let packaged = run_spex(&project, &["specs", "--package", "api", "frontend"], "");
 
-    let all_ids = listed_ids(&everything.stdout);
     let packaged_ids = listed_ids(&packaged.stdout);
     let mut distinct = packaged_ids.clone();
     distinct.dedup();
@@ -130,14 +130,7 @@ fn specs_package_lists_a_spec_in_several_packages_once_and_skips_specs_without_p
         "a spec in both packages was listed twice"
     );
     assert!(packaged_ids.contains(&"in-progress-mixed".to_string()));
-    assert_eq!(
-        all_ids
-            .iter()
-            .filter(|id| !packaged_ids.contains(id))
-            .collect::<Vec<_>>(),
-        ["in-progress-pending"],
-        "only the spec without packages should be left out",
-    );
+    assert_eq!(packaged_ids, listed_ids(&everything.stdout));
 }
 
 #[test]

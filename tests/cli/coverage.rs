@@ -158,7 +158,7 @@ fn coverage_package_accepts_a_full_package_name() {
 }
 
 #[test]
-fn coverage_package_with_several_packages_leaves_out_only_specs_without_packages() {
+fn coverage_package_with_several_packages_counts_a_spec_in_both_once() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");
     common::copy_project(&dummy_project_fixture(), &project);
@@ -168,16 +168,7 @@ fn coverage_package_with_several_packages_leaves_out_only_specs_without_packages
         report_text(&run_spex(&project, &["coverage", "--package", "api", "frontend"], "").stdout);
 
     assert!(everything.contains("Specs (13)"), "{everything}");
-    assert!(everything.contains("in-progress-pending"), "{everything}");
-    assert!(packaged.contains("Specs (12)"), "{packaged}");
-    assert!(
-        !packaged.contains("in-progress-pending"),
-        "the spec without packages should be left out\n{packaged}"
-    );
-    assert!(
-        packaged.ends_with("planned (2), in-progress (1), active (9), gaps (7)\n"),
-        "{packaged}"
-    );
+    assert_eq!(packaged, everything);
 }
 
 #[test]

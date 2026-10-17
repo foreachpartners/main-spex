@@ -9,5 +9,7 @@ acceptance_criteria:
   - id: shows-tooltip
     must: "show a tooltip on the banner explaining what low stock means"
     is_done: false
+packages:
+  - frontend
 status: in-progress
 contract: single

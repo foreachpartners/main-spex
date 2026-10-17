@@ -212,7 +212,7 @@ impl ReportWriter {
             self.line(format!("  {}", "none".dimmed()));
         } else {
             for (package, group) in report.gapped_by_package() {
-                self.line(format!("  {}", package.unwrap_or("no package").bold()));
+                self.line(format!("  {}", package.bold()));
                 for coverage in group {
                     self.gapped_spec(coverage);
                 }
