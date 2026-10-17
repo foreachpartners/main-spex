@@ -25,6 +25,13 @@ spex helps to produce slop-free, verifiable results fast, with minimal human int
 
 ## Typical workflow
 
+Every artifact is traced back to its spec by the spec ID:
+
+```mermaid
+flowchart LR
+    PRD -.-> Spec --> Contract --> Impl --> Test
+```
+
 ### Feature
 
 Adding shopping item creation to the backend of the [shopping-notes example](examples/shopping-notes/README.md):
@@ -87,20 +94,6 @@ Your AI writes these; you review the spec and the contract before any code is wr
 Tip: combine skills like `/spex-spec /spex-contract`, or run `/spex-assembly-line` to implement, review and fix in a loop, and then test.
 
 </details>
-
-Every artifact is traced back to its spec by the spec ID:
-
-```mermaid
-flowchart TD
-    PRD["PRD (optional) — why and what"] --> Func
-
-    subgraph Traced ["traced by spec ID"]
-        Func["Spec — what it provides"] --> Contract["Contract (if applicable) — interface"]
-        Contract --> Plan["Plan (optional) — how to build it"]
-        Plan --> Impl["Implementation — code"]
-        Impl --> Test["Test — proof"]
-    end
-```
 
 ### Rule
 
