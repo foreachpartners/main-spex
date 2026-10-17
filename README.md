@@ -1,6 +1,6 @@
 # 🦉 Main spex
 
-The AI-first development framework that turns specifications into predictable code — keeping AI running at full speed while ensuring slop-free, verified results.
+The AI-first development framework that turns specifications into verified code — keeping AI running at full speed while ensuring slop-free results.
 
 _The name `spex` comes from a casual shorthand for specifications._
 
@@ -8,7 +8,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 
 - **Specs, not guesses** — acceptance criteria tell the AI exactly what to build.
 - **Rules, enforced** — conventions are given to the agent as context and proven by `spex check`.
-- **Skills, not prompts** — each workflow step is a written instruction, so the process is the same every time and the output predictable.
+- **Skills, not prompts** — each workflow step is a written instruction, so the process is the same every time.
 - **Coverage, proven** — every acceptance criterion is traced to its contract, code, and test, and `spex coverage` shows the gaps.
 - **Human review where it counts** — you approve specs and contracts; checks, tests, and agent reviews cover the rest.
 - **Tool-agnostic** — any AI model, coding agent, CLI, or IDE, and any language or framework.

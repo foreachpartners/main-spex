@@ -1,6 +1,6 @@
 # spex
 
-This project is governed by `spex`. The AI-first development framework that turns specifications into predictable code — keeping AI running at full speed while ensuring slop-free, verified results.
+This project is governed by `spex`. The AI-first development framework that turns specifications into verified code — keeping AI running at full speed while ensuring slop-free results.
 
 ## Artifact chain
 
