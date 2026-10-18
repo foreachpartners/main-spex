@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.26.1] - 2026-10-18
+
+- The `spex-rule` skill also removes a rule: it asks which packages stop using it, drops its `id` from their `rules` in `spex.yaml`, and, once no package lists it, deletes the rule file and its script folder and adds the `id` to `rules_unused`, so `spex update` never redeploys a bundled rule that was removed on purpose. The skill's description now mentions removal. `spex update` rewrites the skill; no migration steps.
+
 ## [0.26.0] - 2026-10-17
 
 - **Breaking**: a spec must set `packages`, at least one `package_short_name`: `schemas/spec.schema.json` now requires it, where it was optional before. A spec that sets none, or an empty list, fails `spex check` with a schema error. The "Gaps" section of `spex coverage` therefore no longer has a `no package` heading. Until every spec lists its packages, `spex check` fails. See the migration guide.

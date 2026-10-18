@@ -1,9 +1,9 @@
 ---
 name: spex-rule
-description: Create a new rule or edit an existing one by interviewing the user. Use when the user wants to create, extend, or update a rule — from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing spec.
+description: Create a new rule, edit an existing one, or remove one by interviewing the user. Use when the user wants to create, extend, update, remove, or delete a rule — from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing spec.
 ---
 
-# Create or Edit a Rule
+# Create, Edit or Remove a Rule
 
 A rule describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria. It is not tied to one feature — it applies across whole packages. Your job is to turn a fuzzy convention into one schema-valid spec by asking the user focused questions, proposing automated checks that verify it, then writing the file — or, when the user names an existing spec, to update it in place.
 
@@ -34,10 +34,11 @@ If the matching bucket file already exists, treat this as an edit to it (see Ste
 
 A convention still gets its own dedicated file when it has multiple related acceptance criteria, a clear theme of its own, or the user asks for a separate file. Confirm which path you're taking with the user before writing.
 
-## Step 0 — Establish create vs. edit
+## Step 0 — Establish create, edit or remove
 
-First decide whether this is a new spec or a change to one that already exists:
+First decide whether this is a new spec, a change to one that already exists, or the removal of one:
 
+- If the user asks to remove, delete, or drop a rule, or to stop a package using it, this is a **removal**. Skip the steps below and follow "Remove a rule" at the end.
 - If the user names an existing rule ID (for example `secret-handling`) or asks to update, amend, fix, or change a spec, this is an **edit**. Read `<spex-dir>/rules/<rule-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Also read its checks and any `script` bodies at `<spex-dir>/rules/<rule-id>/`. Confirm with the user what should change (revised or new acceptance criteria, new or adjusted checks, a scope change), applying the same field rules as Steps 3–4. Skip straight to Step 5, editing the existing file (and any check scripts) in place rather than starting over; preserve every untouched field, its ordering, and formatting.
 - Otherwise, this is a **new spec** — continue with Step 0's source-gathering below, then Steps 1–4.
 
@@ -152,6 +153,17 @@ If there are errors:
 
 - Errors can be fixed easily: offer to fix them
 - Too many errors: offer to plan its implementation: run `spex-plan <spec-id>` with the spec's `id`. Note that it is better to start a new chat first to save context.
+
+## Remove a rule
+
+1. Read `<spex-dir>/spex.yaml` and list the packages that list the rule's `id` under `rules`. Confirm with the user which packages stop using it; when the user asks to remove the rule altogether, that is every package listing it.
+2. Remove the `id` from `rules` of each confirmed package in `spex.yaml`, leaving everything else untouched.
+3. If no package lists the `id` under `rules` any more:
+   - Delete `<spex-dir>/rules/<rule-id>.yaml` and its script folder `<spex-dir>/rules/<rule-id>/`, if there is one.
+   - Add the `id` to `rules_unused` in `spex.yaml`, creating the key when missing and skipping an `id` already listed. `spex update` never redeploys a bundled rule listed there, and keeps it for future use.
+4. If another package still lists the `id`, keep the rule's files and do not add it to `rules_unused`.
+5. Run `spex check`. Fix a stale `check_ignore` entry or other reference to the removed rule that it reports.
+6. Tell the user which packages stopped using the rule, whether its files were deleted, and whether it was added to `rules_unused`.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
 

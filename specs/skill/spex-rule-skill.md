@@ -1,6 +1,6 @@
 # `spex-rule` skill
 
-Creates a new rule or edits an existing one by interviewing the user. Loaded when the user wants to create, extend, or update a rule, from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing rule. It turns a fuzzy convention into one schema-valid rule with automated checks that verify it, or updates the named existing rule in place.
+Creates a new rule, edits an existing one, or removes one by interviewing the user. Loaded when the user wants to create, extend, update, or remove a rule, from a coding standard, a style guide, a security policy, an engineering decision, an existing code pattern, or a named existing rule. It turns a fuzzy convention into one schema-valid rule with automated checks that verify it, updates the named existing rule in place, or removes it.
 
 ## Acceptance criteria
 
@@ -16,3 +16,6 @@ Creates a new rule or edits an existing one by interviewing the user. Loaded whe
 - MUST store a `script` check's POSIX `sh` body beside the rule in `rules/<rule-id>/`, make it executable, have it print one `<location><TAB><message>` finding per line, and read `spex.yaml` data with `spex jq` rather than parsing it by hand.
 - MUST leave a criterion only AI or human review can judge without a check and say so.
 - MUST run `spex check` and offer to fix easy errors, or to plan a large fix with `spex-plan <rule-id>`.
+- MUST treat a request to remove, delete, or drop a rule, or to stop a package using it, as a removal: confirm with the user which packages stop using it, and remove its `id` from `rules` of each in `spex.yaml`.
+- MUST, once no package lists a removed rule's `id` under `rules`, delete `rules/<rule-id>.yaml` and its script folder `rules/<rule-id>/`, and add the `id` to `rules_unused` in `spex.yaml`; MUST NOT delete the rule's files or add it to `rules_unused` while a package still lists it.
+- MUST run `spex check` after a removal and fix the references to the removed rule it reports.
