@@ -17,7 +17,7 @@ The PRD is `<prd-file>`.
 
 The PRD starts with `# Product requirements`, then these sections in this order:
 
-- `## Problem` — who hurts and why, in a few sentences.
+- `## Problem` — who is affected and why it matters, in a few sentences.
 - `## Goal` — the outcome the product delivers, one paragraph.
 - `## Users` — one line per user or actor: who they are and what they come for.
 - `## Success` — observable outcomes that show the product works, with numbers where the user has them.
