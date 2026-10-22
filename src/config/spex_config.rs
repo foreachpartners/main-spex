@@ -26,6 +26,8 @@ pub struct SpexConfig {
     pub agent_root: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prd: Option<String>,
     #[serde(default)]
     pub rules_unused: Vec<RuleId>,
     #[serde(default)]

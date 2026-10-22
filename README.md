@@ -48,6 +48,22 @@ flowchart LR
     PRD -.-> Spec --> Contract --> Impl --> Test
 ```
 
+### PRD
+
+Optional: the project's overall goal and main capabilities, the root the specs are broken down from. It keeps the why and the what, never the details:
+
+```text
+You: /spex-prd shopping notes app
+AI:  Who uses it, and when?
+You: A shopper in the store, checking what is left to buy.
+AI:  Created shopping-notes-spex/docs/prd.md
+     ✓ prd: docs/prd.md in spex.yaml
+     ✓ Problem, Goal, Users, Success
+     ✓ Capabilities: add item, view list, mark bought, delete item, clear list
+     ✓ Non-goals: accounts and shared lists, quantities and prices
+     Ready for your review!
+```
+
 ### Feature
 
 Adding shopping item creation to the backend of the [shopping-notes example](examples/shopping-notes/README.md):

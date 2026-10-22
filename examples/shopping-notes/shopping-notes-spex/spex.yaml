@@ -1,10 +1,11 @@
 project_name: shopping-notes
-cli_version: 0.26.1
+cli_version: 0.26.2
 layout: multi-repo
 agent_root: .
 description: >-
   Web application for managing shopping lists, letting users note items to
   buy so they don't forget them at the store.
+prd: docs/prd.md
 rules_unused:
   - graphql-conventions
 packages:

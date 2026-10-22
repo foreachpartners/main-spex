@@ -136,6 +136,20 @@ mod tests {
     }
 
     #[test]
+    fn serialization_keeps_the_prd_path_and_omits_an_absent_one() {
+        let config = |prd_line: &str| -> serde_json::Value {
+            let config: SpexConfig = serde_yaml_ng::from_str(&format!(
+                "project_name: demo\ncli_version: 0.0.0\nlayout: multi-repo\nagent_root: .\n{prd_line}"
+            ))
+            .expect("parse config");
+            serde_json::to_value(&config).expect("serialize")
+        };
+
+        assert_eq!(config("prd: docs/prd.md\n")["prd"], "docs/prd.md");
+        assert!(config("").get("prd").is_none());
+    }
+
+    #[test]
     fn serialization_omits_absent_descriptions_but_keeps_empty_lists() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo

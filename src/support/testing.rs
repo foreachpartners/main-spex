@@ -89,6 +89,7 @@ pub fn spex_config() -> SpexConfig {
         layout: Layout::MultiRepo,
         agent_root: ".".to_string(),
         description: None,
+        prd: None,
         rules_unused: Vec::new(),
         packages: Vec::new(),
     }

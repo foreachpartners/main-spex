@@ -101,7 +101,7 @@ Run the skill:
 /spex-setup
 ```
 
-It finds your packages and proposes a `spex.yaml` entry for each one: description, contracts, and the rules that apply. After you confirm, it writes them, creates a skill for each package, and adds the packages to the workspace file. It then offers to author your first spec or rule.
+It finds your packages and proposes a `spex.yaml` entry for each one: description, contracts, and the rules that apply. After you confirm, it writes them, creates a skill for each package, and adds the packages to the workspace file. It then offers to write the project's PRD with `/spex-prd`, or to author your first spec or rule.
 
 Review what the agent generated, fix what is wrong, and commit.
 
@@ -113,4 +113,4 @@ spex info
 
 It prints the project configuration, so you can see the packages that were added.
 
-Then try your first feature with `/spex-spec`, or follow the [Tutorial](tutorial.md) to take the `shopping-notes` example from a plain project to a fully spec-driven one.
+Then describe the product with `/spex-prd` (optional) and try your first feature with `/spex-spec`, or follow the [Tutorial](tutorial.md) to take the `shopping-notes` example from a plain project to a fully spec-driven one.

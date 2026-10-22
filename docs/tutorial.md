@@ -74,7 +74,7 @@ update `spex.yaml` (which is main spex configuration file for your project) and:
 - pick rules from bundled with spex that applicable to each package and remove unused
 - generate main skills for each package with metadata that requires them to be loaded when AI works on any package. Skills will describe each package and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
 
-[Run your first skill `/spex-setup`](setup.md#6-run-spex-setup) in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit.
+[Run your first skill `/spex-setup`](setup.md#6-run-spex-setup) in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit. At the end the skill offers to write the PRD or your first spec, we do both later in this tutorial, so skip the offer for now.
 
 ## Rules
 
@@ -177,7 +177,13 @@ Shopping notes application that lets a user note down shopping items so they don
 - User can delete an item from the list.
 - User can clear all items from the list.
 
-How do you split the work is up to you, but I suggest you to split frontend and api specs and also make each capability a separate spec, then create all specs, all contracts and implement each or all at once.
+Write it down first as the project's PRD, run `/spex-prd` with the requirements above.
+
+**PRD** (Product Requirements Document) — the root source. Describes _why_ something is being built and _what_ the product should do: goals, success, features, and user-facing behavior. Optional, and kept short: the overall goal and the main capabilities, the details live in specs.
+
+The skill interviews you with `spex-grill-me`, one question at a time, and writes `shopping-notes-spex/docs/prd.md` and records its path as `prd` in `spex.yaml`. Review it and commit changes.
+
+How do you split the work is up to you, but I suggest you to split frontend and api specs and also make each capability a separate spec, then create all specs from the PRD with `/spex-spec`, all contracts and implement each or all at once.
 
 ## Generate a completion report
 

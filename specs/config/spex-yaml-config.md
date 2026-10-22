@@ -14,7 +14,7 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 - MUST declare a package entry's `exclude` as a list of glob patterns, the globs a [check's](../rule/rule-checks-rule.md) `include` / `exclude` use, matched against paths relative to the package's root, each naming files or folders that `spex check` and `spex coverage` leave out of that package, as [spex check](../cli/spex-check-cli-cmd.md) and [spex coverage](../cli/spex-coverage-cli-cmd.md) describe.
 - MUST apply the `exclude`, `check_ignore`, and `coverage_ignore` declared in a package entry to that package only, so the excludes and ignores of one package never affect another.
 - MUST validate `spex.yaml` against `schemas/spex.schema.json`.
-- MAY declare the root fields `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), and `packages`.
+- MAY declare the root fields `description`, `prd` (the path of the project's [PRD](../../docs/glossary.md), relative to the `spex.yaml` file), `rules_unused` (Rule IDs `spex update` must not redeploy), and `packages`.
 - MAY declare, in each package entry, a `description`, a `contracts` list, a `rules` list, and its own `exclude`, `check_ignore` and `coverage_ignore`.
 
 ## Examples
@@ -29,6 +29,7 @@ agent_root: .
 description: >-
   Web application for managing shopping lists, letting users note items to
   buy so they don't forget them at the store.
+prd: docs/prd.md
 rules_unused:
   - graphql-conventions
 packages:

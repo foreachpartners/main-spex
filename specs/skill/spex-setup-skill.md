@@ -12,4 +12,4 @@ Configures one or several new packages for the spex framework: defines each in `
 - MUST create `<agent-root>/.agents/skills/<package-name>/SKILL.md` for each new package from [`references/GENERIC-PACKAGE-SKILL-TEMPLATE.md`](references/GENERIC-PACKAGE-SKILL-TEMPLATE.md), keeping its frontmatter, sections, and order and filling each with real facts ([package-skill-skill.md](package-skill-skill.md)).
 - MUST NOT overwrite an existing `SKILL.md` or invent a path or command.
 - MUST add each new package to `<project-name>.code-workspace` (`multi-repo` only), leaving existing folders untouched.
-- MUST offer to author the first spec with `spex-spec` or the first rule with `spex-rule`.
+- MUST offer to write the PRD with [`spex-prd`](spex-prd-skill.md) when `spex.yaml` sets no `prd`, or to author the first spec with `spex-spec` or the first rule with `spex-rule`.

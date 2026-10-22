@@ -128,6 +128,27 @@ fn info_prints_the_resolved_configuration_as_json() {
 }
 
 #[test]
+fn info_prints_the_prd_as_an_absolute_path_and_omits_an_unset_one() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    let spex_dir = project.join("dummy-project-spex");
+    let unset = info_json(&run_spex(&project, &["info"], "").stdout);
+    assert!(unset.get("prd").is_none());
+    let spex_yaml = spex_dir.join("spex.yaml");
+    let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
+    let patched = config.replace("\npackages:", "\nprd: docs/prd.md\npackages:");
+    assert_ne!(patched, config, "packages not found in spex.yaml");
+    fs::write(&spex_yaml, patched).expect("write spex.yaml");
+
+    let info = info_json(&run_spex(&project, &["info"], "").stdout);
+
+    let expected = spex_dir.canonicalize().expect("canonical spex dir");
+    assert_eq!(
+        info["prd"],
+        serde_json::json!(expected.join("docs/prd.md").to_string_lossy()),
+    );
+}
+
+#[test]
 fn info_reports_the_spex_dir_from_any_project_package() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 

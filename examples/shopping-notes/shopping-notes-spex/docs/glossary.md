@@ -1,6 +1,6 @@
 # Glossary
 
-- **PRD** (Product Requirements Document) — the root source. Describes _why_ something is being built and _what_ the product should do: goals, success, features, and user-facing behavior. Written by/for product, design, and engineering.
+- **PRD** (Product Requirements Document) — the root source. Describes _why_ something is being built and _what_ the product should do: goals, success, features, and user-facing behavior. Written by/for product, design, and engineering. Optional, and kept at the level of the overall goal and main capabilities: the details live in specs. Its path is the `prd` field of `spex.yaml`.
 
   ```md
   Goal: let customers order pizza online to increase sales.

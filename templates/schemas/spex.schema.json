@@ -30,6 +30,11 @@
       "description": "Optional summary of what the project is and does.",
       "minLength": 1
     },
+    "prd": {
+      "type": "string",
+      "description": "Optional path to the project's PRD (product requirements document), relative to the `spex.yaml` file (for example `docs/prd.md`).",
+      "minLength": 1
+    },
     "rules_unused": {
       "type": "array",
       "description": "Rule IDs deliberately removed from this project's `rules/`. `spex update` respects a listed ID by never redeploying its bundled template; any bundled rule missing locally but not listed here is treated as newly available upstream and gets deployed.",
@@ -183,6 +188,7 @@
       "layout": "multi-repo",
       "agent_root": ".",
       "description": "Shopping list app for keeping track of items to buy.",
+      "prd": "docs/prd.md",
       "packages": [
         {
           "package_name": "shopping-notes-api",
