@@ -22,7 +22,7 @@
     },
     "agent_root": {
       "type": "string",
-      "description": "Directory holding the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills/`, `.claude`), relative to the spex directory: `.` in multi-repo, `..` (the repository root) in single-repo and monorepo.",
+      "description": "Directory holding the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills/`, `.claude`), relative to the `spex.yaml` file: `.` in multi-repo, `..` (the repository root) in single-repo and monorepo.",
       "minLength": 1
     },
     "description": {
@@ -72,7 +72,7 @@
         },
         "path": {
           "type": "string",
-          "description": "Path to the package, relative to the spex directory.",
+          "description": "Path to the package, relative to the `spex.yaml` file.",
           "minLength": 1
         },
         "contracts": {
@@ -123,7 +123,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "description": "Path to the contract file, relative to the spex directory (for example `../shopping-notes-api/contracts/api.openapi.yaml` when the contract lives in the owning package, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
+          "description": "Path to the contract file, relative to the `spex.yaml` file (for example `../shopping-notes-api/contracts/api.openapi.yaml` when the contract lives in the owning package, or `contracts/api.openapi.yaml` when it lives in the spex repository's shared `contracts/` folder).",
           "minLength": 1
         },
         "description": {
