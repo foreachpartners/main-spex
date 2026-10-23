@@ -4,7 +4,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 ## [0.27.2] - 2026-10-23
 
-- The `spex-prd` skill no longer caps the capabilities at about ten: it asks to keep them high level, without details. `spex update` rewrites the skill; no migration steps.
+- The `spex-prd` skill no longer caps the capabilities at about ten: it asks to keep them high level, without details, and the "Artifact chain" section of `AGENTS.md` now describes the PRD as high level. `spex update` rewrites the skill and the managed section of `AGENTS.md`; no migration steps.
 
 ## [0.27.1] - 2026-10-23
 
