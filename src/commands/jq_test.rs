@@ -17,14 +17,19 @@ mod tests {
     };
 
     fn evaluated(filter: &str, text: &str, output: Output) -> String {
+        evaluated_from("<stdin>", filter, text, output)
+    }
+
+    fn evaluated_from(input_filename: &str, filter: &str, text: &str, output: Output) -> String {
         let mut out = Vec::new();
-        evaluate(filter, text, output, &mut out).expect("evaluate");
+        evaluate(filter, text, input_filename, output, &mut out).expect("evaluate");
         String::from_utf8(out).expect("utf-8 output")
     }
 
     fn failure(filter: &str, text: &str) -> String {
         let mut out = Vec::new();
-        let report = evaluate(filter, text, PRETTY, &mut out).expect_err("evaluate should fail");
+        let report =
+            evaluate(filter, text, "<stdin>", PRETTY, &mut out).expect_err("evaluate should fail");
         describe(&report)
     }
 
@@ -37,6 +42,15 @@ mod tests {
             "\"shopping-notes\"\n"
         );
         assert_eq!(evaluated(".project_name", json, RAW), "shopping-notes\n");
+    }
+
+    #[test]
+    fn names_the_input_file_or_stdin() {
+        assert_eq!(evaluated("input_filename", "{}", RAW), "<stdin>\n");
+        assert_eq!(
+            evaluated_from("spex.yaml", "input_filename", "{}", RAW),
+            "spex.yaml\n"
+        );
     }
 
     #[test]

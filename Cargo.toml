@@ -2,7 +2,7 @@
 name = "main-spex"
 version = "0.27.1"
 edition = "2024"
-rust-version = "1.90"
+rust-version = "1.93.1"
 license = "MIT"
 description = "AI-first development framework that turns specifications into verified code"
 repository = "https://github.com/foreachpartners/main-spex"
@@ -22,14 +22,14 @@ clap = { version = "4.6.7", features = ["derive"] }
 derive_more = { version = "2.1.1", default-features = false, features = ["display"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_yaml_ng = "0.10.0"
-serde_json = { version = "1.0.151", features = ["preserve_order"] }
-jsonschema = { version = "0.58.5", default-features = false }
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+jsonschema = { version = "0.60.0", default-features = false }
 regex = "1.13.1"
 ignore = "0.4.33"
 globset = "0.4.20"
 include_dir = "0.7.4"
-ast-grep-config = "0.45.3"
-ast-grep-language = "0.45.3"
+ast-grep-config = "0.51.0"
+ast-grep-language = "0.51.0"
 terminal_size = "0.4.4"
 strum = { version = "0.28.0", features = ["derive"] }
 owo-colors = "4.4.0"
@@ -37,11 +37,11 @@ anstream = "1.0.0"
 walkdir = "2.5.0"
 supports-hyperlinks = "3.2.0"
 anstyle-hyperlink = { version = "1.0.2", features = ["file"] }
-jaq-all = { version = "0.3.0", default-features = false, features = ["std-all"] }
+jaq-all = { version = "0.4.0", default-features = false, features = ["std-all"] }
 jaq-json = { version = "2.0.3", features = ["serde"] }
 eros = { version = "0.8.1", features = ["location"] }
 
 [dev-dependencies]
 tempfile = "3.27.0"
 serial_test = "4.0.1"
-indoc = "2.0.7"
+indoc = "2.0.8"

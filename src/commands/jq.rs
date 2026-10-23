@@ -19,6 +19,7 @@ use crate::error::{Result, could_not_read};
 mod jq_test;
 
 const PRETTY_INDENT: &str = "  ";
+const STDIN_FILENAME: &str = "<stdin>";
 
 #[derive(Args)]
 pub struct JqArgs {
@@ -44,8 +45,12 @@ pub fn run(args: JqArgs) -> Result<ExitCode> {
         raw: args.raw_output,
         compact: args.compact_output,
     };
+    let input_filename = args.file.as_deref().map_or_else(
+        || STDIN_FILENAME.to_string(),
+        |path| path.display().to_string(),
+    );
     let mut stdout = BufWriter::new(io::stdout().lock());
-    evaluate(&args.filter, &text, output, &mut stdout)?;
+    evaluate(&args.filter, &text, &input_filename, output, &mut stdout)?;
     stdout
         .flush()
         .context("could not write to standard output")?;
@@ -67,17 +72,24 @@ fn read_input(file: Option<&Path>) -> Result<String> {
     }
 }
 
-fn evaluate(filter: &str, text: &str, output: Output, out: &mut dyn Write) -> Result<()> {
+fn evaluate(
+    filter: &str,
+    text: &str,
+    input_filename: &str,
+    output: Output,
+    out: &mut dyn Write,
+) -> Result<()> {
     let compiled = compile_with(filter, defs(), data::base_funs(), &[])
         .map_err(|reports| eros::error!("{}", describe_filter_errors(&reports)))?;
     let input = parse_input(text)?;
+    let input_filename = Val::from(input_filename.to_string());
     let pp = printer(output);
 
     data::run(
         &data::Runner::default(),
         &compiled,
         Vars::default(),
-        std::iter::once(Ok::<_, String>(input)),
+        (&input_filename, std::iter::once(Ok::<_, String>(input))),
         |message| eros::error!("{message}"),
         |result| {
             let value = unwrap_valr(result).map_err(|err| eros::error!("jq: {err}"))?;
