@@ -19,4 +19,4 @@ Creates or changes the project's PRD, its overall goal and main capabilities, by
 - MUST list the existing specs a change affects when an edit removes, renames, or narrows a capability, and ask whether to update them with `spex-spec`, never changing them itself.
 - MUST tell the user the path it wrote and ask whether to change anything further, applying requested edits in place.
 - MUST offer to break the PRD into specs with `spex-spec from prd`, noting that starting a new chat first saves context.
-- SHOULD NOT list more than about ten capabilities, a sign the PRD has descended to the level of specs.
+- SHOULD keep each capability high level, without details that belong in specs.

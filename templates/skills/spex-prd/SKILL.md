@@ -21,7 +21,7 @@ The PRD starts with `# Product requirements`, then these sections in this order:
 - `## Goal` — the outcome the product delivers, one paragraph.
 - `## Users` — one line per user or actor: who they are and what they come for.
 - `## Success` — observable outcomes that show the product works, with numbers where the user has them.
-- `## Capabilities` — the main blocks, one line each: a bold name and one sentence of user-visible outcome. Each breaks down into one or more specs later. Keep to about ten; more means the PRD has descended to the level of specs.
+- `## Capabilities` — the main blocks, one line each: a bold name and one sentence of user-visible outcome. Each breaks down into one or more specs later, so keep them high level, without details.
 - `## Non-goals` — what the product deliberately does not do, one line each, with the reason when it is not obvious.
 
 ## Step 0 — Establish create vs edit

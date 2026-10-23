@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.27.2] - 2026-10-23
+
+- The `spex-prd` skill no longer caps the capabilities at about ten: it asks to keep them high level, without details. `spex update` rewrites the skill; no migration steps.
+
 ## [0.27.1] - 2026-10-23
 
 - The `spex-spec` and `spex-review-spec` skills read the PRD when `spex info` prints `prd`: `spex-spec` before drafting, so each spec lines up with the product's goal and capabilities, and `spex-review-spec` for the product's goal behind the spec it reviews. `spex update` rewrites the skills; no migration steps.
