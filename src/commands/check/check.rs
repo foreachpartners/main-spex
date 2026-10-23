@@ -137,7 +137,8 @@ pub fn run(args: CheckArgs) -> Result<ExitCode> {
         .collect();
 
     let selected = select_packages(&spex, &args.package, &args.files)?;
-    let mut conformance = validate_conformance(&spex.dir, &spex.packages, &specs, &rules)?;
+    let mut conformance =
+        validate_conformance(&spex.dir, &spex.prd, &spex.packages, &specs, &rules)?;
 
     let mut reports = Vec::with_capacity(selected.len());
     let mut project_checks = ProjectChecks::new();

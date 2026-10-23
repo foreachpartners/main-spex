@@ -12,6 +12,8 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 - Otherwise ask the user whether the project already has a PRD or product brief file. If it does, set `prd` in `spex.yaml` to its path relative to `<spex-dir>`, after `description` (after `agent_root` when there is none).
 - If it has none, set `prd: docs/prd.md` the same way, then write `<spex-dir>/docs/prd.md` by interviewing the user about the product, one question at a time, pre-filling every answer from `spex.yaml`, the package descriptions, and the specs (`spex specs --ai`). Use the `spex-prd` skill when `<agent-root>/.agents/skills/spex-prd` exists; a project older than 0.27.0 has no such skill, so write `# Product requirements` with `## Problem`, `## Goal`, `## Users`, `## Success`, `## Capabilities` (the main blocks, one line each: a bold name and one sentence of user-visible outcome) and `## Non-goals`, short and without details.
 
+`spex check` now also errors on every file `spex.yaml` declares that does not exist: the `prd` file, handled above, and the `path` of each `contracts` entry. In `<spex-dir>`, for every `contracts` entry whose `path` (relative to `<spex-dir>`) names no existing file, ask the user whether the path is wrong or the contract is not written yet. Fix the path in the first case; in the second, write the contract with the `spex-contract` skill when `<agent-root>/.agents/skills/spex-contract` exists, or drop the entry.
+
 ## 0.26.0
 
 A spec must now set `packages`, at least one: `schemas/spec.schema.json` requires it. A spec that sets none fails `spex check` with a schema error until it lists the packages that implement it, and the "Gaps" section of `spex coverage` no longer has a `no package` heading. In `<spex-dir>`:

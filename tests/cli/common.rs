@@ -163,6 +163,12 @@ pub fn copy_no_spex(project: &Path) {
     }
 }
 
+pub fn write_prd(spex_dir: &Path) {
+    let docs = spex_dir.join("docs");
+    fs::create_dir_all(&docs).expect("create docs dir");
+    fs::write(docs.join("prd.md"), "# Product requirements\n").expect("write prd");
+}
+
 pub fn add_packages(project: &Path) {
     let config_path = project.join("proj-spex/spex.yaml");
     let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");

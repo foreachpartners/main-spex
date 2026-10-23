@@ -18,8 +18,14 @@ mod tests {
             ..testing::spec("a")
         };
 
-        let findings =
-            validate_conformance(spex_dir.path(), &[], &[spec], &[]).expect("conformance");
+        let findings = validate_conformance(
+            spex_dir.path(),
+            &spex_dir.path().join("docs/prd.md"),
+            &[],
+            &[spec],
+            &[],
+        )
+        .expect("conformance");
 
         let locations: Vec<Location> = findings
             .iter()

@@ -5,7 +5,7 @@ use tempfile::tempdir;
 
 use crate::common::{
     add_packages, assert_fails_mentioning, copy_no_spex, copy_project, dummy_project_fixture,
-    report_text, run_spex, runners_project_fixture, temp_project, with_version_header,
+    report_text, run_spex, runners_project_fixture, temp_project, with_version_header, write_prd,
 };
 
 mod ast_grep;
@@ -621,6 +621,7 @@ fn preexisting_errors_baseline_suppresses_matching_error() {
     assert!(init.status.success(), "init failed");
 
     add_packages(&project);
+    write_prd(&project.join("proj-spex"));
 
     let config_path = project.join("proj-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
@@ -751,6 +752,40 @@ fn check_dummy_project_matches_expected() {
         "check should exit 0 when there are no errors (exit {:?})",
         check.status.code(),
     );
+}
+
+#[test]
+fn check_errors_on_a_missing_prd_file() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    fs::remove_file(project.join("dummy-project-spex/docs/prd.md")).expect("remove prd");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        report.contains(
+            "error  spex-internal-conformance/declared-files-exist  (spex.yaml)\n      `prd` file `docs/prd.md` does not exist"
+        ),
+        "{report}"
+    );
+    assert_eq!(check.status.code(), Some(1));
+}
+
+#[test]
+fn check_errors_on_a_missing_contract_file() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+    fs::remove_file(project.join("dummy-project-spex/contracts.md")).expect("remove contract");
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(
+        report.contains(
+            "error  spex-internal-conformance/declared-files-exist  (spex.yaml)\n      `contracts` file `contracts.md` of package `dummy-project-api` does not exist"
+        ),
+        "{report}"
+    );
+    assert_eq!(check.status.code(), Some(1));
 }
 
 const EXPECTED_API_ONLY_CHECK_REPORT: &str = r#"dummy-project-api

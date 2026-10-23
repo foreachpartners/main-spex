@@ -2,6 +2,7 @@ mod ac_order;
 mod blocked_by;
 mod conformance;
 mod coverage_ignore;
+mod declared_files;
 mod duplicate_ac_ids;
 mod duplicate_ids;
 mod packages;

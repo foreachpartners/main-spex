@@ -9,6 +9,7 @@ use super::super::finding::{Finding, Location, Source};
 use super::ac_order::validate_ac_order;
 use super::blocked_by::{status_by_id, validate_blocked_by};
 use super::coverage_ignore::validate_coverage_ignore;
+use super::declared_files::validate_declared_files;
 use super::duplicate_ac_ids::validate_no_duplicate_ac_ids;
 use super::duplicate_ids::validate_no_duplicate_ids;
 use super::packages::validate_packages;
@@ -26,6 +27,7 @@ const CONFORM_CHECK: &str = "spec-files-conform";
 
 pub(in crate::commands::check) fn validate_conformance(
     spex_dir: &Path,
+    prd: &Path,
     packages: &[Package],
     specs: &[Spec],
     rules: &[Rule],
@@ -45,6 +47,7 @@ pub(in crate::commands::check) fn validate_conformance(
     }
 
     findings.extend(validate_schema(spex_dir, packages, specs, rules)?);
+    findings.extend(validate_declared_files(spex_dir, prd, packages));
     findings.extend(validate_script_references(rules));
     findings.extend(validate_ac_order(specs, rules));
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));

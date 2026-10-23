@@ -4,7 +4,8 @@ use std::path::Path;
 use tempfile::tempdir;
 
 use crate::common::{
-    add_packages, assert_fails_mentioning, copy_no_spex, report_text, run_spex, with_version_header,
+    add_packages, assert_fails_mentioning, copy_no_spex, report_text, run_spex,
+    with_version_header, write_prd,
 };
 
 const EXPECTED_CHECK_REPORT: &str = r#"proj-spex
@@ -57,6 +58,7 @@ fn init_then_check_no_spex_project() {
     );
 
     add_packages(&project);
+    write_prd(&project.join("proj-spex"));
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
@@ -155,6 +157,8 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
         fs::read_link(project.join("CLAUDE.md")).expect("CLAUDE.md symlink"),
         Path::new("AGENTS.md")
     );
+
+    write_prd(&project.join("spex"));
 
     let check = run_spex(&project, &["check"], "");
     assert_eq!(

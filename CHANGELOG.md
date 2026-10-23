@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.28.0] - 2026-10-23
 
 - **Breaking**: the PRD is now required. `prd`, the path of the project's PRD, is a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and every command that loads the project stops with an error on a `spex.yaml` that sets none. `spex init` seeds `prd: docs/prd.md`, `spex-setup` runs `spex-prd` when there is no PRD yet, `spex-spec` and `spex-review-spec` always read it, and the `spex` skill lists it among the project's paths. `spex update` rewrites the schemas, skills, glossary and the managed section of `AGENTS.md`. See the migration guide.
+- **Breaking**: `spex check` errors on every file `spex.yaml` declares that does not exist, the `prd` file and the `path` of each `contracts` entry, as `spex-internal-conformance/declared-files-exist` at `spex.yaml`, whatever `--package` or `--files` select. A project made by `spex init` therefore fails `spex check` until `spex-setup` writes its PRD. See the migration guide.
 
 ## [0.27.2] - 2026-10-23
 

@@ -65,6 +65,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run `spex-internal-conformance` and the spec-scoped checks (reported as `<spec-id>/<check>`) on every `spex check`, whatever `--package` or `--files` select, since they validate the spex directory as a whole, and report them under the spex package's heading, which is added when that package is not selected.
 - MUST run the `@spec` annotation checks (`annotation-format`, `no-orphan-annotations`) only on the files of the selected packages: `--package api` checks the annotations in `api`, and `--package spex` does not check them in `api`.
 - MUST validate `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.package.yaml` of every package that has one against their JSON Schema.
+- MUST require every file `spex.yaml` declares to exist: the `prd` file and each `contracts` entry's `path`, erroring on every missing one with its path as written relative to the spex directory, and, for a contract, the package that declares it.
 - MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id allowed schema.
 - MUST require each spec file to be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - MUST require every script a rule check references to exist in the rule's script folder, beside the rule file.
