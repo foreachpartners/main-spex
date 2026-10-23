@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.27.1] - 2026-10-23
+
+- The `spex-spec` and `spex-review-spec` skills read the PRD when `spex info` prints `prd`: `spex-spec` before drafting, so each spec lines up with the product's goal and capabilities, and `spex-review-spec` for the product's goal behind the spec it reviews. `spex update` rewrites the skills; no migration steps.
+
 ## [0.27.0] - 2026-10-22
 
 - New `spex-prd` skill writes or changes the project's PRD, the optional root of the artifact chain, and records its path in the new optional `prd` field of `spex.yaml`, which `spex info` prints as an absolute path. `spex update` writes the skill and rewrites the schema; no migration steps.

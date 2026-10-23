@@ -13,7 +13,7 @@ Use the spec the user provided. Otherwise resolve it from the current work: the 
 
 ### 2. Fetch the spec
 
-Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the resolved spec(s).
+Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the resolved spec(s). Read the PRD in full when `spex info` prints `prd`, for the product's goal behind the spec.
 
 ### 3. Find the implementation
 

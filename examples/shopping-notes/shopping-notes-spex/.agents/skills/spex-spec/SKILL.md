@@ -37,6 +37,7 @@ Determine what the specs are based on before doing anything else:
 - If the user attached or pasted a source (a PRD, an RFD, or a feature description) — whether as text or as a file path/link — treat it as the primary input. Read the attached file or the pasted text in full and pre-fill every answer you can from it before asking anything.
 - If the user provided no source and nothing to spec, ask first what they want to spec. Do not invent a capability or proceed on assumptions.
 - Read `<spex-dir>/spex.yaml` for the project overview. Package names are arbitrary, so read each package's `description` to learn its role and use that to determine the spec's `packages`.
+- Read the PRD in full when `spex info` prints `prd`, to align the specs with the product's goal and capabilities.
 - Run `spex specs --ai --output <tmp-path>`, then read `<tmp-path>` for related specs.
 - Read the interface contracts in the spex directory's `contracts/` folder, listed per package under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
 - Run `spex rules --id writing-style --ai` for the writing conventions the spec's prose must follow.
