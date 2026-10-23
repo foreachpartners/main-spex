@@ -4,9 +4,9 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-PRD (why and what, optional) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
+PRD (why and what) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
 
-- **PRD** (optional) — the product's overall goal and main capabilities, kept high level and without details: those live in specs.
+- **PRD** — the short project overview that comes first: what we are building and why. Kept high level, without details: those live in specs. Agents read it to write specs that fit the project's purpose.
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`
 - **Skill** — the instructions an AI agent follows to do the job consistently and correctly.

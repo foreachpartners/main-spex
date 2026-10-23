@@ -18,6 +18,7 @@ pub struct Spex {
     pub dir: PathBuf,
     pub project_name: String,
     pub agent_root: PathBuf,
+    pub prd: PathBuf,
     pub packages: Vec<Package>,
 }
 
@@ -46,6 +47,7 @@ impl Spex {
             .collect();
         Self {
             agent_root: normalize(&dir.join(&config.agent_root)),
+            prd: normalize(&dir.join(&config.prd)),
             dir,
             project_name: config.project_name,
             packages,

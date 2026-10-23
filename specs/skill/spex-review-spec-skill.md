@@ -8,7 +8,7 @@ Spec-axis review of the current branch against a spec: is what is implemented of
 - MUST resolve the spec, when not provided, from the feature branch diff against its base branch and the uncommitted changes: the specs changed in them and the specs named by `@spec` annotations in the changed code.
 - MUST ask the user when no spec resolves.
 - MUST fetch the spec or specs with `spex specs --ai --id <spec-id-a> <spec-id-b>`.
-- MUST read the PRD in full when `spex info` prints `prd`, for the product's goal behind the spec.
+- MUST read the PRD in full, at the path `spex info` prints as `prd`, for the product's goal behind the spec.
 - MUST review the implementation as it stands on the current branch, not the changes since a starting point.
 - MUST find the implementation by its `@spec impl <spec-id>` annotations in the packages listed in the spec's `packages`.
 - MUST report, against the implementation, its contract, and the spec contents, the acceptance criteria whose implementation looks wrong.

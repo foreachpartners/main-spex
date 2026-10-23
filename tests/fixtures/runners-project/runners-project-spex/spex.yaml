@@ -5,6 +5,7 @@ agent_root: .
 description: >-
   Fixture for the check runners (regexp, glob, ast-grep, script) and the script
   run scopes (per-file, per-package, project), with intentional violations.
+prd: docs/prd.md
 packages:
   - package_name: runners-project-api
     package_short_name: api

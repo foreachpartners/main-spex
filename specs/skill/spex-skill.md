@@ -7,6 +7,7 @@ The framework context skill: the paths, the artifacts, and the commands of a spe
 - MUST be loaded before reading, writing, testing, or running any code in a spex project.
 - MUST tell the agent to run `spex info` for the project configuration; its `spex_dir` is the directory the skill describes, holding the specs and config that govern the whole project.
 - MUST describe `spex.yaml` as the project and each package's configuration: description, paths, contracts, and applicable rules.
+- MUST describe the PRD, the file `spex info` prints as `prd`, as the short project overview of what is built and why, without details, giving the big picture to write specs that fit the project's purpose.
 - MUST describe `specs/` as the capabilities the system must provide, with acceptance criteria, and as the single source of truth for the project: all behaviour, contracts, code, tests and other artifacts come from it and adhere to it.
 - MUST describe `rules/` as cross-cutting conventions with acceptance criteria, which each package adheres to as listed for it in `spex.yaml`, and a rule's `script` checks as keeping their scripts in a folder named after the rule beside its file (`rules/<rule-id>.yaml` and `rules/<rule-id>/`).
 - MUST describe `schemas/` as the JSON Schemas `spex check` validates `spex.yaml`, each package's `spex.package.yaml`, specs, rules, and plans against.

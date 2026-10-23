@@ -8,7 +8,7 @@ Initializes the spex directory for a project in one of the three [layouts](../pr
 - MUST prompt to confirm the project name, defaulting to the project root folder name.
 - MUST prompt for the layout, as a numbered list answered with the number or the name and defaulting to `multi-repo`.
 - MUST create the spex directory in the project root: `<project-name>-spex` in `multi-repo`, `spex` otherwise.
-- MUST copy bundled `spex.yaml` in spex directory and replace `unknown` for chosen `project_name`, the installed CLI's version as `cli_version`, the chosen `layout`, `agent_root` (`.` in `multi-repo`, `..` otherwise), `package_name` as the spex directory name (`<project-name>-spex` in `multi-repo`, `spex` otherwise).
+- MUST copy bundled `spex.yaml` in spex directory and replace `unknown` for chosen `project_name`, the installed CLI's version as `cli_version`, the chosen `layout`, `agent_root` (`.` in `multi-repo`, `..` otherwise), `package_name` as the spex directory name (`<project-name>-spex` in `multi-repo`, `spex` otherwise), and keep its `prd: docs/prd.md`.
 - MUST write the bundled templates into the spex directory as is: schemas, docs, rules.
 - MUST create empty `specs/`, `plans/`, and `contracts/` folders in spex dir.
 - MUST write, in the agent root, an `AGENTS.md` and a `CLAUDE.md` -> `AGENTS.md` symlink.

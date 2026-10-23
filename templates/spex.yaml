@@ -3,6 +3,7 @@ layout: unknown
 agent_root: unknown
 description: >-
   unknown
+prd: docs/prd.md
 packages:
   - package_name: unknown
     package_short_name: spex

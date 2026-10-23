@@ -66,6 +66,7 @@ mod tests {
                 cli_version: 0.0.0
                 layout: multi-repo
                 agent_root: .
+                prd: docs/prd.md
                 packages:
                   - package_name: demo-api
                     package_short_name: api
@@ -185,6 +186,7 @@ mod tests {
                 cli_version: 0.0.0
                 layout: multi-repo
                 agent_root: .
+                prd: docs/prd.md
                 packages:
                   - package_name: demo-api
                     package_short_name: api

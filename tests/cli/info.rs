@@ -12,6 +12,7 @@ const EXPECTED_INFO: &str = r#"{
   "layout": "multi-repo",
   "agent_root": {spex_dir},
   "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
+  "prd": {prd_file},
   "rules_unused": [],
   "packages": [
     {
@@ -63,7 +64,16 @@ fn with_project_dirs(template: &str, project: &Path) -> String {
             .expect("canonical package dir");
         serde_json::to_string(&dir).expect("package dir as JSON")
     };
+    let prd_file = project
+        .join("dummy-project-spex")
+        .canonicalize()
+        .expect("canonical spex dir")
+        .join("docs/prd.md");
     template
+        .replace(
+            "{prd_file}",
+            &serde_json::to_string(&prd_file).expect("prd file as JSON"),
+        )
         .replace("{spex_dir}", &as_json("dummy-project-spex"))
         .replace("{api_dir}", &as_json("dummy-project-api"))
         .replace("{frontend_dir}", &as_json("dummy-project-frontend"))
@@ -76,6 +86,7 @@ const EXPECTED_INFO_API: &str = r#"{
   "layout": "multi-repo",
   "agent_root": {spex_dir},
   "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
+  "prd": {prd_file},
   "rules_unused": [],
   "packages": [
     {
@@ -128,24 +139,17 @@ fn info_prints_the_resolved_configuration_as_json() {
 }
 
 #[test]
-fn info_prints_the_prd_as_an_absolute_path_and_omits_an_unset_one() {
+fn info_fails_on_a_spex_yaml_without_a_prd() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
-    let spex_dir = project.join("dummy-project-spex");
-    let unset = info_json(&run_spex(&project, &["info"], "").stdout);
-    assert!(unset.get("prd").is_none());
-    let spex_yaml = spex_dir.join("spex.yaml");
+    let spex_yaml = project.join("dummy-project-spex/spex.yaml");
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
-    let patched = config.replace("\npackages:", "\nprd: docs/prd.md\npackages:");
-    assert_ne!(patched, config, "packages not found in spex.yaml");
+    let patched = config.replace("prd: docs/prd.md\n", "");
+    assert_ne!(patched, config, "prd not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
 
-    let info = info_json(&run_spex(&project, &["info"], "").stdout);
+    let info = run_spex(&project, &["info"], "");
 
-    let expected = spex_dir.canonicalize().expect("canonical spex dir");
-    assert_eq!(
-        info["prd"],
-        serde_json::json!(expected.join("docs/prd.md").to_string_lossy()),
-    );
+    assert_fails_mentioning(&info, "prd");
 }
 
 #[test]

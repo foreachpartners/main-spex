@@ -1,6 +1,6 @@
 # Glossary
 
-- **PRD** (Product Requirements Document) — the root source. Describes _why_ something is being built and _what_ the product should do: goals, success, features, and user-facing behavior. Written by/for product, design, and engineering. Optional, and kept at the level of the overall goal and main capabilities: the details live in specs. Its path is the `prd` field of `spex.yaml`.
+- **PRD** (Product Requirements Document) — the short project overview that comes first: _what_ we are building and _why_, without details. It gives people and AI agents the big picture they need to write specs that fit the project's purpose. One per project, kept at the level of the overall goal, success, and main capabilities: the details live in specs.
 
   ```md
   Goal: let customers order pizza online to increase sales.
@@ -10,7 +10,7 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Most are extracted from the PRD, which typically breaks down into many specs; some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
   id: place-pizza-order

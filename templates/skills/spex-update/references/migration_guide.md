@@ -4,6 +4,14 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.28.0
+
+`prd`, the path of the project's PRD relative to `<spex-dir>`, is now a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and the CLI cannot load a `spex.yaml` without it. The PRD is the short project overview that comes first, what is built and why, without details, which agents read before they write or review specs. In `<spex-dir>`:
+
+- If `spex.yaml` sets `prd` and the file it names exists, change nothing.
+- Otherwise ask the user whether the project already has a PRD or product brief file. If it does, set `prd` in `spex.yaml` to its path relative to `<spex-dir>`, after `description` (after `agent_root` when there is none).
+- If it has none, set `prd: docs/prd.md` the same way, then write `<spex-dir>/docs/prd.md` by interviewing the user about the product, one question at a time, pre-filling every answer from `spex.yaml`, the package descriptions, and the specs (`spex specs --ai`). Use the `spex-prd` skill when `<agent-root>/.agents/skills/spex-prd` exists; a project older than 0.27.0 has no such skill, so write `# Product requirements` with `## Problem`, `## Goal`, `## Users`, `## Success`, `## Capabilities` (the main blocks, one line each: a bold name and one sentence of user-visible outcome) and `## Non-goals`, short and without details.
+
 ## 0.26.0
 
 A spec must now set `packages`, at least one: `schemas/spec.schema.json` requires it. A spec that sets none fails `spex check` with a schema error until it lists the packages that implement it, and the "Gaps" section of `spex coverage` no longer has a `no package` heading. In `<spex-dir>`:

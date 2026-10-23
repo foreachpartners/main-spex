@@ -97,7 +97,7 @@ The file may keep a trailing comma after the last folder.
 
 ## Next
 
-Offer to write the PRD with `spex-prd` (the project's overall goal and main capabilities) when `spex.yaml` sets no `prd`, or to author the first spec with `spex-spec` (a capability the system must provide) or `spex-rule` (a cross-cutting convention). Note that it is better to start a new chat first to save context.
+When the file `prd` names in `spex.yaml` does not exist or is empty, run the `spex-prd` skill with the Skill tool to write the PRD (the project's overall goal and main capabilities), since every project needs one. Then offer to author the first spec with `spex-spec` (a capability the system must provide) or the first rule with `spex-rule` (a cross-cutting convention). Note that it is better to start a new chat first to save context.
 
 ---
 

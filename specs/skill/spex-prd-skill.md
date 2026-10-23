@@ -4,8 +4,7 @@ Creates or changes the project's PRD, its overall goal and main capabilities, by
 
 ## Acceptance criteria
 
-- MUST locate the PRD, one file per project, at the absolute path `spex info` prints as `prd`, defaulting to `docs/prd.md` in the spex directory when `prd` is unset, or at the path the user gives.
-- MUST set `prd` in `spex.yaml` to the PRD's path relative to the spex directory, after `description` (after `agent_root` when there is none), when it writes a PRD and `prd` is unset, and validate `spex.yaml` against `schemas/spex.schema.json`.
+- MUST locate the PRD, one file per project, at the absolute path `spex info` prints as `prd`, or at the path the user gives.
 - MUST treat the request as an edit when the PRD file exists or the user asks to change the PRD, reading it in full, interviewing only about what should change, and preserving every untouched section, heading, and order; otherwise as a new PRD.
 - MUST gather context before interviewing: the user's source read in full, `spex.yaml`, the glossary, and, for an edit, the existing specs (`spex specs --ai`).
 - MUST ask the user what the product is when there is no source and no product to describe, never inventing one.

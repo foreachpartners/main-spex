@@ -5,8 +5,8 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 ## Acceptance criteria
 
 - MUST declare the project and its packages in `spex.yaml`, in the spex directory.
-- MUST require the root fields `project_name`, `cli_version`, `layout` (`multi-repo`, `single-repo`, or `monorepo`), and `agent_root` (the [agent root](../../docs/glossary.md), relative to the spex directory).
-- MUST have `spex init` write `layout` and `agent_root`.
+- MUST require the root fields `project_name`, `cli_version`, `layout` (`multi-repo`, `single-repo`, or `monorepo`), `agent_root` (the [agent root](../../docs/glossary.md), relative to the spex directory), and `prd` (the path of the project's [PRD](../../docs/glossary.md), relative to the spex directory).
+- MUST have `spex init` write `layout`, `agent_root`, and `prd` (`docs/prd.md`).
 - MUST require, in each package entry, `package_name`, `package_short_name`, and `path` (relative to the spex directory).
 - MUST make `package_name` the full `<project-name>-<package-short-name>`, matching the package directory in `multi-repo`; in `single-repo` it is the project name, which is then also the `package_short_name`.
 - MUST require, in each `contracts` entry, a `path` and a `description`; the path is user-owned, typically inside the owning package, and relative to the spex directory.
@@ -14,7 +14,7 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 - MUST declare a package entry's `exclude` as a list of glob patterns, the globs a [check's](../rule/rule-checks-rule.md) `include` / `exclude` use, matched against paths relative to the package's root, each naming files or folders that `spex check` and `spex coverage` leave out of that package, as [spex check](../cli/spex-check-cli-cmd.md) and [spex coverage](../cli/spex-coverage-cli-cmd.md) describe.
 - MUST apply the `exclude`, `check_ignore`, and `coverage_ignore` declared in a package entry to that package only, so the excludes and ignores of one package never affect another.
 - MUST validate `spex.yaml` against `schemas/spex.schema.json`.
-- MAY declare the root fields `description`, `prd` (the path of the project's [PRD](../../docs/glossary.md), relative to the `spex.yaml` file), `rules_unused` (Rule IDs `spex update` must not redeploy), and `packages`.
+- MAY declare the root fields `description`, `rules_unused` (Rule IDs `spex update` must not redeploy), and `packages`.
 - MAY declare, in each package entry, a `description`, a `contracts` list, a `rules` list, and its own `exclude`, `check_ignore` and `coverage_ignore`.
 
 ## Examples

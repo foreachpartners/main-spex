@@ -8,7 +8,7 @@ use serde_json::Value;
 use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
-use crate::support::fs::{canonical, normalize};
+use crate::support::fs::canonical;
 
 #[derive(Args)]
 pub struct InfoArgs {
@@ -30,7 +30,6 @@ struct Info {
 pub fn run(args: InfoArgs) -> Result<ExitCode> {
     let (dir, config) = Spex::discover_config()?;
     let mut config_json = to_json(&config)?;
-    let prd = config.prd.clone();
     let raw_packages = config
         .packages
         .iter()
@@ -53,13 +52,7 @@ pub fn run(args: InfoArgs) -> Result<ExitCode> {
     );
     config_json["agent_root"] =
         Value::String(canonical(&spex.agent_root).to_string_lossy().into_owned());
-    if let Some(prd) = prd {
-        config_json["prd"] = Value::String(
-            canonical(&normalize(&spex.dir.join(prd)))
-                .to_string_lossy()
-                .into_owned(),
-        );
-    }
+    config_json["prd"] = Value::String(canonical(&spex.prd).to_string_lossy().into_owned());
     let info = Info {
         spex_dir: spex.dir.to_string_lossy().into_owned(),
         config: config_json,

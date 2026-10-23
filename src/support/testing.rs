@@ -78,6 +78,7 @@ pub fn spex(packages: Vec<Package>) -> Spex {
         dir: spex_dir().to_path_buf(),
         project_name: "demo".to_string(),
         agent_root: spex_dir().to_path_buf(),
+        prd: spex_dir().join("docs/prd.md"),
         packages,
     }
 }
@@ -89,7 +90,7 @@ pub fn spex_config() -> SpexConfig {
         layout: Layout::MultiRepo,
         agent_root: ".".to_string(),
         description: None,
-        prd: None,
+        prd: "docs/prd.md".to_string(),
         rules_unused: Vec::new(),
         packages: Vec::new(),
     }

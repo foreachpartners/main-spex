@@ -5,11 +5,11 @@ description: Write or change the project's PRD — its overall goal and main cap
 
 # Write or change the PRD
 
-A PRD says _why_ the product is built and _what_ it does, at the level of the overall goal and its main capabilities. Details live downstream: acceptance criteria in specs, interfaces in contracts, conventions in rules, steps and dates in plans. A PRD is optional, one file per project. Your job is to interview the user about the product, then write the PRD — or, when one exists, change it in place.
+A PRD says _why_ the product is built and _what_ it does, at the level of the overall goal and its main capabilities. Details live downstream: acceptance criteria in specs, interfaces in contracts, conventions in rules, steps and dates in plans. There is one PRD per project. Your job is to interview the user about the product, then write the PRD — or, when one exists, change it in place.
 
 ## Paths
 
-Replace `<spex-dir>` with the spex directory, printed by `spex info | spex jq -r .spex_dir`, and `<prd-file>` with the PRD's absolute path, printed by `spex info | spex jq -r '.prd // empty'`: the `prd` field of `spex.yaml`, `<spex-dir>/docs/prd.md` when it is unset. When the user keeps the PRD elsewhere, use the path they give. `<prd-path>` is `<prd-file>` relative to `<spex-dir>`, the value `prd` holds in `spex.yaml`.
+Replace `<spex-dir>` with the spex directory, printed by `spex info | spex jq -r .spex_dir`, and `<prd-file>` with the PRD's absolute path, printed by `spex info | spex jq -r .prd`: the `prd` field of `spex.yaml`. When the user keeps the PRD elsewhere, use the path they give.
 
 The PRD is `<prd-file>`.
 
@@ -48,9 +48,8 @@ The step is done when the user confirms a shared understanding and every require
 ## Step 3 — Write, then offer edits
 
 1. Write `<prd-file>`, following the structure of [`references/prd-example.md`](references/prd-example.md). When editing, change only what the user asked and leave every other section, its heading, and its order untouched.
-2. When `spex.yaml` sets no `prd`, set `prd: <prd-path>` in it, after `description` (after `agent_root` when there is none), then run `spex check-schema --schema schemas/spex.schema.json --files spex.yaml` from `<spex-dir>` and fix any violation.
-3. Tell the user the path you wrote and ask whether they want to change anything further. Apply requested edits in place.
-4. When an edit removes, renames, or narrows a capability, list the specs it affects from Step 1 and ask whether to update them with `spex-spec`. Never change a spec here.
+2. Tell the user the path you wrote and ask whether they want to change anything further. Apply requested edits in place.
+3. When an edit removes, renames, or narrows a capability, list the specs it affects from Step 1 and ask whether to update them with `spex-spec`. Never change a spec here.
 
 ## Step 4 — Point to the next skill
 

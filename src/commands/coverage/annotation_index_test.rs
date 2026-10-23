@@ -116,7 +116,7 @@ mod tests {
         .expect("write contract");
 
         let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
-            "project_name: demo\ncli_version: 0.0.0\nlayout: multi-repo\nagent_root: .\npackages:\n  - package_name: demo-api\n    package_short_name: api\n    path: ../demo-api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
+            "project_name: demo\ncli_version: 0.0.0\nlayout: multi-repo\nagent_root: .\nprd: docs/prd.md\npackages:\n  - package_name: demo-api\n    package_short_name: api\n    path: ../demo-api\n    contracts:\n      - path: contracts/api.openapi.yaml\n        description: REST API\n",
         )
         .expect("parse config");
 
@@ -137,7 +137,7 @@ mod tests {
             .expect("write source");
 
         let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
-            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\npackages:\n  - package_name: demo\n    package_short_name: demo\n    path: ..\n",
+            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\nprd: docs/prd.md\npackages:\n  - package_name: demo\n    package_short_name: demo\n    path: ..\n",
         )
         .expect("parse config");
 
@@ -161,7 +161,7 @@ mod tests {
         package_entry: &str,
     ) -> crate::config::spex::Spex {
         let config: crate::config::SpexConfig = serde_yaml_ng::from_str(&format!(
-            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\npackages:\n{package_entry}"
+            "project_name: demo\ncli_version: 0.0.0\nlayout: single-repo\nagent_root: ..\nprd: docs/prd.md\npackages:\n{package_entry}"
         ))
         .expect("parse config");
         crate::config::spex::Spex::from_config(spex_dir, config)

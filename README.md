@@ -45,19 +45,18 @@ Every artifact is traced back to its spec by the spec ID:
 
 ```mermaid
 flowchart LR
-    PRD -.-> Spec --> Contract --> Impl --> Test
+    PRD --> Spec --> Contract --> Impl --> Test
 ```
 
 ### PRD
 
-Optional: the project's overall goal and main capabilities, the root the specs are broken down from. It keeps the why and the what, never the details:
+The project overview that comes first: its overall goal and main capabilities, the big picture the specs are written from. It keeps the why and the what, never the details:
 
 ```text
 You: /spex-prd shopping notes app
 AI:  Who uses it, and when?
 You: A shopper in the store, checking what is left to buy.
 AI:  Created shopping-notes-spex/docs/prd.md
-     ✓ prd: docs/prd.md in spex.yaml
      ✓ Problem, Goal, Users, Success
      ✓ Capabilities: add item, view list, mark bought, delete item, clear list
      ✓ Non-goals: accounts and shared lists, quantities and prices

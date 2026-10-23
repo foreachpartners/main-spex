@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://spex.dev/schemas/spec.schema.json",
   "title": "Spec",
-  "description": "A spec: one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics captured as acceptance criteria. Most are extracted from the PRD; some capture supporting technical capabilities.",
+  "description": "A spec: one coherent capability the system must provide — a product behavior, or a technical implementation needed to support the product's rules — with its specifics captured as acceptance criteria. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities.",
   "type": "object",
   "properties": {
     "id": {

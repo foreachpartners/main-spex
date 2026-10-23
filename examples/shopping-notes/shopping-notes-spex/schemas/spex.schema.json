@@ -32,7 +32,7 @@
     },
     "prd": {
       "type": "string",
-      "description": "Optional path to the project's PRD (product requirements document), relative to the `spex.yaml` file (for example `docs/prd.md`).",
+      "description": "Path to the project's PRD (product requirements document), relative to the `spex.yaml` file (for example `docs/prd.md`).",
       "minLength": 1
     },
     "rules_unused": {
@@ -179,7 +179,7 @@
       "additionalProperties": false
     }
   },
-  "required": ["project_name", "cli_version", "layout", "agent_root"],
+  "required": ["project_name", "cli_version", "layout", "agent_root", "prd"],
   "additionalProperties": false,
   "examples": [
     {

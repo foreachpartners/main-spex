@@ -10,6 +10,7 @@ Run `spex info` for the project configuration. Its `spex_dir` is the directory t
 # Paths
 
 - `spex.yaml` - project and each package configuration, description, their paths, contracts, and applicable rules.
+- PRD, the file `spex info` prints as `prd` (`docs/prd.md` by default) - the short project overview: what we are building and why, without details. It gives the big picture to write specs that fit the project's purpose.
 - `specs/` - spec: a capability the system must provide, with acceptance criteria. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - `rules/` - rule: a cross-cutting convention or rule, with acceptance criteria. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`. A rule's `script` checks keep their scripts in a folder named after the rule beside its file (`rules/<rule-id>.yaml` and `rules/<rule-id>/`)
 - `schemas/` - schema: the JSON Schemas `spex check` validates `spex.yaml`, each package's `spex.package.yaml`, specs, rules, and plans against.
