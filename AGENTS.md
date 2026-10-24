@@ -77,7 +77,7 @@ specs/                         Single source of truth for behavior, one md file 
   project/                 Layout
   config/                  spex.yaml, spex.package.yaml, CLI version
   spec/                    Spec file, spec annotations, coverage states
-  rule/                    Rule file, rule checks, one `<rule-id>-bundled-rule` file per bundled rule
+  rule/                    Rule file, rule checks
   cli/                     Shared behavior (command set, project discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
   skill/                   Bundled skills (one `<skill-name>-skill` file per skill), package skill
 docs/                          Framework reference docs; only those symlinked from templates/docs/ are bundled into projects by init/update

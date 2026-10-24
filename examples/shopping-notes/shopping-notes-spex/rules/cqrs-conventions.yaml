@@ -1,0 +1,45 @@
+id: cqrs-conventions
+title: CQRS conventions
+description: >-
+  Command Query Responsibility Segregation keeps operations that change state apart
+  from operations that read it, and gives each side its own model. Mixing them hides
+  side effects behind reads, couples consumers to write-side invariants, and forces
+  one model to serve opposing needs.
+acceptance_criteria:
+  - "MUST classify every operation as exactly one of a command, which changes state, or a query, which reads state"
+  - "MUST validate and apply a command against the write model, the entities or aggregates that enforce invariants"
+  - "MUST return a read model from a query, a type shaped for its consumer"
+  - "MUST respond to a consumer after a command with a read model, fetched by a query using the identifier the command produced"
+  - "MUST NOT change persisted state in a query (logging, metrics, and caching excepted)"
+  - "MUST NOT expose a write-model entity or aggregate to a consumer, as the response to a command or from a query"
+  - "MUST NOT add a field or relation to the write model only to serve a response"
+  - "MUST NOT read a read model in a command to make a decision"
+  - "MUST NOT write to a read model except by projecting changes from the write model"
+  - "MAY return the changed entity or aggregate from a command to its in-process caller"
+examples:
+  avoid: |
+    async function orderCreateEndpoint(request: OrderCreateRequest): Promise<Order> {
+      return orderCreate(request);
+    }
+
+    async function orderGet(id: string): Promise<Order> {
+      const order = await orderRepository.load(id);
+      order.markViewed();
+      await orderRepository.save(order);
+      return order;
+    }
+  prefer: |
+    async function orderCreate(command: OrderCreate): Promise<Order> {
+      const order = Order.create(command);
+      await orderRepository.save(order);
+      return order;
+    }
+
+    async function orderGet(query: OrderGet): Promise<OrderSummary> {
+      return orderSummaryReader.findById(query.orderId);
+    }
+
+    async function orderCreateEndpoint(request: OrderCreateRequest): Promise<OrderSummary> {
+      const order = await orderCreate(request);
+      return orderGet({ orderId: order.id });
+    }

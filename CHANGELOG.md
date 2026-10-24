@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.29.0] - 2026-10-24
+
+- Added new `cqrs-conventions` Command Query Responsibility Segregation conventions rule.
+
 ## [0.28.0] - 2026-10-23
 
 - **Breaking**: the PRD is now required. `prd`, the path of the project's PRD, is a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and every command that loads the project stops with an error on a `spex.yaml` that sets none. `spex init` seeds `prd: docs/prd.md`, `spex-setup` runs `spex-prd` when there is no PRD yet, `spex-spec` and `spex-review-spec` always read it, and the `spex` skill lists it among the project's paths. `spex update` rewrites the schemas, skills, glossary and the managed section of `AGENTS.md`. See the migration guide.

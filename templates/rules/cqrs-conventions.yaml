@@ -1,0 +1,48 @@
+id: cqrs-conventions
+title: Command Query Responsibility Segregation conventions
+description: >-
+  Command Query Responsibility Segregation keeps operations that change state apart
+  from operations that read it, and gives each side its own model. Mixing them hides
+  side effects behind reads, couples consumers to write-side invariants, and forces
+  one model to serve opposing needs.
+acceptance_criteria:
+  - "MUST model writes and reads with different types, a write model for commands and a read model for queries, never one type for both"
+  - "MUST return a read model from a query, a type shaped for its consumer"
+  - "MUST treat a command as a request that can be rejected, and let the write model decide"
+  - "MUST NOT call a query from a command or a command from a query"
+  - "MUST NOT cause a side effect in a query, such as changing persisted state (logging, metrics, and caching excepted)"
+  - "MUST NOT load a write-model entity or aggregate outside a command"
+  - "MUST NOT load a read-model entity or aggregate outside a query"
+  - "MUST NOT base a decision on read-model data, it may be stale"
+  - "MAY return a limited information from a command that is knowable only after execution, such as the identifier of the entity created"
+examples:
+  command: |
+    struct BookCreateCmd {
+        initiator_id: UserId,
+        title: String,
+    }
+    impl BookCreateCmd {
+        async fn run(self, db: &Db) -> Result<BookId, Error> {
+            let book = BookAggregate::create(self.initiator_id, &self.title)?;
+            db.book.save(&book).await?;
+            Ok(book.id())
+        }
+    }
+  query: |
+    struct BookFetchOneQuery {
+        book_id: BookId,
+    }
+    impl BookFetchOneQuery {
+        async fn run(self, db: &Db) -> Result<BookView, Error> {
+            db.book_view.get_by_id(self.book_id).await
+        }
+    }
+  handler: |
+    async fn book_create_handler(db: &Db, initiator_id: UserId, title: String) -> Result<BookView, Error> {
+        let book_id = BookCreateCmd { initiator_id, title }.run(db).await?;
+        BookFetchOneQuery { book_id }.run(db).await
+    }
+
+    async fn book_fetch_one_handler(db: &Db, book_id: BookId) -> Result<BookView, Error> {
+        BookFetchOneQuery { book_id }.run(db).await
+    }
