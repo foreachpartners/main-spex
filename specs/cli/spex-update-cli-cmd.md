@@ -1,6 +1,6 @@
 # `spex update`
 
-Syncs the project's spex files with the latest versions shipped in the installed `spex` binary: the bundled templates, schemas, docs, rules, skills and `AGENTS.md`. The [`spex-update` skill](../skill/spex-update-skill.md) drives it together with the migration steps an upgrade requires, which it reads with `--migration-guide` and applies before the update.
+Syncs the project's spex files with the latest versions shipped in the installed `spex` binary: the bundled templates, schemas, docs, rules, skills and `AGENTS.md`. The [`spex-update` skill](../../templates/skills/spex-update/SKILL.md) drives it together with the migration steps an upgrade requires, which it reads with `--migration-guide` and applies before the update.
 
 ## Acceptance criteria
 

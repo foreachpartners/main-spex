@@ -1,6 +1,6 @@
 # `spex init`
 
-Initializes the spex directory for a project in one of the three [layouts](../project/layout-project.md): `multi-repo`, `single-repo`, or `monorepo`. It sets up a fresh project only, and leaves finishing the setup to the [`spex-setup` skill](../skill/spex-setup-skill.md).
+Initializes the spex directory for a project in one of the three [layouts](../project/layout-project.md): `multi-repo`, `single-repo`, or `monorepo`. It sets up a fresh project only, and leaves finishing the setup to the [`spex-setup` skill](../../templates/skills/spex-setup/SKILL.md).
 
 ## Acceptance criteria
 

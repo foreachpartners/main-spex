@@ -1,6 +1,6 @@
 # Package skill
 
-A package skill, named `<package-name>`, holds the package-specific context an agent needs and required to be loaded whenever the agent works on that package. [`spex-setup`](spex-setup-skill.md) creates it from `references/GENERIC-PACKAGE-SKILL-TEMPLATE.md`, and [`spex-implement`](spex-implement-skill.md) keeps it current.
+A package skill, named `<package-name>`, holds the package-specific context an agent needs and required to be loaded whenever the agent works on that package. [`spex-setup`](../../templates/skills/spex-setup/SKILL.md) creates it from `references/GENERIC-PACKAGE-SKILL-TEMPLATE.md`, and [`spex-implement`](../../templates/skills/spex-implement/SKILL.md) keeps it current.
 
 ## Acceptance criteria
 
