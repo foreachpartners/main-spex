@@ -7,6 +7,7 @@ description: >-
   buy so they don't forget them at the store.
 prd: docs/prd.md
 rules_unused:
+  - cqrs-conventions
   - graphql-conventions
 packages:
   - package_name: shopping-notes-api

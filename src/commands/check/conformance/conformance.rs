@@ -17,6 +17,7 @@ use super::property_order::validate_property_order;
 use super::schema::validate_schema;
 use super::script_references::validate_script_references;
 use super::status::{active_incomplete_finding, status_finding};
+use super::unused_rules::validate_unused_rules;
 
 #[cfg(test)]
 #[path = "conformance_test.rs"]
@@ -49,6 +50,7 @@ pub(in crate::commands::check) fn validate_conformance(
     findings.extend(validate_schema(spex_dir, packages, specs, rules)?);
     findings.extend(validate_declared_files(spex_dir, prd, packages));
     findings.extend(validate_script_references(rules));
+    findings.extend(validate_unused_rules(packages, rules));
     findings.extend(validate_ac_order(specs, rules));
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));
     findings.extend(validate_no_duplicate_ac_ids(specs));
@@ -65,6 +67,14 @@ pub(super) fn conformance_error(
     message: String,
 ) -> Finding {
     Finding::error(Source::internal(RULE_ID, check), location, message)
+}
+
+pub(super) fn conformance_warn(
+    check: &str,
+    location: Option<Location>,
+    message: String,
+) -> Finding {
+    Finding::warn(Source::internal(RULE_ID, check), location, message)
 }
 
 pub(super) fn conform_finding(location: Option<Location>, message: String) -> Finding {

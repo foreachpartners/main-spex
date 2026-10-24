@@ -8,10 +8,20 @@ use crate::common::{
     with_version_header, write_prd,
 };
 
-const EXPECTED_CHECK_REPORT: &str = r#"proj-spex
-  no issues
+const UNUSED_BUNDLED_RULE_WARNINGS: &str = r#"  warn  spex-internal-conformance/unused-rule  (rules/cqrs-conventions.yaml)
+      no package lists rule `cqrs-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  warn  spex-internal-conformance/unused-rule  (rules/dependencies-rules.yaml)
+      no package lists rule `dependencies-rules` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  warn  spex-internal-conformance/unused-rule  (rules/graphql-conventions.yaml)
+      no package lists rule `graphql-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  warn  spex-internal-conformance/unused-rule  (rules/openapi-conventions.yaml)
+      no package lists rule `openapi-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  warn  spex-internal-conformance/unused-rule  (rules/testing-rules.yaml)
+      no package lists rule `testing-rules` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  0 errors, 5 warnings
+"#;
 
-proj-api
+const EXPECTED_PACKAGES_CHECK_REPORT: &str = r#"proj-api
   warn  secret-handling/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
   0 errors, 1 warning
@@ -21,8 +31,12 @@ proj-frontend
       Requirements and documentation must be in English
   1 error, 0 warnings
 
-proj: 1 error, 1 warning
+proj: 1 error, 6 warnings
 "#;
+
+fn expected_check_report() -> String {
+    format!("proj-spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\n{EXPECTED_PACKAGES_CHECK_REPORT}")
+}
 
 const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
   none found
@@ -63,7 +77,7 @@ fn init_then_check_no_spex_project() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header(EXPECTED_CHECK_REPORT),
+        with_version_header(&expected_check_report()),
         "check report did not match\nstderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -103,7 +117,7 @@ fn init_with(project: &Path, answers: &str) -> std::process::Output {
 }
 
 #[test]
-fn init_single_repo_keeps_the_package_files_and_checks_clean() {
+fn init_single_repo_keeps_the_package_files_and_checks_without_errors() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = package_with_existing_agent_files(temp_dir.path());
 
@@ -163,7 +177,9 @@ fn init_single_repo_keeps_the_package_files_and_checks_clean() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header("spex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"),
+        with_version_header(&format!(
+            "spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\nsnake: 0 errors, 5 warnings\n"
+        )),
         "stderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );

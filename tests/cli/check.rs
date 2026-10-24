@@ -51,8 +51,27 @@ fn expected_report(sections: &[&str], summary: &str) -> String {
     with_version_header(&format!("{}{summary}\n", sections.concat()))
 }
 
+fn remove_unlisted_rules(rules_dir: &Path, listed: &[&str]) {
+    for entry in fs::read_dir(rules_dir).expect("read rules dir") {
+        let path = entry.expect("read rules entry").path();
+        let rule_id = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .expect("rule name");
+        if listed.contains(&rule_id) {
+            continue;
+        }
+        if path.is_dir() {
+            fs::remove_dir_all(&path).expect("remove unlisted rule scripts");
+        } else {
+            fs::remove_file(&path).expect("remove unlisted rule");
+        }
+    }
+}
+
 fn project_with_rules(rules: &[&str]) -> (tempfile::TempDir, std::path::PathBuf) {
     let (temp_dir, project) = temp_project(&runners_project_fixture());
+    remove_unlisted_rules(&project.join("runners-project-spex/rules"), rules);
     let config_path = project.join("runners-project-spex/spex.yaml");
     let config = fs::read_to_string(&config_path).expect("read spex.yaml");
     let kept: Vec<&str> = config
@@ -752,6 +771,48 @@ fn check_dummy_project_matches_expected() {
         "check should exit 0 when there are no errors (exit {:?})",
         check.status.code(),
     );
+}
+
+const UNUSED_RULE_WARNING: &str = "warn  spex-internal-conformance/unused-rule  (rules/unused-rule.yaml)\n      no package lists rule `unused-rule` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml";
+
+fn dummy_project_with_unused_rule() -> (tempfile::TempDir, std::path::PathBuf) {
+    let (temp_dir, project) = temp_project(&dummy_project_fixture());
+    fs::write(
+        project.join("dummy-project-spex/rules/unused-rule.yaml"),
+        "id: unused-rule\ntitle: Unused rule\ndescription: A rule no package lists.\nacceptance_criteria:\n  - MUST do nothing.\n",
+    )
+    .expect("write unused rule");
+    (temp_dir, project)
+}
+
+#[test]
+fn check_warns_about_a_rule_no_package_lists_without_failing() {
+    let (_temp_dir, project) = dummy_project_with_unused_rule();
+
+    let check = run_spex(&project, &["check"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(report.contains(UNUSED_RULE_WARNING), "{report}");
+    assert!(
+        report.contains("dummy-project: 0 errors, 1 warning"),
+        "{report}"
+    );
+    assert!(
+        check.status.success(),
+        "check should exit 0 on a warning (exit {:?})",
+        check.status.code(),
+    );
+}
+
+#[test]
+fn check_warns_about_an_unused_rule_whatever_package_is_selected() {
+    let (_temp_dir, project) = dummy_project_with_unused_rule();
+
+    let check = run_spex(&project, &["check", "--package", "frontend"], "");
+
+    let report = report_text(&check.stdout);
+    assert!(report.contains(UNUSED_RULE_WARNING), "{report}");
+    assert!(check.status.success());
 }
 
 #[test]

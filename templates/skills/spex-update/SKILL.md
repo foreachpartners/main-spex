@@ -23,11 +23,23 @@ Read all the printed steps, then apply them from the oldest version to the newes
 
 ## Step 4 — Update
 
-Run `spex update`. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc, rule (with its scripts) and skill.
+Run `spex update`. It bumps `cli_version` in `spex.yaml`, rewrites every bundled schema, doc, rule (with its scripts) and skill, and deploys each bundled rule missing locally unless `rules_unused` in `spex.yaml` lists it.
 
-## Step 5 — Verify
+## Step 5 — Place new rules
+
+If the update added no new rules, go to Step 6.
+
+Suggest to the user which packages should apply each new rule: only those it genuinely applies to, given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API), with a one-line reason each. Ask once for all new rules. Add the `id` of each rule to `rules` of every package the user chooses in `spex.yaml`.
+
+Remove each new rule that no package lists under `rules` now, as the `spex-rule` skill does in its "Remove a rule" section.
+
+Tell the user which packages apply each new rule and which new rules were removed.
+
+## Step 6 — Verify
 
 Run `spex check` and `spex coverage` again. Fix any issues they report before finishing.
+
+`spex check` warns on each rule no package lists. Before removing a rule that is not new, as in Step 5, ask the user.
 
 ---
 

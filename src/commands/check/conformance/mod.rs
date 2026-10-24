@@ -10,7 +10,8 @@ mod property_order;
 mod schema;
 mod script_references;
 mod status;
+mod unused_rules;
 
-use conformance::{conform_finding, conformance_error};
+use conformance::{conform_finding, conformance_error, conformance_warn};
 
 pub(in crate::commands::check) use conformance::validate_conformance;

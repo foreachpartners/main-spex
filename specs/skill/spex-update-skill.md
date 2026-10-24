@@ -10,4 +10,6 @@ Updates a spex project's CLI version and applies the migration steps the upgrade
 - MUST run `spex update --migration-guide <previous version>`, read all its printed steps, and apply them from the oldest version to the newest, the reverse of the printed order, before updating.
 - MUST treat `no migration needed` and a printed step that does not apply to the project as needing no action.
 - MUST run `spex update` to bump `cli_version` in `spex.yaml` and rewrite every bundled schema, doc, rule (with its scripts), and skill.
+- MUST suggest to the user which packages should apply each new rule, and list its `id` under `rules` of each package they choose in `spex.yaml`.
+- MUST remove each new rule no package uses, as the [`spex-rule` skill](spex-rule-skill.md) removes a rule.
 - MUST run `spex check` and `spex coverage` again and fix any issue they report.

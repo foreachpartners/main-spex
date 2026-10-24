@@ -78,6 +78,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST require a `packages` entry to match a package's `package_short_name` in `spex.yaml`.
 - MUST require a `coverage_ignore` entry, whether in the spec, in a package entry of `spex.yaml`, or in a package's `spex.package.yaml`, to match the spec's `contract` setting: a contract-layer entry errors under `contract: none` (there is no contract coverage to waive) and, when it carries an `ac`, under `contract: single` (contracts are spec-level there, so per-criterion contracts only exist under `contract: for-each-ac`).
 - MUST error on a `coverage_ignore` entry of a package, in its `spex.yaml` entry or its `spex.package.yaml`, that names a spec whose `packages` does not list that package, since it could never waive anything.
+- MUST warn on a rule that no package lists under `rules` in `spex.yaml`, at the rule's file, suggesting to delete the rule's file and script folder and to list its id in `rules_unused`, since a rule no package follows only pollutes the context of an AI agent.
 - MUST warn on a spec whose acceptance criteria are all done (`is_done` `true` or absent) but whose `status` is neither `active` nor `deprecated`.
 - MUST error on a spec whose `status` is `active` with any acceptance criterion still `is_done: false`, since `active` means fully implemented (`in-progress` applies until then).
 - MUST read only each criterion's `is_done` field for status checks; whether it is backed by impl/test annotations is `spex coverage`'s job.
