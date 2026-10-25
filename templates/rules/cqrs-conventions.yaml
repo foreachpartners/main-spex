@@ -23,7 +23,7 @@ examples:
     }
     impl BookCreateCmd {
         async fn run(self, db: &Db) -> Result<BookId, Error> {
-            let book = BookAggregate::create(self.initiator_id, &self.title)?;
+            let book = Book::create(self.initiator_id, &self.title)?;
             db.book.save(&book).await?;
             Ok(book.id())
         }

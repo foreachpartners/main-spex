@@ -70,6 +70,7 @@ Follow the field rules in `<spex-dir>/schemas/rule.schema.json` and use its `exa
 - Keep `description` short, simple, and concrete: a general summary of the rule and what it protects against. Do not restate individual rules already covered by `acceptance_criteria`.
 - Write `acceptance_criteria` as verifiable statements, each beginning with a commitment level, ordered MUST, MUST NOT, SHOULD, SHOULD NOT, MAY. A rule is a global rule that always applies, so its criteria carry no implementation checkbox.
 - Keep each criterion provable by an automated check or by AI inspection.
+- Prefer a book as the example domain in `examples` (`BookId`, `Book`, `BookView`) unless the rule targets another domain, so examples read the same across rules.
 
 ## Step 4 — Propose checks
 

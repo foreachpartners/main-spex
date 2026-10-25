@@ -8,6 +8,7 @@ description: >-
 prd: docs/prd.md
 rules_unused:
   - cqrs-conventions
+  - ddd-conventions
   - graphql-conventions
 packages:
   - package_name: shopping-notes-api

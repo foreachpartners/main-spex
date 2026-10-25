@@ -1,0 +1,115 @@
+id: ddd-conventions
+title: Domain-Driven Design conventions
+description: >-
+  Keeps business logic in a model that speaks the language of the domain, split into bounded
+  contexts and isolated from technical concerns. Without it, business rules leak into
+  controllers and storage code, the same word silently means different things in different
+  places, and a database or framework change ripples into the business logic.
+acceptance_criteria:
+  - "MUST name types, functions, and modules after the ubiquitous language of their bounded context, with one term per concept, the same in code and specs"
+  - "MUST give each bounded context its own model, with its own types even for a concept another context also has"
+  - "MUST change an aggregate only through its root, which enforces its invariants, never through public fields, setters, or inner entities"
+  - "MUST reference another aggregate by its identifier, never by direct reference"
+  - "MUST give an entity an identity that never changes and compare entities by it"
+  - "MUST make a value object immutable, valid from construction, and compared by its attributes"
+  - "MUST give each kind of identifier its own value object, so a BookId can never be passed where an AuthorId is expected"
+  - "MUST wrap a primitive whose valid values are fewer than its type allows (a bounded string, an email address, a positive amount) in a value object"
+  - "MUST persist each aggregate as a whole, never its parts separately"
+  - "MUST make the domain layer depend on no other layer"
+  - "MUST call another bounded context only through its published interface or events"
+  - "MUST NOT put a business rule outside the domain layer: the application layer only orchestrates"
+  - "MUST NOT share database tables between bounded contexts"
+  - "SHOULD keep an aggregate small, only the entities and value objects that must change together to satisfy an invariant"
+  - "SHOULD change one aggregate per transaction, updating other aggregates afterwards, so each aggregate stays its own consistency boundary"
+  - "SHOULD put domain logic on the entity or value object it belongs to, and only logic that fits none of them into a stateless domain service named after the domain operation, to avoid an anemic model"
+examples:
+  value_object: |
+    #[derive(Clone, PartialEq, Eq)]
+    struct Title(String);
+    impl Title {
+        fn new(value: &str) -> Result<Self, TitleError> {
+            let value = value.trim();
+            if !(1..=200).contains(&value.chars().count()) {
+                return Err(TitleError::InvalidLength);
+            }
+            Ok(Self(value.to_string()))
+        }
+    }
+  aggregate: |
+    struct Book {
+        id: BookId,
+        author_id: AuthorId,
+        title: Title,
+        archived: bool,
+    }
+    impl Book {
+        fn create(author_id: AuthorId, title: Title) -> Self {
+            Self {
+                id: BookId::new(),
+                author_id,
+                title,
+                archived: false,
+            }
+        }
+        fn restore(id: BookId, author_id: AuthorId, title: Title, archived: bool) -> Self {
+            Self {
+                id,
+                author_id,
+                title,
+                archived,
+            }
+        }
+        fn id(&self) -> &BookId {
+            &self.id
+        }
+        fn archive(&mut self) -> Result<(), BookError> {
+            if self.archived {
+                return Err(BookError::AlreadyArchived);
+            }
+            self.archived = true;
+            Ok(())
+        }
+    }
+    impl PartialEq for Book {
+        fn eq(&self, other: &Self) -> bool {
+            self.id == other.id
+        }
+    }
+  domain_service: |
+    fn can_borrow(member: &Member, book: &Book) -> bool {
+        !book.is_archived() && member.borrowed_count() < BORROW_LIMIT
+    }
+  avoid_anemic_model: |
+    struct Book {
+        id: BookId,
+        archived: bool,
+    }
+    impl Book {
+        fn archived(&self) -> bool {
+            self.archived
+        }
+        fn set_archived(&mut self, archived: bool) {
+            self.archived = archived;
+        }
+    }
+    struct BookService;
+    impl BookService {
+        fn archive(book: &mut Book) -> Result<(), BookError> {
+            if book.archived() {
+                return Err(BookError::AlreadyArchived);
+            }
+            book.set_archived(true);
+            Ok(())
+        }
+    }
+  repository: |
+    trait BookRepository {
+        async fn get_by_id(&self, id: BookId) -> Result<Book, Error>;
+        async fn save(&self, book: &Book) -> Result<(), Error>;
+    }
+  use_case: |
+    async fn book_archive(repo: &impl BookRepository, id: BookId) -> Result<(), Error> {
+        let mut book = repo.get_by_id(id).await?;
+        book.archive()?;
+        repo.save(&book).await
+    }

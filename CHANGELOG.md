@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.29.0] - 2026-10-24
 
 - Added new `cqrs-conventions` Command Query Responsibility Segregation conventions rule.
+- Added new `ddd-conventions` Domain-Driven Design conventions rule.
 - Added a `spex check` warning for a rule no package lists, suggesting to delete it.
 - Changed the `spex-update` skill to ask which packages use each newly deployed rule and to delete the ones no package uses.
 
