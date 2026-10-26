@@ -15,7 +15,7 @@ Use the starting point the user gave (a commit, branch, tag, or PR), otherwise `
 
 ### 3. Spawn both sub-agents in parallel
 
-Run the `spex-review-rule` and `spex-review-spec` skills as **parallel sub-agents**, so they don't pollute each other's context. Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
+Run the `spex-review-rule` and `spex-review-spec` skills as **parallel sub-agents**, so they don't pollute each other's context. Spawn both in a single message.
 
 **Rule sub-agent prompt** — include:
 

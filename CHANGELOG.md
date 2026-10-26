@@ -8,6 +8,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 - Added new `ddd-conventions` Domain-Driven Design conventions rule.
 - Added a `spex check` warning for a rule no package lists, suggesting to delete it.
 - Changed the `spex-update` skill to ask which packages use each newly deployed rule and to delete the ones no package uses.
+- Changed the `spex-assembly-line` skill to run each review in its own agent instead of in the orchestrator.
 
 ## [0.28.0] - 2026-10-23
 
