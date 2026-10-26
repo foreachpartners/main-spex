@@ -6,9 +6,11 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 - Added new `cqrs-conventions` Command Query Responsibility Segregation conventions rule.
 - Added new `ddd-conventions` Domain-Driven Design conventions rule.
+- Added the `spex-fix` skill, which fixes a reported problem at its root cause and stops to ask when the fix is major.
 - Added a `spex check` warning for a rule no package lists, suggesting to delete it.
 - Changed the `spex-update` skill to ask which packages use each newly deployed rule and to delete the ones no package uses.
 - Changed the `spex-assembly-line` skill to run each review in its own agent instead of in the orchestrator.
+- Changed the `spex-assembly-line` skill to fix review findings with `spex-fix` and to stop the run when a fix is major.
 
 ## [0.28.0] - 2026-10-23
 
