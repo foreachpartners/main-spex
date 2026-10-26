@@ -10,7 +10,7 @@ AI writes code fast, but fast is not the same as right. Given a request, AI can 
 
 ## Goal
 
-spex helps to produce slop-free, verifiable results fast, with minimal human intervention — unleashing AI's full speed. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and verification layers of reviews, tests, and deterministic checks prove the result.
+spex helps to produce slop-free, verifiable results fast, with minimal human intervention — unleashing AI's full speed. The AI writes everything, following the specs, skills, and rules. The human decides, reviews, and approves what matters. Verification layers of agent reviews, tests, and deterministic checks prove the result.
 
 ## Success
 
@@ -71,7 +71,7 @@ Skills load progressively: only each skill's description is always in context; t
 
 Vibe coding ships code fast, but every unreviewed decision adds mess that compounds. spex keeps the speed without the mess: the AI writes everything, and every change passes layers of validation — agent reviews against the spec, contract and rules, deterministic checks, and tests — so the human can focus on what matters most.
 
-Human review covers the whole change but concentrates on specs and contracts, which are small and fast to reason about, and on the domain model and other important changes. Approving the spec and contract before implementation keeps work streamlined, without haphazard backward edits, and means every change traces back to a decision a human reviewed. The other layers keep the rest of the codebase maintainable.
+Human review concentrates on specs and contracts, which are small and fast to reason about, and on the domain model and other important changes. Minor changes can rely on agent review, tests, and checks alone. Approving the spec and contract before implementation keeps work streamlined, without haphazard backward edits, and means every behavior change traces back to a decision a human reviewed. The other layers keep the rest of the codebase maintainable.
 
 Minimal human intervention means the human reviews and decides on what matters most, never that the human is out of the loop.
 
@@ -163,6 +163,6 @@ The same framework scales from a solo script to a large multi-team repo: no mini
 ## Non-goals
 
 - **Not an AI model, coding agent, or IDE** — it works with the ones a project already chose.
-- **Not unsupervised AI coding** — a human reviews every change and approves its specs and contracts.
+- **Not unsupervised AI coding** — a human approves every spec and contract and reviews important changes.
 - **No opinion on language, framework, or architecture** — those come only from the rules and skills a project chooses.
 - **Not a replacement for tests, linters, or CI** — it proves that a change follows its specs and rules; the project's own tooling still does the running.

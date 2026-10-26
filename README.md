@@ -10,7 +10,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 - **Rules, enforced** — conventions are given to the agent as context and proven by `spex check`.
 - **Skills, not prompts** — each workflow step is a written instruction, so the process is the same every time.
 - **Coverage, proven** — every acceptance criterion is traced to its contract, code, and test, and `spex coverage` shows the gaps.
-- **Human review where it counts** — you approve specs and contracts; checks, tests, and agent reviews cover the rest.
+- **Human review where it counts** — you approve specs and contracts, and review important changes. Verification layers of agent reviews, tests, and checks cover the rest.
 - **Tool-agnostic** — any AI model, coding agent, CLI, or IDE, and any language or framework.
 - **Simple by design** — plain files and a small set of commands, easy to understand and use with minimal docs.
 - **Easy to adopt** — start in minutes, on a new or existing codebase, one package and spec at a time, from solo projects to multi-team repos.
@@ -21,7 +21,7 @@ Ask an AI to write you a snake game and it will. But will the snake have big blu
 
 AI writes code fast, but fast is not the same as right: it can add changes nobody asked for, forget requirements, do the same thing differently each time, or hallucinate. Every unreviewed decision and unverified result adds slop that compounds. Reviewing everything by hand throws away the speed; accepting everything ships the slop.
 
-spex helps to produce slop-free, verifiable results fast, with minimal human intervention. The AI writes everything, following the specs, skills, and rules; the human decides and approves; and reviews, tests, and deterministic checks prove the result.
+spex helps to produce slop-free, verifiable results fast, with minimal human intervention. The AI writes everything, following the specs, skills, and rules. The human decides, reviews, and approves what matters. Verification layers of agent reviews, tests, and deterministic checks prove the result.
 
 ## Quickstart
 
