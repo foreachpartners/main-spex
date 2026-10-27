@@ -103,6 +103,7 @@ tests/                         Integration tests that build and run the spex bin
     check/                     One file per check type (regexp, glob, ast_grep, script), declared as modules of check.rs
   fixtures/                    Projects the integration tests copy and run spex against
   changelog_format.rs          CHANGELOG.md format test, not tied to a command
+  hidden_content.rs            Test that templates, docs and examples hide nothing from reviewers (invisible characters, blank-line padding), not tied to a command
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end
