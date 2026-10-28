@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.29.1] - 2026-10-28
+
+- Changed the `openapi-conventions` rule to require plural collection names, resource-named path parameters, and no verbs in URL paths.
+
 ## [0.29.0] - 2026-10-24
 
 - Added new `cqrs-conventions` Command Query Responsibility Segregation conventions rule.
