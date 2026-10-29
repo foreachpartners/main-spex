@@ -1,5 +1,5 @@
 project_name: shopping-notes
-cli_version: 0.29.2
+cli_version: 0.29.3
 layout: multi-repo
 agent_root: .
 description: >-
@@ -10,6 +10,7 @@ rules_unused:
   - cqrs-conventions
   - ddd-conventions
   - graphql-conventions
+  - postgres-conventions
 packages:
   - package_name: shopping-notes-api
     package_short_name: api

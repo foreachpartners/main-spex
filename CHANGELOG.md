@@ -2,6 +2,11 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.29.3] - 2026-10-29
+
+- Added new `postgres-conventions` Postgres naming and column-type conventions rule.
+- Changed `spex-rule` and `spex-spec` skills to state the reason beside a criterion whose why is not obvious.
+
 ## [0.29.2] - 2026-10-28
 
 - Changed the Self-Documenting Code rule in `AGENTS.md` to allow a short comment where a name cannot carry the meaning.

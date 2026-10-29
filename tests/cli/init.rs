@@ -18,9 +18,11 @@ const UNUSED_BUNDLED_RULE_WARNINGS: &str = r#"  warn  spex-internal-conformance/
       no package lists rule `graphql-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
   warn  spex-internal-conformance/unused-rule  (rules/openapi-conventions.yaml)
       no package lists rule `openapi-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
+  warn  spex-internal-conformance/unused-rule  (rules/postgres-conventions.yaml)
+      no package lists rule `postgres-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
   warn  spex-internal-conformance/unused-rule  (rules/testing-rules.yaml)
       no package lists rule `testing-rules` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  0 errors, 6 warnings
+  0 errors, 7 warnings
 "#;
 
 const EXPECTED_PACKAGES_CHECK_REPORT: &str = r#"proj-api
@@ -33,7 +35,7 @@ proj-frontend
       Requirements and documentation must be in English
   1 error, 0 warnings
 
-proj: 1 error, 7 warnings
+proj: 1 error, 8 warnings
 "#;
 
 fn expected_check_report() -> String {
@@ -180,7 +182,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_without_errors() {
     assert_eq!(
         report_text(&check.stdout),
         with_version_header(&format!(
-            "spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\nsnake: 0 errors, 6 warnings\n"
+            "spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\nsnake: 0 errors, 7 warnings\n"
         )),
         "stderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
