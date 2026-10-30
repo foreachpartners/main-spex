@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.29.4] - 2026-10-30
+
+- Changed the `spex-spec` skill to leave out of a spec what belongs in its contract, such as API status codes and response properties.
+
 ## [0.29.3] - 2026-10-29
 
 - Added new `postgres-conventions` Postgres naming and column-type conventions rule.
