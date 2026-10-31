@@ -85,6 +85,17 @@ Use these to diagnose issues the user may be having with the skill.
 
 New spex-authored skills live under `templates/skills/<skill-name>/SKILL.md` in this repository, and are scaffolded into `.agents/skills/<skill-name>/SKILL.md` of every spex project by `spex init`/`spex update`. Follow the naming rule shared by every skill system: `name` in the frontmatter must be lowercase, hyphen-separated, and match the containing directory exactly.
 
+## Editing a bundled skill
+
+`spex update` rewrites a bundled skill (`spex`, `spex-*`) from upstream: its `SKILL.md` above `# Project` and its other bundled files. When editing one in a project, add the change below `# Project` whenever it fits there, since `spex update` keeps that part. When the change has to sit above `# Project` or in another bundled file, first set `metadata.sync-with-upstream: false` in the frontmatter, otherwise the next `spex update` overwrites it:
+
+```yaml
+metadata:
+  sync-with-upstream: false
+```
+
+The skill then stops receiving upstream updates; tell the user.
+
 ---
 
 # Project

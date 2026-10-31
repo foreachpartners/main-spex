@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.30.0] - 2026-10-31
 
 - Changed the `spex-rule` skill to set `sync_with_upstream: false` on a bundled rule it edits, so `spex update` keeps the change.
+- Changed the `spex-create-skill` skill to put edits to a bundled skill below its `# Project` marker, or to set `metadata.sync-with-upstream: false` when they must go above it, so `spex update` keeps them.
 
 ## [0.29.4] - 2026-10-30
 
