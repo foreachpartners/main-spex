@@ -1,5 +1,6 @@
 id: ddd-conventions
 title: Domain-Driven Design conventions
+sync_with_upstream: true
 description: >-
   Keeps business logic in a model that speaks the language of the domain, split into bounded
   contexts and isolated from technical concerns. Without it, business rules leak into

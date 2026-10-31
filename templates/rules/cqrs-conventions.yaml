@@ -1,5 +1,6 @@
 id: cqrs-conventions
 title: Command Query Responsibility Segregation conventions
+sync_with_upstream: true
 description: >-
   Command Query Responsibility Segregation keeps operations that change state apart
   from operations that read it, and gives each side its own model. Mixing them hides

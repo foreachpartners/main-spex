@@ -1,5 +1,6 @@
 id: testing-rules
 title: Testing hygiene
+sync_with_upstream: true
 description: >-
   A test suite is only trustworthy if every test in it runs and can fail. Skipping,
   ignoring, or focusing a test silences its pass/fail signal covertly — the suite

@@ -11,6 +11,7 @@ A rule, defined in [glossary.md](../../docs/glossary.md), lives at `rules/<rule-
 - MUST apply a rule package-wide, not per feature, once a package opts into it by listing it in `rules` in `spex.yaml`.
 - MUST keep a bundled rule in sync from the bundled template, with its scripts, on `spex update`, unless it sets `sync_with_upstream: false`; an unset `sync_with_upstream` defaults to `true`.
 - MUST keep local changes across updates to a rule with `sync_with_upstream: false`, which customizes it locally.
+- MUST ship every bundled rule with `sync_with_upstream: true` set explicitly, so a local rule that sets `true` is known to come from upstream.
 - MUST recognize a deleted bundled rule as deliberate only once its id is added to `rules_unused` in `spex.yaml`.
 - MUST NOT give a rule a lifecycle status, or its acceptance criteria an implementation flag.
 - SHOULD write the code in `examples` in Rust, unless the rule targets another language or format.

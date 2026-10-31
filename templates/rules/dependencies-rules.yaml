@@ -1,5 +1,6 @@
 id: dependencies-rules
 title: Dependencies rules
+sync_with_upstream: true
 description: >-
   Floating version ranges resolve to different code across environments, breaking
   reproducibility and inviting surprise upgrades. Pin every dependency to an exact,

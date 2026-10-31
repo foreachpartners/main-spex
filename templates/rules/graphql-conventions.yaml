@@ -1,5 +1,6 @@
 id: graphql-conventions
 title: GraphQL conventions
+sync_with_upstream: true
 description: >-
   The GraphQL SDL is the contract that clients and servers must follow.
 acceptance_criteria:

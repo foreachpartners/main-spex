@@ -1,5 +1,6 @@
 id: postgres-conventions
 title: Postgres conventions
+sync_with_upstream: true
 description: >-
   Naming, identifier, column-type and indexing conventions for the Postgres schema, so tables,
   keys, ids and timestamps read the same way in every bounded context.

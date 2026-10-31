@@ -251,6 +251,32 @@ fn init_multi_repo_keeps_everything_in_the_spex_repository() {
 }
 
 #[test]
+fn init_writes_every_bundled_rule_with_sync_with_upstream_true_after_its_title() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    fs::create_dir_all(&project).expect("create project");
+    assert!(init_with(&project, "\n\n").status.success());
+
+    let rules = project.join("proj-spex/rules");
+    let mut checked = 0;
+    for entry in fs::read_dir(&rules).expect("read rules") {
+        let path = entry.expect("read rule entry").path();
+        if path.extension().is_none_or(|extension| extension != "yaml") {
+            continue;
+        }
+        let contents = fs::read_to_string(&path).expect("read rule");
+        let lines: Vec<&str> = contents.lines().take(3).collect();
+        assert!(
+            lines[1].starts_with("title: ") && lines[2] == "sync_with_upstream: true",
+            "{} must set sync_with_upstream: true right after its title",
+            path.display()
+        );
+        checked += 1;
+    }
+    assert!(checked > 0, "no bundled rules scaffolded");
+}
+
+#[test]
 fn init_prefers_claude_md_over_agents_md_when_both_exist() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("snake");

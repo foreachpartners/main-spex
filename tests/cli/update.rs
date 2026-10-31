@@ -305,8 +305,13 @@ fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
 
-    let customized_rule = format!("sync_with_upstream: false\n{pristine_rule}")
+    let customized_rule = pristine_rule
+        .replace("sync_with_upstream: true", "sync_with_upstream: false")
         .replace("title: Writing style", "title: Local writing style");
+    assert!(
+        customized_rule.contains("sync_with_upstream: false"),
+        "sync_with_upstream not found"
+    );
     assert!(
         customized_rule.contains("Local writing style"),
         "title not found"

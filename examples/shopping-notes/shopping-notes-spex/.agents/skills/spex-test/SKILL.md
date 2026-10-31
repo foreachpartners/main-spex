@@ -69,6 +69,10 @@ Summarize the run:
 - The format, lints, tests, and `spex check` run outcome.
 - Which specs you set to `active`, and which acceptance criteria still show `is_done: false` because `spex coverage` doesn't yet show them traced.
 
+## Next
+
+Once the user has committed the change, offer to open a pull request with `spex-create-pr`.
+
 ---
 
 # Project

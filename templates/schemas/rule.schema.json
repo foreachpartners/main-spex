@@ -15,7 +15,7 @@
     },
     "sync_with_upstream": {
       "type": "boolean",
-      "description": "When true or omitted, `spex update` overwrites this rule (and its scripts) from the bundled template on every run. Set to false to customize this rule locally and keep your changes across updates. Defaults to true.",
+      "description": "When true or omitted, `spex update` overwrites this rule (and its scripts) from the bundled template on every run. Bundled rules set it to true, so true marks a rule that came from upstream. Set to false to customize this rule locally and keep your changes across updates. Defaults to true.",
       "default": true
     },
     "description": {
