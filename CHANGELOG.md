@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.30.3] - 2026-11-01
+
+- Changed the `spex-test` skill to remove a spec it sets `active` from the `blocked_by` of the specs it unblocks.
+
 ## [0.30.2] - 2026-11-01
 
 - Changed `spex info` to print each contract `path` as an absolute path, like the other paths.

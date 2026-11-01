@@ -47,8 +47,9 @@ For every governing spec, run `spex coverage` and open `<spex-dir>/specs/<spec-i
 
 - For each acceptance criterion `spex coverage` now shows fully impl+test traced, clear its `is_done: false` (remove the line — absent counts as done).
 - Once every criterion in the spec is done (`is_done` `true` or absent), set `status: active`.
+- For each spec you set to `active`, search `<spex-dir>/specs/` for other specs listing its id in `blocked_by`, and remove that entry, dropping the `blocked_by` key when it becomes empty. A satisfied blocker must not stay listed.
 
-Touch only `is_done` lines and `status` — leave the rest of each spec, including acceptance criteria text and ids, untouched.
+Touch only `is_done` lines and `status` in the governing specs, and only the `blocked_by` entry in the dependent specs — leave the rest of each spec, including acceptance criteria text and ids, untouched.
 
 ## Step 4 — Verify
 
@@ -67,7 +68,7 @@ Summarize the run:
 - Which units of work completed.
 - Which specs and acceptance criteria you added coverage for.
 - The format, lints, tests, and `spex check` run outcome.
-- Which specs you set to `active`, and which acceptance criteria still show `is_done: false` because `spex coverage` doesn't yet show them traced.
+- Which specs you set to `active`, which dependent specs had a `blocked_by` entry removed, and which acceptance criteria still show `is_done: false` because `spex coverage` doesn't yet show them traced.
 
 ## Next
 
