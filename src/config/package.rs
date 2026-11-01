@@ -37,7 +37,7 @@ impl Package {
             contracts: config
                 .contracts
                 .into_iter()
-                .map(|contract| spex_dir.join(contract.path))
+                .map(|contract| normalize(&spex_dir.join(contract.path)))
                 .collect(),
             rules: config.rules,
             exclude: config.exclude,

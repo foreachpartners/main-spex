@@ -72,6 +72,14 @@ fn to_json(value: &impl Serialize) -> Result<Value> {
 
 fn merged_package(mut json: Value, package: &Package) -> Result<Value> {
     json["path"] = Value::String(canonical(&package.path).to_string_lossy().into_owned());
+    for (contract_json, contract) in json["contracts"]
+        .as_array_mut()
+        .into_iter()
+        .flatten()
+        .zip(&package.contracts)
+    {
+        contract_json["path"] = Value::String(canonical(contract).to_string_lossy().into_owned());
+    }
     json["exclude"] = to_json(&package.exclude)?;
     json["check_ignore"] = to_json(&package.check_ignore)?;
     json["coverage_ignore"] = to_json(&package.coverage_ignore)?;

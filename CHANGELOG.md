@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.30.2] - 2026-11-01
+
+- Changed `spex info` to print each contract `path` as an absolute path, like the other paths.
+
 ## [0.30.1] - 2026-10-31
 
 - Changed the package skill template to keep the project structure general instead of listing every file.

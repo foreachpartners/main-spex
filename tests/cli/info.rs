@@ -21,7 +21,7 @@ const EXPECTED_INFO: &str = r#"{
       "path": {api_dir},
       "contracts": [
         {
-          "path": "./contracts.md",
+          "path": {contracts_file},
           "description": "Interface contract notes for the api."
         }
       ],
@@ -64,15 +64,20 @@ fn with_project_dirs(template: &str, project: &Path) -> String {
             .expect("canonical package dir");
         serde_json::to_string(&dir).expect("package dir as JSON")
     };
-    let prd_file = project
+    let spex_dir = project
         .join("dummy-project-spex")
         .canonicalize()
-        .expect("canonical spex dir")
-        .join("docs/prd.md");
+        .expect("canonical spex dir");
+    let prd_file = spex_dir.join("docs/prd.md");
+    let contracts_file = spex_dir.join("contracts.md");
     template
         .replace(
             "{prd_file}",
             &serde_json::to_string(&prd_file).expect("prd file as JSON"),
+        )
+        .replace(
+            "{contracts_file}",
+            &serde_json::to_string(&contracts_file).expect("contracts file as JSON"),
         )
         .replace("{spex_dir}", &as_json("dummy-project-spex"))
         .replace("{api_dir}", &as_json("dummy-project-api"))
@@ -95,7 +100,7 @@ const EXPECTED_INFO_API: &str = r#"{
       "path": {api_dir},
       "contracts": [
         {
-          "path": "./contracts.md",
+          "path": {contracts_file},
           "description": "Interface contract notes for the api."
         }
       ],
