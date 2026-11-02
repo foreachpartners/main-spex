@@ -2,6 +2,11 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.30.4] - 2026-11-02
+
+- Changed the package skill template to say its project structure paths are relative to the package `path` that `spex info` prints to ensure agent reads correct location from the first try.
+- Changed the `spex-create-skill` skill to say "framework skill" instead of "bundled skill", to tell them from package skills.
+
 ## [0.30.3] - 2026-11-01
 
 - Changed the `spex-test` skill to remove a spec it sets `active` from the `blocked_by` of the specs it unblocks.

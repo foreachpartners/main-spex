@@ -5,7 +5,7 @@ Syncs the project's spex files with the latest versions shipped in the installed
 ## Acceptance criteria
 
 - MUST fail when no `spex.yaml` is found: it updates an initialized project only, so `spex init` runs first.
-- MUST rewrite a bundled skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a skill that opts out keeps its local changes, so consumers can override a global skill.
+- MUST rewrite a framework skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a skill that opts out keeps its local changes, so consumers can override a global skill.
 - MUST rewrite a synced skill's `SKILL.md` above its `# Project` marker and the skill's other bundled files, preserving everything from that marker onward and any files added to the skill folder. `# Project` is mark telling that above is managed by spex section, below user customized one.
 - MUST rewrite a bundled rule, and its scripts, already present locally only when it's set `sync_with_upstream: true` or absent which defaults to true; a local rule with `sync_with_upstream: false` is left untouched, so consumers can override a global rule.
 - MUST deploy a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there records a deliberate deletion, so it stays deleted on future updates. We keep `rules_unused` so that users can see all available rules for future use.

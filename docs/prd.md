@@ -63,7 +63,7 @@ Left to chat prompts, every workflow step is improvised: what to read, which rul
 
 The same holds for a package's structure and commands: a package skill is written down once and loaded automatically whenever the agent works on that package, instead of being re-explained every session. The agent keeps it current as the package changes.
 
-Skills load progressively: only each skill's description is always in context; the body loads when the skill is invoked or the request matches its description. This keeps the context small and the output better. Bundled skills stay in sync with upstream through `spex update`, and a project extends or replaces them with its own.
+Skills load progressively: only each skill's description is always in context; the body loads when the skill is invoked or the request matches its description. This keeps the context small and the output better. Framework skills stay in sync with upstream through `spex update`, and a project extends or replaces them with its own.
 
 **Violation test**: a workflow step runs from an ad hoc prompt instead of its skill, or a package's structure and commands are explained by hand each session — the result depends on what was remembered that day, not on what the framework holds.
 

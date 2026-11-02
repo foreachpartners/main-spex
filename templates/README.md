@@ -10,7 +10,7 @@ Assets scaffolded into client projects by `spex init` and `spex update`. Everyth
 - `spex.yaml` — seeds the client's `spex.yaml` on `init`, the same for every layout. `init` replaces every `unknown` with the project name, the layout, the layout's `agent_root` and the spex package name, and adds the installed CLI's `cli_version` (the template carries none). It lists only the spex package; `spex-setup` adds the rest. `update` only refreshes `cli_version`.
 - `project-name.code-workspace` — seeds the client's `<project-name>.code-workspace` on `init` in multi-repo only, with a folder for the spex package only; `spex-setup` adds the others. `update` never touches it.
 - `rules/` — a rule file and its script folder (same name, beside it) are written when the rule is missing locally or does not set `sync_with_upstream: false`. Every bundled rule MUST set `sync_with_upstream: true` right after `title`, which is how the `spex-rule` skill knows a local rule came from upstream.
-- `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`. `update` rewrites each `SKILL.md` only above its `# Project` marker, keeping the client's own content, so every bundled `SKILL.md` MUST end with that marker.
+- `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`. `update` rewrites each `SKILL.md` only above its `# Project` marker, keeping the client's own content, so every framework `SKILL.md` MUST end with that marker.
 
 ## Editing docs
 

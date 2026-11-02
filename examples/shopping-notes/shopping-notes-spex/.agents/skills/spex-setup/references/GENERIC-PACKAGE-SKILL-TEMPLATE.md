@@ -9,7 +9,7 @@ Run `spex info --package <package-short-name>` for general package information a
 
 # Project structure
 
-List only directories and entry points, one line each with its role. Group similar files into one entry; never list individual files besides entry points.
+Paths are relative to the package `path` that `spex info --package <package-short-name>` prints. List only directories and entry points, one line each with its role. Group similar files into one entry; never list individual files besides entry points.
 
 - `src/main.ts` - entry point, boots the server
 - `src/routes` - route definitions, one file per endpoint; add new endpoints here

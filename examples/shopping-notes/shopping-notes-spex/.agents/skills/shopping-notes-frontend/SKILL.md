@@ -9,6 +9,8 @@ Run `spex info --package frontend` for general package information and applicabl
 
 # Project structure
 
+Paths are relative to the package `path` that `spex info --package frontend` prints. List only directories and entry points, one line each with its role. Group similar files into one entry; never list individual files besides entry points.
+
 - `src/main.tsx` - entry point, mounts the React app
 - `src/app.tsx` - root app component and routing
 - `src/pages` - page components, one file per route (`home.tsx`, `api-test.tsx`), each with a colocated `*.test.tsx`
