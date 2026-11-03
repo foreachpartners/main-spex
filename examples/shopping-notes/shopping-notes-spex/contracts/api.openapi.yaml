@@ -15,6 +15,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+              example:
+                status: ok
   /items:
     get:
       operationId: listItems
@@ -27,6 +29,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ItemList"
+              example:
+                items:
+                  - id: 3f2b8c1e
+                    name: Milk
+                    bought: false
     post:
       operationId: createItem
       summary: Create a shopping item
@@ -37,6 +44,8 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/CreateItemRequest"
+            example:
+              name: Milk
       responses:
         "201":
           description: Item created
@@ -44,12 +53,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Item"
+              example:
+                id: 3f2b8c1e
+                name: Milk
+                bought: false
         "422":
           description: Validation error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationError"
+              example:
+                message: name must not be empty
     delete:
       operationId: clearItems
       summary: Clear the shopping list
@@ -70,6 +85,8 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateItemRequest"
+            example:
+              bought: true
       responses:
         "200":
           description: Item updated
@@ -77,12 +94,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Item"
+              example:
+                id: 3f2b8c1e
+                name: Milk
+                bought: true
         "404":
           description: Item not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
+              example:
+                message: Item not found
     delete:
       operationId: deleteItem
       summary: Delete a shopping item
@@ -98,6 +121,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
+              example:
+                message: Item not found
 components:
   parameters:
     ItemId:

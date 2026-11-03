@@ -80,6 +80,36 @@
         "function": "truthy"
       }
     },
+    "body-example": {
+      "description": "MUST give every request body and response body an example or examples",
+      "given": [
+        "$.paths[*][*].requestBody.content[?(!@.example && !@.examples)]",
+        "$.paths[*][*].responses[*].content[?(!@.example && !@.examples)]",
+        "$.components.requestBodies[*].content[?(!@.example && !@.examples)]",
+        "$.components.responses[*].content[?(!@.example && !@.examples)]"
+      ],
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "function": "falsy"
+      }
+    },
+    "body-example-exclusive": {
+      "description": "MUST NOT set both example and examples on the same request body or response body",
+      "given": [
+        "$.paths[*][*].requestBody.content[?(@.example && @.examples)]",
+        "$.paths[*][*].responses[*].content[?(@.example && @.examples)]",
+        "$.components.requestBodies[*].content[?(@.example && @.examples)]",
+        "$.components.responses[*].content[?(@.example && @.examples)]"
+      ],
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "function": "falsy"
+      }
+    },
     "security-scheme-name": {
       "description": "MUST name every components/securitySchemes key with ^[a-zA-Z0-9._-]+$",
       "given": "$.components.securitySchemes[*]~",

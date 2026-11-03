@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.30.5] - 2026-11-03
+
+- Changed the `openapi-conventions` rule to require one `example` or `examples`, never both, on every request and response body.
+
 ## [0.30.4] - 2026-11-02
 
 - Changed the package skill template to say its project structure paths are relative to the package `path` that `spex info` prints to ensure agent reads correct location from the first try.
