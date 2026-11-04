@@ -6,6 +6,7 @@ use serde_yaml_ng::Value;
 use crate::commands::init::scaffold::copy_docs_and_schemas;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
+use crate::support::bundled_agents::bundled_agents_md;
 use crate::support::bundled_rule::write_bundled_rule;
 use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
 use crate::support::managed_section::replace_managed_section;
@@ -28,7 +29,7 @@ pub fn sync_templates(spex_dir: &Path, agent_root: &Path) -> Result<()> {
 }
 
 fn sync_agents_md(agent_root: &Path) -> Result<()> {
-    let Some(template) = BUNDLED_TEMPLATES_DIR.get_file(AGENTS_FILENAME) else {
+    let Some(template) = bundled_agents_md() else {
         return Ok(());
     };
 
@@ -37,7 +38,7 @@ fn sync_agents_md(agent_root: &Path) -> Result<()> {
         return Ok(());
     };
 
-    let updated = replace_managed_section(template.contents(), &local_contents);
+    let updated = replace_managed_section(template.as_bytes(), &local_contents);
     if updated != local_contents.as_bytes() {
         write_file(&agents, updated)?;
     }

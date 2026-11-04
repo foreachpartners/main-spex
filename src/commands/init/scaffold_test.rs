@@ -5,6 +5,7 @@ mod tests_unit {
 
     use tempfile::tempdir;
 
+    use crate::support::bundled_agents::bundled_agents_md;
     use crate::templates::{AGENTS_FILENAME, CLAUDE_FILENAME};
 
     const SCHEMA: &str = "schemas/spex.schema.json";
@@ -101,11 +102,11 @@ mod tests_unit {
         scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
         let agents = spex_dir.path().join(AGENTS_FILENAME);
-        let expected = BUNDLED_TEMPLATES_DIR
-            .get_file(AGENTS_FILENAME)
-            .expect("bundled AGENTS.md")
-            .contents();
-        assert_eq!(fs::read(&agents).expect("read AGENTS.md"), expected);
+        let expected = bundled_agents_md().expect("bundled AGENTS.md");
+        assert_eq!(
+            fs::read_to_string(&agents).expect("read AGENTS.md"),
+            expected
+        );
 
         #[cfg(unix)]
         {

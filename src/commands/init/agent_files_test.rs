@@ -5,14 +5,6 @@ mod tests {
 
     const USER_SKILL: &str = ".claude/skills/my-skill/SKILL.md";
 
-    fn bundled_agents_md() -> String {
-        let bytes = BUNDLED_TEMPLATES_DIR
-            .get_file(AGENTS_FILENAME)
-            .expect("bundled AGENTS.md")
-            .contents();
-        String::from_utf8(bytes.to_vec()).expect("utf8 AGENTS.md")
-    }
-
     fn write(root: &Path, relative: &str, contents: &str) {
         let path = root.join(relative);
         fs::create_dir_all(path.parent().expect("parent")).expect("create parent dirs");
@@ -55,7 +47,7 @@ mod tests {
 
         assert_eq!(
             fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read AGENTS.md"),
-            bundled_agents_md()
+            bundled_agents_md().expect("bundled AGENTS.md")
         );
     }
 
@@ -67,7 +59,7 @@ mod tests {
         write_agents_md(root.path()).expect("write AGENTS.md");
 
         let written = fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read");
-        let template = bundled_agents_md();
+        let template = bundled_agents_md().expect("bundled AGENTS.md");
         let (managed, _) = template
             .split_once("\n---\n\n# Project")
             .expect("bundled AGENTS.md has the project marker");

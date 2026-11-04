@@ -4,13 +4,7 @@ This project is governed by `spex`. The AI-first development framework that turn
 
 ## Artifact chain
 
-PRD (why and what) -> spec (capability) -> contract (interface like OpenAPI schema for data or Figma mockups for UI, if applicable) -> implementation (code) -> test (proof).
-
-- **PRD** — the short project overview that comes first: what we are building and why. Kept high level, without details: those live in specs. Agents read it to write specs that fit the project's purpose.
-- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
-- **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`
-- **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
-- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
+PRD (why and what) -> spec (capability) -> contract (interface, if applicable) -> implementation (code) -> test (proof).
 
 ## Traceability
 
@@ -48,10 +42,6 @@ Run from anywhere inside the project; `spex <command> --help` lists every option
 
 Prefer `--output <file>` for `specs` and `rules`: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.
 
-## Docs
-
-- [docs/glossary.md](docs/glossary.md) — terms used across specs, rules, schemas, and skills.
-
 ## Core discipline
 
 - **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
@@ -80,6 +70,10 @@ feat(ui): list available pizzas @spec list-pizza-menu
 fix(cart): reject negative quantities @spec cart-add-item, cart-validate
 feat(orders): set status on order creation @spec place-pizza-order#created-order-status
 ```
+
+## Glossary
+
+- [docs/glossary.md](docs/glossary.md) inlined.
 
 ---
 

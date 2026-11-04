@@ -10,7 +10,7 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Specs are the single source of truth for the project: its contracts, code, tests and other artifacts come from them and must adhere to them. Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
   id: place-pizza-order
@@ -22,7 +22,7 @@
   contract: single
   ```
 
-- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies across whole packages. A specific capability the system provides is a spec, not a rule.
+- **Rule** — describes _how the code and artifacts are built_: one coherent cross-cutting convention or rule (style, structure, security, traceability, documentation), with its individual rules captured as acceptance criteria proven by `spex check`. Not tied to a single feature — it applies across whole packages. A specific capability the system provides is a spec, not a rule. Each package must adhere to the rules applicable to it, listed in `spex.yaml`.
 
   ```yaml
   id: secret-handling

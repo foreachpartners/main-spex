@@ -262,11 +262,7 @@ mod tests_unit {
         sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let updated = fs::read_to_string(&agents).expect("read AGENTS.md");
-        let template = BUNDLED_TEMPLATES_DIR
-            .get_file(AGENTS_FILENAME)
-            .expect("bundled AGENTS.md")
-            .contents_utf8()
-            .expect("utf8 AGENTS.md");
+        let template = bundled_agents_md().expect("bundled AGENTS.md");
         let (managed, _) = template
             .split_once("\n---\n\n# Project")
             .expect("bundled AGENTS.md has the project marker");
@@ -286,12 +282,9 @@ mod tests_unit {
 
         sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
-        let expected = BUNDLED_TEMPLATES_DIR
-            .get_file(AGENTS_FILENAME)
-            .expect("bundled AGENTS.md")
-            .contents();
+        let expected = bundled_agents_md().expect("bundled AGENTS.md");
         assert_eq!(
-            fs::read(&agents).expect("read AGENTS.md"),
+            fs::read_to_string(&agents).expect("read AGENTS.md"),
             expected,
             "AGENTS.md without the marker must be fully overwritten"
         );

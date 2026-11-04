@@ -56,6 +56,7 @@ src/                CLI source
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages), with each package's spex.package.yaml merged into its own package on discovery, spec (attaching each package's coverage_ignore to the spec under the package's short name, by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
+    bundled_agents.rs  The AGENTS.md template with the glossary inlined (shared by init and update)
     bundled_rule.rs  Writing a bundled rule, with its script folder, to a destination, and the paths that takes (shared by lib and update)
     entry_view.rs   The view of an entry printed by specs, rules and lib: path beside id, --fields selection against the schema, --search keywords, the YAML list of entries (`[]` when empty), and printing or writing it with `nothing found` on stderr when empty
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
@@ -93,7 +94,7 @@ templates/                     Assets scaffolded into projects
   rules/                       Rules library: rules bundled in the binary and read with `spex lib rules`, never scaffolded (one `<rule-id>.yaml` per entry, with its script folder, same name, beside it, when it has scripts)
   docs/                        Framework docs shipped to projects (symlinks into docs/)
   specs/                       Specs library: template specs bundled in the binary and read with `spex lib specs`, never scaffolded (one `<spec-id>.yaml` per entry)
-  AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
+  AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section. Its glossary line is replaced by the glossary on init and update
   README.md                    Contributor notes on scaffolding rules; never scaffolded
   spex.yaml                    Project config seeded by init for every layout, listing only the spex package (project name, layout, agent root, package name filled in)
   project-name.code-workspace  Editor workspace file seeded by init (multi-repo only)

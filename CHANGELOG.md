@@ -4,6 +4,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 ## [0.31.0] - 2026-11-04
 
+- Changed `AGENTS.md` to inline the glossary, so agents know the framework's terms without opening another file.
 - **Breaking**: Removed `--ai` from `spex specs` and `spex rules`, which now always print the `path` of each file and every field, so drop it from your scripts (see the migration guide).
 - Added `--search` and `--fields` to `spex specs` and `spex rules` to print only the specs or rules containing a keyword, or only some of their fields.
 - Added `spex lib specs` to print or search by keyword the specs library of ready-made specs for common capabilities, such as `password-policy` and `email-policy`, which the `spex-spec` skill finds and offers as a draft when you create a spec for a matching capability.

@@ -4,6 +4,7 @@ use std::path::Path;
 use eros::{Context, bail};
 
 use crate::error::{Result, could_not_read, could_not_read_dir};
+use crate::support::bundled_agents::bundled_agents_md;
 use crate::support::fs::{create_dir_all, symlink_if_absent, write_file};
 use crate::support::managed_section::keep_as_project_section;
 use crate::templates::{
@@ -48,10 +49,7 @@ pub fn move_claude_skills(agent_root: &Path) -> Result<()> {
 }
 
 pub fn write_agents_md(agent_root: &Path) -> Result<()> {
-    let template = BUNDLED_TEMPLATES_DIR
-        .get_file(AGENTS_FILENAME)
-        .expect("bundled AGENTS.md is missing")
-        .contents();
+    let template = bundled_agents_md().expect("bundled AGENTS.md is missing");
     let agents = agent_root.join(AGENTS_FILENAME);
     let claude = agent_root.join(CLAUDE_FILENAME);
 
@@ -66,9 +64,9 @@ pub fn write_agents_md(agent_root: &Path) -> Result<()> {
     let contents = match existing_path {
         Some(path) => {
             let existing = fs::read_to_string(path).with_context(|| could_not_read(path))?;
-            keep_as_project_section(template, &existing)
+            keep_as_project_section(template.as_bytes(), &existing)
         }
-        None => template.to_vec(),
+        None => template.into_bytes(),
     };
 
     write_file(&agents, contents)?;
