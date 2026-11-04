@@ -25,7 +25,13 @@ spex helps to produce slop-free, verifiable results fast, with minimal human int
 
 ## Quickstart
 
-In your project root, the folder that holds your packages:
+Install the CLI (needs [Rust](https://rust-lang.org/tools/install/)):
+
+```sh
+cargo install main-spex
+```
+
+Then, in your project root, the folder that holds your packages:
 
 ```sh
 spex init
