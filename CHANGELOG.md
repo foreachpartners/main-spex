@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.31.1] - 2026-11-04
+
+- Changed the `spex-update` skill to install the latest CLI with `cargo install main-spex` before it reads the migration steps, so they come from the new release.
+
 ## [0.31.0] - 2026-11-04
 
 - Changed `AGENTS.md` to inline the glossary, so agents know the framework's terms without opening another file.
