@@ -5,6 +5,7 @@ mod coverage_ignore;
 mod declared_files;
 mod duplicate_ac_ids;
 mod duplicate_ids;
+mod no_blank_lines;
 mod packages;
 mod property_order;
 mod schema;

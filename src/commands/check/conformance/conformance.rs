@@ -12,6 +12,7 @@ use super::coverage_ignore::validate_coverage_ignore;
 use super::declared_files::validate_declared_files;
 use super::duplicate_ac_ids::validate_no_duplicate_ac_ids;
 use super::duplicate_ids::validate_no_duplicate_ids;
+use super::no_blank_lines::validate_no_blank_lines;
 use super::packages::validate_packages;
 use super::property_order::validate_property_order;
 use super::schema::validate_schema;
@@ -55,6 +56,7 @@ pub(in crate::commands::check) fn validate_conformance(
     findings.extend(validate_no_duplicate_ids(spex_dir, specs, rules));
     findings.extend(validate_no_duplicate_ac_ids(specs));
     findings.extend(validate_property_order(spex_dir)?);
+    findings.extend(validate_no_blank_lines(spex_dir)?);
     Ok(findings
         .into_iter()
         .map(|finding| finding.relative_to(spex_dir))

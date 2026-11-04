@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.31.0] - 2026-11-04
 
 - Added `spex lib specs` to print or search by keyword the specs library of ready-made specs for common capabilities, such as `password-policy` and `email-policy`, which the `spex-spec` skill finds and offers as a draft when you create a spec for a matching capability.
+- Changed `spex check` to forbid blank lines between the keys of a spec or rule file, so a blank line visually separates one entry from the next in the output of `spex specs`, `spex rules` and `spex lib`.
 
 ## [0.30.5] - 2026-11-03
 

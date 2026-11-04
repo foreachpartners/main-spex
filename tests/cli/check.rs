@@ -753,6 +753,43 @@ fn fill_preexisting_errors_baselines_spec_conformance_errors() {
 }
 
 #[test]
+fn check_errors_on_a_blank_line_between_spec_keys_but_not_inside_a_value() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+
+    copy_project(&dummy_project_fixture(), &project);
+    let spec_path = project.join("dummy-project-spex/specs/active-full-coverage.yaml");
+    let spec = fs::read_to_string(&spec_path).expect("read spec");
+    let with_blank_in_value = spec.replace(
+        "  Shows the customer the cart subtotal, including tax, so they know the\n",
+        "  Shows the customer the cart subtotal, including tax, so they know the\n\n",
+    );
+    assert_ne!(spec, with_blank_in_value, "fixture changed, fix the test");
+    fs::write(&spec_path, &with_blank_in_value).expect("write spec with a blank line in a value");
+
+    let inside_value = run_spex(&project, &["check"], "");
+    assert!(
+        !report_text(&inside_value.stdout).contains("no-blank-lines"),
+        "a blank line inside a value was reported",
+    );
+
+    fs::write(
+        &spec_path,
+        spec.replace("status: active\n", "\nstatus: active\n"),
+    )
+    .expect("write spec with a blank line between keys");
+
+    let between_keys = run_spex(&project, &["check"], "");
+    assert_eq!(between_keys.status.code(), Some(1));
+    let report = report_text(&between_keys.stdout);
+    assert!(
+        report.contains("error  spex-internal-conformance/no-blank-lines")
+            && report.contains("specs/active-full-coverage.yaml:13"),
+        "the blank line between keys was not reported at its line\n{report}",
+    );
+}
+
+#[test]
 fn check_dummy_project_matches_expected() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("proj");

@@ -70,6 +70,8 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST require each spec file to be named `<spec-id>.yaml` and each rule file `<rule-id>.yaml`.
 - MUST require every script a rule check references to exist in the rule's script folder, beside the rule file.
 - MUST require declared properties to follow their JSON Schema's declared order, at every nesting level the schema describes (e.g. a rule's `checks[]` items).
+- MUST error on a blank line (empty or whitespace-only) between the keys of a spec or rule file (`no-blank-lines`), at the blank line, since a blank line separates one entry from the next in the output of [`spex specs`](spex-specs-cli-cmd.md), [`spex rules`](spex-rules-cli-cmd.md) and [`spex lib`](spex-lib-cli-cmd.md).
+- MUST allow a blank line inside a multi-line value (e.g. a `|` block holding an example), since it is the text of a key, not a separator between keys.
 - MUST require each spec's and rule's `acceptance_criteria` to be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` to be unique within its spec.
 - MUST require every `@spec` annotation to match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and to reference an existing Spec ID, and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
 - MUST skip, for annotation validation, the spex directory's `schemas/`, `specs/`, `rules/` and `docs/` and the agent root's `.agents/skills/` with all their subfolders, and the agent root's `AGENTS.md`, since they hold illustrative example annotations rather than real references.

@@ -4,6 +4,13 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.31.0
+
+`spex check` now errors on a blank line between the keys of a spec or rule file (`spex-internal-conformance/no-blank-lines`), because a blank line separates one spec or rule from the next in the output of `spex specs`, `spex rules` and `spex lib`. In `<spex-dir>`:
+
+- In every spec under `specs/**/*.yaml` and every rule under `rules/**/*.yaml`, delete each empty or whitespace-only line that is not inside a multi-line value (a `|` or `>` block or a multi-line quoted string). Blank lines inside such a value, e.g. in an example, stay. Rules with `sync_with_upstream: true` are rewritten by `spex update` and need no change.
+- Run `spex check` and confirm it reports no `no-blank-lines` error.
+
 ## 0.28.0
 
 `prd`, the path of the project's PRD relative to `<spex-dir>`, is now a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and the CLI cannot load a `spex.yaml` without it. The PRD is the short project overview that comes first, what is built and why, without details, which agents read before they write or review specs. In `<spex-dir>`:
