@@ -19,6 +19,8 @@ Writes a schema-valid YAML file to `<spex-dir>/rules/**/<rule-id>.yaml`
 
 A cross-cutting rule all code must obey, enforceable package-wide -> rule. A specific capability the system must provide (an endpoint, integration, health check, performance target) -> spec.
 
+Rules are loaded into the agent's limited context whenever it works on an applicable package, so a rule must earn that cost: a convention that matters and is used often (`openapi-conventions`, needed on every endpoint) -> rule. A requirement implemented once and then forgotten (`password-policy`) -> spec.
+
 ## Scope: one convention per rule
 
 A rule captures exactly one coherent cross-cutting convention; its individual rules are the acceptance criteria. If the user describes several unrelated conventions, propose splitting them into multiple rules and confirm the split before writing.
