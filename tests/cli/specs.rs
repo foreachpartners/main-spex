@@ -7,7 +7,7 @@ use crate::common::{
     run_spex, temp_project,
 };
 
-const EXPECTED_SPECS_FOR_AI: &str = r#"- id: active-with-gap
+const EXPECTED_SPECS: &str = r#"- id: active-with-gap
   path: {spex_dir}/specs/active-with-gap.yaml
   title: Validate registration input
   description: Validates a new account's registration input before it is created, rejecting invalid or duplicate submissions.
@@ -54,19 +54,15 @@ fn specs_id_limits_output_to_the_named_specs() {
         listed_ids(&specs.stdout),
         ["active-with-gap", "planned-one"]
     );
-    assert!(
-        !String::from_utf8_lossy(&specs.stdout).contains("path:"),
-        "specs should not print paths without --ai",
-    );
 }
 
 #[test]
-fn specs_ai_adds_the_spec_path_after_the_id() {
+fn specs_prints_the_spec_path_after_the_id() {
     let (_temp_dir, project) = temp_project(&dummy_project_fixture());
 
     let specs = run_spex(
         &project,
-        &["specs", "--ai", "--id", "planned-one", "active-with-gap"],
+        &["specs", "--id", "planned-one", "active-with-gap"],
         "",
     );
 
@@ -74,8 +70,106 @@ fn specs_ai_adds_the_spec_path_after_the_id() {
     let spex_dir = canonical_display(&project.join("dummy-project-spex"));
     assert_eq!(
         String::from_utf8_lossy(&specs.stdout),
-        EXPECTED_SPECS_FOR_AI.replace("{spex_dir}", &spex_dir)
+        EXPECTED_SPECS.replace("{spex_dir}", &spex_dir)
     );
+}
+
+#[test]
+fn specs_fields_prints_only_those_fields_of_each_spec() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(
+        &project,
+        &[
+            "specs",
+            "--id",
+            "planned-one",
+            "--fields",
+            "title",
+            "id",
+            "path",
+        ],
+        "",
+    );
+
+    assert!(specs.status.success());
+    let spex_dir = canonical_display(&project.join("dummy-project-spex"));
+    assert_eq!(
+        String::from_utf8_lossy(&specs.stdout),
+        format!(
+            "- id: planned-one\n  path: {spex_dir}/specs/planned-one.yaml\n  title: Let customers save a favorite order\n"
+        )
+    );
+}
+
+#[test]
+fn specs_fields_rejects_a_name_that_is_no_spec_field() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(&project, &["specs", "--fields", "id", "titel"], "");
+
+    assert_fails_mentioning(&specs, "unknown field `titel` — a spec has: id, ");
+    assert!(specs.stdout.is_empty());
+}
+
+#[test]
+fn specs_search_prints_only_specs_containing_a_keyword_ignoring_case() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(
+        &project,
+        &[
+            "specs",
+            "--search",
+            "ONE CLICK",
+            "no-such-word",
+            "--fields",
+            "id",
+        ],
+        "",
+    );
+
+    assert!(specs.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&specs.stdout),
+        "- id: planned-one\n"
+    );
+}
+
+#[test]
+fn specs_search_matching_nothing_prints_an_empty_list_and_nothing_found_on_stderr() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(&project, &["specs", "--search", "no-such-word"], "");
+
+    assert!(specs.status.success());
+    assert_eq!(String::from_utf8_lossy(&specs.stdout), "[]\n");
+    assert!(String::from_utf8_lossy(&specs.stderr).contains("nothing found\n"));
+}
+
+#[test]
+fn specs_selecting_no_spec_by_id_and_package_prints_an_empty_list_and_nothing_found_on_stderr() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(
+        &project,
+        &["specs", "--id", "planned-one", "--package", "api"],
+        "",
+    );
+
+    assert!(specs.status.success());
+    assert_eq!(String::from_utf8_lossy(&specs.stdout), "[]\n");
+    assert!(String::from_utf8_lossy(&specs.stderr).contains("nothing found\n"));
+}
+
+#[test]
+fn specs_selecting_some_specs_does_not_say_nothing_found() {
+    let (_temp_dir, project) = temp_project(&dummy_project_fixture());
+
+    let specs = run_spex(&project, &["specs", "--id", "planned-one"], "");
+
+    assert!(specs.status.success());
+    assert!(!String::from_utf8_lossy(&specs.stderr).contains("nothing found"));
 }
 
 #[test]

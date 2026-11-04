@@ -1,6 +1,6 @@
 pub mod acceptance_criteria_lines;
-pub mod ai_view;
 pub mod commitment;
+pub mod entry_view;
 pub mod fs;
 pub mod glob;
 pub mod managed_section;

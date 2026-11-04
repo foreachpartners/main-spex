@@ -5,12 +5,12 @@ The specs library holds template specs for capabilities many projects need. It l
 ## Acceptance criteria
 
 - MUST keep the library specs in `templates/specs/`, which the binary includes and `spex init` and `spex update` never scaffold.
-- MUST name each entry `<spec-id>.yaml`, a partial spec file that validates against `templates/schemas/spec.schema.json` without its `packages`, `contract` and `status` fields.
+- MUST name each entry `<spec-id>.yaml`, a partial spec file that validates against `templates/schemas/spec.schema.json` limited to its `id`, `title`, `description` and `acceptance_criteria` fields.
 - MUST give each entry an `id` no other entry has.
 - MUST fail `cargo test` when an entry is invalid, misnamed or shares its `id` with another entry.
 - MUST offer entries only through `spex lib specs`, which the `spex-spec` skill is encouraged to read when a user creates a spec that is not specific to a project.
 - MUST write each entry as an opinionated starting point for the general case, choosing defaults and trade-offs most projects can adopt as they are, which a project is free to change for its needs.
-- MUST NOT hold `packages`, `contract` or `status` in an entry, which the project sets when it takes the entry.
+- MUST NOT hold any other field in an entry, such as `packages`, `contract` or `status`, which the project sets when it takes the entry.
 
 ## Examples
 

@@ -33,7 +33,7 @@ If `<prd-file>` exists, or the user asks to change the PRD, this is an **edit**:
 - If the user attached or pasted a source (a brief, a pitch, an RFD, a feature list) — as text, a file path, or a link — read it in full and pre-fill every answer you can from it.
 - If there is no source and nothing to describe, ask first what the product is. Do not invent one.
 - Read `<spex-dir>/spex.yaml` for the project and package descriptions, and `<spex-dir>/docs/glossary.md` for the terms to use.
-- Edit only: run `spex specs --ai --output <tmp-path>`, then read `<tmp-path>` to learn which capabilities are already specced.
+- Edit only: run `spex specs --fields id title description --output <tmp-path>`, then read `<tmp-path>` to learn which capabilities are already specced.
 
 ## Step 2 — Interview
 

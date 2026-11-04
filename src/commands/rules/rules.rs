@@ -1,31 +1,32 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use eros::{Context, IntoAnyUnion, bail};
+use eros::bail;
 
 use crate::config::Package;
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
-use crate::support::ai_view::ai_view;
-use crate::support::fs::write_file;
+use crate::support::entry_view::{
+    Keywords, ensure_schema_fields, entries_to_yaml, keep_fields, print_entries, with_path,
+};
 use crate::support::yaml_dir::load_yaml_dir;
+use crate::templates::RULE_SCHEMA_FILENAME;
 
 #[cfg(test)]
 #[path = "rules_test.rs"]
 mod rules_test;
 
-const FIELDS_AI_DOES_NOT_NEED: [&str; 2] = ["sync_with_upstream", "checks"];
-
 #[derive(Args)]
 pub struct RulesArgs {
-    #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
-    ai: bool,
     #[arg(long, num_args = 1.., help = "Filter by rule ids")]
     id: Vec<String>,
     #[arg(long, num_args = 1.., help = "Filter by package names")]
     package: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Print only rules containing any of these keywords")]
+    search: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Print only these fields of each rule")]
+    fields: Vec<String>,
     #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
@@ -33,64 +34,39 @@ pub struct RulesArgs {
 pub fn run(args: RulesArgs) -> Result<ExitCode> {
     let spex = Spex::discover()?;
     let yaml = render(&spex, &args)?;
-    match &args.output {
-        Some(path) => {
-            write_file(Path::new(path), &yaml)?;
-        }
-        None => print!("{yaml}"),
-    }
+    print_entries(&yaml, args.output.as_deref())?;
     Ok(ExitCode::SUCCESS)
 }
 
 fn render(spex: &Spex, args: &RulesArgs) -> Result<String> {
     let packages = spex.select_packages(&args.package)?;
+    ensure_schema_fields(&args.fields, "rule", RULE_SCHEMA_FILENAME)?;
+    let keywords = Keywords::new(&args.search);
 
-    let rules: Vec<serde_json::Value> =
-        load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?
-            .iter()
-            .map(|file| {
-                if args.ai {
-                    ai_view(file, &FIELDS_AI_DOES_NOT_NEED)
-                } else {
-                    file.item.clone()
-                }
-            })
-            .collect();
+    let files = load_yaml_dir::<serde_json::Value>(&spex.dir.join(RULES_DIR))?;
 
     for id in &args.id {
-        if !rules
+        if !files
             .iter()
-            .any(|rule| rule.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
+            .any(|file| file.item.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
             bail!("unknown rule id `{id}` — not found in {RULES_DIR}");
         }
     }
 
-    let output: Vec<&serde_json::Value> = rules
+    let output: Vec<serde_json::Value> = files
         .iter()
-        .filter(|rule| {
+        .filter(|file| {
             packages
                 .iter()
-                .any(|package| package_has_rule(package, rule))
+                .any(|package| package_has_rule(package, &file.item))
         })
-        .filter(|rule| id_selected(rule, &args.id))
+        .filter(|file| id_selected(&file.item, &args.id))
+        .filter(|file| keywords.matches(&file.item))
+        .map(|file| keep_fields(with_path(file), &args.fields))
         .collect();
 
-    if output.is_empty() {
-        return serde_yaml_ng::to_string(&output)
-            .context("could not serialize rules")
-            .any_union();
-    }
-
-    output
-        .iter()
-        .map(|rule| {
-            serde_yaml_ng::to_string(&[rule])
-                .context("could not serialize rules")
-                .any_union()
-        })
-        .collect::<Result<Vec<_>>>()
-        .map(|docs| docs.join("\n"))
+    entries_to_yaml(&output, "rules")
 }
 
 fn package_has_rule(package: &Package, rule: &serde_json::Value) -> bool {

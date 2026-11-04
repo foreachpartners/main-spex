@@ -39,13 +39,13 @@ Run from anywhere inside the project; `spex <command> --help` lists every option
 - `spex info [--package <name>...]` — print `spex.yaml` merged with each `spex.package.yaml`: project and per-package configuration, including paths.
 - `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
 - `spex coverage [--package <name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
-- `spex specs [--id <spec-id>...] [--package <name>...] [--ai] [--output <file>]` — print specs.
-- `spex rules [--id <rule-id>...] [--package <name>...] [--ai] [--output <file>]` — print the active rules per package.
+- `spex specs [--id <spec-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print specs, each with its file `path` after its `id`; only those containing any keyword, or only the named fields of each (e.g. `--fields id title description` for a catalog).
+- `spex rules [--id <rule-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the active rules per package the same way; `--fields id path title description acceptance_criteria examples` leaves out the `checks`.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
-- `spex lib specs [--id <spec-id>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the bundled template specs in full, only the named ones, only those containing any keyword, or only the named fields of each (e.g. `--search password --fields id description` for a catalog of matches).
+- `spex lib specs [--id <spec-id>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the bundled template specs as a YAML list, in full, only the named ones, only those containing any keyword, or only the named fields of each (e.g. `--search password --fields id description` for a catalog of matches).
 
-Pass `--ai` to `specs` and `rules`: it drops fields AI doesn't need and adds ones it does. Prefer `--output <file>` for them too: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.
+Prefer `--output <file>` for `specs` and `rules`: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.
 
 ## Docs
 

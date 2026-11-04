@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
+    use crate::error::describe;
     use indoc::{formatdoc, indoc};
     use tempfile::tempdir;
 
@@ -94,27 +95,33 @@ mod tests {
         Spex::from_config(dir.to_path_buf(), config)
     }
 
-    fn args(ai: bool, id: &[&str], package: &[&str]) -> SpecsArgs {
+    fn args(id: &[&str], package: &[&str]) -> SpecsArgs {
         SpecsArgs {
-            ai,
             id: id.iter().map(|s| s.to_string()).collect(),
             package: package.iter().map(|s| s.to_string()).collect(),
+            search: Vec::new(),
+            fields: Vec::new(),
             output: None,
         }
     }
 
+    fn names(values: &[&str]) -> Vec<String> {
+        values.iter().map(|s| s.to_string()).collect()
+    }
+
     #[test]
-    fn render_with_no_flags_prints_every_spec() {
+    fn render_with_no_flags_prints_every_spec_with_its_path_after_the_id() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(false, &[], &[])).expect("render");
+        let yaml = render(&project, &args(&[], &[])).expect("render");
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: list-pizza-menu
+                  path: {dir}/specs/list-pizza-menu.yaml
                   title: List the pizza menu
                   description: Lets a customer browse the menu.
                   acceptance_criteria:
@@ -122,28 +129,6 @@ mod tests {
                   packages:
                   - frontend
 
-                - id: place-pizza-order
-                  title: Place a pizza order
-                  description: Lets a customer place an order.
-                  acceptance_criteria:
-                  - '[ ] MUST accept a cart'
-                  packages:
-                  - api
-            "}
-        );
-    }
-
-    #[test]
-    fn render_with_ai_flag_adds_path() {
-        let dir = tempdir().expect("temp dir");
-        write_project(dir.path());
-        let project = project(dir.path());
-
-        let yaml = render(&project, &args(true, &["place-pizza-order"], &[])).expect("render");
-
-        assert_eq!(
-            yaml,
-            formatdoc! {"
                 - id: place-pizza-order
                   path: {dir}/specs/place-pizza-order.yaml
                   title: Place a pizza order
@@ -162,19 +147,20 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(false, &[], &["frontend"])).expect("render");
+        let yaml = render(&project, &args(&[], &["frontend"])).expect("render");
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: list-pizza-menu
+                  path: {dir}/specs/list-pizza-menu.yaml
                   title: List the pizza menu
                   description: Lets a customer browse the menu.
                   acceptance_criteria:
                   - '[ ] MUST list every active pizza'
                   packages:
                   - frontend
-            "}
+            ", dir = dir.path().display()}
         );
     }
 
@@ -184,11 +170,136 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let by_full_name = render(&project, &args(false, &[], &["demo-frontend"])).expect("render");
-        let by_short_name = render(&project, &args(false, &[], &["frontend"])).expect("render");
+        let by_full_name = render(&project, &args(&[], &["demo-frontend"])).expect("render");
+        let by_short_name = render(&project, &args(&[], &["frontend"])).expect("render");
 
         assert_eq!(by_full_name, by_short_name);
         assert!(by_full_name.contains("list-pizza-menu"));
+    }
+
+    #[test]
+    fn render_with_fields_prints_only_those_fields_in_spec_order() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            fields: names(&["description", "id"]),
+            ..args(&[], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(
+            yaml,
+            indoc! {"
+                - id: list-pizza-menu
+                  description: Lets a customer browse the menu.
+
+                - id: place-pizza-order
+                  description: Lets a customer place an order.
+            "}
+        );
+    }
+
+    #[test]
+    fn render_with_the_path_field_prints_the_spec_path() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            fields: names(&["id", "path"]),
+            ..args(&["place-pizza-order"], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(
+            yaml,
+            formatdoc! {"
+                - id: place-pizza-order
+                  path: {dir}/specs/place-pizza-order.yaml
+            ", dir = dir.path().display()}
+        );
+    }
+
+    #[test]
+    fn render_with_a_spec_field_no_spec_sets_prints_the_specs_without_it() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            fields: names(&["id", "blocked_by"]),
+            ..args(&["place-pizza-order"], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: place-pizza-order\n");
+    }
+
+    #[test]
+    fn render_errors_on_a_field_no_spec_has() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            fields: names(&["id", "titel"]),
+            ..args(&[], &[])
+        };
+
+        let error = render(&project, &args).expect_err("unknown field");
+
+        assert!(describe(&error).starts_with("unknown field `titel` — a spec has: id, "));
+    }
+
+    #[test]
+    fn render_with_search_prints_specs_containing_any_keyword_ignoring_case() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            search: names(&["BROWSE", "nothing-like-this"]),
+            fields: names(&["id"]),
+            ..args(&[], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: list-pizza-menu\n");
+    }
+
+    #[test]
+    fn render_with_search_does_not_match_the_spec_path_or_field_names() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+
+        for keyword in ["specs", "acceptance_criteria"] {
+            let args = SpecsArgs {
+                search: names(&[keyword]),
+                ..args(&[], &[])
+            };
+
+            let yaml = render(&project, &args).expect("render");
+
+            assert_eq!(yaml, "[]\n", "keyword `{keyword}` matched");
+        }
+    }
+
+    #[test]
+    fn render_with_search_and_package_prints_only_specs_in_both() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = SpecsArgs {
+            search: names(&["customer"]),
+            fields: names(&["id"]),
+            ..args(&[], &["api"])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: place-pizza-order\n");
     }
 
     #[test]
@@ -197,7 +308,7 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let result = render(&project, &args(false, &[], &["missing"]));
+        let result = render(&project, &args(&[], &["missing"]));
 
         assert!(result.is_err());
     }
@@ -208,7 +319,7 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let result = render(&project, &args(false, &["missing"], &[]));
+        let result = render(&project, &args(&["missing"], &[]));
 
         assert!(result.is_err());
     }

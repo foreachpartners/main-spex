@@ -38,9 +38,9 @@ Determine what the specs are based on before doing anything else:
 - If the user provided no source and nothing to spec, ask first what they want to spec. Do not invent a capability or proceed on assumptions.
 - Read `<spex-dir>/spex.yaml` for the project overview. Package names are arbitrary, so read each package's `description` to learn its role and use that to determine the spec's `packages`.
 - Read the PRD in full, at the path `spex info` prints as `prd`, to align the specs with the product's goal and capabilities.
-- Run `spex specs --ai --output <tmp-path>`, then read `<tmp-path>` for related specs.
+- Run `spex specs --fields id title description --output <tmp-path>`, then read `<tmp-path>` for related specs, and read each related spec in full with `spex specs --id <spec-id-a> <spec-id-b>`. In a project with many specs, narrow the catalog with `--search <keyword>...`.
 - Read the interface contracts in the spex directory's `contracts/` folder, listed per package under `contracts` in `spex.yaml`, to learn the existing interfaces the spec relates to.
-- Run `spex rules --id writing-style --ai` for the writing conventions the spec's prose must follow.
+- Run `spex rules --id writing-style --fields id path title description acceptance_criteria examples` for the writing conventions the spec's prose must follow.
 
 ## Step 2 — Identify the capabilities and clarify missing details
 

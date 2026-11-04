@@ -8,6 +8,7 @@ use crate::common::{
 };
 
 const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
+  path: {spex_dir}/rules/glob-runner.yaml
   title: Glob runner
   sync_with_upstream: true
   description: Exercises the glob runner with a forbidden path and a required path.
@@ -24,15 +25,6 @@ const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
     pattern: README.md
     negate: true
     severity: error
-"#;
-
-const EXPECTED_GLOB_RULE_FOR_AI: &str = r#"- id: glob-runner
-  path: {spex_dir}/rules/glob-runner.yaml
-  title: Glob runner
-  description: Exercises the glob runner with a forbidden path and a required path.
-  acceptance_criteria:
-  - MUST provide a README.md in the package root
-  - MUST NOT keep backup files in a package
 "#;
 
 #[test]
@@ -83,6 +75,8 @@ fn rules_package_limits_output_to_the_rules_of_named_packages() {
     );
     assert!(spex.status.success());
     assert_eq!(String::from_utf8_lossy(&spex.stdout), "[]\n");
+    assert!(String::from_utf8_lossy(&spex.stderr).contains("nothing found\n"));
+    assert!(!String::from_utf8_lossy(&frontend.stderr).contains("nothing found"));
 }
 
 #[test]
@@ -118,27 +112,92 @@ fn rules_id_limits_output_to_the_named_rules() {
 }
 
 #[test]
-fn rules_prints_the_full_rule_content_by_default() {
+fn rules_prints_the_full_rule_content_with_its_path_after_the_id() {
     let (_temp_dir, project) = temp_project(&runners_project_fixture());
 
     let rules = run_spex(&project, &["rules", "--id", "glob-runner"], "");
 
     assert!(rules.status.success());
-    assert_eq!(String::from_utf8_lossy(&rules.stdout), EXPECTED_GLOB_RULE);
-}
-
-#[test]
-fn rules_ai_drops_checks_and_the_sync_flag_and_adds_the_rule_path() {
-    let (_temp_dir, project) = temp_project(&runners_project_fixture());
-
-    let rules = run_spex(&project, &["rules", "--ai", "--id", "glob-runner"], "");
-
-    assert!(rules.status.success());
     let spex_dir = canonical_display(&project.join("runners-project-spex"));
     assert_eq!(
         String::from_utf8_lossy(&rules.stdout),
-        EXPECTED_GLOB_RULE_FOR_AI.replace("{spex_dir}", &spex_dir)
+        EXPECTED_GLOB_RULE.replace("{spex_dir}", &spex_dir)
     );
+}
+
+#[test]
+fn rules_fields_prints_only_those_fields_of_each_rule() {
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
+
+    let rules = run_spex(
+        &project,
+        &[
+            "rules",
+            "--id",
+            "glob-runner",
+            "--fields",
+            "acceptance_criteria",
+            "id",
+            "title",
+        ],
+        "",
+    );
+
+    assert!(rules.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&rules.stdout),
+        r#"- id: glob-runner
+  title: Glob runner
+  acceptance_criteria:
+  - MUST provide a README.md in the package root
+  - MUST NOT keep backup files in a package
+"#
+    );
+}
+
+#[test]
+fn rules_fields_rejects_a_name_that_is_no_rule_field() {
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
+
+    let rules = run_spex(&project, &["rules", "--fields", "id", "titel"], "");
+
+    assert_fails_mentioning(&rules, "unknown field `titel` — a rule has: id, ");
+    assert!(rules.stdout.is_empty());
+}
+
+#[test]
+fn rules_search_prints_only_rules_containing_a_keyword_ignoring_case() {
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
+
+    let rules = run_spex(
+        &project,
+        &[
+            "rules",
+            "--search",
+            "BACKUP FILES",
+            "no-such-word",
+            "--fields",
+            "id",
+        ],
+        "",
+    );
+
+    assert!(rules.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&rules.stdout),
+        "- id: glob-runner\n"
+    );
+}
+
+#[test]
+fn rules_search_matching_nothing_prints_an_empty_list_and_nothing_found_on_stderr() {
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
+
+    let rules = run_spex(&project, &["rules", "--search", "no-such-word"], "");
+
+    assert!(rules.status.success());
+    assert_eq!(String::from_utf8_lossy(&rules.stdout), "[]\n");
+    assert!(String::from_utf8_lossy(&rules.stderr).contains("nothing found\n"));
 }
 
 #[test]

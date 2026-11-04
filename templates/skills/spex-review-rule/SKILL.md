@@ -13,7 +13,7 @@ Use the starting point the user gave (a commit, branch, tag, or PR), otherwise `
 
 ### 2. Identify the rules source
 
-Use the packages the user provided, otherwise the packages affected by the changes. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for them, then read `<tmp-path>` for the governing rules.
+Use the packages the user provided, otherwise the packages affected by the changes. Run `spex rules --package <package-a> <package-b> --fields id path title description acceptance_criteria examples --output <tmp-path>` for them, then read `<tmp-path>` for the governing rules.
 
 On top of whatever the package documents, the review always carries the **smell baseline** below — a fixed set of Fowler code smells that applies even when a package documents nothing. Two rules bind it:
 

@@ -13,14 +13,14 @@ description: Carry out an existing plan, or implement an ad-hoc user request. Us
 
 ### With a plan
 
-Read the plan. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the plan's `Specs` to read the governing specs.
+Read the plan. Run `spex specs --id <spec-id-a> <spec-id-b>` for the plan's `Specs` to read the governing specs.
 
 ### Without a plan (ad-hoc user request)
 
 1. Determine packages we will work on (e.g. frontend, backend).
-2. Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the affected packages from step 1, then read `<tmp-path>` for the governing rules.
+2. Run `spex rules --package <package-a> <package-b> --fields id path title description acceptance_criteria examples --output <tmp-path>` for the affected packages from step 1, then read `<tmp-path>` for the governing rules.
 3. Determine all governing spec IDs related to the request.
-4. Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
+4. Run `spex specs --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
 5. Produce a note in response with a list of governing rules and specs.
 
 ### Both paths

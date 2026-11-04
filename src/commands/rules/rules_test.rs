@@ -2,6 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::config::Package;
+    use crate::error::describe;
     use crate::support::testing;
     use indoc::{formatdoc, indoc};
     use tempfile::tempdir;
@@ -115,27 +116,33 @@ mod tests {
         Spex::from_config(dir.to_path_buf(), config)
     }
 
-    fn args(ai: bool, id: &[&str], package: &[&str]) -> RulesArgs {
+    fn args(id: &[&str], package: &[&str]) -> RulesArgs {
         RulesArgs {
-            ai,
             id: id.iter().map(|s| s.to_string()).collect(),
             package: package.iter().map(|s| s.to_string()).collect(),
+            search: Vec::new(),
+            fields: Vec::new(),
             output: None,
         }
     }
 
+    fn names(values: &[&str]) -> Vec<String> {
+        values.iter().map(|s| s.to_string()).collect()
+    }
+
     #[test]
-    fn render_with_no_flags_prints_every_assigned_rule() {
+    fn render_with_no_flags_prints_every_assigned_rule_in_full_with_its_path_after_the_id() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(false, &[], &[])).expect("render");
+        let yaml = render(&project, &args(&[], &[])).expect("render");
 
         assert_eq!(
             yaml,
-            indoc! {"
+            formatdoc! {"
                 - id: secret-handling
+                  path: {dir}/rules/secret-handling.yaml
                   title: Secret protection
                   description: no secrets
                   sync_with_upstream: true
@@ -147,37 +154,17 @@ mod tests {
                     pattern: '**/*.bak'
 
                 - id: writing-style
+                  path: {dir}/rules/writing-style.yaml
                   title: Writing style
                   description: consistent prose
                   acceptance_criteria:
                   - MUST use plain language
-            "}
-        );
-    }
-
-    #[test]
-    fn render_with_ai_flag_strips_sync_with_upstream_and_checks() {
-        let dir = tempdir().expect("temp dir");
-        write_project(dir.path());
-        let project = project(dir.path());
-
-        let yaml = render(&project, &args(true, &["secret-handling"], &[])).expect("render");
-
-        assert_eq!(
-            yaml,
-            formatdoc! {"
-                - id: secret-handling
-                  path: {dir}/rules/secret-handling.yaml
-                  title: Secret protection
-                  description: no secrets
-                  acceptance_criteria:
-                  - MUST not commit secrets
             ", dir = dir.path().display()}
         );
     }
 
     #[test]
-    fn render_with_ai_flag_preserves_field_order_after_dropping_checks() {
+    fn render_with_fields_prints_only_those_fields_in_rule_order() {
         let dir = tempdir().expect("temp dir");
         std::fs::write(
             dir.path().join("spex.yaml"),
@@ -215,8 +202,19 @@ mod tests {
         )
         .expect("write rule");
         let project = project(dir.path());
+        let args = RulesArgs {
+            fields: names(&[
+                "examples",
+                "acceptance_criteria",
+                "description",
+                "title",
+                "path",
+                "id",
+            ]),
+            ..args(&[], &[])
+        };
 
-        let yaml = render(&project, &args(true, &[], &[])).expect("render");
+        let yaml = render(&project, &args).expect("render");
 
         assert_eq!(
             yaml,
@@ -234,47 +232,100 @@ mod tests {
     }
 
     #[test]
+    fn render_with_a_rule_field_no_rule_sets_prints_the_rules_without_it() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = RulesArgs {
+            fields: names(&["id", "examples"]),
+            ..args(&["writing-style"], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: writing-style\n");
+    }
+
+    #[test]
+    fn render_errors_on_a_field_no_rule_has() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = RulesArgs {
+            fields: names(&["id", "titel"]),
+            ..args(&[], &[])
+        };
+
+        let error = render(&project, &args).expect_err("unknown field");
+
+        assert!(describe(&error).starts_with("unknown field `titel` — a rule has: id, "));
+    }
+
+    #[test]
+    fn render_with_search_prints_rules_containing_any_keyword_ignoring_case() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = RulesArgs {
+            search: names(&["PLAIN language", "nothing-like-this"]),
+            fields: names(&["id"]),
+            ..args(&[], &[])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: writing-style\n");
+    }
+
+    #[test]
+    fn render_with_search_matches_checks_but_not_the_rule_path() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let by_check = RulesArgs {
+            search: names(&["*.bak"]),
+            fields: names(&["id"]),
+            ..args(&[], &[])
+        };
+        let by_path = RulesArgs {
+            search: names(&["rules"]),
+            ..args(&[], &[])
+        };
+
+        assert_eq!(
+            render(&project, &by_check).expect("render"),
+            "- id: secret-handling\n"
+        );
+        assert_eq!(render(&project, &by_path).expect("render"), "[]\n");
+    }
+
+    #[test]
+    fn render_with_search_and_package_prints_only_rules_in_both() {
+        let dir = tempdir().expect("temp dir");
+        write_project(dir.path());
+        let project = project(dir.path());
+        let args = RulesArgs {
+            search: names(&["no secrets", "plain language"]),
+            fields: names(&["id"]),
+            ..args(&[], &["frontend"])
+        };
+
+        let yaml = render(&project, &args).expect("render");
+
+        assert_eq!(yaml, "- id: writing-style\n");
+    }
+
+    #[test]
     fn render_with_single_id_returns_only_that_rule() {
         let dir = tempdir().expect("temp dir");
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(false, &["writing-style"], &[])).expect("render");
-
-        assert_eq!(
-            yaml,
-            indoc! {"
-                - id: writing-style
-                  title: Writing style
-                  description: consistent prose
-                  acceptance_criteria:
-                  - MUST use plain language
-            "}
-        );
-    }
-
-    #[test]
-    fn render_with_multiple_ids_returns_matching_rules_only() {
-        let dir = tempdir().expect("temp dir");
-        write_project(dir.path());
-        let project = project(dir.path());
-
-        let yaml = render(
-            &project,
-            &args(true, &["secret-handling", "writing-style"], &[]),
-        )
-        .expect("render");
+        let yaml = render(&project, &args(&["writing-style"], &[])).expect("render");
 
         assert_eq!(
             yaml,
             formatdoc! {"
-                - id: secret-handling
-                  path: {dir}/rules/secret-handling.yaml
-                  title: Secret protection
-                  description: no secrets
-                  acceptance_criteria:
-                  - MUST not commit secrets
-
                 - id: writing-style
                   path: {dir}/rules/writing-style.yaml
                   title: Writing style
@@ -291,7 +342,7 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(true, &[], &["demo-frontend"])).expect("render");
+        let yaml = render(&project, &args(&[], &["demo-frontend"])).expect("render");
 
         assert_eq!(
             yaml,
@@ -312,27 +363,10 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml =
-            render(&project, &args(true, &[], &["demo-api", "demo-frontend"])).expect("render");
+        let yaml = render(&project, &args(&[], &["demo-api", "demo-frontend"])).expect("render");
 
-        assert_eq!(
-            yaml,
-            formatdoc! {"
-                - id: secret-handling
-                  path: {dir}/rules/secret-handling.yaml
-                  title: Secret protection
-                  description: no secrets
-                  acceptance_criteria:
-                  - MUST not commit secrets
-
-                - id: writing-style
-                  path: {dir}/rules/writing-style.yaml
-                  title: Writing style
-                  description: consistent prose
-                  acceptance_criteria:
-                  - MUST use plain language
-            ", dir = dir.path().display()}
-        );
+        assert!(yaml.contains("- id: secret-handling\n"));
+        assert!(yaml.contains("- id: writing-style\n"));
     }
 
     #[test]
@@ -341,19 +375,12 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let yaml = render(&project, &args(true, &[], &["api"])).expect("render");
+        let by_short_name = render(&project, &args(&[], &["api"])).expect("render");
+        let by_full_name = render(&project, &args(&[], &["demo-api"])).expect("render");
 
-        assert_eq!(
-            yaml,
-            formatdoc! {"
-                - id: secret-handling
-                  path: {dir}/rules/secret-handling.yaml
-                  title: Secret protection
-                  description: no secrets
-                  acceptance_criteria:
-                  - MUST not commit secrets
-            ", dir = dir.path().display()}
-        );
+        assert_eq!(by_short_name, by_full_name);
+        assert!(by_short_name.contains("- id: secret-handling\n"));
+        assert!(!by_short_name.contains("writing-style"));
     }
 
     #[test]
@@ -362,7 +389,7 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let result = render(&project, &args(false, &[], &["missing"]));
+        let result = render(&project, &args(&[], &["missing"]));
 
         assert!(result.is_err());
     }
@@ -373,7 +400,7 @@ mod tests {
         write_project(dir.path());
         let project = project(dir.path());
 
-        let result = render(&project, &args(false, &["missing"], &[]));
+        let result = render(&project, &args(&["missing"], &[]));
 
         assert!(result.is_err());
     }

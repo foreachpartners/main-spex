@@ -9,7 +9,7 @@ Fix what is really broken, properly, at its root cause — or stop and ask. Work
 
 ### 1. Confirm the problem is real
 
-Read the code and the governing specs and rules (`spex specs --ai --id <spec-id>`; `spex rules --package <package> --ai --output <tmp-path>`), then reproduce the problem: a failing test or command, a `spex check` finding, or the exact code path that misbehaves.
+Read the code and the governing specs and rules (`spex specs --id <spec-id>`; `spex rules --package <package> --fields id path title description acceptance_criteria examples --output <tmp-path>`), then reproduce the problem: a failing test or command, a `spex check` finding, or the exact code path that misbehaves.
 
 A report can be wrong — the spec may require the behavior, a rule may allow it, the code may already be correct. When you cannot show the problem, change nothing and report your evidence.
 

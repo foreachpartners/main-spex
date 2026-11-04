@@ -1,15 +1,16 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
-use eros::{Context, IntoAnyUnion, bail};
+use eros::bail;
 
 use crate::config::spex::Spex;
 use crate::error::Result;
 use crate::spec::SPECS_DIR;
-use crate::support::ai_view::ai_view;
-use crate::support::fs::write_file;
+use crate::support::entry_view::{
+    Keywords, ensure_schema_fields, entries_to_yaml, keep_fields, print_entries, with_path,
+};
 use crate::support::yaml_dir::load_yaml_dir;
+use crate::templates::SPEC_SCHEMA_FILENAME;
 
 #[cfg(test)]
 #[path = "specs_test.rs"]
@@ -17,12 +18,14 @@ mod specs_test;
 
 #[derive(Args)]
 pub struct SpecsArgs {
-    #[arg(long, help = "Drop fields AI doesn't need, add ones it does")]
-    ai: bool,
     #[arg(long, num_args = 1.., help = "Filter by spec ids")]
     id: Vec<String>,
     #[arg(long, num_args = 1.., help = "Filter by package name or short name")]
     package: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Print only specs containing any of these keywords")]
+    search: Vec<String>,
+    #[arg(long, num_args = 1.., help = "Print only these fields of each spec")]
+    fields: Vec<String>,
     #[arg(long, help = "Write the output to this file")]
     output: Option<String>,
 }
@@ -30,60 +33,35 @@ pub struct SpecsArgs {
 pub fn run(args: SpecsArgs) -> Result<ExitCode> {
     let spex = Spex::discover()?;
     let yaml = render(&spex, &args)?;
-    match &args.output {
-        Some(path) => {
-            write_file(Path::new(path), &yaml)?;
-        }
-        None => print!("{yaml}"),
-    }
+    print_entries(&yaml, args.output.as_deref())?;
     Ok(ExitCode::SUCCESS)
 }
 
 fn render(spex: &Spex, args: &SpecsArgs) -> Result<String> {
     let short_names = spex.package_short_names(&args.package)?;
+    ensure_schema_fields(&args.fields, "spec", SPEC_SCHEMA_FILENAME)?;
+    let keywords = Keywords::new(&args.search);
 
-    let specs: Vec<serde_json::Value> =
-        load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?
-            .iter()
-            .map(|file| {
-                if args.ai {
-                    ai_view(file, &[])
-                } else {
-                    file.item.clone()
-                }
-            })
-            .collect();
+    let files = load_yaml_dir::<serde_json::Value>(&spex.dir.join(SPECS_DIR))?;
 
     for id in &args.id {
-        if !specs
+        if !files
             .iter()
-            .any(|spec| spec.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
+            .any(|file| file.item.get("id").and_then(|v| v.as_str()) == Some(id.as_str()))
         {
             bail!("unknown spec id `{id}` — not found in {SPECS_DIR}");
         }
     }
 
-    let output: Vec<&serde_json::Value> = specs
+    let output: Vec<serde_json::Value> = files
         .iter()
-        .filter(|spec| package_selected(spec, &short_names))
-        .filter(|spec| id_selected(spec, &args.id))
+        .filter(|file| package_selected(&file.item, &short_names))
+        .filter(|file| id_selected(&file.item, &args.id))
+        .filter(|file| keywords.matches(&file.item))
+        .map(|file| keep_fields(with_path(file), &args.fields))
         .collect();
 
-    if output.is_empty() {
-        return serde_yaml_ng::to_string(&output)
-            .context("could not serialize specs")
-            .any_union();
-    }
-
-    output
-        .iter()
-        .map(|spec| {
-            serde_yaml_ng::to_string(&[spec])
-                .context("could not serialize specs")
-                .any_union()
-        })
-        .collect::<Result<Vec<_>>>()
-        .map(|docs| docs.join("\n"))
+    entries_to_yaml(&output, "specs")
 }
 
 fn package_selected(spec: &serde_json::Value, short_names: &[&str]) -> bool {

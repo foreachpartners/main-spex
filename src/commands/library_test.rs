@@ -33,10 +33,10 @@ mod tests {
     }
 
     #[test]
-    fn render_without_ids_prints_every_entry_in_full_separated_by_a_blank_line() {
+    fn render_without_ids_prints_every_entry_in_full_as_a_list_separated_by_a_blank_line() {
         let printed = render(&entries(), &[], &[], &[]).expect("render");
 
-        assert_eq!(printed, "id: a\n\nid: b\n\nid: c\n");
+        assert_eq!(printed, "- id: a\n\n- id: b\n\n- id: c\n");
     }
 
     #[test]
@@ -45,7 +45,7 @@ mod tests {
 
         let printed = render(&entries(), &ids, &[], &[]).expect("render");
 
-        assert_eq!(printed, "id: a\n\nid: c\n");
+        assert_eq!(printed, "- id: a\n\n- id: c\n");
     }
 
     #[test]
@@ -62,8 +62,14 @@ mod tests {
 
     fn described_entries() -> Vec<Entry> {
         vec![
-            entry("a", "id: a\ndescription: first\ncriteria:\n  - one\n"),
-            entry("b", "id: b\ndescription: second\ncriteria:\n  - two\n"),
+            entry(
+                "a",
+                "id: a\ndescription: first\nacceptance_criteria:\n  - one\n",
+            ),
+            entry(
+                "b",
+                "id: b\ndescription: second\nacceptance_criteria:\n  - two\n",
+            ),
         ]
     }
 
@@ -83,7 +89,7 @@ mod tests {
 
         assert_eq!(
             printed,
-            "id: a\ndescription: first\n\nid: b\ndescription: second\n"
+            "- id: a\n  description: first\n\n- id: b\n  description: second\n"
         );
     }
 
@@ -92,31 +98,27 @@ mod tests {
         let printed =
             render(&described_entries(), &names(&["b"]), &[], &names(&["id"])).expect("render");
 
-        assert_eq!(printed, "id: b\n");
+        assert_eq!(printed, "- id: b\n");
     }
 
     #[test]
-    fn render_rejects_a_field_of_no_entry() {
-        let error = render(&described_entries(), &[], &[], &names(&["id", "nope"]))
+    fn render_rejects_a_field_a_library_entry_does_not_have() {
+        let error = render(&described_entries(), &[], &[], &names(&["id", "packages"]))
             .expect_err("unknown field");
 
         assert_eq!(
             describe(&error),
-            "unknown field `nope` — not found in any entry of the library"
+            "unknown field `packages` — a library entry has: id, title, description, acceptance_criteria"
         );
     }
 
     #[test]
-    fn render_accepts_a_field_of_an_entry_that_is_not_printed() {
-        let entries = vec![
-            entry("a", "id: a\n"),
-            entry("b", "id: b\nblocked_by:\n  - a\n"),
-        ];
+    fn render_accepts_an_entry_field_that_no_entry_sets() {
+        let entries = vec![entry("a", "id: a\n"), entry("b", "id: b\ntitle: Second\n")];
 
-        let printed =
-            render(&entries, &names(&["a"]), &[], &names(&["blocked_by"])).expect("render");
+        let printed = render(&entries, &names(&["a"]), &[], &names(&["title"])).expect("render");
 
-        assert_eq!(printed, "{}\n");
+        assert_eq!(printed, "- {}\n");
     }
 
     fn searchable_entries() -> Vec<Entry> {
@@ -138,7 +140,7 @@ mod tests {
 
         assert_eq!(
             printed,
-            "id: email-policy\ndescription: Validates an address\ncriteria:\n  - must: lowercase the Domain\n"
+            "- id: email-policy\n  description: Validates an address\n  criteria:\n  - must: lowercase the Domain\n"
         );
     }
 
@@ -152,7 +154,7 @@ mod tests {
         )
         .expect("render");
 
-        assert_eq!(printed, "id: email-policy\n\nid: password-policy\n");
+        assert_eq!(printed, "- id: email-policy\n\n- id: password-policy\n");
     }
 
     #[test]
@@ -160,7 +162,7 @@ mod tests {
         let printed =
             render(&searchable_entries(), &[], &names(&["criteria"]), &[]).expect("render");
 
-        assert_eq!(printed, "");
+        assert_eq!(printed, "[]\n");
     }
 
     #[test]
@@ -173,13 +175,13 @@ mod tests {
         )
         .expect("render");
 
-        assert_eq!(printed, "id: email-policy\n");
+        assert_eq!(printed, "- id: email-policy\n");
     }
 
     #[test]
-    fn render_with_search_matching_nothing_prints_nothing() {
+    fn render_with_search_matching_nothing_prints_an_empty_list() {
         let printed = render(&searchable_entries(), &[], &names(&["nope"]), &[]).expect("render");
 
-        assert_eq!(printed, "");
+        assert_eq!(printed, "[]\n");
     }
 }

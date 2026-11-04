@@ -56,7 +56,7 @@ src/                CLI source
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages), with each package's spex.package.yaml merged into its own package on discovery, spec (attaching each package's coverage_ignore to the spec under the package's short name, by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
-    ai_view.rs      The --ai view of a loaded yaml file (path beside id, dropped fields; shared by specs and rules)
+    entry_view.rs   The view of an entry printed by specs, rules and lib: path beside id, --fields selection against the schema, --search keywords, the YAML list of entries (`[]` when empty), and printing or writing it with `nothing found` on stderr when empty
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, path normalizing, relative paths, file URLs, embedded dir extraction, symlinks, exec bits)
     glob.rs         Glob set building from patterns (shared by a check's include and exclude and by a package's exclude)

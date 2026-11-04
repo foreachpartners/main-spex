@@ -15,13 +15,13 @@ struct Entry {
 const LIBRARY_DIR: &str = "templates/specs";
 const SCHEMAS_DIR: &str = "templates/schemas";
 const SPEC_SCHEMA_FILE: &str = "spec.schema.json";
-const PROJECT_FIELDS: [&str; 3] = ["packages", "contract", "status"];
+const ENTRY_FIELDS: [&str; 4] = ["id", "title", "description", "acceptance_criteria"];
 
 fn repository() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
 }
 
-fn schemas_without_project_fields() -> TempDir {
+fn schemas_limited_to_entry_fields() -> TempDir {
     let dir = tempfile::tempdir().expect("temp dir");
     for schema in fs::read_dir(repository().join(SCHEMAS_DIR)).expect("schemas folder") {
         let path = schema.expect("schema").path();
@@ -33,14 +33,12 @@ fn schemas_without_project_fields() -> TempDir {
     let text = fs::read_to_string(&spec_schema).expect("read spec schema");
     let mut schema: Value = serde_json::from_str(&text).expect("parse spec schema");
     let properties = schema["properties"].as_object_mut().expect("properties");
-    for field in PROJECT_FIELDS {
-        properties.remove(field);
-    }
+    properties.retain(|field, _| ENTRY_FIELDS.contains(&field.as_str()));
     let required = schema["required"].as_array_mut().expect("required");
     required.retain(|field| {
-        !field
+        field
             .as_str()
-            .is_some_and(|name| PROJECT_FIELDS.contains(&name))
+            .is_some_and(|name| ENTRY_FIELDS.contains(&name))
     });
     fs::write(&spec_schema, schema.to_string()).expect("write spec schema");
     dir
@@ -66,9 +64,9 @@ fn read_entry(file: &Path) -> Entry {
 }
 
 #[test]
-fn specs_library_entries_validate_against_the_spec_schema_without_project_fields() {
+fn specs_library_entries_validate_against_the_spec_schema_limited_to_entry_fields() {
     let files = entry_files();
-    let schemas = schemas_without_project_fields();
+    let schemas = schemas_limited_to_entry_fields();
 
     let output = Command::new(env!("CARGO_BIN_EXE_spex"))
         .args(["check-schema", "--schema"])

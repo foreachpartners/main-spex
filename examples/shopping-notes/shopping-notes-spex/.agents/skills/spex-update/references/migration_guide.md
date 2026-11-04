@@ -4,13 +4,25 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.31.0
+
+`spex check` now errors on a blank line between the keys of a spec or rule file (`spex-internal-conformance/no-blank-lines`). In `<spex-dir>`:
+
+- In every spec under `specs/**/*.yaml` and every rule under `rules/**/*.yaml`, delete each empty or whitespace-only line that is not inside a multi-line value (a `|` or `>` block or a multi-line quoted string). Blank lines inside such a value, e.g. in an example, stay.
+- Run `spex check` and confirm it reports no `no-blank-lines` error.
+
+`spex specs` and `spex rules` no longer take `--ai`, and the CLI errors on it. In every CI job, script, and own skill or doc of the project (the part of `AGENTS.md` below the managed section, package skills, docs):
+
+- Drop `--ai` from every `spex specs` and `spex rules` command.
+- Add `--fields id path title description acceptance_criteria examples` to a `spex rules` command whose reader needs no `checks`, as `--ai` did.
+
 ## 0.28.0
 
 `prd`, the path of the project's PRD relative to `<spex-dir>`, is now a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and the CLI cannot load a `spex.yaml` without it. The PRD is the short project overview that comes first, what is built and why, without details, which agents read before they write or review specs. In `<spex-dir>`:
 
 - If `spex.yaml` sets `prd` and the file it names exists, change nothing.
 - Otherwise ask the user whether the project already has a PRD or product brief file. If it does, set `prd` in `spex.yaml` to its path relative to `<spex-dir>`, after `description` (after `agent_root` when there is none).
-- If it has none, set `prd: docs/prd.md` the same way, then write `<spex-dir>/docs/prd.md` by interviewing the user about the product, one question at a time, pre-filling every answer from `spex.yaml`, the package descriptions, and the specs (`spex specs --ai`). Use the `spex-prd` skill when `<agent-root>/.agents/skills/spex-prd` exists; a project older than 0.27.0 has no such skill, so write `# Product requirements` with `## Problem`, `## Goal`, `## Users`, `## Success`, `## Capabilities` (the main blocks, one line each: a bold name and one sentence of user-visible outcome) and `## Non-goals`, short and without details.
+- If it has none, set `prd: docs/prd.md` the same way, then write `<spex-dir>/docs/prd.md` by interviewing the user about the product, one question at a time, pre-filling every answer from `spex.yaml`, the package descriptions, and the specs (`spex specs --fields id title description`). Use the `spex-prd` skill when `<agent-root>/.agents/skills/spex-prd` exists; a project older than 0.27.0 has no such skill, so write `# Product requirements` with `## Problem`, `## Goal`, `## Users`, `## Success`, `## Capabilities` (the main blocks, one line each: a bold name and one sentence of user-visible outcome) and `## Non-goals`, short and without details.
 
 `spex check` now also errors on every file `spex.yaml` declares that does not exist: the `prd` file, handled above, and the `path` of each `contracts` entry. In `<spex-dir>`, for every `contracts` entry whose `path` (relative to `<spex-dir>`) names no existing file, ask the user whether the path is wrong or the contract is not written yet. Fix the path in the first case; in the second, write the contract with the `spex-contract` skill when `<agent-root>/.agents/skills/spex-contract` exists, or drop the entry.
 

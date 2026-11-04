@@ -1,18 +1,19 @@
-use std::path::Path;
 use std::process::ExitCode;
 
 use clap::{Args, ValueEnum};
 use eros::{Context, IntoAnyUnion, bail};
 
 use crate::error::Result;
-use crate::support::fs::write_file;
+use crate::support::entry_view::{
+    Keywords, ensure_known_fields, entries_to_yaml, keep_fields, print_entries,
+};
 use crate::templates::{BUNDLED_TEMPLATES_DIR, SPECS_LIBRARY_DIRNAME};
 
 #[cfg(test)]
 #[path = "library_test.rs"]
 mod library_test;
 
-const ENTRY_SEPARATOR: &str = "\n";
+const ENTRY_FIELDS: [&str; 4] = ["id", "title", "description", "acceptance_criteria"];
 
 #[derive(Clone, ValueEnum)]
 enum LibKind {
@@ -42,16 +43,8 @@ pub fn run(args: LibraryArgs) -> Result<ExitCode> {
     let entries = match args.kind {
         LibKind::Specs => spec_entries(),
     };
-    let output = render(&entries, &args.id, &args.search, &args.fields)?;
-    if output.is_empty() {
-        eprintln!("nothing found");
-    }
-    match &args.output {
-        Some(path) => {
-            write_file(Path::new(path), &output)?;
-        }
-        None => print!("{output}"),
-    }
+    let yaml = render(&entries, &args.id, &args.search, &args.fields)?;
+    print_entries(&yaml, args.output.as_deref())?;
     Ok(ExitCode::SUCCESS)
 }
 
@@ -98,55 +91,21 @@ fn render(
         .iter()
         .map(|entry| Ok((entry, parse(entry)?)))
         .collect::<Result<Vec<_>>>()?;
-    for field in fields {
-        if !parsed.iter().any(|(_, object)| object.contains_key(field)) {
-            bail!("unknown field `{field}` — not found in any entry of the library");
-        }
-    }
+    ensure_known_fields(fields, "library entry", &ENTRY_FIELDS)?;
 
-    let keywords: Vec<String> = keywords
-        .iter()
-        .map(|keyword| keyword.to_lowercase())
-        .collect();
-    let selected = parsed.into_iter().filter(|(entry, object)| {
-        (ids.is_empty() || ids.contains(&entry.id))
-            && (keywords.is_empty()
-                || keywords
-                    .iter()
-                    .any(|keyword| object.values().any(|value| contains_text(value, keyword))))
-    });
-
-    selected
-        .map(|(entry, object)| {
-            if fields.is_empty() {
-                return Ok(entry.text.to_string());
-            }
-            let kept: serde_json::Map<String, serde_json::Value> = object
-                .into_iter()
-                .filter(|(key, _)| fields.contains(key))
-                .collect();
-            serde_yaml_ng::to_string(&kept)
-                .context("could not serialize library entry")
-                .any_union()
+    let keywords = Keywords::new(keywords);
+    let selected: Vec<serde_json::Value> = parsed
+        .into_iter()
+        .filter(|(entry, object)| {
+            (ids.is_empty() || ids.contains(&entry.id)) && keywords.matches(object)
         })
-        .collect::<Result<Vec<_>>>()
-        .map(|documents| documents.join(ENTRY_SEPARATOR))
+        .map(|(_, object)| keep_fields(object, fields))
+        .collect();
+
+    entries_to_yaml(&selected, "library entries")
 }
 
-fn contains_text(value: &serde_json::Value, lowercase_keyword: &str) -> bool {
-    match value {
-        serde_json::Value::String(text) => text.to_lowercase().contains(lowercase_keyword),
-        serde_json::Value::Array(items) => items
-            .iter()
-            .any(|item| contains_text(item, lowercase_keyword)),
-        serde_json::Value::Object(object) => object
-            .values()
-            .any(|item| contains_text(item, lowercase_keyword)),
-        _ => false,
-    }
-}
-
-fn parse(entry: &Entry) -> Result<serde_json::Map<String, serde_json::Value>> {
+fn parse(entry: &Entry) -> Result<serde_json::Value> {
     serde_yaml_ng::from_str(entry.text)
         .with_context(|| format!("could not parse library entry `{}`", entry.id))
         .any_union()

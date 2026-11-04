@@ -23,7 +23,7 @@ Determine which specs to contract before doing anything else:
 
 ## Step 1 — Gather context first
 
-Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for the targeted specs. Capture each spec's `title`, `description`, every `acceptance_criteria`, and its `packages`. The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a package boundary and therefore need an interface.
+Run `spex specs --id <spec-id-a> <spec-id-b>` for the targeted specs. Capture each spec's `title`, `description`, every `acceptance_criteria`, and its `packages`. The acceptance criteria are the rules the contract must let the implementation satisfy; identify which ones cross a package boundary and therefore need an interface.
 
 ## Step 2 — Resolve packages, existing contracts, and conventions
 
@@ -31,7 +31,7 @@ From `<spex-dir>/spex.yaml` (package names are arbitrary, so read each package's
 
 - Collect the union of every targeted spec's `packages` — these are the affected packages.
 - For each affected package, read its `contracts` list and open every contract file already recorded there, at its declared `path`, so you extend the real document instead of starting over. Note its format (OpenAPI, proto, GraphQL SDL, AsyncAPI, or design reference).
-- For each affected package, run `spex info --package <package-name>` to read its `rules` list, then run `spex rules --id <rule-id>... --ai` for the union of those IDs plus the governing contract conventions — at minimum `openapi-conventions` (for OpenAPI) or `graphql-conventions` (for GraphQL SDL) — so the contract respects naming, casing, error responses, and secret handling.
+- For each affected package, run `spex info --package <package-name>` to read its `rules` list, then run `spex rules --id <rule-id>... --fields id path title description acceptance_criteria examples` for the union of those IDs plus the governing contract conventions — at minimum `openapi-conventions` (for OpenAPI) or `graphql-conventions` (for GraphQL SDL) — so the contract respects naming, casing, error responses, and secret handling.
 
 ## Step 3 — Decide what the contract needs
 

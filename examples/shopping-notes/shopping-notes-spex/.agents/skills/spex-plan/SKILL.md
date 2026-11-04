@@ -15,11 +15,11 @@ Your output must be machine and human-readable, deterministic, and structured fo
 
 # Gather context
 
-Run `spex specs --ai --id <spec-id-a> <spec-id-b>` for every planned spec. Confirm with the user how to handle any unresolved blocker.
+Run `spex specs --id <spec-id-a> <spec-id-b>` for every planned spec. Confirm with the user how to handle any unresolved blocker.
 
 Resolve the `Packages` for requested changes.
 
-Run `spex rules --package <package-a> <package-b> --ai --output <tmp-path>` for the resolved `Packages`, then read `<tmp-path>` for the governing rules.
+Run `spex rules --package <package-a> <package-b> --fields id path title description acceptance_criteria examples --output <tmp-path>` for the resolved `Packages`, then read `<tmp-path>` for the governing rules.
 
 Read each affected package's information in `Packages` from `spex.yaml`.
 
