@@ -14,6 +14,7 @@ use crate::error::{Result, could_not_read_dir};
 use crate::rule::RULES_DIR;
 use crate::spec::SPECS_DIR;
 use crate::support::fs::{create_dir_all, current_dir, dir_name, normalize, write_file};
+use crate::templates::DOCS_DIRNAME;
 
 use super::agent_files::verify_claude_skills;
 use super::scaffold::scaffold;
@@ -61,6 +62,9 @@ pub fn run() -> Result<ExitCode> {
 
 fn copy_templates(spex_dir: &Path, agent_root: &Path) -> Result<()> {
     scaffold(spex_dir, agent_root)?;
+
+    let docs = spex_dir.join(DOCS_DIRNAME);
+    create_dir_all(&docs)?;
 
     let rules = spex_dir.join(RULES_DIR);
     create_dir_all(&rules)?;

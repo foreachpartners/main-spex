@@ -82,7 +82,7 @@ specs/                         Single source of truth for behavior, one md file 
   rule/                    Rule file, rule checks, rules library
   cli/                     Shared behavior (command set, project discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
   skill/                   Conventions shared by all framework skills (each framework skill's `SKILL.md` in `templates/skills/` is its own spec)
-docs/                          Framework reference docs; only those symlinked from templates/docs/ are bundled into projects by init/update
+docs/                          Framework reference docs; none are shipped to projects, except glossary.md inlined in the managed AGENTS.md
   glossary.md              Terms used across code, messages, schemas, and docs
   prd.md                   Product requirements: problem, goal, success, capabilities, principles, values, non-goals
   setup.md                 Step-by-step setup of spex in a project (one header per step; the tutorial links to its steps)
@@ -92,7 +92,6 @@ templates/                     Assets scaffolded into projects
   schemas/                     JSON Schemas for spex.yaml, specs, rules, and plans
   skills/                      Agent skills
   rules/                       Rules library: rules bundled in the binary and read with `spex lib rules`, never scaffolded (one `<rule-id>.yaml` per entry, with its script folder, same name, beside it, when it has scripts)
-  docs/                        Framework docs shipped to projects (symlinks into docs/)
   specs/                       Specs library: template specs bundled in the binary and read with `spex lib specs`, never scaffolded (one `<spec-id>.yaml` per entry)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section. Its glossary line is replaced by the glossary on init and update
   README.md                    Contributor notes on scaffolding rules; never scaffolded

@@ -11,3 +11,4 @@
 - MUST overwrite a local file that predates the marker in full, since managed and user content cannot be told apart in it.
 - MUST keep an existing `AGENTS.md` content, when `spex init` adopts it, as the user's own section below the marker.
 - MUST inline the bundled [glossary](../../docs/glossary.md) in the managed section of `AGENTS.md` where `spex init` writes it and `spex update` rewrites it, so an agent knows the framework's terms without opening another file.
+- MUST NOT write the glossary as a file of its own in the project, since `AGENTS.md` carries it.

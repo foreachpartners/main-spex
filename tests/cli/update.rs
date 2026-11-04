@@ -206,12 +206,10 @@ fn update_upgrades_project_written_by_older_cli() {
         "update should restore the bundled schema",
     );
 
-    for deployed in [SYNCED_SKILL, "docs/glossary.md"] {
-        assert!(
-            spex.join(deployed).is_file(),
-            "update did not deploy {deployed}"
-        );
-    }
+    assert!(
+        spex.join(SYNCED_SKILL).is_file(),
+        "update did not deploy {SYNCED_SKILL}"
+    );
     assert!(
         !spex.join(SYNCED_RULE).exists(),
         "update must not deploy a rule the project never took"

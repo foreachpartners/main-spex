@@ -16,11 +16,7 @@ mod tests {
 
     #[test]
     fn bundled_agents_md_inlines_the_bundled_glossary() {
-        let glossary = BUNDLED_TEMPLATES_DIR
-            .get_file("docs/glossary.md")
-            .and_then(|file| file.contents_utf8())
-            .expect("bundled glossary");
-        let (_, terms) = glossary.split_once("\n\n").expect("glossary title");
+        let (_, terms) = GLOSSARY.split_once("\n\n").expect("glossary title");
 
         let agents = bundled_agents_md().expect("bundled AGENTS.md");
 

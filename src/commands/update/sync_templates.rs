@@ -3,7 +3,7 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
-use crate::commands::init::scaffold::copy_docs_and_schemas;
+use crate::commands::init::scaffold::copy_schemas;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::support::bundled_agents::bundled_agents_md;
@@ -22,7 +22,7 @@ mod sync_templates_test;
 const SKILL_FILE: &str = "SKILL.md";
 
 pub fn sync_templates(spex_dir: &Path, agent_root: &Path) -> Result<()> {
-    copy_docs_and_schemas(spex_dir)?;
+    copy_schemas(spex_dir)?;
     sync_rules(spex_dir)?;
     sync_skills(agent_root)?;
     sync_agents_md(agent_root)

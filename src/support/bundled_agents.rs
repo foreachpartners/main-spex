@@ -1,20 +1,17 @@
-use crate::templates::{AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, DOCS_DIRNAME};
+use crate::templates::{AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR};
 
 #[cfg(test)]
 #[path = "bundled_agents_test.rs"]
 mod bundled_agents_test;
 
-const GLOSSARY_FILENAME: &str = "glossary.md";
+const GLOSSARY: &str = include_str!("../../docs/glossary.md");
 const GLOSSARY_MARKER: &str = "- [docs/glossary.md](docs/glossary.md) inlined.";
 
 pub fn bundled_agents_md() -> Option<String> {
     let template = BUNDLED_TEMPLATES_DIR
         .get_file(AGENTS_FILENAME)?
         .contents_utf8()?;
-    let glossary = BUNDLED_TEMPLATES_DIR
-        .get_file(format!("{DOCS_DIRNAME}/{GLOSSARY_FILENAME}"))?
-        .contents_utf8()?;
-    Some(inline_glossary(template, glossary))
+    Some(inline_glossary(template, GLOSSARY))
 }
 
 fn inline_glossary(template: &str, glossary: &str) -> String {

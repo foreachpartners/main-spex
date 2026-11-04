@@ -8,7 +8,6 @@ mod tests_unit {
     use crate::support::managed_section::PROJECT_SECTION_MARKER;
 
     const SCHEMA: &str = "schemas/spex.schema.json";
-    const DOC: &str = "docs/glossary.md";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
     const SCRIPT: &str = "rules/commit-message-format/commit-spec-id-trace.sh";
     const RULE: &str = "rules/secret-handling.yaml";
@@ -43,23 +42,6 @@ mod tests_unit {
             .expect("bundled schema")
             .contents();
         assert_eq!(fs::read(&schema).expect("read schema"), expected);
-    }
-
-    #[test]
-    fn sync_overwrites_modified_managed_doc() {
-        let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
-
-        let doc = spex_dir.path().join(DOC);
-        fs::write(&doc, "tampered").expect("modify doc");
-
-        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
-
-        let expected = BUNDLED_TEMPLATES_DIR
-            .get_file(DOC)
-            .expect("bundled doc")
-            .contents();
-        assert_eq!(fs::read(&doc).expect("read doc"), expected);
     }
 
     #[test]

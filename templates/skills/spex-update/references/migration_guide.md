@@ -4,6 +4,13 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.31.1
+
+`spex update` no longer deploys `docs/glossary.md`, since the managed section of `AGENTS.md` inlines the glossary. In `<spex-dir>`:
+
+- Delete `docs/glossary.md`, which `spex update` no longer keeps in sync.
+- Wherever your own text (`AGENTS.md` below the managed section, specs, rules, skills, docs, CI jobs) links to or reads `docs/glossary.md`, point it at the glossary in `AGENTS.md` instead.
+
 ## 0.31.0
 
 `spex check` now errors on a blank line between the keys of a spec or rule file (`spex-internal-conformance/no-blank-lines`). In `<spex-dir>`:

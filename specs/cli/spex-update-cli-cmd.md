@@ -1,6 +1,6 @@
 # `spex update`
 
-Syncs the project's spex files with the latest versions shipped in the installed `spex` binary: the bundled templates, schemas, docs, rules, skills and `AGENTS.md`. The [`spex-update` skill](../../templates/skills/spex-update/SKILL.md) drives it together with the migration steps an upgrade requires, which it reads with `--migration-guide` and applies before the update.
+Syncs the project's spex files with the latest versions shipped in the installed `spex` binary: the bundled templates, schemas, rules, skills and `AGENTS.md`. The [`spex-update` skill](../../templates/skills/spex-update/SKILL.md) drives it together with the migration steps an upgrade requires, which it reads with `--migration-guide` and applies before the update.
 
 ## Acceptance criteria
 
@@ -13,7 +13,7 @@ Syncs the project's spex files with the latest versions shipped in the installed
 - MUST overwrite managed files only.
 - MUST update `cli_version` in `spex.yaml` to the installed binary's version.
 - MUST print the `CHANGELOG.md` entries newer than the previous `cli_version`, newest first; print nothing if there are none, and every entry if the previous `cli_version` is not found in the changelog.
-- MUST NOT touch skills, schemas, docs, or rules added by the user (and the scripts beside them), or plans.
+- MUST NOT touch skills, schemas, or rules added by the user (and the scripts beside them), or plans.
 - MUST, given `--migration-guide <from_version>`, print instead of updating the sections of the installed binary's bundled migration guide for every version strictly greater than `<from_version>`, newest first; print "no migration needed" if there are none.
 - MUST NOT read `spex.yaml` or change any file when given `--migration-guide`, so the steps can be read before the update, even by a project the installed CLI can no longer load.
 - MUST fail when the `<from_version>` of `--migration-guide` is not `MAJOR` or `MAJOR.MINOR` or `MAJOR.MINOR.PATCH`.

@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.31.1] - 2026-11-04
 
 - Changed the `spex-update` skill to install the latest CLI with `cargo install main-spex` before it reads the migration steps, so they come from the new release.
+- Removed `docs/glossary.md` from the files `spex init` and `spex update` write, since `AGENTS.md` inlines the glossary; delete the old copy (see the migration guide).
 
 ## [0.31.0] - 2026-11-04
 
