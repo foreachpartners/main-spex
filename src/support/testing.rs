@@ -91,7 +91,6 @@ pub fn spex_config() -> SpexConfig {
         agent_root: ".".to_string(),
         description: None,
         prd: "docs/prd.md".to_string(),
-        rules_unused: Vec::new(),
         packages: Vec::new(),
     }
 }

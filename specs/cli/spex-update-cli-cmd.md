@@ -8,7 +8,7 @@ Syncs the project's spex files with the latest versions shipped in the installed
 - MUST rewrite a framework skill already present locally only when its `metadata.sync-with-upstream` is not explicitly `false`; a skill that opts out keeps its local changes, so consumers can override a global skill.
 - MUST rewrite a synced skill's `SKILL.md` above its `# Project` marker and the skill's other bundled files, preserving everything from that marker onward and any files added to the skill folder. `# Project` is mark telling that above is managed by spex section, below user customized one.
 - MUST rewrite a bundled rule, and its scripts, already present locally only when it's set `sync_with_upstream: true` or absent which defaults to true; a local rule with `sync_with_upstream: false` is left untouched, so consumers can override a global rule.
-- MUST deploy a bundled rule missing locally, unless its id is listed in `rules_unused` in `spex.yaml`; listing an id there records a deliberate deletion, so it stays deleted on future updates. We keep `rules_unused` so that users can see all available rules for future use.
+- MUST NOT deploy a bundled rule missing locally, so a deleted or never taken rule stays out of the project; a project takes a rule from the [rules library](../rule/rules-library-rule.md) with [`spex lib rules --copy`](spex-lib-cli-cmd.md).
 - MUST rewrite the managed section of the agent root's `AGENTS.md`, everything above the `# Project` marker, preserving everything from that marker onward.
 - MUST overwrite managed files only.
 - MUST update `cli_version` in `spex.yaml` to the installed binary's version.

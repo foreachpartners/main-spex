@@ -11,7 +11,7 @@ The `spex` command-line tool manages a spex project. `spex --help` lists its com
 - MUST provide `spex coverage`: report specs coverage for a project ([spex-coverage-cli-cmd.md](spex-coverage-cli-cmd.md)).
 - MUST provide `spex info`: print project information ([spex-info-cli-cmd.md](spex-info-cli-cmd.md)).
 - MUST provide `spex jq`: run a jq filter on JSON or YAML ([spex-jq-cli-cmd.md](spex-jq-cli-cmd.md)).
-- MUST provide `spex lib`: print template specs of the library bundled in the binary ([spex-lib-cli-cmd.md](spex-lib-cli-cmd.md)).
+- MUST provide `spex lib`: print the template specs and the rules of the libraries bundled in the binary, and copy a rule into a project ([spex-lib-cli-cmd.md](spex-lib-cli-cmd.md)).
 - MUST provide `spex rules`: print the rules governing the selected packages ([spex-rules-cli-cmd.md](spex-rules-cli-cmd.md)).
 - MUST provide `spex specs`: print the project specs ([spex-specs-cli-cmd.md](spex-specs-cli-cmd.md)).
 - MUST list every command in `spex --help`.

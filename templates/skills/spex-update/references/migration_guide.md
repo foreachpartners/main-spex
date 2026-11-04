@@ -16,6 +16,13 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 - Drop `--ai` from every `spex specs` and `spex rules` command.
 - Add `--fields id path title description acceptance_criteria examples` to a `spex rules` command whose reader needs no `checks`, as `--ai` did.
 
+`rules_unused` is removed from `spex.yaml`, and `spex init` and `spex update` no longer deploy bundled rules: `schemas/spex.schema.json` rejects `rules_unused`, and `spex update` only keeps in sync the rules the project already holds. A project takes a bundled rule from the rules library instead. In `<spex-dir>`:
+
+- Delete the root `rules_unused` key of `spex.yaml`, with its list.
+- Delete the files and script folders of the rules in `rules/` that no package lists under `rules` (`spex check` warns on each), unless the user wants to keep one. `spex update` no longer deploys a deleted rule again.
+- To take a bundled rule the project does not hold, such as one from the deleted `rules_unused` list, run `spex lib rules --id <rule-id>... --copy rules`, then list its id under `rules` of each package that follows it. `spex lib rules --fields id description` lists every bundled rule.
+- In every CI job, script, skill, or doc of the project that reads `rules_unused` from the output of `spex info`, drop it: the key is gone.
+
 ## 0.28.0
 
 `prd`, the path of the project's PRD relative to `<spex-dir>`, is now a required field of `spex.yaml`: `schemas/spex.schema.json` requires it, and the CLI cannot load a `spex.yaml` without it. The PRD is the short project overview that comes first, what is built and why, without details, which agents read before they write or review specs. In `<spex-dir>`:

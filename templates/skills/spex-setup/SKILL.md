@@ -24,7 +24,7 @@ The schema is authoritative for field rules and contains a worked example. Read 
 ## Step 1 — Define the packages in spex.yaml
 
 1. Read `spex.yaml`.
-2. Find the new packages, by layout. Confirm the list with the user and drop anything that is not a package, or that `packages` already lists.
+2. Find the new packages, by layout. Confirm the list with the user and drop anything that is not a package, or that `packages` already lists. The spex package `spex init` wrote lists no `rules`: propose them for it too, the same way as below.
    - `multi-repo`: the non-hidden directories directly under the project root (the parent of `<spex-dir>`), or the ones the user named.
    - `single-repo`: the repository itself, as the project's one package.
    - `monorepo`: the packages, from the workspace manifest (`pnpm-workspace.yaml`, `workspaces` in `package.json`, `[workspace]` in `Cargo.toml`, `go.work`) or the conventional folders (`apps/*`, `packages/*`, `services/*`), or the ones the user named.
@@ -36,10 +36,11 @@ The schema is authoritative for field rules and contains a worked example. Read 
    - `description`: one concrete sentence stating the package's role in the project (for example backend service, web client, shared library), without restating its name
    - `path`, relative to `<spex-dir>`: `../<directory-name>` in multi-repo, `../<package-path>` (for example `../apps/api`) in monorepo, `..` in single-repo
    - `contracts`: one entry per interface contract file the package ships (OpenAPI, `.proto`, GraphQL SDL, AsyncAPI), each with a `path` relative to the spex directory and a one-line `description`. Leave the file where it is; never move or copy it. Omit `contracts` when the package ships none.
-   - `rules`: read every file in `rules/` and list only the rule IDs that genuinely apply given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API). Give a one-line reason for each.
+   - `rules`: list the rules the project already has (the files under `rules/`), then run `spex lib rules --fields id description` to see the rules library, and pick only the rule IDs that genuinely apply given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API). Read a candidate in full with `spex lib rules --id <rule-id>` when its description is not enough. Give a one-line reason for each.
 6. Show the proposal to the user and confirm it. Write only what the user confirms.
 7. Append the entries to `packages`, sorted by `package_name`. Set the project `description` if it was proposed. Leave every existing field, entry and rule file untouched.
-8. Run `spex check-schema --schema schemas/spex.schema.json --files spex.yaml` from `<spex-dir>` and fix any violation.
+8. Take each picked library rule the project does not have yet: run `spex lib rules --id <rule-id>... --copy <spex-dir>/rules` once for all of them. It writes each rule with its script folder and never overwrites, so it errors on a rule already there: leave that ID out.
+9. Run `spex check-schema --schema schemas/spex.schema.json --files spex.yaml` from `<spex-dir>` and fix any violation.
 
 Example entry:
 

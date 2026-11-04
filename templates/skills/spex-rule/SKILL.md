@@ -57,6 +57,7 @@ Before asking the user anything, read what already exists so you don't ask for k
 
 - Read `<spex-dir>/spex.yaml` for the project overview, the packages, and which rules they already list. Package names are arbitrary, so read each package's `description` to learn its role.
 - Read `<spex-dir>/rules/**/*.yaml` for related rules and to match their style. Reuse an existing rule rather than duplicating its convention. Note whether `general-rules.yaml` or a per-package `general-rules-<package-short-name>.yaml` already exists — see "Small conventions".
+- Look in the rules library for a rule on the convention: run `spex lib rules --search <keyword>... --fields id description` with a few keywords and synonyms of it. When an entry matches, read it with `spex lib rules --id <id>` and offer the user to take it as it is, or to use it as the starting draft of their own rule. To take it as it is, run `spex lib rules --id <id> --copy <spex-dir>/rules`, add its `id` under `rules` in `spex.yaml` for each package the user names, run `spex check` and stop here. Otherwise tell the user which entry you started from and continue.
 
 ## Step 2 — Clarify missing details with the user
 
@@ -98,7 +99,7 @@ Draft the checks (and any script bodies) into the rule; you write them and offer
 
 ## Step 5 — Write, then offer edits
 
-1. Write the rule to `<spex-dir>/rules/<rule-id>.yaml` — the filename must equal the `<rule-id>` (`general-rules.yaml` or `general-rules-<package-short-name>.yaml` when folding into the catch-all bucket). Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing rule — including appending to an existing general-rules bucket — change only what the user asked for and leave every other field, its ordering, and formatting untouched. Exception: when the rule sets `sync_with_upstream: true` it came from the bundled rules, so change it to `false`, otherwise `spex update` overwrites the edit, and its scripts, with the bundled version. Leave `sync_with_upstream` alone when it is `false` or unset, and never add it to a new rule.
+1. Write the rule to `<spex-dir>/rules/<rule-id>.yaml` — the filename must equal the `<rule-id>` (`general-rules.yaml` or `general-rules-<package-short-name>.yaml` when folding into the catch-all bucket). Use a literal block scalar (`>-`) for a multi-paragraph `description`. When editing an existing rule — including appending to an existing general-rules bucket — change only what the user asked for and leave every other field, its ordering, and formatting untouched. Exception: when the rule sets `sync_with_upstream: true` it came from the rules library, so change it to `false`, otherwise `spex update` overwrites the edit, and its scripts, with the bundled version. Leave `sync_with_upstream` alone when it is `false` or unset, and never add it to a new rule.
 2. Write any `script` check bodies to the path referenced by `script:` (`<spex-dir>/rules/<rule-id>/<name>.sh`) and make them executable.
 3. For a new rule (including a newly created general-rules bucket), add its `id` under `rules` in `spex.yaml` for each package the user said it applies to.
 4. Run `spex check` to validate compliance.
@@ -152,12 +153,10 @@ checks:
 
 1. Read `<spex-dir>/spex.yaml` and list the packages that list the rule's `id` under `rules`. Confirm with the user which packages stop using it; when the user asks to remove the rule altogether, that is every package listing it.
 2. Remove the `id` from `rules` of each confirmed package in `spex.yaml`, leaving everything else untouched.
-3. If no package lists the `id` under `rules` any more:
-   - Delete `<spex-dir>/rules/<rule-id>.yaml` and its script folder `<spex-dir>/rules/<rule-id>/`, if there is one.
-   - Add the `id` to `rules_unused` in `spex.yaml`, creating the key when missing and skipping an `id` already listed. `spex update` never redeploys a bundled rule listed there, and keeps it for future use.
-4. If another package still lists the `id`, keep the rule's files and do not add it to `rules_unused`.
+3. If no package lists the `id` under `rules` any more, delete `<spex-dir>/rules/<rule-id>.yaml` and its script folder `<spex-dir>/rules/<rule-id>/`, if there is one. A rule from the rules library stays available there, and `spex update` never brings it back.
+4. If another package still lists the `id`, keep the rule's files.
 5. Run `spex check`. Fix a stale `check_ignore` entry or other reference to the removed rule that it reports.
-6. Tell the user which packages stopped using the rule, whether its files were deleted, and whether it was added to `rules_unused`.
+6. Tell the user which packages stopped using the rule and whether its files were deleted.
 
 Follow the project's writing style: imperative and directive, clarity over brevity, brevity over all else. No filler, hedging, motivational, or apologetic phrasing.
 

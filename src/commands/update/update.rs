@@ -36,8 +36,6 @@ pub struct UpdateArgs {
 struct UpdateConfig {
     #[serde(default)]
     cli_version: String,
-    #[serde(default)]
-    rules_unused: Vec<String>,
     agent_root: String,
 }
 
@@ -62,8 +60,7 @@ fn update() -> Result<ExitCode> {
 
     let spex_dir = SpexConfig::dir_of(&config_path);
     let agent_root = normalize(&spex_dir.join(&previous.agent_root));
-    sync_templates(spex_dir, &agent_root, &previous.rules_unused)
-        .context("could not rewrite bundled templates")?;
+    sync_templates(spex_dir, &agent_root).context("could not rewrite bundled templates")?;
 
     write_file(
         &config_path,

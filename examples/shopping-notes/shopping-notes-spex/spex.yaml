@@ -6,11 +6,6 @@ description: >-
   Web application for managing shopping lists, letting users note items to
   buy so they don't forget them at the store.
 prd: docs/prd.md
-rules_unused:
-  - cqrs-conventions
-  - ddd-conventions
-  - graphql-conventions
-  - postgres-conventions
 packages:
   - package_name: shopping-notes-api
     package_short_name: api

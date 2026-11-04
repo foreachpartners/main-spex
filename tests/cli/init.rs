@@ -8,23 +8,6 @@ use crate::common::{
     with_version_header, write_prd,
 };
 
-const UNUSED_BUNDLED_RULE_WARNINGS: &str = r#"  warn  spex-internal-conformance/unused-rule  (rules/cqrs-conventions.yaml)
-      no package lists rule `cqrs-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/ddd-conventions.yaml)
-      no package lists rule `ddd-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/dependencies-rules.yaml)
-      no package lists rule `dependencies-rules` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/graphql-conventions.yaml)
-      no package lists rule `graphql-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/openapi-conventions.yaml)
-      no package lists rule `openapi-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/postgres-conventions.yaml)
-      no package lists rule `postgres-conventions` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  warn  spex-internal-conformance/unused-rule  (rules/testing-rules.yaml)
-      no package lists rule `testing-rules` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml
-  0 errors, 7 warnings
-"#;
-
 const EXPECTED_PACKAGES_CHECK_REPORT: &str = r#"proj-api
   warn  secret-handling/no-backup-files  (data.backup)
       Backup and scratch files may carry pre-redaction content
@@ -35,11 +18,11 @@ proj-frontend
       Requirements and documentation must be in English
   1 error, 0 warnings
 
-proj: 1 error, 8 warnings
+proj: 1 error, 1 warning
 "#;
 
 fn expected_check_report() -> String {
-    format!("proj-spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\n{EXPECTED_PACKAGES_CHECK_REPORT}")
+    format!("proj-spex\n  no issues\n\n{EXPECTED_PACKAGES_CHECK_REPORT}")
 }
 
 const EXPECTED_COVERAGE_REPORT: &str = r#"Specs (0)
@@ -70,9 +53,13 @@ fn init_then_check_no_spex_project() {
         project.join("proj-spex/spex.yaml").is_file(),
         "init did not write proj-spex/spex.yaml"
     );
-    assert!(
-        project.join("proj-spex/rules").is_dir(),
-        "init did not scaffold rules"
+    let rules = project.join("proj-spex/rules");
+    assert_eq!(
+        fs::read_dir(&rules)
+            .expect("init did not create rules")
+            .count(),
+        0,
+        "init must not write any rule"
     );
 
     add_packages(&project);
@@ -181,9 +168,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_without_errors() {
     let check = run_spex(&project, &["check"], "");
     assert_eq!(
         report_text(&check.stdout),
-        with_version_header(&format!(
-            "spex\n{UNUSED_BUNDLED_RULE_WARNINGS}\nsnake: 0 errors, 7 warnings\n"
-        )),
+        with_version_header("spex\n  no issues\n\nsnake: 0 errors, 0 warnings\n"),
         "stderr:\n{}",
         String::from_utf8_lossy(&check.stderr),
     );
@@ -248,32 +233,6 @@ fn init_multi_repo_keeps_everything_in_the_spex_repository() {
     assert!(spex.join(".agents/skills/spex-spec/SKILL.md").is_file());
     assert!(spex.join("AGENTS.md").is_file());
     assert!(!project.join(".agents").exists());
-}
-
-#[test]
-fn init_writes_every_bundled_rule_with_sync_with_upstream_true_after_its_title() {
-    let temp_dir = tempdir().expect("create temp dir");
-    let project = temp_dir.path().join("proj");
-    fs::create_dir_all(&project).expect("create project");
-    assert!(init_with(&project, "\n\n").status.success());
-
-    let rules = project.join("proj-spex/rules");
-    let mut checked = 0;
-    for entry in fs::read_dir(&rules).expect("read rules") {
-        let path = entry.expect("read rule entry").path();
-        if path.extension().is_none_or(|extension| extension != "yaml") {
-            continue;
-        }
-        let contents = fs::read_to_string(&path).expect("read rule");
-        let lines: Vec<&str> = contents.lines().take(3).collect();
-        assert!(
-            lines[1].starts_with("title: ") && lines[2] == "sync_with_upstream: true",
-            "{} must set sync_with_upstream: true right after its title",
-            path.display()
-        );
-        checked += 1;
-    }
-    assert!(checked > 0, "no bundled rules scaffolded");
 }
 
 #[test]

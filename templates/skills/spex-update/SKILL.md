@@ -23,23 +23,21 @@ Read all the printed steps, then apply them from the oldest version to the newes
 
 ## Step 4 — Update
 
-Run `spex update`. It bumps `cli_version` in `spex.yaml`, rewrites every bundled schema, doc, rule (with its scripts) and skill, and deploys each bundled rule missing locally unless `rules_unused` in `spex.yaml` lists it.
+Run `spex update`. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc and skill, and every rule (with its scripts) the project holds that is also in the rules library, unless it sets `sync_with_upstream: false`. It never adds a rule.
 
-## Step 5 — Place new rules
+## Step 5 — Offer new rules
 
-If the update added no new rules, go to Step 6.
+The changelog `spex update` printed announces each rule added to the rules library. If it announced none, go to Step 6.
 
-Suggest to the user which packages should apply each new rule: only those it genuinely applies to, given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API), with a one-line reason each. Ask once for all new rules. Add the `id` of each rule to `rules` of every package the user chooses in `spex.yaml`.
+Read each new rule with `spex lib rules --id <rule-id>` and suggest to the user which packages should apply it: only those it genuinely applies to, given the package's stack and role (for example `openapi-conventions` only for a package that exposes a REST API), with a one-line reason each. Ask once for all new rules. Take every rule the user wants for at least one package with `spex lib rules --id <rule-id>... --copy <spex-dir>/rules`, and add its `id` to `rules` of every package the user chooses in `spex.yaml`. Leave the other new rules in the library.
 
-Remove each new rule that no package lists under `rules` now, as the `spex-rule` skill does in its "Remove a rule" section.
-
-Tell the user which packages apply each new rule and which new rules were removed.
+Tell the user which packages apply each new rule and which new rules were left out.
 
 ## Step 6 — Verify
 
 Run `spex check` and `spex coverage` again. Fix any issues they report before finishing.
 
-`spex check` warns on each rule no package lists. Before removing a rule that is not new, as in Step 5, ask the user.
+`spex check` warns on each rule no package lists. Ask the user before removing one, as the `spex-rule` skill does in its "Remove a rule" section.
 
 ---
 

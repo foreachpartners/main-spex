@@ -71,10 +71,7 @@ pub fn keep_fields(view: Value, fields: &[String]) -> Value {
     }
 }
 
-pub fn ensure_schema_fields(fields: &[String], kind: &str, schema_filename: &str) -> Result<()> {
-    if fields.is_empty() {
-        return Ok(());
-    }
+pub fn schema_fields(schema_filename: &str) -> Vec<String> {
     let schema_path = format!("{SCHEMAS_DIRNAME}/{schema_filename}");
     let schema: Value = serde_json::from_str(
         BUNDLED_TEMPLATES_DIR
@@ -83,22 +80,33 @@ pub fn ensure_schema_fields(fields: &[String], kind: &str, schema_filename: &str
             .expect("bundled schema is missing or not UTF-8"),
     )
     .expect("bundled schema is not JSON");
-    let mut known: Vec<&str> = schema["properties"]
+    schema["properties"]
         .as_object()
         .expect("bundled schema has no properties")
         .keys()
-        .map(String::as_str)
-        .collect();
-    known.push(PATH_FIELD);
+        .cloned()
+        .collect()
+}
+
+pub fn ensure_schema_fields(fields: &[String], kind: &str, schema_filename: &str) -> Result<()> {
+    if fields.is_empty() {
+        return Ok(());
+    }
+    let mut known = schema_fields(schema_filename);
+    known.push(PATH_FIELD.to_string());
     ensure_known_fields(fields, kind, &known)
 }
 
-pub fn ensure_known_fields(fields: &[String], kind: &str, known: &[&str]) -> Result<()> {
+pub fn ensure_known_fields(fields: &[String], kind: &str, known: &[impl AsRef<str>]) -> Result<()> {
     for field in fields {
-        if !known.contains(&field.as_str()) {
+        if !known.iter().any(|name| name.as_ref() == field) {
             bail!(
                 "unknown field `{field}` — a {kind} has: {}",
-                known.join(", ")
+                known
+                    .iter()
+                    .map(AsRef::as_ref)
+                    .collect::<Vec<_>>()
+                    .join(", ")
             );
         }
     }

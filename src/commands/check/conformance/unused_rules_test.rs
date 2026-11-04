@@ -48,7 +48,11 @@ mod tests {
         );
         assert!(findings[0].message.contains("`unused-rule`"));
         assert!(findings[0].message.contains("delete"));
-        assert!(findings[0].message.contains("rules_unused"));
+        assert!(
+            findings[0]
+                .message
+                .contains("list its id under a package's `rules`")
+        );
     }
 
     #[test]

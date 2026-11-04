@@ -3,13 +3,16 @@ use std::path::Path;
 
 use serde_yaml_ng::Value;
 
-use crate::commands::init::scaffold::{copy_docs_and_schemas, write_rule};
+use crate::commands::init::scaffold::copy_docs_and_schemas;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
+use crate::support::bundled_rule::write_bundled_rule;
 use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
 use crate::support::managed_section::replace_managed_section;
 use crate::support::yaml_dir::yaml_files;
-use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
+use crate::templates::{
+    AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, RULES_LIBRARY_DIRNAME, SKILLS_DIRNAME,
+};
 
 #[cfg(test)]
 #[path = "sync_templates_test.rs"]
@@ -17,9 +20,9 @@ mod sync_templates_test;
 
 const SKILL_FILE: &str = "SKILL.md";
 
-pub fn sync_templates(spex_dir: &Path, agent_root: &Path, removed_rules: &[String]) -> Result<()> {
+pub fn sync_templates(spex_dir: &Path, agent_root: &Path) -> Result<()> {
     copy_docs_and_schemas(spex_dir)?;
-    sync_rules(spex_dir, removed_rules)?;
+    sync_rules(spex_dir)?;
     sync_skills(agent_root)?;
     sync_agents_md(agent_root)
 }
@@ -68,39 +71,27 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
         .unwrap_or(true)
 }
 
-fn sync_rules(spex_dir: &Path, removed_rules: &[String]) -> Result<()> {
-    let Some(dir) = BUNDLED_TEMPLATES_DIR.get_dir(RULES_DIR) else {
+fn sync_rules(spex_dir: &Path) -> Result<()> {
+    let Some(dir) = BUNDLED_TEMPLATES_DIR.get_dir(RULES_LIBRARY_DIRNAME) else {
         return Ok(());
     };
 
-    let rules_dest = spex_dir.join(RULES_DIR);
-    create_dir_all(&rules_dest)?;
-
-    let existing_rules_in_any_folder = yaml_files(&rules_dest)?;
+    let local_rules = yaml_files(&spex_dir.join(RULES_DIR))?;
 
     for file in dir.files() {
         let Some(name) = file.path().file_name() else {
             continue;
         };
-        let dest = existing_rules_in_any_folder
+        let Some(local) = local_rules
             .iter()
             .find(|path| path.file_name() == Some(name))
-            .cloned()
-            .unwrap_or_else(|| rules_dest.join(name));
-        let rule_id = dest.file_stem().unwrap_or_default().to_string_lossy();
-
-        if dest.exists() {
-            if !is_synced_with_upstream(&dest) {
-                continue;
-            }
-        } else if removed_rules
-            .iter()
-            .any(|id| id.eq_ignore_ascii_case(rule_id.as_ref()))
-        {
+        else {
             continue;
-        }
+        };
 
-        write_rule(file, &dest)?;
+        if is_synced_with_upstream(local) {
+            write_bundled_rule(file, local)?;
+        }
     }
 
     Ok(())

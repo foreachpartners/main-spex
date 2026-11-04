@@ -1,4 +1,5 @@
 use std::fs;
+use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
 use serde_json::{Value, json};
@@ -12,6 +13,34 @@ fn bundled_entry(id: &str) -> Value {
         .join(format!("{id}.yaml"));
     let text = fs::read_to_string(file).expect("read bundled entry");
     serde_yaml_ng::from_str(&text).expect("parse bundled entry")
+}
+
+fn bundled_rule(id: &str) -> Value {
+    let file = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("templates/rules")
+        .join(format!("{id}.yaml"));
+    let text = fs::read_to_string(file).expect("read bundled rule");
+    serde_yaml_ng::from_str(&text).expect("parse bundled rule")
+}
+
+fn bundled_rule_ids() -> Vec<String> {
+    let mut ids: Vec<String> =
+        fs::read_dir(Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/rules"))
+            .expect("read bundled rules")
+            .map(|entry| entry.expect("rule entry").path())
+            .filter(|path| {
+                path.extension()
+                    .is_some_and(|extension| extension == "yaml")
+            })
+            .map(|path| {
+                path.file_stem()
+                    .and_then(|stem| stem.to_str())
+                    .expect("rule file name")
+                    .to_string()
+            })
+            .collect();
+    ids.sort();
+    ids
 }
 
 fn printed_list(stdout: &[u8]) -> Vec<Value> {
@@ -174,8 +203,261 @@ fn lib_specs_rejects_an_unknown_id() {
 fn lib_rejects_an_unknown_kind() {
     let dir = tempdir().expect("tempdir");
 
-    let output = run_spex(dir.path(), &["lib", "rules"], "");
+    let output = run_spex(dir.path(), &["lib", "nope"], "");
 
     assert_eq!(output.status.code(), Some(2));
-    assert_fails_mentioning(&output, "invalid value 'rules'");
+    assert_fails_mentioning(&output, "invalid value 'nope'");
+}
+
+#[test]
+fn lib_rules_prints_every_rule_in_full_as_a_list_outside_a_project() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(dir.path(), &["lib", "rules"], "");
+
+    assert!(output.status.success(), "{output:?}");
+    let expected: Vec<Value> = bundled_rule_ids()
+        .iter()
+        .map(|id| bundled_rule(id))
+        .collect();
+    assert_eq!(printed_list(&output.stdout), expected);
+    assert!(output.stderr.is_empty(), "{output:?}");
+}
+
+#[test]
+fn lib_rules_prints_no_path_and_the_rules_are_synced_with_upstream() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(dir.path(), &["lib", "rules"], "");
+
+    assert_eq!(
+        queried_by_jq(
+            dir.path(),
+            &output.stdout,
+            "map(has(\"path\") or .sync_with_upstream != true) | any"
+        ),
+        json!(false)
+    );
+}
+
+#[test]
+fn lib_rules_id_prints_only_the_named_rules_in_library_order() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(
+        dir.path(),
+        &["lib", "rules", "--id", "writing-style", "secret-handling"],
+        "",
+    );
+
+    assert!(output.status.success(), "{output:?}");
+    assert_eq!(
+        printed_list(&output.stdout),
+        [
+            bundled_rule("secret-handling"),
+            bundled_rule("writing-style")
+        ]
+    );
+}
+
+#[test]
+fn lib_rules_fields_and_search_print_a_catalog_of_the_matches() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(
+        dir.path(),
+        &[
+            "lib",
+            "rules",
+            "--search",
+            "SECRET",
+            "--fields",
+            "id",
+            "description",
+        ],
+        "",
+    );
+
+    assert!(output.status.success(), "{output:?}");
+    let printed = printed_list(&output.stdout);
+    assert!(!printed.is_empty(), "no rule matched `secret`");
+    for entry in &printed {
+        assert_eq!(
+            entry.as_object().expect("entry").keys().collect::<Vec<_>>(),
+            ["id", "description"]
+        );
+    }
+    assert!(printed.iter().any(|entry| entry["id"] == "secret-handling"));
+}
+
+#[test]
+fn lib_rules_accepts_any_field_of_the_rule_schema_and_rejects_others() {
+    let dir = tempdir().expect("tempdir");
+
+    let checks = run_spex(
+        dir.path(),
+        &[
+            "lib",
+            "rules",
+            "--id",
+            "secret-handling",
+            "--fields",
+            "checks",
+        ],
+        "",
+    );
+    let path = run_spex(dir.path(), &["lib", "rules", "--fields", "path"], "");
+
+    assert!(checks.status.success(), "{checks:?}");
+    assert!(String::from_utf8_lossy(&checks.stdout).starts_with("- checks:\n"));
+    assert_fails_mentioning(&path, "unknown field `path`");
+}
+
+#[test]
+fn lib_rules_search_matching_nothing_prints_an_empty_list_and_nothing_found_on_stderr() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(
+        dir.path(),
+        &["lib", "rules", "--search", "no-such-word"],
+        "",
+    );
+
+    assert!(output.status.success(), "{output:?}");
+    assert_eq!(String::from_utf8_lossy(&output.stdout), "[]\n");
+    assert_eq!(String::from_utf8_lossy(&output.stderr), "nothing found\n");
+}
+
+#[test]
+fn lib_rules_rejects_an_unknown_id() {
+    let dir = tempdir().expect("tempdir");
+
+    let output = run_spex(dir.path(), &["lib", "rules", "--id", "nope"], "");
+
+    assert_fails_mentioning(&output, "unknown id `nope`");
+}
+
+#[test]
+fn lib_rules_copy_writes_each_rule_with_its_executable_scripts_and_prints_the_rule_paths() {
+    let dir = tempdir().expect("tempdir");
+    let rules = dir.path().join("proj-spex/rules");
+
+    let output = run_spex(
+        dir.path(),
+        &[
+            "lib",
+            "rules",
+            "--id",
+            "writing-style",
+            "secret-handling",
+            "--copy",
+            rules.to_str().expect("utf-8 path"),
+        ],
+        "",
+    );
+
+    assert!(output.status.success(), "{output:?}");
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout),
+        format!(
+            "{}\n{}\n",
+            rules.join("secret-handling.yaml").display(),
+            rules.join("writing-style.yaml").display()
+        )
+    );
+    let library = Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/rules");
+    for file in [
+        "secret-handling.yaml",
+        "writing-style.yaml",
+        "writing-style/writing-style.sh",
+    ] {
+        assert_eq!(
+            fs::read(rules.join(file)).expect("copied file"),
+            fs::read(library.join(file)).expect("bundled file"),
+            "{file}"
+        );
+    }
+    assert!(!rules.join("secret-handling").exists());
+    let mode = fs::metadata(rules.join("writing-style/writing-style.sh"))
+        .expect("script metadata")
+        .permissions()
+        .mode();
+    assert_ne!(mode & 0o111, 0, "script is not executable");
+}
+
+#[test]
+fn lib_rules_copy_never_overwrites_a_rule() {
+    let dir = tempdir().expect("tempdir");
+    let rules = dir.path().join("rules");
+    fs::create_dir(&rules).expect("create rules");
+    fs::write(rules.join("secret-handling.yaml"), "mine\n").expect("seed rule");
+
+    let output = run_spex(
+        dir.path(),
+        &[
+            "lib",
+            "rules",
+            "--id",
+            "writing-style",
+            "secret-handling",
+            "--copy",
+            rules.to_str().expect("utf-8 path"),
+        ],
+        "",
+    );
+
+    assert_fails_mentioning(&output, "secret-handling.yaml");
+    assert_fails_mentioning(&output, "already exists");
+    assert_eq!(
+        fs::read_to_string(rules.join("secret-handling.yaml")).expect("read rule"),
+        "mine\n"
+    );
+    assert!(!rules.join("writing-style.yaml").exists());
+}
+
+#[test]
+fn lib_copy_needs_an_id_and_refuses_options_that_print() {
+    let dir = tempdir().expect("tempdir");
+    let target = dir.path().join("out");
+    let target = target.to_str().expect("utf-8 path");
+
+    let without_id = run_spex(dir.path(), &["lib", "rules", "--copy", target], "");
+    assert_eq!(without_id.status.code(), Some(2));
+    assert_fails_mentioning(&without_id, "--id");
+
+    for option in [
+        ["--fields", "id"],
+        ["--search", "secret"],
+        ["--output", "out.yaml"],
+    ] {
+        let mut args = vec!["lib", "rules", "--id", "secret-handling", "--copy", target];
+        args.extend(option);
+        let output = run_spex(dir.path(), &args, "");
+
+        assert_eq!(output.status.code(), Some(2), "{option:?}");
+        assert_fails_mentioning(&output, "cannot be used with");
+    }
+    assert!(!dir.path().join("out").exists(), "nothing may be written");
+}
+
+#[test]
+fn lib_specs_copy_is_rejected() {
+    let dir = tempdir().expect("tempdir");
+    let target = dir.path().join("out");
+
+    let output = run_spex(
+        dir.path(),
+        &[
+            "lib",
+            "specs",
+            "--id",
+            "password-policy",
+            "--copy",
+            target.to_str().expect("utf-8 path"),
+        ],
+        "",
+    );
+
+    assert_fails_mentioning(&output, "`--copy` copies rules only");
+    assert!(!target.exists(), "nothing may be written");
 }

@@ -23,7 +23,7 @@ pub(super) fn validate_unused_rules(packages: &[Package], rules: &[Rule]) -> Vec
                 UNUSED_RULE_CHECK,
                 Some(Location::in_file(&rule.path)),
                 format!(
-                    "no package lists rule `{}` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml",
+                    "no package lists rule `{}` under `rules` — delete its file and script folder, or list its id under a package's `rules` in spex.yaml",
                     rule.id
                 ),
             )

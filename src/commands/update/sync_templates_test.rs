@@ -15,6 +15,19 @@ mod tests_unit {
     const MANAGED_SPEC: &str = "rules/commit-message-format.yaml";
     const MANAGED_SPEC_ID: &str = "commit-message-format";
 
+    fn scaffold_with_rules(spex_dir: &Path) {
+        scaffold(spex_dir, spex_dir).expect("scaffold");
+        let rules = spex_dir.join(RULES_DIR);
+        create_dir_all(&rules).expect("create rules dir");
+        let bundled = BUNDLED_TEMPLATES_DIR
+            .get_dir(RULES_LIBRARY_DIRNAME)
+            .expect("bundled rules dir");
+        for file in bundled.files() {
+            let name = file.path().file_name().expect("rule file name");
+            write_bundled_rule(file, &rules.join(name)).expect("take rule");
+        }
+    }
+
     #[test]
     fn sync_overwrites_modified_managed_file() {
         let spex_dir = tempdir().expect("create spex dir");
@@ -23,7 +36,7 @@ mod tests_unit {
         let schema = spex_dir.path().join(SCHEMA);
         fs::write(&schema, "tampered").expect("modify schema");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected = BUNDLED_TEMPLATES_DIR
             .get_file(SCHEMA)
@@ -40,7 +53,7 @@ mod tests_unit {
         let doc = spex_dir.path().join(DOC);
         fs::write(&doc, "tampered").expect("modify doc");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected = BUNDLED_TEMPLATES_DIR
             .get_file(DOC)
@@ -52,7 +65,7 @@ mod tests_unit {
     #[test]
     fn sync_overwrites_rule_marked_managed() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
@@ -63,7 +76,7 @@ mod tests_unit {
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "tampered").expect("tamper script");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected_spec = BUNDLED_TEMPLATES_DIR
             .get_file(MANAGED_SPEC)
@@ -80,12 +93,12 @@ mod tests_unit {
     #[test]
     fn sync_overwrites_rule_without_sync_with_upstream() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(&spec, "id: commit-message-format\ntampered: true\n").expect("tamper spec");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected_spec = BUNDLED_TEMPLATES_DIR
             .get_file(MANAGED_SPEC)
@@ -97,7 +110,7 @@ mod tests_unit {
     #[test]
     fn sync_preserves_rule_opted_out_of_sync_with_upstream() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::write(
@@ -108,7 +121,7 @@ mod tests_unit {
         let script = spex_dir.path().join(SCRIPT);
         fs::write(&script, "customized").expect("customize script");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert_eq!(
             fs::read_to_string(&spec).unwrap(),
@@ -118,46 +131,41 @@ mod tests_unit {
     }
 
     #[test]
-    fn sync_leaves_a_deliberately_deleted_rule_deleted() {
+    fn sync_does_not_deploy_a_rule_missing_locally() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let spec = spex_dir.path().join(MANAGED_SPEC);
         fs::remove_file(&spec).expect("delete rule");
+        fs::remove_dir_all(spex_dir.path().join("rules").join(MANAGED_SPEC_ID))
+            .expect("delete script folder");
 
-        sync_templates(
-            spex_dir.path(),
-            spex_dir.path(),
-            &[MANAGED_SPEC_ID.to_string()],
-        )
-        .expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
+        assert!(!spec.exists(), "a deleted rule should stay deleted");
         assert!(
-            !spec.exists(),
-            "deliberately deleted rule should stay deleted"
+            !spex_dir.path().join("rules").join(MANAGED_SPEC_ID).exists(),
+            "a deleted rule's scripts should stay deleted"
         );
     }
 
     #[test]
-    fn sync_deploys_a_missing_rule_not_marked_removed() {
+    fn sync_does_not_deploy_any_rule_to_a_project_that_took_none() {
         let spex_dir = tempdir().expect("create spex dir");
         scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
 
-        let spec = spex_dir.path().join(MANAGED_SPEC);
-        fs::remove_file(&spec).expect("delete rule");
-
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert!(
-            spec.exists(),
-            "rule missing but not marked removed should be deployed"
+            !spex_dir.path().join("rules").exists(),
+            "update must not create rules"
         );
     }
 
     #[test]
     fn sync_does_not_recreate_a_rule_moved_into_a_nested_folder() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let flat_rule = spex_dir.path().join(RULE);
         let nested_rule = spex_dir
@@ -168,7 +176,7 @@ mod tests_unit {
         fs::create_dir_all(nested_rule.parent().unwrap()).expect("create nested folder");
         fs::rename(&flat_rule, &nested_rule).expect("move rule into nested folder");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert!(
             !flat_rule.exists(),
@@ -180,7 +188,7 @@ mod tests_unit {
     #[test]
     fn sync_writes_the_scripts_of_a_nested_rule_beside_it() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let rules = spex_dir.path().join("rules");
         let nested_rule = rules.join("policy").join("commit-message-format.yaml");
@@ -189,7 +197,7 @@ mod tests_unit {
             .expect("move rule into nested folder");
         fs::remove_dir_all(rules.join(MANAGED_SPEC_ID)).expect("remove flat script folder");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert!(
             nested_rule
@@ -207,7 +215,7 @@ mod tests_unit {
     #[test]
     fn sync_preserves_additional_files() {
         let spex_dir = tempdir().expect("create spex dir");
-        scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
+        scaffold_with_rules(spex_dir.path());
 
         let extra_skill = spex_dir
             .path()
@@ -223,7 +231,7 @@ mod tests_unit {
             .join("rules/commit-message-format/custom.sh");
         fs::write(&extra_script, "echo custom").expect("write custom script");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert_eq!(fs::read_to_string(&extra_skill).unwrap(), "custom");
         assert_eq!(fs::read_to_string(&extra_script).unwrap(), "echo custom");
@@ -233,7 +241,7 @@ mod tests_unit {
     fn sync_does_not_seed_agents_md() {
         let spex_dir = tempdir().expect("create spex dir");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert!(
             !spex_dir.path().join(AGENTS_FILENAME).exists(),
@@ -251,7 +259,7 @@ mod tests_unit {
         )
         .expect("seed AGENTS.md");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let updated = fs::read_to_string(&agents).expect("read AGENTS.md");
         let template = BUNDLED_TEMPLATES_DIR
@@ -276,7 +284,7 @@ mod tests_unit {
         let agents = spex_dir.path().join(AGENTS_FILENAME);
         fs::write(&agents, "a pre-split AGENTS.md with no marker\n").expect("seed AGENTS.md");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected = BUNDLED_TEMPLATES_DIR
             .get_file(AGENTS_FILENAME)
@@ -304,7 +312,7 @@ mod tests_unit {
         fs::write(&bundled_reference, "tampered").expect("tamper bundled reference");
         fs::write(&extra, "my notes").expect("write extra file");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected = BUNDLED_TEMPLATES_DIR
             .get_file("skills/spex-setup/references/GENERIC-PACKAGE-SKILL-TEMPLATE.md")
@@ -346,7 +354,7 @@ mod tests_unit {
         )
         .expect("seed SKILL.md");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let updated = fs::read_to_string(&skill).expect("read SKILL.md");
         let template = BUNDLED_TEMPLATES_DIR
@@ -377,7 +385,7 @@ mod tests_unit {
         )
         .expect("opt skill out of sync");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         assert_eq!(
             fs::read_to_string(&skill).unwrap(),
@@ -397,7 +405,7 @@ mod tests_unit {
         )
         .expect("tamper skill");
 
-        sync_templates(spex_dir.path(), spex_dir.path(), &[]).expect("sync");
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
 
         let expected = BUNDLED_TEMPLATES_DIR
             .get_file("skills/spex-setup/SKILL.md")

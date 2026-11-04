@@ -71,7 +71,7 @@ update `spex.yaml` (which is main spex configuration file for your project) and:
 
 - add the packages (`shopping-notes-api`, `shopping-notes-frontend`) to `spex.yaml` and the workspace file
 - add descriptions for your project and each package
-- pick rules from bundled with spex that applicable to each package and remove unused
+- pick the rules that apply to each package from the rules library bundled with spex, and copy them into `shopping-notes-spex/rules/`
 - generate main skills for each package with metadata that requires them to be loaded when AI works on any package. Skills will describe each package and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
 
 [Run your first skill `/spex-setup`](setup.md#6-run-spex-setup) in AI chat window or agent CLI to complete setup. Check what agent generated, review it, fix if needed and commit. At the end the skill runs `/spex-prd`, since the project has no PRD yet: the requirements to answer it with are in [Product Requirements](#product-requirements) below. It also offers your first spec, we do it later in this tutorial, so skip the offer for now.

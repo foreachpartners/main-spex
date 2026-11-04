@@ -101,7 +101,7 @@ Run the skill:
 /spex-setup
 ```
 
-It finds your packages and proposes a `spex.yaml` entry for each one: description, contracts, and the rules that apply. After you confirm, it writes them, creates a skill for each package, and adds the packages to the workspace file. When the project has no PRD yet, it then runs `/spex-prd` to write one, and offers to author your first spec or rule.
+It finds your packages and proposes a `spex.yaml` entry for each one: description, contracts, and the rules that apply. After you confirm, it writes them, copies the rules they list from the rules library into `rules/`, creates a skill for each package, and adds the packages to the workspace file. When the project has no PRD yet, it then runs `/spex-prd` to write one, and offers to author your first spec or rule.
 
 Review what the agent generated, fix what is wrong, and commit.
 

@@ -104,7 +104,7 @@ mod tests {
     }
 
     #[test]
-    fn serialization_keeps_descriptions_and_rules_unused() {
+    fn serialization_keeps_descriptions() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
             cli_version: 0.0.0
@@ -112,8 +112,6 @@ mod tests {
             agent_root: .
             description: A demo project.
             prd: docs/prd.md
-            rules_unused:
-              - graphql-conventions
             packages:
               - package_name: demo-api
                 package_short_name: api
@@ -128,7 +126,6 @@ mod tests {
         let json = serde_json::to_value(&config).expect("serialize");
 
         assert_eq!(json["description"], "A demo project.");
-        assert_eq!(json["rules_unused"][0], "graphql-conventions");
         assert_eq!(json["packages"][0]["description"], "REST API.");
         assert_eq!(
             json["packages"][0]["contracts"][0]["description"],
@@ -182,7 +179,6 @@ mod tests {
         let json = serde_json::to_value(&config).expect("serialize");
 
         assert!(json.get("description").is_none());
-        assert_eq!(json["rules_unused"], serde_json::json!([]));
         assert!(json["packages"][0].get("description").is_none());
         assert_eq!(json["packages"][0]["contracts"], serde_json::json!([]));
     }

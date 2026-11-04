@@ -179,14 +179,19 @@ mod tests_unit {
     }
 
     #[test]
-    fn copy_templates_writes_rules_and_scripts() {
+    fn copy_templates_creates_empty_project_folders_and_no_rule() {
         let spex_dir = tempdir().expect("create spex dir");
 
         copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
 
-        assert!(spex_dir.path().join("rules").is_dir());
+        assert_eq!(
+            fs::read_dir(spex_dir.path().join("rules"))
+                .expect("read rules")
+                .count(),
+            0,
+            "init must not write any rule"
+        );
         assert!(spex_dir.path().join("specs").is_dir());
-        assert!(spex_dir.path().join("rules/commit-message-format").is_dir());
         assert!(spex_dir.path().join("plans").is_dir());
         assert!(spex_dir.path().join("contracts").is_dir());
     }
@@ -237,24 +242,5 @@ mod tests_unit {
             claude.join("skills/spex-spec/SKILL.md").is_file(),
             ".claude/skills should resolve through the symlink"
         );
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn copy_templates_marks_scripts_executable() {
-        use std::os::unix::fs::PermissionsExt;
-
-        let spex_dir = tempdir().expect("create spex dir");
-
-        copy_templates(spex_dir.path(), spex_dir.path()).expect("copy templates");
-
-        let script = spex_dir
-            .path()
-            .join("rules/commit-message-format/commit-spec-id-trace.sh");
-        let mode = fs::metadata(&script)
-            .expect("read metadata")
-            .permissions()
-            .mode();
-        assert_ne!(mode & 0o111, 0, "script is not executable");
     }
 }

@@ -810,7 +810,7 @@ fn check_dummy_project_matches_expected() {
     );
 }
 
-const UNUSED_RULE_WARNING: &str = "warn  spex-internal-conformance/unused-rule  (rules/unused-rule.yaml)\n      no package lists rule `unused-rule` under `rules` — delete its file and script folder, and add its id to `rules_unused` in spex.yaml";
+const UNUSED_RULE_WARNING: &str = "warn  spex-internal-conformance/unused-rule  (rules/unused-rule.yaml)\n      no package lists rule `unused-rule` under `rules` — delete its file and script folder, or list its id under a package's `rules` in spex.yaml";
 
 fn dummy_project_with_unused_rule() -> (tempfile::TempDir, std::path::PathBuf) {
     let (temp_dir, project) = temp_project(&dummy_project_fixture());

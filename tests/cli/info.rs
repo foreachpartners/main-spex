@@ -13,7 +13,6 @@ const EXPECTED_INFO: &str = r#"{
   "agent_root": {spex_dir},
   "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
   "prd": {prd_file},
-  "rules_unused": [],
   "packages": [
     {
       "package_name": "dummy-project-api",
@@ -92,7 +91,6 @@ const EXPECTED_INFO_API: &str = r#"{
   "agent_root": {spex_dir},
   "description": "Minimal dummy project used by spex's own test suite to exercise `spex check` and `spex coverage` on a project whose specs cover every lifecycle state.",
   "prd": {prd_file},
-  "rules_unused": [],
   "packages": [
     {
       "package_name": "dummy-project-api",

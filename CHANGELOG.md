@@ -8,6 +8,9 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 - Added `--search` and `--fields` to `spex specs` and `spex rules` to print only the specs or rules containing a keyword, or only some of their fields.
 - Added `spex lib specs` to print or search by keyword the specs library of ready-made specs for common capabilities, such as `password-policy` and `email-policy`, which the `spex-spec` skill finds and offers as a draft when you create a spec for a matching capability.
 - Changed `spex check` to forbid blank lines between the keys of a spec or rule file, so a blank line visually separates one entry from the next in the output of `spex specs`, `spex rules` and `spex lib`.
+- Added `spex lib rules` to list, search and copy the bundled rules, so the `spex-setup` skill picks the rules that fit each package, and the `spex-rule` and `spex-update` skills offer matching and new ones.
+- **Breaking**: Changed `spex init` and `spex update` to stop deploying bundled rules: a project takes the ones it needs with `spex lib rules --copy`, and `spex update` only keeps the rules it already holds in sync (see the migration guide).
+- **Breaking**: Removed `rules_unused` from `spex.yaml`, which its schema now rejects (see the migration guide).
 
 ## [0.30.5] - 2026-11-03
 

@@ -56,6 +56,7 @@ src/                CLI source
     spex.rs         Spex built from SpexConfig (spex dir, project name, resolved packages), with each package's spex.package.yaml merged into its own package on discovery, spec (attaching each package's coverage_ignore to the spec under the package's short name, by spec id) and rule loaders, package selection by name, and resolving package names to short names (shared by commands)
   support/          Cross-topic helpers
     acceptance_criteria_lines.rs  Source line of each acceptance criterion (shared by spec and rule)
+    bundled_rule.rs  Writing a bundled rule, with its script folder, to a destination, and the paths that takes (shared by lib and update)
     entry_view.rs   The view of an entry printed by specs, rules and lib: path beside id, --fields selection against the schema, --search keywords, the YAML list of entries (`[]` when empty), and printing or writing it with `nothing found` on stderr when empty
     commitment.rs   RFC 2119 commitments in order (shared by spec and rule)
     fs.rs           Filesystem operations (file writes, dir creation, paths, path normalizing, relative paths, file URLs, embedded dir extraction, symlinks, exec bits)
@@ -77,7 +78,7 @@ specs/                         Single source of truth for behavior, one md file 
   project/                 Layout
   config/                  spex.yaml, spex.package.yaml, CLI version
   spec/                    Spec file, spec annotations, coverage states, specs library
-  rule/                    Rule file, rule checks
+  rule/                    Rule file, rule checks, rules library
   cli/                     Shared behavior (command set, project discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
   skill/                   Conventions shared by all framework skills (each framework skill's `SKILL.md` in `templates/skills/` is its own spec)
 docs/                          Framework reference docs; only those symlinked from templates/docs/ are bundled into projects by init/update
@@ -89,7 +90,7 @@ docs/                          Framework reference docs; only those symlinked fr
 templates/                     Assets scaffolded into projects
   schemas/                     JSON Schemas for spex.yaml, specs, rules, and plans
   skills/                      Agent skills
-  rules/                       Reusable rule templates, each with its script folder (same name, beside the rule file) when it has scripts
+  rules/                       Rules library: rules bundled in the binary and read with `spex lib rules`, never scaffolded (one `<rule-id>.yaml` per entry, with its script folder, same name, beside it, when it has scripts)
   docs/                        Framework docs shipped to projects (symlinks into docs/)
   specs/                       Specs library: template specs bundled in the binary and read with `spex lib specs`, never scaffolded (one `<spec-id>.yaml` per entry)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
@@ -106,6 +107,7 @@ tests/                         Integration tests that build and run the spex bin
   changelog_format.rs          CHANGELOG.md format test, not tied to a command
   hidden_content.rs            Test that templates, docs and examples hide nothing from reviewers (invisible characters, blank-line padding), not tied to a command
   specs_library.rs             Test that specs library entries are valid specs named by their id, not tied to a command
+  rules_library.rs             Test that rules library entries are valid rules named by their id and synced with upstream, not tied to a command
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end

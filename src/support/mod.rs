@@ -1,4 +1,5 @@
 pub mod acceptance_criteria_lines;
+pub mod bundled_rule;
 pub mod commitment;
 pub mod entry_view;
 pub mod fs;

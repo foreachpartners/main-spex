@@ -28,8 +28,6 @@ pub struct SpexConfig {
     pub description: Option<String>,
     pub prd: String,
     #[serde(default)]
-    pub rules_unused: Vec<RuleId>,
-    #[serde(default)]
     pub packages: Vec<PackageEntry>,
 }
 

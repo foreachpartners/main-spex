@@ -6,7 +6,7 @@ use std::process::Output;
 
 use tempfile::tempdir;
 
-use crate::common::{copy_project, dummy_project_fixture, run_spex};
+use crate::common::{copy_project, dummy_project_fixture, run_spex, take_rules};
 
 const CHANGELOG: &str = include_str!("../../CHANGELOG.md");
 const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -47,6 +47,10 @@ impl Project {
             String::from_utf8_lossy(&update.stderr),
         );
         update
+    }
+
+    fn take_rules(&self, ids: &[&str]) {
+        take_rules(&self.spex, ids);
     }
 
     fn path(&self, relative: &str) -> PathBuf {
@@ -202,25 +206,15 @@ fn update_upgrades_project_written_by_older_cli() {
         "update should restore the bundled schema",
     );
 
-    for deployed in [
-        SYNCED_RULE,
-        SYNCED_RULE_SCRIPT,
-        SYNCED_SKILL,
-        "docs/glossary.md",
-    ] {
+    for deployed in [SYNCED_SKILL, "docs/glossary.md"] {
         assert!(
             spex.join(deployed).is_file(),
             "update did not deploy {deployed}"
         );
     }
-    let script_mode = fs::metadata(spex.join(SYNCED_RULE_SCRIPT))
-        .expect("read script metadata")
-        .permissions()
-        .mode();
-    assert_ne!(
-        script_mode & 0o111,
-        0,
-        "deployed script should be executable"
+    assert!(
+        !spex.join(SYNCED_RULE).exists(),
+        "update must not deploy a rule the project never took"
     );
     assert!(
         !spex.join("AGENTS.md").exists(),
@@ -277,31 +271,47 @@ fn update_prints_every_changelog_entry_when_previous_version_is_unknown() {
 }
 
 #[test]
-fn update_restores_synced_rule_and_script_and_redeploys_deleted_rule() {
+fn update_restores_synced_rule_and_script_but_never_deploys_a_rule() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = Project::init(temp_dir.path());
     let deleted_rule = "rules/dependencies-rules.yaml";
+    project.take_rules(&["writing-style", "dependencies-rules"]);
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
-    let pristine_deleted = project.read(deleted_rule);
 
     let tampered_rule = pristine_rule.replace("title: Writing style", "title: Tampered");
     assert_ne!(tampered_rule, pristine_rule, "rule title not found");
     project.write(SYNCED_RULE, &tampered_rule);
     project.write(SYNCED_RULE_SCRIPT, &format!("{pristine_script}\nexit 0\n"));
+    fs::set_permissions(
+        project.path(SYNCED_RULE_SCRIPT),
+        fs::Permissions::from_mode(0o644),
+    )
+    .expect("make script not executable");
     project.remove(deleted_rule);
 
     project.update();
 
     assert_eq!(project.read(SYNCED_RULE), pristine_rule);
     assert_eq!(project.read(SYNCED_RULE_SCRIPT), pristine_script);
-    assert_eq!(project.read(deleted_rule), pristine_deleted);
+    let script_mode = fs::metadata(project.path(SYNCED_RULE_SCRIPT))
+        .expect("read script metadata")
+        .permissions()
+        .mode();
+    assert_ne!(script_mode & 0o111, 0, "synced script should be executable");
+    for not_deployed in [deleted_rule, "rules/testing-rules.yaml"] {
+        assert!(
+            !project.path(not_deployed).exists(),
+            "update deployed {not_deployed}"
+        );
+    }
 }
 
 #[test]
 fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = Project::init(temp_dir.path());
+    project.take_rules(&["writing-style"]);
     let pristine_rule = project.read(SYNCED_RULE);
     let pristine_script = project.read(SYNCED_RULE_SCRIPT);
 
@@ -324,29 +334,6 @@ fn update_keeps_rule_and_script_that_opted_out_of_upstream_sync() {
 
     assert_eq!(project.read(SYNCED_RULE), customized_rule);
     assert_eq!(project.read(SYNCED_RULE_SCRIPT), customized_script);
-}
-
-#[test]
-fn update_does_not_redeploy_rule_listed_in_rules_unused() {
-    let temp_dir = tempdir().expect("create temp dir");
-    let project = Project::init(temp_dir.path());
-    let config = project.read("spex.yaml");
-    project.write(
-        "spex.yaml",
-        &format!("{}\nrules_unused:\n  - testing-rules\n", config.trim_end()),
-    );
-    project.remove("rules/testing-rules.yaml");
-
-    project.update();
-
-    assert!(
-        !project.path("rules/testing-rules.yaml").exists(),
-        "a rule listed in rules_unused was redeployed",
-    );
-    assert!(
-        project.read("spex.yaml").contains("- testing-rules"),
-        "update dropped rules_unused from spex.yaml",
-    );
 }
 
 #[test]

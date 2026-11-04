@@ -180,7 +180,25 @@ pub fn write_prd(spex_dir: &Path) {
     fs::write(docs.join("prd.md"), "# Product requirements\n").expect("write prd");
 }
 
+pub fn take_rules(spex_dir: &Path, ids: &[&str]) {
+    let rules = spex_dir.join("rules");
+    let mut args = vec!["lib", "rules", "--id"];
+    args.extend(ids);
+    args.push("--copy");
+    args.push(rules.to_str().expect("utf-8 path"));
+    let taken = run_spex(spex_dir, &args, "");
+    assert!(
+        taken.status.success(),
+        "taking rules failed\nstderr:\n{}",
+        String::from_utf8_lossy(&taken.stderr),
+    );
+}
+
 pub fn add_packages(project: &Path) {
+    take_rules(
+        &project.join("proj-spex"),
+        &["secret-handling", "writing-style"],
+    );
     let config_path = project.join("proj-spex/spex.yaml");
     let mut config = fs::read_to_string(&config_path).expect("read spex.yaml");
     config.push_str(

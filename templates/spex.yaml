@@ -9,8 +9,3 @@ packages:
     package_short_name: spex
     description: Spex framework. Holds the specs, rules, skills and config that govern the project.
     path: .
-    rules:
-      - commit-message-format
-      - naming-convention
-      - secret-handling
-      - writing-style
