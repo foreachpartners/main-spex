@@ -43,6 +43,7 @@ Run from anywhere inside the project; `spex <command> --help` lists every option
 - `spex rules [--id <rule-id>...] [--package <name>...] [--ai] [--output <file>]` — print the active rules per package.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
 - `spex check-schema --schema <schema> --files <path>...` — validate JSON or YAML files against a JSON Schema.
+- `spex lib specs [--id <spec-id>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the bundled template specs in full, only the named ones, only those containing any keyword, or only the named fields of each (e.g. `--search password --fields id description` for a catalog of matches).
 
 Pass `--ai` to `specs` and `rules`: it drops fields AI doesn't need and adds ones it does. Prefer `--output <file>` for them too: long output gets truncated in a terminal. `spex init` and `spex update` run through the `spex-setup` and `spex-update` skills.
 

@@ -66,7 +66,7 @@ src/                CLI source
     testing.rs      Shared unit-test builders for specs, rules, packages and config (test builds only)
     text.rs         Text helpers (word wrapping, pluralize, markdown level two sections)
     yaml_dir.rs     Yaml file walking and loading of a directory (YamlFile: parsed item, path, raw text)
-  commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info and jq are single files)
+  commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info, jq and library, the `lib` command, are single files)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude`, `AGENTS.md` and `CLAUDE.md`: conflict checks, adoption, links; coverage also holds annotation_index, the project scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-package grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), the bundled migration guide since a version (migration_guide), conditional rewrite of bundled templates (sync_templates)
     check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, package selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
@@ -76,7 +76,7 @@ specs/                         Single source of truth for behavior, one md file 
   framework/               Artifact chain, traceability, managed section
   project/                 Layout
   config/                  spex.yaml, spex.package.yaml, CLI version
-  spec/                    Spec file, spec annotations, coverage states
+  spec/                    Spec file, spec annotations, coverage states, specs library
   rule/                    Rule file, rule checks
   cli/                     Shared behavior (command set, project discovery, exit codes), install, publishing, one `spex-<command>-cli-cmd` file per command
   skill/                   Conventions shared by all framework skills (each framework skill's `SKILL.md` in `templates/skills/` is its own spec)
@@ -91,6 +91,7 @@ templates/                     Assets scaffolded into projects
   skills/                      Agent skills
   rules/                       Reusable rule templates, each with its script folder (same name, beside the rule file) when it has scripts
   docs/                        Framework docs shipped to projects (symlinks into docs/)
+  specs/                       Specs library: template specs bundled in the binary and read with `spex lib specs`, never scaffolded (one `<spec-id>.yaml` per entry)
   AGENTS.md                    Seeds the project's AGENTS.md (and CLAUDE.md symlink) on init; update syncs its managed section
   README.md                    Contributor notes on scaffolding rules; never scaffolded
   spex.yaml                    Project config seeded by init for every layout, listing only the spex package (project name, layout, agent root, package name filled in)
@@ -104,6 +105,7 @@ tests/                         Integration tests that build and run the spex bin
   fixtures/                    Projects the integration tests copy and run spex against
   changelog_format.rs          CHANGELOG.md format test, not tied to a command
   hidden_content.rs            Test that templates, docs and examples hide nothing from reviewers (invisible characters, blank-line padding), not tied to a command
+  specs_library.rs             Test that specs library entries are valid specs named by their id, not tied to a command
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end

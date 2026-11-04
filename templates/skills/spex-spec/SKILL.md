@@ -46,6 +46,8 @@ Determine what the specs are based on before doing anything else:
 
 Break the source into distinct capabilities — one spec per capability (see the scope rule above). When there is more than one, confirm the split with the user before drafting.
 
+Then look in the specs library for a template spec for each capability: run `spex lib specs --search <keyword>... --fields id description` with a few keywords and synonyms of the capability and pick the entry that matches it. When one matches, read it with `spex lib specs --id <id>` and use it as the starting draft for Step 3: keep its criteria with `is_done: false` on each, set `packages` to the project's packages, choose its `contract`, set `status` to `planned`, and adapt its wording to the project's terms. Tell the user which entry you started from, and that it is an opinionated default for the general case they can change for the project's needs. When no entry matches, write the spec from scratch.
+
 Pre-fill every field you can from the source and existing context. Then ask the user only about what's missing or ambiguous — unresolved details or acceptance criteria you cannot infer. Confirm anything you inferred rather than assuming silently.
 
 ## Step 3 — Draft the fields

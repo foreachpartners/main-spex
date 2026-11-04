@@ -16,6 +16,7 @@ use commands::check_schema::CheckSchemaArgs;
 use commands::coverage::CoverageArgs;
 use commands::info::InfoArgs;
 use commands::jq::JqArgs;
+use commands::library::LibraryArgs;
 use commands::rules::RulesArgs;
 use commands::specs::SpecsArgs;
 use commands::update::UpdateArgs;
@@ -52,6 +53,8 @@ enum Commands {
     Rules(RulesArgs),
     #[command(about = "Print the project specs")]
     Specs(SpecsArgs),
+    #[command(about = "Print template specs from the bundled library, not the project's own specs")]
+    Lib(LibraryArgs),
 }
 
 const TOOL_FAILURE_EXIT_CODE: u8 = 2;
@@ -74,5 +77,6 @@ fn run(command: Commands) -> Result<ExitCode> {
         Commands::Jq(args) => commands::jq::run(args),
         Commands::Rules(args) => commands::rules::run(args),
         Commands::Specs(args) => commands::specs::run(args),
+        Commands::Lib(args) => commands::library::run(args),
     }
 }

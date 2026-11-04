@@ -1,6 +1,6 @@
 # Templates
 
-Assets scaffolded into client projects by `spex init` and `spex update`. Everything in this folder reaches clients, so MUST NOT place repository-internal notes, drafts, or examples here — add a file only when clients need it.
+Assets scaffolded into client projects by `spex init` and `spex update`, or included in the `spex` binary to be accessed from it. Everything in this folder is public and part of the spex CLI, so MUST NOT place repository-internal notes, drafts, or examples here — add a file only when clients need it.
 
 ## Scaffolding rules
 
@@ -11,9 +11,10 @@ Assets scaffolded into client projects by `spex init` and `spex update`. Everyth
 - `project-name.code-workspace` — seeds the client's `<project-name>.code-workspace` on `init` in multi-repo only, with a folder for the spex package only; `spex-setup` adds the others. `update` never touches it.
 - `rules/` — a rule file and its script folder (same name, beside it) are written when the rule is missing locally or does not set `sync_with_upstream: false`. Every bundled rule MUST set `sync_with_upstream: true` right after `title`, which is how the `spex-rule` skill knows a local rule came from upstream.
 - `skills/` — written unless the local skill sets `metadata.sync-with-upstream: false`. `update` rewrites each `SKILL.md` only above its `# Project` marker, keeping the client's own content, so every framework `SKILL.md` MUST end with that marker.
+- `specs/` — the specs library: template specs the `spex-spec` skill offers as a draft. Included in the binary and accessed with `spex lib specs`, never scaffolded.
 
 ## Editing docs
 
 MUST edit a shipped doc in the repository's own `docs/` folder — the symlink resolves there, so both stay in sync. MUST NOT replace a symlink with a regular file, which forks the doc into two copies.
 
-This `README.md` is the one file that never scaffolds: it documents this folder for spex contributors.
+This `README.md` is the one file outside `specs/` that never scaffolds: it documents this folder for spex contributors.

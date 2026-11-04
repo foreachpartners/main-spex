@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.31.0] - 2026-11-04
+
+- Added `spex lib specs` to print or search by keyword the specs library of ready-made specs for common capabilities, such as `password-policy` and `email-policy`, which the `spex-spec` skill finds and offers as a draft when you create a spec for a matching capability.
+
 ## [0.30.5] - 2026-11-03
 
 - Changed the `openapi-conventions` rule to require one `example` or `examples`, never both, on every request and response body.

@@ -5,6 +5,7 @@ mod coverage;
 mod info;
 mod init;
 mod jq;
+mod library;
 mod rules;
 mod specs;
 mod update;

@@ -1,0 +1,22 @@
+id: email-policy
+title: Validate and normalize email addresses
+description: Accepts any email address a user can type and stores it in one canonical form so the same mailbox is never registered twice, for every email address the system stores. Loosely follows RFC 5321, RFC 5322, RFC 6531 and the OWASP Input Validation Cheat Sheet.
+acceptance_criteria:
+  - id: trimmed
+    must: "trim leading and trailing whitespace (the Unicode `White_Space` property) from `email` as the first step, before validating, storing or comparing it, because a stray space from typing or autocomplete is most likely a user mistake and, unlike in a password, trimming changes no secret"
+  - id: normalized
+    must: "normalize `email` to NFC and lowercase it after trimming, at creation, change and login, before validating, storing or comparing it, so the same address typed in different cases or on different devices is one address, because RFC 5321 allows a case-sensitive local part but virtually no provider treats it so"
+  - id: international-addresses
+    must: "accept non-ASCII characters in `email` (RFC 6531) and store its domain in ASCII (punycode) form, so internationalized addresses work and one domain has one stored form"
+  - id: length-limits
+    must: "reject an `email` longer than 254 bytes in UTF-8 or with a local part longer than 64 bytes in UTF-8, the RFC 5321 limits, when a user sets or changes it"
+  - id: shape-only-validation
+    must: "validate only the shape of `email` when a user sets or changes it: one `@` separating a non-empty local part from a domain with at least one dot, because the full RFC grammar is too complex for a regex and only a message sent to the address proves it works"
+  - id: plain-addresses-only
+    must: "reject an `email` containing whitespace or a control character (Unicode category `Cc`), a display name (`Name <a@b.c>`), a comment, a quoted local part or an IP address in place of a domain, because nobody types those forms and they are the usual way to inject mail headers or confuse parsers"
+  - id: unique-per-account
+    must: "allow an `email` to belong to one account only, compared after normalization, so a case or Unicode variant cannot register the same mailbox twice"
+  - id: no-provider-rules
+    must_not: "alter the local part of `email` by provider-specific rules, such as removing dots or `+tag` suffixes, because those rules hold for some providers only and would merge distinct mailboxes on the others"
+  - id: no-domain-blocking
+    should_not: "reject an `email` by its domain, such as free-mail or disposable-address providers, because such lists are never complete and block real users"

@@ -51,6 +51,12 @@
   secret-handling
   ```
 
+- **Specs library** — template specs for capabilities many projects need, generic enough to use as they are and to change to fit a project's needs, kept in the `templates/specs/` folder of the spex repository, included in the `spex` binary and never scaffolded into projects. The `spex-spec` skill reads a matching entry with `spex lib specs` as a draft when a user creates a spec; once written into the project's `specs/` it is the project's own spec.
+
+  ```text
+  templates/specs/password-policy.yaml
+  ```
+
 - **Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
   ```text
