@@ -5,7 +5,7 @@ Prints rules project uses, whole or narrowed to the ones an AI agent needs, so a
 ## Acceptance criteria
 
 - MUST print each rule once, however many packages list it.
-- MUST print the full content of each rule, as a YAML list.
+- MUST print the full content of each rule as a valid YAML list and nothing else on stdout (warnings go to stderr), so [`spex jq`](spex-jq-cli-cmd.md) and any other YAML tool read the output.
 - MUST add a `path` field after the `id` of each rule with the rule file's absolute path (e.g. `/work/shop/shop-spex/rules/secret-handling.yaml`), so an AI agent edits the file without searching for it.
 - MUST limit the output to the rule IDs given in `--id <id>...`; it defaults to all rules project uses.
 - MUST error on an unrecognized ID given to `--id`.

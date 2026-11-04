@@ -107,6 +107,17 @@ pub fn listed_ids(stdout: &[u8]) -> Vec<String> {
     ids
 }
 
+pub fn queried_by_jq(dir: &Path, stdout: &[u8], filter: &str) -> serde_json::Value {
+    let input = String::from_utf8_lossy(stdout);
+    let queried = run_spex(dir, &["jq", "-c", filter], &input);
+    assert!(
+        queried.status.success(),
+        "jq could not read the output:\n{input}\njq stderr:\n{}",
+        String::from_utf8_lossy(&queried.stderr),
+    );
+    serde_json::from_slice(&queried.stdout).expect("jq prints JSON")
+}
+
 pub fn assert_fails_mentioning(output: &std::process::Output, needle: &str) {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(

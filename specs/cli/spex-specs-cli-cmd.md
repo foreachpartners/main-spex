@@ -4,7 +4,7 @@ Prints the project specs, whole or narrowed to the ones an AI agent needs, so a 
 
 ## Acceptance criteria
 
-- MUST print the project specs as a YAML list.
+- MUST print the project specs as a valid YAML list and nothing else on stdout (warnings go to stderr), so [`spex jq`](spex-jq-cli-cmd.md) and any other YAML tool read the output.
 - MUST add a `path` field after the `id` of each spec with the spec file's absolute path (e.g. `/work/shop/shop-spex/specs/place-pizza-order.yaml`), so an AI agent edits the file without searching for it.
 - MUST limit the output to the spec IDs given in `--id <id>...`; it defaults to all specs.
 - MUST error on an unrecognized ID given to `--id`.

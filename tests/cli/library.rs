@@ -1,10 +1,10 @@
 use std::fs;
 use std::path::Path;
 
-use serde_json::Value;
+use serde_json::{Value, json};
 use tempfile::tempdir;
 
-use crate::common::{assert_fails_mentioning, run_spex};
+use crate::common::{assert_fails_mentioning, queried_by_jq, run_spex};
 
 fn bundled_entry(id: &str) -> Value {
     let file = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -98,6 +98,32 @@ fn lib_specs_search_matching_nothing_prints_an_empty_list_and_nothing_found_on_s
     assert!(output.status.success(), "{output:?}");
     assert_eq!(String::from_utf8_lossy(&output.stdout), "[]\n");
     assert_eq!(String::from_utf8_lossy(&output.stderr), "nothing found\n");
+}
+
+#[test]
+fn lib_specs_output_is_a_valid_yaml_list_that_jq_reads() {
+    let dir = tempdir().expect("tempdir");
+
+    let all = run_spex(dir.path(), &["lib", "specs"], "");
+    let fields = run_spex(dir.path(), &["lib", "specs", "--fields", "id", "title"], "");
+    let none = run_spex(
+        dir.path(),
+        &["lib", "specs", "--search", "no-such-word"],
+        "",
+    );
+
+    for output in [&all, &fields, &none] {
+        assert!(output.status.success(), "{output:?}");
+    }
+    assert_eq!(
+        queried_by_jq(dir.path(), &all.stdout, "map(.id)"),
+        json!(["email-policy", "password-policy"]),
+    );
+    assert_eq!(
+        queried_by_jq(dir.path(), &fields.stdout, "map(keys) | unique"),
+        json!([["id", "title"]]),
+    );
+    assert_eq!(queried_by_jq(dir.path(), &none.stdout, "length"), json!(0));
 }
 
 #[test]

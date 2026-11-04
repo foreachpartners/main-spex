@@ -1,10 +1,11 @@
 use std::fs;
 
+use serde_json::json;
 use tempfile::tempdir;
 
 use crate::common::{
     assert_fails_mentioning, canonical_display, copy_project, dummy_project_fixture, listed_ids,
-    run_spex, runners_project_fixture, temp_project,
+    queried_by_jq, run_spex, runners_project_fixture, temp_project,
 };
 
 const EXPECTED_GLOB_RULE: &str = r#"- id: glob-runner
@@ -218,6 +219,28 @@ fn rules_rejects_an_unknown_package() {
 
     assert_fails_mentioning(&rules, "unknown package `bogus`");
     assert!(rules.stdout.is_empty());
+}
+
+#[test]
+fn rules_output_is_a_valid_yaml_list_that_jq_reads() {
+    let (_temp_dir, project) = temp_project(&runners_project_fixture());
+
+    let all = run_spex(&project, &["rules"], "");
+    let fields = run_spex(&project, &["rules", "--fields", "id", "title"], "");
+    let none = run_spex(&project, &["rules", "--search", "no-such-word"], "");
+
+    for output in [&all, &fields, &none] {
+        assert!(output.status.success(), "{output:?}");
+    }
+    assert_eq!(
+        queried_by_jq(&project, &all.stdout, "map(.id) | sort"),
+        json!(listed_ids(&all.stdout)),
+    );
+    assert_eq!(
+        queried_by_jq(&project, &fields.stdout, "map(keys) | unique"),
+        json!([["id", "title"]]),
+    );
+    assert_eq!(queried_by_jq(&project, &none.stdout, "length"), json!(0));
 }
 
 #[test]

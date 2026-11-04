@@ -9,7 +9,7 @@ spex lib <KIND> [OPTIONS]
 ## Acceptance criteria
 
 - MUST take `<KIND>`, the library to read, and accept only `specs` for now.
-- MUST print every entry of the kind in full as a YAML list ordered by `id`, with a blank line between entries, in the same shape as [`spex specs`](spex-specs-cli-cmd.md) and [`spex rules`](spex-rules-cli-cmd.md), so one `spex jq` filter reads all three.
+- MUST print every entry of the kind in full as a valid YAML list ordered by `id` and nothing else on stdout, with a blank line between entries, in the same shape as [`spex specs`](spex-specs-cli-cmd.md) and [`spex rules`](spex-rules-cli-cmd.md), so one `spex jq` filter reads all three.
 - MUST print only the entries named in `--id <id>...`, still ordered by `id` whatever the order given, each in the same format, when `--id` is given.
 - MUST error on an unrecognized ID given to `--id`.
 - MUST print only the top-level fields named in `--fields <field>...` of each entry, in the entry's own field order, instead of the entry in full, so an AI agent scans a catalog (e.g. `id` and `description`) without spending its context on every acceptance criterion. It defaults to all fields.
