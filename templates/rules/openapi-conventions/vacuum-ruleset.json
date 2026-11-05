@@ -65,6 +65,35 @@
         "function": "truthy"
       }
     },
+    "operation-tag": {
+      "description": "MUST tag every operation with exactly one tag",
+      "given": "$.paths[*][get,put,post,delete,options,head,patch,trace]",
+      "resolved": false,
+      "severity": "error",
+      "then": [
+        {
+          "field": "tags",
+          "function": "truthy"
+        },
+        {
+          "field": "tags",
+          "function": "length",
+          "functionOptions": {
+            "min": 1,
+            "max": 1
+          }
+        }
+      ]
+    },
+    "operation-tag-defined": {
+      "description": "MUST declare every operation tag in the top-level tags",
+      "given": "$",
+      "resolved": false,
+      "severity": "error",
+      "then": {
+        "function": "oasTagDefined"
+      }
+    },
     "schema-ref": {
       "description": "MUST define request and response shapes in components/schemas and reference them with $ref",
       "given": [

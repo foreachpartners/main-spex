@@ -2,11 +2,18 @@ openapi: 3.1.1
 info:
   title: Shopping Notes API
   version: 1.0.0
+tags:
+  - name: health
+    description: API process liveness
+  - name: items
+    description: Shopping list items
 paths:
   /health:
     get:
       operationId: getHealth
       summary: Report API process liveness
+      tags:
+        - health
       x-spec: "@spec contract api-healthcheck"
       responses:
         "200":
@@ -21,6 +28,8 @@ paths:
     get:
       operationId: listItems
       summary: List shopping items
+      tags:
+        - items
       x-spec: "@spec contract api-view-shopping-list"
       responses:
         "200":
@@ -37,6 +46,8 @@ paths:
     post:
       operationId: createItem
       summary: Create a shopping item
+      tags:
+        - items
       x-spec: "@spec contract api-add-shopping-item"
       requestBody:
         required: true
@@ -68,6 +79,8 @@ paths:
     delete:
       operationId: clearItems
       summary: Clear the shopping list
+      tags:
+        - items
       x-spec: "@spec contract api-clear-shopping-list"
       responses:
         "204":
@@ -76,6 +89,8 @@ paths:
     patch:
       operationId: updateItem
       summary: Update a shopping item's bought status
+      tags:
+        - items
       x-spec: "@spec contract api-mark-item-bought"
       parameters:
         - $ref: "#/components/parameters/ItemId"
@@ -109,6 +124,8 @@ paths:
     delete:
       operationId: deleteItem
       summary: Delete a shopping item
+      tags:
+        - items
       x-spec: "@spec contract api-delete-shopping-item"
       parameters:
         - $ref: "#/components/parameters/ItemId"

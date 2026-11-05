@@ -8,6 +8,8 @@ acceptance_criteria:
   - "MUST declare every endpoint with operationId, summary, and at least one response"
   - "MUST give every operationId a unique value across the document"
   - "MUST annotate each operation with its spec via the `x-spec` extension (e.g. `x-spec: @spec contract list-pizza-menu`)"
+  - "MUST tag every operation with exactly one tag"
+  - "MUST declare every operation tag in the top-level `tags`"
   - "MUST define request and response shapes in components/schemas; never inline"
   - "MUST give every schema a name and use $ref to reference it"
   - "MUST give every request body and response body a simple `example` or `examples`, never both"
