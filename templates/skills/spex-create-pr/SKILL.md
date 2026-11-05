@@ -27,9 +27,10 @@ A change to an area the package's skill marks as sensitive is at least Medium. W
 
 Write the body from the user's request, the commits, the diff and the specs they trace to.
 
+- Summary: the why and what in 1-2 sentences, then the smallest visual that makes the key point, picked with the Summary section of [`references/pull-request-template.md`](references/pull-request-template.md), whichever template step 2 picked. When the template has no Summary section, use its first section for it.
 - Put the level from step 3 in the Risk section. When the template has no Risk section, add one after its first section.
 - List a ticket only when the user, the branch name or a commit names it. When a change spans several repos, list the related PRs.
-- For a UI change, capture it before and after yourself: screenshots when a still image shows the change, a recording when it is a multi-step flow. When the setup cannot capture them, skip them and report it.
+- For a visible change (UI, CLI output, rendered docs), show it in the Visual changes section, captured before and after yourself: screenshots when a still image shows the change, a recording when it is a multi-step flow. When the setup cannot capture them, skip them and report it.
 - Title: one short imperative sentence.
 
 The body is done when no placeholder or empty section is left and every claim is backed by the commits or the user's words.

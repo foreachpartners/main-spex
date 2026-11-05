@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.32.0] - 2026-11-05
+
+- Changed the `spex-create-pr` skill to add more visualisation for faster change understanding and review.
+
 ## [0.31.2] - 2026-11-05
 
 - Changed the `spex-spec` skill to interview you with `spex-grill-me`, one question at a time, about what is missing or ambiguous.
