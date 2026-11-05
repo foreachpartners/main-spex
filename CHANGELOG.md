@@ -2,6 +2,11 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.32.1] - 2026-11-05
+
+- Changed the `spex-spec` skill and the glossary to state that an acceptance criterion's id doubles as its short title.
+- Changed the spec, acceptance criterion and rule ids to allow up to 50 characters instead of 40.
+
 ## [0.32.0] - 2026-11-05
 
 - Changed the `spex-create-pr` skill to add more visualisation for faster change understanding and review.

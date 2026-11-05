@@ -5,13 +5,13 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 ## Acceptance criteria
 
 - MUST name the file `<spec-id>.yaml`, whatever its nesting under `specs/`.
-- MUST follow `schemas/spec-id.schema.json` for the `id`: lowercase letters, digits and hyphens only, at most 40 characters.
+- MUST follow `schemas/spec-id.schema.json` for the `id`: lowercase letters, digits and hyphens only, at most 50 characters.
 - MUST have the required fields `id`, `title`, `description`, `acceptance_criteria`, `packages`, and `contract`.
 - MUST have at least one acceptance criterion; a spec with an empty `acceptance_criteria` is a schema error.
 - MUST set `packages` to the `package_short_name`s of the packages that implement the capability, at least one; a spec with no `packages`, or an empty one, is a schema error.
 - MUST hold the spec's specifics in `acceptance_criteria`, ordered by RFC 2119 commitment level: `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`.
 - MUST write each acceptance criterion as `{id, must|must_not|should|should_not|may, is_done}`, with exactly one of `must`, `must_not`, `should`, `should_not`, `may` present, its value the verifiable statement.
-- MUST follow `schemas/ac-id.schema.json` for a criterion's `id`: lowercase letters, digits and hyphens only, at most 40 characters.
+- MUST follow `schemas/ac-id.schema.json` for a criterion's `id`: lowercase letters, digits and hyphens only, at most 50 characters.
 - MUST keep a criterion's `id` unique within the spec, naming the criterion's behavior rather than its position.
 - MUST set `contract` to `single`, `for-each-ac`, or `none`, which sets the contract coverage granularity.
 - MUST require, under `contract: single` (the migration default), one spec-level `@spec contract <spec-id>` annotation for the whole spec.

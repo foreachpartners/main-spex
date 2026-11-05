@@ -5,7 +5,7 @@ A rule, defined in [glossary.md](../../docs/glossary.md), lives at `rules/<rule-
 ## Acceptance criteria
 
 - MUST name the file `<rule-id>.yaml`, whatever its nesting under `rules/`.
-- MUST follow `schemas/rule-id.schema.json` for the `id`: lowercase letters, digits and hyphens only, at most 40 characters.
+- MUST follow `schemas/rule-id.schema.json` for the `id`: lowercase letters, digits and hyphens only, at most 50 characters.
 - MUST have the required fields `id`, `title`, `description`, and `acceptance_criteria`.
 - MUST hold the individual rules in `acceptance_criteria`, ordered `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`, each criterion a string starting with that commitment.
 - MUST apply a rule package-wide, not per feature, once a package opts into it by listing it in `rules` in `spex.yaml`.

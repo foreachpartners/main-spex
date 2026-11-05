@@ -5,6 +5,6 @@
   "description": "Rule ID, globally unique. Only lowercase English letters, digits and hyphens. The name should convey the rule's contents so it can be understood without opening the rule",
   "type": "string",
   "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
-  "maxLength": 40,
+  "maxLength": 50,
   "examples": ["secret-handling"]
 }

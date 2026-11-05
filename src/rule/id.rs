@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 mod id_test;
 
 const ID_PATTERN: &str = "^[a-z0-9]+(-[a-z0-9]+)*$";
-const ID_MAX_LENGTH: usize = 40;
+const ID_MAX_LENGTH: usize = 50;
 
 static ID: LazyLock<Regex> = LazyLock::new(|| Regex::new(ID_PATTERN).expect("valid id regex"));
 

@@ -34,7 +34,7 @@ mod tests {
 
     #[test]
     fn parse_skips_an_id_over_the_maximum_length() {
-        let content = format!("// @spec impl {}\n", "a".repeat(41));
+        let content = format!("// @spec impl {}\n", "a".repeat(51));
 
         assert!(parse(&content).is_empty());
     }
@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn malformed_lines_reports_an_id_that_breaks_the_id_grammar() {
-        let long_id = "a".repeat(41);
+        let long_id = "a".repeat(51);
         let content = format!(
             "// @spec impl delivery-timeX\n// @spec impl a#Step\n// @spec impl {long_id}\n// @spec impl a#step-one\n"
         );

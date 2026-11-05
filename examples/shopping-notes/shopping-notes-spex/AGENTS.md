@@ -112,7 +112,7 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
   secret-handling
   ```
 
-- **Acceptance Criterion ID** (AC ID) — an identifier assigned to one acceptance criterion, unique within its own spec. Names the criterion's behavior, not its position, so it survives reordering or inserting other criteria, and should convey the criterion's contents so it can be understood without opening the spec.
+- **Acceptance Criterion ID** (AC ID) — an identifier assigned to one acceptance criterion, unique within its own spec, that also serves as the criterion's short title. Names the criterion's behavior, not its position, so it survives reordering or inserting other criteria, and should convey the criterion's contents so it can be understood without opening the spec.
 
   ```text
   auth-required
