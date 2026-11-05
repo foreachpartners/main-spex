@@ -161,3 +161,7 @@ Example [project](examples/shopping-notes/README.md) with spex implemented.
 Ready to try it yourself? Follow the [Tutorial](docs/tutorial.md) to take the
 `shopping-notes` example from a plain multi-repo project to a fully spec-driven
 project, end to end.
+
+## Acknowledgements
+
+Thanks to [Matt Pocock](https://github.com/mattpocock/skills) (MIT) for the skills that inspired and shaped several of ours.
