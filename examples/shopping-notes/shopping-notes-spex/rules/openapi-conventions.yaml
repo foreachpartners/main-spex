@@ -2,7 +2,9 @@ id: openapi-conventions
 title: OpenAPI conventions
 sync_with_upstream: true
 description: >-
-  The OpenAPI document is the contract that clients and servers must follow.
+  The OpenAPI document is the contract that clients and servers must follow. It follows the
+  Zalando RESTful API guidelines (https://opensource.zalando.com/restful-api-guidelines/) loosely:
+  where a criterion below differs, the criterion wins.
 acceptance_criteria:
   - "MUST use OpenAPI 3.1.1"
   - "MUST declare every endpoint with operationId, summary, and at least one response"
@@ -18,16 +20,18 @@ acceptance_criteria:
   - "MUST mark every secret-bearing field (password, token, key, credential) with `x-sensitive: true` so generated code can wrap it in a secret type"
   - "MUST set `format: password` on secret string fields and `writeOnly: true` on secrets accepted in requests but never returned in responses (e.g. password)"
   - "MUST use snake_case as the default casing for property names, query parameter names, and enum values. URL path segments use kebab-case"
-  - "MUST use plural nouns for collection path segments (`/users/{user_id}`, not `/user/{user_id}`); use a singular noun only for a singleton resource (e.g. `/me`, `/users/{user_id}/profile`)"
+  - "MUST use plural nouns for collection path segments (`/users/{user_id}`, not `/user/{user_id}`); use a singular noun only for a singleton resource (e.g. `/me`, `/users/{user_id}/profile`) or a namespace that groups actions (e.g. `/auth`)"
   - "MUST name the path parameter of a nested resource after that resource (`/users/{user_id}/orders/{order_id}`), not a bare `{id}`"
   - "MUST NOT use anyOf / oneOf without a discriminator"
   - "MUST NOT leave operationId implicit"
-  - "MUST NOT put verbs in URL path segments; the HTTP method is the verb (`POST /users`, not `POST /create-user`)"
+  - "MUST NOT start a URL path segment with a standard-method verb (create, get, list, read, update, edit, delete, remove, add, set); the HTTP method is that verb (`POST /users`, not `POST /create-user`)"
   - "MUST NOT duplicate spec mappings between the `x-spec` annotation and `info.description` — the `x-spec` annotation is the single source of truth"
   - "MUST NOT leak internal implementation or persistence details in descriptions (storage, hashing, encryption, normalization, backing datastore); describe only what a consumer observes and must satisfy (e.g. `8–128 characters`, not `stored as an Argon2 hash`)"
   - "SHOULD use enum constraints for fields with a closed set of values"
   - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
+  - "SHOULD model an operation as a resource noun when it reads naturally as creating one (`POST /orders`, not `POST /orders/place`)"
   - "SHOULD tag a standalone endpoint that fits no other group with `general`, declared in `tags` as `Standalone endpoints that fit no other group`"
+  - "MAY use a single verb as the last path segment for an action that is not a create, read, update or delete of a resource, always with `POST` (`POST /auth/login`, `POST /auth/logout`, `POST /orders/{order_id}/cancel`)"
 checks:
   - name: vacuum-lint
     description: Lint OpenAPI documents with vacuum against the MUST and MUST NOT criteria; errors when vacuum is not installed

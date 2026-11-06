@@ -229,6 +229,19 @@
         }
       }
     },
+    "path-no-standard-method-verb": {
+      "description": "MUST NOT start a URL path segment with a standard-method verb (create, get, list, read, update, edit, delete, remove, add, set); the HTTP method is that verb",
+      "given": "$.paths[*]~",
+      "resolved": false,
+      "severity": "error",
+      "message": "{{description}}",
+      "then": {
+        "function": "pattern",
+        "functionOptions": {
+          "notMatch": "(^|/)(create|get|list|read|update|edit|delete|remove|add|set)(-|/|$)"
+        }
+      }
+    },
     "composition-discriminator": {
       "description": "MUST NOT use anyOf / oneOf without a discriminator",
       "given": "$..[?(@.oneOf || @.anyOf)]",
