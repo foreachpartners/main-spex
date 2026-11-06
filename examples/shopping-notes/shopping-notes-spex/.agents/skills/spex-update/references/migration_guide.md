@@ -4,6 +4,38 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.33.0
+
+`spex-implement` no longer updates package skill documentation (its step "Update package skill documentation" is removed). Instead, the package skill itself says when and how to change it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these rules and nothing keeps it current. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:
+
+- In the frontmatter `description`, insert `Keep it up to date with important changes.` before `MUST be loaded`, unless it is already there.
+- Unless `# General` already starts with `Default: change nothing.`, insert this text at the start of `# General`, followed by a blank line, before its first line (the one that starts with "Run"):
+
+  ```markdown
+  Default: change nothing. A package skill is a short orientation for an agent
+  entering the package, not a changelog or feature catalog. Specs, contracts,
+  rules and code are the sources of truth for what the package does.
+
+  Edit a package skill only when the work did one of these:
+
+  - added or removed a top-level directory, bounded context, crate or entry point
+    (one line, directory level)
+  - introduced a package-wide convention or architectural pattern that every later
+    feature must follow, and no spec or rule states it
+  - hit a tooling quirk that cost real time and can't be discovered from the code
+
+  Never add: a feature, endpoint, field, error code, type, function or file;
+  anything a spec, contract, rule or the code already states; a how-to for one
+  feature.
+
+  Before writing a line, ask whether an agent working on an unrelated feature in
+  this package would be misled or slowed without it. If not, skip it. Edit
+  existing text in place instead of appending. When unsure, leave it out and
+  mention it in the report.
+  ```
+
+- Wherever your own text (`AGENTS.md` below the managed section, own skills, docs, CI jobs) expects `spex-implement` to update package skills or to report which ones it updated, drop that.
+
 ## 0.31.1
 
 `spex update` no longer deploys `docs/glossary.md`, since the managed section of `AGENTS.md` inlines the glossary. In `<spex-dir>`:
