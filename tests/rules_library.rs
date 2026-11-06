@@ -20,6 +20,8 @@ struct Check {
 
 const LIBRARY_DIR: &str = "templates/rules";
 const RULE_SCHEMA_FILE: &str = "templates/schemas/rule.schema.json";
+const SCHEMAS_DIR: &str = "templates/schemas";
+const CONFORMANCE_RULE_ID: &str = "spex-internal-conformance";
 
 fn repository() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -133,4 +135,64 @@ fn rules_library_entries_ship_every_script_their_checks_run() {
             );
         }
     }
+}
+
+#[test]
+fn rules_library_entries_pass_the_conformance_checks_of_spex_check() {
+    let ids: Vec<String> = entry_files()
+        .iter()
+        .map(|file| read_entry(file).id)
+        .collect();
+    let project = tempfile::tempdir().expect("temp dir");
+    let spex_dir = project.path().join("proj-spex");
+    let schemas = spex_dir.join("schemas");
+    fs::create_dir_all(&schemas).expect("create schemas dir");
+    for schema in fs::read_dir(repository().join(SCHEMAS_DIR)).expect("schemas folder") {
+        let path = schema.expect("schema").path();
+        fs::copy(&path, schemas.join(path.file_name().expect("schema name"))).expect("copy schema");
+    }
+    fs::create_dir_all(spex_dir.join("docs")).expect("create docs dir");
+    fs::write(spex_dir.join("docs/prd.md"), "# Product requirements\n").expect("write prd");
+    let listed_rules: String = ids.iter().map(|id| format!("      - {id}\n")).collect();
+    let version = env!("CARGO_PKG_VERSION");
+    fs::write(
+        spex_dir.join("spex.yaml"),
+        format!(
+            "project_name: proj\ncli_version: {version}\nlayout: multi-repo\nagent_root: .\ndescription: Takes every rules library entry.\nprd: docs/prd.md\npackages:\n  - package_name: proj-spex\n    package_short_name: spex\n    path: .\n    rules:\n{listed_rules}"
+        ),
+    )
+    .expect("write spex.yaml");
+
+    let taken = Command::new(env!("CARGO_BIN_EXE_spex"))
+        .current_dir(&spex_dir)
+        .args(["lib", "rules", "--copy", "rules", "--id"])
+        .args(&ids)
+        .output()
+        .expect("run spex lib");
+    assert!(
+        taken.status.success(),
+        "{}",
+        String::from_utf8_lossy(&taken.stderr)
+    );
+
+    let check = Command::new(env!("CARGO_BIN_EXE_spex"))
+        .current_dir(&spex_dir)
+        .args(["check", "--files", "spex.yaml"])
+        .output()
+        .expect("run spex check");
+    assert!(
+        matches!(check.status.code(), Some(0 | 1)),
+        "spex check did not run: {}",
+        String::from_utf8_lossy(&check.stderr)
+    );
+    let report = String::from_utf8_lossy(&check.stdout);
+    let conformance_findings: Vec<&str> = report
+        .lines()
+        .filter(|line| line.contains(CONFORMANCE_RULE_ID))
+        .collect();
+
+    assert!(
+        conformance_findings.is_empty(),
+        "rules library entries fail spex check conformance:\n{report}"
+    );
 }

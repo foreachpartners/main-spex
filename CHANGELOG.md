@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.33.1] - 2026-11-06
+
+- Changed the `testing-rules` rule to order its acceptance criteria as `spex check` requires, so a project that takes it no longer fails `ac-ordered`.
+
 ## [0.33.0] - 2026-11-06
 
 - Moved the step of the `spex-implement` skill that updated package skill documentation to package skill itself with focus on important changes.

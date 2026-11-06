@@ -107,7 +107,7 @@ tests/                         Integration tests that build and run the spex bin
   changelog_format.rs          CHANGELOG.md format test, not tied to a command
   hidden_content.rs            Test that templates, docs and examples hide nothing from reviewers (invisible characters, blank-line padding), not tied to a command
   specs_library.rs             Test that specs library entries are valid specs named by their id, not tied to a command
-  rules_library.rs             Test that rules library entries are valid rules named by their id and synced with upstream, not tied to a command
+  rules_library.rs             Test that rules library entries are valid rules named by their id, synced with upstream and passing the `spex check` conformance checks, not tied to a command
 ```
 
 Unit tests live next to the code they cover as `*_test.rs` files. End-to-end

@@ -8,7 +8,7 @@ The rules library holds rules for conventions many projects share. It lives in t
 - MUST name each entry `<rule-id>.yaml`, a rule file that validates against `templates/schemas/rule.schema.json`, with its script folder (same name, beside the file) when its checks run scripts.
 - MUST give each entry an `id` no other entry has.
 - MUST set `sync_with_upstream: true` right after the `title` of each entry, so a project's rule that sets `true` is known to come from the library.
-- MUST fail `cargo test` when an entry is invalid, misnamed, unsynced or shares its `id` with another entry.
+- MUST fail `cargo test` when an entry is invalid, misnamed, unsynced, fails a conformance check of `spex check` (such as acceptance criteria out of commitment order) or shares its `id` with another entry.
 - MUST offer entries only through `spex lib rules`, which the `spex-setup` skill reads to pick the rules of each package and the `spex-rule` skill reads when a user creates a rule that is not specific to a project.
 - MUST write each entry as an opinionated starting point for the general case, choosing defaults and trade-offs most projects can adopt as they are, which a project is free to change for its needs.
 

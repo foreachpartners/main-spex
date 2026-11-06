@@ -7,9 +7,9 @@ description: >-
   still goes green while coverage quietly narrows.
 acceptance_criteria:
   - "MUST fix a failing test at its root cause rather than loosening its assertions"
+  - "MUST optimize the test setup for speed and reliability (parallel runs, no needless sleeps or I/O, no flaky tests), so tests never slow down AI-driven development"
   - "MUST NOT commit a skipped, ignored, or pending test"
   - "MUST NOT commit a focused test (`.only`, `fit`, `fdescribe`) that excludes its siblings from running"
-  - "MUST optimize the test setup for speed and reliability (parallel runs, no needless sleeps or I/O, no flaky tests), so tests never slow down AI-driven development"
 checks:
   - name: no-skipped-tests
     description: Flag skipped, ignored, or pending tests (non-JS/TS runners)
