@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.33.0] - 2026-11-06
+
+- Changed the `openapi-conventions` rule to recommend tagging standalone endpoints that fit no other group with `general`.
+
 ## [0.32.2] - 2026-11-05
 
 - Changed the `openapi-conventions` rule to require exactly one tag on every operation, declared in the top-level `tags`.

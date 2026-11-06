@@ -27,6 +27,7 @@ acceptance_criteria:
   - "MUST NOT leak internal implementation or persistence details in descriptions (storage, hashing, encryption, normalization, backing datastore); describe only what a consumer observes and must satisfy (e.g. `8–128 characters`, not `stored as an Argon2 hash`)"
   - "SHOULD use enum constraints for fields with a closed set of values"
   - "SHOULD declare path parameters with explicit type and format (uuid, date-time, etc.)"
+  - "SHOULD tag a standalone endpoint that fits no other group with `general`, declared in `tags` as `Standalone endpoints that fit no other group`"
 checks:
   - name: vacuum-lint
     description: Lint OpenAPI documents with vacuum against the MUST and MUST NOT criteria; errors when vacuum is not installed
