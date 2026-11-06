@@ -135,7 +135,7 @@ Put back trace for contract and let's continue with implementation.
 
 #### Implement
 
-Like with everything else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all necessary context for the task - spec, applicable rules, package skill `shopping-notes-api/SKILL.md` and auto-updates documentation in this skill if needed.
+Like with everything else, we have a skill for this, run `/spex-implement api-healthcheck`. Skill helps to automate manual steps, pulls all necessary context for the task - spec, applicable rules, and package skill `shopping-notes-api/SKILL.md`.
 
 #### Review
 

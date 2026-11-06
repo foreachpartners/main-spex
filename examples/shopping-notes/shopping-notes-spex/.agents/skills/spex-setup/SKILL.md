@@ -61,7 +61,7 @@ Example entry:
 
 Create `<agent-root>/.agents/skills/<package-name>/SKILL.md` for each new package from [`references/GENERIC-PACKAGE-SKILL-TEMPLATE.md`](references/GENERIC-PACKAGE-SKILL-TEMPLATE.md). Never overwrite a `SKILL.md` that already exists.
 
-- Keep the template's frontmatter, sections and order. Replace its `<package-name>` and `<package-short-name>` placeholders.
+- Keep the template's frontmatter, sections and order. Replace its `<package-name>` and other `<...>` placeholders and example markers with project data.
 - Use the package `description` from Step 1 in `# General`.
 - Fill each section with real facts from the package (layout, manifest scripts, CI config, contributor docs). Never invent a path or command.
 - Omit a section when the package has nothing genuine for it (for example `# Rules` when no test, lint or format policy exists).

@@ -91,13 +91,7 @@ Don't ask user for confirmation about plan deletion.
 
 Nothing to delete.
 
-## Step 6 — Update package skill documentation
-
-For every package touched, check whether its `<package-name>` skill (`SKILL.md` and any `references/*.md`) still matches the code: project structure, commands, and any documented behavior the work changed or added.
-
-Update only what's now inaccurate or missing — don't rewrite unrelated sections. The skill doc's job is agent-facing instructions and context that specs and rules don't cover — e.g. project/directory structure, build/test/run commands, architecture and how components fit together, non-obvious computations or workflows, tooling quirks, or where to find things. Don't duplicate what specs or rules already state — reference them instead. Add a new `references/*.md` file only when the change introduces package-specific context worth documenting this way, and index it in `SKILL.md`.
-
-## Step 7 — Report
+## Step 6 — Report
 
 Summarize the run:
 
@@ -105,9 +99,8 @@ Summarize the run:
 - Which specs you set to `in-progress` (or left as-is), and which acceptance criteria `spex coverage` still shows untraced.
 - The format, lints, tests, `spex check` and `spex coverage` run outcome.
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
-- Which package skill docs you updated or added, and why.
 
-## Step 8 — Point to the next skill
+## Step 7 — Point to the next skill
 
 Ask the user to do an optional review with `spex-review`, then to add test coverage for the change with `spex-test`.
 

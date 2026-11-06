@@ -4,6 +4,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 ## [0.33.0] - 2026-11-06
 
+- Moved the step of the `spex-implement` skill that updated package skill documentation to package skill itself with focus on important changes.
 - Changed the `testing-rules` rule to require a test setup optimized for speed and free of flaky tests, so tests never slow down AI-driven development.
 - Changed the `openapi-conventions` rule to recommend tagging standalone endpoints that fit no other group with `general`.
 - Changed the `openapi-conventions` rule to follow the Zalando RESTful API guidelines loosely and to allow a single verb as the last path segment for non-CRUD actions (`POST /auth/login`), forbidding only standard-method verbs in paths (`POST /create-user`).
