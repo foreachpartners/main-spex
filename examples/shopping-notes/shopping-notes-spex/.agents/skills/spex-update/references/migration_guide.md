@@ -4,6 +4,39 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.34.0
+
+A package skill now keeps `references/review.md`, what earlier reviews of the package kept running into, and says itself when to read and edit it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:
+
+- In the frontmatter `description`, change `testing, or running` to `testing, reviewing, or running`, unless `reviewing` is already there.
+- Unless `SKILL.md` already has a `# Review` heading, insert this section right before `# Index`, or at the end when there is no `# Index`, followed by a blank line:
+
+  ```markdown
+  # Review
+
+  Before reviewing changes in this package, read `references/review.md`: it holds what earlier reviews of this package kept running into.
+
+  Add to it only when a review hit something that cost real time to resolve or made you ask the user, and the next review would hit it again. For example:
+
+  - a pattern that looks like a violation but is intended, with the reason
+  - a check or command that doesn't work as documented, with the workaround
+  - a decision the user already made that a reviewer would otherwise ask about again
+
+  Most reviews add nothing. Never add: a finding about the change under review; anything a spec, contract, rule or the code already states. Edit existing lines in place instead of appending, drop one that no longer holds, and when unsure leave it out and mention it in the report.
+  ```
+
+- Unless `# Index` already lists `references/review.md`, add the line "- `references/review.md` - what earlier reviews of this package kept running into" as the first entry of `# Index`. When there is no `# Index`, add this at the end of `SKILL.md` instead:
+
+  ```markdown
+  # Index
+
+  Read individual files for detailed explanations and code examples:
+
+  - `references/review.md` - what earlier reviews of this package kept running into
+  ```
+
+- Next to `SKILL.md`, create `references/review.md` containing only the heading `# Review notes`, unless it already exists.
+
 ## 0.33.0
 
 `spex-implement` no longer updates package skill documentation (its step "Update package skill documentation" is removed). Instead, the package skill itself says when and how to change it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these rules and nothing keeps it current. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:

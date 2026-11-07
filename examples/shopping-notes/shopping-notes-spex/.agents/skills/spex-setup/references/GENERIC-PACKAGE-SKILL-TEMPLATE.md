@@ -1,6 +1,6 @@
 ---
 name: <package-name>
-description: Information, rules, commands and other <package-name> package context. Keep it up to date with important changes. MUST be loaded before reading, writing, testing, or running any code in that package.
+description: Information, rules, commands and other <package-name> package context. Keep it up to date with important changes. MUST be loaded before reading, writing, testing, reviewing, or running any code in that package.
 ---
 
 # General
@@ -54,11 +54,25 @@ Run from the `<package-name>` package root.
 <replace with project-specific rules, if any>
 After all changes run `npm format`, `npm lint` and `npm test`.
 
+# Review
+
+Before reviewing changes in this package, read `references/review.md`: it holds what earlier reviews of this package kept running into.
+
+Add to it only when a review hit something that cost real time to resolve or made you ask the user, and the next review would hit it again. For example:
+
+- a pattern that looks like a violation but is intended, with the reason
+- a check or command that doesn't work as documented, with the workaround
+- a decision the user already made that a reviewer would otherwise ask about again
+
+Most reviews add nothing. Never add: a finding about the change under review; anything a spec, contract, rule or the code already states. Edit existing lines in place instead of appending, drop one that no longer holds, and when unsure leave it out and mention it in the report.
+
 # Index
 
 Read individual files for detailed explanations and code examples:
 
-<replace or create the index with project-specific data, if needed>
+- `references/review.md` - what earlier reviews of this package kept running into
+
+<add project-specific files below the review notes, if needed>
 
 - `references/error-handling.md` - error handling patterns used in this package
 - `references/testing.md` - testing strategy and conventions
