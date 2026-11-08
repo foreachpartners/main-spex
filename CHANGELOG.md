@@ -6,6 +6,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 - Added `references/review.md` to every package skill, where a review writes down the rare thing that cost it real time, so the next review of that package does not repeat it (see the migration guide).
 - Changed the traceability guidance in the `AGENTS.md` template to place trace comments on the code that performs the behavior of an acceptance criterion, not on a field or other declaration that only holds data.
+- Removed the `spex-cavemen` skill, so delete its folder from `.agents/skills` (see the migration guide).
 
 ## [0.33.1] - 2026-11-06
 
