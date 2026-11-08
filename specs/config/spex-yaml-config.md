@@ -10,7 +10,7 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 - MUST require, in each package entry, `package_name`, `package_short_name`, and `path` (relative to the spex directory).
 - MUST make `package_name` the full `<project-name>-<package-short-name>`, matching the package directory in `multi-repo`; in `single-repo` it is the project name, which is then also the `package_short_name`.
 - MUST require, in each `contracts` entry, a `path` and a `description`; the path is user-owned, typically inside the owning package, and relative to the spex directory.
-- MUST declare a package entry's `coverage_ignore` as one `{spec_id, layer, ac}` entry per waiver, with `spec_id` and `layer` required and `ac` optional; `layer` and `ac` mean what they do in a [spec's `coverage_ignore`](../spec/spec-file-spec.md).
+- MUST declare a package entry's `coverage_ignore` as one `{spec_id, layer, ac, reason}` entry per waiver, with `spec_id`, `layer` and `reason` required and `ac` optional; `layer`, `ac` and `reason` mean what they do in a [spec's `coverage_ignore`](../spec/spec-file-spec.md).
 - MUST declare a package entry's `exclude` as a list of glob patterns, the globs a [check's](../rule/rule-checks-rule.md) `include` / `exclude` use, matched against paths relative to the package's root, each naming files or folders that `spex check` and `spex coverage` leave out of that package, as [spex check](../cli/spex-check-cli-cmd.md) and [spex coverage](../cli/spex-coverage-cli-cmd.md) describe.
 - MUST apply the `exclude`, `check_ignore`, and `coverage_ignore` declared in a package entry to that package only, so the excludes and ignores of one package never affect another.
 - MUST validate `spex.yaml` against `schemas/spex.schema.json`.

@@ -191,7 +191,7 @@ fn info_package_filters_only_the_packages_list() {
 fn write_api_package_config(project: &Path) {
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),
-        "exclude:\n  - vendor\ncoverage_ignore:\n  - spec_id: place-order\n    layer: impl\ncheck_ignore:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
+        "exclude:\n  - vendor\ncoverage_ignore:\n  - spec_id: place-order\n    layer: impl\n    reason: waived\ncheck_ignore:\n  - rule_id: writing-style\n    check: no-cyrillic\n    files: [README.md]\n",
     )
     .expect("write package config");
 }
@@ -211,7 +211,7 @@ fn info_merges_every_package_config_into_its_own_package() {
     let info = info_json(&info.stdout);
     assert_eq!(
         info["packages"][0]["coverage_ignore"],
-        serde_json::json!([{ "spec_id": "place-order", "layer": "impl" }]),
+        serde_json::json!([{ "spec_id": "place-order", "layer": "impl", "reason": "waived" }]),
     );
     assert_eq!(
         info["packages"][0]["check_ignore"],
@@ -239,7 +239,7 @@ fn info_unions_a_package_entry_with_its_package_file() {
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
     let patched = config.replace(
         "    rules:\n      - no-todo-comments\n",
-        "    rules:\n      - no-todo-comments\n    exclude:\n      - build\n    coverage_ignore:\n      - spec_id: list-menu\n        layer: test\n",
+        "    rules:\n      - no-todo-comments\n    exclude:\n      - build\n    coverage_ignore:\n      - spec_id: list-menu\n        layer: test\n        reason: waived\n",
     );
     assert_ne!(patched, config, "api package not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
@@ -254,8 +254,8 @@ fn info_unions_a_package_entry_with_its_package_file() {
     assert_eq!(
         info["packages"][0]["coverage_ignore"],
         serde_json::json!([
-            { "spec_id": "list-menu", "layer": "test" },
-            { "spec_id": "place-order", "layer": "impl" },
+            { "spec_id": "list-menu", "layer": "test", "reason": "waived" },
+            { "spec_id": "place-order", "layer": "impl", "reason": "waived" },
         ]),
     );
 }

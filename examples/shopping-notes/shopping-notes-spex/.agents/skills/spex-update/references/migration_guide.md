@@ -39,6 +39,8 @@ A package skill now keeps `references/review.md`, what earlier reviews of the pa
 
 The `spex-cavemen` skill is no longer bundled, and `spex update` never deletes a skill. If `<agent-root>/.agents/skills/spex-cavemen` exists, delete that folder.
 
+Every `coverage_ignore` entry now needs a `reason`, one short clause saying why the requirement is waived. Until it has one, `spex check` and `spex coverage` fail on the file holding the entry. In `<spex-dir>`, find every `coverage_ignore` entry that has no `reason` yet: in the specs in `specs/`, in the package entries of `spex.yaml`, and in each package's `spex.package.yaml`. Add `reason: <why>` after the entry's other keys to each. Work the reason out from the spec, the code and the git history; when you cannot tell why the requirement is waived, ask the user instead of inventing one, and never write a placeholder such as `n/a`.
+
 ## 0.33.0
 
 `spex-implement` no longer updates package skill documentation (its step "Update package skill documentation" is removed). Instead, the package skill itself says when and how to change it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these rules and nothing keeps it current. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:

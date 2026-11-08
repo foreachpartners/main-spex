@@ -166,6 +166,7 @@ pub struct CoverageIgnore {
     pub layer: CoverageLayer,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ac: Option<AcId>,
+    pub reason: String,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

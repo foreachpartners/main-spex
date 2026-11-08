@@ -100,7 +100,7 @@
     },
     "coverage_ignore": {
       "type": "array",
-      "description": "Coverage requirements to waive. Each entry is `{layer, ac}`: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `spex check` verifies each entry matches the spec's `contract` setting.",
+      "description": "Coverage requirements to waive. Each entry is `{layer, ac, reason}`: `layer` (`contract`, `impl`, or `test`) and `reason` are required; `ac` is optional — omit it to waive that layer for the whole spec (every acceptance criterion, for impl/test), or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `reason` says why the requirement is waived. `spex check` verifies each entry matches the spec's `contract` setting.",
       "items": {
         "type": "object",
         "properties": {
@@ -109,9 +109,12 @@
           },
           "ac": {
             "$ref": "ac-id.schema.json"
+          },
+          "reason": {
+            "$ref": "coverage-ignore-reason.schema.json"
           }
         },
-        "required": ["layer"],
+        "required": ["layer", "reason"],
         "additionalProperties": false
       },
       "uniqueItems": true

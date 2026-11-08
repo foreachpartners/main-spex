@@ -26,4 +26,5 @@ coverage_ignore:
   - spec_id: place-pizza-order
     layer: impl
     ac: no-null-typed-string
+    reason: the type checker enforces it, there is no code to annotate
 ```

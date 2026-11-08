@@ -5,7 +5,8 @@ use crate::config::spex::Spex;
 use crate::config::{Layout, Package, SpexConfig};
 use crate::rule::{RULES_DIR, Rule, RuleId};
 use crate::spec::{
-    AcId, AcceptanceCriterion, ContractLevel, SPECS_DIR, Spec, SpecId, Statement, Status,
+    AcId, AcceptanceCriterion, ContractLevel, CoverageIgnore, CoverageLayer, SPECS_DIR, Spec,
+    SpecId, Statement, Status,
 };
 
 pub fn spex_dir() -> &'static Path {
@@ -38,6 +39,14 @@ pub fn spec(id: &str) -> Spec {
         contract: ContractLevel::Single,
         coverage_ignore: Vec::new(),
         package_coverage_ignore: BTreeMap::new(),
+    }
+}
+
+pub fn coverage_ignore(layer: CoverageLayer, ac: Option<&str>) -> CoverageIgnore {
+    CoverageIgnore {
+        layer,
+        ac: ac.map(ac_id),
+        reason: "waived in the test".to_string(),
     }
 }
 

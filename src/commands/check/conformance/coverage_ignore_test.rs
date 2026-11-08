@@ -6,10 +6,7 @@ mod tests {
     use crate::support::testing;
 
     fn contract_ignore(ac: Option<&str>) -> CoverageIgnore {
-        CoverageIgnore {
-            layer: CoverageLayer::Contract,
-            ac: ac.map(testing::ac_id),
-        }
+        testing::coverage_ignore(CoverageLayer::Contract, ac)
     }
 
     fn spec(contract: ContractLevel, coverage_ignore: Vec<CoverageIgnore>) -> Spec {
@@ -80,14 +77,8 @@ mod tests {
         let spec = spec(
             ContractLevel::None,
             vec![
-                CoverageIgnore {
-                    layer: CoverageLayer::Impl,
-                    ac: Some(testing::ac_id("ac-one")),
-                },
-                CoverageIgnore {
-                    layer: CoverageLayer::Test,
-                    ac: None,
-                },
+                testing::coverage_ignore(CoverageLayer::Impl, Some("ac-one")),
+                testing::coverage_ignore(CoverageLayer::Test, None),
             ],
         );
         assert!(validate_coverage_ignore(&spec).is_empty());
@@ -98,10 +89,7 @@ mod tests {
             packages: packages.iter().map(|name| name.to_string()).collect(),
             package_coverage_ignore: [(
                 "api".to_string(),
-                vec![CoverageIgnore {
-                    layer: CoverageLayer::Impl,
-                    ac: None,
-                }],
+                vec![testing::coverage_ignore(CoverageLayer::Impl, None)],
             )]
             .into(),
             ..spec(contract, Vec::new())

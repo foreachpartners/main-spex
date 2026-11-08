@@ -330,7 +330,7 @@ fn check_accepts_a_valid_package_spex_repo_yaml() {
     copy_project(&dummy_project_fixture(), &project);
     write_api_package_config(
         &project,
-        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\ncheck_ignore:\n  - rule_id: no-todo-comments\n    check: no-todo\n",
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\n    reason: waived\ncheck_ignore:\n  - rule_id: no-todo-comments\n    check: no-todo\n",
     );
 
     let check = run_spex(&project, &["check"], "");
@@ -340,6 +340,36 @@ fn check_accepts_a_valid_package_spex_repo_yaml() {
         "a valid spex.package.yaml should pass\n{}",
         report_text(&check.stdout)
     );
+}
+
+#[test]
+fn check_fails_on_a_package_coverage_ignore_without_a_reason() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    write_api_package_config(
+        &project,
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\n",
+    );
+
+    let check = run_spex(&project, &["check"], "");
+
+    assert_fails_mentioning(&check, "reason");
+}
+
+#[test]
+fn check_fails_on_a_spec_coverage_ignore_without_a_reason() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = temp_dir.path().join("proj");
+    copy_project(&dummy_project_fixture(), &project);
+    let spec = project.join("dummy-project-spex/specs/in-progress-pending.yaml");
+    let mut text = fs::read_to_string(&spec).expect("read spec");
+    text.push_str("coverage_ignore:\n  - layer: test\n");
+    fs::write(&spec, text).expect("write spec");
+
+    let check = run_spex(&project, &["check"], "");
+
+    assert_fails_mentioning(&check, "reason");
 }
 
 #[test]
@@ -363,7 +393,7 @@ fn check_flags_a_spex_yaml_package_coverage_ignore_that_mismatches_the_spec_cont
     let config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
     let patched = config.replace(
         "    rules:\n      - no-todo-comments\n",
-        "    rules:\n      - no-todo-comments\n    coverage_ignore:\n      - spec_id: none-with-gap\n        layer: contract\n",
+        "    rules:\n      - no-todo-comments\n    coverage_ignore:\n      - spec_id: none-with-gap\n        layer: contract\n        reason: waived\n",
     );
     assert_ne!(patched, config, "api package not found in spex.yaml");
     fs::write(&spex_yaml, patched).expect("write spex.yaml");
@@ -382,7 +412,9 @@ fn check_rejects_a_root_coverage_ignore_in_spex_yaml() {
     copy_project(&dummy_project_fixture(), &project);
     let spex_yaml = project.join("dummy-project-spex/spex.yaml");
     let mut config = fs::read_to_string(&spex_yaml).expect("read spex.yaml");
-    config.push_str("coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n");
+    config.push_str(
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    reason: waived\n",
+    );
     fs::write(&spex_yaml, config).expect("write spex.yaml");
 
     let check = run_spex(&project, &["check"], "");
@@ -400,7 +432,7 @@ fn check_flags_a_package_coverage_ignore_naming_a_spec_that_does_not_list_the_pa
     copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-frontend/spex.package.yaml"),
-        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\n",
+        "coverage_ignore:\n  - spec_id: none-with-gap\n    layer: impl\n    ac: resumes-favorite\n    reason: waived\n",
     )
     .expect("write spex.package.yaml");
 

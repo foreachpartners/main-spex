@@ -37,9 +37,11 @@ coverage_ignore:
   - spec_id: none-with-gap
     layer: impl
     ac: resumes-favorite
+    reason: waived
   - spec_id: none-with-gap
     layer: test
     ac: resumes-favorite
+    reason: waived
 "#;
 
 const EXPECTED_COVERAGE: &str = include_str!("../fixtures/dummy-project/expected_coverage.txt");
@@ -55,6 +57,7 @@ coverage_ignore:
   - spec_id: none-with-gap
     layer: impl
     ac: resumes-favorite
+    reason: waived
 "#;
 
 const NONE_WITH_GAP_TEST_WAIVER: &str = r#"
@@ -62,6 +65,7 @@ coverage_ignore:
   - spec_id: none-with-gap
     layer: test
     ac: resumes-favorite
+    reason: waived
 "#;
 
 const IN_PROGRESS_SPEC: &str = r#"id: ci-check
@@ -455,7 +459,7 @@ fn coverage_fails_on_an_invalid_spex_repo_yaml() {
     common::copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/spex.package.yaml"),
-        "coverage_ignore:\n  - spec_id: Not_A_Spec_Id\n    layer: impl\n",
+        "coverage_ignore:\n  - spec_id: Not_A_Spec_Id\n    layer: impl\n    reason: waived\n",
     )
     .expect("write spex.package.yaml");
 

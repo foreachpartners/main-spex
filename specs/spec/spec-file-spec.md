@@ -24,6 +24,7 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 - MUST require, for `status: active`, every acceptance criterion's `is_done` to be `true` or absent; `active` means fully implemented.
 - MUST list in `blocked_by` only genuine, unsatisfied blockers: specs that must be in place before this spec can be implemented.
 - MUST give each `coverage_ignore` entry a required `layer` (`contract`, `impl`, or `test`); without `ac`, it waives that layer for the whole spec.
+- MUST give each `coverage_ignore` entry a required, non-empty `reason` saying why that requirement is waived, so a reviewer can tell a criterion that cannot be proven from one that was skipped.
 - MUST have a `coverage_ignore` entry with `ac` waive just that acceptance criterion's impl or test requirement, or, under `contract: for-each-ac`, its contract requirement.
 - MUST match each `coverage_ignore` entry to the spec's `contract` setting: a whole-spec contract waiver works under `single` and `for-each-ac`, a per-criterion contract waiver only under `for-each-ac`, and under `contract: none` a contract-layer entry is pointless; `spex check` errors on a mismatch.
 - MUST NOT list an already shipped or established spec in `blocked_by`.
@@ -36,6 +37,8 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 ```yaml
 coverage_ignore:
   - layer: contract
+    reason: the contract is traced by the shared `api-surface` spec
   - layer: impl
     ac: no-null-typed-string
+    reason: the type checker enforces it, there is no code to annotate
 ```

@@ -8,6 +8,9 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 - Changed the traceability guidance in the `AGENTS.md` template to place trace comments on the code that performs the behavior of an acceptance criterion, not on a field or other declaration that only holds data.
 - Removed the `spex-cavemen` skill, so delete its folder from `.agents/skills` (see the migration guide).
 - Changed the `spex-grill-me` skill to check the project's specs and contracts when the grilled subject touches something that already exists, and to flag where the plan contradicts or outgrows them.
+- **Breaking**: Changed every `coverage_ignore` entry to require a `reason`, so a waiver says why a requirement cannot be proven; add one to each existing entry (see the migration guide).
+- Changed the `spex-spec` skill to waive the test of a criterion that requires some behavior not to happen and cannot be tested meaningfully, with the reason, instead of leaving it to a placeholder test.
+- Changed the traceability guidance in the `AGENTS.md` template to leave a layer waived by `coverage_ignore` untraced.
 
 ## [0.33.1] - 2026-11-06
 

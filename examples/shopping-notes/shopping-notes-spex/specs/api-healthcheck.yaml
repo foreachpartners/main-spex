@@ -14,3 +14,7 @@ packages:
   - api
 status: active
 contract: single
+coverage_ignore:
+  - layer: test
+    ac: health-endpoint-no-dependency-checks
+    reason: a test sees only the response, which a handler that does check a dependency would return too

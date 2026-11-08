@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spex.dev/schemas/coverage-ignore-reason.schema.json",
+  "title": "Coverage Ignore Reason",
+  "description": "Why a `coverage_ignore` entry waives a requirement, in one short clause, so a reviewer can tell a criterion that cannot be proven from one that was skipped. Never a way to skip a requirement that is merely inconvenient.",
+  "type": "string",
+  "minLength": 1,
+  "examples": ["the type checker enforces it, there is no code to annotate"]
+}

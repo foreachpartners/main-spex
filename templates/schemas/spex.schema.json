@@ -130,7 +130,7 @@
     },
     "spec_coverage_ignore": {
       "type": "object",
-      "description": "A coverage waiver for one spec: `layer` (`contract`, `impl`, or `test`) is required; `ac` is optional — omit it to waive that layer for the whole spec, or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `spex check` verifies the waiver matches the spec's `contract` setting.",
+      "description": "A coverage waiver for one spec: `layer` (`contract`, `impl`, or `test`) and `reason` are required; `ac` is optional — omit it to waive that layer for the whole spec, or give an acceptance criterion id to waive just that one criterion's impl or test annotation, or its contract annotation under `contract: for-each-ac`. `reason` says why the requirement is waived. `spex check` verifies the waiver matches the spec's `contract` setting.",
       "properties": {
         "spec_id": {
           "description": "Spec ID of the spec whose coverage requirement is waived.",
@@ -141,9 +141,12 @@
         },
         "ac": {
           "$ref": "ac-id.schema.json"
+        },
+        "reason": {
+          "$ref": "coverage-ignore-reason.schema.json"
         }
       },
-      "required": ["spec_id", "layer"],
+      "required": ["spec_id", "layer", "reason"],
       "additionalProperties": false
     },
     "ignored_error": {

@@ -48,9 +48,11 @@ mod tests {
                 coverage_ignore:
                   - spec_id: place-order
                     layer: contract
+                    reason: traced by the shared spec
                   - spec_id: place-order
                     layer: impl
                     ac: rejects-empty-cart
+                    reason: enforced by the type checker
                 check_ignore:
                   - rule_id: writing-style
                     check: no-cyrillic
@@ -68,6 +70,10 @@ mod tests {
             CoverageLayer::Contract
         );
         assert!(config.coverage_ignore[0].ignore.ac.is_none());
+        assert_eq!(
+            config.coverage_ignore[0].ignore.reason,
+            "traced by the shared spec"
+        );
         assert_eq!(
             config.coverage_ignore[1]
                 .ignore

@@ -16,6 +16,8 @@ For `@spec test` and `@spec impl` ac-id for each acceptance criterion is require
 - `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec contract place-pizza-order`.
 - `none` - no contract required.
 
+Never trace a layer that `coverage_ignore` waives, for a whole spec or for one acceptance criterion: leave it untraced instead of adding a placeholder annotation or test.
+
 Place the trace comment on the code that performs the behavior the AC describes: the statement, match arm or function that checks, rejects, returns, logs or changes something. Pick the smallest such unit.
 
 - If the AC is a behavior (must require|reject|return|log…), never trace a declaration that only holds data (struct, field, parameter). Trace the code that acts on it. When a framework enforces it implicitly, such as a missing body field or an extractor parameter, trace the code that handles the failure: the rejection arm or the function.

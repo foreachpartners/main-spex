@@ -39,15 +39,6 @@ describe("GET /health", () => {
 
     expect(response.statusCode).toBe(200);
   });
-
-  // @spec test api-healthcheck#health-endpoint-no-dependency-checks
-  it("returns only the status field, without downstream dependency data", async () => {
-    const app = createApp();
-
-    const response = await app.inject({ method: "GET", url: "/health" });
-
-    expect(Object.keys(response.json())).toEqual(["status"]);
-  });
 });
 
 describe("GET /items", () => {

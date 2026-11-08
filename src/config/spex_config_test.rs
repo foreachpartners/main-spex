@@ -198,9 +198,11 @@ mod tests {
                 coverage_ignore:
                   - spec_id: place-order
                     layer: contract
+                    reason: traced by the shared spec
                   - spec_id: place-order
                     layer: impl
                     ac: rejects-empty-cart
+                    reason: enforced by the type checker
         "})
         .expect("parse config");
 
@@ -209,8 +211,8 @@ mod tests {
         assert_eq!(
             json["packages"][0]["coverage_ignore"],
             serde_json::json!([
-                { "spec_id": "place-order", "layer": "contract" },
-                { "spec_id": "place-order", "layer": "impl", "ac": "rejects-empty-cart" },
+                { "spec_id": "place-order", "layer": "contract", "reason": "traced by the shared spec" },
+                { "spec_id": "place-order", "layer": "impl", "ac": "rejects-empty-cart", "reason": "enforced by the type checker" },
             ])
         );
     }

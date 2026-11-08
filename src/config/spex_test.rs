@@ -88,15 +88,17 @@ mod tests {
         std::fs::write(
             spex_dir.join(spec::SPECS_DIR).join(format!("{id}.yaml")),
             format!(
-                "id: {id}\ntitle: {id}\ndescription: {id}\ncontract: single\ncoverage_ignore:\n  - layer: test\n"
+                "id: {id}\ntitle: {id}\ndescription: {id}\ncontract: single\ncoverage_ignore:\n  - layer: test\n    reason: waived\n"
             ),
         )
         .expect("write spec");
     }
 
     fn waiver(spec_id: &str, layer: &str) -> SpecCoverageIgnore {
-        serde_yaml_ng::from_str(&format!("spec_id: {spec_id}\nlayer: {layer}\n"))
-            .expect("parse waiver")
+        serde_yaml_ng::from_str(&format!(
+            "spec_id: {spec_id}\nlayer: {layer}\nreason: waived\n"
+        ))
+        .expect("parse waiver")
     }
 
     #[test]
@@ -168,6 +170,7 @@ mod tests {
                 coverage_ignore:
                   - spec_id: from-api
                     layer: impl
+                    reason: waived
                 check_ignore:
                   - rule_id: writing-style
                     check: no-cyrillic
@@ -177,7 +180,7 @@ mod tests {
         .expect("write api config");
         std::fs::write(
             web.join(PACKAGE_CONFIG_FILE),
-            "coverage_ignore:\n  - spec_id: from-web\n    layer: test\n",
+            "coverage_ignore:\n  - spec_id: from-web\n    layer: test\n    reason: waived\n",
         )
         .expect("write web config");
         let mut api_package = testing::package("api", "api");

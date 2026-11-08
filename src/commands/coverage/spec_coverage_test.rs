@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use super::super::*;
-    use crate::spec::{CoverageIgnore, Status};
+    use crate::spec::Status;
     use crate::support::testing;
 
     const FULL_COVERAGE_OF_AC_A: &str =
@@ -19,13 +19,6 @@ mod tests {
         AcceptanceCriterion {
             is_done: false,
             ..testing::criterion(id)
-        }
-    }
-
-    fn ignoring(layer: CoverageLayer, ac: Option<&str>) -> CoverageIgnore {
-        CoverageIgnore {
-            layer,
-            ac: ac.map(testing::ac_id),
         }
     }
 
@@ -71,7 +64,7 @@ mod tests {
     #[test]
     fn ignored_contract_is_not_missing_and_leaves_no_gap() {
         let spec = Spec {
-            coverage_ignore: vec![ignoring(CoverageLayer::Contract, None)],
+            coverage_ignore: vec![testing::coverage_ignore(CoverageLayer::Contract, None)],
             ..spec(&["ac-a"])
         };
         let coverage = coverage(&spec, "// @spec impl a#ac-a\n// @spec test a#ac-a\n");
@@ -115,7 +108,10 @@ mod tests {
     fn for_each_ac_contract_can_be_waived_for_one_criterion() {
         let spec = Spec {
             contract: ContractLevel::ForEachAc,
-            coverage_ignore: vec![ignoring(CoverageLayer::Contract, Some("ac-one"))],
+            coverage_ignore: vec![testing::coverage_ignore(
+                CoverageLayer::Contract,
+                Some("ac-one"),
+            )],
             ..spec(&["ac-one"])
         };
         let coverage = coverage(&spec, "");
@@ -140,7 +136,7 @@ mod tests {
     #[test]
     fn per_ac_ignore_waives_one_layer_of_one_criterion() {
         let spec = Spec {
-            coverage_ignore: vec![ignoring(CoverageLayer::Impl, Some("ac-a"))],
+            coverage_ignore: vec![testing::coverage_ignore(CoverageLayer::Impl, Some("ac-a"))],
             ..spec(&["ac-a"])
         };
         let coverage = coverage(&spec, "");
@@ -151,7 +147,7 @@ mod tests {
     #[test]
     fn whole_layer_ignore_waives_the_layer_for_every_criterion() {
         let spec = Spec {
-            coverage_ignore: vec![ignoring(CoverageLayer::Test, None)],
+            coverage_ignore: vec![testing::coverage_ignore(CoverageLayer::Test, None)],
             ..spec(&["ac-a"])
         };
         let coverage = coverage(&spec, "");
@@ -293,7 +289,7 @@ mod tests {
     #[test]
     fn not_done_criterion_with_its_impl_waived_stays_pending() {
         let spec = Spec {
-            coverage_ignore: vec![ignoring(CoverageLayer::Impl, Some("ac-a"))],
+            coverage_ignore: vec![testing::coverage_ignore(CoverageLayer::Impl, Some("ac-a"))],
             ..not_done_spec()
         };
         let coverage = coverage(&spec, "");
@@ -378,7 +374,7 @@ mod tests {
                 .map(|name| {
                     (
                         name.to_string(),
-                        vec![ignoring(CoverageLayer::Impl, Some("ac-a"))],
+                        vec![testing::coverage_ignore(CoverageLayer::Impl, Some("ac-a"))],
                     )
                 })
                 .collect(),

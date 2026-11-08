@@ -2,7 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::commands::coverage::annotation_index::AnnotationIndex;
-    use crate::spec::{AcceptanceCriterion, ContractLevel, CoverageIgnore, Statement};
+    use crate::spec::{AcceptanceCriterion, ContractLevel, Statement};
     use crate::support::testing;
 
     fn spec(id: &str, status: Status) -> Spec {
@@ -244,10 +244,7 @@ mod tests {
             is_done: false,
             ..testing::criterion("ac-a")
         }];
-        spec.coverage_ignore = vec![CoverageIgnore {
-            layer: CoverageLayer::Impl,
-            ac: Some(testing::ac_id("ac-a")),
-        }];
+        spec.coverage_ignore = vec![testing::coverage_ignore(CoverageLayer::Impl, Some("ac-a"))];
         spec
     }
 
