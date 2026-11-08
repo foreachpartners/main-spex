@@ -9,6 +9,13 @@ Ask the questions one at a time, waiting for feedback on each question before co
 
 If a _fact_ can be found by exploring the environment (filesystem, tools, etc.), look it up rather than asking me. The _decisions_, though, are mine — put each one to me and wait for my answer.
 
+When the subject touches something that already exists in the project (a capability, endpoint, behavior, data, or package), look up what the project's specs and contracts already say about it before you ask:
+
+- Find the related specs with `spex specs --fields id title description --output <tmp-path>` (narrow it with `--search <keyword>...`), then read each in full with `spex specs --id <spec-id>...`.
+- Read the contracts of the affected packages: `spex info --package <package-name>` lists them under `contracts`, each with its `path`.
+
+Specs are the source of truth, so grill against them. Treat what a spec or contract already settles as a fact: state it and move on instead of asking. Put to me, with your recommendation, each place where my plan contradicts an acceptance criterion or a contract, where they leave a gap, or where a spec or contract would have to change first.
+
 Do not act on it until I confirm we have reached a shared understanding.
 
 ---

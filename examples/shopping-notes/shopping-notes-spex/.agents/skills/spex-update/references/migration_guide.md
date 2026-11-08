@@ -37,6 +37,8 @@ A package skill now keeps `references/review.md`, what earlier reviews of the pa
 
 - Next to `SKILL.md`, create `references/review.md` containing only the heading `# Review notes`, unless it already exists.
 
+The `spex-cavemen` skill is no longer bundled, and `spex update` never deletes a skill. If `<agent-root>/.agents/skills/spex-cavemen` exists, delete that folder.
+
 ## 0.33.0
 
 `spex-implement` no longer updates package skill documentation (its step "Update package skill documentation" is removed). Instead, the package skill itself says when and how to change it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these rules and nothing keeps it current. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:
