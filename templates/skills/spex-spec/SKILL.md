@@ -27,7 +27,7 @@ A spec captures exactly one coherent capability; its specifics are the acceptanc
 
 First decide whether this is a new spec or a change to one that already exists:
 
-- If the user names an existing spec ID (for example `place-pizza-order`) or asks to update, extend, fix, or change a spec, this is an **edit**. Read `<spex-dir>/specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Confirm with the user what should change (new or revised acceptance criteria, a `packages` change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field.
+- If the user names an existing spec ID (for example `place-pizza-order`) or asks to update, extend, fix, or change a spec, this is an **edit**. Read `<spex-dir>/specs/<spec-id>.yaml` in full before doing anything else — this is the file you will modify, not replace. Read the PRD in full, at the path `spex info` prints as `prd`, so the change stays in line with the product's goal and capabilities. Confirm with the user what should change (new or revised acceptance criteria, a `packages` change, a status change), applying the same field rules as Step 3. Skip straight to Step 4, editing the existing file in place rather than writing a new one; preserve every untouched field.
 - Otherwise, this is a **new spec** — continue with Step 1.
 
 ## Step 1 — Gather context first

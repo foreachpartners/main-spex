@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.35.0] - 2026-11-08
+
+- Changed the `spex-spec` skill to read the PRD when editing an existing spec too, so a change stays in line with the product's goal.
+
 ## [0.34.0] - 2026-11-07
 
 - Added `references/review.md` to every package skill, where a review writes down the rare thing that cost it real time, so the next review of that package does not repeat it (see the migration guide).
