@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.36.0] - 2026-11-09
+
+- Added a contract check to the `spex-review-spec` skill, comparing the implementation with the Figma frame or the OpenAPI operations.
+
 ## [0.35.0] - 2026-11-08
 
 - Changed the `spex-spec` skill to read the PRD when editing an existing spec too, so a change stays in line with the product's goal.

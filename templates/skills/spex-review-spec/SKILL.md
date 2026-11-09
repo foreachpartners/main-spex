@@ -19,7 +19,17 @@ Run `spex specs --id <spec-id-a> <spec-id-b>` for the resolved spec(s). Read the
 
 Search the packages listed in the spec's `packages` for code annotated `@spec impl <spec-id>`. Review it as it stands on the current branch.
 
-### 4. Review
+### 4. Check against the contract
+
+Skip when the spec has no contract. Otherwise find the contract annotated `@spec contract <spec-id>` in the contracts of the spec's `packages`. Check only what is implemented.
+
+- Design reference (Figma): open the linked frame and capture it. Run the implementation and capture the same screen at the frame's size, in every state the frame and the acceptance criteria cover. Compare the two and report differences in layout, content, and states. Ignore rendering noise such as font smoothing or 1px shifts.
+- API contract (OpenAPI): compare each operation, status code, field, and error with the code.
+- Use whatever Figma access and screenshot tooling the agent has. When there is none or the app cannot run, skip the comparison and list it in one "Not verified: design" line. Do not judge a design from code alone.
+
+Report each difference as a finding. Quote the acceptance criterion and the contract element or frame note it breaks.
+
+### 5. Review
 
 Against the implementation, contract and the spec contents, report the acceptance criteria whose implementation looks wrong. Quote the acceptance criterion for each finding.
 
