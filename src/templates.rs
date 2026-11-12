@@ -12,4 +12,3 @@ pub const RULES_LIBRARY_DIRNAME: &str = "rules";
 pub const AGENTS_DIRNAME: &str = ".agents";
 pub const CLAUDE_DIRNAME: &str = ".claude";
 pub const AGENTS_FILENAME: &str = "AGENTS.md";
-pub const CLAUDE_FILENAME: &str = "CLAUDE.md";

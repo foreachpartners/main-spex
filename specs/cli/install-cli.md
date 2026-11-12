@@ -10,7 +10,7 @@ How a user gets the `spex` binary, and the platforms and tools it needs.
 - MUST install the latest release from [crates.io](https://crates.io/crates/main-spex) with `cargo install main-spex`; running it again upgrades.
 - MUST report an error naming the missing tool when `spex check` runs a bundled rule's check whose external tool is not installed; a project that takes a bundled rule needs the external tools its checks run.
 - MUST allow installing unreleased changes from a checkout with `cargo install --path . --force`.
-- MUST NOT support a native Windows build, because `script` checks run POSIX `sh` scripts directly and `init` links `CLAUDE.md` to `AGENTS.md` with a symlink.
+- MUST NOT support a native Windows build, because `script` checks run POSIX `sh` scripts directly and `init` links `.claude/skills` to `.agents/skills` with a symlink.
 
 ## Examples
 

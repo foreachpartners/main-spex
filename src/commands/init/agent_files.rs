@@ -8,8 +8,7 @@ use crate::support::bundled_agents::bundled_agents_md;
 use crate::support::fs::{create_dir_all, symlink_if_absent, write_file};
 use crate::support::managed_section::keep_as_project_section;
 use crate::templates::{
-    AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, CLAUDE_DIRNAME, CLAUDE_FILENAME,
-    SKILLS_DIRNAME,
+    AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, CLAUDE_DIRNAME, SKILLS_DIRNAME,
 };
 
 #[cfg(test)]
@@ -51,30 +50,13 @@ pub fn move_claude_skills(agent_root: &Path) -> Result<()> {
 pub fn write_agents_md(agent_root: &Path) -> Result<()> {
     let template = bundled_agents_md().expect("bundled AGENTS.md is missing");
     let agents = agent_root.join(AGENTS_FILENAME);
-    let claude = agent_root.join(CLAUDE_FILENAME);
-
-    let adopted_claude = is_regular_file(&claude) && (!agents.exists() || is_regular_file(&agents));
-    let existing_path = if adopted_claude {
-        Some(&claude)
-    } else if agents.exists() {
-        Some(&agents)
+    let contents = if agents.exists() {
+        let existing = fs::read_to_string(&agents).with_context(|| could_not_read(&agents))?;
+        keep_as_project_section(template.as_bytes(), &existing)
     } else {
-        None
+        template.into_bytes()
     };
-    let contents = match existing_path {
-        Some(path) => {
-            let existing = fs::read_to_string(path).with_context(|| could_not_read(path))?;
-            keep_as_project_section(template.as_bytes(), &existing)
-        }
-        None => template.into_bytes(),
-    };
-
-    write_file(&agents, contents)?;
-    if adopted_claude {
-        fs::remove_file(&claude)
-            .with_context(|| format!("could not remove `{}`", claude.display()))?;
-    }
-    symlink_if_absent(&claude, AGENTS_FILENAME)
+    write_file(&agents, contents)
 }
 
 pub fn link_claude_skills(agent_root: &Path) -> Result<()> {
@@ -108,8 +90,4 @@ fn claude_skill_names(agent_root: &Path) -> Result<Vec<std::ffi::OsString>> {
 
 fn is_real_dir(path: &Path) -> bool {
     path.symlink_metadata().is_ok_and(|meta| meta.is_dir())
-}
-
-fn is_regular_file(path: &Path) -> bool {
-    path.symlink_metadata().is_ok_and(|meta| meta.is_file())
 }

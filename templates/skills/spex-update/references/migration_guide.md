@@ -4,6 +4,13 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.37.0
+
+`spex init` no longer writes a `CLAUDE.md` symlink to `AGENTS.md`, since Claude Code reads `AGENTS.md` itself. In `<agent-root>`:
+
+- If `CLAUDE.md` is a symlink to `AGENTS.md` (check with `ls -l CLAUDE.md`), delete it with `rm CLAUDE.md`.
+- If `CLAUDE.md` is a regular file, change nothing: it is your own.
+
 ## 0.34.0
 
 A package skill now keeps `references/review.md`, what earlier reviews of the package kept running into, and says itself when to read and edit it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:

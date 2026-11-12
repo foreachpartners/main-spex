@@ -6,7 +6,7 @@ mod tests_unit {
     use tempfile::tempdir;
 
     use crate::support::bundled_agents::bundled_agents_md;
-    use crate::templates::{AGENTS_FILENAME, CLAUDE_FILENAME};
+    use crate::templates::AGENTS_FILENAME;
 
     const SCHEMA: &str = "schemas/spex.schema.json";
     const SKILL: &str = ".agents/skills/spex-setup/SKILL.md";
@@ -79,7 +79,7 @@ mod tests_unit {
     }
 
     #[test]
-    fn scaffold_writes_agents_md_and_claude_link() {
+    fn scaffold_writes_agents_md() {
         let spex_dir = tempdir().expect("create spex dir");
 
         scaffold(spex_dir.path(), spex_dir.path()).expect("scaffold");
@@ -90,12 +90,6 @@ mod tests_unit {
             fs::read_to_string(&agents).expect("read AGENTS.md"),
             expected
         );
-
-        #[cfg(unix)]
-        {
-            let claude = spex_dir.path().join(CLAUDE_FILENAME);
-            let target = fs::read_link(&claude).expect("read CLAUDE.md symlink");
-            assert_eq!(target, Path::new(AGENTS_FILENAME));
-        }
+        assert!(!spex_dir.path().join("CLAUDE.md").exists());
     }
 }

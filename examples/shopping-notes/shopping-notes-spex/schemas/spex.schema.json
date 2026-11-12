@@ -22,7 +22,7 @@
     },
     "agent_root": {
       "type": "string",
-      "description": "Directory holding the agent files (`AGENTS.md`, `CLAUDE.md`, `.agents/skills/`, `.claude`), relative to the `spex.yaml` file: `.` in multi-repo, `..` (the repository root) in single-repo and monorepo.",
+      "description": "Directory holding the agent files (`AGENTS.md`, `.agents/skills/`, `.claude`), relative to the `spex.yaml` file: `.` in multi-repo, `..` (the repository root) in single-repo and monorepo.",
       "minLength": 1
     },
     "description": {

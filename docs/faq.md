@@ -5,7 +5,7 @@
 `spex init` asks which layout the project uses:
 
 - `multi-repo`: every package is its own git repository under one project root folder, with a separate spex repository. Choose it when access should be granted per repository, as explained below.
-- `single-repo`: the project is one git repository. The spex files live in its `spex/` folder, and `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in its root.
+- `single-repo`: the project is one git repository. The spex files live in its `spex/` folder, and `AGENTS.md`, `.agents` and `.claude` in its root.
 - `monorepo`: one git repository holding several packages, each listed in `spex.yaml` as a package. Laid out like `single-repo`.
 
 ## Why separate repositories?

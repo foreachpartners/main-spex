@@ -71,50 +71,20 @@ mod tests {
         assert_eq!(written.matches("# Project").count(), 1);
     }
 
-    #[cfg(unix)]
     #[test]
-    fn write_agents_md_links_claude_md_to_agents_md() {
-        let root = tempdir().expect("create agent root");
-
-        write_agents_md(root.path()).expect("write AGENTS.md");
-
-        assert_eq!(
-            fs::read_link(root.path().join(CLAUDE_FILENAME)).expect("read symlink"),
-            Path::new(AGENTS_FILENAME)
-        );
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn write_agents_md_moves_an_existing_claude_md_into_agents_md() {
+    fn write_agents_md_leaves_an_existing_claude_md_alone() {
         let root = tempdir().expect("create agent root");
         write(root.path(), "CLAUDE.md", "# Claude notes\n");
 
         write_agents_md(root.path()).expect("write AGENTS.md");
 
-        let written = fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read");
-        assert!(written.ends_with("# Claude notes\n"));
         assert_eq!(
-            fs::read_link(root.path().join(CLAUDE_FILENAME)).expect("read symlink"),
-            Path::new(AGENTS_FILENAME)
+            fs::read_to_string(root.path().join("CLAUDE.md")).expect("read CLAUDE.md"),
+            "# Claude notes\n"
         );
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn write_agents_md_prefers_claude_md_over_agents_md_when_both_exist() {
-        let root = tempdir().expect("create agent root");
-        write(root.path(), "AGENTS.md", "# Agents notes\n");
-        write(root.path(), "CLAUDE.md", "# Claude notes\n");
-
-        write_agents_md(root.path()).expect("write AGENTS.md");
-
-        let written = fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read");
-        assert!(written.ends_with("# Claude notes\n"));
-        assert!(!written.contains("# Agents notes"));
         assert_eq!(
-            fs::read_link(root.path().join(CLAUDE_FILENAME)).expect("read symlink"),
-            Path::new(AGENTS_FILENAME)
+            fs::read_to_string(root.path().join(AGENTS_FILENAME)).expect("read AGENTS.md"),
+            bundled_agents_md().expect("bundled AGENTS.md")
         );
     }
 

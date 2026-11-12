@@ -63,19 +63,17 @@ shopping-notes/                    project root
     spex.yaml
     shopping-notes.code-workspace
     AGENTS.md
-    CLAUDE.md -> AGENTS.md
     .agents/skills/
     .claude/skills -> ../.agents/skills
     docs/  schemas/  rules/  specs/  plans/  contracts/
 ```
 
-In `single-repo` and `monorepo`, you get a `spex/` folder, and `AGENTS.md`, `CLAUDE.md`, `.agents` and `.claude` in the repository root. Existing ones are kept.
+In `single-repo` and `monorepo`, you get a `spex/` folder, and `AGENTS.md`, `.agents` and `.claude` in the repository root. Existing ones are kept.
 
 ```text
 shopping-notes/                    project root and git repository
   spex/                            spex directory
   AGENTS.md
-  CLAUDE.md -> AGENTS.md
   .agents/skills/
   .claude/skills -> ../.agents/skills
 ```

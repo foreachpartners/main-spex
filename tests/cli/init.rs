@@ -158,10 +158,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_without_errors() {
         agents.ends_with("# Snake notes\n\nuse tabs\n"),
         "existing notes are kept"
     );
-    assert_eq!(
-        fs::read_link(project.join("CLAUDE.md")).expect("CLAUDE.md symlink"),
-        Path::new("AGENTS.md")
-    );
+    assert!(!project.join("CLAUDE.md").exists());
 
     write_prd(&project.join("spex"));
 
@@ -236,7 +233,7 @@ fn init_multi_repo_keeps_everything_in_the_spex_repository() {
 }
 
 #[test]
-fn init_prefers_claude_md_over_agents_md_when_both_exist() {
+fn init_leaves_an_existing_claude_md_alone() {
     let temp_dir = tempdir().expect("create temp dir");
     let project = temp_dir.path().join("snake");
     fs::create_dir_all(&project).expect("create project");
@@ -251,14 +248,10 @@ fn init_prefers_claude_md_over_agents_md_when_both_exist() {
         String::from_utf8_lossy(&init.stderr)
     );
     let agents = fs::read_to_string(project.join("AGENTS.md")).expect("read AGENTS.md");
-    assert!(agents.ends_with("claude\n"), "CLAUDE.md content is kept");
-    assert!(
-        !agents.contains("agents\n"),
-        "AGENTS.md content is replaced"
-    );
+    assert!(agents.ends_with("agents\n"), "AGENTS.md content is kept");
     assert_eq!(
-        fs::read_link(project.join("CLAUDE.md")).expect("CLAUDE.md symlink"),
-        Path::new("AGENTS.md")
+        fs::read_to_string(project.join("CLAUDE.md")).expect("read CLAUDE.md"),
+        "claude\n"
     );
 }
 
