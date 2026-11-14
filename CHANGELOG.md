@@ -2,7 +2,7 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
-## [0.37.0] - Unreleased
+## [0.37.0] - 2026-11-14
 
 - Removed the `CLAUDE.md` symlink `spex init` wrote next to `AGENTS.md`, since Claude Code now reads `AGENTS.md` itself; delete the old link (see the migration guide).
 - Added mockups to the `spex-contract` and `spex-review-spec` skills, so a design reference can link static HTML pages kept in the package instead of a Figma frame.
