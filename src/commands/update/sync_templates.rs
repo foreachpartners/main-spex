@@ -7,13 +7,11 @@ use crate::commands::init::scaffold::copy_schemas;
 use crate::error::Result;
 use crate::rule::RULES_DIR;
 use crate::support::bundled_agents::bundled_agents_md;
-use crate::support::bundled_rule::write_bundled_rule;
+use crate::support::bundled_rule::{bundled_rules, write_bundled_rule};
 use crate::support::fs::{create_dir_all, write_embedded_dir, write_file};
 use crate::support::managed_section::replace_managed_section;
 use crate::support::yaml_dir::yaml_files;
-use crate::templates::{
-    AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, RULES_LIBRARY_DIRNAME, SKILLS_DIRNAME,
-};
+use crate::templates::{AGENTS_DIRNAME, AGENTS_FILENAME, BUNDLED_TEMPLATES_DIR, SKILLS_DIRNAME};
 
 #[cfg(test)]
 #[path = "sync_templates_test.rs"]
@@ -73,13 +71,9 @@ fn skill_synced_with_upstream(skill_md_path: &Path) -> bool {
 }
 
 fn sync_rules(spex_dir: &Path) -> Result<()> {
-    let Some(dir) = BUNDLED_TEMPLATES_DIR.get_dir(RULES_LIBRARY_DIRNAME) else {
-        return Ok(());
-    };
-
     let local_rules = yaml_files(&spex_dir.join(RULES_DIR))?;
 
-    for file in dir.files() {
+    for file in bundled_rules() {
         let Some(name) = file.path().file_name() else {
             continue;
         };

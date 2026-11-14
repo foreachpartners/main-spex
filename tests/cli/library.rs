@@ -1,6 +1,6 @@
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
 use tempfile::tempdir;
@@ -16,31 +16,54 @@ fn bundled_entry(id: &str) -> Value {
 }
 
 fn bundled_rule(id: &str) -> Value {
-    let file = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("templates/rules")
-        .join(format!("{id}.yaml"));
+    let file = bundled_rule_files()
+        .into_iter()
+        .find(|path| rule_id(path) == id)
+        .expect("bundled rule");
     let text = fs::read_to_string(file).expect("read bundled rule");
     serde_yaml_ng::from_str(&text).expect("parse bundled rule")
 }
 
 fn bundled_rule_ids() -> Vec<String> {
-    let mut ids: Vec<String> =
-        fs::read_dir(Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/rules"))
-            .expect("read bundled rules")
-            .map(|entry| entry.expect("rule entry").path())
-            .filter(|path| {
-                path.extension()
-                    .is_some_and(|extension| extension == "yaml")
-            })
-            .map(|path| {
-                path.file_stem()
-                    .and_then(|stem| stem.to_str())
-                    .expect("rule file name")
-                    .to_string()
-            })
-            .collect();
+    let mut ids: Vec<String> = bundled_rule_files()
+        .iter()
+        .map(|path| rule_id(path))
+        .collect();
     ids.sort();
     ids
+}
+
+fn rule_id(path: &Path) -> String {
+    path.file_stem()
+        .and_then(|stem| stem.to_str())
+        .expect("rule file name")
+        .to_string()
+}
+
+fn bundled_rule_files() -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    collect_rule_files(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("templates/rules"),
+        &mut files,
+    );
+    files
+}
+
+// A subfolder groups rules unless a rule file of its name sits beside it, making it that rule's script folder.
+fn collect_rule_files(dir: &Path, files: &mut Vec<PathBuf>) {
+    for entry in fs::read_dir(dir).expect("read bundled rules") {
+        let path = entry.expect("rule entry").path();
+        if path.is_dir() {
+            if !path.with_extension("yaml").is_file() {
+                collect_rule_files(&path, files);
+            }
+        } else if path
+            .extension()
+            .is_some_and(|extension| extension == "yaml")
+        {
+            files.push(path);
+        }
+    }
 }
 
 fn printed_list(stdout: &[u8]) -> Vec<Value> {

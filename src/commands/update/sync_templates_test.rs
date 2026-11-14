@@ -18,10 +18,7 @@ mod tests_unit {
         scaffold(spex_dir, spex_dir).expect("scaffold");
         let rules = spex_dir.join(RULES_DIR);
         create_dir_all(&rules).expect("create rules dir");
-        let bundled = BUNDLED_TEMPLATES_DIR
-            .get_dir(RULES_LIBRARY_DIRNAME)
-            .expect("bundled rules dir");
-        for file in bundled.files() {
+        for file in bundled_rules() {
             let name = file.path().file_name().expect("rule file name");
             write_bundled_rule(file, &rules.join(name)).expect("take rule");
         }
@@ -70,6 +67,23 @@ mod tests_unit {
             .expect("bundled script")
             .contents();
         assert_eq!(fs::read(&script).expect("read script"), expected_script);
+    }
+
+    #[test]
+    fn sync_overwrites_a_rule_kept_in_a_library_group_folder() {
+        let spex_dir = tempdir().expect("create spex dir");
+        scaffold_with_rules(spex_dir.path());
+
+        let rule = spex_dir.path().join("rules/postgres-conventions.yaml");
+        fs::write(&rule, "id: postgres-conventions\ntampered: true\n").expect("tamper rule");
+
+        sync_templates(spex_dir.path(), spex_dir.path()).expect("sync");
+
+        let expected = BUNDLED_TEMPLATES_DIR
+            .get_file("rules/db/postgres-conventions.yaml")
+            .expect("bundled grouped rule")
+            .contents();
+        assert_eq!(fs::read(&rule).expect("read rule"), expected);
     }
 
     #[test]

@@ -28,17 +28,28 @@ fn repository() -> &'static Path {
 }
 
 fn entry_files() -> Vec<PathBuf> {
-    let mut files: Vec<PathBuf> = fs::read_dir(repository().join(LIBRARY_DIR))
-        .expect("rules library folder")
-        .map(|entry| entry.expect("rules library entry").path())
-        .filter(|path| {
-            path.extension()
-                .is_some_and(|extension| extension == "yaml")
-        })
-        .collect();
+    let mut files = Vec::new();
+    collect_entry_files(&repository().join(LIBRARY_DIR), &mut files);
     files.sort();
     assert!(!files.is_empty(), "rules library has no entries");
     files
+}
+
+// A subfolder groups entries unless an entry of its name sits beside it, making it that entry's script folder.
+fn collect_entry_files(dir: &Path, files: &mut Vec<PathBuf>) {
+    for entry in fs::read_dir(dir).expect("rules library folder") {
+        let path = entry.expect("rules library entry").path();
+        if path.is_dir() {
+            if !path.with_extension("yaml").is_file() {
+                collect_entry_files(&path, files);
+            }
+        } else if path
+            .extension()
+            .is_some_and(|extension| extension == "yaml")
+        {
+            files.push(path);
+        }
+    }
 }
 
 fn read_entry(file: &Path) -> Entry {

@@ -6,6 +6,7 @@ The rules library holds rules for conventions many projects share. It lives in t
 
 - MUST keep the library rules in `templates/rules/`, which the binary includes and `spex init` and `spex update` never add to a project.
 - MUST name each entry `<rule-id>.yaml`, a rule file that validates against `templates/schemas/rule.schema.json`, with its script folder (same name, beside the file) when its checks run scripts.
+- MUST allow entries in any number of subfolders of `templates/rules/` (`db/`, `db/postgres/`), telling such a subfolder from a script folder by having no rule file of the same name beside it, and list, copy and sync those entries the same as entries at the top of the library.
 - MUST give each entry an `id` no other entry has.
 - MUST set `sync_with_upstream: true` right after the `title` of each entry, so a project's rule that sets `true` is known to come from the library.
 - MUST fail `cargo test` when an entry is invalid, misnamed, unsynced, fails a conformance check of `spex check` (such as acceptance criteria out of commitment order) or shares its `id` with another entry.

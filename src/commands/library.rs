@@ -4,16 +4,15 @@ use std::process::ExitCode;
 use anstream::println;
 use clap::{Args, ValueEnum};
 use eros::{Context, IntoAnyUnion, bail};
+use include_dir::File;
 
 use crate::error::Result;
-use crate::support::bundled_rule::{bundled_rule_paths, write_bundled_rule};
+use crate::support::bundled_rule::{bundled_rule_paths, bundled_rules, write_bundled_rule};
 use crate::support::entry_view::{
     Keywords, ensure_known_fields, entries_to_yaml, keep_fields, print_entries, schema_fields,
 };
 use crate::support::fs::create_dir_all;
-use crate::templates::{
-    BUNDLED_TEMPLATES_DIR, RULE_SCHEMA_FILENAME, RULES_LIBRARY_DIRNAME, SPECS_LIBRARY_DIRNAME,
-};
+use crate::templates::{BUNDLED_TEMPLATES_DIR, RULE_SCHEMA_FILENAME, SPECS_LIBRARY_DIRNAME};
 
 #[cfg(test)]
 #[path = "library_test.rs"]
@@ -28,10 +27,24 @@ enum LibKind {
 }
 
 impl LibKind {
-    fn dirname(self) -> &'static str {
+    fn files(self) -> Vec<&'static File<'static>> {
         match self {
-            Self::Specs => SPECS_LIBRARY_DIRNAME,
-            Self::Rules => RULES_LIBRARY_DIRNAME,
+            Self::Specs => {
+                let dir = BUNDLED_TEMPLATES_DIR
+                    .get_dir(SPECS_LIBRARY_DIRNAME)
+                    .expect("bundled template directory is missing");
+                let mut files: Vec<_> = dir
+                    .files()
+                    .filter(|file| {
+                        file.path()
+                            .extension()
+                            .is_some_and(|extension| extension == "yaml")
+                    })
+                    .collect();
+                files.sort_by_key(|file| file.path());
+                files
+            }
+            Self::Rules => bundled_rules(),
         }
     }
 
@@ -72,7 +85,7 @@ struct Entry {
 
 pub fn run(args: LibraryArgs) -> Result<ExitCode> {
     ensure_known_fields(&args.fields, "library entry", &args.kind.fields())?;
-    let entries = entries(args.kind.dirname());
+    let entries = entries(args.kind);
 
     match &args.copy {
         Some(dir) => copy_rules(args.kind, &entries, &args.id, dir)?,
@@ -84,20 +97,8 @@ pub fn run(args: LibraryArgs) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn entries(dirname: &str) -> Vec<Entry> {
-    let dir = BUNDLED_TEMPLATES_DIR
-        .get_dir(dirname)
-        .expect("bundled template directory is missing");
-    let mut files: Vec<_> = dir
-        .files()
-        .filter(|file| {
-            file.path()
-                .extension()
-                .is_some_and(|extension| extension == "yaml")
-        })
-        .collect();
-    files.sort_by_key(|file| file.path());
-    files
+fn entries(kind: LibKind) -> Vec<Entry> {
+    kind.files()
         .into_iter()
         .map(|file| Entry {
             id: file
@@ -155,8 +156,11 @@ fn copy_rules(kind: LibKind, entries: &[Entry], ids: &[String], dir: &Path) -> R
         .iter()
         .filter(|entry| ids.contains(&entry.id))
         .map(|entry| {
-            let file = BUNDLED_TEMPLATES_DIR
-                .get_file(Path::new(RULES_LIBRARY_DIRNAME).join(format!("{}.yaml", entry.id)))
+            let file = bundled_rules()
+                .into_iter()
+                .find(|rule| {
+                    rule.path().file_stem().and_then(|stem| stem.to_str()) == Some(&entry.id)
+                })
                 .expect("bundled rule is missing");
             (file, dir.join(format!("{}.yaml", entry.id)))
         })

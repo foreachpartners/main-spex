@@ -1,0 +1,43 @@
+id: db-migrations-with-declarative-seed
+title: Database migrations with a declarative seed
+sync_with_upstream: true
+description: >-
+  Keeps the schema and the data apart. A migration exists to bring an existing database to the
+  latest schema, so migrations hold only the schema and the changes to existing rows; the data the
+  app needs to run and test fixtures each live in a seed of their own, written as their current
+  state. A fresh database and a long-lived one then reach the same state, tests can build each
+  layer on its own, and the data the app relies on is readable in one place instead of spread
+  across the migration history.
+acceptance_criteria:
+  - "MUST keep each kind of database change in its own place: the schema and changes to existing rows in ordered, versioned migrations, the data the app needs to run in a declarative seed, and test or demo fixtures in a seed of their own"
+  - "MUST never edit a migration once it has run on a shared environment: add a new one to change or revert it"
+  - "MUST commit a schema snapshot generated from the migrations, never edited by hand, recording the latest migration it contains, build a new database from it, and fail CI when it differs from the schema the migrations produce"
+  - "MUST change existing rows in a migration written as a set-based update of whatever rows match (`UPDATE app_user SET role_id = 'reader' WHERE role_id = 'viewer'`), so it does nothing on a fresh database and needs no branch for new versus existing data, except a change over a large table, which runs as a batched background job instead"
+  - "MUST keep the data the app needs to run (roles, permissions, lookup values) in one declarative seed that describes its current state against the latest schema, is updated in the same change as a migration that alters a seeded table, and runs after all migrations on every deploy, so a fresh and an existing database converge and the seed shows what that data is"
+  - "MUST make the seed idempotent, so running it once or many times leaves the same rows: it upserts each row by a stable natural key (`'admin'`, never a generated id) instead of inserting it, and deletes the rows it no longer lists only after a migration has moved every reference off them, never through a cascade, since removing a row is a contract step"
+  - "MUST keep the default of a setting in code and store only the values that differ from it, so adding a setting needs no migration"
+  - "MUST split a schema change the running app version cannot work with into expand (add), backfill, switch the code, and contract (drop) steps released one after another, so a deploy needs no downtime"
+  - "MUST define the data the app needs only in the seed, since a database built from the schema snapshot runs no migrations and gets that data from the seed alone"
+  - "MUST insert the row a migration moves existing rows to (users from role `viewer` to `reader`) in that migration, idempotently and before the move, since migrations run before the seed; the seed then sets its final values"
+  - "MUST NOT run test or demo fixtures outside development and test environments, keeping them in a seed of their own"
+  - "SHOULD run a data change over a large table as a batched background job outside the deploy, so it does not hold locks or stall the release"
+examples:
+  avoid: |
+    -- 0012_add_role.sql: the data the app needs lives in the migration history
+    CREATE TABLE role (role_id text PRIMARY KEY, name text NOT NULL);
+    INSERT INTO role (role_id, name) VALUES ('admin', 'Admin'), ('viewer', 'Viewer');
+
+    -- 0013_rename_admin.sql: one more migration just to edit that data
+    UPDATE role SET name = 'Administrator' WHERE role_id = 'admin';
+  prefer: |
+    -- 0012_add_role.sql: schema only
+    CREATE TABLE role (role_id text PRIMARY KEY, name text NOT NULL);
+
+    -- 0013_merge_viewer_into_reader.sql: moves existing rows, a no-op on a fresh database
+    INSERT INTO role (role_id, name) VALUES ('reader', 'Reader') ON CONFLICT DO NOTHING;
+    UPDATE app_user SET role_id = 'reader' WHERE role_id = 'viewer';
+
+    -- seed/role.sql: current state, run after all migrations on every deploy
+    INSERT INTO role (role_id, name) VALUES ('admin', 'Administrator'), ('reader', 'Reader')
+    ON CONFLICT (role_id) DO UPDATE SET name = EXCLUDED.name;
+    DELETE FROM role WHERE role_id NOT IN ('admin', 'reader');

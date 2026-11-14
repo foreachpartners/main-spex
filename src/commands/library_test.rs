@@ -2,6 +2,7 @@
 mod tests {
     use super::super::*;
     use crate::error::describe;
+    use crate::templates::RULES_LIBRARY_DIRNAME;
 
     fn entry(id: &str, text: &'static str) -> Entry {
         Entry {
@@ -20,13 +21,13 @@ mod tests {
 
     #[test]
     fn entries_are_ordered_by_id_and_keep_their_file_text() {
-        for dirname in [SPECS_LIBRARY_DIRNAME, RULES_LIBRARY_DIRNAME] {
-            let entries = entries(dirname);
+        for kind in [LibKind::Specs, LibKind::Rules] {
+            let entries = entries(kind);
 
             let ids: Vec<&str> = entries.iter().map(|entry| entry.id.as_str()).collect();
             let mut sorted = ids.clone();
             sorted.sort_unstable();
-            assert!(!ids.is_empty(), "the `{dirname}` library has no entries");
+            assert!(!ids.is_empty(), "a library has no entries");
             assert_eq!(ids, sorted);
             for entry in &entries {
                 assert!(entry.text.contains(&format!("id: {}\n", entry.id)));
@@ -36,7 +37,7 @@ mod tests {
 
     #[test]
     fn rule_entries_hold_only_rule_files_not_their_script_folders() {
-        let ids: Vec<String> = entries(RULES_LIBRARY_DIRNAME)
+        let ids: Vec<String> = entries(LibKind::Rules)
             .into_iter()
             .map(|entry| entry.id)
             .collect();
@@ -44,6 +45,33 @@ mod tests {
         assert!(ids.contains(&"secret-handling".to_string()));
         assert!(!ids.contains(&"commit-message-format/commit-spec-id-trace".to_string()));
         assert!(ids.iter().all(|id| !id.contains('/') && !id.contains('.')));
+    }
+
+    #[test]
+    fn rule_entries_include_rules_kept_in_group_folders() {
+        let ids: Vec<String> = entries(LibKind::Rules)
+            .into_iter()
+            .map(|entry| entry.id)
+            .collect();
+
+        assert!(ids.contains(&"postgres-conventions".to_string()));
+        assert!(ids.contains(&"db-migrations-with-declarative-seed".to_string()));
+    }
+
+    #[test]
+    fn copy_writes_a_grouped_rule_flat_into_the_directory() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let entries = entries(LibKind::Rules);
+
+        copy_rules(
+            LibKind::Rules,
+            &entries,
+            &rule_ids(&["postgres-conventions"]),
+            dir.path(),
+        )
+        .expect("copy");
+
+        assert!(dir.path().join("postgres-conventions.yaml").is_file());
     }
 
     #[test]
@@ -72,7 +100,7 @@ mod tests {
     fn copy_writes_the_rule_and_its_executable_scripts_into_the_directory() {
         let dir = tempfile::tempdir().expect("tempdir");
         let rules = dir.path().join("new/rules");
-        let entries = entries(RULES_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Rules);
 
         copy_rules(
             LibKind::Rules,
@@ -113,7 +141,7 @@ mod tests {
     fn copy_refuses_to_overwrite_and_writes_nothing() {
         let dir = tempfile::tempdir().expect("tempdir");
         std::fs::write(dir.path().join("secret-handling.yaml"), "mine\n").expect("seed rule");
-        let entries = entries(RULES_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Rules);
 
         let error = copy_rules(
             LibKind::Rules,
@@ -139,7 +167,7 @@ mod tests {
     fn copy_refuses_an_existing_script_folder_of_a_rule_with_scripts() {
         let dir = tempfile::tempdir().expect("tempdir");
         std::fs::create_dir(dir.path().join("naming-convention")).expect("seed folder");
-        let entries = entries(RULES_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Rules);
 
         let error = copy_rules(
             LibKind::Rules,
@@ -157,7 +185,7 @@ mod tests {
     fn copy_ignores_a_folder_named_like_a_rule_without_scripts() {
         let dir = tempfile::tempdir().expect("tempdir");
         std::fs::create_dir(dir.path().join("secret-handling")).expect("seed folder");
-        let entries = entries(RULES_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Rules);
 
         copy_rules(
             LibKind::Rules,
@@ -173,7 +201,7 @@ mod tests {
     #[test]
     fn copy_rejects_an_unknown_id() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let entries = entries(RULES_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Rules);
 
         let error = copy_rules(LibKind::Rules, &entries, &rule_ids(&["nope"]), dir.path())
             .expect_err("unknown id");
@@ -187,7 +215,7 @@ mod tests {
     #[test]
     fn copy_rejects_specs() {
         let dir = tempfile::tempdir().expect("tempdir");
-        let entries = entries(SPECS_LIBRARY_DIRNAME);
+        let entries = entries(LibKind::Specs);
 
         let error = copy_rules(
             LibKind::Specs,
