@@ -121,6 +121,7 @@ fn init_single_repo_keeps_the_package_files_and_checks_without_errors() {
 
     let config = fs::read_to_string(project.join("spex/spex.yaml")).expect("read spex.yaml");
     assert!(config.contains("project_name: snake\n"), "{config}");
+    assert!(config.contains("project_short_name: unknown\n"), "{config}");
     assert!(config.contains("layout: single-repo\n"), "{config}");
     assert!(config.contains("agent_root: ..\n"), "{config}");
     assert!(config.contains("package_name: spex\n"), "{config}");

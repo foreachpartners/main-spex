@@ -95,6 +95,7 @@ pub fn spex(packages: Vec<Package>) -> Spex {
 pub fn spex_config() -> SpexConfig {
     SpexConfig {
         project_name: "demo".to_string(),
+        project_short_name: "dmo".to_string(),
         cli_version: "0.0.0".to_string(),
         layout: Layout::MultiRepo,
         agent_root: ".".to_string(),

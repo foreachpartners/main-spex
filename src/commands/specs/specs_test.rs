@@ -48,6 +48,7 @@ mod tests {
             dir.join("spex.yaml"),
             indoc! {"
                 project_name: demo
+                project_short_name: abc
                 cli_version: 0.0.0
                 layout: multi-repo
                 agent_root: .

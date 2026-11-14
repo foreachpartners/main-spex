@@ -6,6 +6,8 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 - Removed the `CLAUDE.md` symlink `spex init` wrote next to `AGENTS.md`, since Claude Code now reads `AGENTS.md` itself; delete the old link (see the migration guide).
 - Added mockups to the `spex-contract` and `spex-review-spec` skills, so a design reference can link static HTML pages kept in the package instead of a Figma frame.
+- **Breaking**: Added the required `project_short_name` to `spex.yaml`, so set one for your project (see the migration guide).
+- **Breaking**: Changed the `naming-convention` rule to prefix config and env variables with the project short name instead of the project name, so rename them or keep the old prefix locally (see the migration guide).
 
 ## [0.36.0] - 2026-11-09
 

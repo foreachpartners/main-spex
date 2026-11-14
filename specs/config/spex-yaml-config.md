@@ -5,7 +5,7 @@ Declares the project and its packages. Validated against `schemas/spex.schema.js
 ## Acceptance criteria
 
 - MUST declare the project and its packages in `spex.yaml`, in the spex directory.
-- MUST require the root fields `project_name`, `cli_version`, `layout` (`multi-repo`, `single-repo`, or `monorepo`), `agent_root` (the [agent root](../../docs/glossary.md), relative to the spex directory), and `prd` (the path of the project's [PRD](../../docs/glossary.md), relative to the spex directory).
+- MUST require the root fields `project_name`, `project_short_name`, `cli_version`, `layout` (`multi-repo`, `single-repo`, or `monorepo`), `agent_root` (the [agent root](../../docs/glossary.md), relative to the spex directory), and `prd` (the path of the project's [PRD](../../docs/glossary.md), relative to the spex directory).
 - MUST have `spex init` write `layout`, `agent_root`, and `prd` (`docs/prd.md`).
 - MUST require, in each package entry, `package_name`, `package_short_name`, and `path` (relative to the spex directory).
 - MUST make `package_name` the full `<project-name>-<package-short-name>`, matching the package directory in `multi-repo`; in `single-repo` it is the project name, which is then also the `package_short_name`.
@@ -23,6 +23,7 @@ The full config of the `shopping-notes` example project:
 
 ```yaml
 project_name: shopping-notes
+project_short_name: snt
 cli_version: 0.25.0
 layout: multi-repo
 agent_root: .

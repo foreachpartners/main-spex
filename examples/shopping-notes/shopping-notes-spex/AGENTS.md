@@ -166,7 +166,7 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
 
 - **Project** — the whole product being built, named after its project root folder (e.g. `shopping-notes`). One project spans one or several packages, declared in `spex.yaml`, that share a single set of specs.
 
-- **Project name** — the identifier of the project, taken from the name of its project root folder.
+- **Project name** — the identifier of the project, taken from the name of its project root folder. The project short name is its short form (e.g. `snt`).
 
   ```text
   shopping-notes
@@ -191,14 +191,6 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
   shopping-notes-spex
   shopping-notes-api
   shopping-notes-frontend
-  ```
-
-- **Package short name** — package name excluding project name; in a single-repo project, the project name itself.
-
-  ```text
-  spex
-  api
-  frontend
   ```
 
 - **Package config** (`spex.package.yaml`) — optional file at the root of a package that holds the excluded files, the coverage waivers and the pre-existing error baseline concerning that package, merged by spex into the same fields of that package's entry in `spex.yaml`, so they apply to that package only.

@@ -153,6 +153,7 @@ mod tests {
             dir.path().join(crate::config::SPEX_CONFIG_FILE),
             indoc::indoc! {r#"
                 project_name: pizza
+                project_short_name: abc
                 cli_version: 0.1.0
                 layout: multi-repo
                 agent_root: .

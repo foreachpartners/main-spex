@@ -1,4 +1,5 @@
 project_name: shopping-notes
+project_short_name: snt
 cli_version: 0.37.0
 layout: multi-repo
 agent_root: .

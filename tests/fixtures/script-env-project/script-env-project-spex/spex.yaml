@@ -1,4 +1,5 @@
 project_name: script-env-project
+project_short_name: sep
 cli_version: 0.17.0
 layout: multi-repo
 agent_root: .

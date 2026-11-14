@@ -116,10 +116,16 @@ mod tests_unit {
     fn config_from_template_lists_root_fields_in_schema_order() {
         let yaml = config_from_template(Layout::SingleRepo, "pizza-shop");
 
-        let positions: Vec<usize> = ["project_name:", "cli_version:", "layout:", "agent_root:"]
-            .iter()
-            .map(|field| yaml.find(field).expect("root field"))
-            .collect();
+        let positions: Vec<usize> = [
+            "project_name:",
+            "project_short_name:",
+            "cli_version:",
+            "layout:",
+            "agent_root:",
+        ]
+        .iter()
+        .map(|field| yaml.find(field).expect("root field"))
+        .collect();
         assert!(positions.is_sorted());
     }
 

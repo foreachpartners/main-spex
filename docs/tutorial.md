@@ -71,6 +71,7 @@ update `spex.yaml` (which is main spex configuration file for your project) and:
 
 - add the packages (`shopping-notes-api`, `shopping-notes-frontend`) to `spex.yaml` and the workspace file
 - add descriptions for your project and each package
+- pick a project short name (`snt`), used instead of `shopping-notes` to prefix env variables like `SNT_API_DATA_FILE`
 - pick the rules that apply to each package from the rules library bundled with spex, and copy them into `shopping-notes-spex/rules/`
 - generate main skills for each package with metadata that requires them to be loaded when AI works on any package. Skills will describe each package and we will update them from time to time to help AI understand how we want it to work there, see `shopping-notes-api/.agents/skills/shopping-notes-api/SKILL.md`
 

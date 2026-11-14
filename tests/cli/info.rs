@@ -8,6 +8,7 @@ use crate::common::{
 const EXPECTED_INFO: &str = r#"{
   "spex_dir": {spex_dir},
   "project_name": "dummy-project",
+  "project_short_name": "dmy",
   "cli_version": "0.8.8",
   "layout": "multi-repo",
   "agent_root": {spex_dir},
@@ -86,6 +87,7 @@ fn with_project_dirs(template: &str, project: &Path) -> String {
 const EXPECTED_INFO_API: &str = r#"{
   "spex_dir": {spex_dir},
   "project_name": "dummy-project",
+  "project_short_name": "dmy",
   "cli_version": "0.8.8",
   "layout": "multi-repo",
   "agent_root": {spex_dir},

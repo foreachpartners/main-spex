@@ -10,6 +10,11 @@
       "description": "Kebab-case name of the project.",
       "minLength": 1
     },
+    "project_short_name": {
+      "type": "string",
+      "description": "Short name of the project: at least 3 lowercase letters or digits, starting with a letter (for example `snt` for `shopping-notes`). Used instead of the project name for config and env variables in naming-convention.",
+      "pattern": "^[a-z][a-z0-9]{2,}$"
+    },
     "cli_version": {
       "type": "string",
       "description": "Semantic version (MAJOR.MINOR.PATCH) of the spex CLI that wrote this config. spex warns when a command that loads the project finds a mismatch with the installed CLI; run `spex update` to sync.",
@@ -175,11 +180,12 @@
       "additionalProperties": false
     }
   },
-  "required": ["project_name", "cli_version", "layout", "agent_root", "prd"],
+  "required": ["project_name", "project_short_name", "cli_version", "layout", "agent_root", "prd"],
   "additionalProperties": false,
   "examples": [
     {
       "project_name": "shopping-notes",
+      "project_short_name": "snt",
       "cli_version": "0.3.1",
       "layout": "multi-repo",
       "agent_root": ".",

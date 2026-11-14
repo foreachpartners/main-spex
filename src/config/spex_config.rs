@@ -21,6 +21,7 @@ pub const CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SpexConfig {
     pub project_name: String,
+    pub project_short_name: String,
     pub cli_version: String,
     pub layout: Layout,
     pub agent_root: String,

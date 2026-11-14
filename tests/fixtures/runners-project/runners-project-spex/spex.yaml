@@ -1,4 +1,5 @@
 project_name: runners-project
+project_short_name: run
 cli_version: 0.10.5
 layout: multi-repo
 agent_root: .

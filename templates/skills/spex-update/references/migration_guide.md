@@ -11,6 +11,15 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 - If `CLAUDE.md` is a symlink to `AGENTS.md` (check with `ls -l CLAUDE.md`), delete it with `rm CLAUDE.md`.
 - If `CLAUDE.md` is a regular file, change nothing: it is your own.
 
+`spex.yaml` now requires `project_short_name`, the project short name. In `<spex-dir>/spex.yaml`:
+
+- Add `project_short_name: <short-name>` right after `project_name`. Ask the user for it, proposing one in the format `schemas/spex.schema.json` defines, built from the initials of `project_name` (for example `snt` for `shopping-notes`), that is not a prefix well-known tools read from the environment (`aws`, `npm`, `node`, `docker`, `git`).
+
+The `naming-convention` rule now names config and env variables `<PROJECT_SHORT_NAME>_<PACKAGE_SHORT_NAME>_<DATA>` instead of `<PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA>`. If `<spex-dir>/rules/naming-convention.yaml` exists and does not set `sync_with_upstream: false`, ask the user which to do:
+
+- Rename: in every package, rename each config and env variable that starts with `<PROJECT_NAME>_` (the project name upper-cased, `-` replaced by `_`) to start with `<PROJECT_SHORT_NAME>_`, in code, config, CI, deployment files and docs. Tell the user to rename them in every environment the project is deployed to as well.
+- Keep: set `sync_with_upstream: false` in `rules/naming-convention.yaml`, so `spex update` keeps its current env variable format.
+
 ## 0.34.0
 
 A package skill now keeps `references/review.md`, what earlier reviews of the package kept running into, and says itself when to read and edit it. `spex update` never overwrites a package skill, so one made by an earlier version lacks these. In `<agent-root>/.agents/skills`, for every package skill `<package-name>/SKILL.md`:

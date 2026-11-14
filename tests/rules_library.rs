@@ -158,7 +158,7 @@ fn rules_library_entries_pass_the_conformance_checks_of_spex_check() {
     fs::write(
         spex_dir.join("spex.yaml"),
         format!(
-            "project_name: proj\ncli_version: {version}\nlayout: multi-repo\nagent_root: .\ndescription: Takes every rules library entry.\nprd: docs/prd.md\npackages:\n  - package_name: proj-spex\n    package_short_name: spex\n    path: .\n    rules:\n{listed_rules}"
+            "project_name: proj\nproject_short_name: prj\ncli_version: {version}\nlayout: multi-repo\nagent_root: .\ndescription: Takes every rules library entry.\nprd: docs/prd.md\npackages:\n  - package_name: proj-spex\n    package_short_name: spex\n    path: .\n    rules:\n{listed_rules}"
         ),
     )
     .expect("write spex.yaml");

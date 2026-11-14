@@ -2,15 +2,17 @@ id: naming-convention
 title: Derived naming convention
 sync_with_upstream: true
 description: >-
-  A package owns many cross-cutting identifiers: package directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name plus the package short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating.
+  A package owns many cross-cutting identifiers: package directory, crate, binary, config, env variables, database, proto, container image and other names. Deriving each one from the project name or project short name plus the package short name and optional data keeps them consistent, globally identifiable, avoids name clashes and helps two engineers asked the same question reach the same answer without coordinating. An identifier that lives in a namespace shared across projects (a database server, a container registry, a proto or crate registry, a directory) takes the full project name, since a clash there reaches another project's data or artifacts. Config and env variables live inside one process, are typed and read often, and so take the shorter project short name.
 acceptance_criteria:
-  - "MUST derive every cross-cutting identifier from the project name plus the package short name and optional data so it's globally identifiable on its own"
+  - "MUST derive every cross-cutting identifier from the project name or project short name plus the package short name and optional data so it's globally identifiable on its own"
   - "MUST use conventional case and delimiter based on use case"
   - "MUST use <project-name>-<package-short-name> for package directory (in `multi-repo` only), crate, binary and container image"
   - "MUST use <project_name>_<package_short_name> for db (names both the database and its user)"
-  - "MUST use <PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA> for config and env variables"
+  - "MUST use <PROJECT_SHORT_NAME>_<PACKAGE_SHORT_NAME>_<DATA> for config and env variables"
   - "MUST use <project_name>.<package_short_name>.<data> for proto_package"
+  - "MUST use the full project name, never the project short name, for an identifier that lives in a namespace shared across projects, such as a database server, a container, proto or crate registry, or a directory"
   - "MUST extend this convention, not individual packages, when a new cross-cutting identifier is needed"
+  - "SHOULD pick a project short name that is not a prefix well-known tools read from the environment (such as `aws`, `npm`, `node`, `docker`, `git`), so the project's env variables never feed or take values meant for another tool"
 checks:
   - name: package-dir
     description: In multi-repo, package directory name must be <project-name>-<package-short-name>
@@ -31,9 +33,9 @@ examples:
     example:  shopping_notes_frontend
 
     used by:  config, env variables
-    format:   <PROJECT_NAME>_<PACKAGE_SHORT_NAME>_<DATA>
-    example:  SHOPPING_NOTES_FRONTEND_SERVER_PORT
-    example:  SHOPPING_NOTES_API_DATABASE_URL
+    format:   <PROJECT_SHORT_NAME>_<PACKAGE_SHORT_NAME>_<DATA>
+    example:  SNT_FRONTEND_SERVER_PORT
+    example:  SNT_API_DATABASE_URL
 
     used by:  proto_package
     format:   <project_name>.<package_short_name>.<data>

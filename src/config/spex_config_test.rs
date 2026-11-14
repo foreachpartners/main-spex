@@ -107,6 +107,7 @@ mod tests {
     fn serialization_keeps_descriptions() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -137,6 +138,7 @@ mod tests {
     fn serialization_keeps_the_prd_path() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -153,6 +155,7 @@ mod tests {
     fn rejects_a_config_without_a_prd() {
         let parsed = serde_yaml_ng::from_str::<SpexConfig>(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -165,6 +168,7 @@ mod tests {
     fn serialization_omits_absent_descriptions_but_keeps_empty_lists() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -187,6 +191,7 @@ mod tests {
     fn parses_package_coverage_ignore_entries_naming_a_spec() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -221,6 +226,7 @@ mod tests {
     fn parses_a_package_exclude_and_keeps_an_absent_one_as_an_empty_list() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .
@@ -251,6 +257,7 @@ mod tests {
     fn rejects_a_config_without_a_layout() {
         let parsed = serde_yaml_ng::from_str::<SpexConfig>(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             agent_root: .
             prd: docs/prd.md
@@ -263,6 +270,7 @@ mod tests {
     fn serialization_keeps_an_absent_package_coverage_ignore_as_an_empty_list() {
         let config: SpexConfig = serde_yaml_ng::from_str(indoc! {"
             project_name: demo
+            project_short_name: abc
             cli_version: 0.0.0
             layout: multi-repo
             agent_root: .

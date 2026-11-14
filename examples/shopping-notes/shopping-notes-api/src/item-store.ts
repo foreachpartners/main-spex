@@ -15,7 +15,7 @@ export class ItemStore {
   private items: Item[];
   private readonly filePath: string;
 
-  constructor(filePath: string = process.env.SHOPPING_NOTES_API_DATA_FILE ?? DEFAULT_DATA_FILE) {
+  constructor(filePath: string = process.env.SNT_API_DATA_FILE ?? DEFAULT_DATA_FILE) {
     this.filePath = filePath;
     this.items = this.readFromDisk();
   }
