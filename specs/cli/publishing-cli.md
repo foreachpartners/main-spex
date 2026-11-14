@@ -6,6 +6,8 @@
 
 - MUST publish only when a `v*` tag is pushed: `.github/workflows/release.yml` runs `cargo publish`.
 - MUST bump `version` in `Cargo.toml` and add the matching `CHANGELOG.md` entry for each release; `cargo test` updates `Cargo.lock` and checks that the latest changelog entry matches `version`.
+- MUST head the entry of the version not yet released `## [X.Y.Z] - Unreleased` and add every incoming change to it, without bumping `version` again; only the latest entry may be unreleased.
+- MUST replace `Unreleased` with the release date when releasing; the first change after a release bumps `version` and opens a new unreleased entry.
 - MUST merge the release to `dev` and wait for CI to pass before tagging, since the release workflow does not run the tests.
 - MUST tag the merged commit `vX.Y.Z` and push the tag.
 - MUST fail the release workflow without publishing when the tag does not match `version` in `Cargo.toml`.
