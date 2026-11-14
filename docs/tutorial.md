@@ -113,7 +113,7 @@ Commit the change.
 
 Now let's implement `api-healthcheck` spec, we start with OpenAPI contract.
 
-**Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or a Figma mockup for UI. AI implements from spec and contract.
+**Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or, for UI, a design reference linking a Figma frame or a mockup. AI implements from spec and contract.
 
 We implement contract first because it's fast to generate and easy to review it, narrowing down how AI should implement our spec. Without contract we would need to review full implementation and do larger refactoring in case AI implements it not in a way we want it. With contracts we are saving time and tokens. Also it's easy to refactor implementation not changing it public surface, but requires a breaking change otherwise.
 
@@ -155,11 +155,13 @@ Commit changes in api and spex.
 
 Now our project manager want use to have not found page in frontend in case user navigates to non-existing page.
 
-Let's create a spec for it `/spex-spec frontend not found page with link back to main page, id fe-not-found-page, contract figma`. Commit changes.
+Let's create a spec for it `/spex-spec frontend not found page with link back to main page, id fe-not-found-page, contract mockup`. Commit changes.
 
-Now let's create design mockup contract for our page, as we have a bad taste let's ask our designer, here is what we got: `https://www.figma.com/design/MSDzHDhkLsANf0jvFbAUTR/Not-found-page---shopping-notes?node-id=1-2`
+Now let's create the design contract for our page. Instead of a Figma frame from a designer, we keep the design in the frontend itself as a mockup: a static HTML page you open in a browser with no build, reviewed in the same pull request as the code.
 
-Let's write it down `/spex-contract fe-not-found-page, change status to in-progress, place in shopping-notes-frontend/contracts/figma.md, figma https://www.figma.com/design/MSDzHDhkLsANf0jvFbAUTR/Not-found-page---shopping-notes?node-id=1-2`. As our contract is not shared and belongs to frontend we place it there. Commit changes.
+Let's write it down `/spex-contract fe-not-found-page, change status to in-progress, design reference in shopping-notes-frontend/contracts/design.md with a mockup: centered "404" heading, "Page not found" title, one explanatory line and a "Back to main page" button link`. As our contract is not shared and belongs to frontend we place it there. Open `shopping-notes-frontend/contracts/mockups.html` in a browser, ask for changes until the page looks right, then commit changes. A Figma frame works the same way: give its link instead of the description.
+
+In the finished example project, the frontend's e2e tests hold each page to its mockup, so the look can't drift from the approved design.
 
 If you remember next we would need to do implementation, review and testing. There is a orchestrator skill that will do all of this for you `/spex-assembly-line fe-not-found-page` by spawning agent for each stage and running loop review and fix until clean or a 3-pass cap. The only thing that will be left for us is to review and commit changes.
 

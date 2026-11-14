@@ -5,13 +5,13 @@ description: Derive or update the interface contract from one or more specs. Use
 
 # Create an Interface Contract
 
-A contract is the _interface_ derived from a spec. For an API: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec, it's a design reference instead: a markdown document linking each spec to its visual design (e.g. a Figma frame). AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a package boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the packages they touch, then write or update one contract per affected interface, annotated back to its spec.
+A contract is the _interface_ derived from a spec. For an API: endpoints, methods, status codes, errors, auth, and the request/response shapes — OpenAPI for HTTP APIs, `.proto` for gRPC, GraphQL SDL, AsyncAPI for events. For a UI-facing spec, it's a design reference instead: a markdown document linking each spec to its visual design — a Figma frame, or a package static HTML mockups. AI implements from the spec and its contract, so the contract must cover every acceptance criterion that crosses a package boundary, or every UI part a design reference should visually pin down. Your job is to read the approved specs and the packages they touch, then write or update one contract per affected interface, annotated back to its spec.
 
 ## Paths
 
 Replace `<spex-dir>` with the spex directory, printed by `spex info | spex jq -r .spex_dir`, and `<spec-id>` with the spec's `id`.
 
-Each package declares its contracts under `contracts` in `<spex-dir>/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenAPI which is used by api and frontend are put in spex `<spex-dir>/contracts/`, contracts that are specific to only one package, like figma design references are put in the package they belong to (for example `contracts/figma.md` inside the frontend package).
+Each package declares its contracts under `contracts` in `<spex-dir>/spex.yaml`, each with a `path` relative to `spex.yaml` file where it's declared. Shared contracts like OpenAPI which is used by api and frontend are put in spex `<spex-dir>/contracts/`, contracts that are specific to only one package, like design references and their mockups, are put in the package they belong to (for example `contracts/design.md` and `contracts/mockups/` inside the frontend package).
 
 ## Step 0 — Establish the target specs
 
@@ -55,7 +55,7 @@ For an API:
 For a design reference:
 
 - Give each spec its own `##` section with a `<!-- @spec contract <spec-id> -->` comment directly above the heading (under `contract: for-each-ac`, one comment per acceptance criterion the section covers, as `<spec-id>#<ac-id>`).
-- Link the specific design frame (e.g. a Figma node, not the whole file) and note what it covers in one or two sentences.
+- Link the specific design — a Figma node (not the whole file), or a mockup page and its states — and note what it covers in one or two sentences.
 - Extend an existing section instead of duplicating it when a spec's design changes.
 
 Keep the change minimal and consistent with the surrounding document.
@@ -67,7 +67,7 @@ The contract is the consumer-facing interface and may be published, served, or t
 For each affected contract:
 
 1. If the package already has a matching entry under `contracts` in `spex.yaml`, write to its declared `path`.
-2. Otherwise, this is a new contract file: ask the user where it should live, defaulting to inside the owning package itself (for example `<package-path>/contracts/api.openapi.yaml`, with `<package-path>` from `spex info --package <package-name>`, or `contracts/figma.md` for a design reference); offer `<spex-dir>/contracts/` as the alternative for a contract meant to be shared across packages. Write the file at whichever path the user confirms.
+2. Otherwise, this is a new contract file: ask the user where it should live, defaulting to inside the owning package itself (for example `<package-path>/contracts/api.openapi.yaml`, with `<package-path>` from `spex info --package <package-name>`, or `contracts/design.md` for a design reference); offer `<spex-dir>/contracts/` as the alternative for a contract meant to be shared across packages. Write the file at whichever path the user confirms.
 3. Record any new contract file under its package's `contracts` in `<spex-dir>/spex.yaml`, with a `path` (relative to the spex directory) and a `description`, matching the existing entries' shape. An already-recorded contract needs no new entry.
 4. Validate `spex.yaml` against `<spex-dir>/schemas/spex.schema.json`.
 5. Tell the user the contract change you wrote (the added or modified operations, messages, and schemas) and where, then ask whether they want to change or edit anything. Apply any requested edits in place.
@@ -116,18 +116,20 @@ components:
 
 The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `OrderItem`.
 
-Design reference example, for a UI-facing spec, in `contracts/figma.md`:
+Design reference example, for a UI-facing spec, in `contracts/design.md`, linking a mockup:
 
 ```md
 <!-- @spec contract delivery-time -->
 
 ## Delivery time
 
-https://figma.com/file/shopping-notes/list-and-delivery?node-id=42%3A100
+[mockups/pages/order.html](mockups/pages/order.html), states `estimate` and `countdown`
 
 List delivery estimate (live, updates as items are added) and the
 in-progress order countdown.
 ```
+
+A Figma frame takes the mockup link's place: `https://figma.com/file/shopping-notes/list-and-delivery?node-id=42%3A100`.
 
 ## Step 6 — Point to the next skill
 

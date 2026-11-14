@@ -142,7 +142,7 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
   @spec impl place-pizza-order#created-order-status
   ```
 
-- **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or a Figma mockup for UI. AI implements from spec and contract.
+- **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or, for UI, a design reference linking a Figma frame or a mockup. AI implements from spec and contract.
 
   ```yaml
   paths:

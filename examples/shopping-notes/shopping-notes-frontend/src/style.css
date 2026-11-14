@@ -1,0 +1,173 @@
+/* Matches the approved design in contracts/mockups/mockup.css; e2e/design.spec.ts fails until it does. */
+
+/* base */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        sans-serif;
+}
+
+/* pages */
+.not-found {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #fafafa;
+}
+
+.not-found__code {
+    margin: 0;
+    font-size: 64px;
+    font-weight: 700;
+    color: #1c1c1c;
+}
+
+.not-found__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+    color: #1c1c1c;
+}
+
+.not-found__description {
+    width: 280px;
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+
+.not-found__link {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    background-color: #296bfa;
+}
+
+.shopping-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 32px 16px;
+    background-color: #fafafa;
+}
+
+.shopping-list__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #171717;
+}
+
+.shopping-list__add {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.shopping-list__input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+    color: #171717;
+}
+
+.shopping-list__add-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #3373f2;
+}
+
+.shopping-list__items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.shopping-list__item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.shopping-list__checkbox {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #3373f2;
+}
+
+.shopping-list__item-name {
+    flex: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #171717;
+}
+
+.shopping-list__item-name--bought {
+    color: #8c8c8c;
+    text-decoration: line-through;
+}
+
+.shopping-list__delete {
+    border: none;
+    font: inherit;
+    font-size: 13px;
+    color: #d94040;
+    background: none;
+    cursor: pointer;
+}
+
+.shopping-list__empty {
+    width: 100%;
+    padding: 60px 0 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #8c8c8c;
+    text-align: center;
+    background-color: #fff;
+}
+
+.shopping-list__clear {
+    padding: 10px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #171717;
+    background-color: #fff;
+    cursor: pointer;
+}

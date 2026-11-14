@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.37.0] - 2026-11-12
 
 - Removed the `CLAUDE.md` symlink `spex init` wrote next to `AGENTS.md`, since Claude Code now reads `AGENTS.md` itself; delete the old link (see the migration guide).
+- Added mockups to the `spex-contract` and `spex-review-spec` skills, so a design reference can link static HTML pages kept in the package instead of a Figma frame.
 
 ## [0.36.0] - 2026-11-09
 

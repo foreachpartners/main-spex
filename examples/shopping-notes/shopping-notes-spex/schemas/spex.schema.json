@@ -112,7 +112,7 @@
     },
     "contract": {
       "type": "object",
-      "description": "An interface contract owned by a package: OpenAPI, proto, GraphQL SDL, AsyncAPI, or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design.",
+      "description": "An interface contract owned by a package: OpenAPI, proto, GraphQL SDL, AsyncAPI, or, for a UI-facing spec, a design reference — a markdown document linking the spec to its visual design, a Figma frame or a mockup.",
       "properties": {
         "path": {
           "type": "string",

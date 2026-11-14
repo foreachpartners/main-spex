@@ -23,9 +23,9 @@ Search the packages listed in the spec's `packages` for code annotated `@spec im
 
 Skip when the spec has no contract. Otherwise find the contract annotated `@spec contract <spec-id>` in the contracts of the spec's `packages`. Check only what is implemented.
 
-- Design reference (Figma): open the linked frame and capture it. Run the implementation and capture the same screen at the frame's size, in every state the frame and the acceptance criteria cover. Compare the two and report differences in layout, content, and states. Ignore rendering noise such as font smoothing or 1px shifts.
+- Design reference (Figma frame or mockup): open the linked frame or mockup page and capture it. Run the implementation and capture the same screen at the design's size, in every state the design and the acceptance criteria cover. Compare the two and report differences in layout, content, and states. Ignore rendering noise such as font smoothing or 1px shifts.
 - API contract (OpenAPI): compare each operation, status code, field, and error with the code.
-- Use whatever Figma access and screenshot tooling the agent has. When there is none or the app cannot run, skip the comparison and list it in one "Not verified: design" line. Do not judge a design from code alone.
+- Use whatever Figma access, browser, and screenshot tooling the agent has. When there is none or the app cannot run, skip the comparison and list it in one "Not verified: design" line. Do not judge a design from code alone.
 
 Report each difference as a finding. Quote the acceptance criterion and the contract element or frame note it breaks.
 

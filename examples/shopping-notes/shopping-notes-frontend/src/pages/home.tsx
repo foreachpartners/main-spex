@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 interface Item {
   id: string;
@@ -7,116 +7,6 @@ interface Item {
 }
 
 const API_BASE_URL = "http://localhost:3000";
-
-const containerStyle: CSSProperties = {
-  backgroundColor: "#fafafa",
-  display: "flex",
-  flexDirection: "column",
-  gap: "20px",
-  alignItems: "flex-start",
-  padding: "32px 16px",
-  minHeight: "100vh",
-};
-
-const titleStyle: CSSProperties = {
-  fontWeight: 600,
-  color: "#171717",
-  fontSize: "22px",
-  margin: 0,
-};
-
-const addRowStyle: CSSProperties = {
-  display: "flex",
-  gap: "8px",
-  alignItems: "center",
-  width: "100%",
-};
-
-const inputStyle: CSSProperties = {
-  flex: 1,
-  border: "1px solid #e0e0e0",
-  borderRadius: "8px",
-  padding: "10px 12px",
-  fontSize: "15px",
-  color: "#171717",
-};
-
-const addButtonStyle: CSSProperties = {
-  backgroundColor: "#3373f2",
-  color: "#fff",
-  fontWeight: 600,
-  fontSize: "14px",
-  padding: "10px 16px",
-  borderRadius: "8px",
-  border: "none",
-};
-
-const listStyle: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "10px",
-  width: "100%",
-};
-
-const itemRowStyle: CSSProperties = {
-  display: "flex",
-  gap: "12px",
-  alignItems: "center",
-  width: "100%",
-  border: "1px solid #e0e0e0",
-  borderRadius: "8px",
-  padding: "12px",
-  backgroundColor: "#fff",
-};
-
-const checkboxStyle: CSSProperties = {
-  width: "20px",
-  height: "20px",
-  margin: 0,
-  accentColor: "#3373f2",
-};
-
-const itemNameStyle: CSSProperties = {
-  flex: 1,
-  fontSize: "15px",
-  color: "#171717",
-  margin: 0,
-};
-
-const itemNameBoughtStyle: CSSProperties = {
-  ...itemNameStyle,
-  color: "#8c8c8c",
-  textDecoration: "line-through",
-};
-
-const deleteButtonStyle: CSSProperties = {
-  background: "none",
-  border: "none",
-  color: "#d94040",
-  fontSize: "13px",
-  cursor: "pointer",
-};
-
-const emptyStateStyle: CSSProperties = {
-  width: "100%",
-  backgroundColor: "#fff",
-  borderRadius: "8px",
-  padding: "60px 0 20px",
-  textAlign: "center",
-  color: "#8c8c8c",
-  fontSize: "15px",
-};
-
-const clearButtonStyle: CSSProperties = {
-  backgroundColor: "#fff",
-  border: "1px solid #e0e0e0",
-  borderRadius: "8px",
-  padding: "10px 16px",
-  fontWeight: 600,
-  fontSize: "14px",
-  color: "#171717",
-  cursor: "pointer",
-};
 
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
@@ -159,7 +49,11 @@ export default function Home() {
     });
     const updated = (await response.json()) as Item;
 
-    setItems((existing) => existing.map((existingItem) => (existingItem.id === updated.id ? updated : existingItem)));
+    setItems((existing) =>
+      existing.map((existingItem) =>
+        existingItem.id === updated.id ? updated : existingItem,
+      ),
+    );
   }
 
   async function handleDeleteItem(id: string) {
@@ -181,41 +75,53 @@ export default function Home() {
   }
 
   return (
-    <div style={containerStyle}>
-      <p style={titleStyle}>Shopping notes</p>
+    <div className="shopping-list">
+      <p className="shopping-list__title">Shopping notes</p>
       {/* @spec impl fe-add-shopping-item#add-item-input */}
-      <form style={addRowStyle} onSubmit={handleAddItem}>
+      <form className="shopping-list__add" onSubmit={handleAddItem}>
         <input
-          style={inputStyle}
+          className="shopping-list__input"
           type="text"
           placeholder="Add an item"
           value={newItemName}
           onChange={(event) => setNewItemName(event.target.value)}
         />
-        <button style={addButtonStyle} type="submit">
+        <button className="shopping-list__add-button" type="submit">
           Add
         </button>
       </form>
       {items.length === 0 ? (
         // @spec impl fe-view-shopping-list#empty-state
-        <div style={emptyStateStyle}>No items yet</div>
+        <div className="shopping-list__empty">No items yet</div>
       ) : (
         // @spec impl fe-view-shopping-list#display-item-list
-        <div style={listStyle}>
+        <div className="shopping-list__items">
           {items.map((item) => (
-            <div key={item.id} style={itemRowStyle}>
+            <div key={item.id} className="shopping-list__item">
               {/* @spec impl fe-mark-item-bought#mark-bought-action */}
               <input
-                style={checkboxStyle}
+                className="shopping-list__checkbox"
                 type="checkbox"
                 checked={item.bought}
                 onChange={() => handleToggleBought(item)}
                 aria-label={`Mark ${item.name} as bought`}
               />
               {/* @spec impl fe-mark-item-bought#distinguish-bought-items */}
-              <p style={item.bought ? itemNameBoughtStyle : itemNameStyle}>{item.name}</p>
+              <p
+                className={
+                  item.bought
+                    ? "shopping-list__item-name shopping-list__item-name--bought"
+                    : "shopping-list__item-name"
+                }
+              >
+                {item.name}
+              </p>
               {/* @spec impl fe-delete-shopping-item#delete-item-action */}
-              <button style={deleteButtonStyle} type="button" onClick={() => handleDeleteItem(item.id)}>
+              <button
+                className="shopping-list__delete"
+                type="button"
+                onClick={() => handleDeleteItem(item.id)}
+              >
                 Delete
               </button>
             </div>
@@ -224,7 +130,11 @@ export default function Home() {
       )}
       {items.length > 0 && (
         // @spec impl fe-clear-shopping-list#clear-list-action
-        <button style={clearButtonStyle} type="button" onClick={handleClearAll}>
+        <button
+          className="shopping-list__clear"
+          type="button"
+          onClick={handleClearAll}
+        >
           Clear all
         </button>
       )}

@@ -14,7 +14,7 @@ When the subject touches something that already exists in the project (a capabil
 - Find the related specs with `spex specs --fields id title description --output <tmp-path>` (narrow it with `--search <keyword>...`), then read each in full with `spex specs --id <spec-id>...`.
 - Read the contracts of the affected packages: `spex info --package <package-name>` lists them under `contracts`, each with its `path`.
 
-Specs are the source of truth, so grill against them. Treat what a spec or contract already settles as a fact: state it and move on instead of asking. Put to me, with your recommendation, each place where my plan contradicts an acceptance criterion or a contract, where they leave a gap, or where a spec or contract would have to change first. Never change a spec or contract while grilling.
+Specs are the source of truth, so grill against them. Treat what a spec or contract already settles as a fact: state it and move on instead of asking. Put to me, with your recommendation, each place where my plan contradicts an acceptance criterion or a contract, where they leave a gap, or where a spec or contract would have to change first.
 
 Do not act on it until I confirm we have reached a shared understanding.
 

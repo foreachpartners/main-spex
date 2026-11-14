@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Shopping list page mockup</title>
+        <script src="../mockup.js"></script>
+    </head>
+    <body>
+        <main>
+            <div data-state="empty">
+                <p class="mockup__title">Empty, no items yet</p>
+                <div class="shopping-list">
+                    <p class="shopping-list__title">Shopping notes</p>
+                    <form class="shopping-list__add" onsubmit="return false;">
+                        <input
+                            class="shopping-list__input"
+                            type="text"
+                            placeholder="Add an item"
+                        />
+                        <button class="shopping-list__add-button" type="submit">
+                            Add
+                        </button>
+                    </form>
+                    <div class="shopping-list__empty">No items yet</div>
+                </div>
+            </div>
+
+            <div data-state="with-items">
+                <p class="mockup__title">With items, "Eggs" bought</p>
+                <div class="shopping-list">
+                    <p class="shopping-list__title">Shopping notes</p>
+                    <form class="shopping-list__add" onsubmit="return false;">
+                        <input
+                            class="shopping-list__input"
+                            type="text"
+                            placeholder="Add an item"
+                        />
+                        <button class="shopping-list__add-button" type="submit">
+                            Add
+                        </button>
+                    </form>
+                    <div class="shopping-list__items">
+                        <div class="shopping-list__item">
+                            <input
+                                class="shopping-list__checkbox"
+                                type="checkbox"
+                                aria-label="Mark Milk as bought"
+                            />
+                            <p class="shopping-list__item-name">Milk</p>
+                            <button class="shopping-list__delete" type="button">
+                                Delete
+                            </button>
+                        </div>
+                        <div class="shopping-list__item">
+                            <input
+                                class="shopping-list__checkbox"
+                                type="checkbox"
+                                aria-label="Mark Eggs as bought"
+                                checked
+                            />
+                            <p
+                                class="shopping-list__item-name shopping-list__item-name--bought"
+                            >
+                                Eggs
+                            </p>
+                            <button class="shopping-list__delete" type="button">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <button class="shopping-list__clear" type="button">
+                        Clear all
+                    </button>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>

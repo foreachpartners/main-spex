@@ -21,5 +21,5 @@ shopping-notes/               <- project root folder
 ## State
 
 - api: node fastify api with a healthcheck endpoint and shopping list capabilities (add, view, mark bought, delete, clear), vitest tests
-- frontend: react SPA with a home page, a not found page, and shopping list capabilities (add, view, mark bought, delete, clear), vitest unit tests and playwright e2e tests
+- frontend: react SPA with a home page, a not found page, and shopping list capabilities (add, view, mark bought, delete, clear), mockups as its design contract, vitest unit tests and playwright e2e tests that hold each page to its mockup
 - spex: full spec, contract, and traceability coverage — see `shopping-notes-spex/tutorial-completion.md`

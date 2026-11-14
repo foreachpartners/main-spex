@@ -51,8 +51,8 @@ packages:
     description: React SPA that lets users create and manage shopping notes against the API.
     path: ../shopping-notes-frontend
     contracts:
-      - path: ../shopping-notes-frontend/contracts/figma.md
-        description: Figma design references for frontend UI specs.
+      - path: ../shopping-notes-frontend/contracts/design.md
+        description: Design reference for frontend UI specs, linking each to its mockup.
     rules:
       - commit-message-format
       - dependencies-rules
