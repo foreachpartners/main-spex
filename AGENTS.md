@@ -118,14 +118,13 @@ Keep this section in sync when the structure changes.
 
 ## Rules
 
-- **Simplicity**: All technical assets, tools, and processes must be simple and intuitive for any teammate or AI to quickly understand, execute, and safely change.
-- **Single source of truth**: every business rule, behavior, contract, and configuration value must be mastered in exactly one place. Any other system that needs this information must reference, link to, or generate from this primary source rather than duplicating it. Repeating wording or an idea for readability is not duplication.
-- **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works. Avoid unnecessary abstraction, comments, indirection, and premature generalization.
-- **DRY** (Don't Repeat Yourself): Extract shared logic into a single source of truth instead of duplicating it. Reuse existing code, types, and systems before adding new ones.
+- **KISS** (Keep It Simple, Stupid): Prefer the simplest solution that works and that anyone can quickly understand and safely change. Avoid unnecessary abstraction, indirection, and premature generalization.
+- **DRY** (Don't Repeat Yourself): Master every business rule, behavior, contract, configuration value, and piece of shared logic in exactly one place; everything else references, reuses, or generates from it. Repeating wording for readability is not duplication.
+- **Maintainability**: Optimize for long-term maintainability over short-term speed, so code stays easy to change and extend as the application grows. Never apply a workaround or hack unless explicitly asked; if the proper fix goes beyond the task, propose it first.
+- **Consistency**: Follow the patterns already in the codebase. When a pattern must change, change it everywhere it is used; never mix old and new.
 - **Self-Documenting Code**: Express intent through clear names for types, functions, and variables. Add a comment only when the name cannot carry the meaning alone — a non-obvious why, hidden constraint, or surprising behavior — in one short line. Never comment what the code does, restate a name, or narrate an extraction or refactor.
 - **Ask to clarify**: When a request is ambiguous, underspecified, or could be reasonably interpreted in more than one way, ask for clarification before proceeding instead of guessing.
-- **Systemic Fix Over Quick Fix**: Always implement the proper, maintainable solution. Never apply a workaround, hack, band-aid, or temporary fix, unless the user explicitly asks for one in that request. If the proper fix requires refactoring, architectural changes, or expanding the scope of the current task, stop immediately, present the proper solution, and ask the user for explicit permission before proceeding.
-- **Change only what the task requires**: don't refactor, rename, or reformat adjacent code that isn't part of it unless triggered by the "Systemic Fix Over Quick Fix" rule.
+- **Change only what the task requires**: don't refactor, rename, or reformat adjacent code that isn't part of it unless the "Maintainability" rule requires it.
 - **Stop on major findings**: When investigation reveals a major problem — a bug, a spec/code mismatch, a failing check, a design flaw — related to the task or not, stop. Report it with evidence and ask the user how to proceed. Never fix it silently, work around it, or ignore it. Report minor problems at the end of the task.
 - **Propose major improvements**: When, at any step, a substantially simpler or better approach than the requested one emerges, stop, propose it, and wait for the user's decision before continuing. Propose a behavior change as a spec change first, since the spec is the source of truth. Report minor improvements at the end of the task.
 - **Glossary Terms**: Use the terms defined in `docs/glossary.md` consistently across code, messages, schemas, and docs.

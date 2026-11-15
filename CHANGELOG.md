@@ -2,6 +2,10 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
+## [0.38.0] - Unreleased
+
+- Changed the core discipline in the managed `AGENTS.md` to improve the guidance agents follow.
+
 ## [0.37.0] - 2026-11-14
 
 - Removed the `CLAUDE.md` symlink `spex init` wrote next to `AGENTS.md`, since Claude Code now reads `AGENTS.md` itself; delete the old link (see the migration guide).
