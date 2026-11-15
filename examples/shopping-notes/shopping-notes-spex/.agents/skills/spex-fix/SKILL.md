@@ -36,16 +36,16 @@ Reproduce the problem again — it must be gone. Run formatters, linters, the ex
 Stop means: change nothing further, report what you found with evidence, and ask the user how to proceed.
 
 - The proper fix is major (step 3): present the proper solution and wait for explicit permission.
-- Any step reveals a major problem — a different bug, a spec/code mismatch, a failing check, a design flaw — related to the task or not. Never fix it silently, work around it, or ignore it.
+- Any step reveals a major problem a small change can't fix — a different bug, a spec/code mismatch, a failing check, a design flaw — related to the task or not. Never fix it silently, work around it, or ignore it.
 
-Minor problems wait for the report.
+Minor problems, and major ones a small change can fix, wait for the report.
 
 ## Report
 
 - The problem, whether it was real (with evidence), and its root cause.
 - What changed, and how it removes the cause.
 - The outcome of the reproduction, formatters, linters, tests, `spex check` and `spex coverage`.
-- Minor problems noticed along the way, left unfixed.
+- Minor problems, and major ones a small change can fix, noticed along the way, left unfixed.
 
 Offer to add regression coverage with `spex-test`.
 

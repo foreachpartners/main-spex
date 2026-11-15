@@ -4,7 +4,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 
 ## [0.38.0] - Unreleased
 
-- Changed the core discipline in the managed `AGENTS.md` to improve the guidance agents follow.
+- Changed the core discipline in the managed `AGENTS.md` and the `spex-fix` and `spex-assembly-line` skills to improve the guidance agents follow.
 
 ## [0.37.0] - 2026-11-14
 

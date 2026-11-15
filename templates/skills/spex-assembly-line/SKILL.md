@@ -59,6 +59,7 @@ Summarize the run:
 - Whether each axis finished clean, or hit the 3-pass cap with findings still open.
 - Any stop by a Fix agent that ended the run.
 - Whether the Test agent finished cleanly or reported an unresolved failure.
+- Minor problems, and major ones a small change can fix, that any agent reported.
 
 ---
 
