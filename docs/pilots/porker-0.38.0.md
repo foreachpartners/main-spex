@@ -33,3 +33,9 @@ In a scratch Git checkout inside the pilot worktree, initialize a single-reposit
 Porker also exercised `openapi-conventions`. That script invokes `spex jq` under inherited `PATH` and reported `could not read the vacuum report` without the CLI directory, although Vacuum had returned valid JSON. With the pin on `PATH`, the rule passed and a direct Vacuum run returned `[]`. The initial and recovered reports are in the PKR-002 office run.
 
 A framework regression test should invoke `check` by absolute path with a different or missing `spex` on `PATH`. Bundled scripts need a reliable way to invoke the executable running the check.
+
+## An inline Git tag in a task is read as a source annotation
+
+Add a tracked `task.md` to a configured application package in a scratch single-repository project. Write a sentence quoting the Git-message tag `@spec first-play-loop` in inline code. The pinned CLI's `check` exits 1 with `spex-internal-spec-id-tracing/annotation-format` at that line. Change the sentence to “The commit contains the first-play-loop specification tag.” The same check exits 0.
+
+Porker produced the former result at `Tasks/PKR-002.md:63` on `93be0d4`. A task may cite the commit's tag without creating a source-level trace. The archive now links to the commit and names the spec. The original report is retained under `runs/PKR-002/control-task-inline-tag.log`. A follow-up can distinguish quoted evidence in a task record from executable trace locations.
