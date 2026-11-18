@@ -22,3 +22,14 @@ Porker reproduced the boolean finding on `porker-server` at `32bd8201d5a7dd9d203
 Run `spex receipt --help`, then `spex receipt --project <project> --journal <scratch> append <receipt.json>`. Help lists `--project`. The command exits 2 with `this command does not use --project`. Reproduced on the shopping-notes example and on Porker.
 
 With `--journal` alone, a valid pending-decision receipt can refer to a missing `Tasks/PKR-ARCHIVE-PROBE-MISSING.md`. Use the `context_digest` from `spex context --id api-healthcheck` on the example or `--id first-play-loop` on Porker. Set the five verification stages to `not-run` and store the path as `decision.reference`. `append` and `show` both exited 0 and the file remained absent. The [receipt spec](../../specs/cli/spex-receipt-cli-cmd.md) documents that evidence references are reported claims. Git trailers and the Markdown task record provide the archive link in the Porker workflow.
+
+## Rule scripts look up the CLI on PATH
+
+In a scratch Git checkout inside the pilot worktree, initialize a single-repository project with a root package that applies `commit-message-format`. Commit the scaffold with `chore`, then add a source annotation for an existing spec and commit it as `feat` with a matching `@spec` tag. Invoke the pinned executable by absolute path.
+
+- With `PATH=/usr/bin:/bin`, `spex check` prints `commit-spec-id-trace.sh: 88: spex: not found` as a warning and exits 0. The script has not checked the commit against the spec catalog.
+- With the same executable directory prepended to `PATH`, the same checkout and rule exit 0 with no findings.
+
+Porker also exercised `openapi-conventions`. That script invokes `spex jq` under inherited `PATH` and reported `could not read the vacuum report` without the CLI directory, although Vacuum had returned valid JSON. With the pin on `PATH`, the rule passed and a direct Vacuum run returned `[]`. The initial and recovered reports are in the PKR-002 office run.
+
+A framework regression test should invoke `check` by absolute path with a different or missing `spex` on `PATH`. Bundled scripts need a reliable way to invoke the executable running the check.
