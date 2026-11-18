@@ -94,13 +94,30 @@ fn is_listed(check_ignore: &[PreexistingError], finding: &Finding, file: Option<
 pub(super) fn drop_baselined_findings<'a>(
     reports: &mut [CheckReport<'a>],
     selected: &[&'a Package],
-) {
-    for report in reports {
-        let target = &report.target;
-        report.findings.retain(|finding| {
-            !owner(target, finding, selected).is_some_and(|owner| is_baselined(finding, &owner))
-        });
-    }
+) -> Vec<CheckReport<'a>> {
+    split_findings(reports, |target, finding| {
+        owner(target, finding, selected).is_some_and(|owner| is_baselined(finding, &owner))
+    })
+}
+
+pub(super) fn split_findings<'a>(
+    reports: &mut [CheckReport<'a>],
+    mut inherited: impl FnMut(&ReportTarget<'a>, &Finding) -> bool,
+) -> Vec<CheckReport<'a>> {
+    reports
+        .iter_mut()
+        .filter_map(|report| {
+            let target = report.target;
+            let (old, current): (Vec<_>, Vec<_>) = std::mem::take(&mut report.findings)
+                .into_iter()
+                .partition(|finding| inherited(&target, finding));
+            report.findings = current;
+            (!old.is_empty()).then_some(CheckReport {
+                target,
+                findings: old,
+            })
+        })
+        .collect()
 }
 
 pub(super) enum BaselineFile {

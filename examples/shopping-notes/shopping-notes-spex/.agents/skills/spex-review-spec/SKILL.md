@@ -13,11 +13,11 @@ Use the spec the user provided. Otherwise resolve it from the current work: the 
 
 ### 2. Fetch the spec
 
-Run `spex specs --id <spec-id-a> <spec-id-b>` for the resolved spec(s). Read the PRD in full, at the path `spex info` prints as `prd`, for the product's goal behind the spec.
+Use the handed-off task context while its governing specs, rules and contracts stay current. Otherwise run `spex context --id <spec-id-a> <spec-id-b>` for the resolved specs. Read the criteria and project summary. Open its PRD reference when the product intent needs more detail.
 
 ### 3. Find the implementation
 
-Search the packages listed in the spec's `packages` for code annotated `@spec impl <spec-id>`. Review it as it stands on the current branch.
+Use `spex coverage --id <spec-id-a> <spec-id-b>` to find trace locations. Inspect the actual code and the changed entry points in the diff. Report a missing trace when an entry point changes product behavior governed by a spec and lacks the relevant annotation.
 
 ### 4. Check against the contract
 

@@ -5,6 +5,8 @@ mod tests_unit {
     use tempfile::tempdir;
 
     use crate::commands::init::scaffold::scaffold;
+    use crate::support::bundled_rule::write_bundled_rule;
+    use crate::support::fs::create_dir_all;
     use crate::support::managed_section::PROJECT_SECTION_MARKER;
 
     const SCHEMA: &str = "schemas/spex.schema.json";

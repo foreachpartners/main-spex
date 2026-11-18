@@ -35,7 +35,7 @@ mod tests {
         let program = spex.join("rules/commit-message-format/sample.sh");
         write_script(&program, "#!/bin/sh\necho boom\nexit 1\n");
 
-        let hits = run_script_once(&program, &package, &spex).expect("script outcome");
+        let hits = run_script_once(&program, &package, &spex, None).expect("script outcome");
 
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].message, "boom");
@@ -60,7 +60,7 @@ mod tests {
         };
 
         let hits =
-            run_per_file_script(&program, &package, &spex, &[&file]).expect("script outcome");
+            run_per_file_script(&program, &package, &spex, &[&file], None).expect("script outcome");
 
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].message, "README.md");
@@ -79,7 +79,7 @@ mod tests {
             "#!/bin/sh\nprintf 'docs/intro.md:40\\tmatches forbidden writing pattern\\n'\nprintf '\\n'\nprintf 'a stray diagnostic\\n'\nexit 1\n",
         );
 
-        let hits = run_script_once(&program, &package, &spex).expect("script outcome");
+        let hits = run_script_once(&program, &package, &spex, None).expect("script outcome");
 
         assert_eq!(hits.len(), 2);
         assert_eq!(

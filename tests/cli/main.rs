@@ -1,11 +1,15 @@
 mod check;
 mod check_schema;
 mod common;
+mod context;
+mod contract_compatibility;
 mod coverage;
+mod doctor;
 mod info;
 mod init;
 mod jq;
 mod library;
+mod receipt;
 mod rules;
 mod specs;
 mod update;

@@ -17,6 +17,7 @@ pub(super) struct Finding {
 
 pub(super) enum Source {
     Rule { rule_id: String, check: String },
+    Execution { rule_id: String, check: String },
     Spec { spec_id: String, check: String },
     Internal { id: String, check: String },
     UnknownRule { rule_id: String },
@@ -66,6 +67,24 @@ impl Source {
         }
     }
 
+    pub(super) fn execution(rule_id: &str, check: &str) -> Self {
+        Self::Execution {
+            rule_id: rule_id.to_string(),
+            check: check.to_string(),
+        }
+    }
+
+    pub(super) fn kind(&self) -> &'static str {
+        match self {
+            Self::Rule { .. } => "rule",
+            Self::Execution { .. } => "execution-error",
+            Self::Spec { .. } => "spec",
+            Self::Internal { .. } => "conformance",
+            Self::UnknownRule { .. } => "unknown-rule",
+            Self::UnreachablePackage { .. } => "missing-package",
+        }
+    }
+
     pub(super) fn spec(spec_id: &str, check: &str) -> Self {
         Self::Spec {
             spec_id: spec_id.to_string(),
@@ -91,7 +110,9 @@ impl Source {
                 check,
             }
             | Self::Internal { id: owner, check } => Some((owner, check)),
-            Self::UnknownRule { .. } | Self::UnreachablePackage { .. } => None,
+            Self::Execution { .. } | Self::UnknownRule { .. } | Self::UnreachablePackage { .. } => {
+                None
+            }
         }
     }
 }
@@ -100,6 +121,10 @@ impl fmt::Display for Source {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Rule {
+                rule_id: owner,
+                check,
+            }
+            | Self::Execution {
                 rule_id: owner,
                 check,
             }

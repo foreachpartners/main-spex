@@ -84,6 +84,7 @@ pub fn package(name: &str, path: &str) -> Package {
 
 pub fn spex(packages: Vec<Package>) -> Spex {
     Spex {
+        layout: Layout::MultiRepo,
         dir: spex_dir().to_path_buf(),
         project_name: "demo".to_string(),
         agent_root: spex_dir().to_path_buf(),

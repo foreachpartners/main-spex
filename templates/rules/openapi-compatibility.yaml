@@ -1,0 +1,25 @@
+id: openapi-compatibility
+title: OpenAPI compatibility
+sync_with_upstream: true
+description: >-
+  Compare OpenAPI contracts with their counterparts in an explicitly selected earlier checkout.
+  Enable this rule for consumers whose API compatibility must be preserved.
+acceptance_criteria:
+  - "MUST preserve consumer compatibility with the baseline contract"
+  - "MUST set SPEX_OPENAPI_BASELINE_DIR to the absolute root of a baseline checkout or export of the repository storing the contracts"
+  - "MUST run comparisons with trusted contracts and reference trees or isolate the runner from the network and sensitive local files"
+checks:
+  - name: oasdiff-breaking
+    description: Compare each OpenAPI contract with its baseline using oasdiff
+    type: script
+    run: per-file
+    script: oasdiff-breaking.sh
+    requires: [git, oasdiff]
+    timeout_seconds: 120
+    include:
+      - "**/*.openapi.{yaml,yml,json}"
+      - "**/openapi.{yaml,yml,json}"
+    severity: error
+examples:
+  check: |
+    SPEX_OPENAPI_BASELINE_DIR=/work/approved-api-baseline spex check --package api

@@ -1,14 +1,15 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use eros::{Context, IntoAnyUnion};
+use eros::{Context, IntoAnyUnion, bail};
 use serde::{Deserialize, Serialize};
 
 use super::Layout;
+use super::workspace::WorkspaceConfig;
 use crate::error::{Result, config_not_found, could_not_parse, could_not_read};
 use crate::rule::RuleId;
 use crate::spec::SpecCoverageIgnore;
-use crate::support::fs::dir_name;
+use crate::support::fs::{canonical, dir_name};
 
 #[cfg(test)]
 #[path = "spex_config_test.rs"]
@@ -73,7 +74,7 @@ impl SpexConfig {
             if config_path.is_file() {
                 return Ok(config_path);
             }
-            if let Some(child_config_path) = Self::spex_child_config_path(dir) {
+            if let Some(child_config_path) = Self::spex_child_config_path(dir, start)? {
                 return Ok(child_config_path);
             }
         }
@@ -88,17 +89,43 @@ impl SpexConfig {
         name == SPEX_DIR_NAME || name.ends_with(&format!("-{SPEX_DIR_NAME}"))
     }
 
-    fn spex_child_config_path(dir: &Path) -> Option<PathBuf> {
-        let mut config_paths: Vec<PathBuf> = fs::read_dir(dir)
-            .ok()?
+    fn spex_child_config_path(dir: &Path, start: &Path) -> Result<Option<PathBuf>> {
+        let Ok(entries) = fs::read_dir(dir) else {
+            return Ok(None);
+        };
+        let mut config_paths: Vec<PathBuf> = entries
             .filter_map(|entry| entry.ok())
             .map(|entry| entry.path())
             .filter(|path| dir_name(path).is_some_and(Self::is_spex_dir_name))
             .map(|path| path.join(SPEX_CONFIG_FILE))
             .filter(|config_path| config_path.is_file())
             .collect();
+        if config_paths.len() < 2 {
+            return Ok(config_paths.pop());
+        }
+
         config_paths.sort();
-        config_paths.into_iter().next()
+        let start = canonical(start);
+        let owning_configs: Vec<&PathBuf> = config_paths
+            .iter()
+            .filter(|path| {
+                WorkspaceConfig::read(path).is_ok_and(|config| {
+                    config
+                        .package_paths(Self::dir_of(path))
+                        .any(|(_, package)| start.starts_with(canonical(&package)))
+                })
+            })
+            .collect();
+        if let [owner] = owning_configs.as_slice() {
+            return Ok(Some((*owner).clone()));
+        }
+
+        let candidates = config_paths
+            .iter()
+            .map(|path| format!("`{}`", path.display()))
+            .collect::<Vec<_>>()
+            .join(", ");
+        bail!("ambiguous spex project — pass --project with one of {candidates}")
     }
 
     pub fn load(config_path: &Path) -> Result<Self> {

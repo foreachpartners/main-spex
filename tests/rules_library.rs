@@ -207,3 +207,172 @@ fn rules_library_entries_pass_the_conformance_checks_of_spex_check() {
         "rules library entries fail spex check conformance:\n{report}"
     );
 }
+
+#[cfg(unix)]
+mod commit_trace {
+    use super::*;
+    use std::process::Output;
+
+    fn git(dir: &Path, args: &[&str]) -> String {
+        let output = Command::new("git")
+            .current_dir(dir)
+            .env("GIT_CONFIG_NOSYSTEM", "1")
+            .env("GIT_CONFIG_GLOBAL", "/dev/null")
+            .args([
+                "-c",
+                "user.name=Test developer",
+                "-c",
+                "user.email=developer@example.com",
+                "-c",
+                "core.hooksPath=/dev/null",
+            ])
+            .args(args)
+            .output()
+            .expect("run git");
+        assert!(
+            output.status.success(),
+            "{args:?}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        String::from_utf8(output.stdout)
+            .expect("git output is UTF-8")
+            .trim()
+            .to_string()
+    }
+
+    fn project() -> (tempfile::TempDir, PathBuf, PathBuf) {
+        let dir = tempfile::tempdir().expect("temp project");
+        let spec_dir = dir.path().join("demo-spex");
+        let package = dir.path().join("demo-api");
+        let specs = spec_dir.join("specs");
+        fs::create_dir_all(&specs).expect("create specs");
+        fs::create_dir(&package).expect("create API package");
+        fs::write(
+            spec_dir.join("spex.yaml"),
+            format!(
+                "project_name: demo\nproject_short_name: dm\ncli_version: {}\nlayout: multi-repo\nagent_root: .\nprd: docs/prd.md\npackages:\n  - package_name: demo-api\n    package_short_name: api\n    path: ../demo-api\n",
+                env!("CARGO_PKG_VERSION")
+            ),
+        )
+        .expect("write config");
+        for id in ["checkout", "inventory"] {
+            fs::write(
+                specs.join(format!("{id}.yaml")),
+                format!(
+                    "id: {id}\ntitle: Validate a request\ndescription: Validate input.\nacceptance_criteria:\n  - id: validates-input\n    must: Validate input.\n  - id: preserves-label\n    must: Preserve the label.\npackages: [api]\nstatus: active\ncontract: none\n"
+                ),
+            )
+            .expect("write spec");
+        }
+        git(&package, &["init", "-q"]);
+        git(
+            &package,
+            &["commit", "--allow-empty", "-m", "initial commit"],
+        );
+        (dir, spec_dir, package)
+    }
+
+    fn add_trace(package: &Path, annotation: &str, commit_subject: &str) {
+        fs::write(
+            package.join("main.rs"),
+            format!("// @spec impl {annotation}\nfn validate() {{}}\n"),
+        )
+        .expect("write annotation");
+        git(package, &["add", "main.rs"]);
+        git(package, &["commit", "-m", commit_subject]);
+    }
+
+    fn check(spec_dir: &Path, package: &Path, base: Option<&str>) -> Output {
+        let bin = Path::new(env!("CARGO_BIN_EXE_spex"));
+        let mut paths = vec![bin.parent().expect("binary directory").to_path_buf()];
+        if let Some(path) = std::env::var_os("PATH") {
+            paths.extend(std::env::split_paths(&path));
+        }
+        let mut command = Command::new("sh");
+        command
+            .arg(
+                repository()
+                    .join(LIBRARY_DIR)
+                    .join("commit-message-format/commit-spec-id-trace.sh"),
+            )
+            .current_dir(package)
+            .env("PATH", std::env::join_paths(paths).expect("PATH"))
+            .env("SPEX_DIR", spec_dir)
+            .env_remove("SPEX_COMMIT_BASE");
+        if let Some(base) = base {
+            command.env("SPEX_COMMIT_BASE", base);
+        }
+        command.output().expect("run commit trace check")
+    }
+
+    fn stdout(output: &Output) -> String {
+        String::from_utf8(output.stdout.clone()).expect("trace check prints UTF-8")
+    }
+
+    #[test]
+    fn bundled_commit_trace_checks_relevant_fix_tags_against_full_spec_and_criterion_ids() {
+        let (_dir, spec_dir, package) = project();
+        add_trace(
+            &package,
+            "checkout#validates-input",
+            "fix(api): guard checkout @spec inventory#validates-input, checkout#preserves-label, checkout#unknown",
+        );
+        let output = check(&spec_dir, &package, None);
+        assert_eq!(output.status.code(), Some(1));
+        let findings = stdout(&output);
+        assert!(
+            findings.contains("unknown @spec ID checkout#unknown"),
+            "{findings}"
+        );
+        assert!(
+            findings.contains("missing an @spec tag for added trace checkout#validates-input"),
+            "{findings}"
+        );
+    }
+
+    #[test]
+    fn bundled_commit_trace_respects_later_removal_of_a_historical_criterion_marker() {
+        let (_dir, spec_dir, package) = project();
+        add_trace(
+            &package,
+            "checkout#old-criterion",
+            "feat(api): validate checkout @spec checkout#old-criterion",
+        );
+        add_trace(
+            &package,
+            "checkout#validates-input",
+            "fix(api): rename criterion @spec checkout",
+        );
+
+        let output = check(&spec_dir, &package, None);
+        assert!(
+            output.status.success(),
+            "{}\n{}",
+            stdout(&output),
+            String::from_utf8_lossy(&output.stderr),
+        );
+    }
+
+    #[test]
+    fn bundled_commit_trace_accepts_an_exact_ancestor_range_and_rejects_an_invalid_base() {
+        let (_dir, spec_dir, package) = project();
+        let base = git(&package, &["rev-parse", "HEAD"]);
+        add_trace(
+            &package,
+            "checkout#validates-input",
+            "fix(api): guard checkout",
+        );
+        for subject in ["chore: one", "chore: two", "chore: three"] {
+            git(&package, &["commit", "--allow-empty", "-m", subject]);
+        }
+        assert!(check(&spec_dir, &package, None).status.success());
+
+        let ranged = check(&spec_dir, &package, Some(&base));
+        assert_eq!(ranged.status.code(), Some(1));
+        assert!(stdout(&ranged).contains("added trace checkout#validates-input"));
+
+        let invalid = check(&spec_dir, &package, Some("main.rs"));
+        assert_eq!(invalid.status.code(), Some(1));
+        assert!(stdout(&invalid).contains("SPEX_COMMIT_BASE must name a reachable commit"));
+    }
+}

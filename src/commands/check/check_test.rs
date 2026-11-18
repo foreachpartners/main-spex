@@ -24,6 +24,8 @@ mod tests {
             ..check(CheckKind::Script {
                 script: script.to_string(),
                 run,
+                requires: Vec::new(),
+                timeout_seconds: None,
             })
         }
     }
@@ -69,7 +71,7 @@ mod tests {
             candidates: &[],
         };
 
-        let findings = ctx.run_check(&rule_in(&spex, "commit-message-format"), &check);
+        let findings = ctx.run_check(&rule_in(&spex, "commit-message-format"), &check, &mut None);
 
         assert_eq!(findings.len(), 1);
         assert_eq!(findings[0].severity, Severity::Error);
@@ -103,6 +105,7 @@ mod tests {
                 files: &[],
             },
             &mut Vec::new(),
+            &mut None,
         )
         .expect("check");
         assert_eq!(findings.len(), 2);
@@ -123,6 +126,7 @@ mod tests {
                 files: &["src/main.rs".to_string()],
             },
             &mut Vec::new(),
+            &mut None,
         )
         .expect("check");
         assert_eq!(findings.len(), 1);
@@ -171,6 +175,7 @@ mod tests {
                 files: &[],
             },
             &mut collected,
+            &mut None,
         )
         .expect("api");
         package_findings.extend(
@@ -184,6 +189,7 @@ mod tests {
                     files: &[],
                 },
                 &mut collected,
+                &mut None,
             )
             .expect("web"),
         );
@@ -191,7 +197,7 @@ mod tests {
         assert!(package_findings.is_empty());
         assert_eq!(collected.len(), 1);
 
-        let findings = run_project_checks(&spex, &collected);
+        let findings = run_project_checks(&spex, &collected, &mut None);
 
         let runs = std::fs::read_to_string(spex.join("runs.log")).expect("runs.log");
         assert_eq!(runs.lines().count(), 1);

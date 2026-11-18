@@ -79,7 +79,7 @@ Minimal human intervention means the human reviews and decides on what matters m
 
 ### Deterministic Checks over Judgment
 
-AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks (tests, rule checks, linting, schema validation, coverage) prove the change does what the spec demands and that nothing else broke. They give the same answer every time, so they catch what both the AI and the human overlook.
+AI writes code fast, but along the way it may change things nobody asked it to and invent acceptance criteria that no spec actually contains. Human review alone can't catch all of it. Deterministic checks cover distinct parts of verification. Tests exercise behavior, rules and schema validators check conventions and interfaces, and trace coverage finds missing links. A run records only the evidence it obtained.
 
 That is why every check that can be a script must be a script. AI is left to handle what a script can't: writing specs and contracts, generating code and tests, splitting plans, triaging check output, reviewing logic. The tool's language is irrelevant (Bash, Python, Rust); what matters is deterministic input -> output.
 
@@ -87,12 +87,12 @@ That is why every check that can be a script must be a script. AI is left to han
 
 ### Traceability over Assumption
 
-Every behavioral change traces to a spec and down to its acceptance criterion, in both directions: top-down (spec -> contract -> code -> test) and bottom-up (test -> code -> contract -> spec). No orphans, and no acceptance criterion left uncovered. Checking out a commit shows exactly which specs — and which acceptance criteria — the code was built against.
+Every behavioral change traces to a spec and down to its acceptance criterion, in both directions: top-down (spec -> contract -> code -> test) and bottom-up (test -> code -> contract -> spec). No orphans, and no acceptance criterion left uncovered. An exact revision manifest identifies which package commits and spec tree a cross-repository check read. A receipt can link that input to human decisions and verification outcomes.
 
 Traceability pays off twice:
 
 - **Focused context** — a human or agent finds everything related to a spec at once instead of searching the codebase. That saves tokens, improves output, and speeds up the work.
-- **Nothing forgotten** — an agent can forget to implement or test an acceptance criterion. With every criterion traced, the deterministic coverage check proves each one is implemented and tested.
+- **Nothing forgotten** — an agent can forget to implement or test an acceptance criterion. Trace coverage identifies missing contract, implementation and test links so the reviewer can inspect their sources and run the relevant tests.
 
 **Violation test**: a code change affects behavior and carries no trace to a spec, or an acceptance criterion has no trace to a contract, implementation, or test — either is a violation.
 

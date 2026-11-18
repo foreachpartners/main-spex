@@ -38,6 +38,8 @@ checks:
     type: script
     run: per-file
     script: vacuum-lint.sh
+    requires: [vacuum]
+    timeout_seconds: 120
     include:
       - "**/*.openapi.{yaml,yml,json}"
       - "**/openapi.{yaml,yml,json}"

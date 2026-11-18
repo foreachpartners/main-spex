@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -27,8 +28,8 @@ struct Info {
     config: Value,
 }
 
-pub fn run(args: InfoArgs) -> Result<ExitCode> {
-    let (dir, config) = Spex::discover_config()?;
+pub fn run(args: InfoArgs, project: Option<&Path>) -> Result<ExitCode> {
+    let (dir, config) = Spex::load_project_config(project)?;
     let mut config_json = to_json(&config)?;
     let raw_packages = config
         .packages

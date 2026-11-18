@@ -78,9 +78,12 @@ mod tests {
         scoped_file(&dir, "vendor/lib.js", "");
         let files = vec!["src/main.rs".to_string(), "vendor/lib.js".to_string()];
 
-        let resolved =
-            ScopedFile::provided_not_excluded(&package_excluding(&dir, &["vendor/**"]), &files)
-                .expect("provided");
+        let resolved = ScopedFile::provided_not_excluded(
+            &package_excluding(&dir, &["vendor/**"]),
+            dir.path(),
+            &files,
+        )
+        .expect("provided");
 
         assert_eq!(rel_names(&resolved), vec![Path::new("src/main.rs")]);
     }

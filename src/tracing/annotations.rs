@@ -12,15 +12,17 @@ pub struct Annotation {
     pub layer: CoverageLayer,
     pub spec_id: SpecId,
     pub ac_id: Option<AcId>,
+    pub offset: usize,
 }
 
 impl Annotation {
-    fn from_token(layer: CoverageLayer, token: &str) -> Option<Self> {
+    fn from_token(layer: CoverageLayer, token: &str, offset: usize) -> Option<Self> {
         let (spec_id, ac_id) = match token.split_once('#') {
             Some((spec_id, ac_id)) => (spec_id, Some(ac_id)),
             None => (token, None),
         };
         Some(Self {
+            offset,
             layer,
             spec_id: SpecId::try_from(spec_id.to_string()).ok()?,
             ac_id: ac_id
@@ -52,12 +54,12 @@ fn candidates(content: &str) -> impl Iterator<Item = Option<Annotation>> {
         .captures_iter(content)
         .filter_map(|caps| {
             let layer = caps[1].parse::<CoverageLayer>().ok()?;
-            Some((layer, caps.get(2)?.as_str()))
+            Some((layer, caps.get(2)?.as_str(), caps.get(0)?.start()))
         })
-        .flat_map(|(layer, tokens)| {
+        .flat_map(|(layer, tokens, offset)| {
             TOKEN
                 .find_iter(tokens)
-                .map(move |token| Annotation::from_token(layer, token.as_str()))
+                .map(move |token| Annotation::from_token(layer, token.as_str(), offset))
         })
 }
 

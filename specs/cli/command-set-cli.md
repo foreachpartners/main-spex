@@ -8,7 +8,10 @@ The `spex` command-line tool manages a spex project. `spex --help` lists its com
 - MUST provide `spex update`: sync project spex files with latest updates ([spex-update-cli-cmd.md](spex-update-cli-cmd.md)).
 - MUST provide `spex check`: run the rule and framework checks ([spex-check-cli-cmd.md](spex-check-cli-cmd.md)).
 - MUST provide `spex check-schema`: validate JSON or YAML files against a JSON Schema ([spex-check-schema-cli-cmd.md](spex-check-schema-cli-cmd.md)).
-- MUST provide `spex coverage`: report specs coverage for a project ([spex-coverage-cli-cmd.md](spex-coverage-cli-cmd.md)).
+- MUST provide `spex coverage`: report trace coverage for a project ([spex-coverage-cli-cmd.md](spex-coverage-cli-cmd.md)).
+- MUST provide `spex doctor`: diagnose CLI and workspace identity and record or verify Git revision manifests ([spex-doctor-cli-cmd.md](spex-doctor-cli-cmd.md)).
+- MUST provide `spex context`: assemble deterministic task inputs for selected specs ([spex-context-cli-cmd.md](spex-context-cli-cmd.md)).
+- MUST provide `spex receipt`: record scoped decisions and verification outcomes ([spex-receipt-cli-cmd.md](spex-receipt-cli-cmd.md)).
 - MUST provide `spex info`: print project information ([spex-info-cli-cmd.md](spex-info-cli-cmd.md)).
 - MUST provide `spex jq`: run a jq filter on JSON or YAML ([spex-jq-cli-cmd.md](spex-jq-cli-cmd.md)).
 - MUST provide `spex lib`: print the template specs and the rules of the libraries bundled in the binary, and copy a rule into a project ([spex-lib-cli-cmd.md](spex-lib-cli-cmd.md)).

@@ -10,7 +10,7 @@
   The daily order count should be tracked.
   ```
 
-- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria proven by `spex coverage`. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Specs are the single source of truth for the project: its contracts, code, tests and other artifacts come from them and must adhere to them. Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
+- **Spec** (specification) — a single structured requirement, verifiable and precise enough for engineers and AI agents to follow directly, describing _a capability the system must provide_: one coherent product behavior, or a technical implementation needed to support the product's rules, with its specifics captured as acceptance criteria traced with `spex coverage`. Each is written in line with the PRD: most break down its main capabilities, some capture supporting technical capabilities (an endpoint, integration, health check, performance target). Specs are the single source of truth for the project: its contracts, code, tests and other artifacts come from them and must adhere to them. Lives in `specs/`, distinct from a rule, which lives in `rules/`. The dividing line is capability versus convention.
 
   ```yaml
   id: place-pizza-order
@@ -60,6 +60,8 @@
   ```text
   @spec impl place-pizza-order#created-order-status
   ```
+
+- **Trace coverage** — the presence of eligible links from a criterion to its required layers. Executed tests, contract validation and human acceptance each provide their own evidence.
 
 - **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or, for UI, a design reference linking a Figma frame or a mockup. AI implements from spec and contract.
 

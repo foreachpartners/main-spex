@@ -8,6 +8,7 @@ use crate::support::fs::file_url;
 use crate::support::style::{DIM, RED, hyperlink, version_line, visible_width};
 use crate::support::text::wrap_text;
 
+use super::evidence::{CoverageEvidence, declared_waivers};
 use super::report::CoverageReport;
 use super::spec_coverage::{CriterionCoverage, SpecCoverage, SpecHealth};
 
@@ -15,7 +16,12 @@ use super::spec_coverage::{CriterionCoverage, SpecCoverage, SpecHealth};
 #[path = "render_test.rs"]
 mod render_test;
 
-pub fn render(report: &CoverageReport, width: usize, verbose: bool) -> String {
+pub(super) fn render(
+    report: &CoverageReport<'_>,
+    width: usize,
+    verbose: bool,
+    evidence: Option<&CoverageEvidence<'_>>,
+) -> String {
     let mut writer = ReportWriter {
         width,
         verbose,
@@ -27,6 +33,9 @@ pub fn render(report: &CoverageReport, width: usize, verbose: bool) -> String {
     writer.blank();
     writer.specs_section(report);
     writer.gaps_section(report);
+    if let Some(evidence) = evidence {
+        writer.evidence_sections(report, evidence);
+    }
     writer.line(summary_line(report));
     writer.text
 }
@@ -217,6 +226,91 @@ impl ReportWriter {
                     self.gapped_spec(coverage);
                 }
             }
+        }
+        self.end_section();
+    }
+
+    fn evidence_sections(&mut self, report: &CoverageReport<'_>, evidence: &CoverageEvidence<'_>) {
+        if !evidence.unavailable.is_empty() {
+            self.line(format!("Unavailable inputs ({})", evidence.unavailable.len()).bold());
+            for issue in &evidence.unavailable {
+                let kind: &str = issue.kind.into();
+                let state: &str = issue.state.into();
+                let effect = if issue.blocking {
+                    "blocks coverage"
+                } else {
+                    "outside selected scope"
+                };
+                self.line(format!(
+                    "  {} {kind} {} is {state} ({effect})",
+                    issue.package,
+                    issue.path.display()
+                ));
+            }
+            self.end_section();
+        }
+
+        if evidence.strict || evidence.show_traces {
+            self.line("Trace evidence (tests not run)".bold());
+            for coverage in &report.specs {
+                for trace in evidence.traces(&coverage.spec.id) {
+                    if trace.rejection.is_none() && !evidence.show_traces {
+                        continue;
+                    }
+                    let id = match &trace.ac_id {
+                        Some(ac_id) => format!("{}#{ac_id}", coverage.spec.id),
+                        None => coverage.spec.id.to_string(),
+                    };
+                    let rejection = trace
+                        .rejection
+                        .map(|reason| {
+                            let code: &str = reason.into();
+                            format!(" (rejected: {code})")
+                        })
+                        .unwrap_or_default();
+                    let location = format!("{}:{}", trace.path.display(), trace.line);
+                    self.line(format!(
+                        "  {id} {} in {} {}{rejection}",
+                        trace.layer.label(),
+                        trace.package,
+                        hyperlink(&file_url(&trace.path), &location)
+                    ));
+                }
+            }
+            self.end_section();
+        }
+
+        if self.verbose || evidence.show_traces {
+            self.waivers_section(report);
+        }
+    }
+
+    fn waivers_section(&mut self, report: &CoverageReport<'_>) {
+        let mut waivers = report
+            .specs
+            .iter()
+            .flat_map(|coverage| {
+                declared_waivers(coverage.spec).map(move |waiver| (&coverage.spec.id, waiver))
+            })
+            .peekable();
+        if waivers.peek().is_none() {
+            return;
+        }
+        self.line("Declared waivers".bold());
+        for (id, waiver) in waivers {
+            let origin = waiver.package.unwrap_or("spec");
+            let scope = waiver
+                .ignore
+                .ac
+                .as_ref()
+                .map(|id| format!("#{id}"))
+                .unwrap_or_default();
+            let label = waiver.ignore.layer.label();
+            self.wrapped_after(
+                &format!("  {id}{scope} {label} ({origin}): "),
+                &waiver.ignore.reason,
+                DIM,
+            );
         }
         self.end_section();
     }

@@ -193,7 +193,7 @@ mod tests {
 
     fn rendered(width: usize, verbose: bool, specs: &[Spec]) -> String {
         let report = CoverageReport::new(specs, &AnnotationIndex::new());
-        let text = render(&report, width, verbose);
+        let text = render(&report, width, verbose, None);
         anstream::adapter::strip_str(&text).to_string()
     }
 

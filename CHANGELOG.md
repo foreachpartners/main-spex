@@ -5,6 +5,17 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.38.0] - Unreleased
 
 - Changed the core discipline in the managed `AGENTS.md` and the `spex-fix` and `spex-assembly-line` skills to improve the guidance agents follow.
+- Added structured check and trace coverage reports with source locations, skipped work and inherited findings.
+- Changed checks to run a package's file rules on its declared contracts, including contracts stored elsewhere.
+- Added strict coverage for complete inputs and eligible contract, implementation and test traces.
+- Added exact finding baselines so new violations in a previously flagged file still fail.
+- Added an explicit project path, workspace diagnosis and revision manifest verification.
+- Added an upgrade preview for managed files and configuration compatibility.
+- Added deterministic task context and append-only decision and verification receipts.
+- Added script prerequisites and timeouts for external validators.
+- Changed the bundled commit checks to compare spec tags with new annotations in the selected history.
+- Added an opt-in OpenAPI compatibility rule for comparing a contract with a baseline checkout.
+- Changed implementation and review skills to reuse task context and report unresolved findings.
 
 ## [0.37.0] - 2026-11-14
 

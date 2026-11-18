@@ -121,7 +121,7 @@ mod tests {
         .expect("parse config");
 
         let spex = crate::config::spex::Spex::from_config(spex_dir.to_path_buf(), config);
-        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex, false).expect("scan");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
     }
 
@@ -142,7 +142,7 @@ mod tests {
         .expect("parse config");
 
         let spex = crate::config::spex::Spex::from_config(spex_dir, config);
-        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex, false).expect("scan");
 
         assert!(!index.has_ac(
             &testing::spec_id("a"),
@@ -186,7 +186,7 @@ mod tests {
             spex_dir,
             "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    exclude:\n      - vendor\n      - \"**/*.generated.ts\"\n",
         );
-        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex, false).expect("scan");
 
         for (spec, ac, expected) in [
             ("kept", "kept-ac", true),
@@ -221,7 +221,7 @@ mod tests {
             spex_dir,
             "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    contracts:\n      - path: ../contracts/api.openapi.yaml\n        description: REST API\n    exclude:\n      - contracts\n",
         );
-        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex, false).expect("scan");
 
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
     }
@@ -242,7 +242,7 @@ mod tests {
             spex_dir,
             "  - package_name: demo-api\n    package_short_name: api\n    path: ../api\n    exclude: [vendor]\n  - package_name: demo-web\n    package_short_name: web\n    path: ../web\n",
         );
-        let index = AnnotationIndex::scan_project(&spex).expect("scan");
+        let index = AnnotationIndex::scan_project(&spex, false).expect("scan");
 
         assert!(!index.has_ac(
             &testing::spec_id("api"),
@@ -266,7 +266,7 @@ mod tests {
             spex_dir,
             "  - package_name: demo\n    package_short_name: demo\n    path: ..\n    exclude: [\"src/{a,b\"]\n",
         );
-        let error = AnnotationIndex::scan_project(&spex).expect_err("invalid exclude");
+        let error = AnnotationIndex::scan_project(&spex, false).expect_err("invalid exclude");
 
         let message = crate::error::describe(&error);
         assert!(message.contains("`demo`"), "{message}");

@@ -1,10 +1,11 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anstream::eprintln;
 use eros::bail;
 use owo_colors::OwoColorize;
 
-use crate::config::{Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
+use crate::config::workspace::{RevisionManifest, RevisionStatus};
+use crate::config::{Layout, Package, PackageConfig, SPEX_CONFIG_FILE, SpexConfig};
 use crate::error::Result;
 use crate::rule::{self, Rule};
 use crate::spec::{self, CoverageIgnore, Spec, SpecCoverageIgnore, SpecId};
@@ -17,23 +18,47 @@ mod spex_test;
 pub struct Spex {
     pub dir: PathBuf,
     pub project_name: String,
+    pub layout: Layout,
     pub agent_root: PathBuf,
     pub prd: PathBuf,
     pub packages: Vec<Package>,
 }
 
 impl Spex {
-    pub fn locate_spex_config() -> Result<PathBuf> {
-        SpexConfig::find_file(&current_dir()?)
+    pub fn project_config_path(project: Option<&Path>) -> Result<PathBuf> {
+        let Some(project) = project else {
+            return SpexConfig::find_file(&current_dir()?);
+        };
+        let path = if project.is_absolute() {
+            normalize(project)
+        } else {
+            normalize(&current_dir()?.join(project))
+        };
+        let config_path = if path.is_dir() {
+            path.join(SPEX_CONFIG_FILE)
+        } else {
+            path
+        };
+        if config_path
+            .file_name()
+            .is_none_or(|name| name != SPEX_CONFIG_FILE)
+            || !config_path.is_file()
+        {
+            bail!(
+                "--project must point to a `{SPEX_CONFIG_FILE}` file or its directory: `{}`",
+                config_path.display()
+            );
+        }
+        Ok(config_path)
     }
 
-    pub fn discover() -> Result<Self> {
-        let (dir, config) = Self::discover_config()?;
+    pub fn load_project(project: Option<&Path>) -> Result<Self> {
+        let (dir, config) = Self::load_project_config(project)?;
         Self::from_config(dir, config).with_package_configs()
     }
 
-    pub fn discover_config() -> Result<(PathBuf, SpexConfig)> {
-        let config_path = Self::locate_spex_config()?;
+    pub fn load_project_config(project: Option<&Path>) -> Result<(PathBuf, SpexConfig)> {
+        let config_path = Self::project_config_path(project)?;
         let config = SpexConfig::load(&config_path)?;
         warn_if_cli_outdated(&config);
         Ok((SpexConfig::dir_of(&config_path).to_path_buf(), config))
@@ -50,6 +75,7 @@ impl Spex {
             prd: normalize(&dir.join(&config.prd)),
             dir,
             project_name: config.project_name,
+            layout: config.layout,
             packages,
         }
     }
@@ -64,6 +90,46 @@ impl Spex {
                 .extend(package_config.coverage_ignore);
         }
         Ok(self)
+    }
+
+    pub fn verify_revisions(&self, path: &Path) -> Result<()> {
+        let manifest = RevisionManifest::read(path)?;
+        let project =
+            RevisionStatus::inspect_owned(&self.dir, Some(self.expected_git_root(&self.dir)));
+        let packages: Vec<_> = self
+            .packages
+            .iter()
+            .map(|package| {
+                (
+                    package.package_name.as_str(),
+                    RevisionStatus::inspect_owned(
+                        &package.path,
+                        Some(self.expected_git_root(&package.path)),
+                    ),
+                )
+            })
+            .collect();
+        let mismatches = manifest.mismatches(
+            &self.project_name,
+            &project,
+            packages.iter().map(|(name, status)| (*name, status)),
+        );
+        if !mismatches.is_empty() {
+            bail!(
+                "revision manifest `{}` does not match the workspace:\n{}",
+                path.display(),
+                mismatches.join("\n")
+            );
+        }
+        Ok(())
+    }
+
+    fn expected_git_root<'a>(&'a self, package: &'a Path) -> &'a Path {
+        if self.layout.is_multi_repo() {
+            package
+        } else {
+            &self.agent_root
+        }
     }
 
     pub fn rules(&self) -> Result<Vec<Rule>> {

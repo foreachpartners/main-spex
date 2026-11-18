@@ -32,15 +32,21 @@ A change isn't finished until:
 
 - `spex check` passes (no error-severity findings) for every affected package.
 - `spex coverage` shows no gap for any spec acceptance criterion the change touches.
+- The relevant project tests run successfully. Record contract validation and human acceptance when the change calls for them.
 - Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
 
 ## CLI commands
 
-Run from anywhere inside the project; `spex <command> --help` lists every option.
+Run from inside the project or pass `--project <spex-directory-or-config>`. Use `spex <command> --help` for the full option list.
 
 - `spex info [--package <name>...]` — print `spex.yaml` merged with each `spex.package.yaml`: project and per-package configuration, including paths.
-- `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
-- `spex coverage [--package <name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
+- `spex check [--package <name>...] [--files <path>...] [--format json]` — run rules and report inputs, findings and execution errors.
+- `spex coverage [--package <name>...] [--id <id>...] [--strict] [--format json]` — report trace coverage and locations.
+- `spex doctor [--format json]` — inspect detected config, versions and package revisions.
+- `spex doctor --revisions` — print a clean workspace revision manifest. Pass it to `check` or `coverage` with `--require-revisions <file>` to verify the workspace first.
+- `spex context --id <id>... [--package <name>...]` — assemble a reproducible task bundle.
+- `spex receipt --journal <dir> <append|list|show>` — write or read a decision and verification receipt.
+- `spex update --dry-run` — preview managed files affected by an upgrade.
 - `spex specs [--id <spec-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print specs, each with its file `path` after its `id`; only those containing any keyword, or only the named fields of each (e.g. `--fields id title description` for a catalog).
 - `spex rules [--id <rule-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the active rules per package the same way; `--fields id path title description acceptance_criteria examples` leaves out the `checks`.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
