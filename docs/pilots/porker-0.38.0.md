@@ -21,6 +21,8 @@ Porker reproduced the boolean finding on `porker-server` at `32bd8201d5a7dd9d203
 
 Run `spex receipt --help`, then `spex receipt --project <project> --journal <scratch> append <receipt.json>`. Help lists `--project`. The command exits 2 with `this command does not use --project`. Reproduced on the shopping-notes example and on Porker.
 
+Porker PKR-023 found the same mismatch for `--require-revisions`. In the `pilot/porker` worktree, run `spex receipt append --help` and `spex receipt show --help`. Both display the option. Run `spex receipt --journal <scratch> show --require-revisions <manifest> sample`. It exits 2 with `--require-revisions applies to check and coverage` before reading the journal. The [doctor spec](../../specs/cli/spex-doctor-cli-cmd.md) limits the option to those two commands. The Porker run first verified the revisions with `spex doctor --verify-revisions`, then appended and read back the receipt successfully. See `runs/PKR-023/receipt-doctor.log` and `receipt-shown.json` on office-pc.
+
 With `--journal` alone, a valid pending-decision receipt can refer to a missing `Tasks/PKR-ARCHIVE-PROBE-MISSING.md`. Use the `context_digest` from `spex context --id api-healthcheck` on the example or `--id first-play-loop` on Porker. Set the five verification stages to `not-run` and store the path as `decision.reference`. `append` and `show` both exited 0 and the file remained absent. The [receipt spec](../../specs/cli/spex-receipt-cli-cmd.md) documents that evidence references are reported claims. Git trailers and the Markdown task record provide the archive link in the Porker workflow.
 
 ## Rule scripts look up the CLI on PATH
