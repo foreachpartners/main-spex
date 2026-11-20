@@ -5,6 +5,7 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.38.0] - Unreleased
 
 - Changed the core discipline in the managed `AGENTS.md` and the `spex-fix` and `spex-assembly-line` skills to improve the guidance agents follow.
+- Changed the definition of done in the managed `AGENTS.md` to require marking traced acceptance criteria done and fully done specs `active`.
 - Changed the `password-policy` library spec to reject a password equal to the service name or one of the user's own identifiers.
 
 ## [0.37.0] - 2026-11-14
