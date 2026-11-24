@@ -1,19 +1,19 @@
 # `spex coverage`
 
-Reports specs coverage for a project: how well the specs are covered by `@spec` annotations across the project, per acceptance criterion.
+Reports specs coverage for a project: how well the specs are covered by `spec:` annotations across the project, per acceptance criterion.
 
 ## Acceptance criteria
 
 - MUST report, for every spec whose `status` is `active` or `in-progress`, its coverage across the project per acceptance criterion.
-- MUST require a contract per the spec's `contract` field: `single` needs one spec-level `@spec contract <spec-id>` anywhere in any package's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`; `for-each-ac` needs a `@spec contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` needs none.
-- MUST require, for every acceptance criterion, `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>`.
+- MUST require a contract per the spec's `contract` field: `single` needs one spec-level `spec:contract <spec-id>` anywhere in any package's file text, including as the string value of an OpenAPI vendor extension such as `x-spec`; `for-each-ac` needs a `spec:contract <spec-id>#<ac-id>` annotation per acceptance criterion; `none` needs none.
+- MUST require, for every acceptance criterion, `spec:impl <spec-id>#<ac-id>` and `spec:test <spec-id>#<ac-id>`.
 - MUST decide whether a missing requirement is a gap or only pending from the criterion's `is_done` flag and its impl annotation, as laid out in [coverage-states-spec.md](../spec/coverage-states-spec.md).
 - MUST waive a requirement of a spec when the spec's own `coverage_ignore` waives it, or when every package listed in the spec's `packages` waives it in its own `coverage_ignore`, declared in its `spex.yaml` entry or its `spex.package.yaml` ([spec-file-spec.md](../spec/spec-file-spec.md), [spex-yaml-config.md](../config/spex-yaml-config.md), [spex-package-yaml-config.md](../config/spex-package-yaml-config.md)).
 - MUST skip the spex directory's own files in every layout, except the contract files declared in `spex.yaml`, and files ignored by `.gitignore`, as well as well-known dependency lock files.
 - MUST skip the files and folders matched by a package's `exclude`, read as [spex check](spex-check-cli-cmd.md) reads it, so an annotation in them counts for no spec, except in the contract files declared in `spex.yaml`, which `exclude` does not affect.
 - MUST error on an `exclude` pattern that is not a valid glob, naming the package.
 - MUST exit non-zero when an `active` or `in-progress` spec has a gap.
-- MUST NOT let a bare, unqualified `@spec impl|test <spec-id>` satisfy a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec.
+- MUST NOT let a bare, unqualified `spec:impl|test <spec-id>` satisfy a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec.
 - MUST NOT limit the annotation search to the spec's `packages`: a spec kept in the report by `--package` is still traced across every package.
 - MUST NOT waive anything for a `coverage_ignore` entry naming a spec that does not exist.
 - MUST NOT waive a requirement of a spec because of the `coverage_ignore` of a package the spec does not list in `packages`.

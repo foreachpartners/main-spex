@@ -262,7 +262,7 @@
         "field": "description",
         "function": "pattern",
         "functionOptions": {
-          "notMatch": "@spec"
+          "notMatch": "spec:(contract|impl|test)"
         }
       }
     },

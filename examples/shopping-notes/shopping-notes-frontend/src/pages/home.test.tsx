@@ -66,7 +66,7 @@ describe("Home", () => {
   });
 
   it("displays each item's name and bought status", async () => {
-    // @spec test fe-view-shopping-list#display-item-list
+    // spec:test fe-view-shopping-list#display-item-list
     mockFetch([
       { id: "1", name: "Milk", bought: false },
       { id: "2", name: "Bread", bought: true },
@@ -81,7 +81,7 @@ describe("Home", () => {
   });
 
   it("loads the shopping list from the list-items endpoint when the view is opened", async () => {
-    // @spec test fe-view-shopping-list#load-list-from-api
+    // spec:test fe-view-shopping-list#load-list-from-api
     const fetchMock = mockFetch([{ id: "1", name: "Milk", bought: false }]);
 
     render(<Home />);
@@ -92,7 +92,7 @@ describe("Home", () => {
   });
 
   it("shows an empty state when the shopping list has no items", async () => {
-    // @spec test fe-view-shopping-list#empty-state
+    // spec:test fe-view-shopping-list#empty-state
     mockFetch([]);
 
     render(<Home />);
@@ -101,7 +101,7 @@ describe("Home", () => {
   });
 
   it("lets the user enter an item name and submit it to add it to the shopping list", async () => {
-    // @spec test fe-add-shopping-item#add-item-input
+    // spec:test fe-add-shopping-item#add-item-input
     mockFetch([]);
     const user = userEvent.setup();
 
@@ -115,7 +115,7 @@ describe("Home", () => {
   });
 
   it("calls the create-item endpoint when the user submits a new item name", async () => {
-    // @spec test fe-add-shopping-item#call-create-item-endpoint
+    // spec:test fe-add-shopping-item#call-create-item-endpoint
     const fetchMock = mockFetch([]);
     const user = userEvent.setup();
 
@@ -137,7 +137,7 @@ describe("Home", () => {
   });
 
   it("does not submit an add when the input is empty", async () => {
-    // @spec test fe-add-shopping-item#reject-empty-submit
+    // spec:test fe-add-shopping-item#reject-empty-submit
     const fetchMock = mockFetch([]);
     const user = userEvent.setup();
 
@@ -151,7 +151,7 @@ describe("Home", () => {
   });
 
   it("clears the input field after the item is added", async () => {
-    // @spec test fe-add-shopping-item#clear-input-after-add
+    // spec:test fe-add-shopping-item#clear-input-after-add
     mockFetch([]);
     const user = userEvent.setup();
 
@@ -166,7 +166,7 @@ describe("Home", () => {
   });
 
   it("lets the user mark an item as bought from the shopping list with a single action", async () => {
-    // @spec test fe-mark-item-bought#mark-bought-action
+    // spec:test fe-mark-item-bought#mark-bought-action
     mockFetch([{ id: "1", name: "Milk", bought: false }]);
     const user = userEvent.setup();
 
@@ -179,7 +179,7 @@ describe("Home", () => {
   });
 
   it("calls the mark-item-bought endpoint when the user marks an item as bought", async () => {
-    // @spec test fe-mark-item-bought#call-mark-bought-endpoint
+    // spec:test fe-mark-item-bought#call-mark-bought-endpoint
     const fetchMock = mockFetch([{ id: "1", name: "Milk", bought: false }]);
     const user = userEvent.setup();
 
@@ -200,7 +200,7 @@ describe("Home", () => {
   });
 
   it("visually distinguishes bought items from unbought items in the list", async () => {
-    // @spec test fe-mark-item-bought#distinguish-bought-items
+    // spec:test fe-mark-item-bought#distinguish-bought-items
     mockFetch([
       { id: "1", name: "Milk", bought: false },
       { id: "2", name: "Bread", bought: true },
@@ -214,7 +214,7 @@ describe("Home", () => {
   });
 
   it("lets the user delete an item from the shopping list with a single action", async () => {
-    // @spec test fe-delete-shopping-item#delete-item-action
+    // spec:test fe-delete-shopping-item#delete-item-action
     mockFetch([{ id: "1", name: "Milk", bought: false }]);
     const user = userEvent.setup();
 
@@ -227,7 +227,7 @@ describe("Home", () => {
   });
 
   it("calls the delete-item endpoint when the user deletes an item", async () => {
-    // @spec test fe-delete-shopping-item#call-delete-item-endpoint
+    // spec:test fe-delete-shopping-item#call-delete-item-endpoint
     const fetchMock = mockFetch([{ id: "1", name: "Milk", bought: false }]);
     const user = userEvent.setup();
 
@@ -245,7 +245,7 @@ describe("Home", () => {
   });
 
   it("removes the item from the displayed list immediately after it is deleted", async () => {
-    // @spec test fe-delete-shopping-item#remove-item-from-view
+    // spec:test fe-delete-shopping-item#remove-item-from-view
     mockFetch([
       { id: "1", name: "Milk", bought: false },
       { id: "2", name: "Bread", bought: false },
@@ -262,7 +262,7 @@ describe("Home", () => {
   });
 
   it("lets the user clear all items from the shopping list with a single action", async () => {
-    // @spec test fe-clear-shopping-list#clear-list-action
+    // spec:test fe-clear-shopping-list#clear-list-action
     mockFetch([{ id: "1", name: "Milk", bought: false }]);
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
@@ -276,7 +276,7 @@ describe("Home", () => {
   });
 
   it("calls the clear-list endpoint when the user clears the shopping list", async () => {
-    // @spec test fe-clear-shopping-list#call-clear-list-endpoint
+    // spec:test fe-clear-shopping-list#call-clear-list-endpoint
     const fetchMock = mockFetch([{ id: "1", name: "Milk", bought: false }]);
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
@@ -295,7 +295,7 @@ describe("Home", () => {
   });
 
   it("asks the user to confirm before clearing all items", async () => {
-    // @spec test fe-clear-shopping-list#confirm-before-clearing
+    // spec:test fe-clear-shopping-list#confirm-before-clearing
     const fetchMock = mockFetch([{ id: "1", name: "Milk", bought: false }]);
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     const user = userEvent.setup();

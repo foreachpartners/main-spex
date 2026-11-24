@@ -983,7 +983,7 @@ fn check_runs_annotation_checks_only_on_selected_packages() {
     copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/src/rule_reference.rs"),
-        "// @spec impl no-todo-comments\n",
+        "// spec:impl no-todo-comments\n",
     )
     .expect("write rule reference");
     let orphan = "orphan annotation references unknown spec `no-todo-comments`";
@@ -1008,7 +1008,7 @@ fn check_validates_annotations_in_markdown_files() {
     copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/contract.md"),
-        "<!-- @spec contract no-such-spec -->\n",
+        "<!-- spec:contract no-such-spec -->\n",
     )
     .expect("write markdown contract");
 
@@ -1029,7 +1029,7 @@ fn check_flags_annotation_referencing_rule_id_as_orphan() {
     copy_project(&dummy_project_fixture(), &project);
     fs::write(
         project.join("dummy-project-api/src/rule_reference.rs"),
-        "// @spec impl no-todo-comments\n",
+        "// spec:impl no-todo-comments\n",
     )
     .expect("write rule reference");
 

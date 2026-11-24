@@ -39,10 +39,10 @@ export class ItemStore {
   }
 
   create(name: string): Item {
-    // @spec impl api-add-shopping-item#assign-unique-id
+    // spec:impl api-add-shopping-item#assign-unique-id
     const item: Item = { id: randomUUID(), name, bought: false };
     this.items.push(item);
-    // @spec impl api-add-shopping-item#persist-created-item
+    // spec:impl api-add-shopping-item#persist-created-item
     this.writeToDisk();
     return item;
   }
@@ -54,7 +54,7 @@ export class ItemStore {
     }
 
     item.bought = bought;
-    // @spec impl api-mark-item-bought#persist-bought-status
+    // spec:impl api-mark-item-bought#persist-bought-status
     this.writeToDisk();
     return item;
   }
@@ -66,14 +66,14 @@ export class ItemStore {
     }
 
     this.items.splice(index, 1);
-    // @spec impl api-delete-shopping-item#persist-deletion
+    // spec:impl api-delete-shopping-item#persist-deletion
     this.writeToDisk();
     return true;
   }
 
   clear(): void {
     this.items = [];
-    // @spec impl api-clear-shopping-list#persist-cleared-list
+    // spec:impl api-clear-shopping-list#persist-cleared-list
     this.writeToDisk();
   }
 }

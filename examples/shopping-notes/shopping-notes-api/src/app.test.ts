@@ -21,7 +21,7 @@ describe("GET /", () => {
 });
 
 describe("GET /health", () => {
-  // @spec test api-healthcheck#health-endpoint-returns-ok
+  // spec:test api-healthcheck#health-endpoint-returns-ok
   it("returns 200 with status ok", async () => {
     const app = createApp();
 
@@ -31,7 +31,7 @@ describe("GET /health", () => {
     expect(response.json()).toEqual({ status: "ok" });
   });
 
-  // @spec test api-healthcheck#health-endpoint-no-auth
+  // spec:test api-healthcheck#health-endpoint-no-auth
   it("responds without requiring any authorization header", async () => {
     const app = createApp();
 
@@ -49,7 +49,7 @@ describe("GET /items", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  // @spec test api-view-shopping-list#empty-list-when-no-items
+  // spec:test api-view-shopping-list#empty-list-when-no-items
   it("returns an empty list when no items exist", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -60,7 +60,7 @@ describe("GET /items", () => {
     expect(response.json()).toEqual({ items: [] });
   });
 
-  // @spec test api-view-shopping-list#list-items
+  // spec:test api-view-shopping-list#list-items
   it("returns every item with its id, name, and bought status", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -88,7 +88,7 @@ describe("POST /items", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  // @spec test api-add-shopping-item#create-item-with-name
+  // spec:test api-add-shopping-item#create-item-with-name
   it("creates an item with the given name and bought: false", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -103,7 +103,7 @@ describe("POST /items", () => {
     expect(response.json()).toMatchObject({ name: "Bread", bought: false });
   });
 
-  // @spec test api-add-shopping-item#assign-unique-id
+  // spec:test api-add-shopping-item#assign-unique-id
   it("assigns each created item a unique id", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -118,7 +118,7 @@ describe("POST /items", () => {
     expect(secondId).not.toBe(firstId);
   });
 
-  // @spec test api-add-shopping-item#persist-created-item
+  // spec:test api-add-shopping-item#persist-created-item
   it("persists the created item to the JSON file store so it survives an API restart", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -135,7 +135,7 @@ describe("POST /items", () => {
     expect(response.json()).toEqual({ items: [createdItem] });
   });
 
-  // @spec test api-add-shopping-item#reject-empty-name
+  // spec:test api-add-shopping-item#reject-empty-name
   it("does not create an item when name is empty", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -151,7 +151,7 @@ describe("POST /items", () => {
     expect(listResponse.json()).toEqual({ items: [] });
   });
 
-  // @spec test api-add-shopping-item#reject-empty-name
+  // spec:test api-add-shopping-item#reject-empty-name
   it("does not create an item when name is missing", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -176,7 +176,7 @@ describe("PATCH /items/:item_id", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  // @spec test api-mark-item-bought#update-bought-status
+  // spec:test api-mark-item-bought#update-bought-status
   it("sets the item's bought field to the given value", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -193,7 +193,7 @@ describe("PATCH /items/:item_id", () => {
     expect(response.json()).toMatchObject({ id: itemId, bought: true });
   });
 
-  // @spec test api-mark-item-bought#persist-bought-status
+  // spec:test api-mark-item-bought#persist-bought-status
   it("persists the updated bought status so it survives an API restart", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -207,7 +207,7 @@ describe("PATCH /items/:item_id", () => {
     expect(response.json()).toEqual({ items: [{ id: itemId, name: "Milk", bought: true }] });
   });
 
-  // @spec test api-mark-item-bought#unknown-item-not-found
+  // spec:test api-mark-item-bought#unknown-item-not-found
   it("returns 404 when no item matches the id", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -230,7 +230,7 @@ describe("DELETE /items/:item_id", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  // @spec test api-delete-shopping-item#delete-item-by-id
+  // spec:test api-delete-shopping-item#delete-item-by-id
   it("removes the item when called with an existing item id", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -244,7 +244,7 @@ describe("DELETE /items/:item_id", () => {
     expect(listResponse.json()).toEqual({ items: [] });
   });
 
-  // @spec test api-delete-shopping-item#persist-deletion
+  // spec:test api-delete-shopping-item#persist-deletion
   it("persists the deletion so the item does not reappear after an API restart", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -258,7 +258,7 @@ describe("DELETE /items/:item_id", () => {
     expect(response.json()).toEqual({ items: [] });
   });
 
-  // @spec test api-delete-shopping-item#unknown-item-not-found
+  // spec:test api-delete-shopping-item#unknown-item-not-found
   it("returns 404 when no item matches the id", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -277,7 +277,7 @@ describe("DELETE /items", () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  // @spec test api-clear-shopping-list#delete-all-items
+  // spec:test api-clear-shopping-list#delete-all-items
   it("deletes every item from the JSON file store", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });
@@ -291,7 +291,7 @@ describe("DELETE /items", () => {
     expect(listResponse.json()).toEqual({ items: [] });
   });
 
-  // @spec test api-clear-shopping-list#persist-cleared-list
+  // spec:test api-clear-shopping-list#persist-cleared-list
   it("persists the empty list so cleared items do not reappear after an API restart", async () => {
     ({ dataFile, dir } = tempDataFile());
     const app = createApp({ dataFile });

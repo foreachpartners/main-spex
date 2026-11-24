@@ -49,12 +49,12 @@ For an API:
 
 - Declare every endpoint with a unique `operationId`, a `summary`, and at least one response, including explicit error responses for non-trivial endpoints.
 - Define request and response shapes in `components/schemas` (or the format's equivalent) and reference them with `$ref`; never inline.
-- Annotate each operation with its spec — an OpenAPI `x-*` vendor extension (e.g. `x-spec`) whose value is `@spec contract <spec-id>`, or that same comment form in formats without an extension mechanism. The extension's key name is not itself checked, only that its value matches the grammar. Annotate once at the boundary (the operation), never on the nested schemas it references. For a spec with `contract: for-each-ac`, anchor the annotation to the acceptance criterion it satisfies instead — `@spec contract <spec-id>#<ac-id>`, one per criterion; under `contract: single` a single bare `@spec contract <spec-id>` covers the whole spec.
+- Annotate each operation with its spec — an OpenAPI `x-*` vendor extension (e.g. `x-spec`) whose value is `spec:contract <spec-id>`, or that same comment form in formats without an extension mechanism. The extension's key name is not itself checked, only that its value matches the grammar. Annotate once at the boundary (the operation), never on the nested schemas it references. For a spec with `contract: for-each-ac`, anchor the annotation to the acceptance criterion it satisfies instead — `spec:contract <spec-id>#<ac-id>`, one per criterion; under `contract: single` a single bare `spec:contract <spec-id>` covers the whole spec.
 - Follow the format's casing, secret-handling, and discriminator rules from the governing conventions.
 
 For a design reference:
 
-- Give each spec its own `##` section with a `<!-- @spec contract <spec-id> -->` comment directly above the heading (under `contract: for-each-ac`, one comment per acceptance criterion the section covers, as `<spec-id>#<ac-id>`).
+- Give each spec its own `##` section with a `<!-- spec:contract <spec-id> -->` comment directly above the heading (under `contract: for-each-ac`, one comment per acceptance criterion the section covers, as `<spec-id>#<ac-id>`).
 - Link the specific design — a Figma node (not the whole file), or a mockup page and its states — and note what it covers in one or two sentences.
 - Extend an existing section instead of duplicating it when a spec's design changes.
 
@@ -82,7 +82,7 @@ paths:
     post:
       operationId: createOrder
       summary: Create an order
-      x-spec: "@spec contract order-create"
+      x-spec: "spec:contract order-create"
       requestBody:
         content:
           application/json:
@@ -119,7 +119,7 @@ The `x-spec` annotation sits on the operation, not on `CreateOrderRequest` or `O
 Design reference example, for a UI-facing spec, in `contracts/design.md`, linking a mockup:
 
 ```md
-<!-- @spec contract delivery-time -->
+<!-- spec:contract delivery-time -->
 
 ## Delivery time
 

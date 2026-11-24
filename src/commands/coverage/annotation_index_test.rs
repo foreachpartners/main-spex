@@ -5,8 +5,7 @@ mod tests {
 
     #[test]
     fn scan_collects_bare_layers() {
-        let index =
-            AnnotationIndex::scan("// @spec contract a\n// @spec impl a\n// @spec test a\n");
+        let index = AnnotationIndex::scan("// spec:contract a\n// spec:impl a\n// spec:test a\n");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Impl));
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Test));
@@ -14,7 +13,7 @@ mod tests {
 
     #[test]
     fn scan_splits_multiple_ids_in_one_annotation() {
-        let index = AnnotationIndex::scan("// @spec test a, b, rate-limit\n");
+        let index = AnnotationIndex::scan("// spec:test a, b, rate-limit\n");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Test));
         assert!(index.has_bare(&testing::spec_id("b"), CoverageLayer::Test));
         assert!(index.has_bare(&testing::spec_id("rate-limit"), CoverageLayer::Test));
@@ -22,7 +21,7 @@ mod tests {
 
     #[test]
     fn scan_treats_vendor_extension_value_as_contract() {
-        let index = AnnotationIndex::scan("      x-spec: \"@spec contract a\"\n");
+        let index = AnnotationIndex::scan("      x-spec: \"spec:contract a\"\n");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
         assert!(!index.has_bare(&testing::spec_id("a"), CoverageLayer::Impl));
     }
@@ -30,7 +29,7 @@ mod tests {
     #[test]
     fn scan_collects_ac_qualified_annotations() {
         let index =
-            AnnotationIndex::scan("// @spec impl a#empty-string\n// @spec test a#empty-string\n");
+            AnnotationIndex::scan("// spec:impl a#empty-string\n// spec:test a#empty-string\n");
         assert!(index.has_ac(
             &testing::spec_id("a"),
             &testing::ac_id("empty-string"),
@@ -50,7 +49,7 @@ mod tests {
 
     #[test]
     fn scan_supports_ac_qualified_ids_in_a_list() {
-        let index = AnnotationIndex::scan("// @spec impl a#ac-one, b#ac-two\n");
+        let index = AnnotationIndex::scan("// spec:impl a#ac-one, b#ac-two\n");
         assert!(index.has_ac(
             &testing::spec_id("a"),
             &testing::ac_id("ac-one"),
@@ -65,13 +64,13 @@ mod tests {
 
     #[test]
     fn scan_treats_ac_qualified_contract_annotation_as_bare() {
-        let index = AnnotationIndex::scan("// @spec contract a#empty-string\n");
+        let index = AnnotationIndex::scan("// spec:contract a#empty-string\n");
         assert!(index.has_bare(&testing::spec_id("a"), CoverageLayer::Contract));
     }
 
     #[test]
     fn scan_collects_ac_qualified_contract_annotation_per_ac() {
-        let index = AnnotationIndex::scan("// @spec contract a#empty-string\n");
+        let index = AnnotationIndex::scan("// spec:contract a#empty-string\n");
         assert!(index.has_ac(
             &testing::spec_id("a"),
             &testing::ac_id("empty-string"),
@@ -91,7 +90,7 @@ mod tests {
 
     #[test]
     fn bare_annotation_does_not_satisfy_ac_level_coverage() {
-        let index = AnnotationIndex::scan("// @spec impl a\n// @spec test a\n");
+        let index = AnnotationIndex::scan("// spec:impl a\n// spec:test a\n");
         assert!(!index.has_ac(
             &testing::spec_id("a"),
             &testing::ac_id("any-ac"),
@@ -111,7 +110,7 @@ mod tests {
         std::fs::create_dir_all(spex_dir.join("contracts")).expect("contracts dir");
         std::fs::write(
             spex_dir.join("contracts/api.openapi.yaml"),
-            "      x-spec: \"@spec contract a\"\n",
+            "      x-spec: \"spec:contract a\"\n",
         )
         .expect("write contract");
 
@@ -131,9 +130,9 @@ mod tests {
         let spex_dir = dir.path().join("spex");
         std::fs::create_dir_all(spex_dir.join("specs")).expect("specs dir");
         std::fs::create_dir_all(dir.path().join("src")).expect("src dir");
-        std::fs::write(spex_dir.join("specs/a.yaml"), "# @spec impl a#some-ac\n")
+        std::fs::write(spex_dir.join("specs/a.yaml"), "# spec:impl a#some-ac\n")
             .expect("write spec");
-        std::fs::write(dir.path().join("src/lib.rs"), "// @spec test b#other-ac\n")
+        std::fs::write(dir.path().join("src/lib.rs"), "// spec:test b#other-ac\n")
             .expect("write source");
 
         let config: crate::config::SpexConfig = serde_yaml_ng::from_str(
@@ -173,9 +172,9 @@ mod tests {
         let spex_dir = dir.path().join("spex");
         std::fs::create_dir_all(&spex_dir).expect("spex dir");
         for (file, annotation) in [
-            ("src/lib.rs", "// @spec impl kept#kept-ac\n"),
-            ("vendor/dep.rs", "// @spec impl folder#folder-ac\n"),
-            ("src/api.generated.ts", "// @spec impl glob#glob-ac\n"),
+            ("src/lib.rs", "// spec:impl kept#kept-ac\n"),
+            ("vendor/dep.rs", "// spec:impl folder#folder-ac\n"),
+            ("src/api.generated.ts", "// spec:impl glob#glob-ac\n"),
         ] {
             let path = dir.path().join(file);
             std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
@@ -213,7 +212,7 @@ mod tests {
         std::fs::create_dir_all(dir.path().join("contracts")).expect("contracts dir");
         std::fs::write(
             dir.path().join("contracts/api.openapi.yaml"),
-            "      x-spec: \"@spec contract a\"\n",
+            "      x-spec: \"spec:contract a\"\n",
         )
         .expect("write contract");
 
@@ -234,7 +233,7 @@ mod tests {
         for package in ["api", "web"] {
             let path = dir.path().join(package).join("vendor/dep.rs");
             std::fs::create_dir_all(path.parent().expect("parent")).expect("parent dir");
-            std::fs::write(path, format!("// @spec impl {package}#vendored-ac\n"))
+            std::fs::write(path, format!("// spec:impl {package}#vendored-ac\n"))
                 .expect("write source");
         }
 

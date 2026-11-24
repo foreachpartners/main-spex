@@ -5,7 +5,7 @@ import NotFound from "./not-found";
 
 describe("NotFound", () => {
   it("links back to the main page", () => {
-    // @spec test fe-not-found-page#not-found-page-links-to-main-page
+    // spec:test fe-not-found-page#not-found-page-links-to-main-page
     render(
       <MemoryRouter>
         <NotFound />

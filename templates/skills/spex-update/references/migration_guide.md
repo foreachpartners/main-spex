@@ -4,6 +4,15 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.38.0
+
+Spec annotations are now written `spec:<kind>` instead of `@spec <kind>`, and spec-related commits are tagged `spec:ref <ids>` instead of `@spec <ids>`, since code hosts turned `@spec` into a mention of a real user. `spex check` and `spex coverage` no longer read the old form, so every old annotation shows up as a coverage gap until it is rewritten. In every package and in `<spex-dir>`:
+
+- In every file git tracks, outside `<agent-root>/.agents/skills/spex-*`, replace each match of the regex `@spec (contract|impl|test)\b` with `spec:$1`, for example `// @spec impl place-order#auth-required` becomes `// spec:impl place-order#auth-required`. Keep the rest of the line as it is.
+- In the same files, rewrite each remaining mention of `@spec` (in prose, package skills, rules that set `sync_with_upstream: false`, and their scripts) to `spec:` for an annotation, or `spec:ref` for a commit tag.
+- Run `spex coverage` and compare it with its result before the change: it must show the same coverage.
+- Do not rewrite past commit messages.
+
 ## 0.37.0
 
 `spex init` no longer writes a `CLAUDE.md` symlink to `AGENTS.md`, since Claude Code reads `AGENTS.md` itself. In `<agent-root>`:

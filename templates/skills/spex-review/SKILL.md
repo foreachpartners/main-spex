@@ -7,7 +7,7 @@ description: Review the changes since a starting point (commit, branch, tag, or 
 
 ### 1. Resolve the spec
 
-Use the spec the user provided. Otherwise resolve it from the current work: the feature branch diff against its base branch (`git diff <base-branch>...HEAD`) and the uncommitted changes (`git diff HEAD`). Take the specs changed in them and the specs named by `@spec` annotations in the changed code. Ask the user when no spec resolves.
+Use the spec the user provided. Otherwise resolve it from the current work: the feature branch diff against its base branch (`git diff <base-branch>...HEAD`) and the uncommitted changes (`git diff HEAD`). Take the specs changed in them and the specs named by `spec:` annotations in the changed code. Ask the user when no spec resolves.
 
 ### 2. Resolve the starting point
 

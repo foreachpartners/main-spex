@@ -55,10 +55,10 @@
 
 - **Rules library** — rules for conventions many projects share, bundled in the `spex` binary. List them with `spex lib rules`.
 
-- **Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+- **Traceability** (tracing, trace) — the `spec:` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
   ```text
-  @spec impl place-pizza-order#created-order-status
+  spec:impl place-pizza-order#created-order-status
   ```
 
 - **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or, for UI, a design reference linking a Figma frame or a mockup. AI implements from spec and contract.

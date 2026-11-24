@@ -21,7 +21,7 @@ Read the plan. Run `spex specs --id <spec-id-a> <spec-id-b>` for the plan's `Spe
 
 1. Determine packages we will work on (e.g. frontend, backend).
 2. Run `spex rules --package <package-a> <package-b> --fields id path title description acceptance_criteria examples --output <tmp-path>` for the affected packages from step 1, then read `<tmp-path>` for the governing rules.
-3. Determine all governing spec IDs related to the change — from the request, or from `@spec` annotations already in the changed code.
+3. Determine all governing spec IDs related to the change — from the request, or from `spec:` annotations already in the changed code.
 4. Run `spex specs --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
 5. Produce a note in response with a list of governing rules and specs.
 
@@ -33,7 +33,7 @@ Read all specs from step 1 and the governing rules from `<tmp-path>`. Inspect th
 
 1. For each governing spec, run `spex coverage` and add tests for every acceptance criterion that has an `impl` annotation but is missing its `test` annotation.
 2. Add any other tests the implementation needs based on package testing patterns.
-3. Annotate new tests with their spec ID and the specific acceptance criterion they prove, `@spec test <spec-id>#<ac-id>`, where the governing rules require test-layer traceability. Place each annotation on the smallest unit that proves the criterion — the specific test case (`it`/`test` block), not the file or the suite's top-level `describe`. Keep the total number of annotations minimal.
+3. Annotate new tests with their spec ID and the specific acceptance criterion they prove, `spec:test <spec-id>#<ac-id>`, where the governing rules require test-layer traceability. Place each annotation on the smallest unit that proves the criterion — the specific test case (`it`/`test` block), not the file or the suite's top-level `describe`. Keep the total number of annotations minimal.
 
 Split into tasks only when work spans independent packages or clearly separable files; most requests are a single task. Within a unit, run every task in parallel, one AI agent per task.
 

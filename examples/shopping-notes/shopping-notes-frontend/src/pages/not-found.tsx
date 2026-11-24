@@ -8,7 +8,7 @@ export default function NotFound() {
       <p className="not-found__description">
         The page you're looking for doesn't exist or has moved.
       </p>
-      {/* @spec impl fe-not-found-page#not-found-page-links-to-main-page */}
+      {/* spec:impl fe-not-found-page#not-found-page-links-to-main-page */}
       <Link to="/" className="not-found__link">
         Back to main page
       </Link>

@@ -8,12 +8,12 @@ PRD (why and what) -> spec (capability) -> contract (interface, if applicable) -
 
 ## Traceability
 
-Every behavioral change traces to a spec acceptance criterion via a trace comment `@spec impl|test|contract <spec-id>#<ac-id>` e.g `@spec impl place-pizza-order#auth-required` for implementation acceptance criterion.
+Every behavioral change traces to a spec acceptance criterion via a trace comment `spec:impl|test|contract <spec-id>#<ac-id>` e.g `spec:impl place-pizza-order#auth-required` for implementation acceptance criterion.
 
-For `@spec test` and `@spec impl` ac-id for each acceptance criterion is required. Contract type is defined in spec, e.g `contract: for-each-ac`:
+For `spec:test` and `spec:impl` ac-id for each acceptance criterion is required. Contract type is defined in spec, e.g `contract: for-each-ac`:
 
-- `for-each-ac` - contract for each ac is required, same as for `@spec impl` and `@spec test`.
-- `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `@spec contract place-pizza-order`.
+- `for-each-ac` - contract for each ac is required, same as for `spec:impl` and `spec:test`.
+- `single` - one contract required for entire spec, traced by `spec-id` only, e.g. `spec:contract place-pizza-order`.
 - `none` - no contract required.
 
 Never trace a layer that `coverage_ignore` waives, for a whole spec or for one acceptance criterion: leave it untraced instead of adding a placeholder annotation or test.
@@ -32,7 +32,7 @@ A change isn't finished until:
 
 - `spex check` passes (no error-severity findings) for every affected package.
 - `spex coverage` shows no gap for any spec acceptance criterion the change touches.
-- Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
+- Every acceptance criterion touched carries `spec:impl <spec-id>#<ac-id>` and `spec:test <spec-id>#<ac-id>` tracing annotations, e.g. `spec:impl place-pizza-order#auth-required` and `spec:test place-pizza-order#auth-required`.
 - Every acceptance criterion `spex coverage` shows fully traced has its `is_done: false` removed, and every spec whose criteria are all done has `status: active`.
 
 ## CLI commands
@@ -41,7 +41,7 @@ Run from anywhere inside the project; `spex <command> --help` lists every option
 
 - `spex info [--package <name>...]` — print `spex.yaml` merged with each `spex.package.yaml`: project and per-package configuration, including paths.
 - `spex check [--package <name>...] [--files <path>...]` — run the rule checks; fails on error findings.
-- `spex coverage [--package <name>...] [-v]` — report `@spec` annotation coverage per acceptance criterion.
+- `spex coverage [--package <name>...] [-v]` — report `spec:` annotation coverage per acceptance criterion.
 - `spex specs [--id <spec-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print specs, each with its file `path` after its `id`; only those containing any keyword, or only the named fields of each (e.g. `--fields id title description` for a catalog).
 - `spex rules [--id <rule-id>...] [--package <name>...] [--search <keyword>...] [--fields <field>...] [--output <file>]` — print the active rules per package the same way; `--fields id path title description acceptance_criteria examples` leaves out the `checks`.
 - `spex jq [-r] [-c] <filter> [file]` — run a jq filter on JSON or YAML from a file or stdin, e.g. `spex info | spex jq -r .project_name`.
@@ -70,15 +70,15 @@ The most important principles, guiding every change beyond what rules and specs 
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `<type>[optional scope]: <description>`, with an optional body separated by a blank line. See `rules/commit-message-format.yaml`.
 
-Tag every spec-related commit with its ID(s) using @spec: `@spec <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]`.
+Tag every spec-related commit with its ID(s) using `spec:ref <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]`.
 
 Examples:
 
 ```
 style: format md files
-feat(ui): list available pizzas @spec list-pizza-menu
-fix(cart): reject negative quantities @spec cart-add-item, cart-validate
-feat(orders): set status on order creation @spec place-pizza-order#created-order-status
+feat(ui): list available pizzas spec:ref list-pizza-menu
+fix(cart): reject negative quantities spec:ref cart-add-item, cart-validate
+feat(orders): set status on order creation spec:ref place-pizza-order#created-order-status
 ```
 
 ## Glossary
@@ -138,10 +138,10 @@ feat(orders): set status on order creation @spec place-pizza-order#created-order
 
 - **Rules library** — rules for conventions many projects share, bundled in the `spex` binary. List them with `spex lib rules`.
 
-- **Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+- **Traceability** (tracing, trace) — the `spec:` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
   ```text
-  @spec impl place-pizza-order#created-order-status
+  spec:impl place-pizza-order#created-order-status
   ```
 
 - **Contract** — derived from a spec, if applicable. The interface to build against: OpenAPI, `.proto`, GraphQL SDL, AsyncAPI, or, for UI, a design reference linking a Figma frame or a mockup. AI implements from spec and contract.

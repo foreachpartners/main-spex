@@ -9,7 +9,7 @@ Main spex, or spex for short, is built on four simple pieces:
 - **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`
 - **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
-- **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
+- **Traceability** — the `spec:` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
 
 ## Specification
 
@@ -45,7 +45,7 @@ src/                CLI source
     rule_config.rs  RuleConfig, the raw rule file as written in YAML (loaded 1 to 1)
     rule.rs         Rule model built from RuleConfig, with its absolute path
   tracing/          Traceability topic
-    annotations.rs  @spec annotation grammar and parsing (shared by check and coverage)
+    annotations.rs  `spec:` annotation grammar and parsing (shared by check and coverage)
   config/           Configuration topic (mod.rs is an index only)
     layout.rs       Layout (multi-repo, single-repo, monorepo): its spex dir name, agent root and choices
     spex_config.rs  SpexConfig, the raw spex.yaml as written in YAML (loaded 1 to 1)

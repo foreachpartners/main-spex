@@ -14,7 +14,7 @@ paths:
       summary: Report API process liveness
       tags:
         - health
-      x-spec: "@spec contract api-healthcheck"
+      x-spec: "spec:contract api-healthcheck"
       responses:
         "200":
           description: API process is running
@@ -30,7 +30,7 @@ paths:
       summary: List shopping items
       tags:
         - items
-      x-spec: "@spec contract api-view-shopping-list"
+      x-spec: "spec:contract api-view-shopping-list"
       responses:
         "200":
           description: Shopping list returned
@@ -48,7 +48,7 @@ paths:
       summary: Create a shopping item
       tags:
         - items
-      x-spec: "@spec contract api-add-shopping-item"
+      x-spec: "spec:contract api-add-shopping-item"
       requestBody:
         required: true
         content:
@@ -81,7 +81,7 @@ paths:
       summary: Clear the shopping list
       tags:
         - items
-      x-spec: "@spec contract api-clear-shopping-list"
+      x-spec: "spec:contract api-clear-shopping-list"
       responses:
         "204":
           description: Shopping list cleared
@@ -91,7 +91,7 @@ paths:
       summary: Update a shopping item's bought status
       tags:
         - items
-      x-spec: "@spec contract api-mark-item-bought"
+      x-spec: "spec:contract api-mark-item-bought"
       parameters:
         - $ref: "#/components/parameters/ItemId"
       requestBody:
@@ -126,7 +126,7 @@ paths:
       summary: Delete a shopping item
       tags:
         - items
-      x-spec: "@spec contract api-delete-shopping-item"
+      x-spec: "spec:contract api-delete-shopping-item"
       parameters:
         - $ref: "#/components/parameters/ItemId"
       responses:

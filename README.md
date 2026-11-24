@@ -92,7 +92,7 @@ AI:  Updated shopping-notes-spex/contracts/api.openapi.yaml
 You: /spex-implement api-add-shopping-item
 AI:  Read 1 spec and 7 rules for the api package.
      ✓ POST /items handler in shopping-notes-api/src/app.ts
-     ✓ @spec impl annotations on all 4 acceptance criteria
+     ✓ spec:impl annotations on all 4 acceptance criteria
      Spec status: in-progress
 
 You: /spex-review api-add-shopping-item
@@ -126,7 +126,7 @@ status: active
 contract: single
 ```
 
-Your AI writes these; you review the spec and the contract before any code is written. Every criterion is then traced to its contract, code, and test by `@spec` annotations, and `spex coverage` shows what is still missing.
+Your AI writes these; you review the spec and the contract before any code is written. Every criterion is then traced to its contract, code, and test by `spec:` annotations, and `spex coverage` shows what is still missing.
 
 Tip: combine skills like `/spex-spec /spex-contract`, or run `/spex-assembly-line` to implement, review and fix in a loop, and then test.
 

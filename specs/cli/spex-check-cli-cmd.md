@@ -9,7 +9,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST run the checks declared in `spex.yaml` against each package, reporting findings per package.
 - MUST open its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 - MUST skip files ignored by `.gitignore`, even in a package without a `.git` directory, plus well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
-- MUST skip the files and folders matched by a package's `exclude` ([spex.yaml](../config/spex-yaml-config.md), merged with its [`spex.package.yaml`](../config/spex-package-yaml-config.md)) the same way, so no check, including the `@spec` annotation checks, reports a finding in them and no `per-file` script receives them.
+- MUST skip the files and folders matched by a package's `exclude` ([spex.yaml](../config/spex-yaml-config.md), merged with its [`spex.package.yaml`](../config/spex-package-yaml-config.md)) the same way, so no check, including the `spec:` annotation checks, reports a finding in them and no `per-file` script receives them.
 - MUST match each `exclude` pattern, a glob read as in a check's `exclude`, against the path of every file and folder relative to its package's root, and skip a folder that matches with everything inside it: `vendor` or `**/vendor` skips a folder, `vendor/**` the files inside it, and `**/*.generated.ts` such files at any depth.
 - MUST error on an `exclude` pattern that is not a valid glob, naming the package.
 - MUST NOT skip a file because of the `exclude` of another package.
@@ -63,7 +63,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 ### Self-validation
 
 - MUST run `spex-internal-conformance` and the spec-scoped checks (reported as `<spec-id>/<check>`) on every `spex check`, whatever `--package` or `--files` select, since they validate the spex directory as a whole, and report them under the spex package's heading, which is added when that package is not selected.
-- MUST run the `@spec` annotation checks (`annotation-format`, `no-orphan-annotations`) only on the files of the selected packages: `--package api` checks the annotations in `api`, and `--package spex` does not check them in `api`.
+- MUST run the `spec:` annotation checks (`annotation-format`, `no-orphan-annotations`) only on the files of the selected packages: `--package api` checks the annotations in `api`, and `--package spex` does not check them in `api`.
 - MUST validate `spex.yaml`, every `specs/<spec-id>.yaml`, every `rules/<rule-id>.yaml`, and the `spex.package.yaml` of every package that has one against their JSON Schema.
 - MUST require every file `spex.yaml` declares to exist: the `prd` file and each `contracts` entry's `path`, erroring on every missing one with its path as written relative to the spex directory, and, for a contract, the package that declares it.
 - MUST stop with a parse error naming the file, instead of reporting a finding, when a spec id, acceptance criterion id, or rule id is outside the id allowed schema.
@@ -73,7 +73,7 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST error on a blank line (empty or whitespace-only) between the keys of a spec or rule file (`no-blank-lines`), at the blank line, since a blank line separates one entry from the next in the output of [`spex specs`](spex-specs-cli-cmd.md), [`spex rules`](spex-rules-cli-cmd.md) and [`spex lib`](spex-lib-cli-cmd.md).
 - MUST allow a blank line inside a multi-line value (e.g. a `|` block holding an example), since it is the text of a key, not a separator between keys.
 - MUST require each spec's and rule's `acceptance_criteria` to be ordered by RFC 2119 commitment level (`MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, `MAY`), and each criterion's `id` to be unique within its spec.
-- MUST require every `@spec` annotation to match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and to reference an existing Spec ID, and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
+- MUST require every `spec:` annotation to match the annotation grammar, with its `<spec-id>` and `<ac-id>` following the id grammar, and to reference an existing Spec ID, and, when it carries `#<ac-id>`, an existing acceptance criterion of that spec.
 - MUST skip, for annotation validation, the spex directory's `schemas/`, `specs/`, `rules/` and `docs/` and the agent root's `.agents/skills/` with all their subfolders, and the agent root's `AGENTS.md`, since they hold illustrative example annotations rather than real references.
 - MUST require every `blocked_by` entry to be the id of an existing spec, and error on anything else, such as a rule id or an unknown id.
 - MUST warn when a `blocked_by` reference names an already-`active` spec, since a satisfied blocker is dropped.

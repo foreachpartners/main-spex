@@ -4,7 +4,7 @@ Mockups that pin each frontend spec's visual design: static HTML pages opened in
 
 `e2e/design.spec.ts` holds each page to every state of its mockup: `toMatchAriaSnapshot` to its structure, `toHaveScreenshot` to its look, both against the mockup rendered in the same run, so no image is stored. To approve a design change, edit the mockup, then change `src/style.css` and the page until `npm run test:e2e` passes.
 
-<!-- @spec contract fe-not-found-page -->
+<!-- spec:contract fe-not-found-page -->
 
 ## Not found page
 
@@ -12,7 +12,7 @@ Mockups that pin each frontend spec's visual design: static HTML pages opened in
 
 Not found page shown for an unmatched route: a "404" heading, a "Page not found" title, an explanatory line, and a "Back to main page" link, centered on the page.
 
-<!-- @spec contract fe-add-shopping-item -->
+<!-- spec:contract fe-add-shopping-item -->
 
 ## Add a shopping item
 
@@ -20,7 +20,7 @@ Not found page shown for an unmatched route: a "404" heading, a "Page not found"
 
 "Add an item" text input with an "Add" button, at the top of the shopping list page under its title.
 
-<!-- @spec contract fe-view-shopping-list -->
+<!-- spec:contract fe-view-shopping-list -->
 
 ## View the shopping list
 
@@ -28,7 +28,7 @@ Not found page shown for an unmatched route: a "404" heading, a "Page not found"
 
 `with-items`: one row per item showing its bought status and name. `empty`: a "No items yet" panel in place of the rows.
 
-<!-- @spec contract fe-mark-item-bought -->
+<!-- spec:contract fe-mark-item-bought -->
 
 ## Mark an item as bought
 
@@ -36,7 +36,7 @@ Not found page shown for an unmatched route: a "404" heading, a "Page not found"
 
 Item row with a checkbox named after its item ("Mark Milk as bought"); a bought item shows a checked box and a grey, struck-through name (the "Eggs" row).
 
-<!-- @spec contract fe-delete-shopping-item -->
+<!-- spec:contract fe-delete-shopping-item -->
 
 ## Delete a shopping item
 
@@ -44,7 +44,7 @@ Item row with a checkbox named after its item ("Mark Milk as bought"); a bought 
 
 Item row with a red "Delete" action on the right.
 
-<!-- @spec contract fe-clear-shopping-list -->
+<!-- spec:contract fe-clear-shopping-list -->
 
 ## Clear the shopping list
 

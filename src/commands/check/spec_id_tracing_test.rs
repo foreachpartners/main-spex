@@ -38,7 +38,7 @@ mod tests {
         let candidates = vec![write_candidate(
             dir.path(),
             "src/lib.rs",
-            "// @spec impl list-pizza-menu\n// @spec bogus list-pizza-menu\n",
+            "// spec:impl list-pizza-menu\n// spec:impl list-pizza-menu#Bogus\n",
         )];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -61,7 +61,7 @@ mod tests {
         let candidates = vec![write_candidate(
             dir.path(),
             "src/lib.rs",
-            "// @spec impl list-pizza-menu#in-stock-only, rate-limit\n// @spec test unknown-spec#some-ac\n",
+            "// spec:impl list-pizza-menu#in-stock-only, rate-limit\n// spec:test unknown-spec#some-ac\n",
         )];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -87,12 +87,12 @@ mod tests {
             write_candidate(
                 dir.path(),
                 "contracts/figma.md",
-                "<!-- @spec contract bogus -->\n",
+                "<!-- spec:contract bogus -->\n",
             ),
             write_candidate(
                 dir.path(),
                 "contracts/design.md",
-                "<!-- @spec contract list-pizza-menu -->\n",
+                "<!-- spec:contract list-pizza-menu -->\n",
             ),
         ];
         let ctx = PackageCtx {
@@ -114,8 +114,8 @@ mod tests {
     fn skips_spex_project_dirs() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![
-            write_candidate(dir.path(), "docs/notes.md", "@spec bogus\n"),
-            write_candidate(dir.path(), "specs/example.yaml", "@spec bogus\n"),
+            write_candidate(dir.path(), "docs/notes.md", "spec:impl bogus\n"),
+            write_candidate(dir.path(), "specs/example.yaml", "spec:impl bogus\n"),
         ];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -131,11 +131,19 @@ mod tests {
     fn skips_the_spex_dir_nested_in_the_package_but_not_its_code() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![
-            write_candidate(dir.path(), "spex/specs/example.yaml", "@spec bogus\n"),
-            write_candidate(dir.path(), "spex/rules/example/check.sh", "@spec bogus\n"),
-            write_candidate(dir.path(), "spex/schemas/spec.schema.json", "@spec bogus\n"),
-            write_candidate(dir.path(), "spex/docs/glossary.md", "@spec bogus\n"),
-            write_candidate(dir.path(), "src/lib.rs", "// @spec impl bogus\n"),
+            write_candidate(dir.path(), "spex/specs/example.yaml", "spec:impl bogus\n"),
+            write_candidate(
+                dir.path(),
+                "spex/rules/example/check.sh",
+                "spec:impl bogus\n",
+            ),
+            write_candidate(
+                dir.path(),
+                "spex/schemas/spec.schema.json",
+                "spec:impl bogus\n",
+            ),
+            write_candidate(dir.path(), "spex/docs/glossary.md", "spec:impl bogus\n"),
+            write_candidate(dir.path(), "src/lib.rs", "// spec:impl bogus\n"),
         ];
         let spex_dir = dir.path().join("spex");
         let ctx = PackageCtx {
@@ -153,17 +161,17 @@ mod tests {
     fn skips_the_agents_file_and_skills_of_the_agent_root_only() {
         let dir = tempdir().expect("temp dir");
         let candidates = vec![
-            write_candidate(dir.path(), "AGENTS.md", "@spec bogus\n"),
+            write_candidate(dir.path(), "AGENTS.md", "spec:impl bogus\n"),
             write_candidate(
                 dir.path(),
                 ".agents/skills/spex-spec/SKILL.md",
-                "@spec impl bogus\n",
+                "spec:impl bogus\n",
             ),
-            write_candidate(dir.path(), "api/AGENTS.md", "@spec impl bogus\n"),
+            write_candidate(dir.path(), "api/AGENTS.md", "spec:impl bogus\n"),
             write_candidate(
                 dir.path(),
                 "api/.agents/skills/SKILL.md",
-                "@spec impl bogus\n",
+                "spec:impl bogus\n",
             ),
         ];
         let ctx = PackageCtx {
@@ -185,7 +193,7 @@ mod tests {
         let candidates = vec![write_candidate(
             dir.path(),
             "schemas/spec.schema.json",
-            "@spec bogus\n",
+            "spec:impl bogus\n",
         )];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -203,7 +211,7 @@ mod tests {
         let candidates = vec![write_candidate(
             dir.path(),
             "src/lib.rs",
-            "// @spec impl delivery-time#estimate-on-delivery\n// @spec impl delivery-time#xxx\n",
+            "// spec:impl delivery-time#estimate-on-delivery\n// spec:impl delivery-time#xxx\n",
         )];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -228,7 +236,7 @@ mod tests {
         let candidates = vec![write_candidate(
             dir.path(),
             "src/lib.rs",
-            "// @spec impl delivery-timeX#estimate-on-delivery\n",
+            "// spec:impl delivery-timeX#estimate-on-delivery\n",
         )];
         let ctx = PackageCtx {
             package_path: dir.path(),
@@ -278,9 +286,9 @@ mod tests {
     }
 
     #[test]
-    fn flags_an_annotation_without_a_known_layer_or_ids() {
+    fn flags_an_annotation_without_valid_ids() {
         let findings = validate_content(
-            "// @spec xx\n// @spec ggg valid_id\n// @spec test\n",
+            "// spec:impl\n// spec:contract valid_id\n// spec:test\n",
             &known(&["a"]),
         );
 
@@ -298,12 +306,12 @@ mod tests {
     #[test]
     fn flags_an_id_that_continues_past_its_valid_part_without_an_orphan_finding() {
         let findings = validate_content(
-            "// @spec impl a_b\n\
-             // @spec impl a, B\n\
-             // @spec impl a#b#c\n\
-             // @spec impl aB\n\
-             // @spec impl a--b\n\
-             // @spec impl a\u{430}\n",
+            "// spec:impl a_b\n\
+             // spec:impl a, B\n\
+             // spec:impl a#b#c\n\
+             // spec:impl aB\n\
+             // spec:impl a--b\n\
+             // spec:impl a\u{430}\n",
             &known(&["a"]),
         );
 
@@ -328,11 +336,11 @@ mod tests {
     #[test]
     fn accepts_annotations_followed_by_a_comment_or_string_closer() {
         let findings = validate_content(
-            "/* @spec impl a */\n\
-             x-spec: \"@spec contract a\"\n\
-             <!-- @spec impl a -->\n\
-             // @spec impl a.\n\
-             // @spec test a, b\n",
+            "/* spec:impl a */\n\
+             x-spec: \"spec:contract a\"\n\
+             <!-- spec:impl a -->\n\
+             // spec:impl a.\n\
+             // spec:test a, b\n",
             &known(&["a", "b"]),
         );
 

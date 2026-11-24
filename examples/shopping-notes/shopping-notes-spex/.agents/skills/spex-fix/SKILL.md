@@ -25,7 +25,7 @@ If the proper fix is major — a refactor, an architectural change, a spec or co
 
 ### 4. Fix
 
-Apply the proper fix, matching the surrounding code and changing only what the cause requires. Keep `@spec` annotations accurate for every acceptance criterion the fix touches.
+Apply the proper fix, matching the surrounding code and changing only what the cause requires. Keep `spec:` annotations accurate for every acceptance criterion the fix touches.
 
 ### 5. Verify
 

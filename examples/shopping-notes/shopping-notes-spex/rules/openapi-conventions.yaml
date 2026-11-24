@@ -9,7 +9,7 @@ acceptance_criteria:
   - "MUST use OpenAPI 3.1.1"
   - "MUST declare every endpoint with operationId, summary, and at least one response"
   - "MUST give every operationId a unique value across the document"
-  - "MUST annotate each operation with its spec via the `x-spec` extension (e.g. `x-spec: @spec contract list-pizza-menu`)"
+  - "MUST annotate each operation with its spec via the `x-spec` extension (e.g. `x-spec: spec:contract list-pizza-menu`)"
   - "MUST tag every operation with exactly one tag"
   - "MUST declare every operation tag in the top-level `tags`"
   - "MUST define request and response shapes in components/schemas; never inline"
@@ -49,7 +49,7 @@ examples:
         get:
           operationId: listPizzaMenu
           summary: List the available pizza menu
-          x-spec: "@spec contract list-pizza-menu"
+          x-spec: "spec:contract list-pizza-menu"
           responses:
             "200":
               description: Menu returned

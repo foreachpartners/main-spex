@@ -2,8 +2,9 @@
 
 Public-facing and major changes to spex, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions match `Cargo.toml` (`cli_version` in `spex.yaml`). `spex update` prints the entries newer than the version it's updating from.
 
-## [0.38.0] - Unreleased
+## [0.38.0] - 2026-11-24
 
+- **Breaking**: Changed spec annotations from `@spec <kind>` to `spec:<kind>` and the commit tag from `@spec` to `spec:ref`, so quoting them in a commit, pull request, issue or chat no longer mentions a GitHub user; rewrite existing annotations (see the migration guide).
 - Changed the core discipline in the managed `AGENTS.md` and the `spex-fix` and `spex-assembly-line` skills to improve the guidance agents follow.
 - Changed the definition of done in the managed `AGENTS.md` to require marking traced acceptance criteria done and fully done specs `active`.
 - Changed the `password-policy` library spec to reject a password equal to the service name or one of the user's own identifiers.

@@ -3,13 +3,13 @@ title: Commit message format
 sync_with_upstream: true
 description: >-
   Commits are the unit of traceability between code and the specs that justify
-  it. Scope names the affected area freely; the `@spec` tag and its attached ID
+  it. Scope names the affected area freely; the `spec:ref` tag and its attached ID
   list is what lets every spec-related change trace back to an approved
   requirement. See https://www.conventionalcommits.org/ for the
   Conventional Commits specification.
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "MUST tag a commit related to a spec with `@spec <Spec ID>[, <Spec ID>]` in the description or body"
+  - "MUST tag a commit related to a spec with `spec:ref <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]` in the description or body"
 checks:
   - name: commit-conventional-format
     description: Recent commits must follow the Conventional Commits subject format
@@ -18,7 +18,7 @@ checks:
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
-    description: Recent commits adding a spec annotation must carry a matching @spec ID list
+    description: Recent commits adding a spec annotation must carry a matching spec:ref ID list
     type: script
     run: per-package
     script: commit-spec-id-trace.sh
@@ -26,10 +26,11 @@ checks:
 examples:
   subject: |
     style: format md files
-    feat(ui): list available pizzas @spec list-pizza-menu
-    fix(cart): reject negative quantities @spec cart-add-item, cart-validate
+    feat(ui): list available pizzas spec:ref list-pizza-menu
+    fix(cart): reject negative quantities spec:ref cart-add-item, cart-validate
+    feat(orders): set status on order creation spec:ref place-pizza-order#created-order-status
   spec_ids_in_description: |
-    feat(ui): list available pizzas @spec list-pizza-menu
+    feat(ui): list available pizzas spec:ref list-pizza-menu
 
     Render the menu from the catalog service and cache results for 60s
     to reduce load on the upstream API.
@@ -40,4 +41,4 @@ examples:
     when no items match the query. Return an empty list instead
     of panicking.
 
-    @spec list-pizza-menu, catalog-cache
+    spec:ref list-pizza-menu, catalog-cache

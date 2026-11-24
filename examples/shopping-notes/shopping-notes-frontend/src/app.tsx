@@ -8,7 +8,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/api-test" element={<ApiTest />} />
-      {/* @spec impl fe-not-found-page#unmatched-route-shows-not-found-page */}
+      {/* spec:impl fe-not-found-page#unmatched-route-shows-not-found-page */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

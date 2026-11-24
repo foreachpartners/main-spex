@@ -199,7 +199,7 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
     let contracts = project.join("dummy-project-spex/contracts.md");
     let api_source = project.join("dummy-project-api/src/lib.rs");
     fs::write(&api_source, "").expect("clear api source");
-    fs::write(&contracts, "<!-- @spec contract ci-check -->\n").expect("write contract");
+    fs::write(&contracts, "<!-- spec:contract ci-check -->\n").expect("write contract");
 
     let nothing_started = run_spex(&project, &["coverage"], "");
     assert!(
@@ -216,7 +216,7 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
 
     append(
         &api_source,
-        "// @spec impl ci-check#rejects-empty-cart\nfn reject_empty_cart() {}\n",
+        "// spec:impl ci-check#rejects-empty-cart\nfn reject_empty_cart() {}\n",
     );
     let implemented = run_spex(&project, &["coverage"], "");
     assert!(
@@ -233,7 +233,7 @@ fn coverage_fails_an_in_progress_not_done_criterion_once_its_impl_lacks_a_test()
 
     append(
         &api_source,
-        "// @spec test ci-check#rejects-empty-cart\nfn reject_empty_cart_test() {}\n",
+        "// spec:test ci-check#rejects-empty-cart\nfn reject_empty_cart_test() {}\n",
     );
     let tested = run_spex(&project, &["coverage"], "");
     assert_eq!(

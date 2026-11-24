@@ -126,11 +126,11 @@ Run `spex coverage`, you will see that our spec now `in-progress`, meaning we ar
 
 #### Traceability
 
-Try to remove `x-spec: "@spec contract api-healthcheck"` in `api.openapi.yaml` and run `spex coverage`, you will see `missing: contract` gap.
+Try to remove `x-spec: "spec:contract api-healthcheck"` in `api.openapi.yaml` and run `spex coverage`, you will see `missing: contract` gap.
 
-**Traceability** (tracing, trace) — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
+**Traceability** (tracing, trace) — the `spec:` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test from any other, in either direction.
 
-Tracing is like a thread going through from spec to its artifacts in format of comment `@spec <type> <spec-id>` like `@spec contract api-healthcheck`. Trace helps AI and us to quickly find code and test related to spec and the other way around, saving tokens, focusing context for better output, and speeding up work, while deterministic `spex coverage` check ensures nothing is missing, spec has contract and **each** spec acceptance criterion has implementation and test. You may know that AI sometimes forget to implement or test some small part of our request, one ac, with `spex coverage` this problem is no longer exists.
+Tracing is like a thread going through from spec to its artifacts in format of comment `spec:<type> <spec-id>` like `spec:contract api-healthcheck`. Trace helps AI and us to quickly find code and test related to spec and the other way around, saving tokens, focusing context for better output, and speeding up work, while deterministic `spex coverage` check ensures nothing is missing, spec has contract and **each** spec acceptance criterion has implementation and test. You may know that AI sometimes forget to implement or test some small part of our request, one ac, with `spex coverage` this problem is no longer exists.
 
 Put back trace for contract and let's continue with implementation.
 

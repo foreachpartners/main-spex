@@ -14,8 +14,8 @@ A spec, defined in [glossary.md](../../docs/glossary.md), lives at `specs/<spec-
 - MUST follow `schemas/ac-id.schema.json` for a criterion's `id`: lowercase letters, digits and hyphens only, at most 50 characters.
 - MUST keep a criterion's `id` unique within the spec, naming the criterion's behavior rather than its position.
 - MUST set `contract` to `single`, `for-each-ac`, or `none`, which sets the contract coverage granularity.
-- MUST require, under `contract: single` (the migration default), one spec-level `@spec contract <spec-id>` annotation for the whole spec.
-- MUST require, under `contract: for-each-ac`, a `@spec contract <spec-id>#<ac-id>` annotation for every acceptance criterion.
+- MUST require, under `contract: single` (the migration default), one spec-level `spec:contract <spec-id>` annotation for the whole spec.
+- MUST require, under `contract: for-each-ac`, a `spec:contract <spec-id>#<ac-id>` annotation for every acceptance criterion.
 - MUST disable contract coverage under `contract: none`.
 - MUST default `is_done` to `true` when absent; `false` flags a criterion as not actually done yet.
 - MUST have `spex check` read `is_done`, not annotations, to decide whether a spec's status can be `active`.

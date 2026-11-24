@@ -1,16 +1,16 @@
 # Spec ID annotations
 
-Annotations link a contract, implementation, or test to its spec, and optionally to one specific acceptance criterion.
+Annotations link a contract, implementation, or test to its spec, and optionally to one specific acceptance criterion. The `spec:` prefix keeps the word spec readable while meaning nothing to code hosts, chat, shells, markdown, or YAML, so an annotation quoted in a commit, pull request, issue, or chat links to and notifies no one.
 
 ## Acceptance criteria
 
-- MUST write an annotation as `@spec contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`.
+- MUST write an annotation as `spec:contract|impl|test <spec-id>[#<ac-id>][, <spec-id>[#<ac-id>]]...`.
 - MUST match an annotation anywhere in a file's text: as a code comment, or, for contracts, as the string value of any OpenAPI vendor extension (`x-*`) property, whose key name is not itself checked.
 - MUST place one annotation on the smallest unit that actually satisfies the acceptance criterion: a specific field, function, or test case.
 - MUST annotate once at the boundary, never nested: list every acceptance criterion id the boundary satisfies rather than adding a second annotation.
 - MUST carry the `#<ac-id>` of the acceptance criterion it satisfies on an impl or test annotation.
 - MUST carry `#<ac-id>` on a contract annotation only under `contract: for-each-ac`, where every acceptance criterion needs its own annotated contract.
-- MUST accept, under `contract: single`, one bare `@spec contract <spec-id>` for the whole spec.
+- MUST accept, under `contract: single`, one bare `spec:contract <spec-id>` for the whole spec.
 - MUST count a criterion-anchored contract annotation also as the spec-level contract.
 - MUST make `<spec-id>` and `<ac-id>` follow the same id grammar as the ids they reference; an annotation naming an id outside it is malformed.
 - MUST have `spex check` enforce the grammar and the no-orphan rule, built in, in every package regardless of which rules it opts into ([spex-check-cli-cmd.md](../cli/spex-check-cli-cmd.md)).

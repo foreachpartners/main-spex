@@ -39,9 +39,13 @@ fn token_pattern() -> String {
 static ANNOTATION: LazyLock<Regex> = LazyLock::new(|| {
     let token = token_pattern();
     Regex::new(&format!(
-        r"@spec\s+(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)(?:[^\w#,-]|$)"
+        r"spec:(contract|impl|test)\s+({token}(?:\s*,\s*{token})*)(?:[^\w#,-]|$)"
     ))
-    .expect("valid @spec regex")
+    .expect("valid annotation regex")
+});
+
+static ANNOTATION_START: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"spec:(contract|impl|test)(\s|$)").expect("valid annotation start regex")
 });
 
 static TOKEN: LazyLock<Regex> =
@@ -73,7 +77,7 @@ pub fn malformed_lines(content: &str) -> Vec<usize> {
     content
         .lines()
         .enumerate()
-        .filter(|(_, line)| line.contains("@spec ") && !is_well_formed(line))
+        .filter(|(_, line)| ANNOTATION_START.is_match(line) && !is_well_formed(line))
         .map(|(index, _)| index + 1)
         .collect()
 }
