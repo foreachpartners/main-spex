@@ -11,21 +11,15 @@ description: Carry out an existing plan, or implement an ad-hoc user request. Us
 
 **Do not edit or write any code files until this step is done; do not skip it**.
 
-### With a plan
+For a plan, take the IDs and packages from its `Specs` and `Packages`. For an ad-hoc request, determine the affected packages and the spec IDs that govern the change. Use the spec ID and criterion named in the request when they cover the entire change.
 
-Read the plan. Run `spex specs --id <spec-id-a> <spec-id-b>` for the plan's `Specs` to read the governing specs.
+Assemble the task context once and read it before editing.
 
-### Without a plan (ad-hoc user request)
+```sh
+spex context --id <spec-id-a> <spec-id-b> --package <package-a> <package-b> > <tmp-path>
+```
 
-1. Determine packages we will work on (e.g. frontend, backend).
-2. Run `spex rules --package <package-a> <package-b> --fields id path title description acceptance_criteria examples --output <tmp-path>` for the affected packages from step 1, then read `<tmp-path>` for the governing rules.
-3. Determine all governing spec IDs related to the request.
-4. Run `spex specs --id <spec-id-a> <spec-id-b>` for the spec IDs from step 3 to read the governing specs.
-5. Produce a note in response with a list of governing rules and specs.
-
-### Both paths
-
-Read all specs from step 1 and the governing rules from `<tmp-path>`. Don't skip anything, this is not negotiable!
+Use the bundle's spec criteria, package scope and rules. Open its file references for details needed by the task. When the change has no governing spec because it changes no behavior, read the package rules directly with `spex rules --package <package>`. Resolve the relevant spec before changing behavior. Tell the user which specs and rules govern the work.
 
 ## Step 2 — Implement
 
@@ -41,7 +35,7 @@ Split the request into tasks only when it spans independent packages or clearly 
 
 ### Both paths
 
-Within a unit, run every task in parallel, one AI agent per task.
+Run a single task directly. For independent tasks, use parallel agents when the runtime supports them and the user permits it. Otherwise work through the tasks in the order required by their dependencies.
 
 If a task fails or an agent cannot complete it, stop, report what failed, and ask the user how to proceed rather than pressing on with dependent work.
 
@@ -53,7 +47,7 @@ Place each annotation on the smallest unit that actually satisfies the criterion
 
 ## Step 3 — Finalize the specs
 
-For every spec the work implemented or advanced — the plan's `Specs`, or the specs you identified in Step 1 — open `<spex-dir>/specs/<spec-id>.yaml`:
+For every spec the work implemented or advanced, open its path from the task context:
 
 - If `status:` is absent or `planned`, set it to `in-progress` (add the line if absent). Never set it to `active` here — this skill doesn't write tests, so it can't know a criterion is actually done; that determination, and clearing each criterion's `is_done: false`, is `spex-test`'s job once it verifies impl+test tracing with `spex coverage`.
 
@@ -61,7 +55,7 @@ Touch only the `status` line — leave the rest of each spec, including `is_done
 
 ## Step 4 — Verify
 
-Run formatters and linters, and run the existing test suite to confirm the change didn't break anything.
+Run formatters, linters and the existing tests relevant to the change. For a routine change confined to the implementation of one existing acceptance criterion in one package, run targeted tests unless the package rules require a broader suite.
 
 Prove the work respects the governing rules:
 
@@ -69,13 +63,13 @@ Prove the work respects the governing rules:
 spex check --package <package-a> <package-b>
 ```
 
-Prove the work completes the governing specs:
+When there are governing specs, inspect their traces:
 
 ```sh
-spex coverage
+spex coverage --id <spec-id-a> <spec-id-b>
 ```
 
-A missing `test` for a criterion you just annotated is expected here — `spex-test` adds it next. Any other gap is yours to fix.
+A missing `test` trace for a criterion you just annotated is expected here. Address the other gaps introduced by the change. List inherited gaps that affect the task.
 
 ## Step 5 — Delete the plan
 
@@ -97,7 +91,8 @@ Summarize the run:
 
 - Which units of work completed.
 - Which specs you set to `in-progress` (or left as-is), and which acceptance criteria `spex coverage` still shows untraced.
-- The format, lints, tests, `spex check` and `spex coverage` run outcome.
+- The rule checks, trace coverage, contract validation, tests executed and manual acceptance outcomes that apply to this change. Identify any gate that remains pending.
+- The task context path and digest for the reviewer and test author. Reuse the bundle while its governing specs, rules and contracts stay current. Update it when those inputs change.
 - Whether the plan file was deleted (fully completed) or left in place (partial run).
 
 ## Step 7 — Point to the next skill

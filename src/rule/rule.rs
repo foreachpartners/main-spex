@@ -112,6 +112,10 @@ pub enum CheckKind {
         script: String,
         #[serde(default)]
         run: RunScope,
+        #[serde(default)]
+        requires: Vec<String>,
+        #[serde(default)]
+        timeout_seconds: Option<std::num::NonZeroU64>,
     },
 }
 

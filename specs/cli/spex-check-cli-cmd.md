@@ -7,10 +7,16 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 ### Run and report
 
 - MUST run the checks declared in `spex.yaml` against each package, reporting findings per package.
-- MUST open its report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
-- MUST skip files ignored by `.gitignore`, even in a package without a `.git` directory, plus well-known dependency lock files (e.g. `Cargo.lock`, `package-lock.json`).
+- MUST include each declared contract in its owning package's per-file rules and annotation validation, even if it lives outside the package root. For an external contract, use its path relative to the owning package for matching, execution and results.
+- MUST deduplicate a declared contract that also appears in the package walk. Package exclusions still apply. With `--files`, selecting a declared contract by a path relative to its owner or the spex directory, or by absolute path, also selects the owner.
+- MUST distinguish a finding produced by a rule from an error executing that rule. Execution errors cannot be suppressed by a legacy ignore or a finding baseline.
+- MUST support `--format json` with a versioned report containing project name, CLI version, selected and unselected packages, missing package paths, check sources, per-check file selection or scope, outcomes, source locations, findings and inherited findings. With `--files`, report negated checks as skipped.
+- MUST report script prerequisites missing from PATH as execution errors before invoking the script, and report a configured script timeout as an execution error. A check that declares no timeout retains the standard runner behavior.
+- MUST open its text report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
+- MUST skip files ignored by `.gitignore`, even in a package without a `.git` directory, plus well-known dependency lock files except explicitly declared contracts (e.g. `Cargo.lock`, `package-lock.json`).
 - MUST skip the files and folders matched by a package's `exclude` ([spex.yaml](../config/spex-yaml-config.md), merged with its [`spex.package.yaml`](../config/spex-package-yaml-config.md)) the same way, so no check, including the `@spec` annotation checks, reports a finding in them and no `per-file` script receives them.
 - MUST match each `exclude` pattern, a glob read as in a check's `exclude`, against the path of every file and folder relative to its package's root, and skip a folder that matches with everything inside it: `vendor` or `**/vendor` skips a folder, `vendor/**` the files inside it, and `**/*.generated.ts` such files at any depth.
+- MUST use project ignore files for scanning. Global Git ignore settings and local `.git/info/exclude` do not affect the scan.
 - MUST error on an `exclude` pattern that is not a valid glob, naming the package.
 - MUST NOT skip a file because of the `exclude` of another package.
 - MUST visit each package's files sorted by name within each directory, so a check's findings, and the files a `per-file` script receives, come out in the same order on every run and machine.
@@ -59,6 +65,10 @@ Runs the rule checks declared in `spex.yaml` against each package, reporting fin
 - MUST NOT drop new errors in other files.
 - MUST NOT drop an error because of the `check_ignore` of another package.
 - MUST NOT affect `warn`-severity findings with a baseline.
+- MUST let `--write-baseline <path>` record named errors in a versioned JSON snapshot without modifying project configuration or replacing an existing snapshot.
+- MUST let `--baseline <path>` compare findings to that snapshot as a multiset. The fingerprint includes the owning target, check, file, message and source line content when available. Relocating the same source line within the same file keeps its fingerprint.
+- MUST surface inherited findings separately and fail on a new or additional matching violation, even in a file covered by a legacy ignore. An explicit snapshot takes precedence over legacy ignores for that invocation.
+- MUST reject a snapshot for another project or a different package scope, an unsupported version, and conflicts between snapshot capture, comparison and config baseline generation. Baseline capture requires a full file selection and must fail without writing if a check could not run.
 
 ### Self-validation
 

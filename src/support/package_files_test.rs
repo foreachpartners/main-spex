@@ -81,6 +81,15 @@ mod tests {
     }
 
     #[test]
+    fn scans_files_excluded_only_by_private_git_metadata() {
+        let dir = tempdir().expect("temp dir");
+        write_files(dir.path(), &[".git/info/exclude", "kept.txt"]);
+        std::fs::write(dir.path().join(".git/info/exclude"), "kept.txt\n").expect("local exclude");
+
+        assert!(walked_files(dir.path()).contains(&PathBuf::from("kept.txt")));
+    }
+
+    #[test]
     fn skips_dependency_lock_files() {
         let dir = tempdir().expect("temp dir");
         std::fs::write(dir.path().join("Cargo.lock"), "").expect("cargo lock");

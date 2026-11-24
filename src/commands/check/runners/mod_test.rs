@@ -69,9 +69,7 @@ mod tests {
         assert_eq!(findings[0].severity, Severity::Error);
         assert!(findings[0].location.is_none());
         assert_eq!(findings[0].message, "bad config");
-        assert_eq!(
-            findings[0].source.baseline_key(),
-            Some(("secret-handling", "sample"))
-        );
+        assert_eq!(findings[0].source.baseline_key(), None);
+        assert_eq!(findings[0].source.kind(), "execution-error");
     }
 }

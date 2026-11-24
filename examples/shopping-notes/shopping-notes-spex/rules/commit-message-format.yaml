@@ -9,7 +9,10 @@ description: >-
   Conventional Commits specification.
 acceptance_criteria:
   - "MUST use Conventional Commits format `<type>[optional scope]: <description>` with an optional body separated by a blank line"
-  - "MUST tag a commit related to a spec with `@spec <Spec ID>[, <Spec ID>]` in the description or body"
+  - "MUST tag spec-related commits with `@spec <Spec ID>[#<AC ID>][, <Spec ID>[#<AC ID>]]` in the subject or body"
+  - "MUST tag each checked feat commit and each checked fix commit that adds an annotation"
+  - "MUST use exact or spec-level tags covering each annotation added by a checked feat or fix commit"
+  - "MUST resolve each checked tag in the current spec catalog, unless a matching annotation was added by that commit and later removed"
 checks:
   - name: commit-conventional-format
     description: Recent commits must follow the Conventional Commits subject format
@@ -18,7 +21,11 @@ checks:
     script: commit-conventional-format.sh
     severity: warn
   - name: commit-spec-id-trace
-    description: Recent commits adding a spec annotation must carry a matching @spec ID list
+    description: >-
+      Verify spec IDs and added annotations in feat and fix commits among the
+      last three non-merge commits, or among non-merge commits after the
+      ancestor revision in SPEX_COMMIT_BASE. Compare additions where parent
+      history is available.
     type: script
     run: per-package
     script: commit-spec-id-trace.sh

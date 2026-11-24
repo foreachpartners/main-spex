@@ -9,7 +9,7 @@ _The name `spex` comes from a casual shorthand for specifications._
 - **Specs, not guesses** — acceptance criteria tell the AI exactly what to build.
 - **Rules, enforced** — conventions are given to the agent as context and proven by `spex check`.
 - **Skills, not prompts** — each workflow step is a written instruction, so the process is the same every time.
-- **Coverage, proven** — every acceptance criterion is traced to its contract, code, and test, and `spex coverage` shows the gaps.
+- **Trace coverage** — link each acceptance criterion to its contract, code and tests. `spex coverage` reports missing links and their sources.
 - **Human review where it counts** — you approve specs and contracts, and review important changes. Verification layers of agent reviews, tests, and checks cover the rest.
 - **Tool-agnostic** — any AI model, coding agent, CLI, or IDE, and any language or framework.
 - **Simple by design** — plain files and a small set of commands, easy to understand and use with minimal docs.
@@ -147,6 +147,19 @@ AI:  Created shopping-notes-spex/rules/secret-handling.yaml
 ```
 
 Rules live outside the feature flow — they govern how every artifact is built.
+
+## Verify a change
+
+Run the project's tests and capture their results alongside the rule and trace reports.
+
+```sh
+spex doctor
+spex check --format json
+spex coverage --strict --format json
+spex context --id api-add-shopping-item
+```
+
+Use [revision manifests](specs/cli/spex-doctor-cli-cmd.md) to verify a compatible multi-repo checkout before CI scans it. Use [receipts](specs/cli/spex-receipt-cli-cmd.md) when a reviewer needs the decisions and exact evidence behind a handoff.
 
 ## Learn more
 

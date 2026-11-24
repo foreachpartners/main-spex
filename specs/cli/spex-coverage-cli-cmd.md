@@ -1,6 +1,6 @@
 # `spex coverage`
 
-Reports specs coverage for a project: how well the specs are covered by `@spec` annotations across the project, per acceptance criterion.
+Reports trace coverage for a project, per acceptance criterion. A covered layer has a qualifying `@spec` annotation. Runtime test execution and semantic verification are separate activities.
 
 ## Acceptance criteria
 
@@ -11,6 +11,7 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 - MUST waive a requirement of a spec when the spec's own `coverage_ignore` waives it, or when every package listed in the spec's `packages` waives it in its own `coverage_ignore`, declared in its `spex.yaml` entry or its `spex.package.yaml` ([spec-file-spec.md](../spec/spec-file-spec.md), [spex-yaml-config.md](../config/spex-yaml-config.md), [spex-package-yaml-config.md](../config/spex-package-yaml-config.md)).
 - MUST skip the spex directory's own files in every layout, except the contract files declared in `spex.yaml`, and files ignored by `.gitignore`, as well as well-known dependency lock files.
 - MUST skip the files and folders matched by a package's `exclude`, read as [spex check](spex-check-cli-cmd.md) reads it, so an annotation in them counts for no spec, except in the contract files declared in `spex.yaml`, which `exclude` does not affect.
+- MUST use project ignore files for scanning. Global Git ignore settings and local `.git/info/exclude` do not affect the scan.
 - MUST error on an `exclude` pattern that is not a valid glob, naming the package.
 - MUST exit non-zero when an `active` or `in-progress` spec has a gap.
 - MUST NOT let a bare, unqualified `@spec impl|test <spec-id>` satisfy a criterion's requirement, since a single bare annotation would otherwise trivially satisfy every criterion in the spec.
@@ -20,9 +21,17 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 - MUST NOT skip a file because of the `exclude` of another package.
 - MUST NOT waive a requirement of a spec that lists several packages until each of them waives it: a waiver in `api` alone changes nothing for a spec that lists `api` and `frontend`.
 
+### Scan inputs and evidence
+
+- MUST record the package, file, marker line, criterion ID when present, and layer of each trace. A declared contract carries the package that declared it even when its file is outside the package. A declaration takes precedence over an ordinary file walk, so the same path produces one trace per declaring package.
+- MUST report missing or unreadable declared packages and contracts. A full scan and a strict scan fail on unavailable inputs. A non-strict `--package` scan fails on unavailable inputs belonging to a selected package or a package named by a reported active or in-progress spec. Other unavailable inputs remain visible in the report.
+- MUST expose scanned package paths, text file counts, skipped non-UTF-8 package file counts, declared contract inputs and unavailable input states in JSON. An unreadable source file makes its scan incomplete. Ordinary non-UTF-8 package files are skipped. Declared contracts must be readable text.
+- MUST, with `--strict`, accept contract traces from declared contract files only, and exclude impl and test traces in prose files. Prose includes Markdown, AsciiDoc, reStructuredText, Org and plain text extensions and conventional extensionless prose names such as README.
+- MUST show strict exclusions with their location and reason. An excluded trace does not close a gap. A layer supplied by another qualifying trace remains covered.
+
 ### Info
 
-- MUST open the report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
+- MUST open the text report with the installed CLI's version (e.g. `spex 0.10.0`, matching `spex --version`), followed by a blank line, so the output identifies the binary that produced it.
 
 ### Status report
 
@@ -38,7 +47,7 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 - MUST head the section with `Gaps (<count>)`, counting only the gapped specs.
 - MUST list in it only the `active` or `in-progress` specs that have a gap (`✗`), grouped by `packages`, sorted alphabetically; a spec with several packages appears under each, and the header counts it once.
 - MUST show, for each gapped spec, its id, its progress as `done/total AC`, and only what is missing, naming the acceptance criterion ids involved, e.g. `missing: contract, impl(no-null-typed-string), test(no-null-typed-string, empty-string-for-unset)`; under `contract: for-each-ac` the missing contract is named per criterion, e.g. `contract(ac-one, ac-two)`.
-- MUST end the report with a one-line summary of spec counts per status and the gap count, e.g. `planned (5), in-progress (3), active (2), gaps (1)`.
+- MUST end the text report with a one-line summary of spec counts per status and the gap count, e.g. `planned (5), in-progress (3), active (2), gaps (1)`.
 - MUST NOT show pending work in "Gaps"; it is shown under `in-progress` in the status report.
 - MUST NOT list a spec with no gap in "Gaps" at all.
 
@@ -46,6 +55,9 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 
 - MUST limit the report to the specs whose `packages` include a package named in `--package <name>...`, matched by either full `package_name` or `package_short_name`; it defaults to all specs.
 - MUST error on a name given to `--package` that matches no package.
+- MUST select exact spec IDs with `--id <id>...`, error on an unknown ID, and intersect the result with any package filter. The text report for named specs lists their trace locations and declared waivers.
+- MUST produce JSON with `--format json`, with `schema_version: 1`, command and CLI version, project, scan mode, package inputs, unavailable inputs and their effect on the exit status, spec states, criterion states and missing layers, declared waivers and their reasons, accepted and rejected trace locations, and counts. The JSON report states that test execution was not run and uses the same exit status as the text report.
+- MUST show declared waiver reasons in verbose and ID-scoped text reports. Text reports always show unavailable inputs and strict trace exclusions for the reported specs.
 - MUST add description detail with `--verbose` (`-v`): each `planned` spec also shows its `description`, each `in-progress` spec also shows its `description` plus the text of each criterion not implemented yet next to its id, and each gapped spec in "Gaps" also shows its `description` plus, for every acceptance criterion still missing a required layer, that criterion's own text next to its id.
 
 ## Examples
@@ -53,4 +65,5 @@ Reports specs coverage for a project: how well the specs are covered by `@spec` 
 ```sh
 spex coverage --package api frontend
 spex coverage --verbose
+spex coverage --id list-pizza-menu --strict --format json
 ```

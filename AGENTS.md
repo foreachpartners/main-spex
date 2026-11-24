@@ -6,7 +6,7 @@ The AI-first development framework that turns specifications into verified code 
 
 Main spex, or spex for short, is built on four simple pieces:
 
-- **Spec** — one coherent capability the system must provide, with acceptance criteria proven by `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
+- **Spec** — one coherent capability the system must provide, with acceptance criteria traced with `spex coverage`. Specs are single source of truth for project - all behaviour, contracts, code, tests and other artifacts come from it and must adhere to it.
 - **Rule** — one coherent cross-cutting convention (style, structure, security), with acceptance criteria proven by `spex check`. Each package must adhere to a list of rules applicable to it defined in `spex.yaml`
 - **Skill** — the instructions an AI agent follows to do the job consistently and correctly.
 - **Traceability** — the `@spec` annotations stitching together spec, contracts, implementations, and tests, used to ensure coverage and to look up any of spec, contract, implementation, or test artifacts.
@@ -71,7 +71,7 @@ src/                CLI source
   commands/         Subcommands, one per CLI command; a command with more than one file gets a folder whose mod.rs is an index only (info, jq and library, the `lib` command, are single files)
     init/ check_schema/ coverage/ rules/ specs/   Command implementation plus its tests (init also holds scaffold, the fresh copy of bundled templates whose copy steps update reuses, and agent_files, the agent root's existing `.claude` and `AGENTS.md`: conflict checks, adoption, links; coverage also holds annotation_index, the project scan of annotations; spec_coverage, per-spec and per-criterion coverage; report, the per-status and per-package grouping of spec coverage and the exit code; render, the report text)
     update/         update command: orchestration and changelog (update), the bundled migration guide since a version (migration_guide), conditional rewrite of bundled templates (sync_templates)
-    check/          check command: orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, package selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
+    check/          check command: rules, check evidence and baselines, orchestration (check), finding (its typed source and location), scoped file, baseline matching and fill, package selection, report, spec-id annotation tracing, fixtures (shared test builders for scoped files, checks and scripts; test builds only)
       conformance/  Structural checks on specs/rules themselves (ids, ac order, property order, blank lines, schema, declared files, script refs, unused rules, status, blocked_by, packages, coverage_ignore); findings are rebased to spex-relative locations once, in conformance.rs (its mod.rs is an index only)
       runners/      One runner per check type (ast_grep, glob, regexp, script) plus the shared forbidden/required hit reporting (mod)
 specs/                         Single source of truth for behavior, one md file per spec (description + acceptance criteria), named `<name>-<group>`

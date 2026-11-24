@@ -15,9 +15,9 @@ Run `spex check` and `spex coverage`. If either reports a failure, stop and ask 
 
 Read `cli_version` from `<spex-dir>/spex.yaml`. This is the previous version — record it before Step 5 overwrites it.
 
-## Step 3 — Install the latest CLI
+## Step 3 — Select the target CLI
 
-Run `cargo install main-spex`.
+Use the version the project or user selected. For a published target version, run `cargo install main-spex --version <target-version> --locked`, then verify that `spex doctor` reports the intended executable and version.
 
 ## Step 4 — Migrate
 
@@ -27,7 +27,7 @@ Read all the printed steps, then apply them from the oldest version to the newes
 
 ## Step 5 — Update
 
-Run `spex update`. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc and skill, and every rule (with its scripts) the project holds that is also in the rules library, unless it sets `sync_with_upstream: false`. It never adds a rule.
+Run `spex update --dry-run` to review the migration outcome and managed files. Apply the listed migration steps if the preview reports config incompatibility and run the preview again. Run `spex update` when the preview matches the project scope. It bumps `cli_version` in `spex.yaml` and rewrites every bundled schema, doc and skill, and every rule (with its scripts) the project holds that is also in the rules library, unless it sets `sync_with_upstream: false`. It never adds a rule.
 
 ## Step 6 — Offer new rules
 

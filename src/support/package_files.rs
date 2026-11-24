@@ -59,7 +59,8 @@ impl PackageFiles {
             WalkBuilder::new(root)
                 .hidden(false)
                 .git_ignore(true)
-                .git_global(true)
+                .git_global(false)
+                .git_exclude(false)
                 .require_git(false)
                 .sort_by_file_name(|left, right| left.cmp(right))
                 .filter_entry(move |entry| {

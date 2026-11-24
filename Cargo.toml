@@ -48,8 +48,12 @@ jaq-all = { version = "0.4.0", default-features = false, features = [
 ] }
 jaq-json = { version = "2.0.3", features = ["serde"] }
 eros = { version = "0.8.1", features = ["location"] }
+sha2 = "0.10.9"
+tempfile = "3.27.0"
+
+[target.'cfg(unix)'.dependencies]
+rustix = { version = "1.1.5", features = ["process"] }
 
 [dev-dependencies]
-tempfile = "3.27.0"
 serial_test = "4.0.1"
 indoc = "2.0.8"

@@ -16,6 +16,7 @@ use super::finding::{Finding, Location};
 #[path = "report_test.rs"]
 mod report_test;
 
+#[derive(Clone, Copy)]
 pub(super) enum ReportTarget<'a> {
     Package(&'a Package),
     Project { spex_dir: &'a Path },
@@ -42,7 +43,11 @@ pub(super) struct CheckReport<'a> {
     pub(super) findings: Vec<Finding>,
 }
 
-pub(super) fn report(project_name: &str, reports: &[CheckReport]) -> ExitCode {
+pub(super) fn report(
+    project_name: &str,
+    reports: &[CheckReport],
+    inherited_count: Option<usize>,
+) -> ExitCode {
     println!("{}", version_line());
     println!();
     let mut total_errors = 0usize;
@@ -69,6 +74,9 @@ pub(super) fn report(project_name: &str, reports: &[CheckReport]) -> ExitCode {
         println!();
     }
 
+    if let Some(count) = inherited_count {
+        println!("Inherited findings: {count}");
+    }
     let total = count_summary(total_errors, total_warnings);
     println!("{}: {}", project_name.bold(), total.bold());
 

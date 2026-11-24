@@ -1044,3 +1044,137 @@ fn check_flags_annotation_referencing_rule_id_as_orphan() {
         "check should exit non-zero on an orphan annotation",
     );
 }
+
+#[test]
+fn check_applies_the_owners_file_rules_to_the_hub_contract() {
+    let (_temp, project) = temp_project(&dummy_project_fixture());
+    let hub = project.join("dummy-project-spex");
+    let contract = hub.join("contracts.md");
+    fs::write(&contract, "PROHIBITED ENTRY\n").expect("write contract");
+    let rule_path = hub.join("rules/no-todo-comments.yaml");
+    let rule = fs::read_to_string(&rule_path)
+        .expect("read rule")
+        .replace("\"TODO\"", "\"PROHIBITED ENTRY\"")
+        .replace("src/**/*.rs", "**/contracts.md");
+    fs::write(&rule_path, rule).expect("write contract rule");
+
+    for files in [vec![], vec!["--files", "contracts.md"]] {
+        let mut args = vec!["check", "--format", "json"];
+        args.extend(files);
+        let output = run_spex(&project, &args, "");
+        assert_eq!(output.status.code(), Some(1));
+        let report: serde_json::Value = serde_json::from_slice(&output.stdout).expect("report");
+        let findings = report["findings"].as_array().expect("findings");
+        assert_eq!(findings.len(), 1, "{report}");
+        assert_eq!(findings[0]["target"], "dummy-project-api");
+        assert_eq!(
+            findings[0]["location"]["file"],
+            "../dummy-project-spex/contracts.md"
+        );
+        assert_eq!(findings[0]["location"]["line"], 1);
+        assert_eq!(
+            report["rule_executions"][0]["files"][0],
+            crate::common::canonical_display(&contract)
+        );
+        assert_eq!(report["test_execution"], "not-run");
+    }
+}
+
+#[test]
+fn check_exact_baseline_counts_a_new_hit_even_in_a_legacy_ignored_file() {
+    let (_temp, project) = project_with_todo_errors();
+    write_api_package_config(&project, BASELINE_TODO_FILE);
+    let baseline = project.join("baseline.json");
+    let baseline = baseline.to_str().expect("baseline path");
+    let capture = run_spex(
+        &project,
+        &["check", "--package", "api", "--write-baseline", baseline],
+        "",
+    );
+    assert!(
+        capture.status.success(),
+        "{}",
+        String::from_utf8_lossy(&capture.stderr)
+    );
+    let args = [
+        "check",
+        "--package",
+        "api",
+        "--baseline",
+        baseline,
+        "--format",
+        "json",
+    ];
+    let todo = project.join("dummy-project-api").join(TODO_FILE);
+    fs::write(&todo, "\n// TODO later\n").expect("move existing finding");
+    let old = run_spex(&project, &args, "");
+    assert!(
+        old.status.success(),
+        "{}",
+        String::from_utf8_lossy(&old.stdout)
+    );
+    let old: serde_json::Value = serde_json::from_slice(&old.stdout).expect("old report");
+    assert_eq!(old["summary"]["inherited"], 2);
+
+    fs::write(&todo, "\n// TODO later\n\n// TODO later\n").expect("add a second occurrence");
+    let new = run_spex(&project, &args, "");
+    assert_eq!(new.status.code(), Some(1));
+    let new: serde_json::Value = serde_json::from_slice(&new.stdout).expect("new report");
+    assert_eq!(new["summary"]["inherited"], 2);
+    assert_eq!(new["summary"]["errors"], 1);
+    assert_eq!(new["findings"][0]["location"]["file"], TODO_FILE);
+}
+
+#[cfg(unix)]
+#[test]
+fn check_records_missing_tools_and_timeouts_as_execution_errors() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let (_temp, project) = temp_project(&dummy_project_fixture());
+    let hub = project.join("dummy-project-spex");
+    let path = hub.join("rules/no-todo-comments/slow.sh");
+    fs::create_dir_all(path.parent().expect("script directory")).expect("create script directory");
+    fs::write(&path, "#!/bin/sh\nsleep 8\n").expect("write script");
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).expect("make executable");
+    fs::write(
+        hub.join("rules/no-todo-comments.yaml"),
+        r#"id: no-todo-comments
+title: Check a command before invoking its script
+description: A missing tool or a timeout makes the check unavailable.
+acceptance_criteria:
+  - MUST run the configured validator
+checks:
+  - name: missing-validator
+    type: script
+    run: per-package
+    script: slow.sh
+    requires: [spex-test-no-such-validator]
+    severity: warn
+  - name: slow-validator
+    type: script
+    run: per-package
+    script: slow.sh
+    timeout_seconds: 1
+    severity: warn
+"#,
+    )
+    .expect("write rule");
+    let output = run_spex(
+        &project,
+        &["check", "--package", "api", "--format", "json"],
+        "",
+    );
+    assert_eq!(output.status.code(), Some(1));
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).expect("report");
+    let findings = report["findings"].as_array().expect("findings");
+    assert_eq!(findings.len(), 2, "{report}");
+    assert!(
+        findings
+            .iter()
+            .all(|item| item["kind"] == "execution-error")
+    );
+    let missing = findings[0]["message"].as_str().expect("missing command");
+    let timeout = findings[1]["message"].as_str().expect("timeout");
+    assert!(missing.contains("spex-test-no-such-validator"), "{missing}");
+    assert!(timeout.contains("timed out after 1s"), "{timeout}");
+}

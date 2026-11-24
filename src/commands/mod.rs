@@ -1,10 +1,13 @@
 pub mod check;
 pub mod check_schema;
+pub mod context;
 pub mod coverage;
+pub mod doctor;
 pub mod info;
 pub mod init;
 pub mod jq;
 pub mod library;
+pub mod receipt;
 pub mod rules;
 pub mod specs;
 pub mod update;

@@ -4,6 +4,12 @@ Steps required to move a project from one spex CLI version to a newer one, one s
 
 `spex update --migration-guide <from_version>` prints the sections after a version, newest first, and the `spex-update` skill reads them all and applies them from the oldest version to the newest before it runs `spex update`: a step must not rely on files `spex update` writes. Keep every version heading as `## MAJOR.MINOR.PATCH`.
 
+## 0.38.0
+
+Use `spex doctor` to check the installed binary, project version and package roots before an update. Use `spex update --dry-run` after applying any required config changes. Pass `--project` when automatic discovery finds several configurations.
+
+Package file rules now check declared contracts even when the contract files are shared from another repository. Install the validators declared by those rules and review any newly visible findings. Use a checked-in ignore file or package exclusion for local artifacts a team wants to omit from checks. A full trace-coverage run requires its declared inputs. Start with `spex coverage --strict --format json` to see which existing annotations qualify before enabling that mode in CI.
+
 ## 0.37.0
 
 `spex init` no longer writes a `CLAUDE.md` symlink to `AGENTS.md`, since Claude Code reads `AGENTS.md` itself. In `<agent-root>`:

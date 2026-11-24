@@ -23,7 +23,8 @@ pub(super) fn select_packages<'a>(
 
     for file in files {
         let found = spex.packages.iter().any(|package| {
-            !ScopedFile::provided(&package.path, std::slice::from_ref(file)).is_empty()
+            !ScopedFile::provided_for_package(package, &spex.dir, std::slice::from_ref(file))
+                .is_empty()
         });
         if !found {
             bail!("unknown file `{file}` — not found in any package");
@@ -35,7 +36,7 @@ pub(super) fn select_packages<'a>(
         let is_named = names
             .iter()
             .any(|name| package.matches_any_package_name(name));
-        if is_named || !ScopedFile::provided_not_excluded(package, files)?.is_empty() {
+        if is_named || !ScopedFile::provided_not_excluded(package, &spex.dir, files)?.is_empty() {
             selected.push(package);
         }
     }

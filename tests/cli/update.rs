@@ -618,3 +618,119 @@ fn update_fails_on_a_project_without_agent_root_and_changes_nothing() {
         "a failed update must not change any file",
     );
 }
+
+#[test]
+fn dry_run_predicts_managed_edits_without_touching_files() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
+    let config = project.read("spex.yaml");
+    project.write(
+        "spex.yaml",
+        &config.replace(
+            &format!("cli_version: {CLI_VERSION}"),
+            "cli_version: 0.37.0",
+        ),
+    );
+    let (pristine, tampered) = project.with_tampered_managed_section(SYNCED_SKILL);
+    project.write(SYNCED_SKILL, &tampered);
+    project.remove("schemas/rule.schema.json");
+    let before = read_tree(&project.root);
+
+    let preview = run_spex(&project.root, &["update", "--dry-run"], "");
+
+    assert!(
+        preview.status.success(),
+        "{}",
+        String::from_utf8_lossy(&preview.stderr)
+    );
+    let output = String::from_utf8_lossy(&preview.stdout);
+    assert!(
+        output.contains(&format!("0.37.0 → {CLI_VERSION}")),
+        "{output}"
+    );
+    assert!(output.contains("Update spex.yaml"), "{output}");
+    assert!(
+        output.contains(&format!("Update {SYNCED_SKILL}")),
+        "{output}"
+    );
+    assert!(
+        output.contains("Create schemas/rule.schema.json"),
+        "{output}"
+    );
+    assert_eq!(read_tree(&project.root), before);
+
+    project.update();
+    assert_eq!(project.read(SYNCED_SKILL), pristine);
+    assert_eq!(project.read("spex.yaml"), config);
+    assert!(project.path("schemas/rule.schema.json").is_file());
+}
+
+#[test]
+fn migration_blockers_preserve_the_tree_for_preview_and_update() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
+    let config = project.read("spex.yaml");
+    let version = format!("cli_version: {CLI_VERSION}");
+    project.write(
+        "spex.yaml",
+        &config
+            .replace(&version, "cli_version: 0.34.0")
+            .lines()
+            .filter(|line| !line.starts_with("project_short_name:"))
+            .collect::<Vec<_>>()
+            .join("\n"),
+    );
+    project.write(SYNCED_SKILL, "tampered");
+    let before = read_tree(&project.root);
+
+    for args in [&["update", "--dry-run"][..], &["update"][..]] {
+        let result = run_spex(&project.root, args, "");
+        crate::common::assert_fails_mentioning(&result, "project_short_name");
+        crate::common::assert_fails_mentioning(&result, "spex update --migration-guide 0.34.0");
+        assert_eq!(read_tree(&project.root), before);
+    }
+}
+
+#[test]
+fn update_keeps_a_user_added_script_permission() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
+    project.take_rules(&["writing-style"]);
+    let script = "rules/writing-style/local-notes.md";
+    project.write(script, "project notes");
+    fs::set_permissions(project.path(script), fs::Permissions::from_mode(0o644)).expect("set mode");
+
+    project.update();
+
+    assert_eq!(project.read(script), "project notes");
+    assert_eq!(
+        fs::metadata(project.path(script))
+            .expect("metadata")
+            .permissions()
+            .mode()
+            & 0o777,
+        0o644
+    );
+}
+
+#[test]
+fn update_refuses_to_replace_a_linked_managed_file() {
+    let temp_dir = tempdir().expect("create temp dir");
+    let project = Project::init(temp_dir.path());
+    let target = temp_dir.path().join("local-schema.json");
+    fs::write(&target, "local schema").expect("create link target");
+    project.remove("schemas/rule.schema.json");
+    std::os::unix::fs::symlink(&target, project.path("schemas/rule.schema.json"))
+        .expect("link schema");
+
+    let before = read_tree(&project.root);
+    for args in [&["update", "--dry-run"][..], &["update"][..]] {
+        let result = run_spex(&project.root, args, "");
+        crate::common::assert_fails_mentioning(&result, "managed update target is a symbolic link");
+        assert_eq!(read_tree(&project.root), before);
+        assert_eq!(
+            fs::read_to_string(&target).expect("linked file"),
+            "local schema"
+        );
+    }
+}

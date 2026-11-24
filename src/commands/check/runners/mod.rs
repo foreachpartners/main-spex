@@ -12,7 +12,9 @@ mod script;
 pub(super) use ast_grep::run_ast_grep;
 pub(super) use glob::run_glob;
 pub(super) use regexp::run_regexp;
-pub(super) use script::{locate_script, resolve_script, run_per_file_script, run_script_once};
+pub(super) use script::{
+    locate_script, require_commands, resolve_script, run_per_file_script, run_script_once,
+};
 
 #[cfg(test)]
 #[path = "mod_test.rs"]
@@ -78,7 +80,7 @@ pub(super) fn outcome_findings(rule_id: &str, check: &Check, outcome: Outcome) -
             })
             .collect(),
         Err(message) => vec![Finding::error(
-            Source::rule(rule_id, &check.name),
+            Source::execution(rule_id, &check.name),
             None,
             message,
         )],

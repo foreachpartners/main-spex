@@ -129,6 +129,17 @@
             "type": "string",
             "description": "Script filename (for example `writing-style.sh`). Resolved in the rule's script folder, named after the rule file and beside it (`rules/<rule-id>/<script>`), so checks from different rules never share a path.",
             "minLength": 1
+          },
+          "requires": {
+            "type": "array",
+            "description": "Executable command names required on PATH before running this script.",
+            "items": { "type": "string", "pattern": "^[A-Za-z0-9_][A-Za-z0-9._-]*$" },
+            "uniqueItems": true
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "description": "Maximum duration of one script invocation in seconds.",
+            "minimum": 1
           }
         },
         "required": ["script"]

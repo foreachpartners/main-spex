@@ -1,10 +1,14 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+use std::time::Duration;
 
 use super::super::finding::Location;
 use super::super::scoped_file::ScopedFile;
 use super::{Hit, Outcome};
+
+#[path = "script_process.rs"]
+mod script_process;
 
 #[cfg(test)]
 #[path = "script_test.rs"]
@@ -18,6 +22,7 @@ pub(in crate::commands::check) fn run_per_file_script(
     package_path: &Path,
     spex_dir: &Path,
     files: &[&ScopedFile],
+    timeout: Option<Duration>,
 ) -> Outcome {
     let mut hits = Vec::new();
     for batch in files.chunks(SCRIPT_BATCH_SIZE) {
@@ -26,6 +31,7 @@ pub(in crate::commands::check) fn run_per_file_script(
             package_path,
             spex_dir,
             batch.iter().map(|file| file.rel.as_os_str()),
+            timeout,
         )?);
     }
     Ok(hits)
@@ -35,27 +41,80 @@ pub(in crate::commands::check) fn run_script_once(
     program: &Path,
     cwd: &Path,
     spex_dir: &Path,
+    timeout: Option<Duration>,
 ) -> Outcome {
-    run_script(program, cwd, spex_dir, std::iter::empty::<&OsStr>())
+    run_script(
+        program,
+        cwd,
+        spex_dir,
+        std::iter::empty::<&OsStr>(),
+        timeout,
+    )
 }
 
-fn run_script<I, S>(program: &Path, cwd: &Path, spex_dir: &Path, args: I) -> Outcome
+fn run_script<I, S>(
+    program: &Path,
+    cwd: &Path,
+    spex_dir: &Path,
+    args: I,
+    timeout: Option<Duration>,
+) -> Outcome
 where
     I: IntoIterator<Item = S>,
     S: AsRef<OsStr>,
 {
-    let output = Command::new(program)
+    let mut command = Command::new(program);
+    command
         .args(args)
         .current_dir(cwd)
-        .env(SPEX_DIR_ENV, spex_dir)
-        .output()
-        .map_err(|err| format!("could not run script `{}`: {err}", program.display()))?;
+        .env(SPEX_DIR_ENV, spex_dir);
+    let output = match timeout {
+        Some(timeout) => script_process::output_with_timeout(&mut command, timeout),
+        None => command.output(),
+    }
+    .map_err(|err| format!("could not run script `{}`: {err}", program.display()))?;
 
     Ok(if output.status.success() {
         Vec::new()
     } else {
         script_hits(&output)
     })
+}
+
+pub(in crate::commands::check) fn require_commands(
+    prereqs: &[String],
+) -> core::result::Result<(), String> {
+    let paths = std::env::var_os("PATH").unwrap_or_default();
+    let missing: Vec<_> = prereqs
+        .iter()
+        .filter(|program| {
+            !std::env::split_paths(&paths).any(|dir| is_executable(&dir.join(program)))
+        })
+        .map(String::as_str)
+        .collect();
+    if missing.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "required commands missing from PATH: {}",
+            missing.join(", ")
+        ))
+    }
+}
+
+fn is_executable(path: &Path) -> bool {
+    let Ok(metadata) = path.metadata() else {
+        return false;
+    };
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
+    }
+    #[cfg(not(unix))]
+    {
+        metadata.is_file()
+    }
 }
 
 fn script_hits(output: &Output) -> Vec<Hit> {

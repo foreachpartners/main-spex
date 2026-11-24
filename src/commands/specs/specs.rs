@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::process::ExitCode;
 
 use clap::Args;
@@ -30,8 +31,8 @@ pub struct SpecsArgs {
     output: Option<String>,
 }
 
-pub fn run(args: SpecsArgs) -> Result<ExitCode> {
-    let spex = Spex::discover()?;
+pub fn run(args: SpecsArgs, project: Option<&Path>) -> Result<ExitCode> {
+    let spex = Spex::load_project(project)?;
     let yaml = render(&spex, &args)?;
     print_entries(&yaml, args.output.as_deref())?;
     Ok(ExitCode::SUCCESS)

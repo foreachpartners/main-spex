@@ -6,6 +6,7 @@ pub mod entry_view;
 pub mod fs;
 pub mod glob;
 pub mod managed_section;
+pub mod output;
 pub mod package_files;
 pub mod style;
 #[cfg(test)]
