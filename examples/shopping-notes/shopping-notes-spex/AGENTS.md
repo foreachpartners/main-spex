@@ -33,6 +33,7 @@ A change isn't finished until:
 - `spex check` passes (no error-severity findings) for every affected package.
 - `spex coverage` shows no gap for any spec acceptance criterion the change touches.
 - Every acceptance criterion touched carries `@spec impl <spec-id>#<ac-id>` and `@spec test <spec-id>#<ac-id>` tracing annotations, e.g. `@spec impl place-pizza-order#auth-required` and `@spec test place-pizza-order#auth-required`.
+- Every acceptance criterion `spex coverage` shows fully traced has its `is_done: false` removed, and every spec whose criteria are all done has `status: active`.
 
 ## CLI commands
 

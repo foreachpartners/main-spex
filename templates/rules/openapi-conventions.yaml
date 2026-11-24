@@ -22,7 +22,7 @@ acceptance_criteria:
   - "MUST use snake_case as the default casing for property names, query parameter names, and enum values. URL path segments use kebab-case"
   - "MUST use plural nouns for collection path segments (`/users/{user_id}`, not `/user/{user_id}`); use a singular noun only for a singleton resource (e.g. `/me`, `/users/{user_id}/profile`) or a namespace that groups actions (e.g. `/auth`)"
   - "MUST name the path parameter of a nested resource after that resource (`/users/{user_id}/orders/{order_id}`), not a bare `{id}`"
-  - "MUST NOT use anyOf / oneOf without a discriminator"
+  - "MUST NOT use anyOf / oneOf without a discriminator, except a union of exactly one schema and `{type: \"null\"}`, which has nothing to discriminate and marks the value nullable"
   - "MUST NOT leave operationId implicit"
   - "MUST NOT start a URL path segment with a standard-method verb (create, get, list, read, update, edit, delete, remove, add, set); the HTTP method is that verb (`POST /users`, not `POST /create-user`)"
   - "MUST NOT duplicate spec mappings between the `x-spec` annotation and `info.description` — the `x-spec` annotation is the single source of truth"

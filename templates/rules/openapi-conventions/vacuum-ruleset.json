@@ -243,8 +243,8 @@
       }
     },
     "composition-discriminator": {
-      "description": "MUST NOT use anyOf / oneOf without a discriminator",
-      "given": "$..[?(@.oneOf || @.anyOf)]",
+      "description": "MUST NOT use anyOf / oneOf without a discriminator, except a union of exactly one schema and {type: null}",
+      "given": "$..[?(@.oneOf && !(length(@.oneOf) == 2 && (@.oneOf[0].type == 'null' || @.oneOf[1].type == 'null')) || @.anyOf && !(length(@.anyOf) == 2 && (@.anyOf[0].type == 'null' || @.anyOf[1].type == 'null')))]",
       "resolved": false,
       "severity": "error",
       "then": {

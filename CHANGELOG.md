@@ -5,6 +5,9 @@ Public-facing and major changes to spex, following [Keep a Changelog](https://ke
 ## [0.38.0] - Unreleased
 
 - Changed the core discipline in the managed `AGENTS.md` and the `spex-fix` and `spex-assembly-line` skills to improve the guidance agents follow.
+- Changed the definition of done in the managed `AGENTS.md` to require marking traced acceptance criteria done and fully done specs `active`.
+- Changed the `password-policy` library spec to reject a password equal to the service name or one of the user's own identifiers.
+- Changed the `openapi-conventions` rule to allow a union of one schema and `{type: "null"}` without a discriminator, so a `$ref` can be made nullable without repeating its schema inline.
 - Added structured check and trace coverage reports with source locations, skipped work and inherited findings.
 - Changed checks to run a package's file rules on its declared contracts, including contracts stored elsewhere.
 - Added strict coverage for complete inputs and eligible contract, implementation and test traces.
